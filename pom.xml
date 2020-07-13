@@ -40,9 +40,9 @@
         </dependency>
 
         <dependency>
-        <groupId>org.monarchinitiative.phenol</groupId>
-        <artifactId>phenol-core</artifactId>
-        <version>${phenol.version}</version>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-core</artifactId>
+            <version>${phenol.version}</version>
         </dependency>
 
         <dependency>
@@ -112,6 +112,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.6</version>
+        </dependency>
+
 
     </dependencies>
 

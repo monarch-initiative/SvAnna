@@ -1,6 +1,7 @@
 package org.jax.l2o;
 
 
+import org.jax.l2o.io.HpoDownloader;
 import picocli.CommandLine;
 
 import java.io.BufferedWriter;
@@ -30,6 +31,8 @@ public class Main implements Callable<Integer>  {
     @Override
     public Integer call() throws Exception {
         Main main = new Main();
+        HpoDownloader downloader = new HpoDownloader("data");
+        downloader.download();
         Lirical2Overlap l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
 
         return 0;

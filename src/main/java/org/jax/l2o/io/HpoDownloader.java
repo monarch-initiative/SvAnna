@@ -1,0 +1,88 @@
+package org.jax.l2o.io;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+/**
+ * Command to download the {@code hp.obo} and {@code phenotype.hpoa} files that
+ * we will need to run the LIRICAL approach.
+ */
+public class HpoDownloader {
+
+    /** Directory to which we will download the files. */
+    private final String downloadDirectory;
+    /** If true, download new version whether or not the file is already present. */
+    private final boolean overwrite;
+
+    private final static String HP_OBO = "hp.obo";
+    /** URL of the hp.obo file. */
+    private final static String HP_OBO_URL ="https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
+    /** URL of the annotation file phenotype.hpoa. */
+    private final static String HP_ANNOTATION_URL ="http://compbio.charite.de/jenkins/job/hpo.annotations.current/lastSuccessfulBuild/artifact/current/phenotype.hpoa";
+    /** Basename of the phenotype annotation file. */
+    private final static String HP_ANNOTATION ="phenotype.hpoa";
+
+    private final static String MIM2GENE_MEDGEN = "mim2gene_medgen";
+
+    private final static String MIM2GENE_MEDGEN_URL = "ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/mim2gene_medgen";
+
+    private final static String GENE_INFO = "Homo_sapiens_gene_info.gz";
+
+    private final static String GENE_INFO_URL = "ftp://ftp.ncbi.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz";
+
+    //private final static String HUGO_URL = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt";
+
+
+
+    public HpoDownloader(String path){
+        this(path,false);
+    }
+
+    public HpoDownloader(String path, boolean overwrite){
+        this.downloadDirectory=path;
+        this.overwrite=overwrite;
+    }
+
+    /**
+     * Download the files unless they are already present.
+     */
+    public void download() {
+        downloadFileIfNeeded(HP_OBO,HP_OBO_URL);
+        downloadFileIfNeeded(HP_ANNOTATION,HP_ANNOTATION_URL);
+        downloadFileIfNeeded(GENE_INFO,GENE_INFO_URL);
+        downloadFileIfNeeded(MIM2GENE_MEDGEN,MIM2GENE_MEDGEN_URL);
+    }
+
+
+
+
+
+
+
+    private void downloadFileIfNeeded(String filename, String webAddress) {
+        File f = new File(String.format("%s%s%s",downloadDirectory,File.separator,filename));
+        if (f.exists() && (! overwrite)) {
+            return;
+        }
+        FileDownloader downloader=new FileDownloader();
+        try {
+            URL url = new URL(webAddress);
+            downloader.copyURLToFile(url, new File(f.getAbsolutePath()));
+        } catch (MalformedURLException e) {
+
+        } catch (FileDownloadException e) {
+            e.printStackTrace();
+        }
+        System.out.println("[INFO] Downloaded " + filename);
+    }
+
+
+
+
+
+}

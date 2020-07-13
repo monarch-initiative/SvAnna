@@ -1,8 +1,15 @@
 package org.jax.l2o;
 
+import com.google.common.collect.Multimap;
 import org.jax.l2o.lirical.LiricalHit;
+import org.monarchinitiative.phenol.annotations.assoc.Gene2DiseaseAssociationParser;
+import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
+import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,9 +19,10 @@ public class Lirical2Overlap {
 
     final static double THRESHOLD = 1;
     private final List<LiricalHit> hitlist;
+    private final Multimap<TermId, TermId> diseaseId2GeneIdMap;
 
     public Lirical2Overlap(String liricalPath, String Vcf, String outfile) {
-        init();
+        this.diseaseId2GeneIdMap = initDiseaseMap();
         hitlist = new ArrayList<>();
         String line;
         try (BufferedReader br = new BufferedReader(new FileReader(liricalPath))) {
@@ -50,7 +58,12 @@ public class Lirical2Overlap {
         System.out.println(Vcf);
     }
 
-    private void init() {
-
+    private Multimap<TermId, TermId> initDiseaseMap() {
+        String geneinfo = "data/Homo_sapiens_gene_info.gz";
+        String mimgene = "data/mim2gene_medgen";
+        String hpo = "data/hp.obo";
+        Ontology ontology = OntologyLoader.loadOntology(new File(hpo));
+        HpoAssociationParser  parser = new HpoAssociationParser(geneinfo, mimgene, ontology);
+        return parser.getDiseaseToGeneIdMap();
     }
 }

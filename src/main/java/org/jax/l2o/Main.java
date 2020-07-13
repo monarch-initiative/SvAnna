@@ -21,7 +21,10 @@ public class Main implements Callable<Integer>  {
 
 
     public static void main(String [] args) {
-
+        CommandLine cline = new CommandLine(new Main());
+        cline.setToggleBooleanFlags(false);
+        int exitCode = cline.execute(args);
+        System.exit(exitCode);
     }
 
     @Override

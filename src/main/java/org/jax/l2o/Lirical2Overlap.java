@@ -23,6 +23,7 @@ public class Lirical2Overlap {
 
     public Lirical2Overlap(String liricalPath, String Vcf, String outfile) {
         this.diseaseId2GeneIdMap = initDiseaseMap();
+        System.out.printf("We retrieved %d disease to gbene annotations.\n", diseaseId2GeneIdMap.size());
         hitlist = new ArrayList<>();
         String line;
         try (BufferedReader br = new BufferedReader(new FileReader(liricalPath))) {

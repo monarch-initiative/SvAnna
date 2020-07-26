@@ -55,8 +55,6 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
-
-
                 <exclusion>
                     <groupId>com.google.errorprone</groupId>
                     <artifactId>error_prone_annotations</artifactId>
@@ -116,6 +114,20 @@
             <groupId>org.tukaani</groupId>
             <artifactId>xz</artifactId>
             <version>1.8</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/de.charite.compbio/Jannovar -->
+        <dependency>
+            <groupId>de.charite.compbio</groupId>
+            <artifactId>Jannovar</artifactId>
+            <version>0.34</version>
+            <type>pom</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 

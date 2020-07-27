@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>l2o</artifactId>
     <groupId>org.jax.l2o</groupId>
-    <version>0.0.3</version>
+    <version>0.1.0</version>
     <name>l2o</name>
 
     <!-- Inherit artifact from SonaType OSS pom.xml Following this article:
@@ -116,6 +116,12 @@
             <version>1.8</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.freemarker</groupId>
+            <artifactId>freemarker</artifactId>
+            <version>2.3.30</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/de.charite.compbio/Jannovar -->
         <dependency>
             <groupId>de.charite.compbio</groupId>
@@ -213,6 +219,34 @@
                     <source>11</source>
                     <target>11</target>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/distribution-resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>log4j2.xml</include>
+                                        <include>*.ftl</include>
+                                        <include>*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

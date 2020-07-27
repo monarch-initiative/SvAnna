@@ -6,8 +6,7 @@ import org.jax.l2o.lirical.LiricalHit;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -20,6 +19,10 @@ public class AnnotatedVcfParser {
     private final String annotatedVcfPath;
     /** Set of gene symbols of interest */
     private final Set<String> interestingGenes;
+    private final Map<String, List<LiricalHit>> hitmap = new HashMap<>();
+    /** Non translocation lists */
+    private final List<SvAnn> annlist = new ArrayList<>();
+    private final List<SvAnn> translocationList = new ArrayList<>();
 
     public AnnotatedVcfParser(String annotatedVcf, List<LiricalHit> hitlist) {
         this.annotatedVcfPath = annotatedVcf;
@@ -28,6 +31,13 @@ public class AnnotatedVcfParser {
                 .map(LiricalHit::getGeneSymbols)
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet());
+        for (LiricalHit h : hitlist) {
+            Set<String> symset = h.getGeneSymbols();
+            for (String s : symset) {
+                hitmap.putIfAbsent(s, new ArrayList<>());
+                hitmap.get(s).add(h);
+            }
+        }
         try (BufferedReader br = new BufferedReader(new FileReader(annotatedVcfPath))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -44,23 +54,43 @@ public class AnnotatedVcfParser {
                 String id = fields[2];
                 String ref = fields[3];
                 String alt = fields[4];
+//                System.out.println(alt);
+//                System.out.println(line);
+//                for (int i=0;i<fields.length;i++) {
+//                    System.out.printf("\t%d} %s\n", i, fields[i]);
+//                }
                 String qual = fields[5];
                 String filter = fields[6];
                 String info = fields[7];
                 String format = fields[8];
                 String gt = fields[9]; // assume just one sample for now
                 SvAnn sva = new SvAnn(chr, pos, id, ref,alt,qual,filter,info,format,gt);
-                Set<String> symbols = sva.getSymbols();
-                for (String sym : symbols) {
-                    if (interestingGenes.contains(sym)) {
-                        // a keeper
-                        System.out.println("YES"+sva);
+                if (sva.isTranslocation()) {
+                    translocationList.add(sva);
+                } else {
+                    Set<String> symbols = sva.getSymbols();
+                    for (String sym : symbols) {
+                        if (interestingGenes.contains(sym)) {
+                            // a keeper
+                            for (LiricalHit h : hitmap.get(sym)) {
+                                sva.addLiricalHit(h);
+                            }
+                            annlist.add(sva);
+                        }
                     }
                 }
-                //System.out.println(line);
             }
         } catch (IOException e ) {
             e.printStackTrace();
         }
+        Collections.sort(annlist, Collections.reverseOrder());
+    }
+
+    public List<SvAnn> getAnnlist() {
+        return annlist;
+    }
+
+    public List<SvAnn> getTranslocationList() {
+        return translocationList;
     }
 }

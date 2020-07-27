@@ -2,6 +2,8 @@ package org.jax.l2o.vcf;
 
 
 import org.jax.l2o.except.L2ORuntimeException;
+import org.jax.l2o.lirical.LiricalHit;
+import picocli.CommandLine;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -9,11 +11,12 @@ import java.util.regex.Pattern;
 /**
  * Information related to a structural variant annotation by Jannovar.
  */
-public class SvAnn {
+public class SvAnn implements Comparable<SvAnn> {
 
     private static final String PIPE_SYMBOL = Pattern.quote("|");
     private static final int UNINITIALIZED = -1;
     private static final String UNINITIALIZED_STRING = "";
+
 
     private final String chrom;
     private final int pos;
@@ -22,7 +25,7 @@ public class SvAnn {
     private final String alt;
     private final String qual;
     private final String filter;
-    //String info,
+    String info;
     private final String format;
     private final String gt;
     /** From the CIPOS VCF item, confidence interval of the position, e.f., CIPOS=-500,-500. */
@@ -38,6 +41,12 @@ public class SvAnn {
     private String svtype = UNINITIALIZED_STRING;
     private int svlen = UNINITIALIZED;
     private boolean imprecise = false;
+
+    private boolean isTranslocation = false;
+
+    private Priority priority = Priority.UNKNOWN;
+
+    private List<LiricalHit> hitlist = new ArrayList<>();
 
     public SvAnn(String chr,
             int pos,
@@ -56,6 +65,7 @@ public class SvAnn {
         this.alt = alt;
         this.qual = qual;
         this.filter = filter;
+        this.info = info;
         this.format = format;
         this.gt = gt;
         this.categories = new ArrayList<String>();
@@ -70,12 +80,19 @@ public class SvAnn {
                 for (String cat : cats.split("&")) {
                     if (cat.indexOf('|') > -1) {
                         String[] items = cat.split("\\|");
-                        if (items.length == 14) {
+                        if (items.length < 7) {
                             throw new L2ORuntimeException("BAD Jannovar annots: items=" + cat);
+                        }
+                        Priority prio = Priority.fromString(items[1]);
+                        if (prio.compareTo(priority)>0) {
+                            priority = prio;
                         }
                         categories.add(items[0]);
                         symbols.add(items[2]);
                     }
+                }
+                if (f.indexOf("translocation")>0) {
+                    isTranslocation = true;
                 }
             } else if (f.startsWith("CIPOS=")) {
                 String[] A = f.substring(6).split(",");
@@ -102,6 +119,10 @@ public class SvAnn {
                 throw new RuntimeException("Could not find annot " + f);
             }
         }
+    }
+
+    public boolean isTranslocation() {
+        return isTranslocation;
     }
 
     public String getChrom() {
@@ -138,6 +159,10 @@ public class SvAnn {
 
     public String getGt() {
         return gt;
+    }
+
+    public String getInfo() {
+        return info;
     }
 
     public int getCiUp() {
@@ -178,5 +203,54 @@ public class SvAnn {
 
     public boolean isImprecise() {
         return imprecise;
+    }
+
+    public boolean isLowPriority() {
+        return this.priority == Priority.LOW;
+    }
+
+    public boolean isModifierPriority() {
+        return this.priority == Priority.MODIFIER;
+    }
+
+    public boolean isHighPriority() {
+        return this.priority == Priority.HIGH;
+    }
+
+    public void addLiricalHit(LiricalHit h) {
+        this.hitlist.add(h);
+    }
+
+    public List<LiricalHit> getHitlist() {
+        return hitlist;
+    }
+
+    public double getMaxPosteriorProb() {
+        return this.hitlist
+                .stream()
+                .map(H -> H.getPosttestProbability())
+                .max(Double::compareTo)
+                .orElse(0.0);
+    }
+
+    private final static Comparator<SvAnn> COMPARATOR = new Comparator<SvAnn>() {
+        @Override
+        public int compare(SvAnn o1, SvAnn o2) {
+            int c = o1.priority.compareTo(o2.priority);
+            if (c==0) {
+                double m1 = o1.getMaxPosteriorProb();
+                double m2 = o2.getMaxPosteriorProb();
+                if (m1 > m2) return 1;
+                if (m2 > m1) return -1;
+                return 0;
+            }
+            return c;
+        }
+    };
+
+
+    @Override
+    public int compareTo(SvAnn o) {
+        return COMPARATOR.compare(this, o);
     }
 }

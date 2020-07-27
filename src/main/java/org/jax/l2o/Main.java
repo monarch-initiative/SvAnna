@@ -1,9 +1,11 @@
 package org.jax.l2o;
 
 
+import org.jax.l2o.html.HtmlTemplate;
 import org.jax.l2o.io.HpoDownloader;
 import org.jax.l2o.lirical.LiricalHit;
 import org.jax.l2o.vcf.AnnotatedVcfParser;
+import org.jax.l2o.vcf.SvAnn;
 import picocli.CommandLine;
 
 import java.io.BufferedWriter;
@@ -40,6 +42,10 @@ public class Main implements Callable<Integer>  {
         Lirical2Overlap l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
         List<LiricalHit> hitlist = l2o.getHitlist();
         AnnotatedVcfParser vcfParser = new AnnotatedVcfParser(this.vcfFile, hitlist);
+        List<SvAnn> annList = vcfParser.getAnnlist();
+        List<SvAnn> translocationList = vcfParser.getTranslocationList();
+        HtmlTemplate template = new HtmlTemplate(annList, translocationList);
+        template.outputFile();
         return 0;
     }
 }

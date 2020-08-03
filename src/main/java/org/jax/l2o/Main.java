@@ -34,6 +34,22 @@ public class Main implements Callable<Integer>  {
         System.exit(exitCode);
     }
 
+
+    private void outputIgvTargetsFile(List<SvAnn> svlist, String fname) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fname))) {
+            for (SvAnn sv : svlist) {
+                if (sv.isLowPriority()) {
+                    continue;
+                }
+                //String bedline = sv.getBedLine();
+                String igvline = sv.getIgvLine();
+                writer.write(igvline + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public Integer call() throws Exception {
         Main main = new Main();
@@ -46,6 +62,7 @@ public class Main implements Callable<Integer>  {
         List<SvAnn> translocationList = vcfParser.getTranslocationList();
         HtmlTemplate template = new HtmlTemplate(annList, translocationList);
         template.outputFile();
+        outputIgvTargetsFile(annList,"l2o.igv.txt");
         return 0;
     }
 }

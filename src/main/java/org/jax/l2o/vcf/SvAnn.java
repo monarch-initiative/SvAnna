@@ -38,7 +38,7 @@ public class SvAnn implements Comparable<SvAnn> {
     //private Set<String> mechanisms = new HashSet<>();
     private String mateId = UNINITIALIZED_STRING;
     private int mateDist = UNINITIALIZED;
-    private String svtype = UNINITIALIZED_STRING;
+    private SvType svtype;
     private int svlen = UNINITIALIZED;
     private boolean imprecise = false;
 
@@ -104,7 +104,7 @@ public class SvAnn implements Comparable<SvAnn> {
             } else if (f.startsWith("MATEID=")) {
                 mateId = f.substring(7);
             } else if (f.startsWith("SVTYPE=")) {
-                this.svtype = f.substring(7);
+                this.svtype = SvType.fromString(f.substring(7));
             } else if (f.startsWith("MATEDIST=")) {
                 this.mateDist = Integer.parseInt(f.substring(9));
             } else if (f.startsWith("SVLEN=")) {
@@ -138,11 +138,25 @@ public class SvAnn implements Comparable<SvAnn> {
     }
 
     public String getRef() {
-        return ref;
+        int N = ref.length();
+        if (N<5) {
+            return ref;
+        } else if (N<21) {
+            return String.format("%s (%d bp)", ref, N);
+        } else {
+            return String.format("%s[...]%s (%d bp)", ref.substring(0,7), ref.substring(N-7), N);
+        }
     }
 
     public String getAlt() {
-        return alt;
+        int N = alt.length();
+        if (N<5) {
+            return alt;
+        } else if (N<21) {
+            return String.format("%s (%d bp)", alt, N);
+        } else {
+            return String.format("%s[...]%s (%d bp)", alt.substring(0,7), alt.substring(N-7), N);
+        }
     }
 
     public String getQual() {
@@ -193,7 +207,7 @@ public class SvAnn implements Comparable<SvAnn> {
         return mateDist;
     }
 
-    public String getSvtype() {
+    public SvType getSvtype() {
         return svtype;
     }
 
@@ -252,5 +266,51 @@ public class SvAnn implements Comparable<SvAnn> {
     @Override
     public int compareTo(SvAnn o) {
         return COMPARATOR.compare(this, o);
+    }
+
+    public String getBedLine() {
+        int offset = 100;
+        int start = -1;
+        int end = -1;
+        if (svtype.equals(SvType.DELETION)) {
+            offset = Math.max(offset, svlen+100);
+            start = this.pos - offset;
+            end = this.pos + svlen + offset;
+        } else if (svtype.equals(SvType.INSERTION)) {
+            start = this.pos - offset;
+            end = this.pos + offset;
+        } else if (svtype.equals(SvType.TRANSLOCATION)) {
+            start = this.pos - offset;
+            end = this.pos + offset;
+        }  else if (svtype.equals(SvType.DUPLICATION)) {
+            offset = Math.max(offset, svlen+100);
+            start = this.pos - offset;
+            end = this.pos + svlen + offset;
+        } else {
+            throw new L2ORuntimeException("Did not recognize svtype in getBedLine");
+        }
+        return String.format("%s\t%d\t%d", this.chrom, start, end);
+    }
+
+    public String getIgvLine() {
+        int offset = 1000;
+        int start = -1;
+        int end = -1;
+        if (svtype.equals(SvType.DELETION)) {
+            start = this.pos - offset;
+            end = this.pos + svlen + offset;
+        } else if (svtype.equals(SvType.INSERTION)) {
+            start = this.pos - offset;
+            end = this.pos + offset;
+        } else if (svtype.equals(SvType.TRANSLOCATION)) {
+            start = this.pos - offset;
+            end = this.pos + offset;
+        }  else if (svtype.equals(SvType.DUPLICATION)) {
+            start = this.pos - offset;
+            end = this.pos + svlen + offset;
+        } else {
+            throw new L2ORuntimeException("Did not recognize svtype in getBedLine");
+        }
+        return String.format("%s\t%s:%d-%d",this.id, this.chrom, start, end);
     }
 }

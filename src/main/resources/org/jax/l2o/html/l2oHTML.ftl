@@ -395,9 +395,22 @@ a.svg:hover, a.svg:active {
 
           <a name="test"></a>
             <header>
-              <h3>${sva.chrom}-${sva.pos}</h3>
-              <p>ref: ${sva.ref}</p>
-              <p>alt: ${sva.alt}</p>
+              <h3>${sva.igvLine}</h3>
+              <p>
+              <ol>
+              <li>${sva.chrom}</li>
+                <li>${sva.pos}</li>
+              <li>ref: ${sva.ref}</li>
+              <li>alt: ${sva.alt}</li>
+              <li>SV type: ${sva.svtype}</li>
+              <li>SV len: ${sva.svlen} bp</li>
+              <#if sva.ciUp gt 0>
+                <li>confidence interval ${sva.ciUp}/${sva.ciDown}</li>
+              </#if>
+              <li>format: ${sva.format}</li>
+              <li>gt: ${sva.gt}</li>
+              </ol>
+              <p>
             </header>
              <p>
              info: ${sva.info}

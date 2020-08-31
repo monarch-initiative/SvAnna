@@ -11,18 +11,20 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Lirical2Overlap {
 
     final static double THRESHOLD = 1;
     private final List<LiricalHit> hitlist;
-    private final Multimap<TermId, TermId> diseaseId2GeneIdMap;
+    private final Map<TermId, Set<String>> diseaseId2GeneSymbolMap;
+    private final String outputfile;
 
-    public Lirical2Overlap(String liricalPath, String Vcf, String outfile) {
-        this.diseaseId2GeneIdMap = initDiseaseMap();
-        System.out.printf("We retrieved %d disease to gbene annotations.\n", diseaseId2GeneIdMap.size());
+
+    public Lirical2Overlap(String liricalPath, String Vcf,  String outfile) {
+        this.diseaseId2GeneSymbolMap = initDiseaseMap();
+        System.out.printf("We retrieved %d disease to gene annotations.\n", diseaseId2GeneSymbolMap.size());
+        this.outputfile = outfile;
         hitlist = new ArrayList<>();
         String line;
         try (BufferedReader br = new BufferedReader(new FileReader(liricalPath))) {
@@ -44,6 +46,11 @@ public class Lirical2Overlap {
                     double lr = Double.parseDouble(fields[5].replaceAll(",",""));
                     if (prob > THRESHOLD) {
                         LiricalHit hit = new LiricalHit(dname, dcurie, prob, lr);
+                        TermId diseaseId = TermId.of(dcurie);
+                        if (this.diseaseId2GeneSymbolMap.containsKey(diseaseId)) {
+                            //System.out.println("found genes for " + dname);
+                            hit.setGeneSymbols(diseaseId2GeneSymbolMap.get(diseaseId));
+                        }
                         hitlist.add(hit);
                     }
                 } catch (NumberFormatException e) {
@@ -58,12 +65,27 @@ public class Lirical2Overlap {
         System.out.println(Vcf);
     }
 
-    private Multimap<TermId, TermId> initDiseaseMap() {
+    public List<LiricalHit> getHitlist() {
+        return hitlist;
+    }
+
+    private Map<TermId, Set<String>> initDiseaseMap() {
         String geneinfo = "data/Homo_sapiens_gene_info.gz";
         String mimgene = "data/mim2gene_medgen";
         String hpo = "data/hp.obo";
         Ontology ontology = OntologyLoader.loadOntology(new File(hpo));
         HpoAssociationParser  parser = new HpoAssociationParser(geneinfo, mimgene, ontology);
-        return parser.getDiseaseToGeneIdMap();
+        Map<TermId, String> id2sym = parser.getGeneIdToSymbolMap();
+        Map<TermId, Set<String>> dis2symmap =  new HashMap<>();
+        Multimap<TermId, TermId> mm = parser.getDiseaseToGeneIdMap();
+        for (TermId diseaseId : mm.keys()) {
+            dis2symmap.putIfAbsent(diseaseId, new HashSet<>());
+            for (TermId geneId : mm.get(diseaseId)) {
+                if (id2sym.containsKey(geneId)) {
+                    dis2symmap.get(diseaseId).add(id2sym.get(geneId));
+                }
+            }
+        }
+        return dis2symmap;
     }
 }

@@ -27,6 +27,11 @@ public class Lirical2Overlap {
         this.outputfile = outfile;
         hitlist = new ArrayList<>();
         String line;
+        File liricalFile = new File(liricalPath);
+        if (! liricalFile.exists()) {
+            System.err.printf("[ERROR] Could not find LIRICAL input file at %s\n", liricalPath);
+            return;
+        }
         try (BufferedReader br = new BufferedReader(new FileReader(liricalPath))) {
             //rank    diseaseName     diseaseCurie    pretestprob     posttestprob    compositeLR     entrezGeneId    variants
             while ((line=br.readLine()) != null) {

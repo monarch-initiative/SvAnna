@@ -19,9 +19,9 @@ import java.util.concurrent.Callable;
 public class Main implements Callable<Integer>  {
     @CommandLine.Option(names = {"-o","--out"})
     protected String outname = "l2o.bed";
-    @CommandLine.Option(names = {"-v", "--vcf"})
+    @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
     protected String vcfFile;
-    @CommandLine.Option(names = {"-l", "--lirical"})
+    @CommandLine.Option(names = {"-l", "--lirical"}, required = true)
     protected String liricalFile;
 
 
@@ -53,6 +53,7 @@ public class Main implements Callable<Integer>  {
     @Override
     public Integer call() throws Exception {
         Main main = new Main();
+
         HpoDownloader downloader = new HpoDownloader("data");
         downloader.download();
         Lirical2Overlap l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);

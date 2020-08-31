@@ -2,7 +2,6 @@ package org.jax.l2o;
 
 import com.google.common.collect.Multimap;
 import org.jax.l2o.lirical.LiricalHit;
-import org.monarchinitiative.phenol.annotations.assoc.Gene2DiseaseAssociationParser;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;

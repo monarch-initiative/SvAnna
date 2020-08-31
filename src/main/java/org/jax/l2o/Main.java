@@ -4,9 +4,6 @@ package org.jax.l2o;
 import org.jax.l2o.io.HpoDownloader;
 import picocli.CommandLine;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "l2o", mixinStandardHelpOptions = true, version = "l2o 0.0.1",
@@ -29,7 +26,7 @@ public class Main implements Callable<Integer>  {
     }
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         Main main = new Main();
         HpoDownloader downloader = new HpoDownloader("data");
         downloader.download();

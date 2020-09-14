@@ -1,9 +1,6 @@
 package org.jax.l2o.io;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -73,9 +70,7 @@ public class HpoDownloader {
         try {
             URL url = new URL(webAddress);
             downloader.copyURLToFile(url, new File(f.getAbsolutePath()));
-        } catch (MalformedURLException e) {
-
-        } catch (FileDownloadException e) {
+        } catch (MalformedURLException | FileDownloadException e) {
             e.printStackTrace();
         }
         System.out.println("[INFO] Downloaded " + filename);

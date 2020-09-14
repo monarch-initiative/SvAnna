@@ -1,8 +1,11 @@
 package org.jax.l2o.vcf;
 
 
+import org.jax.l2o.Lirical2Overlap;
+import org.jax.l2o.except.L2ORuntimeException;
 import org.jax.l2o.lirical.LiricalHit;
 
+import javax.print.DocFlavor;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,6 +22,7 @@ public class AnnotatedVcfParser {
     private final String annotatedVcfPath;
     /** Set of gene symbols of interest */
     private final Set<String> interestingGenes;
+    private Map<String, String> acc2chrMap;
     private final Map<String, List<LiricalHit>> hitmap = new HashMap<>();
     /** Non translocation lists */
     private final List<SvAnn> annlist = new ArrayList<>();
@@ -26,6 +30,8 @@ public class AnnotatedVcfParser {
 
     public AnnotatedVcfParser(String annotatedVcf, List<LiricalHit> hitlist) {
         this.annotatedVcfPath = annotatedVcf;
+        ChromosomeMapper cmap = new ChromosomeMapper();
+        this.acc2chrMap = cmap.getAcc2chrMap();
         interestingGenes = hitlist
                 .stream()
                 .map(LiricalHit::getGeneSymbols)
@@ -38,6 +44,7 @@ public class AnnotatedVcfParser {
                 hitmap.get(s).add(h);
             }
         }
+
         try (BufferedReader br = new BufferedReader(new FileReader(annotatedVcfPath))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -49,7 +56,7 @@ public class AnnotatedVcfParser {
                     System.err.printf("[ERROR] Bad VCF line with only %d fields: %s", fields.length, line);
                     continue;
                 }
-                String chr = fields[0];
+                String chr = getChr(fields[0]);
                 int pos = Integer.parseInt(fields[1]);
                 String id = fields[2];
                 String ref = fields[3];
@@ -85,6 +92,22 @@ public class AnnotatedVcfParser {
         }
         Collections.sort(annlist, Collections.reverseOrder());
     }
+
+    private String getChr(String acc) {
+        if (acc.startsWith("chr")){
+            return acc;
+        }
+        int i = acc.indexOf(".");
+        if (i>0){
+            acc= acc.substring(0,i);
+        }
+        if (this.acc2chrMap.containsKey(acc)) {
+            return this.acc2chrMap.get(acc);
+        } else {
+            throw new L2ORuntimeException("Could not find acc" + acc);
+        }
+    }
+
 
     public List<SvAnn> getAnnlist() {
         return annlist;

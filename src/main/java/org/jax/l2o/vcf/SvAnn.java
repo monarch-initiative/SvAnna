@@ -115,14 +115,20 @@ public class SvAnn implements Comparable<SvAnn> {
                 continue; // nothing to do something like ANN=|||||||||||||||OTHER_MESSAGE
             } else if (f.startsWith("SHADOWED")) {
                 continue; // todo what is SHADOWED?
-            } else {
-                throw new RuntimeException("Could not find annot " + f);
+            } else if (f.startsWith("SVMETHOD")) {
+               continue;
+            }else if (f.startsWith("CHR2")) {
+                continue;
+            } else if (f.startsWith("ZMW")) {
+                continue;
+            }else {
+                System.err.println("Could not find annot " + f);
             }
         }
     }
 
     public boolean isTranslocation() {
-        return isTranslocation;
+        return this.svtype.equals(SvType.TRANSLOCATION) || isTranslocation;
     }
 
     public String getChrom() {
@@ -309,7 +315,7 @@ public class SvAnn implements Comparable<SvAnn> {
             start = this.pos - offset;
             end = this.pos + svlen + offset;
         } else {
-            throw new L2ORuntimeException("Did not recognize svtype in getBedLine");
+            return("Did not recognize svtype in getBedLine");
         }
         return String.format("%s\t%s:%d-%d",this.id, this.chrom, start, end);
     }

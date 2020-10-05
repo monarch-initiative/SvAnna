@@ -40,8 +40,7 @@ GL000258 	NT_167251 	MAPT Region (ALT_REF_LOCI_9)
         acc2chrMap.put("CM000669","chr7");
         acc2chrMap.put("CM000670","chr8");
         acc2chrMap.put("CM000671","chr9");
-
-        acc2chrMap.put("CM000672","ch10");
+        acc2chrMap.put("CM000672","chr10");
         acc2chrMap.put("CM000673","chr11");
         acc2chrMap.put("CM000674","chr12");
         acc2chrMap.put("CM000675","chr13");

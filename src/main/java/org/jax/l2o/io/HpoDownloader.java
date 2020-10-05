@@ -34,6 +34,9 @@ public class HpoDownloader {
 
     //private final static String HUGO_URL = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/tsv/hgnc_complete_set.txt";
 
+    private final static String GENCODE_FILE = "gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz";
+    private final static String GENECODE_URL = "ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_35/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz";
+
 
 
     public HpoDownloader(String path){
@@ -53,6 +56,7 @@ public class HpoDownloader {
         downloadFileIfNeeded(HP_ANNOTATION,HP_ANNOTATION_URL);
         downloadFileIfNeeded(GENE_INFO,GENE_INFO_URL);
         downloadFileIfNeeded(MIM2GENE_MEDGEN,MIM2GENE_MEDGEN_URL);
+        downloadFileIfNeeded(GENCODE_FILE, GENE_INFO_URL);
     }
 
 

@@ -6,6 +6,7 @@ import org.jax.l2o.io.HpoDownloader;
 import org.jax.l2o.lirical.LiricalHit;
 import org.jax.l2o.vcf.AnnotatedVcfParser;
 import org.jax.l2o.vcf.SvAnn;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import picocli.CommandLine;
 
 import java.io.BufferedWriter;
@@ -23,6 +24,10 @@ public class Main implements Callable<Integer>  {
     protected String vcfFile;
     @CommandLine.Option(names = {"-l", "--lirical"}, required = true)
     protected String liricalFile;
+    @CommandLine.Option(names = {"-e","--enhancer"},  description = "tspec enhancer file")
+    private String enhancerFile = null;
+    @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term ID to classify enhancers")
+    private String hpoTermId = null;
 
 
 
@@ -56,7 +61,13 @@ public class Main implements Callable<Integer>  {
 
         HpoDownloader downloader = new HpoDownloader("data");
         downloader.download();
-        Lirical2Overlap l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
+        Lirical2Overlap l2o;
+        if (enhancerFile != null && hpoTermId != null) {
+            TermId tid = TermId.of(hpoTermId);
+            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname, tid, this.enhancerFile);
+        } else {
+            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
+        }
         List<LiricalHit> hitlist = l2o.getHitlist();
         AnnotatedVcfParser vcfParser = new AnnotatedVcfParser(this.vcfFile, hitlist);
         List<SvAnn> annList = vcfParser.getAnnlist();

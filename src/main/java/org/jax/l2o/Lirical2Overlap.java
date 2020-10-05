@@ -2,6 +2,7 @@ package org.jax.l2o;
 
 import com.google.common.collect.Multimap;
 import org.jax.l2o.lirical.LiricalHit;
+import org.jax.l2o.tspec.TSpecParser;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
@@ -19,6 +20,23 @@ public class Lirical2Overlap {
     private final List<LiricalHit> hitlist;
     private final Map<TermId, Set<String>> diseaseId2GeneSymbolMap;
     private final String outputfile;
+    private final TermId targetHpoId;
+
+
+
+    public Lirical2Overlap(String liricalPath, String Vcf,  String outfile, TermId tid, String enhancerPath) {
+
+        TSpecParser tparser = new TSpecParser(enhancerPath);
+        System.exit(1);
+        this.diseaseId2GeneSymbolMap = initDiseaseMap();
+        this.hitlist = new ArrayList<>();
+        this.outputfile = outfile;
+        this.targetHpoId = tid;
+
+        init(liricalPath);
+
+
+    }
 
 
     public Lirical2Overlap(String liricalPath, String Vcf,  String outfile) {
@@ -26,6 +44,14 @@ public class Lirical2Overlap {
         System.out.printf("We retrieved %d disease to gene annotations.\n", diseaseId2GeneSymbolMap.size());
         this.outputfile = outfile;
         hitlist = new ArrayList<>();
+
+        System.out.println(Vcf);
+        this.targetHpoId = null;
+        init(liricalPath);
+    }
+
+
+    private void init(String liricalPath) {
         String line;
         File liricalFile = new File(liricalPath);
         if (! liricalFile.exists()) {
@@ -67,7 +93,8 @@ public class Lirical2Overlap {
             throw new RuntimeException(e.getMessage());
         }
         System.out.printf("[INFO] We got %d above threshold candidates.\n", hitlist.size());
-        System.out.println(Vcf);
+
+
     }
 
     public List<LiricalHit> getHitlist() {

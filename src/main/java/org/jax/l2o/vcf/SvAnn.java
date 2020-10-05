@@ -91,6 +91,9 @@ public class SvAnn implements Comparable<SvAnn> {
                         symbols.add(items[2]);
                     }
                 }
+                if (cats.contains("intron_variant")) {
+                    priority = Priority.LOW;
+                }
                 if (f.indexOf("translocation")>0) {
                     isTranslocation = true;
                 }

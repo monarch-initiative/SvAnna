@@ -40,4 +40,8 @@ LIRICAL to overlapping SV
 ```
 
 
+We can run l2o to look for specific enhancer overlaps, e.g., for terms with
+	[Abnormal T cell morphology - HP:0002843](https://hpo.jax.org/app/browse/term/HP:0002843).
+
+
 

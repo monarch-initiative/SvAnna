@@ -2,7 +2,7 @@ package org.jax.l2o;
 
 
 import org.jax.l2o.html.HtmlTemplate;
-import org.jax.l2o.io.HpoDownloader;
+import org.jax.l2o.io.L2ODownloader;
 import org.jax.l2o.lirical.LiricalHit;
 import org.jax.l2o.vcf.AnnotatedVcfParser;
 import org.jax.l2o.vcf.SvAnn;
@@ -28,6 +28,8 @@ public class Main implements Callable<Integer>  {
     private String enhancerFile = null;
     @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term ID to classify enhancers")
     private String hpoTermId = null;
+    @CommandLine.Option(names = {"-g", "--gencode"})
+    private String geneCodePath = "data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz";
 
 
 
@@ -59,12 +61,12 @@ public class Main implements Callable<Integer>  {
     public Integer call() throws Exception {
         Main main = new Main();
 
-        HpoDownloader downloader = new HpoDownloader("data");
+        L2ODownloader downloader = new L2ODownloader("data");
         downloader.download();
         Lirical2Overlap l2o;
         if (enhancerFile != null && hpoTermId != null) {
             TermId tid = TermId.of(hpoTermId);
-            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname, tid, this.enhancerFile);
+            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname, tid, this.enhancerFile, this.geneCodePath);
         } else {
             l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
         }

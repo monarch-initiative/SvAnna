@@ -9,7 +9,7 @@ import java.net.URL;
  * Command to download the {@code hp.obo} and {@code phenotype.hpoa} files that
  * we will need to run the LIRICAL approach.
  */
-public class HpoDownloader {
+public class L2ODownloader {
 
     /** Directory to which we will download the files. */
     private final String downloadDirectory;
@@ -39,11 +39,11 @@ public class HpoDownloader {
 
 
 
-    public HpoDownloader(String path){
+    public L2ODownloader(String path){
         this(path,false);
     }
 
-    public HpoDownloader(String path, boolean overwrite){
+    public L2ODownloader(String path, boolean overwrite){
         this.downloadDirectory=path;
         this.overwrite=overwrite;
     }
@@ -56,7 +56,7 @@ public class HpoDownloader {
         downloadFileIfNeeded(HP_ANNOTATION,HP_ANNOTATION_URL);
         downloadFileIfNeeded(GENE_INFO,GENE_INFO_URL);
         downloadFileIfNeeded(MIM2GENE_MEDGEN,MIM2GENE_MEDGEN_URL);
-        downloadFileIfNeeded(GENCODE_FILE, GENE_INFO_URL);
+        downloadFileIfNeeded(GENCODE_FILE, GENECODE_URL);
     }
 
 

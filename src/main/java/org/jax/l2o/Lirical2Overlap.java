@@ -2,7 +2,9 @@ package org.jax.l2o;
 
 import com.google.common.collect.Multimap;
 import org.jax.l2o.lirical.LiricalHit;
+import org.jax.l2o.tspec.GencodeParser;
 import org.jax.l2o.tspec.TSpecParser;
+import org.jax.l2o.tspec.TssPosition;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
@@ -21,12 +23,16 @@ public class Lirical2Overlap {
     private final Map<TermId, Set<String>> diseaseId2GeneSymbolMap;
     private final String outputfile;
     private final TermId targetHpoId;
+   // private final List<TssPosition> tssPositions;
 
 
 
-    public Lirical2Overlap(String liricalPath, String Vcf,  String outfile, TermId tid, String enhancerPath) {
+    public Lirical2Overlap(String liricalPath, String Vcf,  String outfile, TermId tid, String enhancerPath, String gencode) {
 
         TSpecParser tparser = new TSpecParser(enhancerPath);
+        System.out.println("ABout to gparser");
+        GencodeParser gparser = new GencodeParser(gencode);
+       // List<TssPosition> getTranscripts()
         System.exit(1);
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
         this.hitlist = new ArrayList<>();

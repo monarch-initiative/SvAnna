@@ -22,6 +22,7 @@ public class TSpecParser {
         id2enhancerMap = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;
+            br.readLine(); // skip header
             while ((line = br.readLine()) != null) {
                 System.out.println(line);
                 String [] fields = line.split("\t");

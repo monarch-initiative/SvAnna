@@ -16,4 +16,29 @@ public class Enhancer {
         this.tau = t;
         this.termId = tid;
     }
+
+    public boolean matchesPos(String chr, int pos, int THRESHOLD) {
+        return this.chromosome.equals(chr)
+                && Math.abs(start - pos) < THRESHOLD;
+    }
+
+    public String getChromosome() {
+        return chromosome;
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public int getEnd() {
+        return end;
+    }
+
+    public double getTau() {
+        return tau;
+    }
+
+    public TermId getTermId() {
+        return termId;
+    }
 }

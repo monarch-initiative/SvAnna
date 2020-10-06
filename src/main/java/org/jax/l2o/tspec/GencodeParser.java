@@ -4,9 +4,7 @@ import org.jax.l2o.except.L2ORuntimeException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -94,5 +92,14 @@ public class GencodeParser {
 
     public List<TssPosition> getTranscripts() {
         return transcripts;
+    }
+
+    public Map<String, List<TssPosition>> getSymbolToTranscriptListMap() {
+        Map<String, List<TssPosition>> symMap = new HashMap<>();
+        for (var tss : this.transcripts) {
+            symMap.putIfAbsent(tss.getGeneSymbol(), new ArrayList<>());
+            symMap.get(tss.getGeneSymbol()).add(tss);
+        }
+        return symMap;
     }
 }

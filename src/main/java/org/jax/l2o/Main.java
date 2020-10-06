@@ -12,8 +12,10 @@ import picocli.CommandLine;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "l2o", mixinStandardHelpOptions = true, version = "l2o 0.0.1",
         description = "LIRICAL to overlapping SV")
@@ -26,7 +28,7 @@ public class Main implements Callable<Integer>  {
     protected String liricalFile;
     @CommandLine.Option(names = {"-e","--enhancer"},  description = "tspec enhancer file")
     private String enhancerFile = null;
-    @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term ID to classify enhancers")
+    @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list) to classify enhancers")
     private String hpoTermId = null;
     @CommandLine.Option(names = {"-g", "--gencode"})
     private String geneCodePath = "data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz";
@@ -65,8 +67,9 @@ public class Main implements Callable<Integer>  {
         downloader.download();
         Lirical2Overlap l2o;
         if (enhancerFile != null && hpoTermId != null) {
-            TermId tid = TermId.of(hpoTermId);
-            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname, tid, this.enhancerFile, this.geneCodePath);
+            String [] ids = hpoTermId.split(",");
+            List<TermId> tidList = Arrays.stream(ids).map(TermId::of).collect(Collectors.toList());
+            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname, tidList, this.enhancerFile, this.geneCodePath);
         } else {
             l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
         }

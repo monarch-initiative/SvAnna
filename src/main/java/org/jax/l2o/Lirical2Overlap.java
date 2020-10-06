@@ -2,6 +2,7 @@ package org.jax.l2o;
 
 import com.google.common.collect.Multimap;
 import org.jax.l2o.lirical.LiricalHit;
+import org.jax.l2o.tspec.Enhancer;
 import org.jax.l2o.tspec.GencodeParser;
 import org.jax.l2o.tspec.TSpecParser;
 import org.jax.l2o.tspec.TssPosition;
@@ -19,50 +20,82 @@ import java.util.*;
 public class Lirical2Overlap {
 
     final static double THRESHOLD = 1;
+    private final static int DISTANCE_THRESHOLD = 500_000;
     private final List<LiricalHit> hitlist;
     private final Map<TermId, Set<String>> diseaseId2GeneSymbolMap;
     private final String outputfile;
-    private final TermId targetHpoId;
-   // private final List<TssPosition> tssPositions;
+    private final List<TermId> targetHpoIdList;
+    private final  Map<String, List<TssPosition>> symbolToTranscriptListMap;
+    private final Set<Enhancer> phenotypicallyRelevantEnhancerSet = new HashSet<>();
 
 
-
-    public Lirical2Overlap(String liricalPath, String Vcf,  String outfile, TermId tid, String enhancerPath, String gencode) {
+    public Lirical2Overlap(String liricalPath, String Vcf,  String outfile, List<TermId> tidList, String enhancerPath, String gencode) {
 
         TSpecParser tparser = new TSpecParser(enhancerPath);
+        Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
+        Map<TermId, String> hpoId2LabelMap = tparser.getId2labelMap();
         System.out.println("ABout to gparser");
         GencodeParser gparser = new GencodeParser(gencode);
-       // List<TssPosition> getTranscripts()
+        this.symbolToTranscriptListMap = gparser.getSymbolToTranscriptListMap();
         System.exit(1);
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
         this.hitlist = new ArrayList<>();
         this.outputfile = outfile;
-        this.targetHpoId = tid;
+        this.targetHpoIdList = tidList;
+        for (TermId t : tidList) {
+            List<Enhancer> enhancers = id2enhancerMap.getOrDefault(t, new ArrayList<>());
+            for (var e : enhancers) {
+                phenotypicallyRelevantEnhancerSet.add(e);
+            }
+        }
+        List<LiricalHit> hitlist = getLiricalHitList(liricalPath);
+        for (var hit : hitlist) {
+            Set<String> geneSymbols = hit.getGeneSymbols();
+            Set<Enhancer> enhancers = getRelevantEnhancers(geneSymbols);
+            hit.setEnhancerSet(enhancers);
+        }
+    }
 
-        init(liricalPath);
 
+    private Set<Enhancer>  getRelevantEnhancers(Set<String> geneSymbols) {
+        Set<Enhancer> relevant = new HashSet<>();
 
+        for (var gene : geneSymbols) {
+            List<TssPosition> tssList = this.symbolToTranscriptListMap.getOrDefault(gene, List.of());
+            for (var tss : tssList) {
+                String chr = tss.getGenomicPosition().getChromosome();
+                int pos = tss.getGenomicPosition().getPosition();
+                for (var e : phenotypicallyRelevantEnhancerSet) {
+                    if (e.matchesPos(chr, pos, DISTANCE_THRESHOLD)) {
+                        relevant.add(e);
+                    }
+                }
+            }
+        }
+
+        return relevant;
     }
 
 
     public Lirical2Overlap(String liricalPath, String Vcf,  String outfile) {
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
+        symbolToTranscriptListMap = new HashMap<>();
         System.out.printf("We retrieved %d disease to gene annotations.\n", diseaseId2GeneSymbolMap.size());
         this.outputfile = outfile;
         hitlist = new ArrayList<>();
 
         System.out.println(Vcf);
-        this.targetHpoId = null;
-        init(liricalPath);
+        this.targetHpoIdList = null;
+        List<LiricalHit> hitlist =  getLiricalHitList(liricalPath);
     }
 
 
-    private void init(String liricalPath) {
+    private List<LiricalHit> getLiricalHitList(String liricalPath) {
         String line;
         File liricalFile = new File(liricalPath);
         if (! liricalFile.exists()) {
             System.err.printf("[ERROR] Could not find LIRICAL input file at %s\n", liricalPath);
-            return;
+            return List.of();
         }
         try (BufferedReader br = new BufferedReader(new FileReader(liricalPath))) {
             //rank    diseaseName     diseaseCurie    pretestprob     posttestprob    compositeLR     entrezGeneId    variants
@@ -99,8 +132,7 @@ public class Lirical2Overlap {
             throw new RuntimeException(e.getMessage());
         }
         System.out.printf("[INFO] We got %d above threshold candidates.\n", hitlist.size());
-
-
+        return hitlist;
     }
 
     public List<LiricalHit> getHitlist() {

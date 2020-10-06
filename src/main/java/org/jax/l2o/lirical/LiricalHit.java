@@ -1,5 +1,6 @@
 package org.jax.l2o.lirical;
 
+import org.jax.l2o.tspec.Enhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Collection;
@@ -15,6 +16,8 @@ public class LiricalHit {
     private final double posttestProbability;
     private final double likelihoodRatio;
     private Set<String> geneSymbols = Set.of();
+
+    private Set<Enhancer> enhancerSet = Set.of();
 
 
 
@@ -47,5 +50,13 @@ public class LiricalHit {
 
     public Set<String> getGeneSymbols() {
         return geneSymbols;
+    }
+
+    public void setEnhancerSet(Set<Enhancer> enhancers) {
+        this.enhancerSet = enhancers;
+    }
+
+    public Set<Enhancer> getEnhancers() {
+        return enhancerSet;
     }
 }

@@ -4,6 +4,7 @@ package org.jax.l2o.vcf;
 import org.jax.l2o.Lirical2Overlap;
 import org.jax.l2o.except.L2ORuntimeException;
 import org.jax.l2o.lirical.LiricalHit;
+import org.jax.l2o.tspec.Enhancer;
 
 import javax.print.DocFlavor;
 import java.io.BufferedReader;
@@ -27,11 +28,13 @@ public class AnnotatedVcfParser {
     /** Non translocation lists */
     private final List<SvAnn> annlist = new ArrayList<>();
     private final List<SvAnn> translocationList = new ArrayList<>();
+    private final Map<String, List<Enhancer>> chromosome2enhancerListMap;
 
     public AnnotatedVcfParser(String annotatedVcf, List<LiricalHit> hitlist) {
         this.annotatedVcfPath = annotatedVcf;
         ChromosomeMapper cmap = new ChromosomeMapper();
         this.acc2chrMap = cmap.getAcc2chrMap();
+        chromosome2enhancerListMap = new HashMap<>();
         interestingGenes = hitlist
                 .stream()
                 .map(LiricalHit::getGeneSymbols)
@@ -42,6 +45,11 @@ public class AnnotatedVcfParser {
             for (String s : symset) {
                 hitmap.putIfAbsent(s, new ArrayList<>());
                 hitmap.get(s).add(h);
+            }
+            Set<Enhancer> enh = h.getEnhancers();
+            for (var e : enh) {
+                chromosome2enhancerListMap.putIfAbsent(e.getChromosome(), new ArrayList<>());
+                chromosome2enhancerListMap.get(e.getChromosome()).add(e);
             }
         }
 

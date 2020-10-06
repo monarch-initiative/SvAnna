@@ -3,7 +3,7 @@ package org.jax.l2o.vcf;
 
 import org.jax.l2o.except.L2ORuntimeException;
 import org.jax.l2o.lirical.LiricalHit;
-import picocli.CommandLine;
+import org.jax.l2o.tspec.Enhancer;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -34,7 +34,7 @@ public class SvAnn implements Comparable<SvAnn> {
 
     private int end = UNINITIALIZED;
     private List<String> categories;
-    private Set<String> symbols = new HashSet<>();
+    private final Set<String> symbols = new HashSet<>();
     //private Set<String> mechanisms = new HashSet<>();
     private String mateId = UNINITIALIZED_STRING;
     private int mateDist = UNINITIALIZED;
@@ -46,7 +46,9 @@ public class SvAnn implements Comparable<SvAnn> {
 
     private Priority priority = Priority.UNKNOWN;
 
-    private List<LiricalHit> hitlist = new ArrayList<>();
+    private final List<LiricalHit> hitlist = new ArrayList<>();
+
+    private final List<Enhancer> enhancerList = new ArrayList<>();
 
     public SvAnn(String chr,
             int pos,
@@ -68,7 +70,7 @@ public class SvAnn implements Comparable<SvAnn> {
         this.info = info;
         this.format = format;
         this.gt = gt;
-        this.categories = new ArrayList<String>();
+        this.categories = new ArrayList<>();
         String [] fields = info.split(";");
         for (String f : fields) {
             //System.out.println("f="+f);
@@ -251,24 +253,21 @@ public class SvAnn implements Comparable<SvAnn> {
     public double getMaxPosteriorProb() {
         return this.hitlist
                 .stream()
-                .map(H -> H.getPosttestProbability())
+                .map(LiricalHit::getPosttestProbability)
                 .max(Double::compareTo)
                 .orElse(0.0);
     }
 
-    private final static Comparator<SvAnn> COMPARATOR = new Comparator<SvAnn>() {
-        @Override
-        public int compare(SvAnn o1, SvAnn o2) {
-            int c = o1.priority.compareTo(o2.priority);
-            if (c==0) {
-                double m1 = o1.getMaxPosteriorProb();
-                double m2 = o2.getMaxPosteriorProb();
-                if (m1 > m2) return 1;
-                if (m2 > m1) return -1;
-                return 0;
-            }
-            return c;
+    private final static Comparator<SvAnn> COMPARATOR = (o1, o2) -> {
+        int c = o1.priority.compareTo(o2.priority);
+        if (c==0) {
+            double m1 = o1.getMaxPosteriorProb();
+            double m2 = o2.getMaxPosteriorProb();
+            if (m1 > m2) return 1;
+            if (m2 > m1) return -1;
+            return 0;
         }
+        return c;
     };
 
 
@@ -279,8 +278,8 @@ public class SvAnn implements Comparable<SvAnn> {
 
     public String getBedLine() {
         int offset = 100;
-        int start = -1;
-        int end = -1;
+        int start;
+        int end;
         if (svtype.equals(SvType.DELETION)) {
             offset = Math.max(offset, svlen+100);
             start = this.pos - offset;
@@ -303,8 +302,8 @@ public class SvAnn implements Comparable<SvAnn> {
 
     public String getIgvLine() {
         int offset = 1000;
-        int start = -1;
-        int end = -1;
+        int start;
+        int end;
         if (svtype.equals(SvType.DELETION)) {
             start = this.pos - offset;
             end = this.pos + svlen + offset;
@@ -321,5 +320,9 @@ public class SvAnn implements Comparable<SvAnn> {
             return("Did not recognize svtype in getBedLine");
         }
         return String.format("%s\t%s:%d-%d",this.id, this.chrom, start, end);
+    }
+
+    public void addEnhancerHit(Enhancer e) {
+        enhancerList.add(e);
     }
 }

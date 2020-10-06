@@ -1,12 +1,10 @@
 package org.jax.l2o.vcf;
 
 
-import org.jax.l2o.Lirical2Overlap;
 import org.jax.l2o.except.L2ORuntimeException;
 import org.jax.l2o.lirical.LiricalHit;
 import org.jax.l2o.tspec.Enhancer;
 
-import javax.print.DocFlavor;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,7 +21,7 @@ public class AnnotatedVcfParser {
     private final String annotatedVcfPath;
     /** Set of gene symbols of interest */
     private final Set<String> interestingGenes;
-    private Map<String, String> acc2chrMap;
+    private final Map<String, String> acc2chrMap;
     private final Map<String, List<LiricalHit>> hitmap = new HashMap<>();
     /** Non translocation lists */
     private final List<SvAnn> annlist = new ArrayList<>();
@@ -80,6 +78,14 @@ public class AnnotatedVcfParser {
                 String format = fields[8];
                 String gt = fields[9]; // assume just one sample for now
                 SvAnn sva = new SvAnn(chr, pos, id, ref,alt,qual,filter,info,format,gt);
+
+                List<Enhancer> enhancersOnSameChrom = chromosome2enhancerListMap.get(chr);
+                for (var e : enhancersOnSameChrom) {
+                    if (e.matchesPos(chr, pos)) {
+                        sva.addEnhancerHit(e);
+                    }
+                }
+
                 if (sva.isTranslocation()) {
                     translocationList.add(sva);
                 } else {

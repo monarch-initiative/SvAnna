@@ -424,11 +424,14 @@ a.svg:hover, a.svg:active {
 
              </#list>
              </ul>
+             <#if sva.enhancers??>
+             <p>Enhancers:
              <ul>
              <#list sva.enhancers as enhancer>
                 <li>${enhancer.summary}</li>
              </#list>
-             </ul>
+             </ul></p>
+             </#if>
              </p>
              </article>
              </section>

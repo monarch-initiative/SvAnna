@@ -79,7 +79,7 @@ public class AnnotatedVcfParser {
                 String gt = fields[9]; // assume just one sample for now
                 SvAnn sva = new SvAnn(chr, pos, id, ref,alt,qual,filter,info,format,gt);
 
-                List<Enhancer> enhancersOnSameChrom = chromosome2enhancerListMap.get(chr);
+                List<Enhancer> enhancersOnSameChrom = chromosome2enhancerListMap.getOrDefault(chr, new ArrayList<>());
                 for (var e : enhancersOnSameChrom) {
                     if (e.matchesPos(chr, pos)) {
                         sva.addEnhancerHit(e);

@@ -86,6 +86,22 @@ public class VcfOverlap {
         }
         // if we get here, then we overlap with one or more genes
         List<TranscriptModel> overlappingTranscripts = qresult.getEntries();
+        boolean exonic = false;
+        boolean locatedInCds = false;
+        for (var tmod : overlappingTranscripts) {
+            GenomeInterval cds = tmod.getCDSRegion();
+            List<GenomeInterval> exons = tmod.getExonRegions();
+            for (int i=0;i<exons.size();++i) {
+                var exon = exons.get(i);
+                if (exon.contains(start) || exon.contains(end)) {
+                    exonic = true;
+                    if (cds.contains(start) || cds.contains(end)) {
+                        locatedInCds = true;
+                    }
+                    break;
+                }
+            }
+        }
         return new VcfOverlap(VcfOverlapType.UNKNOWN, NOT_APPLICABLE, N_A, NOT_APPLICABLE, N_A);
     }
 

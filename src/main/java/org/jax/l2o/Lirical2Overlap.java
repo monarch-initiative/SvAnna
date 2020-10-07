@@ -37,7 +37,6 @@ public class Lirical2Overlap {
         System.out.println("ABout to gparser");
         GencodeParser gparser = new GencodeParser(gencode);
         this.symbolToTranscriptListMap = gparser.getSymbolToTranscriptListMap();
-        System.exit(1);
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
         this.hitlist = new ArrayList<>();
         this.outputfile = outfile;

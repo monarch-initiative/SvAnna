@@ -58,7 +58,11 @@ public class GencodeParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (transcripts.isEmpty()) {
+            throw new L2ORuntimeException("Could not parse gencode transcripts");
+        }
         System.out.printf("[INFO] We parsed %d transcripts from genecode\n", transcripts.size());
+
     }
 
     private Optional<String> getMatch(String [] entryList, String key) {

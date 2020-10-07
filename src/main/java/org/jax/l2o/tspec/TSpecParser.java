@@ -24,7 +24,6 @@ public class TSpecParser {
             String line;
             br.readLine(); // skip header
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
                 String [] fields = line.split("\t");
                 if (fields.length != 6) {
                     throw new L2ORuntimeException("Bad tspec line: " + line);

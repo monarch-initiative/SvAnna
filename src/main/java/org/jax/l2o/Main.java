@@ -1,6 +1,8 @@
 package org.jax.l2o;
 
 
+import org.jax.l2o.cmd.AnnotateCommand;
+import org.jax.l2o.cmd.DownloadCommand;
 import org.jax.l2o.html.HtmlTemplate;
 import org.jax.l2o.io.L2ODownloader;
 import org.jax.l2o.lirical.LiricalHit;
@@ -20,66 +22,28 @@ import java.util.stream.Collectors;
 @CommandLine.Command(name = "l2o", mixinStandardHelpOptions = true, version = "l2o 0.0.1",
         description = "LIRICAL to overlapping SV")
 public class Main implements Callable<Integer>  {
-    @CommandLine.Option(names = {"-o","--out"})
-    protected String outname = "l2o.bed";
-    @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
-    protected String vcfFile;
-    @CommandLine.Option(names = {"-l", "--lirical"}, required = true)
-    protected String liricalFile;
-    @CommandLine.Option(names = {"-e","--enhancer"},  description = "tspec enhancer file")
-    private String enhancerFile = null;
-    @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list) to classify enhancers")
-    private String hpoTermId = null;
-    @CommandLine.Option(names = {"-g", "--gencode"})
-    private String geneCodePath = "data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz";
+
 
 
 
 
     public static void main(String [] args) {
-        CommandLine cline = new CommandLine(new Main());
+        CommandLine cline = new CommandLine(new Main())
+                .addSubcommand("download", new DownloadCommand())
+                .addSubcommand("annotate", new AnnotateCommand());
         cline.setToggleBooleanFlags(false);
         int exitCode = cline.execute(args);
         System.exit(exitCode);
+
+
     }
 
 
-    private void outputIgvTargetsFile(List<SvAnn> svlist, String fname) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fname))) {
-            for (SvAnn sv : svlist) {
-                if (sv.isLowPriority()) {
-                    continue;
-                }
-                //String bedline = sv.getBedLine();
-                String igvline = sv.getIgvLine();
-                writer.write(igvline + "\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
     @Override
     public Integer call() throws Exception {
-        Main main = new Main();
-
-        L2ODownloader downloader = new L2ODownloader("data");
-        downloader.download();
-        Lirical2Overlap l2o;
-        if (enhancerFile != null && hpoTermId != null) {
-            String [] ids = hpoTermId.split(",");
-            List<TermId> tidList = Arrays.stream(ids).map(TermId::of).collect(Collectors.toList());
-            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname, tidList, this.enhancerFile, this.geneCodePath);
-        } else {
-            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
-        }
-        List<LiricalHit> hitlist = l2o.getHitlist();
-        AnnotatedVcfParser vcfParser = new AnnotatedVcfParser(this.vcfFile, hitlist);
-        List<SvAnn> annList = vcfParser.getAnnlist();
-        List<SvAnn> translocationList = vcfParser.getTranslocationList();
-        HtmlTemplate template = new HtmlTemplate(annList, translocationList);
-        template.outputFile();
-        outputIgvTargetsFile(annList,"l2o.igv.txt");
+        // work done in subcommands
         return 0;
     }
 }

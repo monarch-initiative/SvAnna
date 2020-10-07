@@ -1,6 +1,7 @@
 package org.jax.l2o.html;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,8 +24,6 @@ public class HtmlTemplate {
     /** FreeMarker configuration object. */
     protected final Configuration cfg;
 
-    private final String outpath;
-
     protected static final String EMPTY_STRING="";
 
     public HtmlTemplate(List<SvAnn> svAnnList, List<SvAnn> translocationList) {
@@ -38,7 +37,7 @@ public class HtmlTemplate {
         cfg.setClassForTemplateLoading(HtmlTemplate.class,"");
 
         //templateFile.toURI().toURL().toExternalForm()
-        outpath = "l2o.html";
+
         templateData.putIfAbsent("svalist", svAnnList);
         templateData.put("n_translocations", translocationList.size());
         templateData.put("n_non_translocations", svAnnList.size());
@@ -61,8 +60,9 @@ public class HtmlTemplate {
     }
 
 
-    public void outputFile() {
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(this.outpath))) {
+    public void outputFile(String prefix) {
+        String outpath = String.format( "%s.html", prefix);
+        try (BufferedWriter out = new BufferedWriter(new FileWriter(outpath))) {
             Template template = cfg.getTemplate("l2oHTML.ftl");
             template.process(templateData, out);
         } catch (TemplateException | IOException te) {

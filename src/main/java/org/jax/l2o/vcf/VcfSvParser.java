@@ -1,12 +1,7 @@
 package org.jax.l2o.vcf;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import de.charite.compbio.jannovar.annotation.VariantAnnotations;
-import de.charite.compbio.jannovar.annotation.VariantEffect;
 import de.charite.compbio.jannovar.data.*;
-import de.charite.compbio.jannovar.htsjdk.InvalidCoordinatesException;
 import de.charite.compbio.jannovar.htsjdk.VariantContextAnnotator;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.progress.ProgressReporter;
@@ -14,21 +9,14 @@ import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import htsjdk.samtools.util.CloseableIterator;
-import htsjdk.variant.variantcontext.Allele;
-import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
-import org.apache.commons.io.FilenameUtils;
 import org.jax.l2o.except.L2ORuntimeException;
-import org.monarchinitiative.phenol.base.PhenolRuntimeException;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -84,6 +72,9 @@ public class VcfSvParser {
      * Name of the proband in the VCF file.
      */
     private String samplename;
+
+    private List<VcfOverlapList> vcfOverlapListList = new ArrayList<>();
+
     /**
      * List of all names in the VCF file
      */
@@ -161,7 +152,8 @@ public class VcfSvParser {
                 GenomePosition gposEnd = new GenomePosition(referenceDictionary, strand, id, vc.getEnd());
                 IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
                 IntervalArray<TranscriptModel>.QueryResult queryResult = iarray.findOverlappingWithInterval(vc.getStart(), vc.getEnd());
-                VcfOverlap overlap = VcfOverlap.factory(gposStart, gposEnd, queryResult);
+                VcfOverlapList overlap = VcfOverlapList.factory(gposStart, gposEnd, queryResult);
+                vcfOverlapListList.add(overlap);
                 System.out.println("[VcfOverlap] " + overlap);
 
 

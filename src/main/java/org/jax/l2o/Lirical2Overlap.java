@@ -34,7 +34,6 @@ public class Lirical2Overlap {
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
         Map<TermId, String> hpoId2LabelMap = tparser.getId2labelMap();
-        System.out.println("ABout to gparser");
         GencodeParser gparser = new GencodeParser(gencode);
         this.symbolToTranscriptListMap = gparser.getSymbolToTranscriptListMap();
         this.diseaseId2GeneSymbolMap = initDiseaseMap();

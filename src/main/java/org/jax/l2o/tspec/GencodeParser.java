@@ -49,7 +49,6 @@ public class GencodeParser {
                     }
                 } catch (Exception e) {
                     System.out.printf("[ERROR] %s from line %s\n", e.getMessage(), line);
-                    //e.printStackTrace();
                 }
 
             }

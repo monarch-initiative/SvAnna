@@ -20,8 +20,17 @@ public class VcfOverlap {
         this.description = desc;
     }
 
+    /**
+     * @todo REVISE ME
+     * @return
+     */
+    public boolean isCoding() {
+        return VcfOverlapType.isCoding(this.overlapType);
+    }
+
     @Override
     public String toString() {
-        return String.format("VcfOverlap [%s] 5': (%dbp); 3': (%dbp)", description, leftDistance, rightDistance);
+        return String.format("VcfOverlap [%s:%s] 5': (%dbp); 3': (%dbp)",
+                overlapType, description, leftDistance, rightDistance);
     }
 }

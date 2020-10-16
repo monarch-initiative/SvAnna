@@ -141,7 +141,7 @@ public class VcfSvParser {
                     n_good_quality_variants++;
                 }
 
-                System.out.println("[VariantContext] " + vc);
+
                 String contig = vc.getContig();
                 if (!this.referenceDictionary.getContigNameToID().containsKey(contig)) {
                     System.err.println("[ERR] Could not get key for contig :\"" + contig + "\"");
@@ -152,16 +152,30 @@ public class VcfSvParser {
                 GenomePosition gposEnd = new GenomePosition(referenceDictionary, strand, id, vc.getEnd());
                 IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
                 IntervalArray<TranscriptModel>.QueryResult queryResult = iarray.findOverlappingWithInterval(vc.getStart(), vc.getEnd());
-                VcfOverlapList overlap = VcfOverlapList.factory(gposStart, gposEnd, queryResult);
-                vcfOverlapListList.add(overlap);
-                System.out.println("[VcfOverlap] " + overlap);
+                try {
+                    VcfOverlapList overlap = VcfOverlapList.factory(gposStart, gposEnd, queryResult);
+                    System.out.println(overlap);
+                    if (overlap.isCoding()) {
+                        if (++c > 10) break;
+                        vcfOverlapListList.add(overlap);
+                        System.out.println("[VcfOverlap] " + overlap);
+                    }
+                } catch (L2ORuntimeException e) {
+                    e.printStackTrace();
+                    System.out.println("[Could not annotate VariantContext] " + vc);
+                    System.out.println();
+                    throw e;
+                }
 
 
-                if (++c > 10) break;
+
             }
         }
     }
 
+    public List<VcfOverlapList> getVcfOverlapListList() {
+        return vcfOverlapListList;
+    }
 
     public int getN_samples() {
         return n_samples;

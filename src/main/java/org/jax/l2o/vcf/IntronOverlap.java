@@ -19,7 +19,8 @@ public class IntronOverlap {
 
     /**
      * By assumption, if we get here we have previously determined that the SV is located within an intron
-     * of the transcript.
+     * of the transcript. If the method is called for an SV that is only partially in the intron, it can
+     * return incorrect results. It does not check this.
      *
      * @param tmod
      * @return
@@ -32,20 +33,6 @@ public class IntronOverlap {
                 if (startPos > exons.get(i).getEndPos() && startPos < exons.get(i+1).getBeginPos()) {
                     return i+1;
                 }
-            }
-        } else {
-            // reverse order for neg-strand genes.
-            for (int i=0;i<exons.size()-1;i++) {
-                if (startPos < exons.get(i).getEndPos() && startPos > exons.get(i+1).getBeginPos()) {
-                    return i+1;
-                }
-            }
-        }
-        // rarely, only one of the two ends of the SV is in an intron.
-        // This can be the case of the SV overlaps exon 1, for instance, starting 5' to the transcript and
-        // ending in intron 1
-        if (tmod.getStrand().equals(Strand.FWD)) {
-            for (int i=0;i<exons.size()-1;i++) {
                 if (endPos > exons.get(i).getEndPos() && endPos < exons.get(i+1).getBeginPos()) {
                     return i+1;
                 }
@@ -53,7 +40,10 @@ public class IntronOverlap {
         } else {
             // reverse order for neg-strand genes.
             for (int i=0;i<exons.size()-1;i++) {
-                if (endPos < exons.get(i).getEndPos() && endPos > exons.get(i+1).getBeginPos()) {
+                if (startPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && startPos > exons.get(i+1).withStrand(Strand.FWD).getBeginPos()) {
+                    return i+1;
+                }
+                if (endPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && endPos > exons.get(i+1).withStrand(Strand.FWD).getBeginPos()) {
                     return i+1;
                 }
             }

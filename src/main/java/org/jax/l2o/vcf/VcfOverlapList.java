@@ -10,6 +10,7 @@ import org.jax.l2o.except.L2ORuntimeException;
 import javax.swing.text.html.Option;
 import java.util.*;
 
+import static org.jax.l2o.vcf.IntronOverlap.getIntronNumber;
 import static org.jax.l2o.vcf.VcfOverlapType.*;
 
 public class VcfOverlapList {
@@ -164,53 +165,6 @@ public class VcfOverlapList {
         return Optional.empty();
     }
 
-    /**
-     * By assumption, if we get here we have previously determined that the SV is located within an intron
-     * of the transcript.
-     *
-     * @param tmod
-     * @return
-     */
-    static private int getIntronNumber(TranscriptModel tmod,  GenomePosition startPos, GenomePosition endPos) {
-        int i = 0;
-        List<GenomeInterval> exons = tmod.getExonRegions();
-        if (tmod.getStrand().equals(Strand.FWD)) {
-            for (var ex : exons) {
-                i++;
-                if (startPos.getPos() > ex.getEndPos()) {
-                    return i;
-                }
-            }
-        } else {
-            // reverse order for neg-strand genes.
-            for (var ex : exons) {
-                i++;
-                if (startPos.getPos() < ex.getBeginPos()) {
-                    return i;
-                }
-            }
-        }
-        // rarely, only one of the two ends of the SV is in an intron.
-        // This can be the case of the SV overlaps exon 1, for instance, starting 5' to the transcript and
-        // ending in intron 1
-        if (tmod.getStrand().equals(Strand.FWD)) {
-            for (var ex : exons) {
-                i++;
-                if (endPos.getPos() > ex.getEndPos()) {
-                    return i;
-                }
-            }
-        } else {
-            // reverse order for neg-strand genes.
-            for (var ex : exons) {
-                i++;
-                if (endPos.getPos() < ex.getBeginPos()) {
-                    return i;
-                }
-            }
-        }
-       throw new L2ORuntimeException("Could not find intron number");
-    }
 
     /**
      * Calculate overlap for a non-coding transcript. By assumption, if we get here then we have already
@@ -246,7 +200,7 @@ public class VcfOverlapList {
             }
         } else {
             // if we get here, then both positions must be in the same intron
-            int intronNum = getIntronNumber(tmod, start, end);
+            int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
             return new VcfOverlap(INTRONIC_CODING_TRANSCRIPT, 0, 0, msg);
         }
@@ -290,7 +244,7 @@ public class VcfOverlapList {
             }
         } else {
             // if we get here, then both positions must be in the same intron
-            int intronNum = getIntronNumber(tmod, start, end);
+            int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
             return new VcfOverlap(INTRONIC_NONCODING_TRANSCRIPT, 0, 0, msg);
         }

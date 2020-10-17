@@ -108,13 +108,36 @@ public class IntronOverlapTest {
 
 
     /**
-     * nbpf15 is reverse strand. Test a variant in intron 1, 23_694_558-23_695_858
+     * ZNF436 is reverse strand. Test a variant in intron 1, 23_694_558-23_695_858
      */
     @Test
     public void testZNF436_Intron1() {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_570);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_580);
         int expectedIntronNumber = 1;
+        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+    }
+
+    /**
+     * ZNF436 is reverse strand. Test a variant in intron 2, 23_693_661- 23_694_465
+     *
+     */
+    @Test
+    public void testZNF436_Intron2() {
+        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_161);
+        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_280);
+        int expectedIntronNumber = 2;
+        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+    }
+
+    /**
+     * ZNF436 is reverse strand. Test a variant in intron 1, 23_689_714-23_693_534
+     */
+    @Test
+    public void testZNF436_Intron3() {
+        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_693_234);
+        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_693_334);
+        int expectedIntronNumber = 3;
         assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
     }
 }

@@ -1,7 +1,6 @@
 package org.jax.l2o.vcf;
 
 import de.charite.compbio.jannovar.reference.GenomeInterval;
-import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.l2o.except.L2ORuntimeException;

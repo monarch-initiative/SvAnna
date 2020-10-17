@@ -1,5 +1,6 @@
 package org.jax.l2o.vcf;
 
+import com.github.jsonldjava.utils.Obj;
 import com.google.common.collect.ImmutableMap;
 import de.charite.compbio.jannovar.data.*;
 import de.charite.compbio.jannovar.htsjdk.VariantContextAnnotator;
@@ -149,7 +150,17 @@ public class VcfSvParser {
                     continue;
                 }
                 int id = this.referenceDictionary.getContigNameToID().get(contig);
-
+                Map<String, Object> attributes = vc.getAttributes();
+                if (vc.getStart() == 120447841) {
+                    for (var s : attributes.keySet()) {
+                        System.out.println(s + ": " + attributes.get(s));
+                    }
+                    vc = variantEffectAnnotator.annotateVariantContext(vc);
+                    attributes = vc.getAttributes();
+                    for (var s : attributes.keySet()) {
+                        System.out.println("JANNOVAR "+s + ": " + attributes.get(s));
+                    }
+                }
                 GenomeInterval structVarInterval = new GenomeInterval(referenceDictionary,strand, id, vc.getStart(), vc.getEnd());
                // structVarInterval.
                 IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();

@@ -2,13 +2,11 @@ package org.jax.l2o.vcf;
 
 
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
-import de.charite.compbio.jannovar.data.ReferenceDictionaryBuilder;
 import de.charite.compbio.jannovar.reference.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 public class IntronOverlapTest {
 

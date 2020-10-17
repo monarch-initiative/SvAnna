@@ -169,16 +169,15 @@ public class VcfOverlapList {
      * of the transcript.
      *
      * @param tmod
-     * @param pos
      * @return
      */
-    static private int getIntronNumber(TranscriptModel tmod, GenomePosition pos) {
+    static private int getIntronNumber(TranscriptModel tmod,  GenomePosition startPos, GenomePosition endPos) {
         int i = 0;
         List<GenomeInterval> exons = tmod.getExonRegions();
         if (tmod.getStrand().equals(Strand.FWD)) {
             for (var ex : exons) {
                 i++;
-                if (pos.getPos() > ex.getEndPos()) {
+                if (startPos.getPos() > ex.getEndPos()) {
                     return i;
                 }
             }
@@ -186,13 +185,31 @@ public class VcfOverlapList {
             // reverse order for neg-strand genes.
             for (var ex : exons) {
                 i++;
-                if (pos.getPos() < ex.getBeginPos()) {
+                if (startPos.getPos() < ex.getBeginPos()) {
                     return i;
                 }
             }
         }
-        // we should never get here
-        throw new L2ORuntimeException(String.format("Could not find intron for %d in %s", pos.getPos(), tmod.getGeneID()));
+        // rarely, only one of the two ends of the SV is in an intron.
+        // This can be the case of the SV overlaps exon 1, for instance, starting 5' to the transcript and
+        // ending in intron 1
+        if (tmod.getStrand().equals(Strand.FWD)) {
+            for (var ex : exons) {
+                i++;
+                if (endPos.getPos() > ex.getEndPos()) {
+                    return i;
+                }
+            }
+        } else {
+            // reverse order for neg-strand genes.
+            for (var ex : exons) {
+                i++;
+                if (endPos.getPos() < ex.getBeginPos()) {
+                    return i;
+                }
+            }
+        }
+       throw new L2ORuntimeException("Could not find intron number");
     }
 
     /**
@@ -200,11 +217,9 @@ public class VcfOverlapList {
      * determined that the SV overlaps with a non-coding transcript
      *
      * @param tmod  a non-coding transcript (this is checked by calling code)
-     * @param start start position of the overlapping structural variant
-     * @param end   end position of the overlapping structural variant
      * @return
      */
-    static public VcfOverlap coding(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
+    static public VcfOverlap coding(TranscriptModel tmod, GenomePosition start , GenomePosition end) {
         boolean exonic = overlapsExon(tmod, start, end);
         if (exonic) {
             // determine which exons are affected
@@ -231,7 +246,7 @@ public class VcfOverlapList {
             }
         } else {
             // if we get here, then both positions must be in the same intron
-            int intronNum = getIntronNumber(tmod, start);
+            int intronNum = getIntronNumber(tmod, start, end);
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
             return new VcfOverlap(INTRONIC_CODING_TRANSCRIPT, 0, 0, msg);
         }
@@ -275,16 +290,24 @@ public class VcfOverlapList {
             }
         } else {
             // if we get here, then both positions must be in the same intron
-            int intronNum = getIntronNumber(tmod, start);
+            int intronNum = getIntronNumber(tmod, start, end);
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
             return new VcfOverlap(INTRONIC_NONCODING_TRANSCRIPT, 0, 0, msg);
         }
     }
 
+    static private VcfOverlap containedIn(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
+        int left = start.getPos() - tmod.getTXRegion().getBeginPos();
+        int right = end.getPos() - tmod.getTXRegion().getEndPos();
+        String msg = String.format("%s/%s", tmod.getGeneSymbol(), tmod.getAccession(), tmod.getGeneSymbol(), tmod.getAccession());
+        return new VcfOverlap(TRANSCRIPT_CONTAINED_IN_SV, left, right, msg);
+    }
 
-    static public VcfOverlapList factory(GenomePosition start,
-                                         GenomePosition end,
+
+    static public VcfOverlapList factory(GenomeInterval svInt,
                                          IntervalArray<TranscriptModel>.QueryResult qresult) {
+        GenomePosition start = svInt.getGenomeBeginPos();
+        GenomePosition end = svInt.getGenomeEndPos();
         List<VcfOverlap> overlaps = new ArrayList<>();
         if (qresult.getEntries().isEmpty()) {
             return intergenic(start, end, qresult);
@@ -292,8 +315,16 @@ public class VcfOverlapList {
         // if we get here, then we overlap with one or more genes
         List<TranscriptModel> overlappingTranscripts = qresult.getEntries();
         for (var tmod : overlappingTranscripts) {
-            if (start.getPos() == 25258883) {
-                System.out.println(tmod.getGeneSymbol());
+            if (svInt.contains(tmod.getTXRegion())) {
+                // the transcript is completely contained in the SV
+                VcfOverlap vover = containedIn(tmod, start, end);
+                overlaps.add(vover);
+                continue;
+            }
+            if (! tmod.getTXRegion().contains(start) && ! tmod.getTXRegion().contains(end)) {
+                System.err.printf("[ERROR] Warning, transcript model (%s;%s) retrieved that does not overlap (chr%s:%d-%d): ",
+                        tmod.getGeneSymbol(), tmod.getAccession(), start.getChr(), start.getPos(), end.getPos());
+                //throw new L2ORuntimeException(tmod.getGeneSymbol());
             }
             if (tmod.isCoding()) {
                 VcfOverlap voverlap = coding(tmod, start, end);

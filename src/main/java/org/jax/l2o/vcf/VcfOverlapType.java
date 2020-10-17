@@ -27,6 +27,7 @@ public enum VcfOverlapType {
     SINGLE_EXON_CODING_TRANSCRIPT("single-exon in non-coding transcript"),
     MULTIPLE_EXON_CODING_TRANSCRIPT("multi-exon in non-coding transcript"),
     INTRONIC_CODING_TRANSCRIPT("intronic in non-coding transcript"),
+    TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV"),
     UNKNOWN("unknown");
 
 

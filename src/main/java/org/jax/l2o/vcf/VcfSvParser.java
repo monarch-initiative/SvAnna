@@ -5,6 +5,7 @@ import de.charite.compbio.jannovar.data.*;
 import de.charite.compbio.jannovar.htsjdk.VariantContextAnnotator;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.progress.ProgressReporter;
+import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
@@ -148,15 +149,15 @@ public class VcfSvParser {
                     continue;
                 }
                 int id = this.referenceDictionary.getContigNameToID().get(contig);
-                GenomePosition gposStart = new GenomePosition(referenceDictionary, strand, id, vc.getStart());
-                GenomePosition gposEnd = new GenomePosition(referenceDictionary, strand, id, vc.getEnd());
+
+                GenomeInterval structVarInterval = new GenomeInterval(referenceDictionary,strand, id, vc.getStart(), vc.getEnd());
+               // structVarInterval.
                 IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
                 IntervalArray<TranscriptModel>.QueryResult queryResult = iarray.findOverlappingWithInterval(vc.getStart(), vc.getEnd());
                 try {
-                    VcfOverlapList overlap = VcfOverlapList.factory(gposStart, gposEnd, queryResult);
+                    VcfOverlapList overlap = VcfOverlapList.factory(structVarInterval, queryResult);
                     System.out.println(overlap);
                     if (overlap.isCoding()) {
-                        if (++c > 10) break;
                         vcfOverlapListList.add(overlap);
                         System.out.println("[VcfOverlap] " + overlap);
                     }

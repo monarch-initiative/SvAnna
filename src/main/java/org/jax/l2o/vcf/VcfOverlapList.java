@@ -111,10 +111,20 @@ public class VcfOverlapList {
         // get distance to nearest transcripts to the left and right
         TranscriptModel tmodelLeft = qresult.getLeft();
         TranscriptModel tmodelRight = qresult.getRight();
-        int leftDistance = start.getPos() - tmodelLeft.getTXRegion().withStrand(Strand.FWD).getEndPos();
-        String leftGene = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
-        int rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
-        String rightGene = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+        // if we are 5' or 3' to the first or last gene on the chromosome, then
+        // there is not left or right gene anymore
+        int leftDistance = 0;
+        String leftGene = "";
+        if (tmodelLeft != null) {
+            leftDistance = start.getPos() - tmodelLeft.getTXRegion().withStrand(Strand.FWD).getEndPos();
+            leftGene = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
+        }
+        int rightDistance = 0;
+        String rightGene = "";
+        if (tmodelRight != null) {
+            rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
+            rightGene = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+        }
         int minDistance = Math.min(leftDistance, rightDistance);
         boolean left = leftDistance == minDistance; // in case of ties, default to left
         if (left) {
@@ -143,9 +153,9 @@ public class VcfOverlapList {
 
     static boolean overlapsExon(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
         List<GenomeInterval> exons = tmod.getExonRegions();
-        if (exons.stream().filter(gi -> gi.contains(start)).findAny().isPresent()) {
+        if (exons.stream().anyMatch(gi -> gi.contains(start))) {
             return true;
-        } else if (!start.equals(end) && exons.stream().filter(gi -> gi.contains(end)).findAny().isPresent()) {
+        } else if (!start.equals(end) && exons.stream().anyMatch(gi -> gi.contains(end))) {
             return true;
         } else {
             return false;
@@ -187,7 +197,7 @@ public class VcfOverlapList {
                 secondAffectedExonNumber = firstAffectedExonNumber;
             }
 
-            if (firstAffectedExonNumber.get() == secondAffectedExonNumber.get()) {
+            if (firstAffectedExonNumber.get().equals(secondAffectedExonNumber.get())){
                 String msg = String.format("%s/%s[exon %d]", tmod.getGeneSymbol(), tmod.getAccession(), firstAffectedExonNumber.get());
                 return new VcfOverlap(SINGLE_EXON_CODING_TRANSCRIPT, 0, 0, msg);
             } else {
@@ -253,7 +263,7 @@ public class VcfOverlapList {
     static private VcfOverlap containedIn(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
         int left = start.getPos() - tmod.getTXRegion().getBeginPos();
         int right = end.getPos() - tmod.getTXRegion().getEndPos();
-        String msg = String.format("%s/%s", tmod.getGeneSymbol(), tmod.getAccession(), tmod.getGeneSymbol(), tmod.getAccession());
+        String msg = String.format("%s/%s", tmod.getGeneSymbol(), tmod.getAccession());
         return new VcfOverlap(TRANSCRIPT_CONTAINED_IN_SV, left, right, msg);
     }
 
@@ -296,7 +306,7 @@ public class VcfOverlapList {
     }
 
     public boolean isCoding() {
-        return this.overlaps.stream().filter(VcfOverlap::isCoding).findAny().isPresent();
+        return this.overlaps.stream().anyMatch(VcfOverlap::isCoding);
     }
 
 
@@ -311,7 +321,7 @@ public class VcfOverlapList {
         StringBuilder sb = new StringBuilder();
         sb.append("[VcfOverlapList\n");
         for (var v : overlaps) {
-            sb.append(v + "\n");
+            sb.append(v).append("\n");
         }
         return sb.toString();
     }

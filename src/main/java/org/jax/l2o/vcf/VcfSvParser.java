@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.*;
 
+import static org.jax.l2o.vcf.SvType.BND;
+
 /**
  * This class implements parsing structural variants into SvAnnotation objects.
  * The VCF standard describes two types of SV notations. One is by SV types, i.e. insertions, deletions, inversions,
@@ -76,6 +78,12 @@ public class VcfSvParser {
     private String samplename;
 
     private List<VcfOverlapList> vcfOverlapListList = new ArrayList<>();
+    /**
+     * When we are parsing the SVs line for line, we will encounter the first pair of each BND on one line
+     * and its pair on a subsequent line. We can recognize this by the MATEID of the first mate, which will
+     * be identical with the ID of the second mate.
+     */
+    private Map<String, BndAnnotation> bndMap;
 
     /**
      * List of all names in the VCF file
@@ -87,6 +95,7 @@ public class VcfSvParser {
         this.jannovarData = jannovarData(jannovarPath);
         this.referenceDictionary = this.jannovarData.getRefDict();
         this.chromosomeMap = this.jannovarData.getChromosomes();
+        bndMap = new HashMap<>();
         parseSvVcf();
     }
 
@@ -151,21 +160,38 @@ public class VcfSvParser {
                 }
                 int id = this.referenceDictionary.getContigNameToID().get(contig);
                 Map<String, Object> attributes = vc.getAttributes();
+                String svTypeString = (String) attributes.getOrDefault("SVTYPE", "UNKNOWN");
+                SvType svtype = SvType.fromString(svTypeString);
+               // int mateDistance = (int) attributes.getOrDefault("MATEDIST", 0);
+               // String ciPos = (String) attributes.getOrDefault("CIPOS", "n/a");
+                String mateId = (String) attributes.getOrDefault("MATEID", "n/a");
+                if (svtype.equals(BND)) {
+                    if (bndMap.containsKey(mateId)) {
+                        // add mate information to the BND
+                        BndAnnotation firstMate = bndMap.get(mateId);
+                        firstMate.addSecondMate(attributes, vc);
+                        System.out.println("bnd" + firstMate);
+                    } else {
+                        String vcfId = vc.getID();
+                        BndAnnotation bnd = new BndAnnotation(attributes, vc);
+                        // add first mate of a BND annotation.
+                        this.bndMap.put(bnd.getMateId(), bnd);
+                        System.out.println("bnd" + bnd);
+                    }
+                    continue;
+                }
                 if (vc.getStart() == 120447841) {
                     for (var s : attributes.keySet()) {
                         System.out.println(s + ": " + attributes.get(s));
                     }
-                    vc = variantEffectAnnotator.annotateVariantContext(vc);
-                    attributes = vc.getAttributes();
-                    for (var s : attributes.keySet()) {
-                        System.out.println("JANNOVAR "+s + ": " + attributes.get(s));
-                    }
+
                 }
                 GenomeInterval structVarInterval = new GenomeInterval(referenceDictionary,strand, id, vc.getStart(), vc.getEnd());
-               // structVarInterval.
-                IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
-                IntervalArray<TranscriptModel>.QueryResult queryResult = iarray.findOverlappingWithInterval(vc.getStart(), vc.getEnd());
+               // find overlapping transcripts using the interval array of Jannovar
+
                 try {
+                    IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
+                    IntervalArray<TranscriptModel>.QueryResult queryResult = iarray.findOverlappingWithInterval(vc.getStart(), vc.getEnd());
                     VcfOverlapList overlap = VcfOverlapList.factory(structVarInterval, queryResult);
                     System.out.println(overlap);
                     if (overlap.isCoding()) {
@@ -177,6 +203,8 @@ public class VcfSvParser {
                     System.out.println("[Could not annotate VariantContext] " + vc);
                     System.out.println();
                     throw e;
+                } catch (RuntimeException rte) {
+                    System.err.printf("[ERROR] Runtime exception for vs start %d vc end %d\n", vc.getStart(), vc.getEnd());
                 }
 
 

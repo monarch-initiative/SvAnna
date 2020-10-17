@@ -3,7 +3,7 @@ package org.jax.l2o.vcf;
 import org.jax.l2o.except.L2ORuntimeException;
 
 public enum SvType {
-    DELETION, INSERTION, DUPLICATION, CNV, INVERSION, TRANSLOCATION, DEL_INV, DUP_INS, INV_DUP, INV_INV_DUP;
+    DELETION, INSERTION, DUPLICATION, CNV, INVERSION, TRANSLOCATION, DEL_INV, DUP_INS, INV_DUP, INV_INV_DUP, BND;
 
 
     public static SvType fromString(String svt) {
@@ -28,7 +28,7 @@ public enum SvType {
                 return INV_INV_DUP;
             case "BND":
                 //BND is a catch-all for a generic breakpoint, so you can't assume all to be translocations
-                return TRANSLOCATION;
+                return BND;
             default:
                 throw new L2ORuntimeException("Did not recognize SV TYPE: \"" + svt + "\"");
         }

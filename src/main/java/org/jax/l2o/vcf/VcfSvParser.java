@@ -10,6 +10,7 @@ import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
+import htsjdk.samtools.SAMSequenceDictionary;
 import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
@@ -131,16 +132,17 @@ public class VcfSvParser {
         final long startTime = System.nanoTime();
 
         try (VCFFileReader vcfReader = new VCFFileReader(new File(vcfPath), useInterval)) {
-            //final SAMSequenceDictionary seqDict = VCFFileReader.getSequenceDictionary(new File(getOptionalVcfPath));
+            final SAMSequenceDictionary seqDict = VCFFileReader.getSequenceDictionary(new File(vcfPath));
             VCFHeader vcfHeader = vcfReader.getFileHeader();
             this.samplenames = vcfHeader.getSampleNamesInOrder();
             this.n_samples = samplenames.size();
             this.samplename = samplenames.get(0);
             logger.trace("Annotating VCF at " + vcfPath + " for sample " + this.samplename);
             CloseableIterator<VariantContext> iter = vcfReader.iterator();
-            VariantContextAnnotator variantEffectAnnotator =
-                    new VariantContextAnnotator(this.referenceDictionary, this.chromosomeMap,
-                            new VariantContextAnnotator.Options());
+            // The following is from Jannovar -- it is not providing accurate annotations for pbsv
+//            VariantContextAnnotator variantEffectAnnotator =
+//                    new VariantContextAnnotator(this.referenceDictionary, this.chromosomeMap,
+//                            new VariantContextAnnotator.Options());
             int c = 0;
             while (iter.hasNext()) {
                 VariantContext vc = iter.next();
@@ -155,17 +157,17 @@ public class VcfSvParser {
 
                 String contig = vc.getContig();
                 if (!this.referenceDictionary.getContigNameToID().containsKey(contig)) {
-                    System.err.println("[ERR] Could not get key for contig :\"" + contig + "\"");
+                    System.err.println("[ERROR] Could not get key for contig :\"" + contig + "\"");
                     continue;
                 }
                 int id = this.referenceDictionary.getContigNameToID().get(contig);
                 Map<String, Object> attributes = vc.getAttributes();
                 String svTypeString = (String) attributes.getOrDefault("SVTYPE", "UNKNOWN");
                 SvType svtype = SvType.fromString(svTypeString);
-               // int mateDistance = (int) attributes.getOrDefault("MATEDIST", 0);
-               // String ciPos = (String) attributes.getOrDefault("CIPOS", "n/a");
-                String mateId = (String) attributes.getOrDefault("MATEID", "n/a");
+
+
                 if (svtype.equals(BND)) {
+                    String mateId = (String) attributes.getOrDefault("MATEID", "n/a");
                     if (bndMap.containsKey(mateId)) {
                         // add mate information to the BND
                         BndAnnotation firstMate = bndMap.get(mateId);
@@ -175,21 +177,15 @@ public class VcfSvParser {
                         String vcfId = vc.getID();
                         BndAnnotation bnd = new BndAnnotation(attributes, vc);
                         // add first mate of a BND annotation.
-                        this.bndMap.put(bnd.getMateId(), bnd);
+                        this.bndMap.put(vcfId, bnd);
                         System.out.println("bnd" + bnd);
                     }
+                    // Note we build the final annotations for BNDs later on.
                     continue;
                 }
-                if (vc.getStart() == 120447841) {
-                    for (var s : attributes.keySet()) {
-                        System.out.println(s + ": " + attributes.get(s));
-                    }
-
-                }
                 GenomeInterval structVarInterval = new GenomeInterval(referenceDictionary,strand, id, vc.getStart(), vc.getEnd());
-               // find overlapping transcripts using the interval array of Jannovar
-
                 try {
+                    // find overlapping transcripts using the interval array of Jannovar
                     IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
                     IntervalArray<TranscriptModel>.QueryResult queryResult = iarray.findOverlappingWithInterval(vc.getStart(), vc.getEnd());
                     VcfOverlapList overlap = VcfOverlapList.factory(structVarInterval, queryResult);
@@ -206,11 +202,24 @@ public class VcfSvParser {
                 } catch (RuntimeException rte) {
                     System.err.printf("[ERROR] Runtime exception for vs start %d vc end %d\n", vc.getStart(), vc.getEnd());
                 }
-
-
-
             }
         }
+        final long endTime = System.nanoTime();
+        final long duration = endTime - startTime;
+        System.out.printf("[INFO] VCF input in %.2f seconds.\n", (double)duration/1_000_000_000);
+        // Now process the BND
+        System.out.printf("[INFO] We identified %d BND structural variants.\n", this.bndMap.size());
+        int pair_bnd = 0;
+        int single_end = 0;
+        for (BndAnnotation band : this.bndMap.values()) {
+            if (band.hasMate()) {
+                pair_bnd++;
+            } else {
+                single_end++;
+            }
+            SvAnn svann = SvAnnFactory.fromBnd(band);
+        }
+        System.out.printf("[INFO] %d Paired BND structural variants; %d single break end BNDs.\n", pair_bnd, single_end);
     }
 
     public List<VcfOverlapList> getVcfOverlapListList() {

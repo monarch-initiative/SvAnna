@@ -319,7 +319,7 @@ public class VcfOverlapList {
             return "[ERROR] Could not perform overlap analysis";
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("[VcfOverlapList\n");
+        sb.append("[VcfOverlapList]\n");
         for (var v : overlaps) {
             sb.append(v).append("\n");
         }

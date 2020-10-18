@@ -1,13 +1,10 @@
 package org.jax.l2o.vcf;
 
-import com.github.jsonldjava.utils.Obj;
 import com.google.common.collect.ImmutableMap;
 import de.charite.compbio.jannovar.data.*;
-import de.charite.compbio.jannovar.htsjdk.VariantContextAnnotator;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.progress.ProgressReporter;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
-import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import htsjdk.samtools.SAMSequenceDictionary;
@@ -183,7 +180,7 @@ public class VcfSvParser {
                     // Note we build the final annotations for BNDs later on.
                     continue;
                 }
-                GenomeInterval structVarInterval = new GenomeInterval(referenceDictionary,strand, id, vc.getStart(), vc.getEnd());
+                GenomeInterval structVarInterval = new GenomeInterval(referenceDictionary, strand, id, vc.getStart(), vc.getEnd());
                 try {
                     // find overlapping transcripts using the interval array of Jannovar
                     IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
@@ -218,6 +215,11 @@ public class VcfSvParser {
                 single_end++;
             }
             SvAnn svann = SvAnnFactory.fromBnd(band);
+            System.out.println(svann);
+            if (svann.getSvType().equals(SvType.UNKNOWN)) {
+                int x = 42;
+                throw new L2ORuntimeException("Could not find SvType for " + band);
+            }
         }
         System.out.printf("[INFO] %d Paired BND structural variants; %d single break end BNDs.\n", pair_bnd, single_end);
     }

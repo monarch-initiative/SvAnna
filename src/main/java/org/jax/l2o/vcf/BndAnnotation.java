@@ -46,9 +46,9 @@ public class BndAnnotation {
     private int mate_b_stop;
 
     private String mate_a_ref;
-    private List<String> mate_a_alt;
+    private String mate_a_alt;
     private String mate_b_ref;
-    private List<String> mate_b_alt;
+    private String mate_b_alt;
 
     /** This is set to true if we identify the mate of the first entry (it will remain false for single breakends). */
     private boolean hasMate = false;
@@ -89,11 +89,12 @@ public class BndAnnotation {
         this.mate_a_start = vc.getStart();
         this.mate_a_stop = vc.getEnd();
         this.mate_a_ref = vc.getReference().getDisplayString();
-        this.mate_a_alt = new ArrayList<>();
-        this.mate_b_alt = new ArrayList<>();
-        for (var ref : vc.getAlternateAlleles()) {
-            this.mate_a_alt.add(ref.getDisplayString());
+        if (vc.getAlternateAlleles().size()>1) {
+            System.err.println("[WARNING] Multiple alternate alleles encountered. We are taking the first only TODO FIX");
         }
+
+        this.mate_a_alt = vc.getAlternateAllele(0).getDisplayString();
+
     }
 
 
@@ -172,9 +173,10 @@ public class BndAnnotation {
         this.mate_b_start = vc.getStart();
         this.mate_b_stop = vc.getEnd();
         this.mate_b_ref = vc.getReference().getDisplayString();
-        for (var alt : vc.getAlternateAlleles()) {
-            this.mate_b_alt.add(alt.getDisplayString());
+        if (vc.getAlternateAlleles().size()>1) {
+            System.err.println("[WARNING] Multiple alternate alleles encountered. We are taking the first only TODO FIX");
         }
+        this.mate_b_alt = vc.getAlternateAllele(0).getDisplayString();
         System.out.println(vc);
         hasMate = true;
     }
@@ -215,7 +217,7 @@ public class BndAnnotation {
         return mate_a_ref;
     }
 
-    public List<String> getMate_a_alt() {
+    public String getMate_a_alt() {
         return mate_a_alt;
     }
 
@@ -223,11 +225,20 @@ public class BndAnnotation {
         return mate_b_ref;
     }
 
-    public List<String> getMate_b_alt() {
+    public String getMate_b_alt() {
         return mate_b_alt;
     }
 
     public boolean bothContigsIdentical() {
         return this.mate_a_contig.equals(this.mate_b_contig);
+    }
+
+    public boolean differentContigs() {
+        return ! this.mate_a_contig.equals(this.mate_b_contig);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[BND] a_id = %s", this.mate_a_id);
     }
 }

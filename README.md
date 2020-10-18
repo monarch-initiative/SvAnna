@@ -1,10 +1,6 @@
-# lirical2sv
-LIRICAL TSV output to list of overlapping Structural Variants.
-The executable is called ``lirical2sv`` and can be built using standard
-maven tools.
+# svann
 
-
-This is a very prototyp-y tool at the moment, caveat emptor
+This is a tool to provide annotations for structural variants in VCF files.
 
 ## Running the tool
 We plan to make it easier to set things up for the final tool, but here is what we need
@@ -37,7 +33,7 @@ Run [LIRICAL](https://github.com/TheJacksonLaboratory/LIRICAL) using only the cl
 of the case, and output a TSV file. Consider using the 
 [PhenopacketGenerator](https://github.com/TheJacksonLaboratory/PhenopacketGenerator).
 
-## Running lirical2sv
+## Running svann
 
 Enter the following command to see options. The LIRICAL file is the 
 LIRICAL TSV output file. The enhancers file is created by the
@@ -63,3 +59,18 @@ We can run l2o to look for specific enhancer overlaps, e.g., for terms with
 
 
 
+# Documentation
+
+Generate the read the docs documentation locally by going to the ``docs`` subdirectory.
+First generate a virtual environment and install the required sphinx packages. ::
+
+    virtualenv p38
+    source p38/bin/activate
+    pip install sphinx sphinx-rtd-theme
+    
+To create the documentation, ensure you are using the ``p38`` environment and enter the following command. ::
+
+    source p38/bin/activate
+    make html
+    
+This will generate HTML pages under ``_build/html``.

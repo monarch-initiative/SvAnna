@@ -2,10 +2,8 @@ package org.jax.l2o.cmd;
 
 import org.jax.l2o.Lirical2Overlap;
 import org.jax.l2o.html.HtmlTemplate;
-import org.jax.l2o.io.L2ODownloader;
 import org.jax.l2o.lirical.LiricalHit;
-import org.jax.l2o.vcf.AnnotatedVcfParser;
-import org.jax.l2o.vcf.SvAnn;
+import org.jax.l2o.vcf.SvAnnOld;
 import org.jax.l2o.vcf.VcfSvParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import picocli.CommandLine;
@@ -54,8 +52,8 @@ public class AnnotateCommand implements Callable<Integer> {
         }
         List<LiricalHit> hitlist = l2o.getHitlist();
         VcfSvParser vcfParser = new VcfSvParser(this.vcfFile, this.jannovarPath);
-        List<SvAnn> annList = List.of();//vcfParser.getAnnlist();
-        List<SvAnn> translocationList = List.of();//vcfParser.getTranslocationList();
+        List<SvAnnOld> annList = List.of();//vcfParser.getAnnlist();
+        List<SvAnnOld> translocationList = List.of();//vcfParser.getTranslocationList();
         HtmlTemplate template = new HtmlTemplate(annList, translocationList);
         template.outputFile(this.outprefix);
         if (this.outputIgvFile) {
@@ -68,10 +66,10 @@ public class AnnotateCommand implements Callable<Integer> {
      * Output the chromosomal locations of the "interesting" SVs to a file that can be used to find the SVs in IGV.
      * @param svlist
      */
-    private void outputIgvTargetsFile(List<SvAnn> svlist) {
+    private void outputIgvTargetsFile(List<SvAnnOld> svlist) {
         String fname = String.format("%s.igv.txt", this.outprefix);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fname))) {
-            for (SvAnn sv : svlist) {
+            for (SvAnnOld sv : svlist) {
                 if (sv.isLowPriority()) {
                     continue;
                 }

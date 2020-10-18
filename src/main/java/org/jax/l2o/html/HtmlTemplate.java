@@ -1,22 +1,16 @@
 package org.jax.l2o.html;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import freemarker.cache.ClassTemplateLoader;
-import freemarker.cache.URLTemplateLoader;
 import freemarker.core.HTMLOutputFormat;
-import freemarker.core.OutputFormat;
 import freemarker.template.*;
-import org.jax.l2o.vcf.SvAnn;
+import org.jax.l2o.vcf.SvAnnOld;
 
 public class HtmlTemplate {
     /** Map of data that will be used for the FreeMark template. */
@@ -26,7 +20,7 @@ public class HtmlTemplate {
 
     protected static final String EMPTY_STRING="";
 
-    public HtmlTemplate(List<SvAnn> svAnnList, List<SvAnn> translocationList) {
+    public HtmlTemplate(List<SvAnnOld> svAnnList, List<SvAnnOld> translocationList) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -43,15 +37,15 @@ public class HtmlTemplate {
         templateData.put("n_non_translocations", svAnnList.size());
         int n_low = (int) svAnnList
                 .stream()
-                .filter(SvAnn::isLowPriority)
+                .filter(SvAnnOld::isLowPriority)
                 .count();
         int n_modifer = (int) svAnnList
                 .stream()
-                .filter(SvAnn::isModifierPriority)
+                .filter(SvAnnOld::isModifierPriority)
                 .count();
         int n_high = (int) svAnnList
                 .stream()
-                .filter(SvAnn::isHighPriority)
+                .filter(SvAnnOld::isHighPriority)
                 .count();
         templateData.put("n_high", n_high);
         templateData.put("n_modifer", n_modifer);

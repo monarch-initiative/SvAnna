@@ -3,7 +3,7 @@ package org.jax.l2o.vcf;
 import org.jax.l2o.except.L2ORuntimeException;
 
 public enum SvType {
-    DELETION, INSERTION, DUPLICATION, CNV, INVERSION, TRANSLOCATION, DEL_INV, DUP_INS, INV_DUP, INV_INV_DUP, BND;
+    DELETION, INSERTION, DUPLICATION, CNV, INVERSION, TRANSLOCATION, DEL_INV, DUP_INS, INV_DUP, INV_INV_DUP, BND, UNKNOWN;
 
 
     public static SvType fromString(String svt) {

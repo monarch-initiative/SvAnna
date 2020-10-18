@@ -24,8 +24,8 @@ public class AnnotatedVcfParser {
     private final Map<String, String> acc2chrMap;
     private final Map<String, List<LiricalHit>> hitmap = new HashMap<>();
     /** Non translocation lists */
-    private final List<SvAnn> annlist = new ArrayList<>();
-    private final List<SvAnn> translocationList = new ArrayList<>();
+    private final List<SvAnnOld> annlist = new ArrayList<>();
+    private final List<SvAnnOld> translocationList = new ArrayList<>();
     private final Map<String, List<Enhancer>> chromosome2enhancerListMap;
 
     public AnnotatedVcfParser(String annotatedVcf, List<LiricalHit> hitlist) {
@@ -77,7 +77,7 @@ public class AnnotatedVcfParser {
                 String info = fields[7];
                 String format = fields[8];
                 String gt = fields[9]; // assume just one sample for now
-                SvAnn sva = new SvAnn(chr, pos, id, ref,alt,qual,filter,info,format,gt);
+                SvAnnOld sva = new SvAnnOld(chr, pos, id, ref,alt,qual,filter,info,format,gt);
 
                 List<Enhancer> enhancersOnSameChrom = chromosome2enhancerListMap.getOrDefault(chr, new ArrayList<>());
                 for (var e : enhancersOnSameChrom) {
@@ -123,11 +123,11 @@ public class AnnotatedVcfParser {
     }
 
 
-    public List<SvAnn> getAnnlist() {
+    public List<SvAnnOld> getAnnlist() {
         return annlist;
     }
 
-    public List<SvAnn> getTranslocationList() {
+    public List<SvAnnOld> getTranslocationList() {
         return translocationList;
     }
 }

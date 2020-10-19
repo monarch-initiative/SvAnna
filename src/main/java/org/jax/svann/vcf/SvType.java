@@ -3,7 +3,11 @@ package org.jax.svann.vcf;
 import org.jax.svann.except.L2ORuntimeException;
 
 public enum SvType {
-    DELETION, INSERTION, DUPLICATION, CNV, INVERSION, TRANSLOCATION, DEL_INV, DUP_INS, INV_DUP, INV_INV_DUP, BND, UNKNOWN;
+    DELETION, INSERTION, DUPLICATION, CNV, INVERSION, TRANSLOCATION, DEL_INV, DUP_INS, INV_DUP, INV_INV_DUP, BND, UNKNOWN,
+    /** A deletion in which both rejoined segments retain the same orientation. */
+    DELETION_SIMPLE,
+    /** A deletion in which both rejoined segments have a different orientation. */
+    DELETION_TWISTED;
 
 
     public static SvType fromString(String svt) {

@@ -14,19 +14,24 @@ public class SvAnnFactory {
         BndType bndTypeA = BndType.fromAltString(mateAalt);
         BndType bndTypeB = BndType.fromAltString(mateBalt);
         if (bann.bothContigsIdentical()) {
+            SvType svtype = SvType.UNKNOWN;
             if (bndTypeA.equals(BndType.CASE_1) && bndTypeB.equals(BndType.CASE_3)) {
-                // simple deletion, no 'twisting'
-                SvAnn.SvAnnBuilder builder = new SvAnn.SvAnnBuilder(SvType.DELETION)
+                svtype = SvType.DELETION_SIMPLE;
+            } else if (bndTypeA.equals(BndType.CASE_3) && bndTypeB.equals(BndType.CASE_1)) {
+                svtype = SvType.DELETION_SIMPLE;
+            } else if (bndTypeA.isCase4() && bndTypeB.isCase4()) {
+                svtype = SvType.DELETION_TWISTED;
+            } else if (bndTypeA.isCase2() && bndTypeB.isCase2()) {
+                svtype = SvType.DELETION_TWISTED;
+            }
+
+            SvAnn.SvAnnBuilder builder = new SvAnn.SvAnnBuilder(svtype)
                         .chromA(bann.getMate_a_contig())
                         .chromB(bann.getMate_b_contig())
                         .svlen(bann.getMateDistance())
                         .startPos(bann.getMate_a_start())
                         .endPos(bann.getMate_b_start());
-
                 return builder.build();
-            } else if (bndTypeA.isCase4() && bndTypeB.isCase4()) {
-                // reverse deletion
-            }
         }
 
         if (bann.differentContigs() && bndTypeA.isCase1() && bndTypeB.isCase2()) {

@@ -96,13 +96,15 @@ Note this does not seem to make much sense, this would result in a translocation
 
 
 
-**Large deletion**
+**'Twisted' deletion**
 
 The following call represents a 34 million bp deletion on chromosome 15. In practice,
-calls such as this of very large deletions may be artefacts.
+calls such as this of very large deletions may be artefacts. The orientations
+of the rejoined chromosomal segments have different orientations, for which reason we call
+this a twisted deletion.
 
 
-.. list-table:: Excerpt of the two VCF lines that describe a translocation
+.. list-table:: Excerpt of the two VCF lines that describe a twisted deletion
    :widths: 25 25 50 50 50 50
    :header-rows: 1
 
@@ -144,3 +146,94 @@ canonical sequence).
 
 Note that this deletion does not make sense because it would result in a chromosome without
 a centromere.
+
+**Twisted deletion (case2/case2)**
+
+.. list-table:: Excerpt of the two VCF lines that describe a twisted deletion
+   :widths: 25 25 50 50 50 50
+   :header-rows: 1
+
+   * - Mate ID
+     - Matepair ID
+     - Chr
+     - Pos
+     - Ref
+     - Alt
+   * - BND.1
+     - BND.2
+     - chr4
+     - 49175170
+     - G
+     - G]chr4:49547618]
+   * - BND.2
+     - BND.1
+     - chr4
+     - 49547618
+     - C
+     - C]chr4:49175170]
+
+
+This is a deletion on chromosome 4. The first line describes a breakend whereby
+the reverse complement of the sequence extending left of chr4:49547618 is joined
+after the G at position chr4:49175170  (``t]p]`` notation). This
+breakend is near at 4p12 near the centromere (`visualize in UCSC <https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&virtModeType=default&virtMode=0&position=chr4%3A49175170%2D49175170>`_).
+
+The other breakend is even closer to the centromere, chr4:49547618
+(`visualize in UCSC <https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&virtModeType=default&virtMode=0&position=chr4%3A49547618%2D49547618>`_).
+The reverse complement of the sequence extending left of chr4:4917517 is joined after the
+C at position 49547618.
+
+This is a deletion of 49547618-49175170=372448 basepairs (as denoted by the ``MATEDIST=372448`` entry in the INFO field).
+
+Note that because both breakends have the ``t]p]`` notation, the relative orientation of the
+two joined ends is different (if one is 5' to 3', the other is 3' to 5' with respect to the
+canonical sequence).
+
+
+
+**Simple deletion (case3/case1) **
+
+
+
+.. list-table:: Excerpt of the two VCF lines that describe a twisted deletion
+   :widths: 25 25 50 50 50 50
+   :header-rows: 1
+
+   * - Mate ID
+     - Matepair ID
+     - Chr
+     - Pos
+     - Ref
+     - Alt
+   * - BND.1
+     - BND.2
+     - chr21
+     - 7280317
+     - T
+     - ]chr21:10757960]T
+   * - BND.2
+     - BND.1
+     - chr21
+     - 10757960
+     - A
+     - A[chr21:7280317[
+
+This is a deletion on chromosome 21.
+
+The first line specifies that the segment extending to the left of chr21:10757960 is
+joined before the T at position 7280317 of chromosome 21.
+(`visualize in UCSC <https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&virtMode=0&position=chr21%3A7280317%2D7280317>`_).
+This is the ``]p]t`` notation.
+
+The second line specifies that segment extending to the right of chr21:7280317, which is at 21p11.2,
+joined after the
+A at position 10757960
+(`visualize in UCSC <https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&virtMode=0&position=chr21%3A10757960%2D10757960>`_).
+This position is located near the q-terminal side of 21p11.2. This is the ``t[p[`` notation.
+
+The result is a deletion on chromosome 21p11.2 of length 3,477,643.
+
+This is a simple deletion, since the relative orientation of the two parts of chr21 is unchanged.
+
+
+

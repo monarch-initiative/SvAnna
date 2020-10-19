@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>l2o</artifactId>
-    <groupId>org.jax.l2o</groupId>
+    <artifactId>svann</artifactId>
+    <groupId>org.jax.svann</groupId>
     <version>0.2.7</version>
     <name>lirical2sv</name>
 
@@ -23,8 +23,8 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <junit.version>5.6.1</junit.version>
-        <slf4j.version>1.7.25</slf4j.version>
+        <junit.version>5.7.0</junit.version>
+        <slf4j.version>1.7.30</slf4j.version>
         <phenol.version>1.6.1</phenol.version>
         <jannovar.version>0.35</jannovar.version>
         <htsjdk.version>2.23.0</htsjdk.version>
@@ -218,7 +218,7 @@
     </dependencies>
 
     <build>
-        <finalName>lirical2sv</finalName>
+        <finalName>svann</finalName>
 
         <plugins>
             <!-- More JAR building -->
@@ -236,7 +236,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.jax.l2o.Main</mainClass>
+                                    <mainClass>org.jax.svann.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -244,10 +244,6 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-            </plugin>
 
             <!-- Make an executable jar and specify the main class and classpath -->
             <plugin>
@@ -262,7 +258,7 @@
                             <!-- set useUniqueVersions=false in order that the classpath has the
                                SNAPSHOT instead of the build number prefixed to the dependency -->
                             <useUniqueVersions>false</useUniqueVersions>
-                            <mainClass>org.jax.l2o.Main</mainClass>
+                            <mainClass>org.jax.svann.Main</mainClass>
                         </manifest>
                     </archive>
                     <!--   <compilerArgument>-Xlint:all</compilerArgument>

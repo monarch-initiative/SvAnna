@@ -137,3 +137,10 @@ The reverse complement of the sequence extending right from chr15:41578122
 is joined before the A at position chr15:76259140 (``[p[t`` notation).
 
 This would correspond to a deletion of 76259140-41578122=34681018 base pairs, i.e., 34.7 million bp.
+
+Note that because both breakends have the ``[p[t`` notation, the relative orientation of the
+two joined ends is different (if one is 5' to 3', the other is 3' to 5' with respect to the
+canonical sequence).
+
+Note that this deletion does not make sense because it would result in a chromosome without
+a centromere.

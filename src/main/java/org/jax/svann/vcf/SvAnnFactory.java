@@ -14,7 +14,7 @@ public class SvAnnFactory {
         BndType bndTypeA = BndType.fromAltString(mateAalt);
         BndType bndTypeB = BndType.fromAltString(mateBalt);
         if (bann.bothContigsIdentical()) {
-            if (bann.bothContigsIdentical() && bndTypeA.equals(BndType.CASE_1) && bndTypeB.equals(BndType.CASE_3)) {
+            if (bndTypeA.equals(BndType.CASE_1) && bndTypeB.equals(BndType.CASE_3)) {
                 // simple deletion, no 'twisting'
                 SvAnn.SvAnnBuilder builder = new SvAnn.SvAnnBuilder(SvType.DELETION)
                         .chromA(bann.getMate_a_contig())
@@ -24,6 +24,8 @@ public class SvAnnFactory {
                         .endPos(bann.getMate_b_start());
 
                 return builder.build();
+            } else if (bndTypeA.isCase4() && bndTypeB.isCase4()) {
+                // reverse deletion
             }
         }
 

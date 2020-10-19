@@ -1,6 +1,6 @@
 package org.jax.svann.tspec;
 
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.BufferedReader;
@@ -25,7 +25,7 @@ public class TSpecParser {
             while ((line = br.readLine()) != null) {
                 String [] fields = line.split("\t");
                 if (fields.length != 6) {
-                    throw new L2ORuntimeException("Bad tspec line: " + line);
+                    throw new SvAnnRuntimeException("Bad tspec line: " + line);
                 }
                 String chr = fields[0];
                 int start  = Integer.parseInt(fields[1]);

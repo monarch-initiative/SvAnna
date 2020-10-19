@@ -1,6 +1,10 @@
 package org.jax.svann.vcf;
 
-import org.yaml.snakeyaml.emitter.ScalarAnalysis;
+import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.structuralvar.SvAnn;
+import org.jax.svann.structuralvar.SvDeletionSimple;
+import org.jax.svann.structuralvar.SvTranslocation;
+import org.jax.svann.structuralvar.SvType;
 
 public class SvAnnFactory {
 
@@ -16,44 +20,48 @@ public class SvAnnFactory {
         if (bann.bothContigsIdentical()) {
             SvType svtype = SvType.UNKNOWN;
             if (bndTypeA.equals(BndType.CASE_1) && bndTypeB.equals(BndType.CASE_3)) {
-                svtype = SvType.DELETION_SIMPLE;
+                return new SvDeletionSimple(
+                        bann.getMate_a_id(),
+                        bann.getMateId(),
+                        bann.getMate_a_contig(),
+                        bann.getMate_a_start(),
+                        bann.getMate_b_start());
             } else if (bndTypeA.equals(BndType.CASE_3) && bndTypeB.equals(BndType.CASE_1)) {
-                svtype = SvType.DELETION_SIMPLE;
-            } else if (bndTypeA.isCase4() && bndTypeB.isCase4()) {
-                svtype = SvType.DELETION_TWISTED;
-            } else if (bndTypeA.isCase2() && bndTypeB.isCase2()) {
-                svtype = SvType.DELETION_TWISTED;
+                return new SvDeletionSimple(
+                        bann.getMate_a_id(),
+                        bann.getMateId(),
+                        bann.getMate_a_contig(),
+                        bann.getMate_a_start(),
+                        bann.getMate_b_start());
+            } else if ( (bndTypeA.isCase4() && bndTypeB.isCase4() ) ||
+                    (bndTypeA.isCase2() && bndTypeB.isCase2()) )  {
+                return new SvDeletionSimple(
+                        bann.getMate_a_id(),
+                        bann.getMateId(),
+                        bann.getMate_a_contig(),
+                        bann.getMate_a_start(),
+                        bann.getMate_b_start());
             }
-
-            SvAnn.SvAnnBuilder builder = new SvAnn.SvAnnBuilder(svtype)
-                        .chromA(bann.getMate_a_contig())
-                        .chromB(bann.getMate_b_contig())
-                        .svlen(bann.getMateDistance())
-                        .startPos(bann.getMate_a_start())
-                        .endPos(bann.getMate_b_start());
-                return builder.build();
+          throw new SvAnnRuntimeException("Could not find type on same chromosomee");
         }
 
-        if (bann.differentContigs() && bndTypeA.isCase1() && bndTypeB.isCase2()) {
-            SvAnn.SvAnnBuilder builder = new SvAnn.SvAnnBuilder(SvType.TRANSLOCATION)
-                    .chromA(bann.getMate_a_contig())
-                    .chromB(bann.getMate_b_contig());
-            return builder.build();
-        } else if (bann.differentContigs()) {
+        if (bann.differentContigs()) {
+            // TODO -- exploit the different cases!
             // td do decide how to model the different translocation types
-            SvAnn.SvAnnBuilder builder = new SvAnn.SvAnnBuilder(SvType.TRANSLOCATION)
-                    .chromA(bann.getMate_a_contig())
-                    .chromB(bann.getMate_b_contig());
-            return builder.build();
+            return new SvTranslocation(
+                    bann.getMate_a_id(),
+                    bann.getMateId(),
+                    bann.getMate_a_contig(),
+                    bann.getMate_b_contig(),
+                    bann.getMate_a_start(),
+                    bann.getMate_b_start());
         }
 
         System.out.println("A(ref):" + mateAref + "; (alt):" + String.join(";", mateAalt));
         System.out.println("B(ref):" + mateBref + "; (alt):" + String.join(";", mateBalt));
 
 
-        SvAnn.SvAnnBuilder b2 = new SvAnn.SvAnnBuilder(SvType.UNKNOWN);
-
-        return b2.build();
+        throw new SvAnnRuntimeException("Could not find type on different chromosomee");
     }
 
 

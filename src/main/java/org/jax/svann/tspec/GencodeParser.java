@@ -1,6 +1,6 @@
 package org.jax.svann.tspec;
 
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -28,7 +28,7 @@ public class GencodeParser {
                 String [] fields = line.split("\t");
                 if (fields.length < 9 ) {
                     String msg = String.format("Bad line with %d instead of 9 fields: %s", fields.length, line);
-                    throw new L2ORuntimeException(msg);
+                    throw new SvAnnRuntimeException(msg);
                 }
                 try {
                     String chr = fields[0];
@@ -45,7 +45,7 @@ public class GencodeParser {
                     } else if (strand.equals("-")) {
                         fromFields(chr,end, false, attr );
                     } else {
-                        throw new L2ORuntimeException("Did not recognize strand \"" + strand +"\"");
+                        throw new SvAnnRuntimeException("Did not recognize strand \"" + strand +"\"");
                     }
                 } catch (Exception e) {
                     System.out.printf("[ERROR] %s from line %s\n", e.getMessage(), line);
@@ -58,7 +58,7 @@ public class GencodeParser {
             e.printStackTrace();
         }
         if (transcripts.isEmpty()) {
-            throw new L2ORuntimeException("Could not parse gencode transcripts");
+            throw new SvAnnRuntimeException("Could not parse gencode transcripts");
         }
         System.out.printf("[INFO] We parsed %d transcripts from genecode\n", transcripts.size());
 

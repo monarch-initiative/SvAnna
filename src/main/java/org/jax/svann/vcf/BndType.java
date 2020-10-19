@@ -1,6 +1,6 @@
 package org.jax.svann.vcf;
 
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 
 public enum BndType {
 
@@ -16,13 +16,13 @@ public enum BndType {
             if (altString.startsWith("[")) {
                 int i = altString.indexOf("[",2);
                 if (i<0 || i==altString.length()-1) {
-                    throw new L2ORuntimeException("Malformed altstring (4): " + altString);
+                    throw new SvAnnRuntimeException("Malformed altstring (4): " + altString);
                 }
                 return CASE_4;
             } else if (altString.startsWith("]")) {
                 int i = altString.indexOf("]",2);
                 if (i<0 || i==altString.length()-1) {
-                    throw new L2ORuntimeException("Malformed altstring (3): " + altString);
+                    throw new SvAnnRuntimeException("Malformed altstring (3): " + altString);
                 }
                 return CASE_3;
             } else if (altString.charAt(altString.length()-1) == '[') {
@@ -30,17 +30,17 @@ public enum BndType {
                 if (i>0 && i < altString.length()-1) {
                     return CASE_1;
                 } else {
-                    throw new L2ORuntimeException("Malformed altstring (1): " + altString);
+                    throw new SvAnnRuntimeException("Malformed altstring (1): " + altString);
                 }
             } else if (altString.charAt(altString.length()-1) == ']') {
                 int i = altString.indexOf("]");
                 if (i>0 && i < altString.length()-1) {
                     return CASE_2;
                 } else {
-                    throw new L2ORuntimeException("Malformed altstring (2): " + altString);
+                    throw new SvAnnRuntimeException("Malformed altstring (2): " + altString);
                 }
             } else {
-                throw new L2ORuntimeException("Malformed altstring (5): " + altString);
+                throw new SvAnnRuntimeException("Malformed altstring (5): " + altString);
             }
         }
 

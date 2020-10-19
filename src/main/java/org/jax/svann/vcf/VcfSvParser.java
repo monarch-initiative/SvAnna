@@ -12,14 +12,16 @@ import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.structuralvar.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.rmi.ServerError;
 import java.util.*;
 
-import static org.jax.svann.vcf.SvType.BND;
+import static org.jax.svann.structuralvar.SvType.*;
 
 /**
  * This class implements parsing structural variants into SvAnnotation objects.
@@ -76,6 +78,9 @@ public class VcfSvParser {
     private String samplename;
 
     private List<VcfOverlapList> vcfOverlapListList = new ArrayList<>();
+
+    private List<SvAnn> svannList = new ArrayList<>();
+
     /**
      * When we are parsing the SVs line for line, we will encounter the first pair of each BND on one line
      * and its pair on a subsequent line. We can recognize this by the MATEID of the first mate, which will
@@ -110,14 +115,43 @@ public class VcfSvParser {
         if (jannovarData != null) return jannovarData;
         File f = new File(jannovarPath);
         if (!f.exists()) {
-            throw new L2ORuntimeException("[FATAL] Could not find Jannovar transcript file at " + jannovarPath);
+            throw new SvAnnRuntimeException("[FATAL] Could not find Jannovar transcript file at " + jannovarPath);
         }
         try {
             return new JannovarDataSerializer(jannovarPath).load();
         } catch (SerializationException e) {
             logger.error("Could not deserialize Jannovar file with legacy deserializer...");
-            throw new L2ORuntimeException(String.format("Could not load Jannovar data from %s (%s)",
+            throw new SvAnnRuntimeException(String.format("Could not load Jannovar data from %s (%s)",
                     jannovarPath, e.getMessage()));
+        }
+    }
+
+
+    private void findOverlappingGenes(SvAnn svann) {
+        String contig = svann.getContigA();
+        if (!this.referenceDictionary.getContigNameToID().containsKey(contig)) {
+            System.err.println("[ERROR] 2. Could not get key for contig :\"" + contig + "\"");
+            System.err.println("[ERROR] svann="+svann);
+            throw new SvAnnRuntimeException(contig);
+        }
+        int id = this.referenceDictionary.getContigNameToID().get(contig);
+        GenomeInterval structVarInterval =
+                new GenomeInterval(referenceDictionary, strand, id, svann.getStartPos(), svann.getEndPos());
+        try {
+            // find overlapping transcripts using the interval array of Jannovar
+            IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
+            IntervalArray<TranscriptModel>.QueryResult queryResult =
+                    iarray.findOverlappingWithInterval(svann.getStartPos(), svann.getEndPos());
+            VcfOverlapList overlap = VcfOverlapList.factory(structVarInterval, queryResult);
+            svann.setVcfOverlapList(overlap);
+            System.out.println(overlap);
+        } catch (SvAnnRuntimeException e) {
+            e.printStackTrace();
+            System.out.println("[Could not annotate SvAnn] " + svann);
+            System.out.println();
+            throw e;
+        } catch (RuntimeException rte) {
+            System.err.printf("[ERROR] Runtime exception for vs start %d vc end %d\n", svann.getStartPos(), svann.getEndPos());
         }
     }
 
@@ -150,19 +184,15 @@ public class VcfSvParser {
                 } else {
                     n_good_quality_variants++;
                 }
-
-
                 String contig = vc.getContig();
                 if (!this.referenceDictionary.getContigNameToID().containsKey(contig)) {
-                    System.err.println("[ERROR] Could not get key for contig :\"" + contig + "\"");
-                    continue;
+                    System.err.println("[ERROR] 1. Could not get key for contig :\"" + contig + "\"");
+                    throw new SvAnnRuntimeException(contig);
                 }
                 int id = this.referenceDictionary.getContigNameToID().get(contig);
                 Map<String, Object> attributes = vc.getAttributes();
                 String svTypeString = (String) attributes.getOrDefault("SVTYPE", "UNKNOWN");
                 SvType svtype = SvType.fromString(svTypeString);
-
-
                 if (svtype.equals(BND)) {
                     String mateId = (String) attributes.getOrDefault("MATEID", "n/a");
                     if (bndMap.containsKey(mateId)) {
@@ -179,25 +209,24 @@ public class VcfSvParser {
                     }
                     // Note we build the final annotations for BNDs later on.
                     continue;
-                }
-                GenomeInterval structVarInterval = new GenomeInterval(referenceDictionary, strand, id, vc.getStart(), vc.getEnd());
-                try {
-                    // find overlapping transcripts using the interval array of Jannovar
-                    IntervalArray<TranscriptModel> iarray = this.chromosomeMap.get(id).getTMIntervalTree();
-                    IntervalArray<TranscriptModel>.QueryResult queryResult = iarray.findOverlappingWithInterval(vc.getStart(), vc.getEnd());
-                    VcfOverlapList overlap = VcfOverlapList.factory(structVarInterval, queryResult);
-                    System.out.println(overlap);
-                    if (overlap.isCoding()) {
-                        vcfOverlapListList.add(overlap);
-                        System.out.println("[VcfOverlap] " + overlap);
+                } else {
+                    // non-BND annotation
+                    SvAnn svann;
+                    if (svtype.equals(DELETION)) {
+                        svann = new SvDeletion(vc.getID(), vc.getContig(), vc.getStart(), vc.getEnd());
+                    } else if (svtype.equals(INSERTION)) {
+                        svann = new SvInsertion(vc.getID(), vc.getContig(), vc.getStart(), vc.getEnd());
+                    } else if (svtype.equals(DUPLICATION)) {
+                        svann = new  SvInsertion(vc.getID(), vc.getContig(), vc.getStart(), vc.getEnd());
+                    } else if (svtype.equals(CNV)) {
+                        svann = new SvInsertion(vc.getID(), vc.getContig(), vc.getStart(), vc.getEnd());
+                    } else if (svtype.equals(INVERSION)) {
+                        svann = new  SvInversion(vc.getID(), vc.getContig(), vc.getStart(), vc.getEnd());
+                    } else {
+                        throw new SvAnnRuntimeException("Could not identify SV type:"+svTypeString);
                     }
-                } catch (L2ORuntimeException e) {
-                    e.printStackTrace();
-                    System.out.println("[Could not annotate VariantContext] " + vc);
-                    System.out.println();
-                    throw e;
-                } catch (RuntimeException rte) {
-                    System.err.printf("[ERROR] Runtime exception for vs start %d vc end %d\n", vc.getStart(), vc.getEnd());
+                    findOverlappingGenes(svann);
+                    this.svannList.add(svann);
                 }
             }
         }
@@ -215,11 +244,12 @@ public class VcfSvParser {
                 single_end++;
             }
             SvAnn svann = SvAnnFactory.fromBnd(band);
-            System.out.println(svann);
+
             if (svann.getSvType().equals(SvType.UNKNOWN)) {
-                int x = 42;
-                throw new L2ORuntimeException("Could not find SvType for " + band);
+                throw new SvAnnRuntimeException("Could not find SvType for " + band);
             }
+            findOverlappingGenes(svann);
+            this.svannList.add(svann);
         }
         System.out.printf("[INFO] %d Paired BND structural variants; %d single break end BNDs.\n", pair_bnd, single_end);
     }

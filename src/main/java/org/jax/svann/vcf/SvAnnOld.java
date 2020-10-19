@@ -1,8 +1,9 @@
 package org.jax.svann.vcf;
 
 
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.lirical.LiricalHit;
+import org.jax.svann.structuralvar.SvType;
 import org.jax.svann.tspec.Enhancer;
 
 import java.util.*;
@@ -83,7 +84,7 @@ public class SvAnnOld implements Comparable<SvAnnOld> {
                     if (cat.indexOf('|') > -1) {
                         String[] items = cat.split("\\|");
                         if (items.length < 7) {
-                            throw new L2ORuntimeException("BAD Jannovar annots: items=" + cat);
+                            throw new SvAnnRuntimeException("BAD Jannovar annots: items=" + cat);
                         }
                         Priority prio = Priority.fromString(items[1]);
                         if (prio.compareTo(priority)>0) {
@@ -295,7 +296,7 @@ public class SvAnnOld implements Comparable<SvAnnOld> {
             start = this.pos - offset;
             end = this.pos + svlen + offset;
         } else {
-            throw new L2ORuntimeException("Did not recognize svtype in getBedLine");
+            throw new SvAnnRuntimeException("Did not recognize svtype in getBedLine");
         }
         return String.format("%s\t%d\t%d", this.chrom, start, end);
     }

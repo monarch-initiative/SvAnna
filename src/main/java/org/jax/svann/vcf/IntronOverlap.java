@@ -3,7 +3,7 @@ package org.jax.svann.vcf;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ public class IntronOverlap {
                 }
             }
         }
-        throw new L2ORuntimeException("Could not find intron number");
+        throw new SvAnnRuntimeException("Could not find intron number");
     }
 
 }

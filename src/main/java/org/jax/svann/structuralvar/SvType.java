@@ -1,6 +1,6 @@
-package org.jax.svann.vcf;
+package org.jax.svann.structuralvar;
 
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 
 public enum SvType {
     DELETION, INSERTION, DUPLICATION, CNV, INVERSION, TRANSLOCATION, DEL_INV, DUP_INS, INV_DUP, INV_INV_DUP, BND, UNKNOWN,
@@ -34,7 +34,7 @@ public enum SvType {
                 //BND is a catch-all for a generic breakpoint, so you can't assume all to be translocations
                 return BND;
             default:
-                throw new L2ORuntimeException("Did not recognize SV TYPE: \"" + svt + "\"");
+                throw new SvAnnRuntimeException("Did not recognize SV TYPE: \"" + svt + "\"");
         }
     }
 }

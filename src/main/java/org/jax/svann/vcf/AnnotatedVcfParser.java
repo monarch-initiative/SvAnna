@@ -1,7 +1,7 @@
 package org.jax.svann.vcf;
 
 
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.lirical.LiricalHit;
 import org.jax.svann.tspec.Enhancer;
 
@@ -118,7 +118,7 @@ public class AnnotatedVcfParser {
         if (this.acc2chrMap.containsKey(acc)) {
             return this.acc2chrMap.get(acc);
         } else {
-            throw new L2ORuntimeException("Could not find acc" + acc);
+            throw new SvAnnRuntimeException("Could not find acc" + acc);
         }
     }
 

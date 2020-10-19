@@ -5,7 +5,7 @@ import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 
 import java.util.*;
 
@@ -25,7 +25,7 @@ public class VcfOverlapList {
 
     public VcfOverlapList(List<VcfOverlap> overlaps) {
         if (overlaps.isEmpty()) {
-            throw new L2ORuntimeException("Empty overlap list");
+            throw new SvAnnRuntimeException("Empty overlap list");
         }
         this.overlaps = List.copyOf(overlaps);
     }
@@ -80,10 +80,10 @@ public class VcfOverlapList {
             }
         }
         if (lastInBlack == UNINITIALIZED_EXON) {
-            throw new L2ORuntimeException("Unable to localized lastInBlock exon for " + tmod.getAccession());
+            throw new SvAnnRuntimeException("Unable to localized lastInBlock exon for " + tmod.getAccession());
         }
         if (firstInBlock == UNINITIALIZED_EXON) {
-            throw new L2ORuntimeException("Unable to localized firstInBlock exon for " + tmod.getAccession());
+            throw new SvAnnRuntimeException("Unable to localized firstInBlock exon for " + tmod.getAccession());
         }
         if (lastInBlack - firstInBlock == -1) {
             // in this case, both ends of the SV are in the same intron
@@ -189,7 +189,7 @@ public class VcfOverlapList {
             Optional<Integer> firstAffectedExonNumber = getExonNumber(tmod, start);
             Optional<Integer> secondAffectedExonNumber = getExonNumber(tmod, end);
             if (firstAffectedExonNumber.isEmpty() && secondAffectedExonNumber.isEmpty()) {
-                throw new L2ORuntimeException("Both positions empty");
+                throw new SvAnnRuntimeException("Both positions empty");
             } else if (firstAffectedExonNumber.isEmpty()) {
                 firstAffectedExonNumber = secondAffectedExonNumber;
             } else {
@@ -231,7 +231,7 @@ public class VcfOverlapList {
             Optional<Integer> firstAffectedExonNumber = getExonNumber(tmod, start);
             Optional<Integer> secondAffectedExonNumber = getExonNumber(tmod, end);
             if (firstAffectedExonNumber.isEmpty() && secondAffectedExonNumber.isEmpty()) {
-                throw new L2ORuntimeException("Both positions empty");
+                throw new SvAnnRuntimeException("Both positions empty");
             } else if (firstAffectedExonNumber.isEmpty()) {
                 firstAffectedExonNumber = secondAffectedExonNumber;
             } else {
@@ -299,7 +299,7 @@ public class VcfOverlapList {
         }
         if (overlaps.isEmpty()) {
             System.out.println("QOVER" + qresult);
-            throw new L2ORuntimeException("Empty overlap list");
+            throw new SvAnnRuntimeException("Empty overlap list");
         }
         return new VcfOverlapList(overlaps);
     }

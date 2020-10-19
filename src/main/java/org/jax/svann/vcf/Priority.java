@@ -1,6 +1,6 @@
 package org.jax.svann.vcf;
 
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
 
 public enum Priority {
 
@@ -15,7 +15,7 @@ public enum Priority {
             case "HIGH":
                 return HIGH;
             default:
-                throw new L2ORuntimeException("Did not recognize case" + s);
+                throw new SvAnnRuntimeException("Did not recognize case" + s);
         }
     }
 }

@@ -1,13 +1,18 @@
 package org.jax.svann.vcf;
 
 import htsjdk.variant.variantcontext.VariantContext;
-import org.jax.svann.except.L2ORuntimeException;
+import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.structuralvar.SvAnn;
+import org.jax.svann.structuralvar.SvType;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * An object representing a Breakend annotation with the two mates of a breakend.
+ * An object representing a Breakend annotation with the two mates of a breakend. This object is not intended to be
+ * our final representation of the SV, but instead to organize the information from up to several BND lines that we
+ * will need to instantiate a {@link SvAnn} object.
+ * @author Peter N Robinson
  */
 public class BndAnnotation {
 
@@ -27,7 +32,7 @@ public class BndAnnotation {
     /** confidence interval 3' for second member of pair*/
     private int cpos_b_3 = NOT_AVAILABLE;
     private final String mateId;
-
+    /** Chromosome of the first mate of the pair. */
     private final String mate_a_contig;
     /** Chromosome of the second mate of the pair,
      *  if available, this will be set by {@link #addSecondMate(Map, VariantContext)}.
@@ -71,7 +76,7 @@ public class BndAnnotation {
             List<String> ciPos = (List<String>) attributes.get("CIPOS");
             // this should be a string such as "[-69, 85]"
             if (ciPos.size() != 2) {
-                throw new L2ORuntimeException("Malformed CIPOS (after split): \"" + ciPos + "\"");
+                throw new SvAnnRuntimeException("Malformed CIPOS (after split): \"" + ciPos + "\"");
             }
             cpos_a_5 = Integer.parseInt(ciPos.get(0));
             cpos_a_3 = Integer.parseInt(ciPos.get(1));
@@ -94,7 +99,6 @@ public class BndAnnotation {
         }
 
         this.mate_a_alt = vc.getAlternateAllele(0).getDisplayString();
-
     }
 
 
@@ -142,11 +146,11 @@ public class BndAnnotation {
         }
         if (! mateAId.equals(this.mate_a_id)) {
             String msg = String.format("Mate A ids do not match %s vs. %s (from mate b)", this.mate_a_id, mateAId);
-            throw new L2ORuntimeException(msg);
+            throw new SvAnnRuntimeException(msg);
         }
         String myString = (String) attributes.getOrDefault("SVTYPE", "UNKNOWN");
         if (!myString.equals("BND")) {
-            throw new L2ORuntimeException("Unexpected SVTYPE annotation: " + myString);
+            throw new SvAnnRuntimeException("Unexpected SVTYPE annotation: " + myString);
         }
         myString = (String) attributes.getOrDefault("MATEDIST", NOT_PROVIDED);
         int mdist;
@@ -157,13 +161,13 @@ public class BndAnnotation {
         }
         if (mdist != this.mateDistance) {
             String msg = String.format("Mate distance does not match: from A: %d, from B: %d", this.mateDistance, mdist);
-            throw new L2ORuntimeException(msg);
+            throw new SvAnnRuntimeException(msg);
         }
         if (attributes.containsKey("CIPOS")) {
             List<String> ciPos = (List<String>) attributes.get("CIPOS");
             // this should be a string such as "[-69, 85]"
             if (ciPos.size() != 2) {
-                throw new L2ORuntimeException("Malformed CIPOS (after split): \"" + ciPos + "\"");
+                throw new SvAnnRuntimeException("Malformed CIPOS (after split): \"" + ciPos + "\"");
             }
             cpos_b_5 = Integer.parseInt(ciPos.get(0));
             cpos_b_3 = Integer.parseInt(ciPos.get(1));

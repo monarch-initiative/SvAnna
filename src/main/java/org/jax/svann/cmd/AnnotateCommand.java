@@ -1,6 +1,6 @@
 package org.jax.svann.cmd;
 
-import org.jax.svann.Lirical2Overlap;
+import org.jax.svann.SvAnn;
 import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.lirical.LiricalHit;
 import org.jax.svann.vcf.SvAnnOld;
@@ -42,13 +42,13 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        Lirical2Overlap l2o;
+        SvAnn l2o;
         if (enhancerFile != null && hpoTermId != null) {
             String [] ids = hpoTermId.split(",");
             List<TermId> tidList = Arrays.stream(ids).map(TermId::of).collect(Collectors.toList());
-            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname, tidList, this.enhancerFile, this.geneCodePath);
+            l2o = new SvAnn(this.liricalFile, this.vcfFile, this.outname, tidList, this.enhancerFile, this.geneCodePath);
         } else {
-            l2o = new Lirical2Overlap(this.liricalFile, this.vcfFile, this.outname);
+            l2o = new SvAnn(this.liricalFile, this.vcfFile, this.outname);
         }
         List<LiricalHit> hitlist = l2o.getHitlist();
         VcfSvParser vcfParser = new VcfSvParser(this.vcfFile, this.jannovarPath);

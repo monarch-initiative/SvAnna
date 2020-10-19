@@ -93,3 +93,47 @@ chr17:45867415 is joined before the C at position 45,867,415 of chromosome 17
 This is therefore a translocation between 5q and 17q.
 
 Note this does not seem to make much sense, this would result in a translocation product with two centromeres.
+
+
+
+**Large deletion**
+
+The following call represents a 34 million bp deletion on chromosome 15. In practice,
+calls such as this of very large deletions may be artefacts.
+
+
+.. list-table:: Excerpt of the two VCF lines that describe a translocation
+   :widths: 25 25 50 50 50 50
+   :header-rows: 1
+
+   * - Mate ID
+     - Matepair ID
+     - Chr
+     - Pos
+     - Ref
+     - Alt
+   * - BND.1
+     - BND.2
+     - chr15
+     - 41578122
+     - T
+     - [chr15:76259140[T
+   * - BND.2
+     - BND.1
+     - chr15
+     - 76259140
+     - A
+     - [chr15:41578122[A
+
+
+This is a deletion on chromosome 15. The first line describes a breakend whereby
+the reverse complement of the sequence extending right of chr15:76259140 is joined
+before the T at position chr15:41578122  (``[p[t`` notation). This
+breakend is at (15q15) (`visualize in UCSC <https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&virtModeType=default&virtMode=0&position=chr15%3A41578122%2D41578122>`_).
+
+The other breakend is at position chr15:76259140, which is at 15q24.2
+(`visualize in UCSC <https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&virtModeType=default&virtMode=0&position=chr15%3A76259140%2D76259140>`_).
+The reverse complement of the sequence extending right from chr15:41578122
+is joined before the A at position chr15:76259140 (``[p[t`` notation).
+
+This would correspond to a deletion of 76259140-41578122=34681018 base pairs, i.e., 34.7 million bp.

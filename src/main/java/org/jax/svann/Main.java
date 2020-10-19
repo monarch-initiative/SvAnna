@@ -7,8 +7,8 @@ import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
 
-@CommandLine.Command(name = "l2o", mixinStandardHelpOptions = true, version = "l2o 0.0.1",
-        description = "LIRICAL to overlapping SV")
+@CommandLine.Command(name = "svann", mixinStandardHelpOptions = true, version = "0.2.9",
+        description = "Structural variant annotation")
 public class Main implements Callable<Integer>  {
 
 

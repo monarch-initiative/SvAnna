@@ -42,7 +42,7 @@ it is required to also use an HPO term with the major phenotypic abnormality,
 e.g., [Abnormality of the immune system](https://hpo.jax.org/app/browse/term/HP:0002715).
 
 ```
-$ java -jar target/l2o.jar
+$ java -jar target/svann.jar
 LIRICAL to overlapping SV
   -h, --help            Show this help message and exit.
   -l, --lirical=<liricalFile>

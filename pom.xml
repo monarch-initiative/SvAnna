@@ -6,8 +6,8 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>svann</artifactId>
     <groupId>org.jax.svann</groupId>
-    <version>0.2.7</version>
-    <name>lirical2sv</name>
+    <version>0.2.8</version>
+    <name>svann</name>
 
     <!-- Inherit artifact from SonaType OSS pom.xml Following this article:
       http://java.dzone.com/articles/deploy-maven-central -->

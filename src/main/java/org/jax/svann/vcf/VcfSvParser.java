@@ -26,7 +26,7 @@ import static org.jax.svann.structuralvar.SvType.*;
 /**
  * This class implements parsing structural variants into SvAnnotation objects.
  * The VCF standard describes two types of SV notations. One is by SV types, i.e. insertions, deletions, inversions,
- * translocations, etc. The other is by breakend notations, often labelled with SVTYPE=BND.
+ * translocations, etc. The other is by breakend notations, labelled with SVTYPE=BND.
  *
  * @author Peter Robinson
  */
@@ -37,7 +37,7 @@ public class VcfSvParser {
      */
     private static Strand strand = Strand.FWD;
     /**
-     * Path to the VCF file with the exome/genome of the proband.
+     * Path to the VCF file with the genome sequence of the proband.
      */
     private final String vcfPath;
     /**
@@ -45,21 +45,24 @@ public class VcfSvParser {
      */
     private final JannovarData jannovarData;
     /**
-     * Reference dictionary that is part of {@link #jannovarData}.
+     * Reference dictionary (part of {@link #jannovarData}).
      */
     private final ReferenceDictionary referenceDictionary;
     /**
-     * Map of Chromosomes, used in the annotation.
+     * Map of Chromosomes (part of {@link #jannovarData}). It assigns integers to chromosome names such as CM000666.2.
      */
     private final ImmutableMap<Integer, Chromosome> chromosomeMap;
     /**
      * A Jannovar object to report progress of VCF parsing.
+     * Probably we can delete this, it only takes a few seconds with the SV VCF files.
      */
+    @Deprecated
     private ProgressReporter progressReporter = null;
     /**
-     * Should be hg37 or hg38
+     * Should be hg37 or hg38 TODO how do we want to represent the assembly?
+     * private final GenomeAssembly genomeAssembly;
      */
-    //private final GenomeAssembly genomeAssembly;
+
     /**
      * Number of variants that were not filtered.
      */
@@ -76,8 +79,6 @@ public class VcfSvParser {
      * Name of the proband in the VCF file.
      */
     private String samplename;
-
-    private List<VcfOverlapList> vcfOverlapListList = new ArrayList<>();
 
     private List<SvAnn> svannList = new ArrayList<>();
 
@@ -254,9 +255,7 @@ public class VcfSvParser {
         System.out.printf("[INFO] %d Paired BND structural variants; %d single break end BNDs.\n", pair_bnd, single_end);
     }
 
-    public List<VcfOverlapList> getVcfOverlapListList() {
-        return vcfOverlapListList;
-    }
+
 
     public int getN_samples() {
         return n_samples;

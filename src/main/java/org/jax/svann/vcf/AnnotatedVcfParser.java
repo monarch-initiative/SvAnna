@@ -15,8 +15,10 @@ import java.util.stream.Collectors;
  * This class intends to ingest a VCF file that has been annotated by Jannovar and to return
  * a list of variants in genes that match with the top candidates of a LIRICAL analysis. This
  * is clearly a clumsy way of doing things and is only intended to prototype/
+ * Let's delete this soon
  * @author Peter N Robinson
  */
+@Deprecated
 public class AnnotatedVcfParser {
     private final String annotatedVcfPath;
     /** Set of gene symbols of interest */

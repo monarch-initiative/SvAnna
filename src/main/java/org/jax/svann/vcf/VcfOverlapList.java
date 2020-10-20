@@ -7,6 +7,7 @@ import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 import static org.jax.svann.vcf.IntronOverlap.getIntronNumber;
@@ -150,29 +151,64 @@ public class VcfOverlapList {
         return new VcfOverlapList(overlaps);
     }
 
-    static boolean overlapsExon(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
+    static boolean overlapsExon(TranscriptModel tmod, GenomeInterval svInt) {
         List<GenomeInterval> exons = tmod.getExonRegions();
+        GenomePosition start = svInt.getGenomeBeginPos();
+        GenomePosition end = svInt.getGenomeEndPos();
         if (exons.stream().anyMatch(gi -> gi.contains(start))) {
             return true;
         } else if (!start.equals(end) && exons.stream().anyMatch(gi -> gi.contains(end))) {
             return true;
         } else {
-            return false;
+            return exons.stream().anyMatch(svInt::contains);
         }
     }
 
-    static private Optional<Integer> getExonNumber(TranscriptModel tmod, GenomePosition pos) {
-        int i = 0;
-
-        for (var ex : tmod.getExonRegions()) {
-            i += 1;
-            if (ex.contains(pos))
-                return Optional.of(i);
+    /**
+     * We check for overlap in three ways. The structural variant has an interval (b,e). b or e can
+     * be contained within an exon. Alternatively, the entire exon can be contained within (b,e). Note
+     * that if we call this method then
+     * @param tmod A transcript
+     * @param svInterval a structural variant interval
+     * @return object representing the number of the first and last affected exon
+     */
+    static private ExonPair getAffectedExons(TranscriptModel tmod, GenomeInterval svInterval) {
+        Optional<Integer> firstAffectedExonNumber = Optional.empty();
+        Optional<Integer> lastAffectedExonNumber = Optional.empty();
+        List<GenomeInterval> exons = tmod.getExonRegions();
+        GenomePosition svStartPos = svInterval.getGenomeBeginPos();
+        GenomePosition svEndPos = svInterval.getGenomeEndPos();
+        boolean [] affected = new boolean[exons.size()]; // initializes to false
+        for (int i=0; i<exons.size(); i++) {
+            GenomeInterval exon = exons.get(i);
+            if (exon.contains(svStartPos)) {
+                affected[i] = true;
+            }
+            if (exon.contains(svEndPos)) {
+                affected[i] = true;
+            }
+            if (svInterval.contains(exon)) {
+                affected[i] = true;
+            }
         }
-        // we can get here if one end of the SV is exonic and the other is not
-        // because we can for start and end separately. TODO MAKE MORE ROBUST
-        return Optional.empty();
+        // -1 is a code for not applicable
+        // we may encounter transcripts where the exons do not overlap
+        // in this case, first and last will not be changed
+        // the ExonPair object will treat first=last=-1 as a signal that there
+        // is no overlap.
+        int first = -1;
+        int last = -1;
+        for (int i=0;i<affected.length;i++) {
+            if (first < 0 && affected[i]) {
+                first = i+1;
+                last = first;
+            } else if (first > 0 && affected[i]) {
+                last = i+1;
+            }
+        }
+        return new ExonPair(first,last);
     }
+
 
 
     /**
@@ -182,29 +218,26 @@ public class VcfOverlapList {
      * @param tmod  a non-coding transcript (this is checked by calling code)
      * @return
      */
-    static public VcfOverlap coding(TranscriptModel tmod, GenomePosition start , GenomePosition end) {
-        boolean exonic = overlapsExon(tmod, start, end);
-        if (exonic) {
-            // determine which exons are affected
-            Optional<Integer> firstAffectedExonNumber = getExonNumber(tmod, start);
-            Optional<Integer> secondAffectedExonNumber = getExonNumber(tmod, end);
-            if (firstAffectedExonNumber.isEmpty() && secondAffectedExonNumber.isEmpty()) {
-                throw new SvAnnRuntimeException("Both positions empty");
-            } else if (firstAffectedExonNumber.isEmpty()) {
-                firstAffectedExonNumber = secondAffectedExonNumber;
-            } else {
-                secondAffectedExonNumber = firstAffectedExonNumber;
-            }
+    static public VcfOverlap coding(TranscriptModel tmod, GenomeInterval svInt) {
 
-            if (firstAffectedExonNumber.get().equals(secondAffectedExonNumber.get())){
-                String msg = String.format("%s/%s[exon %d]", tmod.getGeneSymbol(), tmod.getAccession(), firstAffectedExonNumber.get());
+        GenomePosition start = svInt.getGenomeBeginPos();
+        GenomePosition end = svInt.getGenomeEndPos();
+        boolean exonic = overlapsExon(tmod, svInt);
+        ExonPair exonPair = getAffectedExons(tmod, svInt);
+        if (exonPair.atLeastOneExonOverlap()) {
+            // determine which exons are affected
+            int firstAffectedExon = exonPair.getFirstAffectedExon();
+            int lastAffectedExon = exonPair.getLastAffectedExon();
+
+            if (firstAffectedExon == lastAffectedExon){
+                String msg = String.format("%s/%s[exon %d]", tmod.getGeneSymbol(), tmod.getAccession(), firstAffectedExon);
                 return new VcfOverlap(SINGLE_EXON_CODING_TRANSCRIPT, 0, 0, msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
-                        firstAffectedExonNumber.get(),
-                        secondAffectedExonNumber.get());
+                        firstAffectedExon,
+                        lastAffectedExon);
                 return new VcfOverlap(MULTIPLE_EXON_CODING_TRANSCRIPT, 0, 0, msg);
             }
         } else {
@@ -220,35 +253,30 @@ public class VcfOverlapList {
      * determined that the SV overlaps with a non-coding transcript
      *
      * @param tmod  a non-coding transcript (this is checked by calling code)
-     * @param start start position of the overlapping structural variant
-     * @param end   end position of the overlapping structural variant
+     * @param svInt start and end position of the overlapping structural variant
      * @return
      */
-    static public VcfOverlap noncoding(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
-        boolean exonic = overlapsExon(tmod, start, end);
-        if (exonic) {
+    static public VcfOverlap noncoding(TranscriptModel tmod, GenomeInterval svInt) {
+        boolean exonic = overlapsExon(tmod, svInt);
+        GenomePosition start = svInt.getGenomeBeginPos();
+        GenomePosition end = svInt.getGenomeEndPos();
+        ExonPair exonPair = getAffectedExons(tmod, svInt);
+        if (exonPair.atLeastOneExonOverlap()) {
             // determine which exons are affected
-            Optional<Integer> firstAffectedExonNumber = getExonNumber(tmod, start);
-            Optional<Integer> secondAffectedExonNumber = getExonNumber(tmod, end);
-            if (firstAffectedExonNumber.isEmpty() && secondAffectedExonNumber.isEmpty()) {
-                throw new SvAnnRuntimeException("Both positions empty");
-            } else if (firstAffectedExonNumber.isEmpty()) {
-                firstAffectedExonNumber = secondAffectedExonNumber;
-            } else {
-                secondAffectedExonNumber = firstAffectedExonNumber;
-            }
-            if (firstAffectedExonNumber.get() == secondAffectedExonNumber.get()) {
+            int firstAffectedExon = exonPair.getFirstAffectedExon();
+            int lastAffectedExon = exonPair.getLastAffectedExon();
+            if (firstAffectedExon == lastAffectedExon) {
                 String msg = String.format("%s/%s[exon %d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
-                        firstAffectedExonNumber.get());
+                        firstAffectedExon);
                 return new VcfOverlap(SINGLE_EXON_NONCODING_TRANSCRIPT, 0, 0, msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
-                        firstAffectedExonNumber.get(),
-                        secondAffectedExonNumber.get());
+                        firstAffectedExon,
+                        lastAffectedExon);
                 return new VcfOverlap(MULTIPLE_EXON_NONCODING_TRANSCRIPT, 0, 0, msg);
             }
         } else {
@@ -290,10 +318,10 @@ public class VcfOverlapList {
                 //throw new L2ORuntimeException(tmod.getGeneSymbol());
             }
             if (tmod.isCoding()) {
-                VcfOverlap voverlap = coding(tmod, start, end);
+                VcfOverlap voverlap = coding(tmod, svInt);
                 overlaps.add(voverlap);
             } else {
-                VcfOverlap voverlap = noncoding(tmod, start, end);
+                VcfOverlap voverlap = noncoding(tmod, svInt);
                 overlaps.add(voverlap);
             }
         }

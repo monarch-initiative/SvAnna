@@ -3,16 +3,17 @@ package org.jax.svann.vcf;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
-import org.jax.svann.reference.GenomeAssembly;
-import org.jax.svann.reference.GenomeAssemblyProvider;
+import org.jax.svann.reference.genome.GenomeAssembly;
+import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public abstract class TestBase {
 
-    private static Path JANNOVAR_PATH = Paths.get("src/test/resources/hg38_ucsc_small.ser");
+    protected static final GenomeAssembly GENOME_ASSEMBLY = GenomeAssemblyProvider.getGrch38Assembly();
 
+    private static final Path JANNOVAR_PATH = Paths.get("src/test/resources/hg38_ucsc_small.ser");
     /**
      * Small Jannovar cache that contains UCSC transcripts of the following genes:
      * <ul>
@@ -28,8 +29,6 @@ public abstract class TestBase {
      * </ul>
      */
     protected static final JannovarData JANNOVAR_DATA = getJannovarData();
-
-    protected static final GenomeAssembly GENOME_ASSEMBLY = GenomeAssemblyProvider.getGrch38Assembly();
 
     private static JannovarData getJannovarData() {
         try {

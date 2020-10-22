@@ -1,4 +1,4 @@
-package org.jax.svann.reference;
+package org.jax.svann.reference.genome;
 
 public enum SequenceRole {
     ASSEMBLED_MOLECULE,

@@ -1,15 +1,69 @@
 package org.jax.svann.reference;
 
-import java.util.List;
+import org.jax.svann.reference.genome.Contig;
 
-public interface ChromosomalRegion extends ChromosomalCoordinates {
+/**
+ * Region on a chromosome that represents a single chromosomal position by default.
+ */
+public interface ChromosomalRegion extends Comparable<ChromosomalRegion> {
 
-    GenomePosition getBegin();
+    /**
+     * @return contig where the region is located
+     */
+    Contig getContig();
 
-    GenomePosition getEnd();
+    /**
+     * @return 1-based begin coordinate
+     */
+    Position getBeginPosition();
+
+    default int getBegin() {
+        return getBeginPosition().getPos();
+    }
+
+    /**
+     * The begin position is also the end by default
+     *
+     * @return 1-based end coordinate
+     */
+    default Position getEndPosition() {
+        return getBeginPosition();
+    }
+
+    default int getEnd() {
+        return getEndPosition().getPos();
+    }
+
+    Strand getStrand();
+
+    ChromosomalRegion withStrand(Strand strand);
+
+    default int length() {
+        return getEnd() - getBegin() + 1;
+    }
 
     @Override
-    default List<GenomePosition> getPositions() {
-        return List.of(getBegin(), getEnd());
+    default int compareTo(ChromosomalRegion o) {
+        final int contig = getContig().compareTo(o.getContig());
+        if (contig != 0) {
+            return contig;
+        }
+        final int begin = getBeginPosition().compareTo(o.getBeginPosition());
+        if (begin != 0) {
+            return begin;
+        }
+        final int end = getEndPosition().compareTo(o.getEndPosition());
+        if (end != 0) {
+            return end;
+        }
+        if (getStrand().equals(o.getStrand())) {
+            return 0;
+        } else {
+            if (getStrand().equals(Strand.FWD)) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
     }
 }

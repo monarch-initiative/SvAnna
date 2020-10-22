@@ -1,6 +1,5 @@
-package org.jax.svann.reference;
+package org.jax.svann.reference.genome;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public interface Contig extends Comparable<Contig> {

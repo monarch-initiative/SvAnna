@@ -1,5 +1,6 @@
 package org.jax.svann.structuralvar;
 
+@Deprecated
 public class SvDuplication extends SvAnn {
 
 

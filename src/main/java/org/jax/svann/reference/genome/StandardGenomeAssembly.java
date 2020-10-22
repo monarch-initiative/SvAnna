@@ -1,4 +1,4 @@
-package org.jax.svann.reference;
+package org.jax.svann.reference.genome;
 
 import java.util.Map;
 import java.util.Objects;

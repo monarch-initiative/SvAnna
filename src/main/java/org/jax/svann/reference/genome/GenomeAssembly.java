@@ -1,4 +1,4 @@
-package org.jax.svann.reference;
+package org.jax.svann.reference.genome;
 
 import java.util.Collection;
 import java.util.Map;
@@ -29,7 +29,7 @@ public interface GenomeAssembly {
      * @return optional with contig or an empty optional if the contig with given <code>id</code> is not present in
      * this genome build
      */
-    default Optional<Contig> getContigByName(int id) {
+    default Optional<Contig> getContigById(int id) {
         return getContigMap().containsKey(id)
                 ? Optional.of(getContigMap().get(id))
                 : Optional.empty();

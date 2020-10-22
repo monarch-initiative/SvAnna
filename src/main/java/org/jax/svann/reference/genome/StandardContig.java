@@ -1,4 +1,4 @@
-package org.jax.svann.reference;
+package org.jax.svann.reference.genome;
 
 import java.util.Objects;
 import java.util.Set;
@@ -75,12 +75,6 @@ class StandardContig implements Contig {
 
     @Override
     public String toString() {
-        return "Contig{" +
-                "id=" + id +
-                ", primaryName='" + primaryName + '\'' +
-                ", altNames=" + altNames +
-                ", role=" + role +
-                ", length=" + length +
-                '}';
+        return String.format("%s(%d)", primaryName, id);
     }
 }

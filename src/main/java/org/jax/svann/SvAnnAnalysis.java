@@ -17,7 +17,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class SvAnn {
+public class SvAnnAnalysis {
 
     final static double THRESHOLD = 1;
     private final static int DISTANCE_THRESHOLD = 500_000;
@@ -29,7 +29,7 @@ public class SvAnn {
     private final Set<Enhancer> phenotypicallyRelevantEnhancerSet = new HashSet<>();
 
 
-    public SvAnn(String liricalPath, String Vcf, String outfile, List<TermId> tidList, String enhancerPath, String gencode) {
+    public SvAnnAnalysis(String liricalPath, String Vcf, String outfile, List<TermId> tidList, String enhancerPath, String gencode) {
 
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
@@ -73,7 +73,7 @@ public class SvAnn {
     }
 
 
-    public SvAnn(String liricalPath, String Vcf, String outfile) {
+    public SvAnnAnalysis(String liricalPath, String Vcf, String outfile) {
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
         symbolToTranscriptListMap = new HashMap<>();
         System.out.printf("We retrieved %d disease to gene annotations.\n", diseaseId2GeneSymbolMap.size());

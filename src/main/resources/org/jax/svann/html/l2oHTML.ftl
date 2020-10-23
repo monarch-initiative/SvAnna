@@ -375,8 +375,7 @@ a.svg:hover, a.svg:active {
       <a name="sample"></a>
         <article>
         <ul>
-         <li>Translocation variants: ${n_translocations}</li>
-        <li>Non-translocation variants: ${n_non_translocations}</li>
+        <li>Structural variants: n=${n_non_translocations}</li>
         <ol>
         <li>High impact: ${n_high}</li>
         <li>Modifier impact: ${n_modifer}</li>

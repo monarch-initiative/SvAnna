@@ -17,9 +17,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-public class SvAnn {
+/**
+ * This is the main class that coordinates parsing of the various input files to extract and prioritize structural
+ * variants from long-read genome sequencing.
+ * @author Peter Robinson
+ */
+public class SvAnnotator {
 
     final static double THRESHOLD = 1;
+    /** The threshold for considering enhancers to be 'close' to target genes. */
     private final static int DISTANCE_THRESHOLD = 500_000;
     private final List<LiricalHit> hitlist;
     private final Map<TermId, Set<String>> diseaseId2GeneSymbolMap;
@@ -29,7 +35,7 @@ public class SvAnn {
     private final Set<Enhancer> phenotypicallyRelevantEnhancerSet = new HashSet<>();
 
 
-    public SvAnn(String liricalPath, String Vcf, String outfile, List<TermId> tidList, String enhancerPath, String gencode) {
+    public SvAnnotator(String liricalPath, String Vcf, String outfile, List<TermId> tidList, String enhancerPath, String gencode) {
 
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
@@ -44,7 +50,6 @@ public class SvAnn {
             List<Enhancer> enhancers = id2enhancerMap.getOrDefault(t, new ArrayList<>());
             phenotypicallyRelevantEnhancerSet.addAll(enhancers);
         }
-        List<LiricalHit> hitlist = getLiricalHitList(liricalPath);
         for (var hit : hitlist) {
             Set<String> geneSymbols = hit.getGeneSymbols();
             Set<Enhancer> enhancers = getRelevantEnhancers(geneSymbols);
@@ -73,7 +78,7 @@ public class SvAnn {
     }
 
 
-    public SvAnn(String liricalPath, String Vcf, String outfile) {
+    public SvAnnotator(String liricalPath, String Vcf, String outfile) {
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
         symbolToTranscriptListMap = new HashMap<>();
         System.out.printf("We retrieved %d disease to gene annotations.\n", diseaseId2GeneSymbolMap.size());
@@ -82,58 +87,12 @@ public class SvAnn {
 
         System.out.println(Vcf);
         this.targetHpoIdList = null;
-        List<LiricalHit> hitlist =  getLiricalHitList(liricalPath);
     }
 
 
-    private List<LiricalHit> getLiricalHitList(String liricalPath) {
-        String line;
-        File liricalFile = new File(liricalPath);
-        if (! liricalFile.exists()) {
-            System.err.printf("[ERROR] Could not find LIRICAL input file at %s\n", liricalPath);
-            return List.of();
-        }
-        try (BufferedReader br = new BufferedReader(new FileReader(liricalPath))) {
-            //rank    diseaseName     diseaseCurie    pretestprob     posttestprob    compositeLR     entrezGeneId    variants
-            while ((line=br.readLine()) != null) {
-                if (line.startsWith("rank")) break;
-            }
-            while ((line=br.readLine()) != null) {
-                String []fields = line.split("\t");
-                if (fields.length < 8) {
-                    System.err.println("[ERROR] Bad line, less than 8 fields: " + line);
-                    continue;
-                }
-                String dname = fields[1];
-                String dcurie = fields[2];
-                String posttestprob = fields[4].replace("%","");
-                try {
-                    double prob = Double.parseDouble(posttestprob);
-                    double lr = Double.parseDouble(fields[5].replaceAll(",",""));
-                    if (prob > THRESHOLD) {
-                        LiricalHit hit = new LiricalHit(dname, dcurie, prob, lr);
-                        TermId diseaseId = TermId.of(dcurie);
-                        if (this.diseaseId2GeneSymbolMap.containsKey(diseaseId)) {
-                            //System.out.println("found genes for " + dname);
-                            hit.setGeneSymbols(diseaseId2GeneSymbolMap.get(diseaseId));
-                        }
-                        hitlist.add(hit);
-                    }
-                } catch (NumberFormatException e) {
-                    System.err.println("[ERROR] " + e.getLocalizedMessage());
-                    System.err.println("[ERROR] " + line);
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-        System.out.printf("[INFO] We got %d above threshold candidates.\n", hitlist.size());
-        return hitlist;
-    }
 
-    public List<LiricalHit> getHitlist() {
-        return hitlist;
-    }
+
+
 
     private Map<TermId, Set<String>> initDiseaseMap() {
         String geneinfo = "data/Homo_sapiens_gene_info.gz";

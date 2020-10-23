@@ -6,10 +6,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * Command to download the {@code hp.obo} and {@code phenotype.hpoa} files that
- * we will need to run the LIRICAL approach.
+ * Command to download the files used by SvAnn for analysis.
  */
-public class L2ODownloader {
+public class SvAnnDownloader {
 
     /** Directory to which we will download the files. */
     private final String downloadDirectory;
@@ -39,11 +38,11 @@ public class L2ODownloader {
 
 
 
-    public L2ODownloader(String path){
+    public SvAnnDownloader(String path){
         this(path,false);
     }
 
-    public L2ODownloader(String path, boolean overwrite){
+    public SvAnnDownloader(String path, boolean overwrite){
         this.downloadDirectory=path;
         this.overwrite=overwrite;
     }

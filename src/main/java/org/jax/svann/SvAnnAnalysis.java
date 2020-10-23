@@ -2,6 +2,10 @@ package org.jax.svann;
 
 import com.google.common.collect.Multimap;
 import org.jax.svann.lirical.LiricalHit;
+import org.jax.svann.reference.Position;
+import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.genome.GenomeAssembly;
+import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.jax.svann.tspec.Enhancer;
 import org.jax.svann.tspec.GencodeParser;
 import org.jax.svann.tspec.TSpecParser;
@@ -10,6 +14,8 @@ import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,7 +24,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class SvAnnAnalysis {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(SvAnnAnalysis.class);
     final static double THRESHOLD = 1;
     private final static int DISTANCE_THRESHOLD = 500_000;
     private final List<LiricalHit> hitlist;
@@ -27,7 +33,10 @@ public class SvAnnAnalysis {
     private final List<TermId> targetHpoIdList;
     private final  Map<String, List<TssPosition>> symbolToTranscriptListMap;
     private final Set<Enhancer> phenotypicallyRelevantEnhancerSet = new HashSet<>();
-
+    /**
+     * TODO allow as parameter to CTOR
+     */
+    private final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
 
     public SvAnnAnalysis(String liricalPath, String Vcf, String outfile, List<TermId> tidList, String enhancerPath, String gencode) {
 
@@ -60,9 +69,16 @@ public class SvAnnAnalysis {
             List<TssPosition> tssList = this.symbolToTranscriptListMap.getOrDefault(gene, List.of());
             for (var tss : tssList) {
                 String chr = tss.getGenomicPosition().getChromosome();
+                final Optional<Contig> contigOptional = assembly.getContigByName(chr);
+                if (contigOptional.isEmpty()) {
+                    LOGGER.warn("Unknown contig `{}` for {}", chr, tss);
+                    continue;
+                }
+                final Contig contig = contigOptional.get();
                 int pos = tss.getGenomicPosition().getPosition();
                 for (var e : phenotypicallyRelevantEnhancerSet) {
-                    if (e.matchesPos(chr, pos, DISTANCE_THRESHOLD)) {
+                    // TODO Do we need the TSS class and should it return a Position?
+                    if (e.matchesPos(contig, Position.precise( pos ), DISTANCE_THRESHOLD)) {
                         relevant.add(e);
                     }
                 }
@@ -82,7 +98,7 @@ public class SvAnnAnalysis {
 
         System.out.println(Vcf);
         this.targetHpoIdList = null;
-        List<LiricalHit> hitlist =  getLiricalHitList(liricalPath);
+
     }
 
 

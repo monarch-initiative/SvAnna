@@ -9,6 +9,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * We are moving to Jannovar and do not really need this any longer.
+ */
+@Deprecated
 public class GencodeParser {
 
     private final List<TssPosition> transcripts;

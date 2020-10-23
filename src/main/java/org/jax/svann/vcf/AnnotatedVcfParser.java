@@ -3,6 +3,10 @@ package org.jax.svann.vcf;
 
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.lirical.LiricalHit;
+import org.jax.svann.reference.Position;
+import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.genome.GenomeAssembly;
+import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.jax.svann.tspec.Enhancer;
 
 import java.io.BufferedReader;
@@ -15,7 +19,7 @@ import java.util.stream.Collectors;
  * This class intends to ingest a VCF file that has been annotated by Jannovar and to return
  * a list of variants in genes that match with the top candidates of a LIRICAL analysis. This
  * is clearly a clumsy way of doing things and is only intended to prototype/
- * Let's delete this soon
+ * TODO delete after refactoring enhancer code
  * @author Peter N Robinson
  */
 @Deprecated
@@ -28,7 +32,12 @@ public class AnnotatedVcfParser {
     /** Non translocation lists */
     private final List<SvAnnOld> annlist = new ArrayList<>();
     private final List<SvAnnOld> translocationList = new ArrayList<>();
-    private final Map<String, List<Enhancer>> chromosome2enhancerListMap;
+    private final Map<Contig, List<Enhancer>> chromosome2enhancerListMap;
+
+    /**
+     * For now, the enhancer files are provided only as hg38. TODO allow as parameter to CTOR
+     */
+    private final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
 
     public AnnotatedVcfParser(String annotatedVcf, List<LiricalHit> hitlist) {
         this.annotatedVcfPath = annotatedVcf;
@@ -65,6 +74,11 @@ public class AnnotatedVcfParser {
                     continue;
                 }
                 String chr = getChr(fields[0]);
+                final Optional<Contig> contigOptional = assembly.getContigByName(chr);
+                if (contigOptional.isEmpty()) {
+                    continue;
+                }
+                final Contig contig = contigOptional.get();
                 int pos = Integer.parseInt(fields[1]);
                 String id = fields[2];
                 String ref = fields[3];
@@ -81,9 +95,9 @@ public class AnnotatedVcfParser {
                 String gt = fields[9]; // assume just one sample for now
                 SvAnnOld sva = new SvAnnOld(chr, pos, id, ref,alt,qual,filter,info,format,gt);
 
-                List<Enhancer> enhancersOnSameChrom = chromosome2enhancerListMap.getOrDefault(chr, new ArrayList<>());
+                List<Enhancer> enhancersOnSameChrom = chromosome2enhancerListMap.getOrDefault(contig, new ArrayList<>());
                 for (var e : enhancersOnSameChrom) {
-                    if (e.matchesPos(chr, pos)) {
+                    if (e.matchesPos(contig, Position.precise(pos))) {
                         sva.addEnhancerHit(e);
                     }
                 }

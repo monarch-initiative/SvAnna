@@ -1,12 +1,7 @@
 package org.jax.svann.reference;
 
-public interface BreakendCoordinate {
-
-    ChromosomalRegion getPosition();
+public interface BreakendCoordinate extends ChromosomalRegion {
 
     BreakendDirection getDirection();
 
-    default Strand getStrand() {
-        return getPosition().getStrand();
-    }
 }

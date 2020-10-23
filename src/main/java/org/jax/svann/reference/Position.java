@@ -23,10 +23,23 @@ public class Position implements Comparable<Position> {
         this.confidenceInterval = Objects.requireNonNull(confidenceInterval);
     }
 
+    /**
+     * Create precise position using given coordinate system.
+     *
+     * @param pos              position coordinate
+     * @param coordinateSystem coordinate system
+     * @return precise position
+     */
     public static Position precise(int pos, CoordinateSystem coordinateSystem) {
         return imprecise(pos, ConfidenceInterval.precise(), coordinateSystem);
     }
 
+    /**
+     * Create 1-based precise position.
+     *
+     * @param pos position coordinate
+     * @return precise position
+     */
     public static Position precise(int pos) {
         return imprecise(pos, ConfidenceInterval.precise());
     }

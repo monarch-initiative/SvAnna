@@ -19,7 +19,8 @@ import java.util.*;
 
 /**
  * This is the main class that coordinates parsing of the various input files to extract and prioritize structural
- * variants from long-read genome sequencing.
+ * variants from long-read genome sequencing. Note that we assume that the {@code download} command has been executed
+ *  * and that we can find the corresponding files there. If we cannot, the program terminates with an error message.
  * @author Peter Robinson
  */
 public class SvAnnotator {

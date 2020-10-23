@@ -3,6 +3,7 @@ package org.jax.svann.hpo;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -33,7 +34,7 @@ public class HpoDiseaseGeneMap {
      */
     private final Map<TermId, HpoDisease> diseaseMap;
 
-    public HpoDiseaseGeneMap(String hpOboPath, String phenotypeHpoaPath, String mim2geneMedgenPath, String geneInfoPath) {
+    private HpoDiseaseGeneMap(String hpOboPath, String phenotypeHpoaPath, String mim2geneMedgenPath, String geneInfoPath) {
         this.ontology = OntologyLoader.loadOntology(new File(hpOboPath));
         List<String> desiredDatabasePrefixes= ImmutableList.of("OMIM");
         String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
@@ -69,6 +70,40 @@ public class HpoDiseaseGeneMap {
             }
         }
         return Map.copyOf(gene2diseaseMap); // immutable
+    }
+
+    /**
+     * Entry point to using this class.
+     * @param targetHpoTermIds List of terms provided by the user.
+     * @return Map of genes/diseases characterized by one or more of these terms.
+     */
+    public static Map<TermId, Set<HpoDiseaseSummary>> loadRelevantGenesAndDiseases(List<TermId> targetHpoTermIds) {
+        String hpoPath = String.join("data", File.separator, "hp.obo");
+        String phenotypeHpoaPath = String.join("data", File.separator, "phenotype.hpoa");
+        String mim2geneMedgenPath = String.join("data", File.separator, "mim2gene_medgen");
+        String geneInfoPath = String.join("data", File.separator, "Homo_sapiens_gene_info.gz");
+        File hpoFile = new File(hpoPath);
+        File phenotypeFile = new File(phenotypeHpoaPath);
+        File mim2geneFile = new File(mim2geneMedgenPath);
+        File geneInfoFile = new File(geneInfoPath);
+        if (! hpoFile.exists()) {
+            throw new SvAnnRuntimeException("Could not find hp.obo. Did you run the download command?");
+        }
+        if (! phenotypeFile.exists()) {
+            throw new SvAnnRuntimeException("Could not find phenotype.hpoa. Did you run the download command?");
+        }
+        if (! mim2geneFile.exists()) {
+            throw new SvAnnRuntimeException("Could not find mim2gene_medgen Did you run the download command?");
+        }
+        if (! geneInfoFile.exists()) {
+            throw new SvAnnRuntimeException("Could not find Homo_sapiens_gene_info.gz. Did you run the download command?");
+        }
+        HpoDiseaseGeneMap hdgmap = new HpoDiseaseGeneMap(hpoFile.getAbsolutePath(),
+                phenotypeFile.getAbsolutePath(),
+                mim2geneFile.getAbsolutePath(),
+                geneInfoFile.getAbsolutePath());
+        return hdgmap.getRelevantGenesAndDiseases(targetHpoTermIds);
+
     }
 
 }

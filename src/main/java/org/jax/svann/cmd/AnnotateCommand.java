@@ -45,7 +45,7 @@ public class AnnotateCommand implements Callable<Integer> {
         } else {
             l2o = new SvAnnotator(this.liricalFile, this.vcfFile, this.outname);
         }
-        List<LiricalHit> hitlist = l2o.getHitlist();
+        //List<LiricalHit> hitlist = l2o.getHitlist();
         VcfSvParser vcfParser = new VcfSvParser(this.vcfFile, this.jannovarPath);
         List<SvAnnOld> annList = List.of();//vcfParser.getAnnlist();
         HtmlTemplate template = new HtmlTemplate(annList);

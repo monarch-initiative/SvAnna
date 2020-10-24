@@ -1,6 +1,6 @@
 package org.jax.svann.cmd;
 
-import org.jax.svann.io.L2ODownloader;
+import org.jax.svann.io.SvAnnDownloader;
 import picocli.CommandLine;
 
 import java.util.concurrent.Callable;
@@ -14,7 +14,7 @@ public class DownloadCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        L2ODownloader downloader = new L2ODownloader("data");
+        SvAnnDownloader downloader = new SvAnnDownloader("data");
         downloader.download();
         return 0;
     }

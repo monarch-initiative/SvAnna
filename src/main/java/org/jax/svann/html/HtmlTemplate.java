@@ -20,7 +20,7 @@ public class HtmlTemplate {
 
     protected static final String EMPTY_STRING="";
 
-    public HtmlTemplate(List<SvAnnOld> svAnnList, List<SvAnnOld> translocationList) {
+    public HtmlTemplate(List<SvAnnOld> svAnnList) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -33,7 +33,6 @@ public class HtmlTemplate {
         //templateFile.toURI().toURL().toExternalForm()
 
         templateData.putIfAbsent("svalist", svAnnList);
-        templateData.put("n_translocations", translocationList.size());
         templateData.put("n_non_translocations", svAnnList.size());
         int n_low = (int) svAnnList
                 .stream()

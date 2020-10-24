@@ -1,6 +1,6 @@
 package org.jax.svann.lirical;
 
-import org.jax.svann.tspec.Enhancer;
+import org.jax.svann.genomicreg.Enhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Set;

@@ -4,7 +4,7 @@ package org.jax.svann.vcf;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.lirical.LiricalHit;
 import org.jax.svann.structuralvar.SvType;
-import org.jax.svann.tspec.Enhancer;
+import org.jax.svann.genomicreg.Enhancer;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 /**
  * Information related to a structural variant annotation by Jannovar.
  */
+@Deprecated
 public class SvAnnOld implements Comparable<SvAnnOld> {
 
     private static final String PIPE_SYMBOL = Pattern.quote("|");

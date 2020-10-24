@@ -1,16 +1,18 @@
 package org.jax.svann.genomicreg;
 
-import org.junit.jupiter.api.BeforeAll;
+
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.io.IOException;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * This class uses the example file {@code src/test/resources/tspec-small.tsv} to test
@@ -52,6 +54,20 @@ public class TSpecParserTest {
         assertEquals("Abnormal vascular morphology", hpoIdToLabelMap.get(vascular));
         TermId heart = TermId.of("HP:0001627");
         assertEquals("Abnormal heart morphology", hpoIdToLabelMap.get(heart));
+    }
+
+    /**
+     * There is only one thymus enhancer,
+     * chr10	100014348	100014634	0.728857	HP:0000777	Abnormality of the thymus
+     */
+    @Test
+    public void testThymusEnhancer() {
+        TermId thymusHpoId = TermId.of("HP:0000777");
+        List<Enhancer> enhancers = id2enhancerMap.get(thymusHpoId);
+        assertEquals(1, enhancers.size());
+        Enhancer thymusEnhancer = enhancers.get(0);
+        assertNotNull(thymusEnhancer);
+        //Contig chr10 = StandardContig.of(10, String "chr10", Set.of(), SequenceRole.ASSEMBLED_MOLECULE, int length)
     }
 
 

@@ -1,20 +1,19 @@
 package org.jax.svann;
 
 import com.google.common.collect.Multimap;
+import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.genomicreg.TSpecParser;
+import org.jax.svann.genomicreg.TssPosition;
 import org.jax.svann.lirical.LiricalHit;
-import org.jax.svann.tspec.Enhancer;
-import org.jax.svann.tspec.GencodeParser;
-import org.jax.svann.tspec.TSpecParser;
-import org.jax.svann.tspec.TssPosition;
+
+import org.jax.svann.reference.Position;
+import org.jax.svann.reference.genome.Contig;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -41,8 +40,8 @@ public class SvAnnotator {
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
         Map<TermId, String> hpoId2LabelMap = tparser.getId2labelMap();
-        GencodeParser gparser = new GencodeParser(gencode);
-        this.symbolToTranscriptListMap = gparser.getSymbolToTranscriptListMap();
+
+        this.symbolToTranscriptListMap = Map.of();//gparser.getSymbolToTranscriptListMap();
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
         this.hitlist = new ArrayList<>();
         this.outputfile = outfile;
@@ -65,8 +64,8 @@ public class SvAnnotator {
         for (var gene : geneSymbols) {
             List<TssPosition> tssList = this.symbolToTranscriptListMap.getOrDefault(gene, List.of());
             for (var tss : tssList) {
-                String chr = tss.getGenomicPosition().getChromosome();
-                int pos = tss.getGenomicPosition().getPosition();
+                Contig chr = tss.getGenomicPosition().getChromosome();
+                Position pos = tss.getGenomicPosition().getPosition();
                 for (var e : phenotypicallyRelevantEnhancerSet) {
                     if (e.matchesPos(chr, pos, DISTANCE_THRESHOLD)) {
                         relevant.add(e);

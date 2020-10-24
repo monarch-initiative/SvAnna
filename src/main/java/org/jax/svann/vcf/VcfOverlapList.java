@@ -97,7 +97,7 @@ public class VcfOverlapList {
         int firstExon = includedExons.get(0);
         int lastExon = includedExons.get(includedExons.size() - 1);
         String desc = String.format("SV comprises exons %d-%d", firstExon, lastExon);
-        return new VcfOverlap(MULTIPLE_EXON_CODING_TRANSCRIPT, leftDistance, rightDistance, desc);
+        return new VcfOverlap(MULTIPLE_EXON_IN_TRANSCRIPT, leftDistance, rightDistance, desc);
 
     }
 
@@ -230,14 +230,14 @@ public class VcfOverlapList {
 
             if (firstAffectedExon == lastAffectedExon){
                 String msg = String.format("%s/%s[exon %d]", tmod.getGeneSymbol(), tmod.getAccession(), firstAffectedExon);
-                return new VcfOverlap(SINGLE_EXON_CODING_TRANSCRIPT, 0, 0, msg);
+                return new VcfOverlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon,
                         lastAffectedExon);
-                return new VcfOverlap(MULTIPLE_EXON_CODING_TRANSCRIPT, 0, 0, msg);
+                return new VcfOverlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron
@@ -282,7 +282,7 @@ public class VcfOverlapList {
             // if we get here, then both positions must be in the same intron
             int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new VcfOverlap(INTRONIC_NONCODING_TRANSCRIPT, 0, 0, msg);
+            return new VcfOverlap(INTRONIC, 0, 0, msg);
         }
     }
 

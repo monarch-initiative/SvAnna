@@ -1,7 +1,6 @@
-package org.jax.svann.tspec;
+package org.jax.svann.genomicreg;
 
 import org.jax.svann.except.SvAnnRuntimeException;
-import org.jax.svann.parse.VcfStructuralVariantParser;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
@@ -31,15 +30,17 @@ import java.util.*;
  */
 public class TSpecParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(TSpecParser.class);
-    Map<TermId, String> id2labelMap;
-    Map<TermId, List<Enhancer>> id2enhancerMap;
+    /** key: an HPO id, e.g., HP:0001234; value: corresponding label. TODO may not be needed here, it is more for output*/
+    private final Map<TermId, String> id2labelMap;
+    /** Key: An HPO id; value: List of {@link Enhancer} objects annotated to the HPO id. */
+    private final Map<TermId, List<Enhancer>> id2enhancerMap;
     /**
      * For now, the enhancer files are provided only as hg38. TODO allow as parameter to CTOR
      */
     private final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
 
     public TSpecParser(String path) {
-        id2labelMap = new HashMap();
+        id2labelMap = new HashMap<>();
         id2enhancerMap = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String line;

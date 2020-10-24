@@ -1,4 +1,4 @@
-package org.jax.svann.tspec;
+package org.jax.svann.genomicreg;
 
 import org.jax.svann.reference.CoordinateSystem;
 import org.jax.svann.reference.Position;
@@ -54,6 +54,6 @@ public class Enhancer {
     }
 
     public String getSummary() {
-        return String.format("%s:%d-%d [%s]", contig, start, end, termId.getValue());
+        return String.format("%s:%d-%d [%s]", contig, start.getPos(), end.getPos(), termId.getValue());
     }
 }

@@ -1,8 +1,11 @@
-package org.jax.svann.tspec;
+package org.jax.svann.genomicreg;
+
+import org.jax.svann.reference.Position;
+import org.jax.svann.reference.Strand;
 
 import java.util.Comparator;
 import java.util.Objects;
-
+import org.jax.svann.reference.genome.Contig;
 import static java.util.Comparator.comparing;
 
 /**
@@ -16,10 +19,10 @@ public class TssPosition implements Comparable<TssPosition> {
     private final GenomicPosition genomicPosition;
 
 
-    public TssPosition(String gene, String transcript, String chr, int pos, boolean ps) {
+    public TssPosition(String gene, String transcript, Contig chr, Position pos, Strand strand) {
         this.geneSymbol = gene;
         this.transcriptId = transcript;
-        this.genomicPosition = new GenomicPosition(chr, pos, ps);
+        this.genomicPosition = new GenomicPosition(chr, pos, strand);
 
     }
 
@@ -37,7 +40,7 @@ public class TssPosition implements Comparable<TssPosition> {
     }
 
     /** Be consistent with equals: use the same fields as getSigFields().*/
-    private static Comparator<TssPosition> COMPARATOR =
+    private static final Comparator<TssPosition> COMPARATOR =
                 comparing(TssPosition::getGenomicPosition)
                         .thenComparing(TssPosition::getTranscriptId);
 

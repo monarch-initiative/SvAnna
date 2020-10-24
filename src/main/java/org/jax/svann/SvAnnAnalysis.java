@@ -6,10 +6,9 @@ import org.jax.svann.reference.Position;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
-import org.jax.svann.tspec.Enhancer;
-import org.jax.svann.tspec.GencodeParser;
-import org.jax.svann.tspec.TSpecParser;
-import org.jax.svann.tspec.TssPosition;
+import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.genomicreg.TSpecParser;
+import org.jax.svann.genomicreg.TssPosition;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
@@ -43,8 +42,9 @@ public class SvAnnAnalysis {
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
         Map<TermId, String> hpoId2LabelMap = tparser.getId2labelMap();
-        GencodeParser gparser = new GencodeParser(gencode);
-        this.symbolToTranscriptListMap = gparser.getSymbolToTranscriptListMap();
+//        GencodeParser gparser = new GencodeParser(gencode);
+//        this.symbolToTranscriptListMap = gparser.getSymbolToTranscriptListMap();
+        symbolToTranscriptListMap = Map.of(); // TODO Populate from Jannovar
         this.diseaseId2GeneSymbolMap = initDiseaseMap();
         this.hitlist = new ArrayList<>();
         this.outputfile = outfile;
@@ -68,17 +68,17 @@ public class SvAnnAnalysis {
         for (var gene : geneSymbols) {
             List<TssPosition> tssList = this.symbolToTranscriptListMap.getOrDefault(gene, List.of());
             for (var tss : tssList) {
-                String chr = tss.getGenomicPosition().getChromosome();
-                final Optional<Contig> contigOptional = assembly.getContigByName(chr);
+                Contig chr = tss.getGenomicPosition().getChromosome();
+                final Optional<Contig> contigOptional = assembly.getContigByName(chr.getPrimaryName());
                 if (contigOptional.isEmpty()) {
                     LOGGER.warn("Unknown contig `{}` for {}", chr, tss);
                     continue;
                 }
                 final Contig contig = contigOptional.get();
-                int pos = tss.getGenomicPosition().getPosition();
+                Position pos = tss.getGenomicPosition().getPosition();
                 for (var e : phenotypicallyRelevantEnhancerSet) {
                     // TODO Do we need the TSS class and should it return a Position?
-                    if (e.matchesPos(contig, Position.precise( pos ), DISTANCE_THRESHOLD)) {
+                    if (e.matchesPos(contig, pos , DISTANCE_THRESHOLD)) {
                         relevant.add(e);
                     }
                 }

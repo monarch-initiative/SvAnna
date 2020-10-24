@@ -4,7 +4,7 @@ package org.jax.svann.vcf;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.lirical.LiricalHit;
 import org.jax.svann.structuralvar.SvType;
-import org.jax.svann.tspec.Enhancer;
+import org.jax.svann.genomicreg.Enhancer;
 
 import java.util.*;
 import java.util.regex.Pattern;

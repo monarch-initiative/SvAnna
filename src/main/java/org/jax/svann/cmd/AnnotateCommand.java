@@ -1,13 +1,25 @@
 package org.jax.svann.cmd;
 
+
 import org.jax.svann.SvAnnotator;
+import de.charite.compbio.jannovar.data.JannovarData;
+import de.charite.compbio.jannovar.data.JannovarDataSerializer;
+import de.charite.compbio.jannovar.data.SerializationException;
+import org.jax.svann.SvAnnAnalysis;
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.lirical.LiricalHit;
 import org.jax.svann.vcf.SvAnnOld;
 import org.jax.svann.vcf.VcfSvParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -15,7 +27,15 @@ import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "annotate", aliases = {"A"}, mixinStandardHelpOptions = true, description = "annotate VCF file")
 public class AnnotateCommand implements Callable<Integer> {
-    @CommandLine.Option(names = {"-o","--out"})
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
+
+    /**
+     * This is what we use, candidate for externalization into a CLI parameter
+     */
+    private static final String ASSEMBLY_ID = "GRCh38.p13";
+
+    @CommandLine.Option(names = {"-o", "--out"})
     protected String outname = "l2o.bed";
     @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
     protected String vcfFile;
@@ -37,13 +57,14 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        SvAnnotator l2o;
+        SvAnnAnalysis l2o;
+
         if (enhancerFile != null && hpoTermId != null) {
-            String [] ids = hpoTermId.split(",");
+            String[] ids = hpoTermId.split(",");
             List<TermId> tidList = Arrays.stream(ids).map(TermId::of).collect(Collectors.toList());
-            l2o = new SvAnnotator(this.liricalFile, this.vcfFile, this.outname, tidList, this.enhancerFile, this.geneCodePath);
+            l2o = new SvAnnAnalysis(this.liricalFile, this.vcfFile, this.outname, tidList, this.enhancerFile, this.geneCodePath);
         } else {
-            l2o = new SvAnnotator(this.liricalFile, this.vcfFile, this.outname);
+            l2o = new SvAnnAnalysis(this.liricalFile, this.vcfFile, this.outname);
         }
         //List<LiricalHit> hitlist = l2o.getHitlist();
         VcfSvParser vcfParser = new VcfSvParser(this.vcfFile, this.jannovarPath);
@@ -52,6 +73,5 @@ public class AnnotateCommand implements Callable<Integer> {
         template.outputFile(this.outprefix);
         return 0;
     }
-
 
 }

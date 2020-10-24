@@ -7,11 +7,10 @@ import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 
 import static org.jax.svann.vcf.IntronOverlap.getIntronNumber;
-import static org.jax.svann.vcf.VcfOverlapType.*;
+import static org.jax.svann.vcf.OverlapType.*;
 
 public class VcfOverlapList {
 
@@ -129,23 +128,23 @@ public class VcfOverlapList {
         boolean left = leftDistance == minDistance; // in case of ties, default to left
         if (left) {
             if (minDistance <= 2_000) {
-                overlaps.add(new VcfOverlap(VcfOverlapType.UPSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 5_000) {
-                overlaps.add(new VcfOverlap(VcfOverlapType.UPSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 500_000) {
-                overlaps.add(new VcfOverlap(VcfOverlapType.UPSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
             } else {
-                overlaps.add(new VcfOverlap(VcfOverlapType.UPSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
             }
         } else {
             if (minDistance <= 2_000) {
-                overlaps.add(new VcfOverlap(VcfOverlapType.DOWNSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 5_000) {
-                overlaps.add(new VcfOverlap(VcfOverlapType.DOWNSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 500_000) {
-                overlaps.add(new VcfOverlap(VcfOverlapType.DOWNSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
             } else {
-                overlaps.add(new VcfOverlap(VcfOverlapType.DOWNSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
+                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
             }
         }
         return new VcfOverlapList(overlaps);
@@ -244,7 +243,7 @@ public class VcfOverlapList {
             // if we get here, then both positions must be in the same intron
             int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new VcfOverlap(INTRONIC_CODING_TRANSCRIPT, 0, 0, msg);
+            return new VcfOverlap(INTRONIC, 0, 0, msg);
         }
     }
 
@@ -270,14 +269,14 @@ public class VcfOverlapList {
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon);
-                return new VcfOverlap(SINGLE_EXON_NONCODING_TRANSCRIPT, 0, 0, msg);
+                return new VcfOverlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon,
                         lastAffectedExon);
-                return new VcfOverlap(MULTIPLE_EXON_NONCODING_TRANSCRIPT, 0, 0, msg);
+                return new VcfOverlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron

@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 /**
  * Information related to a structural variant annotation by Jannovar.
  */
+@Deprecated
 public class SvAnnOld implements Comparable<SvAnnOld> {
 
     private static final String PIPE_SYMBOL = Pattern.quote("|");

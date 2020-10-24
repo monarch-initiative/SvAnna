@@ -2,7 +2,7 @@ package org.jax.svann.vcf;
 
 public class VcfOverlap {
 
-    private final VcfOverlapType overlapType;
+    private final OverlapType overlapType;
     /** This field's meaning depends on the type. For INTERGENIC, it is the distance to the 5' (left) nearest gene.
      * For INTRONIC, it is the distance to the 5' (left) nearest exon.
      */
@@ -13,7 +13,7 @@ public class VcfOverlap {
     private final String description;
 
 
-    public VcfOverlap(VcfOverlapType type, int left, int right, String desc) {
+    public VcfOverlap(OverlapType type, int left, int right, String desc) {
         this.overlapType = type;
         this.leftDistance = left;
         this.rightDistance = right;
@@ -25,7 +25,7 @@ public class VcfOverlap {
      * @return
      */
     public boolean isCoding() {
-        return VcfOverlapType.isCoding(this.overlapType);
+        return OverlapType.isExonic(this.overlapType);
     }
 
     @Override

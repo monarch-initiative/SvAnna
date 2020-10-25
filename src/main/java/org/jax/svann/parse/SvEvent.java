@@ -4,7 +4,7 @@ import org.jax.svann.reference.IntrachromosomalEvent;
 import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
-import org.jax.svann.structuralvar.SvType;
+import org.jax.svann.reference.SvType;
 
 import java.util.Objects;
 

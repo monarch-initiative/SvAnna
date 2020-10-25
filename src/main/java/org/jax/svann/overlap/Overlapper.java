@@ -9,15 +9,13 @@ import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.reference.IntrachromosomalEvent;
-import org.jax.svann.reference.Position;
-import org.jax.svann.reference.genome.Contig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.*;
 
-import static org.jax.svann.overlap.IntronOverlap.getIntronNumber;
+
 import static org.jax.svann.overlap.OverlapType.*;
 
 /**
@@ -106,14 +104,9 @@ public class Overlapper {
                 // TODO I observed this once, it should never happen and may be a Jannovar bug or have some other cause
                 //throw new L2ORuntimeException(tmod.getGeneSymbol());
             }
-            // TODO -- there is no reason to have separate methods for coding and noncoding.
-            if (tmod.isCoding()) {
-                Overlap voverlap = coding(tmod, svInt);
-                overlaps.add(voverlap);
-            } else {
-                Overlap voverlap = noncoding(tmod, svInt);
-                overlaps.add(voverlap);
-            }
+            // TODO if the above bug no longer occurs, make a regular if/else with the above
+            Overlap voverlap = genic(tmod, svInt);
+            overlaps.add(voverlap);
         }
         if (overlaps.isEmpty()) {
             System.err.println("Could not find any overlaps with this query result" + qresult);
@@ -142,81 +135,47 @@ public class Overlapper {
         // if we are 5' or 3' to the first or last gene on the chromosome, then
         // there is not left or right gene anymore
         int leftDistance = 0;
-        String leftGene = "";
+        String description = "";
         if (tmodelLeft != null) {
             leftDistance = start.getPos() - tmodelLeft.getTXRegion().withStrand(Strand.FWD).getEndPos();
-            leftGene = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
+            description = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
         }
         int rightDistance = 0;
-        String rightGene = "";
         if (tmodelRight != null) {
             rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
-            rightGene = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+            if (description.length()>0) {
+                description = String.format("%s/%s[%s]", description,tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+            } else {
+                description = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+            }
         }
         int minDistance = Math.min(leftDistance, rightDistance);
         boolean left = leftDistance == minDistance; // in case of ties, default to left
         if (left) {
             if (minDistance <= 2_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, description));
             } else if (minDistance <= 5_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, description));
             } else if (minDistance <= 500_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, description));
             } else {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT, leftDistance, rightDistance, description));
             }
         } else {
             if (minDistance <= 2_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, description));
             } else if (minDistance <= 5_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, description));
             } else if (minDistance <= 500_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, description));
             } else {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, leftDistance, rightDistance, description));
             }
         }
         return overlaps;
     }
 
-    /**
-     * Calculate overlap for a non-coding transcript. By assumption, if we get here then we have already
-     * determined that the SV overlaps with a non-coding transcript
-     *
-     * @param tmod  a non-coding transcript (this is checked by calling code)
-     * @param svInt start and end position of the overlapping structural variant
-     * @return
-     */
-    public Overlap noncoding(TranscriptModel tmod, GenomeInterval svInt) {
-        //boolean exonic = overlapsExon(tmod, svInt);
-        GenomePosition start = svInt.getGenomeBeginPos();
-        GenomePosition end = svInt.getGenomeEndPos();
-        ExonPair exonPair = getAffectedExons(tmod, svInt);
-        if (exonPair.atLeastOneExonOverlap()) {
-            // determine which exons are affected
-            int firstAffectedExon = exonPair.getFirstAffectedExon();
-            int lastAffectedExon = exonPair.getLastAffectedExon();
-            if (firstAffectedExon == lastAffectedExon) {
-                String msg = String.format("%s/%s[exon %d]",
-                        tmod.getGeneSymbol(),
-                        tmod.getAccession(),
-                        firstAffectedExon);
-                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
-            } else {
-                String msg = String.format("%s/%s[exon %d-%d]",
-                        tmod.getGeneSymbol(),
-                        tmod.getAccession(),
-                        firstAffectedExon,
-                        lastAffectedExon);
-                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
-            }
-        } else {
-            // if we get here, then both positions must be in the same intron
-            int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
-            String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new Overlap(INTRONIC, 0, 0, msg);
-        }
-    }
+
 
     /**
      * We check for overlap in three ways. The structural variant has an interval (b,e). b or e can
@@ -272,105 +231,80 @@ public class Overlapper {
      * @param tmod  a non-coding transcript (this is checked by calling code)
      * @return
      */
-    public Overlap coding(TranscriptModel tmod, GenomeInterval svInt) {
-
+    public Overlap genic(TranscriptModel tmod, GenomeInterval svInt) {
         GenomePosition start = svInt.getGenomeBeginPos();
         GenomePosition end = svInt.getGenomeEndPos();
-        //boolean exonic = overlapsExon(tmod, svInt);
         ExonPair exonPair = getAffectedExons(tmod, svInt);
+        boolean affectsCds = false; // note this can only only true if the SV is exonic and the transcript is coding
+        if (tmod.isCoding()) {
+            GenomeInterval cds = tmod.getCDSRegion();
+            if (cds.contains(svInt)) {
+                affectsCds = true;
+            } else if (svInt.contains(cds)) {
+                affectsCds = true;
+            } else if (cds.contains(svInt.getGenomeBeginPos()) || cds.contains(svInt.getGenomeEndPos())) {
+                affectsCds = true;
+            }
+        }
         if (exonPair.atLeastOneExonOverlap()) {
             // determine which exons are affected
             int firstAffectedExon = exonPair.getFirstAffectedExon();
             int lastAffectedExon = exonPair.getLastAffectedExon();
-
             if (firstAffectedExon == lastAffectedExon){
-                String msg = String.format("%s/%s[exon %d]", tmod.getGeneSymbol(), tmod.getAccession(), firstAffectedExon);
-                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
+                String msg = String.format("%s/%s[exon %d]",
+                        tmod.getGeneSymbol(),
+                        tmod.getAccession(),
+                        firstAffectedExon);
+                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, affectsCds,  msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon,
                         lastAffectedExon);
-                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
+                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, affectsCds, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron
             int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new Overlap(INTRONIC, 0, 0, msg);
+            return new Overlap(INTRONIC, false, msg);
         }
     }
-
 
     /**
-     * Calculate the overlap type
+     * By assumption, if we get here we have previously determined that the SV is located within an intron
+     * of the transcript. If the method is called for an SV that is only partially in the intron, it can
+     * return incorrect results. It does not check this.
      *
-     * @param start start position of SV, assumed to be on the same chromosome (asssumed to be POS strand)
-     * @param end   end position of SV, assumed to be on the same chromosome (asssumed to be POS strand)
-     * @param tmod  an overlapping Jannovar TranscriptModel (already identified to overlap somehow with the SV)
-     * @return corresponding VcfOverlap object
+     * @param tmod
+     * @return
      */
-    @Deprecated
-    public Overlap getOverlap(Contig chr, Position start, Position end, TranscriptModel tmod) {
-        GenomeInterval cdsRegion = tmod.getCDSRegion();
-        List<GenomeInterval> exons = tmod.getExonRegions();
-        int indexStart = -1, indexEnd = -1;
-        boolean overlapsExon = false;
-        boolean overlapsCds = false;
-        int leftDistance = 0;
-        int rightDistance = 0;
-        Set<Integer> downstreamOfStart = new HashSet<>(); // exons downstream of or including 'start'
-        Set<Integer> upstreamOfEnd = new HashSet<>(); // exons upstream of or including 'end'
-        int firstInBlock = UNINITIALIZED_EXON;
-        int lastInBlack = UNINITIALIZED_EXON;
-        for (int i = 0; i < exons.size(); i++) {
-            var gi = exons.get(i);
-            int gi_endpos = gi.withStrand(Strand.FWD).getEndPos();
-            if (start.getPos() <= gi_endpos) {
-                // current and all remaining exons are downstream
-                firstInBlock = i + 1;
-                // if the start is in the intron, calculate the distance
-                int gi_beginpos = gi.withStrand(Strand.FWD).getBeginPos();
-                if (start.getPos() < gi_beginpos) {
-                    leftDistance = gi_beginpos - start.getPos();
-                }
-                break;
-            }
-        }
-        for (int i = 0; i < exons.size(); i++) {
-            var gi = exons.get(i);
-            int gi_beginpos = gi.withStrand(Strand.FWD).getBeginPos();
-            if (end.getPos() >= gi_beginpos) {
-                // current and all previous exons are upstream
-                lastInBlack = i + 1;
-                // if the end is in the intron, calculate the distance
-                int gi_endpos = gi.withStrand(Strand.FWD).getEndPos();
-                if (gi_endpos < end.getPos()) {
-                    rightDistance = end.getPos() - gi_endpos;
-                }
-                break;
-            }
-        }
-        if (lastInBlack == UNINITIALIZED_EXON) {
-            throw new SvAnnRuntimeException("Unable to localized lastInBlock exon for " + tmod.getAccession());
-        }
-        if (firstInBlock == UNINITIALIZED_EXON) {
-            throw new SvAnnRuntimeException("Unable to localized firstInBlock exon for " + tmod.getAccession());
-        }
-        if (lastInBlack - firstInBlock == -1) {
-            // in this case, both ends of the SV are in the same intron
-        }
-        // the intersection of exons in downstreamOfStart and upstreamOfEnd are the exons
-        // included within the interval of the SV (for the current transcript).
-        upstreamOfEnd.retainAll(downstreamOfStart);
-        // create a list to sort the exons
-        List<Integer> includedExons = new ArrayList<>(upstreamOfEnd);
-        Collections.sort(includedExons);
-        int firstExon = includedExons.get(0);
-        int lastExon = includedExons.get(includedExons.size() - 1);
-        String desc = String.format("SV comprises exons %d-%d", firstExon, lastExon);
-        return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, leftDistance, rightDistance, desc);
+    public static int getIntronNumber(TranscriptModel tmod, int startPos, int endPos) {
 
+        List<GenomeInterval> exons = tmod.getExonRegions();
+        if (tmod.getStrand().equals(Strand.FWD)) {
+            for (int i=0;i<exons.size()-1;i++) {
+                if (startPos > exons.get(i).getEndPos() && startPos < exons.get(i+1).getBeginPos()) {
+                    return i+1;
+                }
+                if (endPos > exons.get(i).getEndPos() && endPos < exons.get(i+1).getBeginPos()) {
+                    return i+1;
+                }
+            }
+        } else {
+            // reverse order for neg-strand genes.
+            for (int i=0;i<exons.size()-1;i++) {
+                if (startPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && startPos > exons.get(i+1).withStrand(Strand.FWD).getBeginPos()) {
+                    return i+1;
+                }
+                if (endPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && endPos > exons.get(i+1).withStrand(Strand.FWD).getBeginPos()) {
+                    return i+1;
+                }
+            }
+        }
+        throw new SvAnnRuntimeException("Could not find intron number");
     }
+
+
 }

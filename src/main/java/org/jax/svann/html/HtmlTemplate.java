@@ -10,7 +10,7 @@ import java.util.Map;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.template.*;
-import org.jax.svann.overlap.SvAnnOld;
+import org.jax.svann.reference.IntrachromosomalEvent;
 
 public class HtmlTemplate {
     /** Map of data that will be used for the FreeMark template. */
@@ -20,7 +20,7 @@ public class HtmlTemplate {
 
     protected static final String EMPTY_STRING="";
 
-    public HtmlTemplate(List<SvAnnOld> svAnnList) {
+    public HtmlTemplate(List<IntrachromosomalEvent> svAnnList) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -36,15 +36,15 @@ public class HtmlTemplate {
         templateData.put("n_non_translocations", svAnnList.size());
         int n_low = (int) svAnnList
                 .stream()
-                .filter(SvAnnOld::isLowPriority)
+               // .filter(IntrachromosomalEvent::isLowPriority)
                 .count();
         int n_modifer = (int) svAnnList
                 .stream()
-                .filter(SvAnnOld::isModifierPriority)
+               // .filter(SvAnnOld::isModifierPriority)
                 .count();
         int n_high = (int) svAnnList
                 .stream()
-                .filter(SvAnnOld::isHighPriority)
+              //  .filter(SvAnnOld::isHighPriority)
                 .count();
         templateData.put("n_high", n_high);
         templateData.put("n_modifer", n_modifer);

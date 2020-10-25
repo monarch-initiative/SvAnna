@@ -1,7 +1,7 @@
 package org.jax.svann.priority;
 
 import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.jax.svann.structuralvar.SvType;
+import org.jax.svann.reference.SvType;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Set;

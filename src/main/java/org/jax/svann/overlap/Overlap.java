@@ -16,13 +16,26 @@ public class Overlap {
 
     private final String description;
 
+    private boolean overlapsCds;
+
 
     public Overlap(OverlapType type, int left, int right, String desc) {
         this.overlapType = type;
         this.leftDistance = left;
         this.rightDistance = right;
         this.description = desc;
+        this.overlapsCds = false;
     }
+
+    public Overlap(OverlapType type,  boolean overlapsCds, String desc) {
+        this.overlapType = type;
+        this.leftDistance = 0;
+        this.rightDistance = 0;
+        this.overlapsCds = overlapsCds;
+        this.description = desc;
+    }
+
+
 
     /**
      * @todo REVISE ME

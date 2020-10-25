@@ -1,4 +1,4 @@
-package org.jax.svann.vcf;
+package org.jax.svann.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
@@ -9,10 +9,10 @@ import org.jax.svann.except.SvAnnRuntimeException;
 
 import java.util.*;
 
-import static org.jax.svann.vcf.IntronOverlap.getIntronNumber;
-import static org.jax.svann.vcf.OverlapType.*;
+import static org.jax.svann.overlap.IntronOverlap.getIntronNumber;
+import static org.jax.svann.overlap.OverlapType.*;
 
-public class VcfOverlapList {
+public class OverlapperOld {
 
     private final static int NOT_APPLICABLE = -1;
 
@@ -21,9 +21,9 @@ public class VcfOverlapList {
     private final static String N_A = "n/a";
 
 
-    private List<VcfOverlap> overlaps;
+    private List<Overlap> overlaps;
 
-    public VcfOverlapList(List<VcfOverlap> overlaps) {
+    public OverlapperOld(List<Overlap> overlaps) {
         if (overlaps.isEmpty()) {
             throw new SvAnnRuntimeException("Empty overlap list");
         }
@@ -39,7 +39,7 @@ public class VcfOverlapList {
      * @param tmod  an overlapping Jannovar TranscriptModel (already identified to overlap somehow with the SV)
      * @return corresponding VcfOverlap object
      */
-    public static VcfOverlap getOverlap(String chr, GenomePosition start, GenomePosition end, TranscriptModel tmod) {
+    public static Overlap getOverlap(String chr, GenomePosition start, GenomePosition end, TranscriptModel tmod) {
         GenomeInterval cdsRegion = tmod.getCDSRegion();
         List<GenomeInterval> exons = tmod.getExonRegions();
         int indexStart = -1, indexEnd = -1;
@@ -97,15 +97,15 @@ public class VcfOverlapList {
         int firstExon = includedExons.get(0);
         int lastExon = includedExons.get(includedExons.size() - 1);
         String desc = String.format("SV comprises exons %d-%d", firstExon, lastExon);
-        return new VcfOverlap(MULTIPLE_EXON_IN_TRANSCRIPT, leftDistance, rightDistance, desc);
+        return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, leftDistance, rightDistance, desc);
 
     }
 
 
-    static private VcfOverlapList intergenic(GenomePosition start,
-                                             GenomePosition end,
-                                             IntervalArray<TranscriptModel>.QueryResult qresult) {
-        List<VcfOverlap> overlaps = new ArrayList<>();
+    static private OverlapperOld intergenic(GenomePosition start,
+                                            GenomePosition end,
+                                            IntervalArray<TranscriptModel>.QueryResult qresult) {
+        List<Overlap> overlaps = new ArrayList<>();
         // This means that the SV does not overlap with any annotated transcript
         // get distance to nearest transcripts to the left and right
         TranscriptModel tmodelLeft = qresult.getLeft();
@@ -128,26 +128,26 @@ public class VcfOverlapList {
         boolean left = leftDistance == minDistance; // in case of ties, default to left
         if (left) {
             if (minDistance <= 2_000) {
-                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 5_000) {
-                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 500_000) {
-                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
             } else {
-                overlaps.add(new VcfOverlap(OverlapType.UPSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
             }
         } else {
             if (minDistance <= 2_000) {
-                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 5_000) {
-                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, leftGene));
             } else if (minDistance <= 500_000) {
-                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, leftGene));
             } else {
-                overlaps.add(new VcfOverlap(OverlapType.DOWNSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, leftDistance, rightDistance, leftGene));
             }
         }
-        return new VcfOverlapList(overlaps);
+        return new OverlapperOld(overlaps);
     }
 
     static boolean overlapsExon(TranscriptModel tmod, GenomeInterval svInt) {
@@ -217,7 +217,7 @@ public class VcfOverlapList {
      * @param tmod  a non-coding transcript (this is checked by calling code)
      * @return
      */
-    static public VcfOverlap coding(TranscriptModel tmod, GenomeInterval svInt) {
+    static public Overlap coding(TranscriptModel tmod, GenomeInterval svInt) {
 
         GenomePosition start = svInt.getGenomeBeginPos();
         GenomePosition end = svInt.getGenomeEndPos();
@@ -230,20 +230,20 @@ public class VcfOverlapList {
 
             if (firstAffectedExon == lastAffectedExon){
                 String msg = String.format("%s/%s[exon %d]", tmod.getGeneSymbol(), tmod.getAccession(), firstAffectedExon);
-                return new VcfOverlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
+                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon,
                         lastAffectedExon);
-                return new VcfOverlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
+                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron
             int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new VcfOverlap(INTRONIC, 0, 0, msg);
+            return new Overlap(INTRONIC, 0, 0, msg);
         }
     }
 
@@ -255,7 +255,7 @@ public class VcfOverlapList {
      * @param svInt start and end position of the overlapping structural variant
      * @return
      */
-    static public VcfOverlap noncoding(TranscriptModel tmod, GenomeInterval svInt) {
+    static public Overlap noncoding(TranscriptModel tmod, GenomeInterval svInt) {
         boolean exonic = overlapsExon(tmod, svInt);
         GenomePosition start = svInt.getGenomeBeginPos();
         GenomePosition end = svInt.getGenomeEndPos();
@@ -269,36 +269,36 @@ public class VcfOverlapList {
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon);
-                return new VcfOverlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
+                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon,
                         lastAffectedExon);
-                return new VcfOverlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
+                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, 0, 0, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron
             int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new VcfOverlap(INTRONIC, 0, 0, msg);
+            return new Overlap(INTRONIC, 0, 0, msg);
         }
     }
 
-    static private VcfOverlap containedIn(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
+    static private Overlap containedIn(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
         int left = start.getPos() - tmod.getTXRegion().getBeginPos();
         int right = end.getPos() - tmod.getTXRegion().getEndPos();
         String msg = String.format("%s/%s", tmod.getGeneSymbol(), tmod.getAccession());
-        return new VcfOverlap(TRANSCRIPT_CONTAINED_IN_SV, left, right, msg);
+        return new Overlap(TRANSCRIPT_CONTAINED_IN_SV, left, right, msg);
     }
 
 
-    static public VcfOverlapList factory(GenomeInterval svInt,
-                                         IntervalArray<TranscriptModel>.QueryResult qresult) {
+    static public OverlapperOld factory(GenomeInterval svInt,
+                                        IntervalArray<TranscriptModel>.QueryResult qresult) {
         GenomePosition start = svInt.getGenomeBeginPos();
         GenomePosition end = svInt.getGenomeEndPos();
-        List<VcfOverlap> overlaps = new ArrayList<>();
+        List<Overlap> overlaps = new ArrayList<>();
         if (qresult.getEntries().isEmpty()) {
             return intergenic(start, end, qresult);
         }
@@ -307,7 +307,7 @@ public class VcfOverlapList {
         for (var tmod : overlappingTranscripts) {
             if (svInt.contains(tmod.getTXRegion())) {
                 // the transcript is completely contained in the SV
-                VcfOverlap vover = containedIn(tmod, start, end);
+                Overlap vover = containedIn(tmod, start, end);
                 overlaps.add(vover);
                 continue;
             }
@@ -317,10 +317,10 @@ public class VcfOverlapList {
                 //throw new L2ORuntimeException(tmod.getGeneSymbol());
             }
             if (tmod.isCoding()) {
-                VcfOverlap voverlap = coding(tmod, svInt);
+                Overlap voverlap = coding(tmod, svInt);
                 overlaps.add(voverlap);
             } else {
-                VcfOverlap voverlap = noncoding(tmod, svInt);
+                Overlap voverlap = noncoding(tmod, svInt);
                 overlaps.add(voverlap);
             }
         }
@@ -328,11 +328,11 @@ public class VcfOverlapList {
             System.out.println("QOVER" + qresult);
             throw new SvAnnRuntimeException("Empty overlap list");
         }
-        return new VcfOverlapList(overlaps);
+        return new OverlapperOld(overlaps);
     }
 
     public boolean isCoding() {
-        return this.overlaps.stream().anyMatch(VcfOverlap::isCoding);
+        return this.overlaps.stream().anyMatch(Overlap::isCoding);
     }
 
 

@@ -1,7 +1,6 @@
 package org.jax.svann.hpo;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
@@ -38,9 +37,8 @@ public class HpoDiseaseGeneMap {
         this.ontology = OntologyLoader.loadOntology(new File(hpOboPath));
         List<String> desiredDatabasePrefixes= ImmutableList.of("OMIM");
         String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
-        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath, mim2geneMedgenPath, null, phenotypeHpoaPath, ontology);
+        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath, mim2geneMedgenPath, orphaToGeneFile, phenotypeHpoaPath, ontology);
         this.disease2geneIdMultiMap = hap.getDiseaseToGeneIdMap();
-
         this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath,ontology,desiredDatabasePrefixes);
     }
 
@@ -64,7 +62,7 @@ public class HpoDiseaseGeneMap {
                 if (totalAnnotations.contains(tid)) {
                     for (TermId geneId : associatedGenes) {
                         gene2diseaseMap.putIfAbsent(geneId, new HashSet<>());
-                        gene2diseaseMap.get(geneId).add(new HpoDiseaseSummary(disease, targetHpoTermIds));
+                        gene2diseaseMap.get(geneId).add(new HpoDiseaseSummary(disease));
                     }
                 }
             }
@@ -74,10 +72,9 @@ public class HpoDiseaseGeneMap {
 
     /**
      * Entry point to using this class.
-     * @param targetHpoTermIds List of terms provided by the user.
-     * @return Map of genes/diseases characterized by one or more of these terms.
+     * @return HpoDiseaseGeneMap initialized with files from data subdirectory
      */
-    public static Map<TermId, Set<HpoDiseaseSummary>> loadRelevantGenesAndDiseases(List<TermId> targetHpoTermIds) {
+    public static HpoDiseaseGeneMap loadGenesAndDiseaseMap() {
         String hpoPath = String.join("data", File.separator, "hp.obo");
         String phenotypeHpoaPath = String.join("data", File.separator, "phenotype.hpoa");
         String mim2geneMedgenPath = String.join("data", File.separator, "mim2gene_medgen");
@@ -102,8 +99,26 @@ public class HpoDiseaseGeneMap {
                 phenotypeFile.getAbsolutePath(),
                 mim2geneFile.getAbsolutePath(),
                 geneInfoFile.getAbsolutePath());
-        return hdgmap.getRelevantGenesAndDiseases(targetHpoTermIds);
+        return hdgmap;
+    }
 
+    /**
+     * The Enhancers are linked to HPO terms representing their tissue specificity. Here, we
+     * return a set of the HPO terms that are equal to or ancestors of our target HPO terms, i.e., that
+     * are clinicallly relevant.
+     * @param candidates List of all HPO terms annotated to Enhancers by {@link org.jax.svann.genomicreg.TSpecParser}
+     * @param targetHpoTermIds List of HPO terms annotated the proband (can be subterms of the candidates or equal)
+     * @return set of terms from the candidate list that match the target terms, directly or indirectly
+     */
+    public Set<TermId> getRelevantAncestors(Set<TermId> candidates, List<TermId> targetHpoTermIds) {
+        Set<TermId> relevantSet = new HashSet<>();
+        Set<TermId> targetSet = new HashSet<>(targetHpoTermIds);
+        Set<TermId> ancs = OntologyAlgorithm.getAncestorTerms(this.ontology,targetSet, true);
+        for (TermId tid : candidates) {
+            if (ancs.contains(tid))
+                relevantSet.add(tid);
+        }
+        return Set.copyOf(relevantSet); // return immutable set
     }
 
 }

@@ -10,7 +10,7 @@ import java.util.Map;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.template.*;
-import org.jax.svann.vcf.SvAnnOld;
+import org.jax.svann.overlap.SvAnnOld;
 
 public class HtmlTemplate {
     /** Map of data that will be used for the FreeMark template. */

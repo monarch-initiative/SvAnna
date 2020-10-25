@@ -1,8 +1,7 @@
-package org.jax.svann.vcf;
+package org.jax.svann.overlap;
 
 
 import org.jax.svann.except.SvAnnRuntimeException;
-import org.jax.svann.lirical.LiricalHit;
 import org.jax.svann.structuralvar.SvType;
 import org.jax.svann.genomicreg.Enhancer;
 
@@ -48,7 +47,7 @@ public class SvAnnOld implements Comparable<SvAnnOld> {
 
     private Priority priority = Priority.UNKNOWN;
 
-    private final List<LiricalHit> hitlist = new ArrayList<>();
+
 
     private final List<Enhancer> enhancerList = new ArrayList<>();
 
@@ -244,33 +243,9 @@ public class SvAnnOld implements Comparable<SvAnnOld> {
         return this.priority == Priority.HIGH;
     }
 
-    public void addLiricalHit(LiricalHit h) {
-        this.hitlist.add(h);
-    }
 
-    public List<LiricalHit> getHitlist() {
-        return hitlist;
-    }
 
-    public double getMaxPosteriorProb() {
-        return this.hitlist
-                .stream()
-                .map(LiricalHit::getPosttestProbability)
-                .max(Double::compareTo)
-                .orElse(0.0);
-    }
-
-    private final static Comparator<SvAnnOld> COMPARATOR = (o1, o2) -> {
-        int c = o1.priority.compareTo(o2.priority);
-        if (c==0) {
-            double m1 = o1.getMaxPosteriorProb();
-            double m2 = o2.getMaxPosteriorProb();
-            if (m1 > m2) return 1;
-            if (m2 > m1) return -1;
-            return 0;
-        }
-        return c;
-    };
+    private final static Comparator<SvAnnOld> COMPARATOR = Comparator.comparing(o -> o.priority);
 
 
     @Override

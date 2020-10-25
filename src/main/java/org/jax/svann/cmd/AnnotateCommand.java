@@ -1,25 +1,14 @@
 package org.jax.svann.cmd;
 
 
-import org.jax.svann.SvAnnotator;
-import de.charite.compbio.jannovar.data.JannovarData;
-import de.charite.compbio.jannovar.data.JannovarDataSerializer;
-import de.charite.compbio.jannovar.data.SerializationException;
 import org.jax.svann.SvAnnAnalysis;
-import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.html.HtmlTemplate;
-import org.jax.svann.lirical.LiricalHit;
-import org.jax.svann.vcf.SvAnnOld;
-import org.jax.svann.vcf.VcfSvParser;
+import org.jax.svann.overlap.SvAnnOld;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -35,8 +24,6 @@ public class AnnotateCommand implements Callable<Integer> {
      */
     private static final String ASSEMBLY_ID = "GRCh38.p13";
 
-    @CommandLine.Option(names = {"-o", "--out"})
-    protected String outname = "l2o.bed";
     @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
     protected String vcfFile;
     @CommandLine.Option(names = {"-l", "--lirical"}, required = true)
@@ -44,7 +31,7 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-e","--enhancer"},  description = "tspec enhancer file")
     private String enhancerFile = null;
     @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list)")
-    private String hpoTermId = null;
+    private String hpoTermIdList = null;
     @CommandLine.Option(names = {"-g", "--gencode"})
     private String geneCodePath = "data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz";
     @CommandLine.Option(names={"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
@@ -59,15 +46,14 @@ public class AnnotateCommand implements Callable<Integer> {
     public Integer call() {
         SvAnnAnalysis l2o;
 
-        if (enhancerFile != null && hpoTermId != null) {
-            String[] ids = hpoTermId.split(",");
+        if (enhancerFile != null && hpoTermIdList != null) {
+            String[] ids = hpoTermIdList.split(",");
             List<TermId> tidList = Arrays.stream(ids).map(TermId::of).collect(Collectors.toList());
-            l2o = new SvAnnAnalysis(this.liricalFile, this.vcfFile, this.outname, tidList, this.enhancerFile, this.geneCodePath);
+            l2o = new SvAnnAnalysis(this.vcfFile, this.outprefix, tidList, this.enhancerFile);
         } else {
-            l2o = new SvAnnAnalysis(this.liricalFile, this.vcfFile, this.outname);
+            l2o = new SvAnnAnalysis(this.vcfFile, this.outprefix);
         }
-        //List<LiricalHit> hitlist = l2o.getHitlist();
-        VcfSvParser vcfParser = new VcfSvParser(this.vcfFile, this.jannovarPath);
+
         List<SvAnnOld> annList = List.of();//vcfParser.getAnnlist();
         HtmlTemplate template = new HtmlTemplate(annList);
         template.outputFile(this.outprefix);

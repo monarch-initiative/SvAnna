@@ -1,6 +1,6 @@
 package org.jax.svann.structuralvar;
 
-import org.jax.svann.vcf.VcfOverlapList;
+import org.jax.svann.overlap.OverlapperOld;
 
 /**
  * This is the superclass for all structural variant annotations. The goal of this class is to
@@ -25,7 +25,7 @@ public abstract class SvAnn {
     private final String id;
     private int svLen;
 
-    private VcfOverlapList vcfOverlapList = null;
+    private OverlapperOld vcfOverlapList = null;
 
 
     public SvAnn(SvType svtype, String svid, String contig, int start, int end) {
@@ -57,7 +57,7 @@ public abstract class SvAnn {
         return endPos;
     }
 
-    public void setVcfOverlapList(VcfOverlapList vcfOverlapList) {
+    public void setVcfOverlapList(OverlapperOld vcfOverlapList) {
         this.vcfOverlapList = vcfOverlapList;
     }
 

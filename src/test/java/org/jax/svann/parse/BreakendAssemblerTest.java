@@ -3,7 +3,7 @@ package org.jax.svann.parse;
 import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
-import org.jax.svann.vcf.TestBase;
+import org.jax.svann.overlap.TestBase;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

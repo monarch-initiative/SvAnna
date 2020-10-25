@@ -1,4 +1,4 @@
-package org.jax.svann.vcf;
+package org.jax.svann.overlap;
 
 import htsjdk.variant.variantcontext.VariantContext;
 import org.jax.svann.except.SvAnnRuntimeException;

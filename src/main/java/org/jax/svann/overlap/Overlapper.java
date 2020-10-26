@@ -117,12 +117,16 @@ public class Overlapper {
         return overlaps;
     }
 
-
+    /**
+     * This is called if the transcriptmodel is entirely contained within an SV
+     * @param tmod
+     * @param start
+     * @param end
+     * @return
+     */
     private Overlap containedIn(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
-        int left = start.getPos() - tmod.getTXRegion().getBeginPos();
-        int right = end.getPos() - tmod.getTXRegion().getEndPos();
         String msg = String.format("%s/%s", tmod.getGeneSymbol(), tmod.getAccession());
-        return new Overlap(TRANSCRIPT_CONTAINED_IN_SV, left, right, msg);
+        return new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tmod, true, msg);
     }
 
 
@@ -141,37 +145,27 @@ public class Overlapper {
         if (tmodelLeft != null) {
             leftDistance = start.getPos() - tmodelLeft.getTXRegion().withStrand(Strand.FWD).getEndPos();
             description = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
+            if (leftDistance <= 2_000) {
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, tmodelLeft, leftDistance, description));
+            } else if (leftDistance <= 5_000) {
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, tmodelLeft, leftDistance, description));
+            } else if (leftDistance <= 500_000) {
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, tmodelLeft, leftDistance, description));
+            } else {
+                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT, tmodelLeft, leftDistance, description));
+            }
         }
-        int rightDistance = 0;
         if (tmodelRight != null) {
-            rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
-            if (description.length()>0) {
-                description = String.format("%s/%s[%s]", description,tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+            int rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
+            description = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+            if (rightDistance <= 2_000) {
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, tmodelLeft, rightDistance, description));
+            } else if (rightDistance <= 5_000) {
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, tmodelLeft, rightDistance, description));
+            } else if (rightDistance <= 500_000) {
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, tmodelLeft, rightDistance, description));
             } else {
-                description = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
-            }
-        }
-        int minDistance = Math.min(leftDistance, rightDistance);
-        boolean left = leftDistance == minDistance; // in case of ties, default to left
-        if (left) {
-            if (minDistance <= 2_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, description));
-            } else if (minDistance <= 5_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, description));
-            } else if (minDistance <= 500_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, description));
-            } else {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT, leftDistance, rightDistance, description));
-            }
-        } else {
-            if (minDistance <= 2_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, leftDistance, rightDistance, description));
-            } else if (minDistance <= 5_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, leftDistance, rightDistance, description));
-            } else if (minDistance <= 500_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, leftDistance, rightDistance, description));
-            } else {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, leftDistance, rightDistance, description));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, tmodelLeft, rightDistance, description));
             }
         }
         return overlaps;
@@ -257,20 +251,20 @@ public class Overlapper {
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon);
-                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, affectsCds,  msg);
+                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tmod, affectsCds,  msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon,
                         lastAffectedExon);
-                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, affectsCds, msg);
+                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, tmod, affectsCds, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron
             int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
             String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new Overlap(INTRONIC, false, msg);
+            return new Overlap(INTRONIC, tmod, false, msg);
         }
     }
 

@@ -50,9 +50,9 @@ public class PositionTest {
     @Test
     public void errorThrownWhenInvalidInput() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> Position.precise(0, CoordinateSystem.ONE_BASED));
-        assertThat(ex.getMessage(), is("Position `0` cannot be non-positive"));
+        assertThat(ex.getMessage(), is("One-based position `0` cannot be non-positive"));
 
         ex = assertThrows(IllegalArgumentException.class, () -> Position.precise(-1, CoordinateSystem.ZERO_BASED));
-        assertThat(ex.getMessage(), is("Position `0` cannot be non-positive"));
+        assertThat(ex.getMessage(), is("One-based position `0` cannot be non-positive"));
     }
 }

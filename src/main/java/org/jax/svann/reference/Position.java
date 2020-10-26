@@ -21,8 +21,8 @@ public class Position implements Comparable<Position> {
     private Position(int pos, ConfidenceInterval confidenceInterval, CoordinateSystem coordinateSystem) {
         // convert to 1-based
         this.pos = coordinateSystem.equals(CoordinateSystem.ONE_BASED) ? pos : pos + 1;
-        if (this.pos < 0) {
-            throw new IllegalArgumentException(String.format("Position `%d` cannot be negative", this.pos));
+        if (this.pos <= 0) {
+            throw new IllegalArgumentException(String.format("One-based position `%d` cannot be non-positive", this.pos));
         }
         this.confidenceInterval = Objects.requireNonNull(confidenceInterval);
     }

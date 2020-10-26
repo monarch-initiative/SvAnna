@@ -25,6 +25,10 @@ class ChromosomalPosition implements ChromosomalRegion {
         return new ChromosomalPosition(contig, position, strand);
     }
 
+    static ChromosomalPosition precise(Contig contig, int position, Strand strand) {
+        return new ChromosomalPosition(contig, Position.precise(position), strand);
+    }
+
     @Override
     public Contig getContig() {
         return contig;
@@ -46,7 +50,7 @@ class ChromosomalPosition implements ChromosomalRegion {
             return this;
         } else {
             Position pos = Position.imprecise(contig.getLength() - position.getPos() + 1,
-                    position.getConfidenceInterval());
+                    position.getConfidenceInterval().toOppositeStrand());
             return new ChromosomalPosition(contig, pos, strand);
         }
     }

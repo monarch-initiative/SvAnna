@@ -1,5 +1,6 @@
 package org.jax.svann.parse;
 
+import org.jax.svann.ContigImpl;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeAll;
@@ -19,7 +20,7 @@ public class SvEventTest {
 
     @BeforeAll
     public static void beforeAll() {
-        CONTIG = new SimpleContig(1, "contig", 1000);
+        CONTIG = new ContigImpl(1, "contig", 1000);
     }
 
     @BeforeEach

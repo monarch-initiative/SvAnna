@@ -24,6 +24,9 @@ public interface ChromosomalRegion extends Comparable<ChromosomalRegion> {
      */
     Position getBeginPosition();
 
+    /**
+     * @return 1-based begin coordinate of the region
+     */
     default int getBegin() {
         return getBeginPosition().getPos();
     }
@@ -37,6 +40,9 @@ public interface ChromosomalRegion extends Comparable<ChromosomalRegion> {
         return getBeginPosition();
     }
 
+    /**
+     * @return 1-based end coordinate of the region
+     */
     default int getEnd() {
         return getEndPosition().getPos();
     }
@@ -49,8 +55,32 @@ public interface ChromosomalRegion extends Comparable<ChromosomalRegion> {
         return getEnd() - getBegin() + 1;
     }
 
+    /**
+     * @param other chromosomal region
+     * @return true if the region shares at least 1 bp with the <code>other</code> region
+     */
+    default boolean overlapsWith(ChromosomalRegion other) {
+        if (this.getContig().getId() != other.getContig().getId()) {
+            return false;
+        }
+        ChromosomalRegion onStrand = other.withStrand(this.getStrand());
+        return getBegin() <= onStrand.getEnd() && getEnd() >= onStrand.getBegin();
+    }
+
+    /**
+     * @param other chromosomal region
+     * @return true if the <code>other</code> region is fully contained within this region
+     */
+    default boolean contains(ChromosomalRegion other) {
+        if (this.getContig().getId() != other.getContig().getId()) {
+            return false;
+        }
+        ChromosomalRegion onStrand = other.withStrand(this.getStrand());
+        return onStrand.getBegin() >= getBegin() && onStrand.getEnd() <= getEnd();
+    }
+
     @Override
-    default int compareTo(ChromosomalRegion o) {
-        return DEFAULT_COMPARATOR.compare(this, o);
+    default int compareTo(ChromosomalRegion other) {
+        return DEFAULT_COMPARATOR.compare(this, other);
     }
 }

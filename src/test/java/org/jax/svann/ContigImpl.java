@@ -1,4 +1,4 @@
-package org.jax.svann.parse;
+package org.jax.svann;
 
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.SequenceRole;
@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Contig implementation for testing only.
  */
-class SimpleContig implements Contig {
+public class ContigImpl implements Contig {
 
     private final int id;
 
@@ -17,7 +17,7 @@ class SimpleContig implements Contig {
 
     private final int length;
 
-    SimpleContig(int id, String primaryName, int length) {
+    public ContigImpl(int id, String primaryName, int length) {
         this.id = id;
         this.primaryName = primaryName;
         this.length = length;
@@ -52,7 +52,7 @@ class SimpleContig implements Contig {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SimpleContig that = (SimpleContig) o;
+        ContigImpl that = (ContigImpl) o;
         return id == that.id &&
                 length == that.length &&
                 Objects.equals(primaryName, that.primaryName);
@@ -65,7 +65,7 @@ class SimpleContig implements Contig {
 
     @Override
     public String toString() {
-        return "SimpleContig{" +
+        return "ContigImpl{" +
                 "id=" + id +
                 ", primaryName='" + primaryName + '\'' +
                 ", length=" + length +

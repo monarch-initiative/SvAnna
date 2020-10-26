@@ -1,5 +1,6 @@
 package org.jax.svann.parse;
 
+import org.jax.svann.ContigImpl;
 import org.jax.svann.reference.ConfidenceInterval;
 import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
@@ -17,7 +18,7 @@ public class ChromosomalPositionTest {
 
     @BeforeAll
     public static void beforeAll() {
-        CONTIG = new SimpleContig(1, "contig", 1000);
+        CONTIG = new ContigImpl(1, "contig", 1000);
     }
 
     private ChromosomalPosition precise, imprecise;

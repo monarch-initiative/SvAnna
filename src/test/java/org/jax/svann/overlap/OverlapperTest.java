@@ -1,5 +1,6 @@
 package org.jax.svann.overlap;
 
+import org.jax.svann.TestBase;
 import org.jax.svann.parse.SvEvent;
 import org.jax.svann.reference.IntrachromosomalEvent;
 import org.jax.svann.reference.Strand;

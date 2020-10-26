@@ -2,7 +2,7 @@ package org.jax.svann.reference;
 
 import org.jax.svann.ChromosomalRegionImpl;
 import org.jax.svann.ContigImpl;
-import org.jax.svann.overlap.TestBase;
+import org.jax.svann.TestBase;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

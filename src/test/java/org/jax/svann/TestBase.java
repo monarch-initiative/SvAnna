@@ -1,4 +1,4 @@
-package org.jax.svann.overlap;
+package org.jax.svann;
 
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;

@@ -43,7 +43,7 @@ public class AnnotateCommand implements Callable<Integer> {
     }
 
     @Override
-    public Integer call() {
+    public Integer call() throws Exception {
         SvAnnAnalysis svann;
         List<TermId> tidList;
         if (hpoTermIdList != null) {

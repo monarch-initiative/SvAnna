@@ -44,14 +44,22 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        SvAnnAnalysis l2o;
-
-        if (enhancerFile != null && hpoTermIdList != null) {
+        SvAnnAnalysis svann;
+        List<TermId> tidList;
+        if (hpoTermIdList != null) {
             String[] ids = hpoTermIdList.split(",");
-            List<TermId> tidList = Arrays.stream(ids).map(TermId::of).collect(Collectors.toList());
-            l2o = new SvAnnAnalysis(this.vcfFile, this.outprefix, tidList, this.enhancerFile);
+            tidList = Arrays.stream(ids).map(TermId::of).collect(Collectors.toList());
         } else {
-            l2o = new SvAnnAnalysis(this.vcfFile, this.outprefix);
+            tidList = List.of(); // HPO terms are optional, we can pass an empty list
+            // and this will turn off HPO prioritization.
+        }
+        svann = new SvAnnAnalysis(this.vcfFile, this.outprefix, this.enhancerFile, this.jannovarPath, tidList);
+        // 1. Prioritize the sequences by overlap with
+        svann.prioritizeSymbolSvs();
+        svann.prioritizeBreakendSvs();
+        // 2. prioritize by phenotype
+        if (tidList.size()>0) {
+            svann.prioritizeByPhenotype();
         }
 
         List<IntrachromosomalEvent> annList = List.of();//vcfParser.getAnnlist();

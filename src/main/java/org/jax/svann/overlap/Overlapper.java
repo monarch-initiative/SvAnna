@@ -48,6 +48,8 @@ public class Overlapper {
      * @return the object created by deserializing a Jannovar file.
      */
     public Overlapper(String jannovarPath){
+        // TODO: 26. 10. 2020 a classes like this should not deserialize Jannovar here. The data should be deserialized
+        //  upstream and then provided via constructor.
         File f = new File(jannovarPath);
         if (!f.exists()) {
             throw new SvAnnRuntimeException("[FATAL] Could not find Jannovar transcript file at " + jannovarPath);

@@ -31,6 +31,7 @@ public class SvEvent implements IntrachromosomalEvent {
 
         // checks
         if (end.getPos() > contig.getLength()) {
+            // TODO(PNR): 26. 10. 2020 should we also throw an exception if CI bound is past the contig end?
             throw new IllegalArgumentException(String.format("End position `%d` past the contig end `%d`", end.getPos(), contig.getLength()));
         }
         if (begin.getPos() > end.getPos()) {

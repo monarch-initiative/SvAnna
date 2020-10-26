@@ -75,6 +75,7 @@ public class HpoDiseaseGeneMap {
      * @return HpoDiseaseGeneMap initialized with files from data subdirectory
      */
     public static HpoDiseaseGeneMap loadGenesAndDiseaseMap() {
+        // TODO: 26. 10. 2020 externalize
         String hpoPath = String.join("data", File.separator, "hp.obo");
         String phenotypeHpoaPath = String.join("data", File.separator, "phenotype.hpoa");
         String mim2geneMedgenPath = String.join("data", File.separator, "mim2gene_medgen");

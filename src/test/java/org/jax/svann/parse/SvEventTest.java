@@ -28,13 +28,13 @@ public class SvEventTest {
         preciseEvent = SvEvent.of(CONTIG,
                 Position.precise(101, CoordinateSystem.ONE_BASED),
                 Position.precise(200, CoordinateSystem.ONE_BASED),
-                SvType.DELETION,
-                Strand.FWD);
+                Strand.FWD,
+                SvType.DELETION);
         impreciseEvent = SvEvent.of(CONTIG,
                 Position.imprecise(101, ConfidenceInterval.of(20, 10), CoordinateSystem.ONE_BASED),
                 Position.imprecise(200, ConfidenceInterval.of(50, 30), CoordinateSystem.ONE_BASED),
-                SvType.DELETION,
-                Strand.FWD);
+                Strand.FWD,
+                SvType.DELETION);
     }
 
     @Test
@@ -59,10 +59,10 @@ public class SvEventTest {
 
     @Test
     public void errorThrownWhenSpecifyingInvalidCoordinates() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> SvEvent.of(CONTIG, Position.precise(100), Position.precise(1001), SvType.DELETION, Strand.FWD));
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> SvEvent.of(CONTIG, Position.precise(100), Position.precise(1001), Strand.FWD, SvType.DELETION));
         assertThat(ex.getMessage(), is("End position `1001` past the contig end `1000`"));
 
-        ex = assertThrows(IllegalArgumentException.class, () -> SvEvent.of(CONTIG, Position.precise(101), Position.precise(100), SvType.DELETION, Strand.FWD));
+        ex = assertThrows(IllegalArgumentException.class, () -> SvEvent.of(CONTIG, Position.precise(101), Position.precise(100), Strand.FWD, SvType.DELETION));
         assertThat(ex.getMessage(), is("Begin position `101` past the end position `100`"));
     }
 }

@@ -27,7 +27,7 @@ public class Overlap {
         this.overlapsCds = false;
     }
 
-    public Overlap(OverlapType type,  boolean overlapsCds, String desc) {
+    public Overlap(OverlapType type, boolean overlapsCds, String desc) {
         this.overlapType = type;
         this.leftDistance = 0;
         this.rightDistance = 0;

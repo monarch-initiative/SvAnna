@@ -134,7 +134,7 @@ public class VcfStructuralVariantParser implements StructuralVariantParser {
         }
 
         // make the result
-        final SvEvent svann = SvEvent.of(contig, begin, end, svType, Strand.FWD);
+        final SvEvent svann = SvEvent.of(contig, begin, end, Strand.FWD, svType);
         return Optional.of(svann);
     }
 

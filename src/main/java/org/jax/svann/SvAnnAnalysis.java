@@ -1,5 +1,8 @@
 package org.jax.svann;
 
+import de.charite.compbio.jannovar.data.JannovarData;
+import de.charite.compbio.jannovar.data.JannovarDataSerializer;
+import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
@@ -61,7 +64,9 @@ public class SvAnnAnalysis {
      * @param tidList list of relevant HPO terms
      * @param enhancerPath path to the TSpec enhancer file
      */
-    public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) {
+    public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) throws SerializationException {
+        JannovarData jannovarData = readJannovarData(jannovarPath);
+
 
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
@@ -77,7 +82,7 @@ public class SvAnnAnalysis {
         this.breakendRecordList = parseResult.getBreakends();
         this.prefix = prefix;
         this.targetHpoIdList = tidList;
-        overlapper = new Overlapper(jannovarPath);
+        overlapper = new Overlapper(jannovarData);
     }
 
     /**
@@ -115,8 +120,9 @@ public class SvAnnAnalysis {
     }
 
 
-
-
+    private static JannovarData readJannovarData(String jannovarDataPath) throws SerializationException {
+        return new JannovarDataSerializer(jannovarDataPath).load();
+    }
 
 
 }

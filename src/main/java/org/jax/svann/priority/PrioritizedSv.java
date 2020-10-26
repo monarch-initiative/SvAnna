@@ -12,8 +12,6 @@ public class PrioritizedSv implements SvPriority, Visualizable {
 
 
 
-
-
     private PrioritizedSv(SvEvent e) {
 
     }

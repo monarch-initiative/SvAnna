@@ -17,7 +17,7 @@ public interface SvPriority {
 
     SvType getSvType();
 
-    /** If true, the SV overlaps with a transcript or genomic regulatory element that is annnotated
+    /** If true, the SV overlaps with a transcript or genomic regulatory element that is annotated
      * to an HPO term representing the phenotypic observations in the proband.
      * @return true if the SV disrupts a gene or enhancer of potential phenotypic relevance.
      */

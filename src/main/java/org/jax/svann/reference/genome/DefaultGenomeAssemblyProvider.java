@@ -2,7 +2,9 @@ package org.jax.svann.reference.genome;
 
 import java.nio.file.Path;
 
-
+/**
+ * This class parses the bundled assembly report files.
+ */
 class DefaultGenomeAssemblyProvider extends AssemblyReportGenomeAssemblyProvider {
 
     private static final Path[] ASSEMBLY_REPORTS;

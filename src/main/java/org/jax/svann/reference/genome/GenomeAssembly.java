@@ -38,7 +38,7 @@ public interface GenomeAssembly {
     /**
      * Get contig by name.
      *
-     * @param name primary or secondary name of a contig
+     * @param name primary or secondary name of a contig (e.g. "CM000663.1", "NC_000001.10", "chr1")
      * @return optional with contig or empty optional if contig with <code>name</code> is not present
      */
     default Optional<Contig> getContigByName(String name) {

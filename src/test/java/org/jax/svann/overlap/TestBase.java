@@ -11,6 +11,9 @@ import java.nio.file.Paths;
 
 public abstract class TestBase {
 
+    /**
+     * Full GRCh38.p13 assembly.
+     */
     protected static final GenomeAssembly GENOME_ASSEMBLY = GenomeAssemblyProvider.getGrch38Assembly();
 
     private static final Path JANNOVAR_PATH = Paths.get("src/test/resources/hg38_ucsc_small.ser");

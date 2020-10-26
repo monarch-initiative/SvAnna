@@ -1,11 +1,15 @@
 package org.jax.svann.reference;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 /**
  * Position with a confidence level expressed using a {@link ConfidenceInterval}.
  */
 public class Position implements Comparable<Position> {
+
+    private static final Comparator<Position> COMPARATOR = Comparator.comparing(Position::getPos)
+            .thenComparing(Position::getConfidenceInterval);
 
     /**
      * 1-based position
@@ -17,8 +21,8 @@ public class Position implements Comparable<Position> {
     private Position(int pos, ConfidenceInterval confidenceInterval, CoordinateSystem coordinateSystem) {
         // convert to 1-based
         this.pos = coordinateSystem.equals(CoordinateSystem.ONE_BASED) ? pos : pos + 1;
-        if (pos < 0) {
-            throw new IllegalArgumentException("Position cannot be negative");
+        if (this.pos < 0) {
+            throw new IllegalArgumentException(String.format("Position `%d` cannot be negative", this.pos));
         }
         this.confidenceInterval = Objects.requireNonNull(confidenceInterval);
     }
@@ -87,11 +91,6 @@ public class Position implements Comparable<Position> {
 
     @Override
     public int compareTo(Position o) {
-        final int pos = Integer.compare(this.pos, o.pos);
-        if (pos != 0) {
-            return pos;
-        } else {
-            return confidenceInterval.compareTo(o.confidenceInterval);
-        }
+        return COMPARATOR.compare(this, o);
     }
 }

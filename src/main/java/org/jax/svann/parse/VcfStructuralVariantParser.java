@@ -5,7 +5,7 @@ import htsjdk.variant.vcf.VCFFileReader;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
-import org.jax.svann.structuralvar.SvType;
+import org.jax.svann.reference.SvType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +34,7 @@ public class VcfStructuralVariantParser implements StructuralVariantParser {
                 final SvType svType = SvType.fromString(vc.getAttributeAsString("SVTYPE", "UNKNOWN"));
                 if (svType.equals(SvType.BND)) {
                     // process breakend record
-                    final Optional<BreakendRecord> breakendOptional = parseBreakend(vc);
-                    if (breakendOptional.isEmpty()) {
-                        // parsing failed
-                        continue;
-                    }
-                    breakendOptional.ifPresent(breakends::add);
+                    parseBreakend(vc).ifPresent(breakends::add);
                 } else {
                     // process structural variants
                     parseStructuralVariant(vc, svType).ifPresent(anns::add);

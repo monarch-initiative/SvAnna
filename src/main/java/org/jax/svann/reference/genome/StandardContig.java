@@ -3,6 +3,9 @@ package org.jax.svann.reference.genome;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A simple {@link Contig} implementation.
+ */
 class StandardContig implements Contig {
 
     private final int id;

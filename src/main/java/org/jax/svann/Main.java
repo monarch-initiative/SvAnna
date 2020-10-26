@@ -30,7 +30,7 @@ public class Main implements Callable<Integer>  {
 
 
     @Override
-    public Integer call() throws Exception {
+    public Integer call() {
         // work done in subcommands
         return 0;
     }

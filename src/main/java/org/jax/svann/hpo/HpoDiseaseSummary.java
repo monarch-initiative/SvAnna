@@ -1,9 +1,6 @@
 package org.jax.svann.hpo;
 
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.ontology.data.TermId;
-
-import java.util.List;
 
 /**
  * This class offers a simple POJO with information about HpoDiseases that are required for output in the
@@ -17,10 +14,18 @@ public class HpoDiseaseSummary {
 
     /**
      * Extract salient information about the disease and the terms used for prioritization
-     * @param disease
+     * @param disease phenol object representing a disease annotated with HPO terms.
      */
-    public HpoDiseaseSummary(HpoDisease disease, List<TermId> hpoIdList) {
+    public HpoDiseaseSummary(HpoDisease disease) {
         this.diseaseId = disease.getDiseaseDatabaseId().getValue();
         this.diseaseName = disease.getName();
+    }
+
+    public String getDiseaseId() {
+        return diseaseId;
+    }
+
+    public String getDiseaseName() {
+        return diseaseName;
     }
 }

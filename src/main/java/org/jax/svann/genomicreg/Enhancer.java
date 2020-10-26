@@ -23,12 +23,14 @@ public class Enhancer {
         this.termId = tid;
     }
 
+    // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
     public boolean matchesPos(Contig otherContig, Position pos, int THRESHOLD) {
         return this.contig.equals(otherContig)
                 && Math.abs(start.getPos() - pos.getPos()) < THRESHOLD;
     }
 
 
+    // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
     public boolean matchesPos(Contig otherContig, Position pos) {
         return matchesPos(otherContig, pos, DEFAULT_DISTANCE_THRESHOLD);
     }

@@ -7,6 +7,7 @@ import java.util.Objects;
 /**
  * Adjacency ties together 2 breakends.
  */
+// TODO(DD): 26. 10. 2020 evaluate if this is useful & correct
 public class Adjacency {
 
     private final Breakend a, b;

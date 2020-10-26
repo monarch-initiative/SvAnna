@@ -1,4 +1,4 @@
-package org.jax.svann.structuralvar;
+package org.jax.svann.reference;
 
 import org.jax.svann.except.SvAnnRuntimeException;
 

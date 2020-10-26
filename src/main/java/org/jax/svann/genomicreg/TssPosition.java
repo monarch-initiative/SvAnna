@@ -18,6 +18,11 @@ public class TssPosition implements Comparable<TssPosition> {
     private final String transcriptId;
     private final GenomicPosition genomicPosition;
 
+    /** Be consistent with equals: use the same fields as getSigFields().*/
+    private static final Comparator<TssPosition> COMPARATOR =
+            comparing(TssPosition::getGenomicPosition)
+                    .thenComparing(TssPosition::getTranscriptId);
+
 
     public TssPosition(String gene, String transcript, Contig chr, Position pos, Strand strand) {
         this.geneSymbol = gene;
@@ -38,11 +43,6 @@ public class TssPosition implements Comparable<TssPosition> {
     public GenomicPosition getGenomicPosition() {
         return genomicPosition;
     }
-
-    /** Be consistent with equals: use the same fields as getSigFields().*/
-    private static final Comparator<TssPosition> COMPARATOR =
-                comparing(TssPosition::getGenomicPosition)
-                        .thenComparing(TssPosition::getTranscriptId);
 
 
     @Override

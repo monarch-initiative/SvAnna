@@ -145,6 +145,11 @@ abstract class AssemblyReportGenomeAssemblyProvider implements GenomeAssemblyPro
         return Set.copyOf(assemblyMap.keySet());
     }
 
+    /**
+     * Each contig of a genome assembly is assigned an integer ID. We want the ID numbering to be intuitive within human
+     * assembly (e.g. "chr1" maps to 1, "chrX" maps to 23, ...). The assignment of intuitive integer IDs is
+     * a responsibility of this class.
+     */
     private static class ContigIdAssigner {
 
         /**

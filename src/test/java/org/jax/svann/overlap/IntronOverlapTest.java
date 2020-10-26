@@ -1,4 +1,4 @@
-package org.jax.svann.vcf;
+package org.jax.svann.overlap;
 
 
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
@@ -54,7 +54,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_640_400);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_640_500);
         int expectedIntronNumber = 1;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
     /**
@@ -65,7 +65,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_641_400);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_641_500);
         int expectedIntronNumber = 2;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
     /**
@@ -76,7 +76,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_643_200);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_643_700);
         int expectedIntronNumber = 3;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
     /**
@@ -87,7 +87,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_646_200);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_646_700);
         int expectedIntronNumber = 4;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
 
@@ -100,7 +100,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_648_915);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_648_925);
         int expectedIntronNumber = 10;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
 
@@ -113,7 +113,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_570);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_580);
         int expectedIntronNumber = 1;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
     }
 
     /**
@@ -125,7 +125,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_161);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_280);
         int expectedIntronNumber = 2;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
     }
 
     /**
@@ -136,6 +136,6 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_693_234);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_693_334);
         int expectedIntronNumber = 3;
-        assertEquals(expectedIntronNumber, IntronOverlap.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
     }
 }

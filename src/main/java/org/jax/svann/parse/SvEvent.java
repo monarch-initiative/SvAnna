@@ -4,7 +4,7 @@ import org.jax.svann.reference.IntrachromosomalEvent;
 import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
-import org.jax.svann.structuralvar.SvType;
+import org.jax.svann.reference.SvType;
 
 import java.util.Objects;
 
@@ -31,6 +31,7 @@ public class SvEvent implements IntrachromosomalEvent {
 
         // checks
         if (end.getPos() > contig.getLength()) {
+            // TODO(PNR): 26. 10. 2020 should we also throw an exception if CI bound is past the contig end?
             throw new IllegalArgumentException(String.format("End position `%d` past the contig end `%d`", end.getPos(), contig.getLength()));
         }
         if (begin.getPos() > end.getPos()) {
@@ -73,8 +74,10 @@ public class SvEvent implements IntrachromosomalEvent {
         if (this.strand.equals(strand)) {
             return this;
         } else {
-            Position begin = Position.imprecise(contig.getLength() - this.end.getPos() + 1, this.end.getConfidenceInterval());
-            Position end = Position.imprecise(contig.getLength() - this.begin.getPos() + 1, this.begin.getConfidenceInterval());
+            Position begin = Position.imprecise(contig.getLength() - this.end.getPos() + 1,
+                    this.end.getConfidenceInterval().toOppositeStrand());
+            Position end = Position.imprecise(contig.getLength() - this.begin.getPos() + 1,
+                    this.begin.getConfidenceInterval().toOppositeStrand());
             return new SvEvent(contig, begin, end, strand, type);
         }
     }
@@ -98,7 +101,7 @@ public class SvEvent implements IntrachromosomalEvent {
 
     @Override
     public String toString() {
-        return "SvAnnNeo{" +
+        return "SvEvent{" +
                 "contig=" + contig +
                 ", begin=" + begin +
                 ", end=" + end +

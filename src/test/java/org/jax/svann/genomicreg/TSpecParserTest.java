@@ -1,6 +1,10 @@
 package org.jax.svann.genomicreg;
 
 
+import org.jax.svann.reference.ConfidenceInterval;
+import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.genome.GenomeAssembly;
+import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -9,10 +13,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This class uses the example file {@code src/test/resources/tspec-small.tsv} to test
@@ -24,6 +27,8 @@ public class TSpecParserTest {
     private static final TSpecParser parser = new TSpecParser(EXAMPLE_TSPEC.toAbsolutePath().toString());
     private static final Map<TermId, String> hpoIdToLabelMap = parser.getId2labelMap();
     private static final Map<TermId, List<Enhancer>> id2enhancerMap = parser.getId2enhancerMap();
+    private static final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
+    private static final double EPSILON = 0.000_001;
 
     /**
      * There are a total of ten difference enhancers in 7 tissues.
@@ -67,7 +72,24 @@ public class TSpecParserTest {
         assertEquals(1, enhancers.size());
         Enhancer thymusEnhancer = enhancers.get(0);
         assertNotNull(thymusEnhancer);
-        //Contig chr10 = StandardContig.of(10, String "chr10", Set.of(), SequenceRole.ASSEMBLED_MOLECULE, int length)
+        Optional<Contig> chr10opt = assembly.getContigByName("chr10");
+        assertTrue(chr10opt.isPresent());
+        Contig chr10 = chr10opt.get();
+        assertEquals(chr10, thymusEnhancer.getChromosome());
+        assertEquals(100014348, thymusEnhancer.getStart().getPos());
+        assertEquals(100014634, thymusEnhancer.getEnd().getPos());
+        assertEquals(thymusHpoId, thymusEnhancer.getTermId());
+        assertEquals(0.728857, thymusEnhancer.getTau(),EPSILON);
+        // both the start and end are precise, i.e., the confidence interval is +/- 0
+        assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getStart().getConfidenceInterval());
+        assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getEnd().getConfidenceInterval());
+    }
+
+    @Test
+    public void if_three_brain_enhancers_retrieved_then_ok() {
+        TermId brainHpd = TermId.of("HP:0012443"); // 	Abnormality of brain morphology
+        List<Enhancer> enhancers = id2enhancerMap.get(brainHpd);
+        assertEquals(3, enhancers.size());
     }
 
 

@@ -73,8 +73,10 @@ public class SvEvent implements IntrachromosomalEvent {
         if (this.strand.equals(strand)) {
             return this;
         } else {
-            Position begin = Position.imprecise(contig.getLength() - this.end.getPos() + 1, this.end.getConfidenceInterval());
-            Position end = Position.imprecise(contig.getLength() - this.begin.getPos() + 1, this.begin.getConfidenceInterval());
+            Position begin = Position.imprecise(contig.getLength() - this.end.getPos() + 1,
+                    this.end.getConfidenceInterval().toOppositeStrand());
+            Position end = Position.imprecise(contig.getLength() - this.begin.getPos() + 1,
+                    this.begin.getConfidenceInterval().toOppositeStrand());
             return new SvEvent(contig, begin, end, strand, type);
         }
     }
@@ -98,7 +100,7 @@ public class SvEvent implements IntrachromosomalEvent {
 
     @Override
     public String toString() {
-        return "SvAnnNeo{" +
+        return "SvEvent{" +
                 "contig=" + contig +
                 ", begin=" + begin +
                 ", end=" + end +

@@ -1,8 +1,11 @@
 package org.jax.svann.reference;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class ConfidenceInterval implements Comparable<ConfidenceInterval> {
+
+    private static final Comparator<ConfidenceInterval> COMPARATOR = Comparator.comparing(ConfidenceInterval::length).reversed();
 
     private static final ConfidenceInterval PRECISE = new ConfidenceInterval(0, 0);
 
@@ -26,7 +29,9 @@ public class ConfidenceInterval implements Comparable<ConfidenceInterval> {
      * @return confidence interval
      */
     public static ConfidenceInterval of(int upstream, int downstream) {
-        return new ConfidenceInterval(upstream, downstream);
+        return upstream == 0 && downstream == 0
+                ? PRECISE
+                : new ConfidenceInterval(upstream, downstream);
     }
 
     public int getUpstream() {
@@ -37,8 +42,11 @@ public class ConfidenceInterval implements Comparable<ConfidenceInterval> {
         return downstream;
     }
 
+    public ConfidenceInterval toOppositeStrand() {
+        return this == PRECISE ? PRECISE : new ConfidenceInterval(downstream, upstream);
+    }
+
     /**
-     *
      * @return length of the confidence interval, precise CI has length <code>0</code>
      */
     public int length() {
@@ -73,7 +81,6 @@ public class ConfidenceInterval implements Comparable<ConfidenceInterval> {
      */
     @Override
     public int compareTo(ConfidenceInterval o) {
-        // the order is reversed on purpose, smaller confidence
-        return Integer.compare(o.length(), length());
+        return COMPARATOR.compare(this, o);
     }
 }

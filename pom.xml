@@ -39,46 +39,6 @@
         </dependency>
         <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>
-            <artifactId>phenol-core</artifactId>
-            <version>${phenol.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.monarchinitiative.phenol</groupId>
-            <artifactId>phenol-io</artifactId>
-            <version>${phenol.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.errorprone</groupId>
-                    <artifactId>error_prone_annotations</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-slf4j18-impl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.h2database</groupId>
-                    <artifactId>h2</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.monarchinitiative.phenol</groupId>
             <artifactId>phenol-annotations</artifactId>
             <version>${phenol.version}</version>
             <exclusions>
@@ -92,21 +52,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>3.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.26</version>
-        </dependency>
-        <dependency>
-            <groupId>org.tukaani</groupId>
-            <artifactId>xz</artifactId>
-            <version>1.8</version>
-        </dependency>
 
         <dependency>
             <groupId>org.freemarker</groupId>
@@ -114,30 +59,6 @@
             <version>2.3.30</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>de.charite.compbio</groupId>
-            <artifactId>Jannovar</artifactId>
-            <version>0.35</version>
-            <type>pom</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>de.charite.compbio</groupId>
-            <artifactId>jannovar-core</artifactId>
-            <version>${jannovar.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.testing</groupId>
-                    <artifactId>testing</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
         <dependency>
             <groupId>de.charite.compbio</groupId>
             <artifactId>jannovar-cli</artifactId>
@@ -195,20 +116,6 @@
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-runner</artifactId>
             <version>1.6.1</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-all -->
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-api</artifactId>
-                </exclusion>
-            </exclusions>
             <scope>test</scope>
         </dependency>
 

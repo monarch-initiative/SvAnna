@@ -63,5 +63,9 @@ public enum OverlapType {
         return exonicTypes.contains(vtype);
     }
 
+    public String getName() {
+        return name;
+    }
+
 
 }

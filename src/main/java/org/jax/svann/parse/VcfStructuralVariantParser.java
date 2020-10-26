@@ -34,12 +34,7 @@ public class VcfStructuralVariantParser implements StructuralVariantParser {
                 final SvType svType = SvType.fromString(vc.getAttributeAsString("SVTYPE", "UNKNOWN"));
                 if (svType.equals(SvType.BND)) {
                     // process breakend record
-                    final Optional<BreakendRecord> breakendOptional = parseBreakend(vc);
-                    if (breakendOptional.isEmpty()) {
-                        // parsing failed
-                        continue;
-                    }
-                    breakendOptional.ifPresent(breakends::add);
+                    parseBreakend(vc).ifPresent(breakends::add);
                 } else {
                     // process structural variants
                     parseStructuralVariant(vc, svType).ifPresent(anns::add);

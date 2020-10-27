@@ -147,7 +147,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         return Optional.of(new SimpleSequenceRearrangement(adjacencies, svType));
     }
 
-    Collection<? extends Adjacency> makeDuplicationAdjacencies(VariantContext vc) {
+    List<? extends Adjacency> makeDuplicationAdjacencies(VariantContext vc) {
         // We know that this context represents a symbolic duplication - SvType.DUPLICATION
         //
         // TODO: 27. 10. 2020 implement
@@ -155,7 +155,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         return List.of();
     }
 
-    Collection<? extends Adjacency> makeInsertionAdjacencies(VariantContext vc) {
+    List<? extends Adjacency> makeInsertionAdjacencies(VariantContext vc) {
         // We know that this context represents a symbolic insertion - SvType.INSERTION
         //
         // TODO: 27. 10. 2020 implement
@@ -207,15 +207,23 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         return List.of(alpha, beta);
     }
 
-    private Optional<Adjacency> makeDeletionAdjacency(VariantContext vc) {
+    Optional<Adjacency> makeDeletionAdjacency(VariantContext vc) {
         // We know that this context represents symbolic deletion.
         // Let's get the required coordinates first
         return extractCoreData(vc).map(coords -> {
             // then convert the coordinates to adjacency
-            ChromosomalPosition leftPos = ChromosomalPosition.of(coords.getContig(), coords.getBegin(), Strand.FWD);
+            Contig contig = coords.getContig();
+
+            ChromosomalPosition leftPos = ChromosomalPosition.of(contig,
+                    Position.imprecise(coords.getBegin().getPos() - 1, coords.getBegin().getConfidenceInterval()),
+                    Strand.FWD);
             SimpleBreakend left = new SimpleBreakend(leftPos, vc.getID(), vc.getReference().getDisplayString(), EMPTY_STRING);
-            ChromosomalPosition rightPos = ChromosomalPosition.of(coords.getContig(), coords.getEnd(), Strand.FWD);
+
+            ChromosomalPosition rightPos = ChromosomalPosition.of(contig,
+                    Position.imprecise(coords.getEnd().getPos() + 1, coords.getEnd().getConfidenceInterval()),
+                    Strand.FWD);
             SimpleBreakend right = new SimpleBreakend(rightPos, vc.getID(), vc.getReference().getDisplayString(), EMPTY_STRING);
+
             return SimpleAdjacency.of(left, right);
         });
     }

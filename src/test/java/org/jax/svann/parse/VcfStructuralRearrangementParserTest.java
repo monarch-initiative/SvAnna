@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -71,5 +72,26 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
         assertThat(betaRight.getId(), is("INV0"));
         assertThat(betaRight.getBeginPosition(), is(Position.precise(20)));
         assertThat(betaRight.getStrand(), is(Strand.FWD));
+    }
+
+    @Test
+    public void makeDeletionAdjacency() {
+        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=19\t";
+        VariantContext vc = VCF_CODEC.decode(line);
+
+        Optional<Adjacency> adjacencyOpt = parser.makeDeletionAdjacency(vc);
+        assertThat(adjacencyOpt.isPresent(), is(true));
+
+        Adjacency adjacency = adjacencyOpt.get();
+
+        Breakend left = adjacency.getLeft();
+        assertThat(left.getId(), is("DEL0"));
+        assertThat(left.getBeginPosition(), is(Position.precise(10)));
+        assertThat(left.getStrand(), is(Strand.FWD));
+
+        Breakend right = adjacency.getRight();
+        assertThat(right.getId(), is("DEL0"));
+        assertThat(right.getBeginPosition(), is(Position.precise(20)));
+        assertThat(right.getStrand(), is(Strand.FWD));
     }
 }

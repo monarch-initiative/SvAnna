@@ -1,5 +1,8 @@
 package org.jax.svann;
 
+import de.charite.compbio.jannovar.data.JannovarData;
+import de.charite.compbio.jannovar.data.JannovarDataSerializer;
+import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
@@ -61,7 +64,9 @@ public class SvAnnAnalysis {
      * @param tidList list of relevant HPO terms
      * @param enhancerPath path to the TSpec enhancer file
      */
-    public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) {
+    public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) throws SerializationException {
+        JannovarData jannovarData = readJannovarData(jannovarPath);
+
 
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
@@ -77,7 +82,7 @@ public class SvAnnAnalysis {
         this.breakendRecordList = parseResult.getBreakends();
         this.prefix = prefix;
         this.targetHpoIdList = tidList;
-        overlapper = new Overlapper(jannovarPath);
+        overlapper = new Overlapper(jannovarData);
     }
 
     /**
@@ -87,11 +92,11 @@ public class SvAnnAnalysis {
         for (SvEvent sv : this.svEventList) {
             List<Overlap> overlaps = overlapper.getOverlapList(sv);
             // todo 1 create and store SvPriority objects
-            // do we store them as PrioritizedSv or as SvPriority?
+            //  do we store them as PrioritizedSv or as SvPriority?
             // todo 2 -- if overlaps does not have coding, then we could prioritize to a
-            // enhancer. We can use this -- chromosomeToEnhancerIntervalArrayMap
-            // we only need to find svs that disrupt enhancers and then they are prioritized based on
-            // the HPO term they contain
+            //  enhancer. We can use this -- chromosomeToEnhancerIntervalArrayMap
+            //  we only need to find svs that disrupt enhancers and then they are prioritized based on
+            //  the HPO term they contain
         }
     }
 
@@ -102,21 +107,22 @@ public class SvAnnAnalysis {
         // todo 4. create and store SvPriority objects
         //         do we store them as PrioritizedSv or as SvPriority?
 
-        // store them in the same list
+        //  store them in the same list
     }
 
 
     public void prioritizeByPhenotype() {
         // todo 1. We can go over all of the PrioritizedSv objects created above
         // todo 2. Basically, we check whether
-        // a -- any of the affected genes are in relevantGeneIdToAssociatedDiseaseMap
-        // if so, add information about the gene and disease to the object
-        // b -- any of the affected enhancers have an HPO id in relevantHpoIdsForEnhancers
+        //  a -- any of the affected genes are in relevantGeneIdToAssociatedDiseaseMap
+        //   if so, add information about the gene and disease to the object
+        //  b -- any of the affected enhancers have an HPO id in relevantHpoIdsForEnhancers
     }
 
 
-
-
+    private static JannovarData readJannovarData(String jannovarDataPath) throws SerializationException {
+        return new JannovarDataSerializer(jannovarDataPath).load();
+    }
 
 
 }

@@ -39,8 +39,17 @@ public class SvEvent implements IntrachromosomalEvent {
         }
     }
 
-    public static SvEvent of(Contig contig, Position begin, Position end, SvType type, Strand strand) {
+    public static SvEvent of(Contig contig, Position begin, Position end, Strand strand, SvType type) {
         return new SvEvent(contig, begin, end, strand, type);
+    }
+
+    /**
+     * Create event using precise begin and end coordinates (confidence intervals for both begin/end are [0,0])
+     *
+     * @return precise SV event
+     */
+    public static SvEvent precise(Contig contig, int begin, int end, Strand strand, SvType type) {
+        return new SvEvent(contig, Position.precise(begin), Position.precise(end), strand, type);
     }
 
 

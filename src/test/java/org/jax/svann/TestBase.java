@@ -1,4 +1,4 @@
-package org.jax.svann.overlap;
+package org.jax.svann;
 
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
@@ -16,19 +16,20 @@ public abstract class TestBase {
      */
     protected static final GenomeAssembly GENOME_ASSEMBLY = GenomeAssemblyProvider.getGrch38Assembly();
 
-    private static final Path JANNOVAR_PATH = Paths.get("src/test/resources/hg38_ucsc_small.ser");
+    private static final Path JANNOVAR_PATH = Paths.get("src/test/resources/hg38_refseq_small.ser");
     /**
-     * Small Jannovar cache that contains UCSC transcripts of the following genes:
+     * Small Jannovar cache that contains RefSeq transcripts of the following genes:
      * <ul>
      *     <li><em>SURF1</em></li>
      *     <li><em>SURF2</em></li>
      *     <li><em>FBN1</em></li>
      *     <li><em>ZNF436</em></li>
-     *     <li><em>ZBTB38</em></li>
+     *     <li><em>ZBTB48</em></li>
      *     <li><em>HNF4A</em></li>
      *     <li><em>GCK</em></li>
-     *     <li><em>COL4A5</em></li>
      *     <li><em>BRCA2</em></li>
+     *     <li><em>COL4A5</em></li> (on <code>chrX</code>)
+     *     <li><em>SRY</em></li> (on <code>chrY</code>)
      * </ul>
      */
     protected static final JannovarData JANNOVAR_DATA = getJannovarData();

@@ -113,10 +113,10 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
             case DELETION:
                 makeDeletionAdjacency(vc).ifPresent(adjacencies::add);
                 break;
-            // cases with two adjacencies
             case DUPLICATION:
-                adjacencies.addAll(makeDuplicationAdjacencies(vc));
+                makeDuplicationAdjacency(vc).ifPresent(adjacencies::add);
                 break;
+            // cases with two adjacencies
             case INSERTION:
                 adjacencies.addAll(makeInsertionAdjacencies(vc));
                 break;
@@ -147,20 +147,48 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         return Optional.of(new SimpleSequenceRearrangement(adjacencies, svType));
     }
 
-    List<? extends Adjacency> makeDuplicationAdjacencies(VariantContext vc) {
-        // We know that this context represents a symbolic duplication - SvType.DUPLICATION
-        //
-        // TODO: 27. 10. 2020 implement
+    Optional<Adjacency> makeDeletionAdjacency(VariantContext vc) {
+        // We know that this context represents symbolic deletion.
+        // Let's get the required coordinates first
+        return extractCoreData(vc).map(coords -> {
+            // then convert the coordinates to adjacency
+            Contig contig = coords.getContig();
 
-        return List.of();
+            ChromosomalPosition leftPos = ChromosomalPosition.of(contig,
+                    Position.imprecise(coords.getBegin().getPos() - 1, coords.getBegin().getConfidenceInterval()),
+                    Strand.FWD);
+            SimpleBreakend left = new SimpleBreakend(leftPos, vc.getID(), vc.getReference().getDisplayString(), EMPTY_STRING);
+
+            ChromosomalPosition rightPos = ChromosomalPosition.of(contig,
+                    Position.imprecise(coords.getEnd().getPos() + 1, coords.getEnd().getConfidenceInterval()),
+                    Strand.FWD);
+            SimpleBreakend right = new SimpleBreakend(rightPos, vc.getID(), vc.getReference().getDisplayString(), EMPTY_STRING);
+
+            return SimpleAdjacency.of(left, right);
+        });
     }
 
-    List<? extends Adjacency> makeInsertionAdjacencies(VariantContext vc) {
-        // We know that this context represents a symbolic insertion - SvType.INSERTION
-        //
-        // TODO: 27. 10. 2020 implement
+    Optional<Adjacency> makeDuplicationAdjacency(VariantContext vc) {
+        /*
+        We know that this context represents a symbolic inversion - SvType.DUPLICATION
+        Duplication consists of 2 adjacencies that we denote as alpha, and beta.
+        The VCF line might look like this:
+        2	11	DUP0	T	<DUP>	6	PASS	SVTYPE=DUP;END=19;CIPOS=-2,2;CIEND=-1,1
+         */
+        return extractCoreData(vc).map(cd -> {
+            String id = vc.getID();
+            Contig contig = cd.getContig();
+            Position begin = cd.getBegin();
+            Position end = cd.getEnd();
 
-        return List.of();
+            // the 1st adjacency (alpha) starts at the end coordinate, by convention on + strand
+            ChromosomalPosition alphaLeftPos = ChromosomalPosition.of(contig, end, Strand.FWD);
+            Breakend alphaLeft = new SimpleBreakend(alphaLeftPos, id, EMPTY_STRING, EMPTY_STRING);
+            // the right position is the begin position of the duplicated segment on + strand
+            ChromosomalPosition alphaRightPos = ChromosomalPosition.of(contig, begin, Strand.FWD);
+            SimpleBreakend alphaRight = new SimpleBreakend(alphaRightPos, id, EMPTY_STRING, EMPTY_STRING);
+            return SimpleAdjacency.of(alphaLeft, alphaRight);
+        });
     }
 
     List<? extends Adjacency> makeInversionAdjacencies(VariantContext vc) {
@@ -207,25 +235,12 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         return List.of(alpha, beta);
     }
 
-    Optional<Adjacency> makeDeletionAdjacency(VariantContext vc) {
-        // We know that this context represents symbolic deletion.
-        // Let's get the required coordinates first
-        return extractCoreData(vc).map(coords -> {
-            // then convert the coordinates to adjacency
-            Contig contig = coords.getContig();
+    List<? extends Adjacency> makeInsertionAdjacencies(VariantContext vc) {
+        // We know that this context represents a symbolic insertion - SvType.INSERTION
+        //
+        // TODO: 27. 10. 2020 implement
 
-            ChromosomalPosition leftPos = ChromosomalPosition.of(contig,
-                    Position.imprecise(coords.getBegin().getPos() - 1, coords.getBegin().getConfidenceInterval()),
-                    Strand.FWD);
-            SimpleBreakend left = new SimpleBreakend(leftPos, vc.getID(), vc.getReference().getDisplayString(), EMPTY_STRING);
-
-            ChromosomalPosition rightPos = ChromosomalPosition.of(contig,
-                    Position.imprecise(coords.getEnd().getPos() + 1, coords.getEnd().getConfidenceInterval()),
-                    Strand.FWD);
-            SimpleBreakend right = new SimpleBreakend(rightPos, vc.getID(), vc.getReference().getDisplayString(), EMPTY_STRING);
-
-            return SimpleAdjacency.of(left, right);
-        });
+        return List.of();
     }
 
     /**

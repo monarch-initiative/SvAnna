@@ -5,10 +5,7 @@ import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.jax.svann.ToyCoordinateTestBase;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.Breakend;
-import org.jax.svann.reference.Position;
-import org.jax.svann.reference.Strand;
+import org.jax.svann.reference.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,8 +22,8 @@ import static org.hamcrest.core.Is.is;
 public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase {
 
     private static final VCFCodec VCF_CODEC = new VCFCodec();
-    private static BreakendAssembler ASSEMBLER;
     private static final Path VCF_HEADER = Paths.get("src/test/resources/sv_example.vcf");
+    private static BreakendAssembler ASSEMBLER;
     private VcfStructuralRearrangementParser parser;
 
     @BeforeAll
@@ -40,6 +37,48 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
     @BeforeEach
     public void setUp() {
         parser = new VcfStructuralRearrangementParser(TOY_ASSEMBLY, ASSEMBLER);
+    }
+
+    @Test
+    public void makeDeletionAdjacency() {
+        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=19\t";
+        VariantContext vc = VCF_CODEC.decode(line);
+
+        Optional<Adjacency> adjacencyOpt = parser.makeDeletionAdjacency(vc);
+        assertThat(adjacencyOpt.isPresent(), is(true));
+
+        Adjacency adjacency = adjacencyOpt.get();
+
+        Breakend left = adjacency.getLeft();
+        assertThat(left.getId(), is("DEL0"));
+        assertThat(left.getBeginPosition(), is(Position.precise(10)));
+        assertThat(left.getStrand(), is(Strand.FWD));
+
+        Breakend right = adjacency.getRight();
+        assertThat(right.getId(), is("DEL0"));
+        assertThat(right.getBeginPosition(), is(Position.precise(20)));
+        assertThat(right.getStrand(), is(Strand.FWD));
+    }
+
+    @Test
+    public void makeDuplicationAdjacency() {
+        String line = "ctg1\t11\tDUP0\tT\t<DUP>\t6\tPASS\tSVTYPE=DUP;END=19;CIPOS=-2,2;CIEND=-1,1\t";
+        VariantContext vc = VCF_CODEC.decode(line);
+
+        Optional<Adjacency> adjacencyOpt = parser.makeDuplicationAdjacency(vc);
+        assertThat(adjacencyOpt.isPresent(), is(true));
+
+        Adjacency adjacency = adjacencyOpt.get();
+
+        Breakend left = adjacency.getLeft();
+        assertThat(left.getId(), is("DUP0"));
+        assertThat(left.getBeginPosition(), is(Position.imprecise(19, -1, 1, CoordinateSystem.ONE_BASED)));
+        assertThat(left.getStrand(), is(Strand.FWD));
+
+        Breakend right = adjacency.getRight();
+        assertThat(right.getId(), is("DUP0"));
+        assertThat(right.getBeginPosition(), is(Position.imprecise(11, -2, 2, CoordinateSystem.ONE_BASED)));
+        assertThat(right.getStrand(), is(Strand.FWD));
     }
 
     @Test
@@ -72,26 +111,5 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
         assertThat(betaRight.getId(), is("INV0"));
         assertThat(betaRight.getBeginPosition(), is(Position.precise(20)));
         assertThat(betaRight.getStrand(), is(Strand.FWD));
-    }
-
-    @Test
-    public void makeDeletionAdjacency() {
-        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=19\t";
-        VariantContext vc = VCF_CODEC.decode(line);
-
-        Optional<Adjacency> adjacencyOpt = parser.makeDeletionAdjacency(vc);
-        assertThat(adjacencyOpt.isPresent(), is(true));
-
-        Adjacency adjacency = adjacencyOpt.get();
-
-        Breakend left = adjacency.getLeft();
-        assertThat(left.getId(), is("DEL0"));
-        assertThat(left.getBeginPosition(), is(Position.precise(10)));
-        assertThat(left.getStrand(), is(Strand.FWD));
-
-        Breakend right = adjacency.getRight();
-        assertThat(right.getId(), is("DEL0"));
-        assertThat(right.getBeginPosition(), is(Position.precise(20)));
-        assertThat(right.getStrand(), is(Strand.FWD));
     }
 }

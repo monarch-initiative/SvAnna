@@ -48,6 +48,12 @@ public class PositionTest {
     }
 
     @Test
+    public void isPrecise() {
+        assertThat(precise.isPrecise(), is(true));
+        assertThat(imprecise.isPrecise(), is(false));
+    }
+
+    @Test
     public void errorThrownWhenInvalidInput() {
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> Position.precise(0, CoordinateSystem.ONE_BASED));
         assertThat(ex.getMessage(), is("One-based position `0` cannot be non-positive"));

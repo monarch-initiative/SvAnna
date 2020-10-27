@@ -7,6 +7,7 @@ import java.nio.file.Path;
  * The classes that implement this interface load a file with structural variants into the domain model of this
  * application.
  */
+@Deprecated
 public interface StructuralVariantParser {
 
     ParseResult parseFile(Path filePath) throws IOException ;

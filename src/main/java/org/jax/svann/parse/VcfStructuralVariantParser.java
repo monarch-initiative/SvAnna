@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Deprecated
 public class VcfStructuralVariantParser implements StructuralVariantParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfStructuralVariantParser.class);
@@ -80,8 +81,8 @@ public class VcfStructuralVariantParser implements StructuralVariantParser {
             LOGGER.warn("Breakend with >1 alt allele: {}", vc);
             return Optional.empty();
         }
-        final byte[] ref = vc.getReference().getDisplayBases();
-        final byte[] alt = vc.getAlternateAllele(0).getDisplayBases();
+        final String ref = vc.getReference().getDisplayString();
+        final String alt = vc.getAlternateAllele(0).getDisplayString();
 
         // in VCF specs, the position is always on the FWD(+) strand
         final ChromosomalPosition breakendPosition = ChromosomalPosition.of(contig, position, Strand.FWD);

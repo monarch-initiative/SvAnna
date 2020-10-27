@@ -1,23 +1,22 @@
 package org.jax.svann.parse;
 
-import org.jax.svann.reference.*;
+import org.jax.svann.reference.Breakend;
+import org.jax.svann.reference.ChromosomalRegion;
+import org.jax.svann.reference.Position;
+import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
-
-import java.util.Arrays;
 
 public class SimpleBreakend implements Breakend {
 
     private final ChromosomalRegion position;
-    private final BreakendDirection direction;
     private final String id;
-    private final byte[] ref, inserted;
+    private final String ref, inserted;
 
-    public SimpleBreakend(ChromosomalRegion position,
-                          BreakendDirection direction,
-                          String id, byte[] ref,
-                          byte[] inserted) {
+
+    SimpleBreakend(ChromosomalRegion position,
+                   String id, String ref,
+                   String inserted) {
         this.position = position;
-        this.direction = direction;
         this.id = id;
         this.ref = ref;
         this.inserted = inserted;
@@ -44,11 +43,6 @@ public class SimpleBreakend implements Breakend {
     }
 
     @Override
-    public BreakendDirection getDirection() {
-        return direction;
-    }
-
-    @Override
     public Breakend withStrand(Strand strand) {
         throw new RuntimeException("Not yet implemented");
     }
@@ -59,12 +53,12 @@ public class SimpleBreakend implements Breakend {
     }
 
     @Override
-    public byte[] getRef() {
+    public String getRef() {
         return ref;
     }
 
     @Override
-    public byte[] getInserted() {
+    public String getInserted() {
         return inserted;
     }
 
@@ -72,10 +66,9 @@ public class SimpleBreakend implements Breakend {
     public String toString() {
         return "SimpleBreakend{" +
                 "position=" + position +
-                ", direction=" + direction +
                 ", id='" + id + '\'' +
-                ", ref=" + Arrays.toString(ref) +
-                ", inserted=" + Arrays.toString(inserted) +
+                ", ref='" + ref + '\'' +
+                ", inserted='" + inserted + '\'' +
                 '}';
     }
 }

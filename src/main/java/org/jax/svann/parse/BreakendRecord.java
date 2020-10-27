@@ -13,14 +13,14 @@ public class BreakendRecord {
     private final ChromosomalRegion position;
     private final String id;
     private final String mateId;
-    private final byte[] ref;
-    private final byte[] alt;
+    private final String ref;
+    private final String alt;
 
     public BreakendRecord(ChromosomalRegion position,
                           String id,
                           String mateId,
-                          byte[] ref,
-                          byte[] alt) {
+                          String ref,
+                          String alt) {
         this.position = position;
         this.id = id;
         this.mateId = mateId;
@@ -40,11 +40,11 @@ public class BreakendRecord {
         return mateId;
     }
 
-    public byte[] getRef() {
+    public String getRef() {
         return ref;
     }
 
-    public byte[] getAlt() {
+    public String getAlt() {
         return alt;
     }
 
@@ -56,20 +56,17 @@ public class BreakendRecord {
         return Objects.equals(position, that.position) &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(mateId, that.mateId) &&
-                Arrays.equals(ref, that.ref) &&
-                Arrays.equals(alt, that.alt);
+                Objects.equals(ref, that.ref) &&
+                Objects.equals(alt, that.alt);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(position, id, mateId);
-        result = 31 * result + Arrays.hashCode(ref);
-        result = 31 * result + Arrays.hashCode(alt);
-        return result;
+        return Objects.hash(position, id, mateId, ref, alt);
     }
 
     @Override
     public String toString() {
-        return String.format("%s(%s)%s>%s", position, id, new String(ref), new String(alt));
+        return String.format("%s(%s)%s>%s", position, id, ref, alt);
     }
 }

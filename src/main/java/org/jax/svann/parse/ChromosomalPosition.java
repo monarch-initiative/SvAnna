@@ -72,6 +72,6 @@ class ChromosomalPosition implements ChromosomalRegion {
 
     @Override
     public String toString() {
-        return contig.getPrimaryName() + ":" + position;
+        return contig.getPrimaryName() + ":" + position + "(" + strand + ")";
     }
 }

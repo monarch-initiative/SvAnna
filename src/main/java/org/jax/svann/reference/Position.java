@@ -93,7 +93,10 @@ public class Position implements Comparable<Position> {
 
     @Override
     public String toString() {
-        return pos + "(+-" + confidenceInterval + ')';
+        String ci = (confidenceInterval.isPrecise())
+                ? ""
+                : "(+-" + confidenceInterval + ")";
+        return pos + ci;
     }
 
     @Override

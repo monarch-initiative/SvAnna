@@ -92,11 +92,11 @@ public class SvAnnAnalysis {
         for (SvEvent sv : this.svEventList) {
             List<Overlap> overlaps = overlapper.getOverlapList(sv);
             // todo 1 create and store SvPriority objects
-            // do we store them as PrioritizedSv or as SvPriority?
+            //  do we store them as PrioritizedSv or as SvPriority?
             // todo 2 -- if overlaps does not have coding, then we could prioritize to a
-            // enhancer. We can use this -- chromosomeToEnhancerIntervalArrayMap
-            // we only need to find svs that disrupt enhancers and then they are prioritized based on
-            // the HPO term they contain
+            //  enhancer. We can use this -- chromosomeToEnhancerIntervalArrayMap
+            //  we only need to find svs that disrupt enhancers and then they are prioritized based on
+            //  the HPO term they contain
         }
     }
 
@@ -107,16 +107,16 @@ public class SvAnnAnalysis {
         // todo 4. create and store SvPriority objects
         //         do we store them as PrioritizedSv or as SvPriority?
 
-        // store them in the same list
+        //  store them in the same list
     }
 
 
     public void prioritizeByPhenotype() {
         // todo 1. We can go over all of the PrioritizedSv objects created above
         // todo 2. Basically, we check whether
-        // a -- any of the affected genes are in relevantGeneIdToAssociatedDiseaseMap
-        // if so, add information about the gene and disease to the object
-        // b -- any of the affected enhancers have an HPO id in relevantHpoIdsForEnhancers
+        //  a -- any of the affected genes are in relevantGeneIdToAssociatedDiseaseMap
+        //   if so, add information about the gene and disease to the object
+        //  b -- any of the affected enhancers have an HPO id in relevantHpoIdsForEnhancers
     }
 
 

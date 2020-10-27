@@ -70,6 +70,13 @@ public class Position implements Comparable<Position> {
         return confidenceInterval;
     }
 
+    /**
+     * @return true if this position is precise (CI = [0,0])
+     */
+    public boolean isPrecise() {
+        return confidenceInterval.isPrecise();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -86,7 +93,10 @@ public class Position implements Comparable<Position> {
 
     @Override
     public String toString() {
-        return pos + "(+-" + confidenceInterval + ')';
+        String ci = (confidenceInterval.isPrecise())
+                ? ""
+                : "(+-" + confidenceInterval + ")";
+        return pos + ci;
     }
 
     @Override

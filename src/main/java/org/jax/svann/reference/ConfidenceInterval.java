@@ -13,8 +13,8 @@ public class ConfidenceInterval implements Comparable<ConfidenceInterval> {
     private final int downstream;
 
     private ConfidenceInterval(int upstream, int downstream) {
-        this.upstream = Math.abs(upstream);
-        this.downstream = Math.abs(downstream);
+        this.upstream = upstream;
+        this.downstream = downstream;
     }
 
     public static ConfidenceInterval precise() {
@@ -29,9 +29,11 @@ public class ConfidenceInterval implements Comparable<ConfidenceInterval> {
      * @return confidence interval
      */
     public static ConfidenceInterval of(int upstream, int downstream) {
-        return upstream == 0 && downstream == 0
+        int absUp = Math.abs(upstream);
+        int absDown = Math.abs(downstream);
+        return absUp == 0 && absDown == 0
                 ? PRECISE
-                : new ConfidenceInterval(upstream, downstream);
+                : new ConfidenceInterval(absUp, absDown);
     }
 
     public int getUpstream() {
@@ -42,8 +44,12 @@ public class ConfidenceInterval implements Comparable<ConfidenceInterval> {
         return downstream;
     }
 
+    public boolean isPrecise() {
+        return this == PRECISE;
+    }
+
     public ConfidenceInterval toOppositeStrand() {
-        return this == PRECISE ? PRECISE : new ConfidenceInterval(downstream, upstream);
+        return isPrecise() ? PRECISE : new ConfidenceInterval(downstream, upstream);
     }
 
     /**

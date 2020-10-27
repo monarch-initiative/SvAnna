@@ -46,6 +46,25 @@ public class ConfidenceIntervalTest {
         assertThat(imprecise.length(), is(30));
     }
 
+    @Test
+    public void isPrecise() {
+        assertThat(precise.isPrecise(), is(true));
+        assertThat(imprecise.isPrecise(), is(false));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0,-0,true",
+            "-0,0,true",
+            "-0,1,false",
+            "0,1,false",
+            "1,-0,false",
+            "1,0,false"
+    })
+    public void isPreciseWithParams(int up, int down, boolean expected) {
+        assertThat(ConfidenceInterval.of(up, down).isPrecise(), is(expected));
+    }
+
     @ParameterizedTest
     @CsvSource({
             "10,10,11,10,1", // left is shorter -> more

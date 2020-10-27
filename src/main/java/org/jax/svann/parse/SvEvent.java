@@ -8,6 +8,7 @@ import org.jax.svann.reference.SvType;
 
 import java.util.Objects;
 
+@Deprecated
 public class SvEvent implements IntrachromosomalEvent {
 
     private final Contig contig;

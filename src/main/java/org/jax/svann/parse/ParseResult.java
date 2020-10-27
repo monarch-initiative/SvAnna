@@ -3,6 +3,7 @@ package org.jax.svann.parse;
 import java.util.List;
 import java.util.Objects;
 
+@Deprecated
 public class ParseResult {
 
     private static final ParseResult EMPTY = new ParseResult(List.of(), List.of());

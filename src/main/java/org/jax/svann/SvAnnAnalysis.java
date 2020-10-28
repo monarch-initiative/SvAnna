@@ -4,14 +4,13 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.overlap.Overlapper;
-import org.jax.svann.parse.BreakendRecord;
-import org.jax.svann.parse.ParseResult;
-import org.jax.svann.parse.SvEvent;
-import org.jax.svann.parse.VcfStructuralVariantParser;
+import org.jax.svann.parse.*;
+import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.jax.svann.genomicreg.Enhancer;
@@ -20,6 +19,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -46,9 +46,10 @@ public class SvAnnAnalysis {
      */
     private final Set<TermId> relevantHpoIdsForEnhancers;
 
-    private final List<SvEvent> svEventList;
-
-    private final List<BreakendRecord> breakendRecordList;
+//    private final List<SvEvent> svEventList;
+//
+//    private final List<BreakendRecord> breakendRecordList;
+    private final Collection<SequenceRearrangement> rearrangements;
     /** Object to find overlaps with transcripts. */
     private final Overlapper overlapper;
 
@@ -75,32 +76,24 @@ public class SvAnnAnalysis {
         HpoDiseaseGeneMap hpomap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
         relevantGeneIdToAssociatedDiseaseMap = hpomap.getRelevantGenesAndDiseases(tidList);
         relevantHpoIdsForEnhancers = hpomap.getRelevantAncestors(id2enhancerMap.keySet(), tidList);
-        VcfStructuralVariantParser vcfParser = new VcfStructuralVariantParser(assembly);
+        //VcfStructuralVariantParser vcfParser = new VcfStructuralVariantParser(assembly);
+        VcfStructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, new BreakendAssembler());
         Path vcfPath = Paths.get(vcfFile);
-        ParseResult parseResult = vcfParser.parseFile(vcfPath);
-        this.svEventList = parseResult.getAnns();
-        this.breakendRecordList = parseResult.getBreakends();
-        this.prefix = prefix;
-        this.targetHpoIdList = tidList;
-        overlapper = new Overlapper(jannovarData);
-    }
-
-    /**
-     * TODO prototype
-     */
-    public void prioritizeSymbolSvs() {
-        for (SvEvent sv : this.svEventList) {
-            List<Overlap> overlaps = overlapper.getOverlapList(sv);
-            // todo 1 create and store SvPriority objects
-            //  do we store them as PrioritizedSv or as SvPriority?
-            // todo 2 -- if overlaps does not have coding, then we could prioritize to a
-            //  enhancer. We can use this -- chromosomeToEnhancerIntervalArrayMap
-            //  we only need to find svs that disrupt enhancers and then they are prioritized based on
-            //  the HPO term they contain
+        try {
+            rearrangements = parser.parseFile(vcfPath);
+//            this.svEventList = parseResult.getAnns();
+//            this.breakendRecordList = parseResult.getBreakends();
+            this.prefix = prefix;
+            this.targetHpoIdList = tidList;
+            overlapper = new Overlapper(jannovarData);
+        } catch (IOException e) {
+            throw new SvAnnRuntimeException("Error: " + e.getMessage());
         }
     }
 
-    public void prioritizeBreakendSvs() {
+
+
+    public void prioritizeSvs() {
         // todo 1. merge BNDs that are pairs of the same adjancency together
         // todo 2. now or later, merge BNDs that have > 2 breakends, e.g. inversions together
         // todo 3. get overlaps

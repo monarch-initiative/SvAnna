@@ -5,16 +5,15 @@ import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.jax.svann.ToyCoordinateTestBase;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.Breakend;
-import org.jax.svann.reference.Position;
-import org.jax.svann.reference.Strand;
+import org.jax.svann.reference.*;
+import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,14 +24,14 @@ import static org.hamcrest.core.Is.is;
 public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase {
 
     private static final VCFCodec VCF_CODEC = new VCFCodec();
+    private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/sv_example.vcf");
     private static BreakendAssembler ASSEMBLER;
-    private static final Path VCF_HEADER = Paths.get("src/test/resources/sv_example.vcf");
     private VcfStructuralRearrangementParser parser;
 
     @BeforeAll
     public static void beforeAll() {
         ASSEMBLER = new BreakendAssembler();
-        try (VCFFileReader reader = new VCFFileReader(VCF_HEADER, false)) {
+        try (VCFFileReader reader = new VCFFileReader(SV_EXAMPLE_PATH, false)) {
             VCF_CODEC.setVCFHeader(reader.getFileHeader(), VCFHeaderVersion.VCF4_3);
         }
     }
@@ -40,6 +39,93 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
     @BeforeEach
     public void setUp() {
         parser = new VcfStructuralRearrangementParser(TOY_ASSEMBLY, ASSEMBLER);
+    }
+
+    @Test
+    public void parseFile() throws Exception {
+        VcfStructuralRearrangementParser parser = new VcfStructuralRearrangementParser(GenomeAssemblyProvider.getGrch38Assembly(), ASSEMBLER);
+        Collection<SequenceRearrangement> rearrangements = parser.parseFile(SV_EXAMPLE_PATH);
+
+        // we expect to see 6 rearrangement when things are ready
+        assertThat(rearrangements, hasSize(6));
+    }
+
+    /*
+     *              TEST SYMBOLIC RECORD CONVERSION METHODS
+     */
+
+    @Test
+    public void makeDeletionAdjacency() {
+        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=20\t";
+        VariantContext vc = VCF_CODEC.decode(line);
+
+        Optional<Adjacency> adjacencyOpt = parser.makeDeletionAdjacency(vc);
+        assertThat(adjacencyOpt.isPresent(), is(true));
+
+        Adjacency adjacency = adjacencyOpt.get();
+
+        Breakend left = adjacency.getLeft();
+        assertThat(left.getId(), is("DEL0"));
+        assertThat(left.getBeginPosition(), is(Position.precise(10)));
+        assertThat(left.getStrand(), is(Strand.FWD));
+
+        Breakend right = adjacency.getRight();
+        assertThat(right.getId(), is("DEL0"));
+        assertThat(right.getBeginPosition(), is(Position.precise(21)));
+        assertThat(right.getStrand(), is(Strand.FWD));
+    }
+
+    @Test
+    public void makeDuplicationAdjacency() {
+        String line = "ctg1\t11\tDUP0\tT\t<DUP>\t6\tPASS\tSVTYPE=DUP;END=19;CIPOS=-2,2;CIEND=-1,1\t";
+        VariantContext vc = VCF_CODEC.decode(line);
+
+        Optional<Adjacency> adjacencyOpt = parser.makeDuplicationAdjacency(vc);
+        assertThat(adjacencyOpt.isPresent(), is(true));
+
+        Adjacency adjacency = adjacencyOpt.get();
+
+        Breakend left = adjacency.getLeft();
+        assertThat(left.getId(), is("DUP0"));
+        assertThat(left.getBeginPosition(), is(Position.imprecise(19, -1, 1, CoordinateSystem.ONE_BASED)));
+        assertThat(left.getStrand(), is(Strand.FWD));
+
+        Breakend right = adjacency.getRight();
+        assertThat(right.getId(), is("DUP0"));
+        assertThat(right.getBeginPosition(), is(Position.imprecise(11, -2, 2, CoordinateSystem.ONE_BASED)));
+        assertThat(right.getStrand(), is(Strand.FWD));
+    }
+
+    @Test
+    public void makeInsertionAdjacencies() {
+        String line = "ctg1\t15\tINS0\tT\t<INS>\t6\tPASS\tSVTYPE=INS;END=15;SVLEN=10\t";
+        VariantContext vc = VCF_CODEC.decode(line);
+
+        List<? extends Adjacency> adjacencies = parser.makeInsertionAdjacencies(vc);
+        assertThat(adjacencies, hasSize(2));
+
+        Adjacency alpha = adjacencies.get(0);
+        Adjacency beta = adjacencies.get(1);
+
+        Breakend alphaLeft = alpha.getLeft();
+        assertThat(alphaLeft.getId(), is("INS0"));
+        assertThat(alphaLeft.getBeginPosition(), is(Position.precise(15)));
+        assertThat(alphaLeft.getStrand(), is(Strand.FWD));
+
+        Breakend alphaRight = alpha.getRight();
+        assertThat(alphaRight.getId(), is("INS0"));
+        assertThat(alphaRight.getBeginPosition(), is(Position.precise(1)));
+        assertThat(alphaRight.getStrand(), is(Strand.FWD));
+
+        Breakend betaLeft = beta.getLeft();
+        assertThat(betaLeft.getId(), is("INS0"));
+        assertThat(betaLeft.getBeginPosition(), is(Position.precise(10)));
+        assertThat(betaLeft.getStrand(), is(Strand.FWD));
+
+        Breakend betaRight = beta.getRight();
+        assertThat(betaRight.getId(), is("INS0"));
+        assertThat(betaRight.getBeginPosition(), is(Position.precise(16)));
+        assertThat(betaRight.getStrand(), is(Strand.FWD));
     }
 
     @Test
@@ -72,26 +158,5 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
         assertThat(betaRight.getId(), is("INV0"));
         assertThat(betaRight.getBeginPosition(), is(Position.precise(20)));
         assertThat(betaRight.getStrand(), is(Strand.FWD));
-    }
-
-    @Test
-    public void makeDeletionAdjacency() {
-        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=19\t";
-        VariantContext vc = VCF_CODEC.decode(line);
-
-        Optional<Adjacency> adjacencyOpt = parser.makeDeletionAdjacency(vc);
-        assertThat(adjacencyOpt.isPresent(), is(true));
-
-        Adjacency adjacency = adjacencyOpt.get();
-
-        Breakend left = adjacency.getLeft();
-        assertThat(left.getId(), is("DEL0"));
-        assertThat(left.getBeginPosition(), is(Position.precise(10)));
-        assertThat(left.getStrand(), is(Strand.FWD));
-
-        Breakend right = adjacency.getRight();
-        assertThat(right.getId(), is("DEL0"));
-        assertThat(right.getBeginPosition(), is(Position.precise(20)));
-        assertThat(right.getStrand(), is(Strand.FWD));
     }
 }

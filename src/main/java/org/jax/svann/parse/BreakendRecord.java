@@ -2,7 +2,6 @@ package org.jax.svann.parse;
 
 import org.jax.svann.reference.ChromosomalRegion;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -12,20 +11,27 @@ public class BreakendRecord {
 
     private final ChromosomalRegion position;
     private final String id;
+    private final String eventId;
     private final String mateId;
     private final String ref;
     private final String alt;
 
     public BreakendRecord(ChromosomalRegion position,
                           String id,
+                          String eventId,
                           String mateId,
                           String ref,
                           String alt) {
         this.position = position;
         this.id = id;
+        this.eventId = eventId;
         this.mateId = mateId;
         this.ref = ref;
         this.alt = alt;
+    }
+
+    public String getEventId() {
+        return eventId;
     }
 
     public ChromosomalRegion getPosition() {
@@ -55,6 +61,7 @@ public class BreakendRecord {
         BreakendRecord that = (BreakendRecord) o;
         return Objects.equals(position, that.position) &&
                 Objects.equals(id, that.id) &&
+                Objects.equals(eventId, that.eventId) &&
                 Objects.equals(mateId, that.mateId) &&
                 Objects.equals(ref, that.ref) &&
                 Objects.equals(alt, that.alt);
@@ -62,11 +69,14 @@ public class BreakendRecord {
 
     @Override
     public int hashCode() {
-        return Objects.hash(position, id, mateId, ref, alt);
+        return Objects.hash(position, id, eventId, mateId, ref, alt);
     }
 
     @Override
     public String toString() {
-        return String.format("%s(%s)%s>%s", position, id, ref, alt);
+        return "BND " + id + " {" + position +
+                ", EVENT='" + eventId + '\'' +
+                ", MATE='" + mateId + '\'' +
+                ", " + ref + '>' + alt + '}';
     }
 }

@@ -6,21 +6,33 @@ import org.jax.svann.reference.Strand;
 
 import java.util.Objects;
 
-/**
- * Adjacency ties together 2 breakends.
- */
 class SimpleAdjacency implements Adjacency {
 
-    private final Breakend left, right;
+    private static final byte[] EMPTY = new byte[0];
+    private final Breakend left;
+    private final Breakend right;
+    private final byte[] inserted;
 
-    static Adjacency of(Breakend left, Breakend right) {
-        return new SimpleAdjacency(left, right);
-    }
-
-    private SimpleAdjacency(Breakend left, Breakend right) {
+    private SimpleAdjacency(Breakend left, Breakend right, byte[] inserted) {
         this.left = left;
         this.right = right;
+        this.inserted = inserted;
     }
+
+    /**
+     * Make adjacency with no inserted sequence.
+     */
+    static SimpleAdjacency empty(Breakend left, Breakend right) {
+        return new SimpleAdjacency(left, right, EMPTY);
+    }
+
+    /**
+     * Make adjacency with inserted sequence.
+     */
+    static SimpleAdjacency withInsertedSequence(Breakend left, Breakend right, byte[] inserted) {
+        return new SimpleAdjacency(left, right, inserted);
+    }
+
 
     @Override
     public Breakend getLeft() {
@@ -33,11 +45,17 @@ class SimpleAdjacency implements Adjacency {
     }
 
     @Override
+    public byte[] getInserted() {
+        return inserted;
+    }
+
+    @Override
     public Adjacency withStrand(Strand strand) {
         if (getStrand().equals(strand)) {
             return this;
         } else {
-            return new SimpleAdjacency(right.withStrand(strand), left.withStrand(strand));
+            // adjust strand and reverse order
+            return new SimpleAdjacency(right.toOppositeStrand(), left.toOppositeStrand(), Utils.reverseComplement(inserted));
         }
     }
 
@@ -45,9 +63,9 @@ class SimpleAdjacency implements Adjacency {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SimpleAdjacency adjacency = (SimpleAdjacency) o;
-        return Objects.equals(left, adjacency.left) &&
-                Objects.equals(right, adjacency.right);
+        SimpleAdjacency that = (SimpleAdjacency) o;
+        return Objects.equals(left, that.left) &&
+                Objects.equals(right, that.right);
     }
 
     @Override
@@ -57,9 +75,6 @@ class SimpleAdjacency implements Adjacency {
 
     @Override
     public String toString() {
-        return "Adjacency{" +
-                "left=" + left +
-                ", right=" + right +
-                '}';
+        return "ADJ[" + left + ", " + right + "]";
     }
 }

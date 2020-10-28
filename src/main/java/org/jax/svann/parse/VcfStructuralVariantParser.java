@@ -5,7 +5,6 @@ import htsjdk.variant.vcf.VCFFileReader;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
-import org.jax.svann.reference.SvType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,7 +85,7 @@ public class VcfStructuralVariantParser implements StructuralVariantParser {
 
         // in VCF specs, the position is always on the FWD(+) strand
         final ChromosomalPosition breakendPosition = ChromosomalPosition.of(contig, position, Strand.FWD);
-        final BreakendRecord breakendRecord = new BreakendRecord(breakendPosition, vc.getID(), mateId, ref, alt);
+        final BreakendRecord breakendRecord = new BreakendRecord(breakendPosition, vc.getID(), "NONE", mateId, ref, alt);
 
         return Optional.of(breakendRecord);
     }

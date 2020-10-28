@@ -52,6 +52,10 @@ public class Position implements Comparable<Position> {
         return new Position(pos, confidenceInterval, coordinateSystem);
     }
 
+    public static Position imprecise(int pos, int ciUpstream, int ciDownstream, CoordinateSystem coordinateSystem) {
+        return new Position(pos, ConfidenceInterval.of(ciUpstream, ciDownstream), coordinateSystem);
+    }
+
     public static Position imprecise(int pos, ConfidenceInterval confidenceInterval) {
         return new Position(pos, confidenceInterval, CoordinateSystem.ONE_BASED);
     }

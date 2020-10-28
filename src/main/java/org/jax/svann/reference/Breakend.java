@@ -12,11 +12,15 @@ public interface Breakend extends ChromosomalRegion {
      */
     String getRef();
 
-    /**
-     * @return alt allele sequence
-     */
-    String getInserted();
-
     @Override
     Breakend withStrand(Strand strand);
+
+    /**
+     * Convert the breakend to opposite strand no matter what.
+     */
+    default Breakend toOppositeStrand() {
+        return getStrand().equals(Strand.FWD)
+                ? withStrand(Strand.REV)
+                : withStrand(Strand.FWD);
+    }
 }

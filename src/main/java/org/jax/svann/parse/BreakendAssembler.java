@@ -21,7 +21,7 @@ public class BreakendAssembler {
 
         SimpleBreakend f = SimpleBreakend.of(first.getPosition(), first.getId(), first.getRef());
         SimpleBreakend s = SimpleBreakend.of(second.getPosition(), second.getId(), second.getRef());
-        return SimpleAdjacency.of(f, s);
+        return SimpleAdjacency.empty(f, s);
     }
 
     public List<SequenceRearrangement> assemble(Collection<BreakendRecord> breakends) {

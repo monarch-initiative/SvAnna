@@ -33,6 +33,13 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         List<SequenceRearrangement> rearrangements = new ArrayList<>();
         List<BreakendRecord> breakendRecords = new ArrayList<>();
         try (VCFFileReader reader = new VCFFileReader(filePath, false)) {
+            /*
+            TODO: 28. 10. 2020 to parse events like:
+             13 123456  INS0    T    C<ctg1> 6  PASS    SVTYPE=INS
+             we the access to an assembly file with <ctg1> definition. Path to the file needs to be defined in VCF header.
+             If the assembly is not defined, then we're most likely not able to proceed with these items.
+             */
+
             for (VariantContext vc : reader) {
                 final SvType svType = SvType.fromString(vc.getAttributeAsString("SVTYPE", "UNKNOWN"));
                 if (svType.equals(SvType.BND)) {
@@ -162,7 +169,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
                     Strand.FWD);
             SimpleBreakend right = SimpleBreakend.of(rightPos, vc.getID());
 
-            return SimpleAdjacency.of(left, right);
+            return SimpleAdjacency.empty(left, right);
         });
     }
 
@@ -185,7 +192,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
             // the right position is the begin position of the duplicated segment on + strand
             ChromosomalPosition alphaRightPos = ChromosomalPosition.of(contig, begin, Strand.FWD);
             SimpleBreakend alphaRight = SimpleBreakend.of(alphaRightPos, id);
-            return SimpleAdjacency.of(alphaLeft, alphaRight);
+            return SimpleAdjacency.empty(alphaLeft, alphaRight);
         });
     }
 
@@ -194,7 +201,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         We know that this context represents a symbolic inversion - SvType.INVERSION
         Inversion consists of 2 adjacencies, we denote them as alpha and beta
         The VCF line might look like this:
-        2   11  INV0    <INV>   6   PASS    SVTYPE=INV;END=19
+        2   11  INV0    T   <INV>   6   PASS    SVTYPE=INV;END=19
         */
         Optional<CoreData> cdOpt = extractCoreData(vc);
         if (cdOpt.isEmpty()) {
@@ -218,7 +225,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         // the right position is the last base of the inverted segment on the (-) strand
         ChromosomalPosition alphaRightPos = ChromosomalPosition.of(contig, end, Strand.FWD).withStrand(Strand.REV);
         SimpleBreakend alphaRight = SimpleBreakend.of(alphaRightPos, id);
-        Adjacency alpha = SimpleAdjacency.of(alphaLeft, alphaRight);
+        Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
 
         // the 2nd adjacency (beta) starts at the begin coordinate on (-) strand
@@ -229,17 +236,54 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
                 Position.imprecise(end.getPos() + 1, end.getConfidenceInterval()),
                 Strand.FWD);
         Breakend betaRight = SimpleBreakend.of(betaRightPos, id);
-        Adjacency beta = SimpleAdjacency.of(betaLeft, betaRight);
+        Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
         return List.of(alpha, beta);
     }
 
     List<? extends Adjacency> makeInsertionAdjacencies(VariantContext vc) {
-        // We know that this context represents a symbolic insertion - SvType.INSERTION
-        //
-        // TODO: 27. 10. 2020 implement
+        /*
+        We know that this context represents a symbolic insertion - SvType.INSERTION
+        Insertion consists of 2 adjacencies, we denote them as alpha and beta
+        The VCF line might look like this:
+        2   15  INS0    T   <INS>   6   PASS    SVTYPE=INS;END=15;SVLEN=10
+
+        Note that `SVLEN` field is mandatory, otherwise it is not possible to determine length of the insertion.
+        */
+        if (!vc.hasAttribute("SVLEN")) {
+            LOGGER.warn("Missing `SVLEN` attribute for an insertion: {}:{}-{}", vc.getContig(), vc.getStart(), vc.getID());
+            return List.of();
+        }
+        int insLength = vc.getAttributeAsInt("SVLEN", -1);
+
+        Optional<CoreData> cdOpt = extractCoreData(vc);
+        if (cdOpt.isEmpty()) {
+            return List.of();
+        }
 
 
-        return List.of();
+        String id = vc.getID();
+        CoreData cd = cdOpt.get();
+        Contig contig = cd.getContig();
+        Position begin = cd.getBegin();
+
+        Contig insContig = new InsertionContig(id, insLength);
+
+        // the 1st adjacency (alpha) starts at the POS coordinate, by convention on the (+) strand
+        ChromosomalPosition alphaLeftPos = ChromosomalPosition.of(contig, begin, Strand.FWD);
+        Breakend alphaLeft = SimpleBreakend.of(alphaLeftPos, id, vc.getReference().getDisplayString());
+        // the right position is the first base of the insertion contig
+        ChromosomalPosition alphaRightPos = ChromosomalPosition.of(insContig, Position.precise(1), Strand.FWD);
+        SimpleBreakend alphaRight = SimpleBreakend.of(alphaRightPos, id);
+        Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+
+        // the 2nd adjacency (beta) starts at the end of the insertion contig
+        ChromosomalPosition betaLeftPos = ChromosomalPosition.of(insContig, Position.precise(insLength), Strand.FWD);
+        SimpleBreakend betaLeft = SimpleBreakend.of(betaLeftPos, id);
+        // the right position is one base past the POS coordinate, by convention on (+) strand
+        ChromosomalPosition betaRightPos = ChromosomalPosition.of(contig, Position.imprecise(begin.getPos() + 1, begin.getConfidenceInterval()), Strand.FWD);
+        Breakend betaRight = SimpleBreakend.of(betaRightPos, id);
+        Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+        return List.of(alpha, beta);
     }
 
     /**

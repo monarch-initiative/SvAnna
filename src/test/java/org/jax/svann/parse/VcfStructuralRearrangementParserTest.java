@@ -41,7 +41,7 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
 
     @Test
     public void makeDeletionAdjacency() {
-        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=19\t";
+        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=20\t";
         VariantContext vc = VCF_CODEC.decode(line);
 
         Optional<Adjacency> adjacencyOpt = parser.makeDeletionAdjacency(vc);
@@ -56,7 +56,7 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
 
         Breakend right = adjacency.getRight();
         assertThat(right.getId(), is("DEL0"));
-        assertThat(right.getBeginPosition(), is(Position.precise(20)));
+        assertThat(right.getBeginPosition(), is(Position.precise(21)));
         assertThat(right.getStrand(), is(Strand.FWD));
     }
 
@@ -83,12 +83,34 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
 
     @Test
     public void makeInsertionAdjacencies() {
-        String line = "ctg1\t11\tINS0\tT\t<INS>\t6\tPASS\tSVTYPE=INS;END=11;SVLEN=10\t";
+        String line = "ctg1\t15\tINS0\tT\t<INS>\t6\tPASS\tSVTYPE=INS;END=15;SVLEN=10\t";
         VariantContext vc = VCF_CODEC.decode(line);
 
         List<? extends Adjacency> adjacencies = parser.makeInsertionAdjacencies(vc);
         assertThat(adjacencies, hasSize(2));
-        adjacencies.forEach(System.err::println);
+
+        Adjacency alpha = adjacencies.get(0);
+        Adjacency beta = adjacencies.get(1);
+
+        Breakend alphaLeft = alpha.getLeft();
+        assertThat(alphaLeft.getId(), is("INS0"));
+        assertThat(alphaLeft.getBeginPosition(), is(Position.precise(15)));
+        assertThat(alphaLeft.getStrand(), is(Strand.FWD));
+
+        Breakend alphaRight = alpha.getRight();
+        assertThat(alphaRight.getId(), is("INS0"));
+        assertThat(alphaRight.getBeginPosition(), is(Position.precise(1)));
+        assertThat(alphaRight.getStrand(), is(Strand.FWD));
+
+        Breakend betaLeft = beta.getLeft();
+        assertThat(betaLeft.getId(), is("INS0"));
+        assertThat(betaLeft.getBeginPosition(), is(Position.precise(10)));
+        assertThat(betaLeft.getStrand(), is(Strand.FWD));
+
+        Breakend betaRight = beta.getRight();
+        assertThat(betaRight.getId(), is("INS0"));
+        assertThat(betaRight.getBeginPosition(), is(Position.precise(16)));
+        assertThat(betaRight.getStrand(), is(Strand.FWD));
     }
 
     @Test

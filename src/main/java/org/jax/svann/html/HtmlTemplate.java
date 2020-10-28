@@ -10,7 +10,7 @@ import java.util.Map;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.core.HTMLOutputFormat;
 import freemarker.template.*;
-import org.jax.svann.reference.IntrachromosomalEvent;
+import org.jax.svann.priority.PrioritizedSv;
 
 public class HtmlTemplate {
     /** Map of data that will be used for the FreeMark template. */
@@ -20,7 +20,7 @@ public class HtmlTemplate {
 
     protected static final String EMPTY_STRING="";
 
-    public HtmlTemplate(List<IntrachromosomalEvent> svAnnList) {
+    public HtmlTemplate(List<PrioritizedSv> svAnnList) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);

@@ -4,8 +4,7 @@ import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
-import org.jax.svann.parse.SvEvent;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.viz.Visualizable;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -14,12 +13,12 @@ import java.util.Set;
 
 public class PrioritizedSv implements SvPriority, Visualizable {
     /** A structural variant that is being prioritized. */
-    private final SvEvent svEvent;
+    private final SequenceRearrangement svEvent;
     private final List<Overlap> overlaps;
     private final List<Enhancer> enhancers;
     private final List<HpoDiseaseSummary> diseases;
 
-    private PrioritizedSv(SvEvent e, List<Overlap> overlaps, List<Enhancer> enhancers, List<HpoDiseaseSummary> diseases) {
+    private PrioritizedSv(SequenceRearrangement e, List<Overlap> overlaps, List<Enhancer> enhancers, List<HpoDiseaseSummary> diseases) {
         this.svEvent = e;
         this.overlaps = overlaps;
         this.enhancers = enhancers;
@@ -29,7 +28,7 @@ public class PrioritizedSv implements SvPriority, Visualizable {
 
 
 
-    public static PrioritizedSv fromSvEvent(SvEvent sve, List<Overlap> overlaps, List<Enhancer> enhancers, List<HpoDiseaseSummary> diseases) {
+    public static PrioritizedSv fromSvEvent(SequenceRearrangement sve, List<Overlap> overlaps, List<Enhancer> enhancers, List<HpoDiseaseSummary> diseases) {
 
         return new PrioritizedSv(sve, overlaps, enhancers, diseases);
     }

@@ -2,8 +2,6 @@ package org.jax.svann.cmd;
 
 
 import org.jax.svann.SvAnnAnalysis;
-import org.jax.svann.html.HtmlTemplate;
-import org.jax.svann.reference.IntrachromosomalEvent;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

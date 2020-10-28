@@ -1,8 +1,6 @@
 package org.jax.svann.overlap;
 
 import org.jax.svann.TestBase;
-import org.jax.svann.parse.SvEvent;
-import org.jax.svann.reference.IntrachromosomalEvent;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
@@ -31,8 +29,8 @@ public class OverlapperTest extends TestBase {
     @Test
     public void getOverlapList() {
         // TODO: 26. 10. 2020 implement
-        IntrachromosomalEvent event = SvEvent.precise(CHR9, 136_224_000, 136_225_000, Strand.FWD, SvType.DELETION);
-        final List<Overlap> overlaps = overlapper.getOverlapList(event);
-        overlaps.forEach(System.err::println);
+//        IntrachromosomalEvent event = SvEvent.precise(CHR9, 136_224_000, 136_225_000, Strand.FWD, SvType.DELETION);
+//        final List<Overlap> overlaps = overlapper.getOverlapList(event);
+//        overlaps.forEach(System.err::println);
     }
 }

@@ -8,7 +8,7 @@ import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
-import org.jax.svann.reference.IntrachromosomalEvent;
+import org.jax.svann.reference.SequenceRearrangement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,13 +79,14 @@ public class Overlapper {
      *
      * @param svEvent
      * @return list of overlapping transcripts.
+     * TODO REFACTOR
      */
-    public List<Overlap> getOverlapList(IntrachromosomalEvent svEvent) {
+    public List<Overlap> getOverlapList(SequenceRearrangement svEvent) {
         // TODO: 26. 10. 2020 check coordinate remapping
-        int id = svEvent.getContig().getId();
+        int id = 42;//svEvent.getAdjacencies().get(0)..getId();
         Strand strand = Strand.FWD; // We assume all SVs are on the forward strand
 
-        GenomeInterval structVarInterval = new GenomeInterval(rd, strand, id, svEvent.getBegin(), svEvent.getEnd());
+        GenomeInterval structVarInterval = new GenomeInterval(rd, strand, id, 42,43);//svEvent.getBegin(), svEvent.getEnd());
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
                 iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());

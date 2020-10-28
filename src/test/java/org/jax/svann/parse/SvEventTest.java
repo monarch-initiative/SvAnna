@@ -1,16 +1,9 @@
 package org.jax.svann.parse;
 
 import org.jax.svann.ContigImpl;
-import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SvEventTest {
 

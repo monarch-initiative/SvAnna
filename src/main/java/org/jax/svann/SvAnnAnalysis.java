@@ -7,7 +7,6 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.overlap.Overlap;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.parse.*;
 import org.jax.svann.reference.SequenceRearrangement;

@@ -1,14 +1,10 @@
 package org.jax.svann.overlap;
 
 import org.jax.svann.TestBase;
-import org.jax.svann.reference.Strand;
-import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 public class OverlapperTest extends TestBase {
 
@@ -18,7 +14,7 @@ public class OverlapperTest extends TestBase {
 
     @BeforeAll
     public static void beforeAll() {
-        CHR9 = GENOME_ASSEMBLY.getContigByName("chr9").get();
+        CHR9 = GENOME_ASSEMBLY.getContigByName("chr9").orElseThrow();
     }
 
     @BeforeEach

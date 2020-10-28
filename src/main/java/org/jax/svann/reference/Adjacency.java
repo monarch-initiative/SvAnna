@@ -16,4 +16,13 @@ public interface Adjacency {
     default Strand getStrand() {
         return getLeft().getStrand();
     }
+
+    /**
+     * Convert the adjacency to opposite strand no matter what.
+     */
+    default Adjacency toOppositeStrand() {
+        return getStrand().equals(Strand.FWD)
+                ? withStrand(Strand.REV)
+                : withStrand(Strand.FWD);
+    }
 }

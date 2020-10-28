@@ -16,23 +16,23 @@ class SimpleBreakend implements Breakend {
     private final String id;
     private final String ref;
 
+    private SimpleBreakend(ChromosomalRegion position,
+                           String id,
+                           String ref) {
+        this.position = position;
+        this.id = id;
+        this.ref = ref;
+    }
+
     static SimpleBreakend of(ChromosomalRegion position,
-                       String id,
-                       String ref) {
+                             String id,
+                             String ref) {
         return new SimpleBreakend(position, id, ref);
     }
 
     static SimpleBreakend of(ChromosomalRegion position,
-                       String id) {
+                             String id) {
         return new SimpleBreakend(position, id, EMPTY);
-    }
-
-    private SimpleBreakend(ChromosomalRegion position,
-                   String id,
-                   String ref) {
-        this.position = position;
-        this.id = id;
-        this.ref = ref;
     }
 
     @Override
@@ -91,10 +91,8 @@ class SimpleBreakend implements Breakend {
 
     @Override
     public String toString() {
-        return "SimpleBreakend{" +
-                "position=" + position +
-                ", id='" + id + '\'' +
-                ", ref='" + ref + '\'' +
-                '}';
+        return "BND[" + position +
+                "(" + id + ")" +
+                "'" + ref + "']";
     }
 }

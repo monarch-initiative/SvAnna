@@ -14,4 +14,13 @@ public interface Breakend extends ChromosomalRegion {
 
     @Override
     Breakend withStrand(Strand strand);
+
+    /**
+     * Convert the breakend to opposite strand no matter what.
+     */
+    default Breakend toOppositeStrand() {
+        return getStrand().equals(Strand.FWD)
+                ? withStrand(Strand.REV)
+                : withStrand(Strand.FWD);
+    }
 }

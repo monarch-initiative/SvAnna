@@ -55,7 +55,7 @@ class SimpleAdjacency implements Adjacency {
             return this;
         } else {
             // adjust strand and reverse order
-            return new SimpleAdjacency(right.withStrand(strand), left.withStrand(strand), Utils.reverseComplement(inserted));
+            return new SimpleAdjacency(right.toOppositeStrand(), left.toOppositeStrand(), Utils.reverseComplement(inserted));
         }
     }
 
@@ -75,9 +75,6 @@ class SimpleAdjacency implements Adjacency {
 
     @Override
     public String toString() {
-        return "SimpleAdjacency{" +
-                "left=" + left +
-                ", right=" + right +
-                '}';
+        return "ADJ[" + left + ", " + right + "]";
     }
 }

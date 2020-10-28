@@ -280,7 +280,7 @@ public class TestVariants extends TestBase {
                 ChromosomalPosition.of(chr13, Position.precise(32_300_000), Strand.FWD),
                 "tra_r", "");
 
-        return SimpleSequenceRearrangement.of(SvType.INSERTION, SimpleAdjacency.empty(left, right));
+        return SimpleSequenceRearrangement.of(SvType.TRANSLOCATION, SimpleAdjacency.empty(left, right));
     }
 
 }

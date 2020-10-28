@@ -240,4 +240,92 @@ public class OverlapperTest extends TestBase {
         }
     }
 
+
+    /**
+     * Insertion in 3'UTR
+     * <p>
+     * SURF1:NM_003172.4 10bp insertion in 3UTR
+     * chr9:133_351_851-133_351_851
+     */
+    @Test
+    public void testInsertionIn3UTR() {
+        SequenceRearrangement surf2insertion3utr = insertionIn3UTR();
+        List<Overlap> overlaps = overlapper.getOverlapList(surf2insertion3utr);
+        assertEquals(3, overlaps.size());
+        Set<String> expectedAccessionNumbers = Set.of("NM_003172.3","NM_001280787.1", "XM_011518942.1");
+        Set<String> observedAccessionNumbers = overlaps.stream().map(Overlap::getAccession).collect(Collectors.toSet());
+        assertEquals(expectedAccessionNumbers, observedAccessionNumbers);
+        for (var o : overlaps) {
+            assertEquals(SINGLE_EXON_IN_TRANSCRIPT, o.getOverlapType());
+            assertFalse(o.overlapsCds());
+        }
+    }
+
+
+    /**
+     * Insertion in exon.
+     * <p>
+     * SURF2:NM_017503.5 10bp insertion in exon 4
+     * chr9:133_360_001-133_360_001
+     */
+
+    @Test
+    public void testInsertionInExon4() {
+        SequenceRearrangement surf2insertionExon4 = insertionInExon4();
+        List<Overlap> overlaps = overlapper.getOverlapList(surf2insertionExon4);
+        assertEquals(2, overlaps.size());
+        Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");
+        Set<String> observedAccessionNumbers = overlaps.stream().map(Overlap::getAccession).collect(Collectors.toSet());
+        assertEquals(expectedAccessionNumbers, observedAccessionNumbers);
+        for (var o : overlaps) {
+            assertEquals(SINGLE_EXON_IN_TRANSCRIPT, o.getOverlapType());
+            assertTrue(o.overlapsCds());
+        }
+    }
+
+    /**
+     * Insertion in intron.
+     * <p>
+     * SURF2:NM_017503.5 10bp insertion in intron 3
+     * chr9:133_359_001-133_359_001
+     *
+     * INTRONIC, NON-CDS
+     */
+    @Test
+    public void testInsertionInIntron3() {
+        SequenceRearrangement surf2insertionIntron3 = insertionInIntron3();
+        List<Overlap> overlaps = overlapper.getOverlapList(surf2insertionIntron3);
+        assertEquals(2, overlaps.size());
+        Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");
+        Set<String> observedAccessionNumbers = overlaps.stream().map(Overlap::getAccession).collect(Collectors.toSet());
+        assertEquals(expectedAccessionNumbers, observedAccessionNumbers);
+        for (var o : overlaps) {
+            assertEquals(INTRONIC, o.getOverlapType());
+            assertFalse(o.overlapsCds());
+        }
+    }
+
+    /**
+     * Translocation where one CDS is disrupted and the other is not
+     * <p>
+     * left mate, SURF2:NM_017503.5 intron 3 (disrupted CDS)
+     * chr9:133_359_000 (+)
+     * right mate, upstream from BRCA2 (not disrupted)
+     * chr13:32_300_000 (+)
+     *
+     * TODO discuss behavior
+     * The SURF2 breakend is in an intron of SURF2, but this will clearly disrupt the CDS.
+     * I think it is ok that the overlap objects do not know about this, we will
+     * do this in the SvPrioritizer class.
+     */
+    @Test
+    public void testTranslocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+        SequenceRearrangement translocation = translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
+        List<Overlap> overlaps = overlapper.getOverlapList(translocation);
+        assertEquals(2, overlaps.size());
+        // The following do not work because the breakend is in an intron of SURF2
+        //Overlap codingOverlap = overlaps.stream().filter(Overlap::overlapsCds).findFirst().orElseThrow();
+        //assertEquals("SURF2", codingOverlap.getGeneSymbol());
+    }
+
 }

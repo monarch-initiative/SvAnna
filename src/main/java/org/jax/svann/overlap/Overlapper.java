@@ -91,6 +91,8 @@ public class Overlapper {
             return getDeletionOverlaps(rearrangement);
         } else if (rearrangement.getType() == SvType.INSERTION) {
             return getInsertionOverlaps(rearrangement);
+        }  else if (rearrangement.getType() == SvType.TRANSLOCATION) {
+            return getTranslocationOverlaps(rearrangement);
         } else {
             return List.of();
         }
@@ -102,6 +104,53 @@ public class Overlapper {
 //        IntervalArray<TranscriptModel>.QueryResult queryResult =
 //                iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
 //        return getOverlapList(structVarInterval, queryResult);
+    }
+
+    /**
+     * This method returns all overlapping transcripts for simple deletions. We assume that deletions
+     * are forward strand (it does not matter but is needed by the API).
+     * @param srearrangement The candidate deletion
+     * @return List over overlapping transcripts
+     */
+    public List<Overlap> getTranslocationOverlaps(SequenceRearrangement srearrangement) {
+        List<Adjacency> adjacencies = srearrangement.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            throw new SvAnnRuntimeException("Malformed delection adjacency list with size " + adjacencies.size());
+        }
+        Adjacency translocation = adjacencies.get(0);
+        Breakend breakendA = translocation.getLeft();
+        Breakend breakendB = translocation.getRight();
+        List<Overlap> overlapA = getTranslocationPartOverlap(breakendA);
+        List<Overlap> overlapB = getTranslocationPartOverlap(breakendB);
+        // we would like to return one Overlap object for each end of the transclocation
+        // if there is a coding overlap return it, otherwise return any of the returned overlaps
+        // TODO consider the optimal behavior!
+        List<Overlap> translocationOverlapPair = new ArrayList<>();
+        Optional<Overlap> optOverlap = overlapA.stream().filter(Overlap::overlapsCds).findAny();
+        if (optOverlap.isPresent()) {
+            translocationOverlapPair.add(optOverlap.get());
+        } else {
+            translocationOverlapPair.add(overlapA.get(0));
+        }
+        optOverlap = overlapB.stream().filter(Overlap::overlapsCds).findAny();
+        if (optOverlap.isPresent()) {
+            translocationOverlapPair.add(optOverlap.get());
+        } else {
+            translocationOverlapPair.add(overlapB.get(0));
+        }
+        return translocationOverlapPair;
+    }
+
+    private List<Overlap> getTranslocationPartOverlap(Breakend bend) {
+        Contig chrom = bend.getContig();
+        int id = chrom.getId();
+        int begin = bend.getBegin();
+        int end = bend.getEnd();
+        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
+        IntervalArray<TranscriptModel>.QueryResult queryResult =
+                iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
+        return getOverlapList(structVarInterval, queryResult);
     }
 
     /**

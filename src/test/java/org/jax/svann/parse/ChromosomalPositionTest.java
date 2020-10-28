@@ -37,6 +37,7 @@ public class ChromosomalPositionTest {
 
         pos = precise.withStrand(Strand.REV);
         assertThat(pos.getBeginPosition(), is(Position.precise(8)));
+        assertThat(pos.getEndPosition(), is(Position.precise(8)));
         assertThat(pos.getStrand(), is(Strand.REV));
 
         // imprecise
@@ -45,6 +46,7 @@ public class ChromosomalPositionTest {
 
         pos = imprecise.withStrand(Strand.REV);
         assertThat(pos.getBeginPosition(), is(Position.imprecise(6, ConfidenceInterval.of(2, 1))));
+        assertThat(pos.getEndPosition(), is(Position.imprecise(6, ConfidenceInterval.of(2, 1))));
         assertThat(pos.getStrand(), is(Strand.REV));
     }
 }

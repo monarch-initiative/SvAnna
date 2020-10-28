@@ -57,7 +57,11 @@ class SimpleBreakend implements Breakend {
 
     @Override
     public Breakend withStrand(Strand strand) {
-        throw new RuntimeException("Not yet implemented");
+        if (position.getStrand().equals(strand)) {
+            return this;
+        } else {
+            return new SimpleBreakend(position.withStrand(strand), id, Utils.reverseComplement(ref));
+        }
     }
 
     @Override

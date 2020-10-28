@@ -37,7 +37,7 @@ public class HpoDiseaseGeneMap {
         this.ontology = OntologyLoader.loadOntology(new File(hpOboPath));
         List<String> desiredDatabasePrefixes= ImmutableList.of("OMIM");
         String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
-        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath, mim2geneMedgenPath, orphaToGeneFile, phenotypeHpoaPath, ontology);
+        HpoAssociationParser hap = new HpoAssociationParser(new File(geneInfoPath), new File(mim2geneMedgenPath), null, new File(phenotypeHpoaPath), ontology);
         this.disease2geneIdMultiMap = hap.getDiseaseToGeneIdMap();
         this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath,ontology,desiredDatabasePrefixes);
     }
@@ -76,10 +76,10 @@ public class HpoDiseaseGeneMap {
      */
     public static HpoDiseaseGeneMap loadGenesAndDiseaseMap() {
         // TODO: 26. 10. 2020 externalize
-        String hpoPath = String.join("data", File.separator, "hp.obo");
-        String phenotypeHpoaPath = String.join("data", File.separator, "phenotype.hpoa");
-        String mim2geneMedgenPath = String.join("data", File.separator, "mim2gene_medgen");
-        String geneInfoPath = String.join("data", File.separator, "Homo_sapiens_gene_info.gz");
+        String hpoPath = String.format("%s%s%s", "data", File.separator, "hp.obo");
+        String phenotypeHpoaPath = String.format("%s%s%s", "data", File.separator, "phenotype.hpoa");
+        String mim2geneMedgenPath = String.format("%s%s%s", "data", File.separator, "mim2gene_medgen");
+        String geneInfoPath = String.format("%s%s%s", "data", File.separator, "Homo_sapiens_gene_info.gz");
         File hpoFile = new File(hpoPath);
         File phenotypeFile = new File(phenotypeHpoaPath);
         File mim2geneFile = new File(mim2geneMedgenPath);

@@ -26,8 +26,6 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
     protected String vcfFile;
-    @CommandLine.Option(names = {"-l", "--lirical"}, required = true)
-    protected String liricalFile;
     @CommandLine.Option(names = {"-e","--enhancer"},  description = "tspec enhancer file")
     private String enhancerFile = null;
     @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list)")

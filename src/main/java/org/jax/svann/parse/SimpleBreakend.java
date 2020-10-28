@@ -6,20 +6,33 @@ import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
-public class SimpleBreakend implements Breakend {
+import java.util.Objects;
+
+class SimpleBreakend implements Breakend {
+
+    private static final String EMPTY = "";
 
     private final ChromosomalRegion position;
     private final String id;
-    private final String ref, inserted;
+    private final String ref;
 
+    static SimpleBreakend of(ChromosomalRegion position,
+                       String id,
+                       String ref) {
+        return new SimpleBreakend(position, id, ref);
+    }
 
-    SimpleBreakend(ChromosomalRegion position,
-                   String id, String ref,
-                   String inserted) {
+    static SimpleBreakend of(ChromosomalRegion position,
+                       String id) {
+        return new SimpleBreakend(position, id, EMPTY);
+    }
+
+    private SimpleBreakend(ChromosomalRegion position,
+                   String id,
+                   String ref) {
         this.position = position;
         this.id = id;
         this.ref = ref;
-        this.inserted = inserted;
     }
 
     @Override
@@ -58,8 +71,18 @@ public class SimpleBreakend implements Breakend {
     }
 
     @Override
-    public String getInserted() {
-        return inserted;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SimpleBreakend that = (SimpleBreakend) o;
+        return Objects.equals(position, that.position) &&
+                Objects.equals(id, that.id) &&
+                Objects.equals(ref, that.ref);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(position, id, ref);
     }
 
     @Override
@@ -68,7 +91,6 @@ public class SimpleBreakend implements Breakend {
                 "position=" + position +
                 ", id='" + id + '\'' +
                 ", ref='" + ref + '\'' +
-                ", inserted='" + inserted + '\'' +
                 '}';
     }
 }

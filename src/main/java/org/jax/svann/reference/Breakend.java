@@ -12,11 +12,6 @@ public interface Breakend extends ChromosomalRegion {
      */
     String getRef();
 
-    /**
-     * @return alt allele sequence
-     */
-    String getInserted();
-
     @Override
     Breakend withStrand(Strand strand);
 }

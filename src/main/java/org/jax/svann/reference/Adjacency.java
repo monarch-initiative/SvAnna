@@ -9,6 +9,8 @@ public interface Adjacency {
 
     Breakend getRight();
 
+    byte[] getInserted();
+
     Adjacency withStrand(Strand strand);
 
     default Strand getStrand() {

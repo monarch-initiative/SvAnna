@@ -82,6 +82,16 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
     }
 
     @Test
+    public void makeInsertionAdjacencies() {
+        String line = "ctg1\t11\tINS0\tT\t<INS>\t6\tPASS\tSVTYPE=INS;END=11;SVLEN=10\t";
+        VariantContext vc = VCF_CODEC.decode(line);
+
+        List<? extends Adjacency> adjacencies = parser.makeInsertionAdjacencies(vc);
+        assertThat(adjacencies, hasSize(2));
+        adjacencies.forEach(System.err::println);
+    }
+
+    @Test
     public void makeInversionAdjacencies() {
         String line = "ctg1\t11\tINV0\tT\t<INV>\t6\tPASS\tSVTYPE=INV;END=19\t";
         VariantContext vc = VCF_CODEC.decode(line);

@@ -7,19 +7,21 @@ import org.jax.svann.reference.Strand;
 import java.util.Objects;
 
 /**
- * Adjacency ties together 2 breakends.
+ * Simple adjacency ties together 2 breakends with no inserted sequence.
  */
 class SimpleAdjacency implements Adjacency {
 
-    private final Breakend left, right;
+    private static final byte[] EMPTY = new byte[0];
 
-    static Adjacency of(Breakend left, Breakend right) {
-        return new SimpleAdjacency(left, right);
-    }
+    private final Breakend left, right;
 
     private SimpleAdjacency(Breakend left, Breakend right) {
         this.left = left;
         this.right = right;
+    }
+
+    static Adjacency of(Breakend left, Breakend right) {
+        return new SimpleAdjacency(left, right);
     }
 
     @Override
@@ -30,6 +32,11 @@ class SimpleAdjacency implements Adjacency {
     @Override
     public Breakend getRight() {
         return right;
+    }
+
+    @Override
+    public byte[] getInserted() {
+        return EMPTY;
     }
 
     @Override

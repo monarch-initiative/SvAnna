@@ -19,13 +19,14 @@ public class BreakendAssembler {
 
         // TODO: 22. 10. 2020 resolve
 
-        SimpleBreakend f = new SimpleBreakend(first.getPosition(), first.getId(), first.getRef(), first.getAlt());
-        SimpleBreakend s = new SimpleBreakend(second.getPosition(), second.getId(), second.getRef(), second.getAlt());
+        SimpleBreakend f = SimpleBreakend.of(first.getPosition(), first.getId(), first.getRef());
+        SimpleBreakend s = SimpleBreakend.of(second.getPosition(), second.getId(), second.getRef());
         return SimpleAdjacency.of(f, s);
     }
 
     public List<SequenceRearrangement> assemble(Collection<BreakendRecord> breakends) {
         List<SequenceRearrangement> rearrangements = new ArrayList<>();
+        // TODO: 28. 10. 2020 implement
         List<Adjacency> adjacencies = new ArrayList<>();
 
         Map<String, BreakendRecord> bndById = breakends.stream()

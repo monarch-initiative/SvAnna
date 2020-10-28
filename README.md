@@ -28,11 +28,6 @@ This command downloads various files and generates `data/hg38_refseq_curated.ser
 this to the data subdirectory in this project or softlink it (from 'data', enter `ln -s <path>`).
 Thus, for now, this project expects the path `data/data/refseq_curated.ser`.
 
-### LIRICAL
-Run [LIRICAL](https://github.com/TheJacksonLaboratory/LIRICAL) using only the clinical manifestations
-of the case, and output a TSV file. Consider using the 
-[PhenopacketGenerator](https://github.com/TheJacksonLaboratory/PhenopacketGenerator).
-
 ## Running svann
 
 Enter the following command to see options. The LIRICAL file is the 
@@ -42,20 +37,25 @@ it is required to also use an HPO term with the major phenotypic abnormality,
 e.g., [Abnormality of the immune system](https://hpo.jax.org/app/browse/term/HP:0002715).
 
 ```
-$ java -jar target/svann.jar
-LIRICAL to overlapping SV
-  -h, --help            Show this help message and exit.
-  -l, --lirical=<liricalFile>
-
-  -o, --out=<outname>
-  -v, --vcf=<vcfFile>
-  -V, --version         Print version information and exit.
-
+$  java -jar target/svann.jar annotate -h
+  Usage: svann annotate [-hV] [-e=<enhancerFile>] [-g=<geneCodePath>]
+                        [-j=<jannovarPath>] [-t=<hpoTermIdList>] -v=<vcfFile>
+                        [-x=<outprefix>]
+  annotate VCF file
+    -e, --enhancer=<enhancerFile>
+                               tspec enhancer file
+    -g, --gencode=<geneCodePath>
+  
+    -h, --help                 Show this help message and exit.
+    -j, --jannovar=<jannovarPath>
+                               prefix for output files (default:
+                                 data/data/hg38_refseq_curated.ser )
+    -t, --term=<hpoTermIdList> HPO term IDs (comma-separated list)
+    -v, --vcf=<vcfFile>
+    -V, --version              Print version information and exit.
+    -x, --prefix=<outprefix>   prefix for output files (default: L2O )
 ```
 
-
-We can run l2o to look for specific enhancer overlaps, e.g., for terms with
-	[Abnormal T cell morphology - HP:0002843](https://hpo.jax.org/app/browse/term/HP:0002843).
 
 
 

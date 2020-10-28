@@ -52,17 +52,17 @@ public class AnnotateCommand implements Callable<Integer> {
             // and this will turn off HPO prioritization.
         }
         svann = new SvAnnAnalysis(this.vcfFile, this.outprefix, this.enhancerFile, this.jannovarPath, tidList);
-        // 1. Prioritize the sequences by overlap with
-        svann.prioritizeSymbolSvs();
-        svann.prioritizeBreakendSvs();
-        // 2. prioritize by phenotype
-        if (tidList.size()>0) {
-            svann.prioritizeByPhenotype();
-        }
-
-        List<IntrachromosomalEvent> annList = List.of();//vcfParser.getAnnlist();
-        HtmlTemplate template = new HtmlTemplate(annList);
-        template.outputFile(this.outprefix);
+//        // 1. Prioritize the sequences by overlap with
+//        svann.prioritizeSymbolSvs();
+//        svann.prioritizeBreakendSvs();
+//        // 2. prioritize by phenotype
+//        if (tidList.size()>0) {
+//            svann.prioritizeByPhenotype();
+//        }
+//
+//        List<IntrachromosomalEvent> annList = List.of();//vcfParser.getAnnlist();
+//        HtmlTemplate template = new HtmlTemplate(annList);
+//        template.outputFile(this.outprefix);
         return 0;
     }
 

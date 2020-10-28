@@ -6,12 +6,14 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.jax.svann.ToyCoordinateTestBase;
 import org.jax.svann.reference.*;
+import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,14 +24,14 @@ import static org.hamcrest.core.Is.is;
 public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase {
 
     private static final VCFCodec VCF_CODEC = new VCFCodec();
-    private static final Path VCF_HEADER = Paths.get("src/test/resources/sv_example.vcf");
+    private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/sv_example.vcf");
     private static BreakendAssembler ASSEMBLER;
     private VcfStructuralRearrangementParser parser;
 
     @BeforeAll
     public static void beforeAll() {
         ASSEMBLER = new BreakendAssembler();
-        try (VCFFileReader reader = new VCFFileReader(VCF_HEADER, false)) {
+        try (VCFFileReader reader = new VCFFileReader(SV_EXAMPLE_PATH, false)) {
             VCF_CODEC.setVCFHeader(reader.getFileHeader(), VCFHeaderVersion.VCF4_3);
         }
     }
@@ -38,6 +40,19 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
     public void setUp() {
         parser = new VcfStructuralRearrangementParser(TOY_ASSEMBLY, ASSEMBLER);
     }
+
+    @Test
+    public void parseFile() throws Exception {
+        VcfStructuralRearrangementParser parser = new VcfStructuralRearrangementParser(GenomeAssemblyProvider.getGrch38Assembly(), ASSEMBLER);
+        Collection<SequenceRearrangement> rearrangements = parser.parseFile(SV_EXAMPLE_PATH);
+
+        // we expect to see 6 rearrangement when things are ready
+        assertThat(rearrangements, hasSize(6));
+    }
+
+    /*
+     *              TEST SYMBOLIC RECORD CONVERSION METHODS
+     */
 
     @Test
     public void makeDeletionAdjacency() {

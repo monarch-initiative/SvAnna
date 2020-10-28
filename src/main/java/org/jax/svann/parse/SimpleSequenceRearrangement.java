@@ -6,18 +6,27 @@ import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.SvType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 class SimpleSequenceRearrangement implements SequenceRearrangement {
 
-    private final List<Adjacency> adjacencies;
-
     private final SvType type;
 
-    SimpleSequenceRearrangement(List<Adjacency> adjacencies, SvType type) {
-        this.adjacencies = adjacencies;
+    private final List<Adjacency> adjacencies;
+
+    public static SimpleSequenceRearrangement of(SvType type, Adjacency... adjacencies) {
+        return new SimpleSequenceRearrangement(type, Arrays.asList(adjacencies));
+    }
+
+    public static SimpleSequenceRearrangement of(SvType type, List<Adjacency> adjacencies) {
+        return new SimpleSequenceRearrangement(type, adjacencies);
+    }
+
+    private SimpleSequenceRearrangement(SvType type, List<Adjacency> adjacencies) {
         this.type = type;
+        this.adjacencies = adjacencies;
     }
 
     @Override
@@ -40,7 +49,7 @@ class SimpleSequenceRearrangement implements SequenceRearrangement {
             for (int i = adjacencies.size() - 1; i >= 0; i--) {
                 reversed.add(adjacencies.get(i).toOppositeStrand());
             }
-            return new SimpleSequenceRearrangement(reversed, type);
+            return new SimpleSequenceRearrangement(type, reversed);
         }
     }
 

@@ -41,7 +41,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
              */
 
             for (VariantContext vc : reader) {
-                final SvType svType = SvType.fromString(vc.getAttributeAsString("SVTYPE", "UNKNOWN"));
+                SvType svType = SvType.fromString(vc.getAttributeAsString("SVTYPE", "UNKNOWN"));
                 if (svType.equals(SvType.BND)) {
                     // decode the required information from this breakend record
                     parseBreakend(vc).ifPresent(breakendRecords::add);
@@ -60,13 +60,12 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
     }
 
     private Optional<BreakendRecord> parseBreakend(VariantContext vc) {
-        final Optional<Contig> contigOptional = assembly.getContigByName(vc.getContig());
+        Optional<Contig> contigOptional = assembly.getContigByName(vc.getContig());
         if (contigOptional.isEmpty()) {
             LOGGER.warn("Unknown contig `{}` for variant {}", vc.getContig(), vc);
             return Optional.empty();
         }
-        final Contig contig = contigOptional.get();
-
+        Contig contig = contigOptional.get();
         // position
         Position position;
         if (vc.hasAttribute("CIPOS")) {
@@ -80,6 +79,9 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         } else {
             position = Position.precise(vc.getStart(), CoordinateSystem.ONE_BASED);
         }
+
+        // event ID
+        String eventId = vc.getAttributeAsString("EVENT", null);
 
         // mate ID
         List<String> mateIds = vc.getAttributeAsStringList("MATEID", null);
@@ -99,7 +101,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
 
         // in VCF specs, the position is always on the FWD(+) strand
         final ChromosomalPosition breakendPosition = ChromosomalPosition.of(contig, position, Strand.FWD);
-        final BreakendRecord breakendRecord = new BreakendRecord(breakendPosition, vc.getID(), mateId, ref, alt);
+        final BreakendRecord breakendRecord = new BreakendRecord(breakendPosition, vc.getID(), eventId, mateId, ref, alt);
 
         return Optional.of(breakendRecord);
     }
@@ -148,8 +150,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
                 return Optional.empty();
         }
 
-
-        return Optional.of(new SimpleSequenceRearrangement(adjacencies, svType));
+        return Optional.of(SimpleSequenceRearrangement.of(svType, adjacencies));
     }
 
     Optional<Adjacency> makeDeletionAdjacency(VariantContext vc) {

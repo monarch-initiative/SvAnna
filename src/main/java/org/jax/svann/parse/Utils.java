@@ -15,6 +15,11 @@ class Utils {
 
     private static final Map<Byte, Byte> IUPAC_COMPLEMENT_MAP = makeIupacByteMap(IUPAC);
 
+    /**
+     *
+     */
+    static final String IUPAC_BASES = "ACGTUWSMKRYBDHVNacgtuwsmkrybdhvn";
+
     private Utils() {
         // static utility class
     }

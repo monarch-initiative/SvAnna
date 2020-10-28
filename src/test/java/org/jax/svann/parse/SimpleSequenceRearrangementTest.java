@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.hamcrest.Matchers.*;
 
 public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
@@ -33,7 +32,7 @@ public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
         Breakend betaRight = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 20, Strand.FWD), "betaRight");
         Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
-        instance = new SimpleSequenceRearrangement(List.of(alpha, beta), SvType.INVERSION);
+        instance = SimpleSequenceRearrangement.of(SvType.INVERSION, alpha, beta);
     }
 
     @Test

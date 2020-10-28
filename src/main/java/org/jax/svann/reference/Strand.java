@@ -10,6 +10,19 @@ public enum Strand {
         this.name = name;
     }
 
+    public boolean isForward() {
+        return this == FWD;
+    }
+
+    public boolean isReverse() {
+        return this == REV;
+    }
+
+    public Strand getOpposite() {
+        return isForward()
+                ? REV
+                : FWD;
+    }
 
     @Override
     public String toString() {

@@ -66,6 +66,10 @@ public class Overlap {
         return overlapType;
     }
 
+//    public TermId getGeneId() {
+//        return TermId.of(this.transcriptModel.getGeneID())
+//    }
+
     @Override
     public String toString() {
         return String.format("VcfOverlap [%s:%s] %dbp; 3'",

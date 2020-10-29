@@ -8,6 +8,8 @@ import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.viz.Visualizable;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -18,19 +20,12 @@ public class PrioritizedSv implements SvPriority, Visualizable {
     private final List<Enhancer> enhancers;
     private final List<HpoDiseaseSummary> diseases;
 
-    private PrioritizedSv(SequenceRearrangement e, List<Overlap> overlaps, List<Enhancer> enhancers, List<HpoDiseaseSummary> diseases) {
+    public PrioritizedSv(SequenceRearrangement e, List<Overlap> overlaps, List<Enhancer> enhancers, Set<HpoDiseaseSummary> diseases) {
         this.svEvent = e;
         this.overlaps = overlaps;
         this.enhancers = enhancers;
-        this.diseases = diseases;
+        this.diseases = new ArrayList<>(diseases);
 
-    }
-
-
-
-    public static PrioritizedSv fromSvEvent(SequenceRearrangement sve, List<Overlap> overlaps, List<Enhancer> enhancers, List<HpoDiseaseSummary> diseases) {
-
-        return new PrioritizedSv(sve, overlaps, enhancers, diseases);
     }
 
 

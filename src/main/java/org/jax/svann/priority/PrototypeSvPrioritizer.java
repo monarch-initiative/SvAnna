@@ -56,13 +56,11 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                            Set<TermId> relevantHposForEnhancers,
                            Map<Integer, IntervalArray<Enhancer>> enhancerMap,
                            Map<TermId, Set<HpoDiseaseSummary>> gene2diseaseMap,
-                           String jannovarPath
-    ) {
+                           JannovarData jannovarData) {
         this.assembly = assembly;
         this.relevantHpoIdsForEnhancers = relevantHposForEnhancers;
         this.chromosomeToEnhancerIntervalArrayMap = enhancerMap;
         this.relevantGeneIdToAssociatedDiseaseMap = gene2diseaseMap;
-        JannovarData jannovarData = readJannovarData(jannovarPath);
         overlapper = new Overlapper(jannovarData);
         this.rd = jannovarData.getRefDict();
     }
@@ -71,7 +69,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     @Override
     public PrioritizedSv prioritize(SequenceRearrangement rearrangement) {
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
-        // Here we want to do something fasncy to see of an SV interrupts enhancer-gene interactions, e.g., Inversion,
+        // Here we want to do something fancy to see if an SV interrupts enhancer-gene interactions, e.g., Inversion,
         // but for now let's just see if the SV directly affects and enhancer
         for (var adjacency : rearrangement.getAdjacencies()) {
             int contigId = adjacency.getLeft().getContig().getId();

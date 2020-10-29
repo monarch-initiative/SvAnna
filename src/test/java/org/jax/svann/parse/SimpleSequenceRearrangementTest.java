@@ -50,7 +50,7 @@ public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
         rearrangement = instance.withStrand(Strand.REV);
 
         // assert
-        assertThat(rearrangement.getStrand(), is(Strand.REV));
+        assertThat(rearrangement.getLeftmostStrand(), is(Strand.REV));
         assertThat(rearrangement.getType(), is(SvType.INVERSION));
 
         List<Adjacency> adjacencies = rearrangement.getAdjacencies();
@@ -79,5 +79,25 @@ public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
         assertThat(betaRight.getBegin(), is(21));
         assertThat(betaRight.getStrand(), is(Strand.REV));
         assertThat(betaRight.getId(), is("alphaLeft"));
+    }
+
+    @Test
+    public void getLeftmostStrand() {
+        assertThat(instance.getLeftmostStrand(), is(Strand.FWD));
+    }
+
+    @Test
+    public void getLeftmostPosition() {
+        assertThat(instance.getLeftmostPosition(), is(10));
+    }
+
+    @Test
+    public void getRightmostStrand() {
+        assertThat(instance.getRightmostStrand(), is(Strand.FWD));
+    }
+
+    @Test
+    public void getRightmostPosition() {
+        assertThat(instance.getRightmostPosition(), is(20));
     }
 }

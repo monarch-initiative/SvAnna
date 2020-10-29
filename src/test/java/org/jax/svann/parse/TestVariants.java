@@ -145,12 +145,12 @@ public class TestVariants extends TestBase {
      * chr13:32_280_001-32_290_000
      */
     public static SequenceRearrangement deletionUpstreamIntergenic() {
-        Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
+        Contig chr13 = GENOME_ASSEMBLY.getContigByName("13").get();
         SimpleBreakend left = SimpleBreakend.of(
-                ChromosomalPosition.of(chr9, Position.precise(32_280_001), Strand.FWD),
+                ChromosomalPosition.of(chr13, Position.precise(32_280_001), Strand.FWD),
                 "del_upstream_intergenic_l", "T");
         SimpleBreakend right = SimpleBreakend.of(
-                ChromosomalPosition.of(chr9, Position.precise(32_290_000), Strand.FWD),
+                ChromosomalPosition.of(chr13, Position.precise(32_290_000), Strand.FWD),
                 "del_upstream_intergenic_r", "G");
 
         return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));

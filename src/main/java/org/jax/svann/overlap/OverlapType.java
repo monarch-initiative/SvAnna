@@ -22,9 +22,9 @@ public enum OverlapType {
      */
     DOWNSTREAM_GENE_VARIANT_5KB("5kb downstream gene variant"),
     /**
-     * 500KB_downstream_variant (SO:0001634)
+     * 500B_downstream_variant (SO:0001634)
      */
-    DOWNSTREAM_GENE_VARIANT_500KB("500kb downstream gene variant"),
+    DOWNSTREAM_GENE_VARIANT_500B("500b downstream gene variant"),
     /**
      * upstream_gene_variant (SO:0001631)
      */
@@ -48,7 +48,7 @@ public enum OverlapType {
     UNKNOWN("unknown");
 
     private final static Set<OverlapType> intergenicTypes = Set.of(DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_5KB,
-            DOWNSTREAM_GENE_VARIANT_500KB, UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_500KB);
+            DOWNSTREAM_GENE_VARIANT_500B, UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_500KB);
     private final static Set<OverlapType> exonicTypes = Set.of(SINGLE_EXON_IN_TRANSCRIPT, MULTIPLE_EXON_IN_TRANSCRIPT, TRANSCRIPT_CONTAINED_IN_SV);
     private final static Set<OverlapType> intronicTypes = Set.of(INTRONIC);
 

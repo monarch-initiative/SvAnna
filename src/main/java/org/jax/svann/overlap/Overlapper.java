@@ -281,12 +281,12 @@ public class Overlapper {
         if (tmodelRight != null) {
             int rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
             description = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
-            if (rightDistance <= 2_000) {
+            if (rightDistance <= 500) {
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500B, tmodelRight, rightDistance, description));
+            } else if (rightDistance <= 2_000) {
                 overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, tmodelRight, rightDistance, description));
             } else if (rightDistance <= 5_000) {
                 overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, tmodelRight, rightDistance, description));
-            } else if (rightDistance <= 500_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, tmodelRight, rightDistance, description));
             } else {
                 overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, tmodelRight, rightDistance, description));
             }

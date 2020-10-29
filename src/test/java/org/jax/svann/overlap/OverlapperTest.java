@@ -3,8 +3,6 @@ package org.jax.svann.overlap;
 import org.jax.svann.TestBase;
 import org.jax.svann.parse.TestVariants;
 import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.genome.Contig;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 
 import static org.jax.svann.overlap.OverlapType.*;
 import static org.jax.svann.parse.TestVariants.*;
-import static org.jax.svann.reference.SvType.INSERTION;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -188,7 +185,7 @@ public class OverlapperTest extends TestBase {
         assertEquals(1, overlaps.size());
         Overlap overlap = overlaps.get(0);
         assertEquals("SURF1", overlap.getGeneSymbol());
-        assertEquals(DOWNSTREAM_GENE_VARIANT_500KB, overlap.getOverlapType());
+        assertEquals(DOWNSTREAM_GENE_VARIANT, overlap.getOverlapType());
         assertFalse(overlap.overlapsCds());
     }
 
@@ -196,17 +193,16 @@ public class OverlapperTest extends TestBase {
     /**
      * Deletion upstream intergenic.
      * <p>
-     * SURF1:NM_017503.5 upstream, 10kb deletion
-     * chr9:133_380_001-133_381_000
+     * BRCA2:NM_0000059 upstream, 10kb deletion
+     * chr13:32_280_001-32_290_000
      */
-
     @Test
     public void testDeletionUpstreamIntergenic() {
         SequenceRearrangement surf1Upstream = deletionUpstreamIntergenic();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1Upstream);
         assertEquals(1, overlaps.size());
         Overlap overlap = overlaps.get(0);
-        assertEquals("SURF2", overlap.getGeneSymbol());
+        assertEquals("BRCA2", overlap.getGeneSymbol());
         assertEquals(UPSTREAM_GENE_VARIANT_500KB, overlap.getOverlapType());
         assertFalse(overlap.overlapsCds());
     }

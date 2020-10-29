@@ -135,15 +135,15 @@ public class TestVariants extends TestBase {
     /**
      * Deletion upstream intergenic.
      * <p>
-     * SURF1:NM_017503.5 upstream, 10kb deletion
-     * chr9:133_380_001-133_381_000
+     * BRCA2:NM_0000059 upstream, 10kb deletion
+     * chr13:32_280_001-32_290_000
      */
     public static SequenceRearrangement deletionUpstreamIntergenic() {
         SimpleBreakend left = SimpleBreakend.of(
-                ChromosomalPosition.of(GENOME_ASSEMBLY.getContigByName("9").get(), Position.precise(133_380_001), Strand.FWD),
-                "del_upstream_intergenic_l", "C");
+                ChromosomalPosition.of(GENOME_ASSEMBLY.getContigByName("9").get(), Position.precise(32_280_001), Strand.FWD),
+                "del_upstream_intergenic_l", "T");
         SimpleBreakend right = SimpleBreakend.of(
-                ChromosomalPosition.of(GENOME_ASSEMBLY.getContigByName("9").get(), Position.precise(133_381_000), Strand.FWD),
+                ChromosomalPosition.of(GENOME_ASSEMBLY.getContigByName("9").get(), Position.precise(32_290_000), Strand.FWD),
                 "del_upstream_intergenic_r", "G");
 
         return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));

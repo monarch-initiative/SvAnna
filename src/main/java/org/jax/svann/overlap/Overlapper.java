@@ -94,6 +94,7 @@ public class Overlapper {
         }  else if (rearrangement.getType() == SvType.TRANSLOCATION) {
             return getTranslocationOverlaps(rearrangement);
         } else {
+            LOGGER.warn("Getting overlaps for `{}` is not yet supported", rearrangement.getType());
             return List.of();
         }
 //        int id = 42;//svEvent.getAdjacencies().get(0)..getId();
@@ -162,7 +163,7 @@ public class Overlapper {
     public List<Overlap> getDeletionOverlaps(SequenceRearrangement srearrangement) {
         List<Adjacency> adjacencies = srearrangement.getAdjacencies();
         if (adjacencies.size() != 1) {
-            throw new SvAnnRuntimeException("Malformed delection adjacency list with size " + adjacencies.size());
+            throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
         }
         Adjacency deletion = adjacencies.get(0);
         Breakend left = deletion.getLeft();

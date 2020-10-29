@@ -64,4 +64,14 @@ public class PrioritizedSv implements SvPriority, Visualizable {
     public SvPriority getPriority() {
         return null;
     }
+
+    @Override
+    public String toString() {
+        return "PrioritizedSv{" +
+                "svEvent=" + svEvent +
+                ", overlaps=" + overlaps +
+                ", enhancers=" + enhancers +
+                ", diseases=" + diseases +
+                '}';
+    }
 }

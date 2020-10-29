@@ -37,18 +37,12 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class OverlapperTest extends TestBase {
 
-    private static Contig CHR9;
+    private Overlapper overlapper;
 
-    private static Overlapper overlapper;
-
-
-
-    @BeforeAll
-    public static void beforeAll() {
-        CHR9 = GENOME_ASSEMBLY.getContigByName("chr9").orElseThrow();
+    @BeforeEach
+    public void setUp() {
         overlapper = new Overlapper(JANNOVAR_DATA);
     }
-
 
     /**
      * We expect two overlapping transcripts for the SURF2 single exon deletion

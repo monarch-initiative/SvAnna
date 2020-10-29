@@ -8,7 +8,11 @@ import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
-import org.jax.svann.reference.IntrachromosomalEvent;
+import org.jax.svann.reference.Adjacency;
+import org.jax.svann.reference.Breakend;
+import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.genome.Contig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,15 +81,125 @@ public class Overlapper {
      * This is the main method for getting a list of overlapping transcripts (with extra data in an {@link Overlap}
      * object) for structural variants that occur on one Chromosome, such as deletions
      *
-     * @param svEvent
+     * @param rearrangement
      * @return list of overlapping transcripts.
+     * TODO REFACTOR
      */
-    public List<Overlap> getOverlapList(IntrachromosomalEvent svEvent) {
+    public List<Overlap> getOverlapList(SequenceRearrangement rearrangement) {
         // TODO: 26. 10. 2020 check coordinate remapping
-        int id = svEvent.getContig().getId();
-        Strand strand = Strand.FWD; // We assume all SVs are on the forward strand
+        if (rearrangement.getType() == SvType.DELETION) {
+            return getDeletionOverlaps(rearrangement);
+        } else if (rearrangement.getType() == SvType.INSERTION) {
+            return getInsertionOverlaps(rearrangement);
+        }  else if (rearrangement.getType() == SvType.TRANSLOCATION) {
+            return getTranslocationOverlaps(rearrangement);
+        } else {
+            LOGGER.warn("Getting overlaps for `{}` is not yet supported", rearrangement.getType());
+            return List.of();
+        }
+//        int id = 42;//svEvent.getAdjacencies().get(0)..getId();
+//        Strand strand = Strand.FWD; // We assume all SVs are on the forward strand
+//
+//        GenomeInterval structVarInterval = new GenomeInterval(rd, strand, id, 42,43);//svEvent.getBegin(), svEvent.getEnd());
+//        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
+//        IntervalArray<TranscriptModel>.QueryResult queryResult =
+//                iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
+//        return getOverlapList(structVarInterval, queryResult);
+    }
 
-        GenomeInterval structVarInterval = new GenomeInterval(rd, strand, id, svEvent.getBegin(), svEvent.getEnd());
+    /**
+     * This method returns all overlapping transcripts for simple deletions. We assume that deletions
+     * are forward strand (it does not matter but is needed by the API).
+     * @param srearrangement The candidate deletion
+     * @return List over overlapping transcripts
+     */
+    public List<Overlap> getTranslocationOverlaps(SequenceRearrangement srearrangement) {
+        List<Adjacency> adjacencies = srearrangement.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            throw new SvAnnRuntimeException("Malformed delection adjacency list with size " + adjacencies.size());
+        }
+        Adjacency translocation = adjacencies.get(0);
+        Breakend breakendA = translocation.getLeft();
+        Breakend breakendB = translocation.getRight();
+        List<Overlap> overlapA = getTranslocationPartOverlap(breakendA);
+        List<Overlap> overlapB = getTranslocationPartOverlap(breakendB);
+        // we would like to return one Overlap object for each end of the transclocation
+        // if there is a coding overlap return it, otherwise return any of the returned overlaps
+        // TODO consider the optimal behavior!
+        List<Overlap> translocationOverlapPair = new ArrayList<>();
+        Optional<Overlap> optOverlap = overlapA.stream().filter(Overlap::overlapsCds).findAny();
+        if (optOverlap.isPresent()) {
+            translocationOverlapPair.add(optOverlap.get());
+        } else {
+            translocationOverlapPair.add(overlapA.get(0));
+        }
+        optOverlap = overlapB.stream().filter(Overlap::overlapsCds).findAny();
+        if (optOverlap.isPresent()) {
+            translocationOverlapPair.add(optOverlap.get());
+        } else {
+            translocationOverlapPair.add(overlapB.get(0));
+        }
+        return translocationOverlapPair;
+    }
+
+    private List<Overlap> getTranslocationPartOverlap(Breakend bend) {
+        Contig chrom = bend.getContig();
+        int id = chrom.getId();
+        int begin = bend.getBegin();
+        int end = bend.getEnd();
+        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
+        IntervalArray<TranscriptModel>.QueryResult queryResult =
+                iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
+        return getOverlapList(structVarInterval, queryResult);
+    }
+
+    /**
+     * This method returns all overlapping transcripts for simple deletions. We assume that deletions
+     * are forward strand (it does not matter but is needed by the API).
+     * @param srearrangement The candidate deletion
+     * @return List over overlapping transcripts
+     */
+    public List<Overlap> getDeletionOverlaps(SequenceRearrangement srearrangement) {
+        List<Adjacency> adjacencies = srearrangement.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
+        }
+        Adjacency deletion = adjacencies.get(0);
+        Breakend left = deletion.getLeft();
+        Breakend right = deletion.getRight();
+        Contig chrom = left.getContig();
+        int id = chrom.getId();
+        int begin = left.getBegin();
+        int end = right.getEnd();
+        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
+        IntervalArray<TranscriptModel>.QueryResult queryResult =
+                iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
+        return getOverlapList(structVarInterval, queryResult);
+    }
+
+    /**
+     * This method returns all overlapping transcripts for insertions. We assume that insertions
+     * are forward strand (it does not matter but is needed by the API). Insertions have two
+     * adjancencies in our implementation
+     * @param srearrangement The candidate insertion
+     * @return List over overlapping transcripts
+     */
+    public List<Overlap> getInsertionOverlaps(SequenceRearrangement srearrangement) {
+        List<Adjacency> adjacencies = srearrangement.getAdjacencies();
+        if (adjacencies.size() != 2) {
+            throw new SvAnnRuntimeException("Malformed insertion adjacency list with size " + adjacencies.size());
+        }
+        Adjacency insertion1 = adjacencies.get(0);
+        Breakend left = insertion1.getLeft();
+        Breakend right = insertion1.getRight();
+        Contig chrom = left.getContig();
+        int id = chrom.getId();
+        int begin = left.getBegin();
+        Adjacency insertion2 = adjacencies.get(1);
+        int end = insertion2.getRight().getEnd();
+        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin,end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
                 iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
@@ -168,13 +282,13 @@ public class Overlapper {
             int rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
             description = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
             if (rightDistance <= 2_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, tmodelLeft, rightDistance, description));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, tmodelRight, rightDistance, description));
             } else if (rightDistance <= 5_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, tmodelLeft, rightDistance, description));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, tmodelRight, rightDistance, description));
             } else if (rightDistance <= 500_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, tmodelLeft, rightDistance, description));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500KB, tmodelRight, rightDistance, description));
             } else {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, tmodelLeft, rightDistance, description));
+                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, tmodelRight, rightDistance, description));
             }
         }
         return overlaps;

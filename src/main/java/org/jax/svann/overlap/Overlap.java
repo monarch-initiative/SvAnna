@@ -14,8 +14,6 @@ public class Overlap {
      */
     private final int distance;
 
-
-
     private final TranscriptModel transcriptModel;
 
     private final String description;
@@ -53,6 +51,19 @@ public class Overlap {
      */
     public boolean overlapsCds() {
         return overlapsCds;
+    }
+
+
+    public String getGeneSymbol() {
+        return this.transcriptModel.getGeneSymbol();
+    }
+
+    public String getAccession() {
+        return this.transcriptModel.getAccession();
+    }
+
+    public OverlapType getOverlapType() {
+        return overlapType;
     }
 
     @Override

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -24,9 +23,9 @@ public class BreakendAssemblerTest extends TestBase {
 
     @BeforeAll
     public static void beforeAll() throws Exception {
-        CHR2 = GENOME_ASSEMBLY.getContigByName("chr2").get();
-        CHR13 = GENOME_ASSEMBLY.getContigByName("chr13").get();
-        CHR17 = GENOME_ASSEMBLY.getContigByName("chr17").get();
+        CHR2 = GENOME_ASSEMBLY.getContigByName("chr2").orElseThrow();
+        CHR13 = GENOME_ASSEMBLY.getContigByName("chr13").orElseThrow();
+        CHR17 = GENOME_ASSEMBLY.getContigByName("chr17").orElseThrow();
     }
 
     @BeforeEach

@@ -5,11 +5,10 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import de.charite.compbio.jannovar.reference.GenomeInterval;
-import de.charite.compbio.jannovar.reference.Strand;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
+import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.reference.SequenceRearrangement;
@@ -38,6 +37,9 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
     private final Overlapper overlapper;
 
+    private final EnhancerOverlapper enhancerOverlapper;
+
+
     /**
      * Reference dictionary (part of {@link JannovarData}).
      */
@@ -52,7 +54,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      */
     private final Map<TermId, Set<HpoDiseaseSummary>> relevantGeneIdToAssociatedDiseaseMap;
 
-    PrototypeSvPrioritizer(GenomeAssembly assembly,
+    public PrototypeSvPrioritizer(GenomeAssembly assembly,
                            Set<TermId> relevantHposForEnhancers,
                            Map<Integer, IntervalArray<Enhancer>> enhancerMap,
                            Map<TermId, Set<HpoDiseaseSummary>> gene2diseaseMap,
@@ -61,7 +63,8 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         this.relevantHpoIdsForEnhancers = relevantHposForEnhancers;
         this.chromosomeToEnhancerIntervalArrayMap = enhancerMap;
         this.relevantGeneIdToAssociatedDiseaseMap = gene2diseaseMap;
-        overlapper = new Overlapper(jannovarData);
+        this.overlapper = new Overlapper(jannovarData);
+        this.enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
         this.rd = jannovarData.getRefDict();
     }
 
@@ -71,23 +74,14 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         // Here we want to do something fancy to see if an SV interrupts enhancer-gene interactions, e.g., Inversion,
         // but for now let's just see if the SV directly affects and enhancer
-        for (var adjacency : rearrangement.getAdjacencies()) {
-            int contigId = adjacency.getLeft().getContig().getId();
-            GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, contigId,
-                    adjacency.getLeft().getBegin(),
-                    adjacency.getRight().getEnd());
-            // enhancer interval array does not work, we need method to contruct it from the intervals
-           // IntervalArray<Enhancer> iarray = chromosomeToEnhancerIntervalArrayMap.get(contigId).g();
-            //IntervalArray<Enhancer>.QueryResult queryResult =
-            //         iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
-        }
+
         List<Enhancer> affectedEnhancers = List.of();
         // TODO get list of genes located within XXX nucleotides of the affected enhancers.
         // TODO check if any of the genes in the "overlaps" or in the "affectedEnhancers" are
         // in  relevantGeneIdToAssociatedDiseaseMap -- if so we are PHENOTYPICALLY RELEVANT
         List<String> affectedRelevantGenes = overlaps
                 .stream()
-                .filter(g -> relevantGeneIdToAssociatedDiseaseMap.containsKey(g))
+                .filter(relevantGeneIdToAssociatedDiseaseMap::containsKey)
                 .map(Overlap::getGeneSymbol)
                 .collect(Collectors.toList());
         // TODO, we need to get a TermId, not a String. We may need to refactor relevantGeneIdToAssociatedDiseaseMap

@@ -7,8 +7,10 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.parse.*;
+import org.jax.svann.priority.PrioritizedSv;
+import org.jax.svann.priority.PrototypeSvPrioritizer;
+import org.jax.svann.priority.SvPrioritizer;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
@@ -49,8 +51,8 @@ public class SvAnnAnalysis {
 //
 //    private final List<BreakendRecord> breakendRecordList;
     private final Collection<SequenceRearrangement> rearrangements;
-    /** Object to find overlaps with transcripts. */
-    private final Overlapper overlapper;
+
+    private final JannovarData jannovarData;
 
     /**
      * TODO allow as parameter to CTOR
@@ -65,9 +67,7 @@ public class SvAnnAnalysis {
      * @param enhancerPath path to the TSpec enhancer file
      */
     public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) throws SerializationException {
-        JannovarData jannovarData = readJannovarData(jannovarPath);
-
-
+        this.jannovarData = readJannovarData(jannovarPath);
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
         Map<TermId, String> hpoId2LabelMap = tparser.getId2labelMap();
@@ -75,41 +75,38 @@ public class SvAnnAnalysis {
         HpoDiseaseGeneMap hpomap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
         relevantGeneIdToAssociatedDiseaseMap = hpomap.getRelevantGenesAndDiseases(tidList);
         relevantHpoIdsForEnhancers = hpomap.getRelevantAncestors(id2enhancerMap.keySet(), tidList);
-        //VcfStructuralVariantParser vcfParser = new VcfStructuralVariantParser(assembly);
+        this.prefix = prefix;
+        this.targetHpoIdList = tidList;
         VcfStructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, new BreakendAssembler());
         Path vcfPath = Paths.get(vcfFile);
         try {
             rearrangements = parser.parseFile(vcfPath);
-//            this.svEventList = parseResult.getAnns();
-//            this.breakendRecordList = parseResult.getBreakends();
-            this.prefix = prefix;
-            this.targetHpoIdList = tidList;
-            overlapper = new Overlapper(jannovarData);
         } catch (IOException e) {
             throw new SvAnnRuntimeException("Error: " + e.getMessage());
         }
     }
 
 
-
-    public void prioritizeSvs() {
-        // todo 1. merge BNDs that are pairs of the same adjancency together
-        // todo 2. now or later, merge BNDs that have > 2 breakends, e.g. inversions together
-        // todo 3. get overlaps
-        // todo 4. create and store SvPriority objects
-        //         do we store them as PrioritizedSv or as SvPriority?
-
-        //  store them in the same list
+    /**
+     * Prioritize the structural variants in {@link #rearrangements}.
+     * @return List of prioritized structural variants
+     */
+    public List<PrioritizedSv> prioritizeSvs() {
+        List<PrioritizedSv> svList = new ArrayList<>();
+        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(assembly,
+                relevantHpoIdsForEnhancers,
+                chromosomeToEnhancerIntervalArrayMap,
+                relevantGeneIdToAssociatedDiseaseMap,
+                jannovarData);
+        for (var rearrangement : rearrangements) {
+            PrioritizedSv sv = prioritizer.prioritize(rearrangement);
+            svList.add(sv);
+        }
+        return svList;
     }
 
 
-    public void prioritizeByPhenotype() {
-        // todo 1. We can go over all of the PrioritizedSv objects created above
-        // todo 2. Basically, we check whether
-        //  a -- any of the affected genes are in relevantGeneIdToAssociatedDiseaseMap
-        //   if so, add information about the gene and disease to the object
-        //  b -- any of the affected enhancers have an HPO id in relevantHpoIdsForEnhancers
-    }
+
 
 
     private static JannovarData readJannovarData(String jannovarDataPath) throws SerializationException {

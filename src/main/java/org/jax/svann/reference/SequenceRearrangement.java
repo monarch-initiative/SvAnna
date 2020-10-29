@@ -2,6 +2,15 @@ package org.jax.svann.reference;
 
 import java.util.List;
 
+/**
+ * General representation of structural as well as small variants.
+ * <p>
+ * Implementors must ensure that the following invariants are met:
+ * <ul>
+ *     <li>at least one adjacency is present</li>
+ *     <li>adjacencies are sorted in representative order for the variant</li>
+ * </ul>
+ */
 public interface SequenceRearrangement {
 
     /**
@@ -23,11 +32,36 @@ public interface SequenceRearrangement {
     SequenceRearrangement withStrand(Strand strand);
 
     /**
-     * @return strand of the first adjacency
+     * @return strand of the leftmost position of the rearrangement
      */
-    default Strand getStrand() {
-        return getAdjacencies().isEmpty()
-                ? Strand.FWD
-                : getAdjacencies().get(0).getStrand();
+    default Strand getLeftmostStrand() {
+        return getAdjacencies().get(0).getLeft().getStrand();
+    }
+
+    /**
+     * Get leftmost position of the rearrangement. The position is on the strand that you get by {@link #getLeftmostStrand()}.
+     *
+     * @return coordinate of the leftmost position of the rearrangement
+     */
+    default int getLeftmostPosition() {
+        return getAdjacencies().get(0).getLeft().getBegin();
+    }
+
+    /**
+     * @return strand of the rightmost position of the rearrangement
+     */
+    default Strand getRightmostStrand() {
+        int n = getAdjacencies().size();
+        return getAdjacencies().get(n - 1).getRight().getStrand();
+    }
+
+    /**
+     * Get rightmost position of the rearrangement. The position is on the strand that you get by {@link #getRightmostStrand()}.
+     *
+     * @return coordinate of the rightmost position of the rearrangement
+     */
+    default int getRightmostPosition() {
+        int n = getAdjacencies().size();
+        return getAdjacencies().get(n - 1).getRight().getBegin();
     }
 }

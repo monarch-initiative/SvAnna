@@ -16,17 +16,21 @@ class SimpleSequenceRearrangement implements SequenceRearrangement {
 
     private final List<Adjacency> adjacencies;
 
+    private SimpleSequenceRearrangement(SvType type, List<Adjacency> adjacencies) {
+        if (adjacencies.isEmpty()) {
+            throw new IllegalArgumentException("Adjacency list cannot be empty");
+        }
+        this.type = type;
+        this.adjacencies = adjacencies;
+
+    }
+
     public static SimpleSequenceRearrangement of(SvType type, Adjacency... adjacencies) {
         return new SimpleSequenceRearrangement(type, Arrays.asList(adjacencies));
     }
 
     public static SimpleSequenceRearrangement of(SvType type, List<Adjacency> adjacencies) {
         return new SimpleSequenceRearrangement(type, adjacencies);
-    }
-
-    private SimpleSequenceRearrangement(SvType type, List<Adjacency> adjacencies) {
-        this.type = type;
-        this.adjacencies = adjacencies;
     }
 
     @Override

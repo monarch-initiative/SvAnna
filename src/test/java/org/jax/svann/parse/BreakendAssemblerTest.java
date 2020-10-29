@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -92,7 +91,8 @@ public class BreakendAssemblerTest extends TestBase {
 
         SequenceRearrangement rearrangement = rearrangementOpt.get();
         assertThat(rearrangement.getType(), is(SvType.TRANSLOCATION));
-        assertThat(rearrangement.getStrand(), is(Strand.FWD)); // W is on FWD strand
+        assertThat(rearrangement.getLeftmostStrand(), is(Strand.FWD)); // W is on FWD strand
+        assertThat(rearrangement.getRightmostStrand(), is(Strand.REV)); // Y is on REV strand
 
         List<Adjacency> adjacencies = rearrangement.getAdjacencies();
         assertThat(adjacencies, hasSize(1));
@@ -130,7 +130,8 @@ public class BreakendAssemblerTest extends TestBase {
 
         SequenceRearrangement rearrangement = rearrangementOpt.get();
         assertThat(rearrangement.getType(), is(SvType.TRANSLOCATION));
-        assertThat(rearrangement.getStrand(), is(Strand.FWD)); // U is on FWD strand
+        assertThat(rearrangement.getLeftmostStrand(), is(Strand.FWD)); // U is on FWD strand
+        assertThat(rearrangement.getRightmostStrand(), is(Strand.FWD)); // V is on FWD strand
 
         List<Adjacency> adjacencies = rearrangement.getAdjacencies();
         assertThat(adjacencies, hasSize(1));
@@ -168,7 +169,8 @@ public class BreakendAssemblerTest extends TestBase {
 
         SequenceRearrangement rearrangement = rearrangementOpt.get();
         assertThat(rearrangement.getType(), is(SvType.TRANSLOCATION));
-        assertThat(rearrangement.getStrand(), is(Strand.REV)); // X is on REV strand
+        assertThat(rearrangement.getLeftmostStrand(), is(Strand.REV)); // X is on REV strand
+        assertThat(rearrangement.getRightmostStrand(), is(Strand.FWD)); // Z is on FWD strand
 
         List<Adjacency> adjacencies = rearrangement.getAdjacencies();
         assertThat(adjacencies, hasSize(1));

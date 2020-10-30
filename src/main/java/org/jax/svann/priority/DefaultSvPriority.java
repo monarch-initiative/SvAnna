@@ -9,6 +9,8 @@ import java.util.Set;
 
 class DefaultSvPriority implements SvPriority {
 
+    private static final DefaultSvPriority UNKNOWN = new DefaultSvPriority(SvImpact.UNKNOWN, Set.of(), Set.of(), Set.of(), false);
+
     private final SvImpact svImpact;
     private final Set<TranscriptModel> affectedTranscripts;
     private final Set<TermId> affectedGeneIds;
@@ -27,6 +29,9 @@ class DefaultSvPriority implements SvPriority {
         this.hasPhenotypicRelevance = hasPhenotypicRelevance;
     }
 
+    static DefaultSvPriority unknown() {
+        return UNKNOWN;
+    }
 
     @Override
     public SvImpact getImpact() {
@@ -46,11 +51,6 @@ class DefaultSvPriority implements SvPriority {
     @Override
     public Set<Enhancer> getAffectedEnhancers() {
         return affectedEnhancers;
-    }
-
-    @Override
-    public SvImpact getSvImpact() {
-        return svImpact;
     }
 
     /**

@@ -48,6 +48,24 @@ public class TestVariants extends TestBase {
     }
 
     /**
+     * Single exon deletion.
+     * <p>
+     * SURF1:NM_003172.4 deletion of the exon 2, tx on (-) strand
+     * chr9:133_356_251-133_356_350
+     */
+    public static SequenceRearrangement singleExonDeletion_SURF1_exon2() {
+        Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
+        SimpleBreakend left = SimpleBreakend.of(
+                ChromosomalPosition.of(chr9, Position.precise(133_356_251), Strand.FWD),
+                "surf1_exon2_del_l", "C");
+        SimpleBreakend right = SimpleBreakend.of(
+                ChromosomalPosition.of(chr9, Position.precise(133_356_350), Strand.FWD),
+                "surf1_exon2_del_r", "C");
+
+        return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+    }
+
+    /**
      * Deletion of one entire transcript and part of another.
      * <p>
      * SURF1:NM_003172.4 entirely deleted, SURF2:NM_017503.5 partially deleted

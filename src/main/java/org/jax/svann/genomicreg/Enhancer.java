@@ -5,6 +5,8 @@ import org.jax.svann.reference.Position;
 import org.jax.svann.reference.genome.Contig;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
+import java.util.Objects;
+
 public class Enhancer {
 
     private final static int DEFAULT_DISTANCE_THRESHOLD = 500_000;
@@ -57,5 +59,22 @@ public class Enhancer {
 
     public String getSummary() {
         return String.format("%s:%d-%d [%s]", contig, start.getPos(), end.getPos(), termId.getValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(contig, start, end, tau, termId);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (! (obj instanceof Enhancer))
+            return false;
+        Enhancer that = (Enhancer) obj;
+        return this.contig.equals(that.contig) &&
+                this.start.equals(that.start) &&
+                this.end.equals(that.end) &&
+                this.tau == that.tau &&
+                this.termId.equals(that.termId);
     }
 }

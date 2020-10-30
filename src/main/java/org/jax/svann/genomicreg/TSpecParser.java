@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class is intended to parse files from the tspec repository
@@ -85,12 +86,20 @@ public class TSpecParser {
             enhancerMap.put(chrID, new ArrayList<>());
        for (Enhancer e : enhancers)
            enhancerMap.get(e.getChromosome().getId()).add(e);
-        for (Integer chrID : enhancerMap.keySet()) {
-            IntervalArray<Enhancer> iTree = new IntervalArray<>(enhancerMap.get(chrID),
+       Set<Contig> chromosomeIdSet = enhancers
+               .stream()
+               .map(Enhancer::getChromosome)
+               .collect(Collectors.toSet());
+        for (Contig  ctig: chromosomeIdSet) {
+            IntervalArray<Enhancer> iTree = new IntervalArray<>(enhancerMap.get(ctig.getId()),
                     new EnhancerIntervalEndExtractor());
-            builder.put(chrID, iTree);
+            builder.put(ctig.getId(), iTree);
         }
         this.chromosomeToEnhancerIntervalArrayMap = builder.build();
+//        for (Enhancer e : enhancers) {
+//            int chromId = e.getChromosome().getId();
+//            this.chromosomeToEnhancerIntervalArrayMap.get(chromId).
+//        }
     }
 
     public Map<TermId, String> getId2labelMap() {

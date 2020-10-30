@@ -1,16 +1,19 @@
 package org.jax.svann.html;
 
+import freemarker.cache.ClassTemplateLoader;
+import freemarker.core.HTMLOutputFormat;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+import freemarker.template.Version;
+import org.jax.svann.priority.SvPriority;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import freemarker.cache.ClassTemplateLoader;
-import freemarker.core.HTMLOutputFormat;
-import freemarker.template.*;
-import org.jax.svann.priority.PrioritizedSv;
 
 public class HtmlTemplate {
     /** Map of data that will be used for the FreeMark template. */
@@ -20,7 +23,7 @@ public class HtmlTemplate {
 
     protected static final String EMPTY_STRING="";
 
-    public HtmlTemplate(List<PrioritizedSv> svAnnList) {
+    public HtmlTemplate(List<SvPriority> svAnnList) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -28,7 +31,7 @@ public class HtmlTemplate {
         cfg.setIncompatibleImprovements(new Version(2, 3, 20));
         ClassTemplateLoader templateLoader = new ClassTemplateLoader(HtmlTemplate.class, "");
         cfg.setTemplateLoader(templateLoader);
-        cfg.setClassForTemplateLoading(HtmlTemplate.class,"");
+        cfg.setClassForTemplateLoading(HtmlTemplate.class, "");
 
         //templateFile.toURI().toURL().toExternalForm()
 

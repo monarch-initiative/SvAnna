@@ -5,17 +5,18 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.genomicreg.TSpecParser;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.parse.*;
-import org.jax.svann.priority.PrioritizedSv;
+import org.jax.svann.parse.BreakendAssembler;
+import org.jax.svann.parse.VcfStructuralRearrangementParser;
 import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvPrioritizer;
+import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
-import org.jax.svann.genomicreg.Enhancer;
-import org.jax.svann.genomicreg.TSpecParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,18 +90,18 @@ public class SvAnnAnalysis {
 
     /**
      * Prioritize the structural variants in {@link #rearrangements}.
+     *
      * @return List of prioritized structural variants
      */
-    public List<PrioritizedSv> prioritizeSvs() {
-        List<PrioritizedSv> svList = new ArrayList<>();
+    public List<SvPriority> prioritizeSvs() {
+        List<SvPriority> svList = new ArrayList<>();
         SvPrioritizer prioritizer = new PrototypeSvPrioritizer(assembly,
                 relevantHpoIdsForEnhancers,
                 chromosomeToEnhancerIntervalArrayMap,
                 relevantGeneIdToAssociatedDiseaseMap,
                 jannovarData);
         for (var rearrangement : rearrangements) {
-            PrioritizedSv sv = prioritizer.prioritize(rearrangement);
-            svList.add(sv);
+            svList.add(prioritizer.prioritize(rearrangement));
         }
         return svList;
     }

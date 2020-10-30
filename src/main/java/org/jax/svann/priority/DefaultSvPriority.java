@@ -2,26 +2,30 @@ package org.jax.svann.priority;
 
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.reference.SvType;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Objects;
 import java.util.Set;
 
-class DefaultSvPriority implements SvPriority {
+public class DefaultSvPriority implements SvPriority {
 
-    private static final DefaultSvPriority UNKNOWN = new DefaultSvPriority(SvImpact.UNKNOWN, Set.of(), Set.of(), Set.of(), false);
-
+    private static final DefaultSvPriority UNKNOWN =
+            new DefaultSvPriority(SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), Set.of(), false);
+    private final SvType svType;
     private final SvImpact svImpact;
     private final Set<TranscriptModel> affectedTranscripts;
     private final Set<TermId> affectedGeneIds;
     private final Set<Enhancer> affectedEnhancers;
     private final boolean hasPhenotypicRelevance;
 
-    DefaultSvPriority(SvImpact svImpact,
+    public DefaultSvPriority(SvType svType,
+                             SvImpact svImpact,
                       Set<TranscriptModel> affectedTranscripts,
                       Set<TermId> affectedGeneIds,
                       Set<Enhancer> affectedEnhancers,
                       boolean hasPhenotypicRelevance) {
+        this.svType = svType;
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
         this.affectedGeneIds = affectedGeneIds;
@@ -31,6 +35,11 @@ class DefaultSvPriority implements SvPriority {
 
     static DefaultSvPriority unknown() {
         return UNKNOWN;
+    }
+
+    @Override
+    public SvType getType() {
+        return this.svType;
     }
 
     @Override

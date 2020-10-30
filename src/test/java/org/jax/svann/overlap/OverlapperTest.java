@@ -185,7 +185,7 @@ public class OverlapperTest extends TestBase {
         assertEquals(1, overlaps.size());
         Overlap overlap = overlaps.get(0);
         assertEquals("SURF1", overlap.getGeneSymbol());
-        assertEquals(DOWNSTREAM_GENE_VARIANT, overlap.getOverlapType());
+        assertEquals(DOWNSTREAM_GENE_VARIANT_500KB, overlap.getOverlapType());
         assertFalse(overlap.overlapsCds());
     }
 
@@ -193,8 +193,9 @@ public class OverlapperTest extends TestBase {
     /**
      * Deletion upstream intergenic.
      * <p>
-     * BRCA2:NM_0000059 upstream, 10kb deletion
-     * chr13:32_280_001-32_290_000
+     * hg38 chr15:48,408,306-48,645,849 Size: 237,544 Total Exon Count: 66 Strand: -
+     * upstream, 10kb deletion
+     * chr15:48_655_000-48_665_000
      */
     @Test
     public void testDeletionUpstreamIntergenic() {
@@ -202,7 +203,7 @@ public class OverlapperTest extends TestBase {
         List<Overlap> overlaps = overlapper.getOverlapList(surf1Upstream);
         assertEquals(1, overlaps.size());
         Overlap overlap = overlaps.get(0);
-        assertEquals("BRCA2", overlap.getGeneSymbol());
+        assertEquals("FBN1", overlap.getGeneSymbol());
         assertEquals(UPSTREAM_GENE_VARIANT_500KB, overlap.getOverlapType());
         assertFalse(overlap.overlapsCds());
     }

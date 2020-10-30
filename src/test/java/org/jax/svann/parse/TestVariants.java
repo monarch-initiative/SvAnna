@@ -159,16 +159,17 @@ public class TestVariants extends TestBase {
     /**
      * Deletion upstream intergenic.
      * <p>
-     * BRCA2:NM_0000059 upstream, 10kb deletion
-     * chr13:32_280_001-32_290_000
+     * hg38 chr15:48,408,306-48,645,849 Size: 237,544 Total Exon Count: 66 Strand: -
+     * upstream, 10kb deletion
+     * chr15:48_655_000-48_665_000
      */
     public static SequenceRearrangement deletionUpstreamIntergenic() {
-        Contig chr13 = GENOME_ASSEMBLY.getContigByName("13").get();
+        Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").get();
         SimpleBreakend left = SimpleBreakend.of(
-                ChromosomalPosition.of(chr13, Position.precise(32_280_001), Strand.FWD),
+                ChromosomalPosition.of(chr15, Position.precise(48_655_000), Strand.FWD),
                 "del_upstream_intergenic_l", "T");
         SimpleBreakend right = SimpleBreakend.of(
-                ChromosomalPosition.of(chr13, Position.precise(32_290_000), Strand.FWD),
+                ChromosomalPosition.of(chr15, Position.precise(48_665_000), Strand.FWD),
                 "del_upstream_intergenic_r", "G");
 
         return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));

@@ -40,7 +40,7 @@ public class BreakendAssembler {
      * E.g.: `G]1:123]`, `]1:123]G`, `G[1:123[`, `[1:123[G`
      */
     private static final Pattern BND_ALT_PATTERN = Pattern.compile(
-            String.format("^(?<head>[%s]*)[\\[\\]][\\w:<>]+[\\[\\]](?<tail>[%s]*)$", Utils.IUPAC_BASES, Utils.IUPAC_BASES));
+            String.format("^(?<head>[%s]*)[\\[\\]][\\w:._<>]+[\\[\\]](?<tail>[%s]*)$", Utils.IUPAC_BASES, Utils.IUPAC_BASES));
 
     /**
      * Figure out strand of the mate breakend from the ALT allele record.

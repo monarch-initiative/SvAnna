@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 /**
  * Let's assume we're running prioritization for a patient with a causal SV in SURF1 gene. Variants in SURF1 lead to
  * Leigh syndrome (OMIM:256000)- a progressive neurological disease defined by specific neuropathological features
@@ -92,6 +95,14 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     @BeforeEach
     public void setUp() {
         prioritizer = new PrototypeSvPrioritizer(GENOME_ASSEMBLY, RELEVANT_ENHANCER_TOP_LEVEL_TERMS, ENHANCER_MAP, DISEASE_MAP, JANNOVAR_DATA);
+    }
+
+    @Test
+    public void prioritize_singleExonDeletion_SURF1_exon2() {
+        SequenceRearrangement sr = TestVariants.singleExonDeletion_SURF1_exon2();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.HIGH_IMPACT));
     }
 
     @Test

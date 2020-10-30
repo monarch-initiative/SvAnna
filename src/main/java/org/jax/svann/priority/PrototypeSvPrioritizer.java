@@ -12,9 +12,7 @@ import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -93,8 +91,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
         switch (rearrangement.getType()) {
             case DELETION:
-//                return prioritizeDeletion(rearrangement);
-                break;
+                return prioritizeDeletion(rearrangement);
             case INVERSION:
 //                return prioritizeInversion(rearrangement);
                 break;
@@ -131,6 +128,14 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     }
 
     private DefaultSvPriority prioritizeDeletion(SequenceRearrangement rearrangement) {
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        Optional<Overlap> highestImpactOverlap = overlaps.stream()
+                .min(Comparator.comparing(Overlap::getOverlapType)); // counterintuitive but correct
+        if (highestImpactOverlap.isEmpty()) {
+            //
+            return DefaultSvPriority.unknown();
+        }
+
 
         return null;
     }

@@ -5,6 +5,6 @@ import org.jax.svann.reference.SequenceRearrangement;
 
 public interface SvPrioritizer {
 
-    PrioritizedSv prioritize(SequenceRearrangement rearrangement);
+    SvPriority prioritize(SequenceRearrangement rearrangement);
 
 }

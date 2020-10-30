@@ -70,7 +70,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
 
     @Override
-    public PrioritizedSv prioritize(SequenceRearrangement rearrangement) {
+    public SvPriority prioritize(SequenceRearrangement rearrangement) {
         /*
         For each case we need to figure out the affected transcripts/genes.
         Then, we figure out the impact on the sequence (high/medium/low) and phenotype relevance.
@@ -85,6 +85,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
         Phenotypic relevance:
         - the affected gene is among the relevant genes -> relevant
+        - translocation that removes enhancer from a phenotypically relevant gene
         - else not
 
         Note that the rules for getting "overlap" depends on SvType
@@ -124,24 +125,25 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // Extract the relevant disease genes for this enhancer
         Set<HpoDiseaseSummary> diseases = relevantGeneIdToAssociatedDiseaseMap.getOrDefault("todo", EMPTYSET);
         //SequenceRearrangement e, List<Overlap> overlaps, List<Enhancer> enhancers, Set<HpoDiseaseSummary> diseases)
-        return new PrioritizedSv(rearrangement, overlaps, affectedEnhancers, diseases);
-
-    }
-
-    private PrioritizedSv prioritizeDeletion(SequenceRearrangement rearrangement) {
+//        return new DefaultSvPriority(rearrangement, overlaps, affectedEnhancers, diseases);
 
         return null;
     }
 
-    private PrioritizedSv prioritizeInversion(SequenceRearrangement rearrangement) {
+    private DefaultSvPriority prioritizeDeletion(SequenceRearrangement rearrangement) {
+
         return null;
     }
 
-    private PrioritizedSv prioritizeInsertion(SequenceRearrangement rearrangement) {
+    private DefaultSvPriority prioritizeInversion(SequenceRearrangement rearrangement) {
         return null;
     }
 
-    private PrioritizedSv prioritizeTranslocation(SequenceRearrangement rearrangement) {
+    private DefaultSvPriority prioritizeInsertion(SequenceRearrangement rearrangement) {
+        return null;
+    }
+
+    private DefaultSvPriority prioritizeTranslocation(SequenceRearrangement rearrangement) {
         return null;
     }
 }

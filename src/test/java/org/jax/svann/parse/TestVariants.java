@@ -48,6 +48,24 @@ public class TestVariants extends TestBase {
     }
 
     /**
+     * Single exon deletion.
+     * <p>
+     * SURF1:NM_003172.4 deletion of the exon 2, tx on (-) strand
+     * chr9:133_356_251-133_356_350
+     */
+    public static SequenceRearrangement singleExonDeletion_SURF1_exon2() {
+        Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
+        SimpleBreakend left = SimpleBreakend.of(
+                ChromosomalPosition.of(chr9, Position.precise(133_356_251), Strand.FWD),
+                "surf1_exon2_del_l", "C");
+        SimpleBreakend right = SimpleBreakend.of(
+                ChromosomalPosition.of(chr9, Position.precise(133_356_350), Strand.FWD),
+                "surf1_exon2_del_r", "C");
+
+        return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+    }
+
+    /**
      * Deletion of one entire transcript and part of another.
      * <p>
      * SURF1:NM_003172.4 entirely deleted, SURF2:NM_017503.5 partially deleted
@@ -152,6 +170,43 @@ public class TestVariants extends TestBase {
         SimpleBreakend right = SimpleBreakend.of(
                 ChromosomalPosition.of(chr9, Position.precise(32_290_000), Strand.FWD),
                 "del_upstream_intergenic_r", "G");
+
+        return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+    }
+
+    /**
+     * Deletion upstream intergenic | GCK.
+     * <p>
+     * BRCA2:NM_000162 upstream, 200b deletion
+     * chr7:44_189_901-44_190_100
+     */
+    public static SequenceRearrangement deletionGCKUpstreamIntergenic_affectingEnhancer() {
+        Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
+        SimpleBreakend left = SimpleBreakend.of(
+                ChromosomalPosition.of(chr7, Position.precise(44_189_901), Strand.FWD),
+                "gck_del_upstream_intergenic_enhancer_l", "G");
+        SimpleBreakend right = SimpleBreakend.of(
+                ChromosomalPosition.of(chr7, Position.precise(44_190_100), Strand.FWD),
+                "gck_del_upstream_intergenic_enhancer_r", "G");
+
+        return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+    }
+
+
+    /**
+     * Deletion upstream intergenic | GCK.
+     * <p>
+     * BRCA2:NM_000162 upstream, 1kb deletion
+     * chr7:44_191_001-44_192_000
+     */
+    public static SequenceRearrangement deletionGCKUpstreamIntergenic_NotAffectingEnhancer() {
+        Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
+        SimpleBreakend left = SimpleBreakend.of(
+                ChromosomalPosition.of(chr7, Position.precise(44_191_001), Strand.FWD),
+                "gck_del_upstream_intergenic_l", "t");
+        SimpleBreakend right = SimpleBreakend.of(
+                ChromosomalPosition.of(chr7, Position.precise(44_192_000), Strand.FWD),
+                "gck_del_upstream_intergenic_r", "t");
 
         return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
     }

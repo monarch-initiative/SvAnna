@@ -191,7 +191,7 @@ public class OverlapperTest extends TestBase {
 
 
     /**
-     * Deletion upstream intergenic.
+     * Deletion upstream intergenic. FBN1
      * <p>
      * hg38 chr15:48,408,306-48,645,849 Size: 237,544 Total Exon Count: 66 Strand: -
      * upstream, 10kb deletion

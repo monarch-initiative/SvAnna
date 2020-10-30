@@ -1,0 +1,48 @@
+package org.jax.svann.viz;
+
+import de.charite.compbio.jannovar.data.JannovarData;
+import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svann.TestBase;
+import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.parse.TestVariants;
+import org.jax.svann.priority.DefaultSvPriority;
+import org.jax.svann.priority.SvImpact;
+import org.jax.svann.priority.SvPriority;
+import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.SvType;
+import org.junit.jupiter.api.Test;
+import org.monarchinitiative.phenol.ontology.data.TermId;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Map;
+import java.util.Set;
+
+public class HtmlVisualizerTest extends TestBase {
+
+
+    private static final Map<String, TranscriptModel> transcriptmap = JANNOVAR_DATA.getTmByAccession();
+    private static final TranscriptModel fbn1 = transcriptmap.get("NM_000138.4");
+    private static final Set<TranscriptModel> affectedTranscripts = Set.of(fbn1);
+    private static final Set<TermId> affectedGeneIds = Set.of(TermId.of("NCBIGene:2200"));
+    private static final Set<Enhancer> enhancers = Set.of(); // no affected enhancers for this
+    private static final SvPriority svpriority =
+            new DefaultSvPriority(SvType.DELETION, SvImpact.HIGH_IMPACT, affectedTranscripts, affectedGeneIds, enhancers, true);
+
+
+    @Test
+    public void testCtor() {
+        assertNotNull(svpriority);
+    }
+
+
+    @Test
+    public void testGetHtml() {
+        SequenceRearrangement surf1Exon3Deletion = TestVariants.singleExonDeletion_SURF2_exon3();
+        Visualizable visualizable = new HtmlVisualizable(surf1Exon3Deletion, svpriority);
+        Visualizer visualizer = new HtmlVisualizer(visualizable);
+        String html = visualizer.toHtml();
+        System.out.println(html);
+    }
+
+
+}

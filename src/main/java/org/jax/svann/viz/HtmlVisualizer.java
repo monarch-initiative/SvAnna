@@ -56,7 +56,7 @@ public class HtmlVisualizer implements Visualizer {
 
 
     @Override
-    public String toHtml() {
+    public String getHtml() {
         StringBuilder sb = new StringBuilder();
         sb.append(HTML_TABLE_HEADER);
         sb.append("<tbody>\n");

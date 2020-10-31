@@ -94,7 +94,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        prioritizer = new PrototypeSvPrioritizer(GENOME_ASSEMBLY, RELEVANT_ENHANCER_TOP_LEVEL_TERMS, ENHANCER_MAP, DISEASE_MAP, JANNOVAR_DATA);
+        prioritizer = new PrototypeSvPrioritizer(GENOME_ASSEMBLY, RELEVANT_ENHANCER_TOP_LEVEL_TERMS, ENHANCER_MAP, DISEASE_MAP, Map.of(), JANNOVAR_DATA);
     }
 
     @Test

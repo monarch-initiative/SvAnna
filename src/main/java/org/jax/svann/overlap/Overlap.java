@@ -66,7 +66,23 @@ public class Overlap {
         return overlapType;
     }
 
-//    public TermId getGeneId() {
+    public int getDistance() {
+        return distance;
+    }
+
+    public TranscriptModel getTranscriptModel() {
+        return transcriptModel;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean isOverlapsCds() {
+        return overlapsCds;
+    }
+
+    //    public TermId getGeneId() {
 //        return TermId.of(this.transcriptModel.getGeneID())
 //    }
 

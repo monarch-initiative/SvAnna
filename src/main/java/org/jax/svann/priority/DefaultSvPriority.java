@@ -2,6 +2,7 @@ package org.jax.svann.priority;
 
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.reference.SvType;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -15,14 +16,14 @@ public class DefaultSvPriority implements SvPriority {
     private final SvType svType;
     private final SvImpact svImpact;
     private final Set<TranscriptModel> affectedTranscripts;
-    private final Set<TermId> affectedGeneIds;
+    private final Set<GeneWithId> affectedGeneIds;
     private final Set<Enhancer> affectedEnhancers;
     private final boolean hasPhenotypicRelevance;
 
     public DefaultSvPriority(SvType svType,
                              SvImpact svImpact,
                       Set<TranscriptModel> affectedTranscripts,
-                      Set<TermId> affectedGeneIds,
+                      Set<GeneWithId> affectedGeneIds,
                       Set<Enhancer> affectedEnhancers,
                       boolean hasPhenotypicRelevance) {
         this.svType = svType;
@@ -53,7 +54,7 @@ public class DefaultSvPriority implements SvPriority {
     }
 
     @Override
-    public Set<TermId> getAffectedGeneIds() {
+    public Set<GeneWithId> getAffectedGeneIds() {
         return affectedGeneIds;
     }
 

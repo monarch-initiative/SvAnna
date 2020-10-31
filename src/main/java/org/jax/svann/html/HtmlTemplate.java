@@ -7,6 +7,8 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import org.jax.svann.priority.SvPriority;
+import org.jax.svann.viz.Visualizable;
+import org.jax.svann.viz.Visualizer;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -23,7 +25,7 @@ public class HtmlTemplate {
 
     protected static final String EMPTY_STRING="";
 
-    public HtmlTemplate(List<SvPriority> svAnnList) {
+    public HtmlTemplate(List<Visualizer> svAnnList) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -36,30 +38,14 @@ public class HtmlTemplate {
         //templateFile.toURI().toURL().toExternalForm()
 
         templateData.putIfAbsent("svalist", svAnnList);
-        templateData.put("n_non_translocations", svAnnList.size());
-        int n_low = (int) svAnnList
-                .stream()
-               // .filter(IntrachromosomalEvent::isLowPriority)
-                .count();
-        int n_modifer = (int) svAnnList
-                .stream()
-               // .filter(SvAnnOld::isModifierPriority)
-                .count();
-        int n_high = (int) svAnnList
-                .stream()
-              //  .filter(SvAnnOld::isHighPriority)
-                .count();
-        templateData.put("n_high", n_high);
-        templateData.put("n_modifer", n_modifer);
-        templateData.put("n_low",n_low);
-
+        templateData.put("n_structural_vars", svAnnList.size());
     }
 
 
     public void outputFile(String prefix) {
         String outpath = String.format( "%s.html", prefix);
         try (BufferedWriter out = new BufferedWriter(new FileWriter(outpath))) {
-            Template template = cfg.getTemplate("l2oHTML.ftl");
+            Template template = cfg.getTemplate("svannHTML.ftl");
             template.process(templateData, out);
         } catch (TemplateException | IOException te) {
             te.printStackTrace();

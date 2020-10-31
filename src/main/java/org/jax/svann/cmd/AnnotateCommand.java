@@ -2,11 +2,17 @@ package org.jax.svann.cmd;
 
 
 import org.jax.svann.SvAnnAnalysis;
+import org.jax.svann.html.HtmlTemplate;
+import org.jax.svann.priority.SvPriority;
+import org.jax.svann.viz.HtmlVisualizer;
+import org.jax.svann.viz.Visualizable;
+import org.jax.svann.viz.Visualizer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -50,17 +56,14 @@ public class AnnotateCommand implements Callable<Integer> {
             // and this will turn off HPO prioritization.
         }
         svann = new SvAnnAnalysis(this.vcfFile, this.outprefix, this.enhancerFile, this.jannovarPath, tidList);
-//        // 1. Prioritize the sequences by overlap with
-//        svann.prioritizeSymbolSvs();
-//        svann.prioritizeBreakendSvs();
-//        // 2. prioritize by phenotype
-//        if (tidList.size()>0) {
-//            svann.prioritizeByPhenotype();
-//        }
-//
-//        List<IntrachromosomalEvent> annList = List.of();//vcfParser.getAnnlist();
-//        HtmlTemplate template = new HtmlTemplate(annList);
-//        template.outputFile(this.outprefix);
+        List<Visualizable> prioritizedList = svann.prioritizeSvs();
+        List<Visualizer> visualizerList = new ArrayList<>();
+        for (Visualizable visualizable : prioritizedList) {
+            visualizerList.add(new HtmlVisualizer(visualizable));
+        }
+
+        HtmlTemplate template = new HtmlTemplate(visualizerList);
+        template.outputFile(this.outprefix);
         return 0;
     }
 

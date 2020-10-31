@@ -3,12 +3,16 @@ package org.jax.svann.priority;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
+import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlap;
+import org.jax.svann.overlap.OverlapType;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -33,6 +37,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      */
     private final Set<TermId> relevantHpoIdsForEnhancers;
 
+
     /**
      * Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers.
      */
@@ -40,7 +45,10 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     private final Overlapper overlapper;
 
     private final EnhancerOverlapper enhancerOverlapper;
-
+    /**
+     * Key -- gene symbol, vallue, {@link GeneWithId} object with symbol and id
+     */
+    private final Map<String, GeneWithId> geneSymbolMap;
     /**
      * Reference dictionary (part of {@link JannovarData}).
      */
@@ -56,11 +64,13 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                                   Set<TermId> relevantHposForEnhancers,
                                   Map<Integer, IntervalArray<Enhancer>> enhancerMap,
                                   Map<TermId, Set<HpoDiseaseSummary>> gene2diseaseMap,
+                                  Map<String, GeneWithId> geneSymbolMap,
                                   JannovarData jannovarData) {
         this.assembly = assembly;
         this.relevantHpoIdsForEnhancers = relevantHposForEnhancers;
         this.chromosomeToEnhancerIntervalArrayMap = enhancerMap;
         this.relevantGeneIdToAssociatedDiseaseMap = gene2diseaseMap;
+        this.geneSymbolMap = geneSymbolMap;
         this.overlapper = new Overlapper(jannovarData);
         this.enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
         this.rd = jannovarData.getRefDict();
@@ -96,8 +106,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 //                return prioritizeInversion(rearrangement);
                 break;
             case INSERTION:
-//                return prioritizeInsertion(rearrangement);
-                break;
+               return prioritizeInsertion(rearrangement);
             case TRANSLOCATION:
 //                return prioritizeTranslocation(rearrangement);
                 break;
@@ -129,15 +138,45 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
     private DefaultSvPriority prioritizeDeletion(SequenceRearrangement rearrangement) {
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
-        Optional<Overlap> highestImpactOverlap = overlaps.stream()
+        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .min(Comparator.comparing(Overlap::getOverlapType)); // counterintuitive but correct
-        if (highestImpactOverlap.isEmpty()) {
+        if (highestImpactOverlapOpt.isEmpty()) {
             //
             return DefaultSvPriority.unknown();
         }
+        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        Set<String> affectedGeneIds = overlaps.stream().map(Overlap::getGeneSymbol).collect(Collectors.toSet());
+        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
+        for (String symbol: affectedGeneIds) {
+            if (geneSymbolMap.containsKey(symbol)) {
+                geneWithIdsSet.add(geneSymbolMap.get(symbol));
+            }
+        }
+        Set<TranscriptModel> affectedTranscripts =
+                overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
+        SvImpact impact = SvImpact.LOW_IMPACT; // default
+        SvType svType = SvType.DELETION;
+        OverlapType highestOT = highestImpactOverlap.getOverlapType();
+        if (affectedGeneIds.size()>1) {
+            impact = SvImpact.HIGH_IMPACT;
+        } else if (highestOT.toImpact() == SvImpact.HIGH_IMPACT) {
+            if (highestImpactOverlap.isOverlapsCds())
+                impact = SvImpact.HIGH_IMPACT;
+            else
+                impact = SvImpact.INTERMEDIATE_IMPACT;
+        }
+        // TODO -- FIGURE OUT LOGIC FOR IMPACT
 
-
-        return null;
+        // TODO -- Add Enhancers
+        Set<Enhancer> enhancers = Set.of();
+        // TODO -- calculate phenotypic relevance
+        boolean hasPhenotypicRelevance = false;
+        return new DefaultSvPriority(svType,
+                impact,
+                affectedTranscripts,
+                geneWithIdsSet,
+                enhancers,
+                hasPhenotypicRelevance);
     }
 
     private DefaultSvPriority prioritizeInversion(SequenceRearrangement rearrangement) {
@@ -145,7 +184,46 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     }
 
     private DefaultSvPriority prioritizeInsertion(SequenceRearrangement rearrangement) {
-        return null;
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
+                .min(Comparator.comparing(Overlap::getOverlapType)); // counterintuitive but correct
+        if (highestImpactOverlapOpt.isEmpty()) {
+            //
+            return DefaultSvPriority.unknown();
+        }
+        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        Set<String> affectedGeneIds = overlaps.stream().map(Overlap::getGeneSymbol).collect(Collectors.toSet());
+        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
+        for (String symbol: affectedGeneIds) {
+            if (geneSymbolMap.containsKey(symbol)) {
+                geneWithIdsSet.add(geneSymbolMap.get(symbol));
+            }
+        }
+        Set<TranscriptModel> affectedTranscripts =
+                overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
+        SvImpact impact = SvImpact.LOW_IMPACT; // default
+        SvType svType = SvType.INSERTION;
+        OverlapType highestOT = highestImpactOverlap.getOverlapType();
+        if (affectedGeneIds.size()>1) {
+            impact = SvImpact.HIGH_IMPACT;
+        } else if (highestOT.toImpact() == SvImpact.HIGH_IMPACT) {
+            if (highestImpactOverlap.isOverlapsCds())
+                impact = SvImpact.HIGH_IMPACT;
+            else
+                impact = SvImpact.INTERMEDIATE_IMPACT;
+        }
+        // TODO -- FIGURE OUT LOGIC FOR IMPACT
+
+        // TODO -- Add Enhancers
+        Set<Enhancer> enhancers = Set.of();
+        // TODO -- calculate phenotypic relevance
+        boolean hasPhenotypicRelevance = false;
+        return new DefaultSvPriority(svType,
+                impact,
+                affectedTranscripts,
+                geneWithIdsSet,
+                enhancers,
+                hasPhenotypicRelevance);
     }
 
     private DefaultSvPriority prioritizeTranslocation(SequenceRearrangement rearrangement) {

@@ -2,6 +2,7 @@ package org.jax.svann.priority;
 
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.reference.SvType;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -14,7 +15,7 @@ public interface SvPriority {
 
     Set<TranscriptModel> getAffectedTranscripts();
 
-    Set<TermId> getAffectedGeneIds();
+    Set<GeneWithId> getAffectedGeneIds();
 
     Set<Enhancer> getAffectedEnhancers();
 

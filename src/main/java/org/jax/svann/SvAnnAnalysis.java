@@ -7,6 +7,7 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
+import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.parse.BreakendAssembler;
@@ -15,8 +16,12 @@ import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvPrioritizer;
 import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
+import org.jax.svann.viz.HtmlVisualizable;
+import org.jax.svann.viz.Visualizable;
+import org.jax.svann.viz.Visualizer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +61,11 @@ public class SvAnnAnalysis {
     private final JannovarData jannovarData;
 
     /**
+     * Key -- gene symbol, vallue, {@link GeneWithId} object with symbol and id
+     */
+    private final Map<String, GeneWithId> geneSymbolMap;
+
+    /**
      * TODO allow as parameter to CTOR
      */
     private final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
@@ -75,6 +85,7 @@ public class SvAnnAnalysis {
         this.chromosomeToEnhancerIntervalArrayMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
         HpoDiseaseGeneMap hpomap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
         relevantGeneIdToAssociatedDiseaseMap = hpomap.getRelevantGenesAndDiseases(tidList);
+        this.geneSymbolMap = hpomap.getGeneSymbolMap();
         relevantHpoIdsForEnhancers = hpomap.getRelevantAncestors(id2enhancerMap.keySet(), tidList);
         this.prefix = prefix;
         this.targetHpoIdList = tidList;
@@ -93,17 +104,23 @@ public class SvAnnAnalysis {
      *
      * @return List of prioritized structural variants
      */
-    public List<SvPriority> prioritizeSvs() {
-        List<SvPriority> svList = new ArrayList<>();
+    public List<Visualizable> prioritizeSvs() {
+        //List<SvPriority> svList = new ArrayList<>();
+        List<Visualizable> visualizableList = new ArrayList<>();
         SvPrioritizer prioritizer = new PrototypeSvPrioritizer(assembly,
                 relevantHpoIdsForEnhancers,
                 chromosomeToEnhancerIntervalArrayMap,
                 relevantGeneIdToAssociatedDiseaseMap,
+                geneSymbolMap,
                 jannovarData);
         for (var rearrangement : rearrangements) {
-            svList.add(prioritizer.prioritize(rearrangement));
+            if (rearrangement.getType() == SvType.DELETION || rearrangement.getType() == SvType.INSERTION) {
+                //svList.add(prioritizer.prioritize(rearrangement));
+                Visualizable visualizable = new HtmlVisualizable(rearrangement, prioritizer.prioritize(rearrangement));
+                visualizableList.add(visualizable);
+            }
         }
-        return svList;
+        return visualizableList;
     }
 
 

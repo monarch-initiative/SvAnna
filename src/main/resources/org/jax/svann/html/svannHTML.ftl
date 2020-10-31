@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>LIRICAL</title>
+  <title>svann: Structural Variant Annotator</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -375,12 +375,7 @@ a.svg:hover, a.svg:active {
       <a name="sample"></a>
         <article>
         <ul>
-        <li>Structural variants: n=${n_non_translocations}</li>
-        <ol>
-        <li>High impact: ${n_high}</li>
-        <li>Modifier impact: ${n_modifer}</li>
-        <li>Low impact: ${n_low}</li>
-        </ol>
+        <li>Structural variants: n=${n_structural_vars}</li>
         </article>
     </section>
 
@@ -390,48 +385,7 @@ a.svg:hover, a.svg:active {
         <#list svalist as sva>
         <section>
               <article>
-                <a name="diff"></a>
-
-          <a name="test"></a>
-            <header>
-              <h3>${sva.igvLine}</h3>
-              <p>
-              <ol>
-              <li>${sva.chrom}</li>
-                <li>${sva.pos}</li>
-              <li>ref: ${sva.ref}</li>
-              <li>alt: ${sva.alt}</li>
-              <li>SV type: ${sva.svtype}</li>
-              <li>SV len: ${sva.svlen} bp</li>
-              <#if sva.ciUp gt 0>
-                <li>confidence interval ${sva.ciUp}/${sva.ciDown}</li>
-              </#if>
-              <li>format: ${sva.format}</li>
-              <li>gt: ${sva.gt}</li>
-              </ol>
-              <p>
-            </header>
-             <p>
-             info: ${sva.info}
-             </p>
-             <p>
-             Candidates:
-             <ul>
-             <#list sva.hitlist as hit>
-                <li>${hit.diseaseName}</li>
-                <li>Post test probasbility: ${hit.posttestProbability}%</li>
-
-             </#list>
-             </ul>
-             <#if sva.enhancers??>
-             <p>Enhancers:
-             <ul>
-             <#list sva.enhancers as enhancer>
-                <li>${enhancer.summary}</li>
-             </#list>
-             </ul></p>
-             </#if>
-             </p>
+              ${sva.html?no_esc}
              </article>
              </section>
         </#list>
@@ -441,7 +395,7 @@ a.svg:hover, a.svg:active {
         <a name="about"></a>
         <article>
           <h2>About</h2>
-            <p>L2O shows candidate SVs that affect genes associated witht the top LIRICAL candidates.</p>
+            <p>L2O shows candidate SVs that affect genes associated witht the top svann candidates.</p>
 
 
         </article>

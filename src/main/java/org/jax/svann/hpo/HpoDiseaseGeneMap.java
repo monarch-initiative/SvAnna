@@ -33,12 +33,19 @@ public class HpoDiseaseGeneMap {
      */
     private final Map<TermId, HpoDisease> diseaseMap;
 
+    private final Map<String, GeneWithId> geneSymbolMap;
+
     private HpoDiseaseGeneMap(String hpOboPath, String phenotypeHpoaPath, String mim2geneMedgenPath, String geneInfoPath) {
         this.ontology = OntologyLoader.loadOntology(new File(hpOboPath));
         List<String> desiredDatabasePrefixes= ImmutableList.of("OMIM");
         String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
         HpoAssociationParser hap = new HpoAssociationParser(new File(geneInfoPath), new File(mim2geneMedgenPath), null, new File(phenotypeHpoaPath), ontology);
         this.disease2geneIdMultiMap = hap.getDiseaseToGeneIdMap();
+        Map<TermId, String> tid2symbolMap = hap.getGeneIdToSymbolMap();
+        this.geneSymbolMap = new HashMap<>();
+        for (var e : tid2symbolMap.entrySet()) {
+            geneSymbolMap.put(e.getValue(), new GeneWithId(e.getValue(), e.getKey()));
+        }
         this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath,ontology,desiredDatabasePrefixes);
     }
 
@@ -101,6 +108,10 @@ public class HpoDiseaseGeneMap {
                 mim2geneFile.getAbsolutePath(),
                 geneInfoFile.getAbsolutePath());
         return hdgmap;
+    }
+
+    public Map<String, GeneWithId> getGeneSymbolMap() {
+        return geneSymbolMap;
     }
 
     /**

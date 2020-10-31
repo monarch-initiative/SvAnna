@@ -1,5 +1,8 @@
 package org.jax.svann.overlap;
 
+import htsjdk.samtools.cram.encoding.core.huffmanUtils.HuffmanIntHelper;
+import org.jax.svann.priority.SvImpact;
+
 import java.util.Set;
 
 /**
@@ -65,6 +68,25 @@ public enum OverlapType {
 
     public String getName() {
         return name;
+    }
+
+
+    public SvImpact toImpact() {
+        switch (this) {
+            case SINGLE_EXON_IN_TRANSCRIPT:
+            case MULTIPLE_EXON_IN_TRANSCRIPT:
+                return SvImpact.HIGH_IMPACT;
+            case TRANSCRIPT_CONTAINED_IN_SV:
+                return SvImpact.HIGH_IMPACT;
+            case UPSTREAM_GENE_VARIANT_2KB:
+            case DOWNSTREAM_GENE_VARIANT_2KB:
+                return SvImpact.HIGH_IMPACT;
+            case UPSTREAM_GENE_VARIANT_5KB:
+            case DOWNSTREAM_GENE_VARIANT_5KB:
+                return SvImpact.INTERMEDIATE_IMPACT;
+            default:
+                return SvImpact.LOW_IMPACT;
+        }
     }
 
 

@@ -66,6 +66,19 @@ public enum OverlapType {
         return exonicTypes.contains(vtype);
     }
 
+    /**
+     * Check if this overlap type overlaps with any part of a transcript
+     * @param vtype an overlap type
+     * @return true if there is overlap with some part of a transcript
+     */
+    public static boolean overlapsTranscript(OverlapType vtype) {
+        return exonicTypes.contains(vtype) || intronicTypes.contains(vtype);
+    }
+
+    public static boolean inversionDisruptable(OverlapType vtype) {
+        return exonicTypes.contains(vtype) || intronicTypes.contains(vtype) || vtype == UPSTREAM_GENE_VARIANT_2KB;
+    }
+
     public String getName() {
         return name;
     }

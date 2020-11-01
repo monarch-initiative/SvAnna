@@ -81,30 +81,23 @@ public class Overlapper {
      * This is the main method for getting a list of overlapping transcripts (with extra data in an {@link Overlap}
      * object) for structural variants that occur on one Chromosome, such as deletions
      *
-     * @param rearrangement
+     * @param rearrangement a structural variant identified in the input file.
      * @return list of overlapping transcripts.
      * TODO REFACTOR
      */
     public List<Overlap> getOverlapList(SequenceRearrangement rearrangement) {
-        // TODO: 26. 10. 2020 check coordinate remapping
         if (rearrangement.getType() == SvType.DELETION) {
             return getDeletionOverlaps(rearrangement);
         } else if (rearrangement.getType() == SvType.INSERTION) {
             return getInsertionOverlaps(rearrangement);
         }  else if (rearrangement.getType() == SvType.TRANSLOCATION) {
             return getTranslocationOverlaps(rearrangement);
+        } else if (rearrangement.getType() == SvType.INVERSION) {
+            return getInversionOverlaps(rearrangement);
         } else {
             LOGGER.warn("Getting overlaps for `{}` is not yet supported", rearrangement.getType());
             return List.of();
         }
-//        int id = 42;//svEvent.getAdjacencies().get(0)..getId();
-//        Strand strand = Strand.FWD; // We assume all SVs are on the forward strand
-//
-//        GenomeInterval structVarInterval = new GenomeInterval(rd, strand, id, 42,43);//svEvent.getBegin(), svEvent.getEnd());
-//        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
-//        IntervalArray<TranscriptModel>.QueryResult queryResult =
-//                iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
-//        return getOverlapList(structVarInterval, queryResult);
     }
 
     /**
@@ -178,6 +171,44 @@ public class Overlapper {
                 iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
         return getOverlapList(structVarInterval, queryResult);
     }
+
+
+    List<Overlap> getBreakendOverlaps(Breakend be) {
+        Contig chrom = be.getContig();
+        int id = chrom.getId();
+        int begin = be.getBegin();
+        int end = be.getEnd();
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
+        IntervalArray<TranscriptModel>.QueryResult queryResult =
+                iarray.findOverlappingWithInterval(gi.getBeginPos(), gi.getEndPos());
+        return getOverlapList(gi, queryResult);
+    }
+
+    /**
+     * This method checks whether any of the breakends of an inversion overlaps with
+     * any part of a transcript
+     * @param inversion an inversion
+     * @return list of transcript overlaps (can be empty)
+     */
+    List<Overlap> getInversionOverlaps(SequenceRearrangement inversion) {
+        List<Adjacency> adjacencies = inversion.getAdjacencies();
+        if (adjacencies.size() != 2) {
+            throw new SvAnnRuntimeException("Malformed inversion adjacency list with size " + adjacencies.size());
+        }
+        List<Overlap> overlaps = new ArrayList<>();
+        for (var a : adjacencies) {
+            Breakend be = a.getLeft();
+            List<Overlap> leftOverlaps = getBreakendOverlaps(be);
+            leftOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
+            be = a.getRight();
+            List<Overlap> rightOverlaps = getBreakendOverlaps(be);
+            rightOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
+        }
+        return overlaps;
+    }
+
+
 
     /**
      * This method returns all overlapping transcripts for insertions. We assume that insertions

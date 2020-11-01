@@ -46,6 +46,14 @@ public class Overlap {
         return OverlapType.isExonic(this.overlapType);
     }
 
+    public boolean overlapsTranscript() {
+        return OverlapType.overlapsTranscript(this.overlapType);
+    }
+
+    public boolean inversionDisruptable() {
+        return OverlapType.inversionDisruptable(this.overlapType);
+    }
+
     /**
      * @return true if this overlap involves exonic sequence
      */

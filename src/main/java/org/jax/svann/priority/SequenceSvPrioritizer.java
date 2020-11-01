@@ -152,6 +152,13 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         return new DefaultSvPriority(svType, impact, affectedTranscripts, geneWithIdsSet, enhancers);
     }
 
+    /**
+     * The sequence-based inversion prioritization only checks whether the two breakends of the
+     * inversion disrupt a gene. Here, we take any inversion that disrupts any part of a transcript
+     * to be high impact (regardless of whether the CDS is disrupted).
+     * @param rearrangement an inversion
+     * @return Prioritization
+     */
     private DefaultSvPriority prioritizeInversion(SequenceRearrangement rearrangement) {
         return null;
     }

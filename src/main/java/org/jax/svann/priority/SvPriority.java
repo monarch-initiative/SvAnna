@@ -3,6 +3,7 @@ package org.jax.svann.priority;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
+import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 
@@ -16,7 +17,7 @@ public interface SvPriority {
     SvType getType();
     SvImpact getImpact();
 
-
+    List<HpoDiseaseSummary> getDiseases();
 
     Set<TranscriptModel> getAffectedTranscripts();
 

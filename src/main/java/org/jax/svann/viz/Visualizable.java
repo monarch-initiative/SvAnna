@@ -1,11 +1,6 @@
 package org.jax.svann.viz;
 
-import org.jax.svann.priority.SvImpact;
-import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.SvType;
-
-import java.util.List;
+import org.jax.svann.reference.SequenceRearrangement;
 import java.util.Map;
 
 public interface Visualizable {
@@ -15,6 +10,8 @@ public interface Visualizable {
     String getType();
 
     boolean hasPhenotypicRelevance();
+
+    SequenceRearrangement getRearrangement();
 
     /**
      * key, value, where key is a display string such as 'location' and value is a string such

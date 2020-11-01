@@ -1,6 +1,5 @@
 package org.jax.svann.viz;
 
-import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.TestBase;
 import org.jax.svann.genomicreg.Enhancer;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -26,7 +26,7 @@ public class HtmlVisualizerTest extends TestBase {
     private static final Set<TranscriptModel> affectedTranscripts = Set.of(fbn1);
     private static final GeneWithId fbn1WithId = new GeneWithId("FBN1", TermId.of("NCBIGene:2200"));
     private static final Set<GeneWithId> affectedGeneIds = Set.of(fbn1WithId);
-    private static final Set<Enhancer> enhancers = Set.of(); // no affected enhancers for this
+    private static final List<Enhancer> enhancers = List.of(); // no affected enhancers for this
     private static final SvPriority svpriority =
             new DefaultSvPriority(SvType.DELETION, SvImpact.HIGH_IMPACT, affectedTranscripts, affectedGeneIds, enhancers, true);
 

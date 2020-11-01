@@ -4,27 +4,27 @@ import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.reference.SvType;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 public class DefaultSvPriority implements SvPriority {
 
     private static final DefaultSvPriority UNKNOWN =
-            new DefaultSvPriority(SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), Set.of(), false);
+            new DefaultSvPriority(SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), false);
     private final SvType svType;
     private final SvImpact svImpact;
     private final Set<TranscriptModel> affectedTranscripts;
     private final Set<GeneWithId> affectedGeneIds;
-    private final Set<Enhancer> affectedEnhancers;
+    private final List<Enhancer> affectedEnhancers;
     private final boolean hasPhenotypicRelevance;
 
     public DefaultSvPriority(SvType svType,
                              SvImpact svImpact,
                       Set<TranscriptModel> affectedTranscripts,
                       Set<GeneWithId> affectedGeneIds,
-                      Set<Enhancer> affectedEnhancers,
+                      List<Enhancer> affectedEnhancers,
                       boolean hasPhenotypicRelevance) {
         this.svType = svType;
         this.svImpact = svImpact;
@@ -32,6 +32,29 @@ public class DefaultSvPriority implements SvPriority {
         this.affectedGeneIds = affectedGeneIds;
         this.affectedEnhancers = affectedEnhancers;
         this.hasPhenotypicRelevance = hasPhenotypicRelevance;
+    }
+
+    /**
+     * This constructor is used by the Sequence based prioritization, phenotypic relevance is false
+     * TODO refactor, we do not need a boolean, we can instead use a list of associated diseases,
+     * and if the list is empty relevance is FALSE.
+     * @param svType
+     * @param svImpact
+     * @param affectedTranscripts
+     * @param affectedGeneIds
+     * @param affectedEnhancers
+     */
+    public DefaultSvPriority(SvType svType,
+                             SvImpact svImpact,
+                             Set<TranscriptModel> affectedTranscripts,
+                             Set<GeneWithId> affectedGeneIds,
+                             List<Enhancer> affectedEnhancers) {
+        this.svType = svType;
+        this.svImpact = svImpact;
+        this.affectedTranscripts = affectedTranscripts;
+        this.affectedGeneIds = affectedGeneIds;
+        this.affectedEnhancers = affectedEnhancers;
+        this.hasPhenotypicRelevance = false;
     }
 
     static DefaultSvPriority unknown() {
@@ -59,7 +82,7 @@ public class DefaultSvPriority implements SvPriority {
     }
 
     @Override
-    public Set<Enhancer> getAffectedEnhancers() {
+    public List<Enhancer> getAffectedEnhancers() {
         return affectedEnhancers;
     }
 

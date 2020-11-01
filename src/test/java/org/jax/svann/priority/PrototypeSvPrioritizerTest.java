@@ -42,7 +42,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
 
     private static final Map<TermId, Set<HpoDiseaseSummary>> DISEASE_MAP = makeDiseaseSummaryMap();
     private static final Map<Integer, IntervalArray<Enhancer>> ENHANCER_MAP = makeEnhancerMap();
-    private PrototypeSvPrioritizer prioritizer;
+    private SequenceSvPrioritizer prioritizer;
 
 
     /**
@@ -94,7 +94,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        prioritizer = new PrototypeSvPrioritizer(GENOME_ASSEMBLY, RELEVANT_ENHANCER_TOP_LEVEL_TERMS, ENHANCER_MAP, DISEASE_MAP, Map.of(), JANNOVAR_DATA);
+        prioritizer = new SequenceSvPrioritizer(GENOME_ASSEMBLY, ENHANCER_MAP, Map.of(), JANNOVAR_DATA);
     }
 
     @Test

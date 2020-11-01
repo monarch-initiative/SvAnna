@@ -12,16 +12,14 @@ import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
-import org.jax.svann.priority.PrototypeSvPrioritizer;
+import org.jax.svann.priority.SequenceSvPrioritizer;
 import org.jax.svann.priority.SvPrioritizer;
-import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.jax.svann.viz.HtmlVisualizable;
 import org.jax.svann.viz.Visualizable;
-import org.jax.svann.viz.Visualizer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +50,18 @@ public class SvAnnAnalysis {
      * relevant.
      */
     private final Set<TermId> relevantHpoIdsForEnhancers;
-
-//    private final List<SvEvent> svEventList;
-//
-//    private final List<BreakendRecord> breakendRecordList;
+    /**
+     * All of the structural variants identified in the VCF file, both symbolic and breakend calls.
+     */
     private final Collection<SequenceRearrangement> rearrangements;
-
+    /**
+     * Jannovar representation of all transcripts
+     */
     private final JannovarData jannovarData;
 
     /**
-     * Key -- gene symbol, vallue, {@link GeneWithId} object with symbol and id
+     * Key -- gene symbol, vallue, {@link GeneWithId} object with symbol and id. This map is used to connect
+     * geneIDs with gene symbols for display in HTML TODO - this is not very elegant and we may want to refactor.
      */
     private final Map<String, GeneWithId> geneSymbolMap;
 
@@ -78,7 +78,7 @@ public class SvAnnAnalysis {
      * @param enhancerPath path to the TSpec enhancer file
      */
     public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) throws SerializationException {
-        this.jannovarData = readJannovarData(jannovarPath);
+        this.jannovarData = new JannovarDataSerializer(jannovarPath).load();
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
         Map<TermId, String> hpoId2LabelMap = tparser.getId2labelMap();
@@ -105,31 +105,18 @@ public class SvAnnAnalysis {
      * @return List of prioritized structural variants
      */
     public List<Visualizable> prioritizeSvs() {
-        //List<SvPriority> svList = new ArrayList<>();
         List<Visualizable> visualizableList = new ArrayList<>();
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(assembly,
-                relevantHpoIdsForEnhancers,
+        SvPrioritizer prioritizer = new SequenceSvPrioritizer(assembly,
                 chromosomeToEnhancerIntervalArrayMap,
-                relevantGeneIdToAssociatedDiseaseMap,
                 geneSymbolMap,
                 jannovarData);
         for (var rearrangement : rearrangements) {
             if (rearrangement.getType() == SvType.DELETION || rearrangement.getType() == SvType.INSERTION) {
-                //svList.add(prioritizer.prioritize(rearrangement));
                 Visualizable visualizable = new HtmlVisualizable(rearrangement, prioritizer.prioritize(rearrangement));
                 visualizableList.add(visualizable);
             }
         }
         return visualizableList;
     }
-
-
-
-
-
-    private static JannovarData readJannovarData(String jannovarDataPath) throws SerializationException {
-        return new JannovarDataSerializer(jannovarDataPath).load();
-    }
-
 
 }

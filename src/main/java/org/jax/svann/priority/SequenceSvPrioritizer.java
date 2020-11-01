@@ -1,7 +1,6 @@
 package org.jax.svann.priority;
 
 import de.charite.compbio.jannovar.data.JannovarData;
-import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
@@ -14,82 +13,65 @@ import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * This class contains the code that we have written until now.
+ * This class prioritizes structural variants according to the sequences they affect. It does not take
+ * into account any notion of phenotypic relevance. The rules are
+ * <ol>
+ *     <li>HIGH: High -- multiple genes, exonic, Disruption of a promoter (2kb upstream). Disruption of an enhancer.
+ *     For SVs that affect exons, we only count HIGH priority if the SV affects the coding sequence (CDS).</li>
+ *     <li>INTERMEDIATE. Intronic, downstream (up to 2kb). For coding genes, exonic SVs that do not afffect the CDS</li>
+ *     <li>LOW: intergenic but not enhancer. Upstream/downstream, more than 2kb.</li>
+ * </ol>
+ * If the user has provided HPO terms describing the phenotypes observed in a proband, then we intend objects
+ * of this class to subsequently be passed to a a phenotype based prioritizer.
+ * @author Daniel Danis
+ * @author Peter N Robinson
  */
-public class PrototypeSvPrioritizer implements SvPrioritizer {
-
+public class SequenceSvPrioritizer implements SvPrioritizer {
+    /** In the first pass, we just look at sequence and do not analyze diseases, so this is the empty set.*/
     private static final Set<HpoDiseaseSummary> EMPTYSET = Set.of();
-
     /**
      * Genome assembly in use.
      */
     private final GenomeAssembly assembly;
-
     /**
-     * Collection of top level HPO ids that are equal to or ancestors of terms used to annotate the clinical
-     * features of the individual being investigated.
+     * The overlapper tests overlap of structural variants with transcripts.
      */
-    private final Set<TermId> relevantHpoIdsForEnhancers;
-
-
-    /**
-     * Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers.
-     */
-    private final Map<Integer, IntervalArray<Enhancer>> chromosomeToEnhancerIntervalArrayMap;
     private final Overlapper overlapper;
-
+    /**
+     * The enhancer overlapper tests overlap of structural variants with enhancers.
+     */
     private final EnhancerOverlapper enhancerOverlapper;
     /**
-     * Key -- gene symbol, vallue, {@link GeneWithId} object with symbol and id
+     * Key -- gene symbol, value, {@link GeneWithId} object with symbol and id
      */
     private final Map<String, GeneWithId> geneSymbolMap;
-    /**
-     * Reference dictionary (part of {@link JannovarData}).
-     */
-    private final ReferenceDictionary rd;
 
     /**
-     * This map is initialized to contain only those gene ids that are associated with diseases that
-     * are annotated to at least one of the HPO terms in targetHpoIdList.
+     * @param assembly An object representing the assembly, e.g., HG38
+     * @param enhancerMap A map of enhancers
+     * @param geneSymbolMap A map of gene symbols and NCBI ids
+     * @param jannovarData An object that contains representations of all transcripts
      */
-    private final Map<TermId, Set<HpoDiseaseSummary>> relevantGeneIdToAssociatedDiseaseMap;
-
-    public PrototypeSvPrioritizer(GenomeAssembly assembly,
-                                  Set<TermId> relevantHposForEnhancers,
-                                  Map<Integer, IntervalArray<Enhancer>> enhancerMap,
-                                  Map<TermId, Set<HpoDiseaseSummary>> gene2diseaseMap,
-                                  Map<String, GeneWithId> geneSymbolMap,
-                                  JannovarData jannovarData) {
+    public SequenceSvPrioritizer(GenomeAssembly assembly,
+                                 Map<Integer, IntervalArray<Enhancer>> enhancerMap,
+                                 Map<String, GeneWithId> geneSymbolMap,
+                                 JannovarData jannovarData) {
         this.assembly = assembly;
-        this.relevantHpoIdsForEnhancers = relevantHposForEnhancers;
-        this.chromosomeToEnhancerIntervalArrayMap = enhancerMap;
-        this.relevantGeneIdToAssociatedDiseaseMap = gene2diseaseMap;
         this.geneSymbolMap = geneSymbolMap;
         this.overlapper = new Overlapper(jannovarData);
         this.enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
-        this.rd = jannovarData.getRefDict();
     }
 
 
     @Override
     public SvPriority prioritize(SequenceRearrangement rearrangement) {
         /*
-        For each case we need to figure out the affected transcripts/genes.
-        Then, we figure out the impact on the sequence (high/medium/low) and phenotype relevance.
 
-        Sequence impact category:
-        - use overlapper to get the overlapping transcripts
-        - if overlap type is intergenic:
-          - if variant disrupts an enhancer with tissue relevance -> medium sequence impact
-            - else low
-        - if overlap type is single/multiple/entire tx affected -> high sequence impact
-        report the most severe sequence impact category
 
         Phenotypic relevance:
         - the affected gene is among the relevant genes -> relevant
@@ -122,14 +104,14 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // in  relevantGeneIdToAssociatedDiseaseMap -- if so we are PHENOTYPICALLY RELEVANT
         List<String> affectedRelevantGenes = overlaps
                 .stream()
-                .filter(relevantGeneIdToAssociatedDiseaseMap::containsKey)
+                //ilter(relevantGeneIdToAssociatedDiseaseMap::containsKey)
                 .map(Overlap::getGeneSymbol)
                 .collect(Collectors.toList());
         // TODO, we need to get a TermId, not a String. We may need to refactor relevantGeneIdToAssociatedDiseaseMap
         // to use the gene symbol as the key, since we will get potentially different gene ids from different
         // sources (NCBI, ucsc, Ensembl....)
         // Extract the relevant disease genes for this enhancer
-        Set<HpoDiseaseSummary> diseases = relevantGeneIdToAssociatedDiseaseMap.getOrDefault("todo", EMPTYSET);
+       // Set<HpoDiseaseSummary> diseases = relevantGeneIdToAssociatedDiseaseMap.getOrDefault("todo", EMPTYSET);
         //SequenceRearrangement e, List<Overlap> overlaps, List<Enhancer> enhancers, Set<HpoDiseaseSummary> diseases)
 //        return new DefaultSvPriority(rearrangement, overlaps, affectedEnhancers, diseases);
 

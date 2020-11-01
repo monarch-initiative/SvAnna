@@ -13,6 +13,8 @@ import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,11 +29,12 @@ import java.util.stream.Collectors;
  *     <li>LOW: intergenic but not enhancer. Upstream/downstream, more than 2kb.</li>
  * </ol>
  * If the user has provided HPO terms describing the phenotypes observed in a proband, then we intend objects
- * of this class to subsequently be passed to a a phenotype based prioritizer.
+ * of this class to subsequently be passed to {@link PhenotypeSvPrioritizer}.
  * @author Daniel Danis
  * @author Peter N Robinson
  */
 public class SequenceSvPrioritizer implements SvPrioritizer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SequenceSvPrioritizer.class);
     /** In the first pass, we just look at sequence and do not analyze diseases, so this is the empty set.*/
     private static final Set<HpoDiseaseSummary> EMPTYSET = Set.of();
     /**
@@ -70,17 +73,6 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
 
     @Override
     public SvPriority prioritize(SequenceRearrangement rearrangement) {
-        /*
-
-
-        Phenotypic relevance:
-        - the affected gene is among the relevant genes -> relevant
-        - translocation that removes enhancer from a phenotypically relevant gene
-        - else not
-
-        Note that the rules for getting "overlap" depends on SvType
-         */
-
         switch (rearrangement.getType()) {
             case DELETION:
                 return prioritizeDeletion(rearrangement);
@@ -118,12 +110,18 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         return null;
     }
 
+    /**
+     * Prioritize deletions according to sequence
+     * @param rearrangement The  deletion
+     * @return Prioritization
+     */
     private DefaultSvPriority prioritizeDeletion(SequenceRearrangement rearrangement) {
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .min(Comparator.comparing(Overlap::getOverlapType)); // counterintuitive but correct
         if (highestImpactOverlapOpt.isEmpty()) {
-            //
+            // should never happen
+            LOGGER.error("Could not identify highest impact overlap for {}.", rearrangement);
             return DefaultSvPriority.unknown();
         }
         Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
@@ -147,18 +145,11 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
             else
                 impact = SvImpact.INTERMEDIATE_IMPACT;
         }
-        // TODO -- FIGURE OUT LOGIC FOR IMPACT
-
-        // TODO -- Add Enhancers
-        Set<Enhancer> enhancers = Set.of();
-        // TODO -- calculate phenotypic relevance
-        boolean hasPhenotypicRelevance = false;
-        return new DefaultSvPriority(svType,
-                impact,
-                affectedTranscripts,
-                geneWithIdsSet,
-                enhancers,
-                hasPhenotypicRelevance);
+        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(rearrangement);
+        if (enhancers.size()>0) {
+            impact = SvImpact.HIGH_IMPACT;
+        }
+        return new DefaultSvPriority(svType, impact, affectedTranscripts, geneWithIdsSet, enhancers);
     }
 
     private DefaultSvPriority prioritizeInversion(SequenceRearrangement rearrangement) {
@@ -197,7 +188,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         // TODO -- FIGURE OUT LOGIC FOR IMPACT
 
         // TODO -- Add Enhancers
-        Set<Enhancer> enhancers = Set.of();
+        List<Enhancer> enhancers = List.of();
         // TODO -- calculate phenotypic relevance
         boolean hasPhenotypicRelevance = false;
         return new DefaultSvPriority(svType,

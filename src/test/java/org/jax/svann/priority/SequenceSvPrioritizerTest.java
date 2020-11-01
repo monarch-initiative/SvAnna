@@ -28,7 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * <p>
  * Thus, the patient might have terms such as HP:0002490 (Increased CSF lactate), and HP:0001290 (Generalized hypotonia).
  */
-public class PrototypeSvPrioritizerTest extends TestBase {
+public class SequenceSvPrioritizerTest extends TestBase {
 
     /**
      * Assuming the patient has variant in SURF1, increased CSV lactate and generalized hypotonia, these are the
@@ -101,7 +101,6 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     public void prioritize_singleExonDeletion_SURF1_exon2() {
         SequenceRearrangement sr = TestVariants.singleExonDeletion_SURF1_exon2();
         SvPriority result = prioritizer.prioritize(sr);
-
         assertThat(result.getImpact(), is(SvImpact.HIGH_IMPACT));
     }
 

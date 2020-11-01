@@ -7,6 +7,7 @@ import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.Strand;
+import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.Adjacency;
@@ -15,6 +16,7 @@ import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,12 +65,50 @@ public class EnhancerOverlapper {
         return new GenomeInterval(rd, Strand.FWD, id, begin,end);
     }
 
+    List<Enhancer> getBreakendOverlaps(Breakend be) {
+        Contig chrom = be.getContig();
+        int id = chrom.getId();
+        int begin = be.getBegin();
+        int end = be.getEnd();
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        return getSimpleEnhancerOverlap(gi);
+    }
+
+    /**
+     * This is intended to be used to check if structural rearrangements such as inversions
+     * affect enhancers -- if a breakend occurs WITHIN an enhancer, we regard this as a match.
+     * In contrast, enhancers are defined as being independent of orientation, and so we
+     * do not regard it as a match if an enhancer is completely contained within an inversion.
+     * @param inversion Representation of an inversion
+     * @return Prioritization
+     */
+    private List<Enhancer> getEnhancersAffectedByBreakends(SequenceRearrangement inversion) {
+        List<Adjacency> adjacencies = inversion.getAdjacencies();
+        if (adjacencies.size() != 2) {
+            throw new SvAnnRuntimeException("Malformed inversion adjacency list with size " + adjacencies.size());
+        }
+        List<Enhancer> overlaps = new ArrayList<>();
+        for (var a : adjacencies) {
+            Breakend be = a.getLeft();
+            List<Enhancer> leftOverlaps = getBreakendOverlaps(be);
+            leftOverlaps.stream().forEach(overlaps::add);
+            be = a.getRight();
+            List<Enhancer> rightOverlaps = getBreakendOverlaps(be);
+            rightOverlaps.stream().forEach(overlaps::add);
+        }
+        return overlaps;
+    }
+
+
+
     public List<Enhancer> getEnhancerOverlaps(SequenceRearrangement rearrangement) {
         if (rearrangement.getType() == SvType.DELETION) {
             GenomeInterval gi = getDeletionInterval(rearrangement);
             return getSimpleEnhancerOverlap(gi);
+        } else if (rearrangement.getType() == SvType.INVERSION) {
+            return getEnhancersAffectedByBreakends(rearrangement);
         }
-
+        System.err.println("[WARNING Enhancer overlap type not implemented yet");
         return List.of();
     }
 

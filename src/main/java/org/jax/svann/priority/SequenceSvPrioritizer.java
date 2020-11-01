@@ -77,8 +77,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
             case DELETION:
                 return prioritizeDeletion(rearrangement);
             case INVERSION:
-//                return prioritizeInversion(rearrangement);
-                break;
+                return prioritizeInversion(rearrangement);
             case INSERTION:
                return prioritizeInsertion(rearrangement);
             case TRANSLOCATION:
@@ -160,7 +159,34 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
      * @return Prioritization
      */
     private DefaultSvPriority prioritizeInversion(SequenceRearrangement rearrangement) {
-        return null;
+        // the following gets overlaps of just the breakends of the inversion!
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        // if overlaps is not empty, then we regard this as high impact, other wise low
+        SvImpact impact = SvImpact.LOW_IMPACT; // default
+        OverlapType otype = OverlapType.UNKNOWN; // default
+        Set<TranscriptModel> affectedTranscripts;
+        Set<GeneWithId> geneWithIdsSet;
+        if (! overlaps.isEmpty()) {
+            Set<String> affectedGeneIds = overlaps.stream().map(Overlap::getGeneSymbol).collect(Collectors.toSet());
+            geneWithIdsSet = new HashSet<>();
+            for (String symbol: affectedGeneIds) {
+                if (geneSymbolMap.containsKey(symbol)) {
+                    geneWithIdsSet.add(geneSymbolMap.get(symbol));
+                }
+            }
+            affectedTranscripts =
+                    overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
+            impact = SvImpact.HIGH_IMPACT;
+            otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_INVERSION;
+        } else {
+            affectedTranscripts = Set.of();
+            geneWithIdsSet = Set.of();
+        }
+        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(rearrangement);
+        if (enhancers.size()>0) {
+            impact = SvImpact.HIGH_IMPACT;
+        }
+        return new DefaultSvPriority(SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers);
     }
 
     private DefaultSvPriority prioritizeInsertion(SequenceRearrangement rearrangement) {

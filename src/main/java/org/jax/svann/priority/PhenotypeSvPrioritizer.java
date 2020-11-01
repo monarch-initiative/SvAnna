@@ -1,6 +1,17 @@
 package org.jax.svann.priority;
 
+import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.hpo.GeneWithId;
+import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.SvType;
+import org.monarchinitiative.phenol.ontology.data.TermId;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *  This class prioritizes structural variants according to the phenotypic associations of the
@@ -18,8 +29,54 @@ import org.jax.svann.reference.SequenceRearrangement;
  * @author Daniel Danis
  */
 public class PhenotypeSvPrioritizer implements SvPrioritizer {
+
+    private final List<TermId> targetHpoIdList;
+
+    private final Map<TermId, Set<HpoDiseaseSummary>> relevantGeneIdToAssociatedDiseaseMap;
+
+    public PhenotypeSvPrioritizer(List<TermId> targetHpos, Map<TermId, Set<HpoDiseaseSummary>> diseaseMap){
+        this.targetHpoIdList = targetHpos;
+        this.relevantGeneIdToAssociatedDiseaseMap = diseaseMap;
+    }
+
+
+    SvPriority prioritizeByPhenotype(SvPriority svPriority) {
+        Set<GeneWithId> genes = svPriority.getAffectedGeneIds();
+        List<HpoDiseaseSummary> relevantDiseases = new ArrayList<>();
+        for (var gene : genes) {
+            TermId tid = gene.getGeneId();
+            if (this.relevantGeneIdToAssociatedDiseaseMap.containsKey(tid)) {
+                relevantDiseases.addAll(this.relevantGeneIdToAssociatedDiseaseMap.get(tid));
+            }
+        }
+        return new DefaultSvPriority(svPriority, relevantDiseases);
+    }
+
+    SvPriority prioritizeInversion(SvPriority svPriority) {
+        return prioritizeByPhenotype(svPriority); // TODO IMPLEMENT ME
+    }
+
+    SvPriority prioritizeTranslocation(SvPriority svPriority) {
+        return prioritizeByPhenotype(svPriority); // TODO IMPLEMENT ME
+    }
+
+
+    /**
+     * This method adjusts the sequence-based priority according to whether the
+     * involved genes share HPO annotations with {@link #targetHpoIdList}.
+     * TODO -- still need to implement special rules for inversions and translocations.
+     * @param svPriority
+     * @return phenotypic prioritization
+     */
     @Override
-    public SvPriority prioritize(SvPriority rearrangement) {
-        return null;
+    public SvPriority prioritize(SvPriority svPriority) {
+       switch (svPriority.getRearrangement().getType()) {
+           case TRANSLOCATION:
+               return prioritizeTranslocation(svPriority);
+           case INVERSION:
+               return prioritizeInversion(svPriority);
+           default:
+               return prioritizeByPhenotype(svPriority);
+       }
     }
 }

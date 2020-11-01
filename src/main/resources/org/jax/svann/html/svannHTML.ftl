@@ -358,7 +358,7 @@ a.svg:hover, a.svg:active {
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 <header class="banner">
-    <h1><font color="#FFDA1A">L2O</font></h1>
+    <h1><font color="#FFDA1A">SvAnna</font></h1>
 </header>
 
   <nav>
@@ -374,13 +374,25 @@ a.svg:hover, a.svg:active {
     <section>
       <a name="sample"></a>
         <article>
-        <ul>
-        <li>Structural variants: n=${n_structural_vars}</li>
+        <p>SvAnna (Structural Variant Annotation Amenuensis) analysis of structural variants.</p>
+        <p>A total of ${n_structural_vars} above-threshold variants were extracted from ${vcf_file}.</p>
+        <table border=1>
+        <thead>
+            <tr>
+              <th>Type</th>
+              <th>Low impact</th>
+              <th>Intermediate impact</th>
+              <th>High impact</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+        <#list svtypecounts as svt>
+        <tr><td>${svt.name}</td><td>${svt.low}</td><td>${svt.intermediate}</td><td>${svt.high}</td><td>${svt.total}</td><td></tr>
+          </#list>
+        </table>
+        <p>We were unable to parse ${n_unparsable} entries.</p>
         </article>
     </section>
-
-
-
 
         <#list svalist as sva>
         <section>
@@ -395,7 +407,7 @@ a.svg:hover, a.svg:active {
         <a name="about"></a>
         <article>
           <h2>About</h2>
-            <p>L2O shows candidate SVs that affect genes associated witht the top svann candidates.</p>
+            <p>SvAnna shows candidate SVs that affect genes associated witht the top svann candidates.</p>
 
 
         </article>
@@ -403,7 +415,7 @@ a.svg:hover, a.svg:active {
       <span id="tooltip" display="none" style="position: absolute; display: none;"></span>
   </main>
   <footer>
-    <p>L2O &copy; 2020</p>
+    <p>SvAnn &copy; 2020</p>
   </footer>
 
   <script>

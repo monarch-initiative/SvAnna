@@ -20,23 +20,25 @@ public class HtmlVisualizable implements  Visualizable {
 
     final private SvImpact svImpact;
 
-    final private List<Adjacency> adjacencyList;
-
     final private Map<String, String> locationMap;
 
     final private SvPriority svPriority;
 
-
+    /**
+     * Representation of the structural variant as it came from the VCF file.
+     */
     private SequenceRearrangement rearrangement;
 
+    /**
+     *
+     * @param svPriority
+     */
     public HtmlVisualizable(SvPriority svPriority) {
-        svImpact = svPriority.getImpact();
-        adjacencyList = rearrangement.getAdjacencies();
-        svType = rearrangement.getType();
-        this.svPriority = svPriority;
+        this.svImpact = svPriority.getImpact();
         this.rearrangement = svPriority.getRearrangement();
+        this.svType = this.rearrangement.getType();
+        this.svPriority = svPriority;
         this.locationMap =  initializeLocationStrings();
-
     }
 
     private String getDeletionLocationString(SequenceRearrangement rearrangement) {
@@ -45,7 +47,6 @@ public class HtmlVisualizable implements  Visualizable {
             throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
         }
         Adjacency deletion = adjacencies.get(0);
-
         Breakend left = deletion.getLeft();
         Breakend right = deletion.getRight();
         Contig chrom = left.getContig();
@@ -72,6 +73,10 @@ public class HtmlVisualizable implements  Visualizable {
         return sortedMap;
     }
 
+    @Override
+    public SequenceRearrangement getRearrangement() {
+        return this.rearrangement;
+    }
 
     @Override
     public String getType() {
@@ -89,7 +94,7 @@ public class HtmlVisualizable implements  Visualizable {
     }
 
     @Override
-    public  boolean hasPhenotypicRelevance() {
+    public boolean hasPhenotypicRelevance() {
         return this.svPriority.hasPhenotypicRelevance();
     }
 }

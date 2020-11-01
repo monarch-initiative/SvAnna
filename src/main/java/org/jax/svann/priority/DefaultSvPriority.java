@@ -3,6 +3,7 @@ package org.jax.svann.priority;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
+import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 
@@ -20,7 +21,7 @@ public class DefaultSvPriority implements SvPriority {
     private final Set<TranscriptModel> affectedTranscripts;
     private final Set<GeneWithId> affectedGeneIds;
     private final List<Enhancer> affectedEnhancers;
-
+    private final List<HpoDiseaseSummary> diseases;
 
     public DefaultSvPriority(SequenceRearrangement rearrangement,
                              SvType svType,
@@ -34,6 +35,32 @@ public class DefaultSvPriority implements SvPriority {
         this.affectedTranscripts = affectedTranscripts;
         this.affectedGeneIds = affectedGeneIds;
         this.affectedEnhancers = affectedEnhancers;
+        diseases = List.of(); // not relevant at this stage
+    }
+
+    public DefaultSvPriority(SvPriority svprio,
+                             List<HpoDiseaseSummary> diseaseList) {
+        this.rearrangement = svprio.getRearrangement();
+        this.svType = svprio.getType();
+        if (diseaseList.isEmpty()) {
+            switch (svprio.getImpact()) {
+                case HIGH_IMPACT:
+                    this.svImpact = SvImpact.INTERMEDIATE_IMPACT;
+                    break;
+                case INTERMEDIATE_IMPACT:
+                    this.svImpact = SvImpact.LOW_IMPACT;
+                    break;
+                default:
+                    this.svImpact = svprio.getImpact();
+            }
+        } else {
+            this.svImpact = svprio.getImpact();
+        }
+
+        this.affectedTranscripts = svprio.getAffectedTranscripts();
+        this.affectedGeneIds = svprio.getAffectedGeneIds();
+        this.affectedEnhancers = svprio.getAffectedEnhancers();
+        this.diseases = diseaseList;
     }
 
     static DefaultSvPriority unknown() {
@@ -53,6 +80,11 @@ public class DefaultSvPriority implements SvPriority {
     @Override
     public SvImpact getImpact() {
         return svImpact;
+    }
+
+    @Override
+    public List<HpoDiseaseSummary> getDiseases() {
+        return this.diseases;
     }
 
     @Override

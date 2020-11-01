@@ -30,6 +30,9 @@ hs_err_pid*
 # Local data files
 data/
 
+# Local output files
+*.html
+
 # Sphinx documentation
 docs/_build/
 /dependency-reduced-pom.xml

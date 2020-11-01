@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class HtmlVisualizerTest extends TestBase {
 
-
+    private static final SequenceRearrangement surf1Exon3Deletion = TestVariants.singleExonDeletion_SURF2_exon3();
     private static final Map<String, TranscriptModel> transcriptmap = JANNOVAR_DATA.getTmByAccession();
     private static final TranscriptModel fbn1 = transcriptmap.get("NM_000138.4");
     private static final Set<TranscriptModel> affectedTranscripts = Set.of(fbn1);
@@ -28,7 +28,7 @@ public class HtmlVisualizerTest extends TestBase {
     private static final Set<GeneWithId> affectedGeneIds = Set.of(fbn1WithId);
     private static final List<Enhancer> enhancers = List.of(); // no affected enhancers for this
     private static final SvPriority svpriority =
-            new DefaultSvPriority(SvType.DELETION, SvImpact.HIGH_IMPACT, affectedTranscripts, affectedGeneIds, enhancers, true);
+            new DefaultSvPriority(surf1Exon3Deletion,SvType.DELETION, SvImpact.HIGH_IMPACT, affectedTranscripts, affectedGeneIds, enhancers);
 
 
     @Test
@@ -39,11 +39,10 @@ public class HtmlVisualizerTest extends TestBase {
 
     @Test
     public void testGetHtml() {
-        SequenceRearrangement surf1Exon3Deletion = TestVariants.singleExonDeletion_SURF2_exon3();
-        Visualizable visualizable = new HtmlVisualizable(surf1Exon3Deletion, svpriority);
-        Visualizer visualizer = new HtmlVisualizer(visualizable);
-        String html = visualizer.getHtml();
-        System.out.println(html);
+//        Visualizable visualizable = new HtmlVisualizable(svpriority);
+//        Visualizer visualizer = new HtmlVisualizer(visualizable);
+//        String html = visualizer.getHtml();
+//        System.out.println(html);
     }
 
 

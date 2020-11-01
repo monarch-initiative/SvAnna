@@ -19,7 +19,7 @@ import org.jax.svann.reference.SequenceRearrangement;
  */
 public class PhenotypeSvPrioritizer implements SvPrioritizer {
     @Override
-    public SvPriority prioritize(SequenceRearrangement rearrangement) {
+    public SvPriority prioritize(SvPriority rearrangement) {
         return null;
     }
 }

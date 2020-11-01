@@ -116,17 +116,16 @@ public class Overlapper {
         Breakend breakendB = translocation.getRight();
         List<Overlap> overlapA = getTranslocationPartOverlap(breakendA);
         List<Overlap> overlapB = getTranslocationPartOverlap(breakendB);
-        // we would like to return one Overlap object for each end of the transclocation
-        // if there is a coding overlap return it, otherwise return any of the returned overlaps
-        // TODO consider the optimal behavior!
+        // we would like to return one Overlap object for each end of the translocation
+        // if the translocation overlaps a transcript it is high impact -- similar to inversions.
         List<Overlap> translocationOverlapPair = new ArrayList<>();
-        Optional<Overlap> optOverlap = overlapA.stream().filter(Overlap::overlapsCds).findAny();
+        Optional<Overlap> optOverlap = overlapA.stream().filter(Overlap::inversionDisruptable).findAny();
         if (optOverlap.isPresent()) {
             translocationOverlapPair.add(optOverlap.get());
         } else {
             translocationOverlapPair.add(overlapA.get(0));
         }
-        optOverlap = overlapB.stream().filter(Overlap::overlapsCds).findAny();
+        optOverlap = overlapB.stream().filter(Overlap::inversionDisruptable).findAny();
         if (optOverlap.isPresent()) {
             translocationOverlapPair.add(optOverlap.get());
         } else {

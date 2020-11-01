@@ -189,12 +189,20 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         return new DefaultSvPriority(SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers);
     }
 
+    /**
+     * Sequence based insertion prioritization. Any insertion that occurs in exonic regions is considered HIGH impact
+     * except for insertions into UTR regions of coding genes (Any insertion in a transcript of a non-coding gene
+     * is considered high impact).
+     * @param rearrangement an insertion
+     * @return Corresponding prioritization according to sequence
+     */
     private DefaultSvPriority prioritizeInsertion(SequenceRearrangement rearrangement) {
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .min(Comparator.comparing(Overlap::getOverlapType)); // counterintuitive but correct
         if (highestImpactOverlapOpt.isEmpty()) {
-            //
+            // should never happen
+            LOGGER.error("Could not identify highest impact overlap for insertion: {}.", rearrangement);
             return DefaultSvPriority.unknown();
         }
         Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
@@ -208,7 +216,6 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         Set<TranscriptModel> affectedTranscripts =
                 overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
         SvImpact impact = SvImpact.LOW_IMPACT; // default
-        SvType svType = SvType.INSERTION;
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
         if (affectedGeneIds.size()>1) {
             impact = SvImpact.HIGH_IMPACT;
@@ -218,18 +225,15 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
             else
                 impact = SvImpact.INTERMEDIATE_IMPACT;
         }
-        // TODO -- FIGURE OUT LOGIC FOR IMPACT
-
-        // TODO -- Add Enhancers
-        List<Enhancer> enhancers = List.of();
-        // TODO -- calculate phenotypic relevance
-        boolean hasPhenotypicRelevance = false;
-        return new DefaultSvPriority(svType,
+        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(rearrangement);
+        if (enhancers.size()>0) {
+            impact = SvImpact.HIGH_IMPACT;
+        }
+        return new DefaultSvPriority(SvType.INSERTION,
                 impact,
                 affectedTranscripts,
                 geneWithIdsSet,
-                enhancers,
-                hasPhenotypicRelevance);
+                enhancers);
     }
 
     private DefaultSvPriority prioritizeTranslocation(SequenceRearrangement rearrangement) {

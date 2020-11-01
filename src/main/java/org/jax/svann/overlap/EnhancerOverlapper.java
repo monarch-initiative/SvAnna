@@ -108,6 +108,9 @@ public class EnhancerOverlapper {
         } else if (rearrangement.getType() == SvType.INVERSION) {
             return getEnhancersAffectedByBreakends(rearrangement);
         }
+        else if (rearrangement.getType() == SvType.INSERTION) {
+            return getEnhancersAffectedByBreakends(rearrangement);
+        }
         System.err.println("[WARNING Enhancer overlap type not implemented yet");
         return List.of();
     }

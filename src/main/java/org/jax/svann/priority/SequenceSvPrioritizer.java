@@ -3,6 +3,7 @@ package org.jax.svann.priority;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
@@ -81,32 +82,10 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
             case INSERTION:
                return prioritizeInsertion(rearrangement);
             case TRANSLOCATION:
-//                return prioritizeTranslocation(rearrangement);
-                break;
+                return prioritizeTranslocation(rearrangement);
         }
-
-        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
-        // Here we want to do something fancy to see if an SV interrupts enhancer-gene interactions, e.g., Inversion,
-        // but for now let's just see if the SV directly affects and enhancer
-
-        List<Enhancer> affectedEnhancers = List.of();
-        // TODO get list of genes located within XXX nucleotides of the affected enhancers.
-        // TODO check if any of the genes in the "overlaps" or in the "affectedEnhancers" are
-        // in  relevantGeneIdToAssociatedDiseaseMap -- if so we are PHENOTYPICALLY RELEVANT
-        List<String> affectedRelevantGenes = overlaps
-                .stream()
-                //ilter(relevantGeneIdToAssociatedDiseaseMap::containsKey)
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toList());
-        // TODO, we need to get a TermId, not a String. We may need to refactor relevantGeneIdToAssociatedDiseaseMap
-        // to use the gene symbol as the key, since we will get potentially different gene ids from different
-        // sources (NCBI, ucsc, Ensembl....)
-        // Extract the relevant disease genes for this enhancer
-       // Set<HpoDiseaseSummary> diseases = relevantGeneIdToAssociatedDiseaseMap.getOrDefault("todo", EMPTYSET);
-        //SequenceRearrangement e, List<Overlap> overlaps, List<Enhancer> enhancers, Set<HpoDiseaseSummary> diseases)
-//        return new DefaultSvPriority(rearrangement, overlaps, affectedEnhancers, diseases);
-
-        return null;
+        // for development - TODO, figure out graceful default prioritization!
+        throw new SvAnnRuntimeException("Could not prioritize rearrangement with type=" + rearrangement.getType());
     }
 
     /**
@@ -237,6 +216,32 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
     }
 
     private DefaultSvPriority prioritizeTranslocation(SequenceRearrangement rearrangement) {
-        return null;
+        // the following gets overlaps that disrupt transcripts only
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        SvImpact impact = SvImpact.LOW_IMPACT; // default
+        OverlapType otype = OverlapType.UNKNOWN; // default
+        Set<TranscriptModel> affectedTranscripts;
+        Set<GeneWithId> geneWithIdsSet;
+        if (! overlaps.isEmpty()) {
+            Set<String> affectedGeneIds = overlaps.stream().map(Overlap::getGeneSymbol).collect(Collectors.toSet());
+            geneWithIdsSet = new HashSet<>();
+            for (String symbol: affectedGeneIds) {
+                if (geneSymbolMap.containsKey(symbol)) {
+                    geneWithIdsSet.add(geneSymbolMap.get(symbol));
+                }
+            }
+            affectedTranscripts =
+                    overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
+            impact = SvImpact.HIGH_IMPACT;
+            otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_INVERSION;
+        } else {
+            affectedTranscripts = Set.of();
+            geneWithIdsSet = Set.of();
+        }
+        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(rearrangement);
+        if (enhancers.size()>0) {
+            impact = SvImpact.HIGH_IMPACT;
+        }
+        return new DefaultSvPriority(SvType.TRANSLOCATION, impact, affectedTranscripts, geneWithIdsSet, enhancers);
     }
 }

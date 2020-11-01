@@ -15,12 +15,15 @@ import org.jax.svann.reference.Breakend;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class EnhancerOverlapper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerOverlapper.class);
     /** Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers. */
     private final Map<Integer, IntervalArray<Enhancer>> chromosomeToEnhancerIntervalArrayMap;
     /**
@@ -46,6 +49,10 @@ public class EnhancerOverlapper {
     private List<Enhancer> getSimpleEnhancerOverlap(GenomeInterval gi) {
         int contigId = gi.getChr();
         IntervalArray<Enhancer> iarray = chromosomeToEnhancerIntervalArrayMap.get(contigId);
+        if (iarray == null) {
+            throw new SvAnnRuntimeException("Could not find contig for GenomeInterval: {}" + gi);
+            //return List.of();
+        }
         IntervalArray<Enhancer>.QueryResult queryResult = iarray.findOverlappingWithInterval(gi.getBeginPos(), gi.getEndPos());
         return queryResult.getEntries();
     }
@@ -79,7 +86,7 @@ public class EnhancerOverlapper {
      * affect enhancers -- if a breakend occurs WITHIN an enhancer, we regard this as a match.
      * In contrast, enhancers are defined as being independent of orientation, and so we
      * do not regard it as a match if an enhancer is completely contained within an inversion.
-     * @param inversion Representation of an inversion
+     * @param inversion Representation of an inversion, insertion or translocation TODO rename
      * @return Prioritization
      */
     private List<Enhancer> getEnhancersAffectedByBreakends(SequenceRearrangement inversion) {
@@ -90,11 +97,19 @@ public class EnhancerOverlapper {
         List<Enhancer> overlaps = new ArrayList<>();
         for (var a : adjacencies) {
             Breakend be = a.getLeft();
-            List<Enhancer> leftOverlaps = getBreakendOverlaps(be);
-            leftOverlaps.stream().forEach(overlaps::add);
+            if (this.chromosomeMap.containsKey(be.getContig())) {
+                List<Enhancer> leftOverlaps = getBreakendOverlaps(be);
+                leftOverlaps.stream().forEach(overlaps::add);
+            } else {
+                LOGGER.error("Skipping left breakend for " +inversion + " because we did not find a contig");
+            }
             be = a.getRight();
-            List<Enhancer> rightOverlaps = getBreakendOverlaps(be);
-            rightOverlaps.stream().forEach(overlaps::add);
+            if (this.chromosomeMap.containsKey(be.getContig())) {
+                List<Enhancer> rightOverlaps = getBreakendOverlaps(be);
+                rightOverlaps.stream().forEach(overlaps::add);
+            } else {
+                LOGGER.error("Skipping right breakend for " +inversion + " because we did not find a contig");
+            }
         }
         return overlaps;
     }

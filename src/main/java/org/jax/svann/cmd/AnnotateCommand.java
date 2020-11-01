@@ -59,6 +59,7 @@ public class AnnotateCommand implements Callable<Integer> {
         List<Visualizable> prioritizedList = svann.prioritizeSvs();
         List<Visualizer> visualizerList = new ArrayList<>();
         for (Visualizable visualizable : prioritizedList) {
+
             visualizerList.add(new HtmlVisualizer(visualizable));
         }
 

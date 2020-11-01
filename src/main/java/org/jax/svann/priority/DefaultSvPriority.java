@@ -3,6 +3,7 @@ package org.jax.svann.priority;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
+import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 
 import java.util.List;
@@ -10,55 +11,38 @@ import java.util.Objects;
 import java.util.Set;
 
 public class DefaultSvPriority implements SvPriority {
-
+    /** TODO -- can we delete this object? */
     private static final DefaultSvPriority UNKNOWN =
-            new DefaultSvPriority(SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), false);
+            new DefaultSvPriority(null, SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), List.of());
+    private final SequenceRearrangement rearrangement;
     private final SvType svType;
     private final SvImpact svImpact;
     private final Set<TranscriptModel> affectedTranscripts;
     private final Set<GeneWithId> affectedGeneIds;
     private final List<Enhancer> affectedEnhancers;
-    private final boolean hasPhenotypicRelevance;
 
-    public DefaultSvPriority(SvType svType,
-                             SvImpact svImpact,
-                      Set<TranscriptModel> affectedTranscripts,
-                      Set<GeneWithId> affectedGeneIds,
-                      List<Enhancer> affectedEnhancers,
-                      boolean hasPhenotypicRelevance) {
-        this.svType = svType;
-        this.svImpact = svImpact;
-        this.affectedTranscripts = affectedTranscripts;
-        this.affectedGeneIds = affectedGeneIds;
-        this.affectedEnhancers = affectedEnhancers;
-        this.hasPhenotypicRelevance = hasPhenotypicRelevance;
-    }
 
-    /**
-     * This constructor is used by the Sequence based prioritization, phenotypic relevance is false
-     * TODO refactor, we do not need a boolean, we can instead use a list of associated diseases,
-     * and if the list is empty relevance is FALSE.
-     * @param svType
-     * @param svImpact
-     * @param affectedTranscripts
-     * @param affectedGeneIds
-     * @param affectedEnhancers
-     */
-    public DefaultSvPriority(SvType svType,
+    public DefaultSvPriority(SequenceRearrangement rearrangement,
+                             SvType svType,
                              SvImpact svImpact,
                              Set<TranscriptModel> affectedTranscripts,
                              Set<GeneWithId> affectedGeneIds,
                              List<Enhancer> affectedEnhancers) {
+        this.rearrangement = rearrangement;
         this.svType = svType;
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
         this.affectedGeneIds = affectedGeneIds;
         this.affectedEnhancers = affectedEnhancers;
-        this.hasPhenotypicRelevance = false;
     }
 
     static DefaultSvPriority unknown() {
         return UNKNOWN;
+    }
+
+    @Override
+    public SequenceRearrangement getRearrangement() {
+        return this.rearrangement;
     }
 
     @Override
@@ -91,7 +75,7 @@ public class DefaultSvPriority implements SvPriority {
      */
     @Override
     public boolean hasPhenotypicRelevance() {
-        return hasPhenotypicRelevance;
+        return false;
     }
 
     @Override
@@ -99,8 +83,9 @@ public class DefaultSvPriority implements SvPriority {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DefaultSvPriority that = (DefaultSvPriority) o;
-        return hasPhenotypicRelevance == that.hasPhenotypicRelevance &&
-                svImpact == that.svImpact &&
+        return  Objects.equals(this.rearrangement, that.rearrangement) &&
+                this.svType == that.svType &&
+                this.svImpact == that.svImpact &&
                 Objects.equals(affectedTranscripts, that.affectedTranscripts) &&
                 Objects.equals(affectedGeneIds, that.affectedGeneIds) &&
                 Objects.equals(affectedEnhancers, that.affectedEnhancers);
@@ -108,7 +93,7 @@ public class DefaultSvPriority implements SvPriority {
 
     @Override
     public int hashCode() {
-        return Objects.hash(svImpact, affectedTranscripts, affectedGeneIds, affectedEnhancers, hasPhenotypicRelevance);
+        return Objects.hash(rearrangement, svType, svImpact, affectedTranscripts, affectedGeneIds, affectedEnhancers);
     }
 
     @Override
@@ -118,7 +103,13 @@ public class DefaultSvPriority implements SvPriority {
                 ", affectedTranscripts=" + affectedTranscripts +
                 ", affectedGeneIds=" + affectedGeneIds +
                 ", affectedEnhancers=" + affectedEnhancers +
-                ", hasPhenotypicRelevance=" + hasPhenotypicRelevance +
                 '}';
     }
+
+
+    public static SvPriority createBaseSvPriority(SequenceRearrangement rearrangement) {
+        return new DefaultSvPriority(rearrangement, SvType.UNKNOWN, SvImpact.UNKNOWN, Set.of(),Set.of(),List.of());
+    }
+
+
 }

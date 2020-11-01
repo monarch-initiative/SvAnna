@@ -29,12 +29,12 @@ public class HtmlVisualizable implements  Visualizable {
 
     private SequenceRearrangement rearrangement;
 
-    public HtmlVisualizable(SequenceRearrangement rearrangement, SvPriority svPriority) {
+    public HtmlVisualizable(SvPriority svPriority) {
         svImpact = svPriority.getImpact();
         adjacencyList = rearrangement.getAdjacencies();
         svType = rearrangement.getType();
         this.svPriority = svPriority;
-        this.rearrangement = rearrangement;
+        this.rearrangement = svPriority.getRearrangement();
         this.locationMap =  initializeLocationStrings();
 
     }

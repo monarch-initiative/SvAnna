@@ -100,28 +100,32 @@ public class SequenceSvPrioritizerTest extends TestBase {
     @Test
     public void prioritize_singleExonDeletion_SURF1_exon2() {
         SequenceRearrangement sr = TestVariants.singleExonDeletion_SURF1_exon2();
-        SvPriority result = prioritizer.prioritize(sr);
+        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
+        SvPriority result = prioritizer.prioritize(prio);
         assertThat(result.getImpact(), is(SvImpact.HIGH_IMPACT));
     }
 
     @Test
     public void prioritize_twoExonDeletion_SURF1_exons_6_and_7() {
-        SequenceRearrangement se = TestVariants.twoExonDeletion_SURF1_exons_6_and_7();
-        SvPriority result = prioritizer.prioritize(se);
+        SequenceRearrangement sr = TestVariants.twoExonDeletion_SURF1_exons_6_and_7();
+        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
+        SvPriority result = prioritizer.prioritize(prio);
         System.err.println(result);
     }
 
     @Test
     public void prioritize_upstreamDeletion_GCK_inEnhancer() {
-        SequenceRearrangement se = TestVariants.deletionGCKUpstreamIntergenic_affectingEnhancer();
-        SvPriority result = prioritizer.prioritize(se);
+        SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_affectingEnhancer();
+        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
+        SvPriority result = prioritizer.prioritize(prio);
         System.err.println(result);
     }
 
     @Test
     public void prioritize_upstreamDeletion_GCK_notInEnhancer() {
-        SequenceRearrangement se = TestVariants.deletionGCKUpstreamIntergenic_NotAffectingEnhancer();
-        SvPriority result = prioritizer.prioritize(se);
+        SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_NotAffectingEnhancer();
+        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
+        SvPriority result = prioritizer.prioritize(prio);
         System.err.println(result);
     }
 }

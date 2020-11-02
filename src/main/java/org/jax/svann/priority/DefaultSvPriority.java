@@ -4,6 +4,7 @@ import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
+import org.jax.svann.overlap.Overlap;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 
@@ -14,7 +15,7 @@ import java.util.Set;
 public class DefaultSvPriority implements SvPriority {
     /** TODO -- can we delete this object? */
     private static final DefaultSvPriority UNKNOWN =
-            new DefaultSvPriority(null, SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), List.of());
+            new DefaultSvPriority(null, SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), List.of());
     private final SequenceRearrangement rearrangement;
     private final SvType svType;
     private final SvImpact svImpact;
@@ -22,13 +23,15 @@ public class DefaultSvPriority implements SvPriority {
     private final Set<GeneWithId> affectedGeneIds;
     private final List<Enhancer> affectedEnhancers;
     private final List<HpoDiseaseSummary> diseases;
+    private final List<Overlap> overlaps;
 
     public DefaultSvPriority(SequenceRearrangement rearrangement,
                              SvType svType,
                              SvImpact svImpact,
                              Set<TranscriptModel> affectedTranscripts,
                              Set<GeneWithId> affectedGeneIds,
-                             List<Enhancer> affectedEnhancers) {
+                             List<Enhancer> affectedEnhancers,
+                             List<Overlap> olaps) {
         this.rearrangement = rearrangement;
         this.svType = svType;
         this.svImpact = svImpact;
@@ -36,6 +39,7 @@ public class DefaultSvPriority implements SvPriority {
         this.affectedGeneIds = affectedGeneIds;
         this.affectedEnhancers = affectedEnhancers;
         diseases = List.of(); // not relevant at this stage
+        overlaps = olaps;
     }
 
     public DefaultSvPriority(SvPriority svprio,
@@ -60,6 +64,7 @@ public class DefaultSvPriority implements SvPriority {
         this.affectedTranscripts = svprio.getAffectedTranscripts();
         this.affectedGeneIds = svprio.getAffectedGeneIds();
         this.affectedEnhancers = svprio.getAffectedEnhancers();
+        this.overlaps = svprio.getOverlaps();
         this.diseases = diseaseList;
     }
 
@@ -102,6 +107,11 @@ public class DefaultSvPriority implements SvPriority {
         return affectedEnhancers;
     }
 
+    @Override
+    public List<Overlap> getOverlaps() {
+        return overlaps;
+    }
+
     /**
      * An SvEvent is phenotypically relevant if it is assigned to one or more diseases.
      */
@@ -138,9 +148,9 @@ public class DefaultSvPriority implements SvPriority {
                 '}';
     }
 
-
+   // TODO do we really need this? It is ugly
     public static SvPriority createBaseSvPriority(SequenceRearrangement rearrangement) {
-        return new DefaultSvPriority(rearrangement, SvType.UNKNOWN, SvImpact.UNKNOWN, Set.of(),Set.of(),List.of());
+        return new DefaultSvPriority(rearrangement, SvType.UNKNOWN, SvImpact.UNKNOWN, Set.of(),Set.of(),List.of(), List.of());
     }
 
 

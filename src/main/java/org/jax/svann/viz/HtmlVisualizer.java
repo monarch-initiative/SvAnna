@@ -3,6 +3,7 @@ package org.jax.svann.viz;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.Strand;
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.Adjacency;
@@ -53,21 +54,54 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
+    String getUnorderedListWithDiseases() {
+        List<HpoDiseaseSummary> diseases = visualizable.getDiseaseSummaries();
+        if (diseases.isEmpty()) {
+            return "n/a";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<ul>\n");
+        for (var disease: visualizable.getDiseaseSummaries()) {
+            String url = String.format("<a href=\"https://hpo.jax.org/app/browse/disease/%s\" target=\"__blank\">%s (%s)</a>",
+                    disease.getDiseaseId(), disease.getDiseaseName(), disease.getDiseaseId());
+            sb.append("<li>").append(url).append("</li>\n");
+        }
+        sb.append("</ul>\n");
+        return sb.toString();
+    }
 
+    String getUcscLink(HtmlLocation hloc) {
+        String chrom = hloc.getChrom().startsWith("chr") ? hloc.getChrom() : "chr" + hloc.getChrom();
+        String url = String.format("https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&virtMode=0&position=%s%%3A%d-%d",
+                chrom, hloc.getBegin(), hloc.getEnd());
+        return String.format("<a href=\"%s\" target=\"__blank\">%s:%d-%d</a>",
+                url,chrom, hloc.getBegin(), hloc.getEnd());
+    }
 
     @Override
     public String getHtml() {
         StringBuilder sb = new StringBuilder();
+        List<HtmlLocation> locations = visualizable.getLocations();
+        sb.append("<p>").append(visualizable.getType()).append("<br/>");
+        if (locations.isEmpty()) {
+            sb.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
+        } else if (locations.size() == 1) {
+            sb.append(getUcscLink(locations.get(0))).append("</p>");
+        } else {
+            sb.append("<ul>\n");
+            for (var loc : locations) {
+                sb.append("<li>").append(getUcscLink(loc)).append("</li>\n");
+            }
+            sb.append("</ul></p>\n");
+        }
         sb.append(HTML_TABLE_HEADER);
         sb.append("<tbody>\n");
-        Map<String, String> locationMap = visualizable.getLocationStrings();
-        for (var e : locationMap.entrySet()) {
-            sb.append(keyValueRow(e.getKey(), e.getValue()));
-        }
-        sb.append(keyValueRow("Type", visualizable.getType()));
+//        Map<String, String> locationMap = visualizable.getLocationStrings();
+//        for (var e : locationMap.entrySet()) {
+//            sb.append(keyValueRow(e.getKey(), e.getValue()));
+//        }
         sb.append(keyValueRow("Impact", visualizable.getImpact()));
-        String relevant = this.visualizable.hasPhenotypicRelevance() ? "YES" : "NO";
-        sb.append(keyValueRow("Clinically relevant", relevant));
+        sb.append(keyValueRow("Associated diseases", getUnorderedListWithDiseases()));
         sb.append("</table>");
 
         return sb.toString();

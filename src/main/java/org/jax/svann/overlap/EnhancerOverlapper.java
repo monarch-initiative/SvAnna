@@ -6,8 +6,8 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
+import de.charite.compbio.jannovar.reference.PositionType;
 import de.charite.compbio.jannovar.reference.Strand;
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.Adjacency;
@@ -19,12 +19,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class EnhancerOverlapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerOverlapper.class);
-    /** Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers. */
+    /**
+     * Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers.
+     */
     private final Map<Integer, IntervalArray<Enhancer>> chromosomeToEnhancerIntervalArrayMap;
     /**
      * Reference dictionary (part of {@link JannovarData}).
@@ -35,7 +38,7 @@ public class EnhancerOverlapper {
      */
     private final ImmutableMap<Integer, Chromosome> chromosomeMap;
 
-    public EnhancerOverlapper(JannovarData jdata, Map<Integer, IntervalArray<Enhancer>>  enhancerMap) {
+    public EnhancerOverlapper(JannovarData jdata, Map<Integer, IntervalArray<Enhancer>> enhancerMap) {
         this.chromosomeToEnhancerIntervalArrayMap = enhancerMap;
         this.rd = jdata.getRefDict();
         this.chromosomeMap = jdata.getChromosomes();
@@ -43,6 +46,7 @@ public class EnhancerOverlapper {
 
     /**
      * Get enhancers that overlap with the genomic interval associated with DEL, INS and related SVs
+     *
      * @param gi a GenomeInterval associated with a structural variant
      * @return a list of overlapping enhancers (can be empty)
      */
@@ -69,15 +73,28 @@ public class EnhancerOverlapper {
         int id = chrom.getId();
         int begin = left.getBegin();
         int end = right.getEnd();
-        return new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        return new GenomeInterval(rd, Strand.FWD, id, begin, end);
     }
 
+    List<Enhancer> getEnhancerOverlapsForInsertionAndInversions(Contig contig, int begin, int end) {
+        // TODO: 2. 11. 2020 here we assume that the coordinates are always on FWD strand, which might not always hold
+        return getSimpleEnhancerOverlap(new GenomeInterval(rd, Strand.FWD, contig.getId(), begin, end, PositionType.ONE_BASED));
+    }
+
+    private Collection<? extends Enhancer> getEnhancerOverlapsForTranslocation() {
+        // TODO: 2. 11. 2020 implement enhancer overlap for translocations
+        LOGGER.warn("Enhancer overlaps for translocations is not yet implemented");
+        return List.of();
+    }
+
+    @Deprecated
+        // consider removal in favor of getEnhancerOverlapsForInsertionAndInversions
     List<Enhancer> getBreakendOverlaps(Breakend be) {
         Contig chrom = be.getContig();
         int id = chrom.getId();
         int begin = be.getBegin();
         int end = be.getEnd();
-        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         return getSimpleEnhancerOverlap(gi);
     }
 
@@ -86,34 +103,30 @@ public class EnhancerOverlapper {
      * affect enhancers -- if a breakend occurs WITHIN an enhancer, we regard this as a match.
      * In contrast, enhancers are defined as being independent of orientation, and so we
      * do not regard it as a match if an enhancer is completely contained within an inversion.
-     * @param inversion Representation of an inversion, insertion or translocation TODO rename
+     *
+     * @param rearrangement Representation of an inversion, insertion or translocation TODO rename
      * @return Prioritization
      */
-    private List<Enhancer> getEnhancersAffectedByBreakends(SequenceRearrangement inversion) {
-        List<Adjacency> adjacencies = inversion.getAdjacencies();
-        if (adjacencies.size() != 2) {
-            throw new SvAnnRuntimeException("Malformed inversion adjacency list with size " + adjacencies.size());
-        }
+    private List<Enhancer> getEnhancersAffectedByBreakends(SequenceRearrangement rearrangement) {
         List<Enhancer> overlaps = new ArrayList<>();
-        for (var a : adjacencies) {
-            Breakend be = a.getLeft();
-            if (this.chromosomeMap.containsKey(be.getContig())) {
-                List<Enhancer> leftOverlaps = getBreakendOverlaps(be);
-                leftOverlaps.stream().forEach(overlaps::add);
-            } else {
-                LOGGER.error("Skipping left breakend for " +inversion + " because we did not find a contig");
-            }
-            be = a.getRight();
-            if (this.chromosomeMap.containsKey(be.getContig())) {
-                List<Enhancer> rightOverlaps = getBreakendOverlaps(be);
-                rightOverlaps.stream().forEach(overlaps::add);
-            } else {
-                LOGGER.error("Skipping right breakend for " +inversion + " because we did not find a contig");
-            }
+        Breakend lb = rearrangement.getLeftmostBreakend();
+        Breakend rb = rearrangement.getRightmostBreakend();
+        switch (rearrangement.getType()) {
+            case INSERTION:
+            case INVERSION:
+                // we assume that all coordinates of these types are on a single contig
+                Contig contig = lb.getContig();
+                overlaps.addAll(getEnhancerOverlapsForInsertionAndInversions(contig, lb.getBegin(), rb.getBegin()));
+                break;
+            case TRANSLOCATION:
+                // by definition, translocation has coordinates on different contigs, correct?
+                overlaps.addAll(getEnhancerOverlapsForTranslocation());
+                break;
+            default:
+                LOGGER.warn("");
         }
         return overlaps;
     }
-
 
 
     public List<Enhancer> getEnhancerOverlaps(SequenceRearrangement rearrangement) {
@@ -122,14 +135,12 @@ public class EnhancerOverlapper {
             return getSimpleEnhancerOverlap(gi);
         } else if (rearrangement.getType() == SvType.INVERSION) {
             return getEnhancersAffectedByBreakends(rearrangement);
-        }
-        else if (rearrangement.getType() == SvType.INSERTION) {
+        } else if (rearrangement.getType() == SvType.INSERTION) {
+            return getEnhancersAffectedByBreakends(rearrangement);
+        } else if (rearrangement.getType() == SvType.TRANSLOCATION) {
             return getEnhancersAffectedByBreakends(rearrangement);
         }
-        else if (rearrangement.getType() == SvType.TRANSLOCATION) {
-            return getEnhancersAffectedByBreakends(rearrangement);
-        }
-        System.err.println("[WARNING Enhancer overlap type not implemented yet");
+        LOGGER.warn("Enhancer overlap type not implemented yet");
         return List.of();
     }
 

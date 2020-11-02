@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
  * @author Daniel Danis
  * @author Peter N Robinson
  */
+@Deprecated // in favor of PrototypeSvPrioritizer
 public class SequenceSvPrioritizer implements SvPrioritizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(SequenceSvPrioritizer.class);
     /** In the first pass, we just look at sequence and do not analyze diseases, so this is the empty set.*/
@@ -71,7 +72,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
     }
 
 
-    @Override
+    //    @Override
     public SvPriority prioritize(SvPriority prioritizedRearrangement) {
         SequenceRearrangement rearrangement = prioritizedRearrangement.getRearrangement();
         switch (rearrangement.getType()) {
@@ -262,5 +263,10 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
                 geneWithIdsSet,
                 enhancers,
                 overlaps);
+    }
+
+    @Override
+    public SvPriority prioritize(SequenceRearrangement rearrangement) {
+        return SvPriority.unknown();
     }
 }

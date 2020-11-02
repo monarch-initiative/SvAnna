@@ -28,7 +28,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * <p>
  * Thus, the patient might have terms such as HP:0002490 (Increased CSF lactate), and HP:0001290 (Generalized hypotonia).
  */
-public class SequenceSvPrioritizerTest extends TestBase {
+public class PrototypeSvPrioritizerTest extends TestBase {
 
     /**
      * Assuming the patient has variant in SURF1, increased CSV lactate and generalized hypotonia, these are the
@@ -42,7 +42,7 @@ public class SequenceSvPrioritizerTest extends TestBase {
 
     private static final Map<TermId, Set<HpoDiseaseSummary>> DISEASE_MAP = makeDiseaseSummaryMap();
     private static final Map<Integer, IntervalArray<Enhancer>> ENHANCER_MAP = makeEnhancerMap();
-    private SequenceSvPrioritizer prioritizer;
+    private PrototypeSvPrioritizer prioritizer;
 
 
     /**
@@ -94,38 +94,34 @@ public class SequenceSvPrioritizerTest extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        prioritizer = new SequenceSvPrioritizer(GENOME_ASSEMBLY, ENHANCER_MAP, Map.of(), JANNOVAR_DATA);
+        prioritizer = new PrototypeSvPrioritizer(GENOME_ASSEMBLY, ENHANCER_MAP, Map.of(), JANNOVAR_DATA);
     }
 
     @Test
     public void prioritize_singleExonDeletion_SURF1_exon2() {
         SequenceRearrangement sr = TestVariants.singleExonDeletion_SURF1_exon2();
-        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
-        SvPriority result = prioritizer.prioritize(prio);
+        SvPriority result = prioritizer.prioritize(sr);
         assertThat(result.getImpact(), is(SvImpact.HIGH_IMPACT));
     }
 
     @Test
     public void prioritize_twoExonDeletion_SURF1_exons_6_and_7() {
         SequenceRearrangement sr = TestVariants.twoExonDeletion_SURF1_exons_6_and_7();
-        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
-        SvPriority result = prioritizer.prioritize(prio);
+        SvPriority result = prioritizer.prioritize(sr);
         System.err.println(result);
     }
 
     @Test
     public void prioritize_upstreamDeletion_GCK_inEnhancer() {
         SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_affectingEnhancer();
-        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
-        SvPriority result = prioritizer.prioritize(prio);
+        SvPriority result = prioritizer.prioritize(sr);
         System.err.println(result);
     }
 
     @Test
     public void prioritize_upstreamDeletion_GCK_notInEnhancer() {
         SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_NotAffectingEnhancer();
-        SvPriority prio = DefaultSvPriority.createBaseSvPriority(sr);
-        SvPriority result = prioritizer.prioritize(prio);
+        SvPriority result = prioritizer.prioritize(sr);
         System.err.println(result);
     }
 }

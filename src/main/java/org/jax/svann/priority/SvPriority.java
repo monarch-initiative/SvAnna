@@ -13,9 +13,14 @@ import java.util.Set;
 
 public interface SvPriority {
 
+    static SvPriority unknown() {
+        return DefaultSvPriority.unknown();
+    }
+
     SequenceRearrangement getRearrangement();
 
     SvType getType();
+
     SvImpact getImpact();
 
     List<HpoDiseaseSummary> getDiseases();

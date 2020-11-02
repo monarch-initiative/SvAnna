@@ -12,10 +12,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class DefaultSvPriority implements SvPriority {
-    /** TODO -- can we delete this object? */
+class DefaultSvPriority implements SvPriority {
     private static final DefaultSvPriority UNKNOWN =
-            new DefaultSvPriority(null, SvType.UNKNOWN,SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), List.of());
+            new DefaultSvPriority(null, SvType.UNKNOWN, SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), List.of());
     private final SequenceRearrangement rearrangement;
     private final SvType svType;
     private final SvImpact svImpact;
@@ -147,11 +146,4 @@ public class DefaultSvPriority implements SvPriority {
                 ", affectedEnhancers=" + affectedEnhancers +
                 '}';
     }
-
-   // TODO do we really need this? It is ugly
-    public static SvPriority createBaseSvPriority(SequenceRearrangement rearrangement) {
-        return new DefaultSvPriority(rearrangement, SvType.UNKNOWN, SvImpact.UNKNOWN, Set.of(),Set.of(),List.of(), List.of());
-    }
-
-
 }

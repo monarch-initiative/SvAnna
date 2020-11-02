@@ -3,8 +3,6 @@ package org.jax.svann.overlap;
 import org.jax.svann.TestBase;
 import org.jax.svann.parse.TestVariants;
 import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.genome.Contig;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +12,6 @@ import java.util.stream.Collectors;
 
 import static org.jax.svann.overlap.OverlapType.*;
 import static org.jax.svann.parse.TestVariants.*;
-import static org.jax.svann.reference.SvType.INSERTION;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -200,7 +197,6 @@ public class OverlapperTest extends TestBase {
      * upstream, 10kb deletion
      * chr15:48_655_000-48_665_000
      */
-
     @Test
     public void testDeletionUpstreamIntergenic() {
         SequenceRearrangement surf1Upstream = deletionUpstreamIntergenic();

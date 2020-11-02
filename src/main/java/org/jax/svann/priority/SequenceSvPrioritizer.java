@@ -95,7 +95,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
     private SvPriority prioritizeDuplication(SequenceRearrangement rearrangement) {
         // TODO: 2. 11. 2020 fix
         // rules for prioritizing duplication
-        return null;
+        return DefaultSvPriority.unknown();
     }
 
     /**

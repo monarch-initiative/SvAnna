@@ -257,7 +257,7 @@ public class Overlapper {
                 continue;
             }
             if (!tmod.getTXRegion().contains(start) && !tmod.getTXRegion().contains(end)) {
-                System.err.printf("[ERROR] Warning, transcript model (%s;%s) retrieved that does not overlap (chr%s:%d-%d): ",
+                LOGGER.error("Warning, transcript model ({};{}) retrieved that does not overlap (chr{}:{}-{}): ",
                         tmod.getGeneSymbol(), tmod.getAccession(), start.getChr(), start.getPos(), end.getPos());
                 // TODO I observed this once, it should never happen and may be a Jannovar bug or have some other cause
                 //throw new L2ORuntimeException(tmod.getGeneSymbol());

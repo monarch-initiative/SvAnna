@@ -375,7 +375,7 @@ a.svg:hover, a.svg:active {
       <a name="sample"></a>
         <article>
         <p>SvAnna (Structural Variant Annotation Amenuensis) analysis of structural variants.</p>
-        <p>A total of ${n_structural_vars} above-threshold variants were extracted from ${vcf_file}.</p>
+        <p>structural variants were extracted from ${vcf_file}.</p>
         <table border=1>
         <thead>
             <tr>
@@ -397,7 +397,7 @@ a.svg:hover, a.svg:active {
         <#list svalist as sva>
         <section>
               <article>
-              ${sva.html?no_esc}
+              ${sva?no_esc}
              </article>
              </section>
         </#list>

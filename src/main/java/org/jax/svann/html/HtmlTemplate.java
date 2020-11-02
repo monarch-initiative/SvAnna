@@ -27,7 +27,7 @@ public class HtmlTemplate {
 
     protected static final String NOT_AVAILABLE = "n/a";
 
-    public HtmlTemplate(List<Visualizer> svAnnList,
+    public HtmlTemplate(List<String> htmlList,
                         Map<SvType, Integer> lowImpact,
                         Map<SvType, Integer> intermediateImpact,
                         Map<SvType, Integer> highImpact,
@@ -56,8 +56,7 @@ public class HtmlTemplate {
         SvTypeCountRow totals = new SvTypeCountRow(lowImpact, intermediateImpact, highImpact);
         rows.add(totals);
         templateData.put("svtypecounts", rows);
-        templateData.putIfAbsent("svalist", svAnnList);
-        templateData.put("n_structural_vars", svAnnList.size());
+        templateData.putIfAbsent("svalist", htmlList);
         templateData.put("n_unparsable", infoMap.getOrDefault("unparsable", NOT_AVAILABLE));
         templateData.put("vcf_file", infoMap.getOrDefault("vcf_file", NOT_AVAILABLE));
     }

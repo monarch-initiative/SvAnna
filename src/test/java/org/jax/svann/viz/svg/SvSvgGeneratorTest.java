@@ -7,13 +7,13 @@ import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.TestBase;
 import org.jax.svann.genomicreg.Enhancer;
-import org.jax.svann.parse.TestVariants;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +34,8 @@ public class SvSvgGeneratorTest extends TestBase {
         int start = 133_353_500;
         int end = 133_354_500;
         GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, chr9.getId(), start, end, PositionType.ONE_BASED);
-        generator = new SvSvgGenerator(new ArrayList<>(surf1list), enhancers, gi);
+        String deletion = "Deletion, ch9:133_353_500-133_354_500";
+        generator = new SvSvgGenerator(new ArrayList<>(surf1list), enhancers, gi, deletion);
     }
 
 
@@ -44,6 +45,15 @@ public class SvSvgGeneratorTest extends TestBase {
         String svg = generator.getSvg();
         assertNotNull(svg);
         System.out.println(svg);
+        assertNotNull(svg);
+        try {
+            String path = "target/deletion.svg";
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+            writer.write(svg);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

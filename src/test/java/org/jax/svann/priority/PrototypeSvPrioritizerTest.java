@@ -3,7 +3,10 @@ package org.jax.svann.priority;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.TestBase;
 import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
+import org.jax.svann.overlap.EnhancerOverlapper;
+import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.parse.TestVariants;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.Contig;
@@ -42,6 +45,9 @@ public class PrototypeSvPrioritizerTest extends TestBase {
 
     private static final Map<TermId, Set<HpoDiseaseSummary>> DISEASE_MAP = makeDiseaseSummaryMap();
     private static final Map<Integer, IntervalArray<Enhancer>> ENHANCER_MAP = makeEnhancerMap();
+    private static final Map<String, GeneWithId> GENE_SYMBOL_MAP = Map.of();
+    private static final Set<TermId> PATIENT_TERMS = Set.of(TermId.of("HP:0002490"), TermId.of("HP:0001290"));
+
     private PrototypeSvPrioritizer prioritizer;
 
 
@@ -94,27 +100,32 @@ public class PrototypeSvPrioritizerTest extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        prioritizer = new PrototypeSvPrioritizer(GENOME_ASSEMBLY, ENHANCER_MAP, Map.of(), JANNOVAR_DATA);
+        Overlapper overlapper = new Overlapper(JANNOVAR_DATA);
+        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(JANNOVAR_DATA, ENHANCER_MAP);
+        prioritizer = new PrototypeSvPrioritizer(GENE_SYMBOL_MAP, overlapper, enhancerOverlapper, PATIENT_TERMS);
     }
 
     @Test
     public void prioritize_singleExonDeletion_SURF1_exon2() {
         SequenceRearrangement sr = TestVariants.singleExonDeletion_SURF1_exon2();
         SvPriority result = prioritizer.prioritize(sr);
-        assertThat(result.getImpact(), is(SvImpact.HIGH_IMPACT));
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
     }
 
     @Test
     public void prioritize_twoExonDeletion_SURF1_exons_6_and_7() {
         SequenceRearrangement sr = TestVariants.twoExonDeletion_SURF1_exons_6_and_7();
         SvPriority result = prioritizer.prioritize(sr);
+
         System.err.println(result);
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
     }
 
     @Test
     public void prioritize_upstreamDeletion_GCK_inEnhancer() {
         SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_affectingEnhancer();
         SvPriority result = prioritizer.prioritize(sr);
+
         System.err.println(result);
     }
 
@@ -122,6 +133,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     public void prioritize_upstreamDeletion_GCK_notInEnhancer() {
         SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_NotAffectingEnhancer();
         SvPriority result = prioritizer.prioritize(sr);
+
         System.err.println(result);
     }
 }

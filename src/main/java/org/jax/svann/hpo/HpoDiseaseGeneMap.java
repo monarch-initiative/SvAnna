@@ -52,19 +52,20 @@ public class HpoDiseaseGeneMap {
     /**
      * Create a map with key=GeneId, value=Set of {@link HpoDiseaseSummary} objects corresponding to the gene.
      * We create entries for diseases associated with the target term ids.
+     *
      * @param targetHpoTermIds HPO ids entered by the user
      * @return map with key=GeneId, value=Set of {@link HpoDiseaseSummary} objects
      */
-    public Map<TermId, Set<HpoDiseaseSummary>> getRelevantGenesAndDiseases(List<TermId> targetHpoTermIds){
+    public Map<TermId, Set<HpoDiseaseSummary>> getRelevantGenesAndDiseases(Collection<TermId> targetHpoTermIds) {
         Map<TermId, Set<HpoDiseaseSummary>> gene2diseaseMap = new HashMap<>();
-        for (var disease: diseaseMap.values()) {
+        for (var disease : diseaseMap.values()) {
             Collection<TermId> associatedGenes = this.disease2geneIdMultiMap.get(disease.getDiseaseDatabaseId());
             if (associatedGenes.isEmpty()) {
                 continue; // we are not interested in diseases with no associated genes for this prioritization
             }
             List<TermId> directAnnotations = disease.getPhenotypicAbnormalityTermIdList();
             Set<TermId> totalAnnotations =
-                    OntologyAlgorithm.getAncestorTerms( ontology, new HashSet<>(directAnnotations), true);
+                    OntologyAlgorithm.getAncestorTerms(ontology, new HashSet<>(directAnnotations), true);
             for (TermId tid : targetHpoTermIds) {
                 if (totalAnnotations.contains(tid)) {
                     for (TermId geneId : associatedGenes) {
@@ -118,14 +119,14 @@ public class HpoDiseaseGeneMap {
      * The Enhancers are linked to HPO terms representing their tissue specificity. Here, we
      * return a set of the HPO terms that are equal to or ancestors of our target HPO terms, i.e., that
      * are clinicallly relevant.
-     * @param candidates List of all HPO terms annotated to Enhancers by {@link org.jax.svann.genomicreg.TSpecParser}
+     *
+     * @param candidates       List of all HPO terms annotated to Enhancers by {@link org.jax.svann.genomicreg.TSpecParser}
      * @param targetHpoTermIds List of HPO terms annotated the proband (can be subterms of the candidates or equal)
      * @return set of terms from the candidate list that match the target terms, directly or indirectly
      */
-    public Set<TermId> getRelevantAncestors(Set<TermId> candidates, List<TermId> targetHpoTermIds) {
+    public Set<TermId> getRelevantAncestors(Set<TermId> candidates, Set<TermId> targetHpoTermIds) {
         Set<TermId> relevantSet = new HashSet<>();
-        Set<TermId> targetSet = new HashSet<>(targetHpoTermIds);
-        Set<TermId> ancs = OntologyAlgorithm.getAncestorTerms(this.ontology,targetSet, true);
+        Set<TermId> ancs = OntologyAlgorithm.getAncestorTerms(ontology, targetHpoTermIds, true);
         for (TermId tid : candidates) {
             if (ancs.contains(tid))
                 relevantSet.add(tid);

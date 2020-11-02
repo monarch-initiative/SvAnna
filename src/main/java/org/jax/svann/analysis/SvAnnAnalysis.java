@@ -34,9 +34,13 @@ public class SvAnnAnalysis {
     final static double THRESHOLD = 1;
     private final static int DISTANCE_THRESHOLD = 500_000;
     private final String prefix;
-    /** HPO terms that characterize the individual whose VCF we are analyzing. */
-    private final List<TermId> targetHpoIdList;
-    /** Path to the VCF file to be analyzed. */
+    /**
+     * HPO terms that characterize the individual whose VCF we are analyzing.
+     */
+    private final Set<TermId> targetHpoIdList;
+    /**
+     * Path to the VCF file to be analyzed.
+     */
     private final String vcfPath;
     /** Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers. */
     private final Map<Integer, IntervalArray<Enhancer>> chromosomeToEnhancerIntervalArrayMap;
@@ -69,13 +73,12 @@ public class SvAnnAnalysis {
     private final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
 
     /**
-     *
-     * @param vcfFile path to a structural variant VCF file
-     * @param prefix prefix for the output file
-     * @param tidList list of relevant HPO terms
+     * @param vcfFile      path to a structural variant VCF file
+     * @param prefix       prefix for the output file
+     * @param tidList      list of relevant HPO terms
      * @param enhancerPath path to the TSpec enhancer file
      */
-    public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) throws SerializationException {
+    public SvAnnAnalysis(String vcfFile, String prefix, String enhancerPath, String jannovarPath, Set<TermId> tidList) throws SerializationException {
         this.vcfPath = vcfFile;
         this.jannovarData = new JannovarDataSerializer(jannovarPath).load();
         TSpecParser tparser = new TSpecParser(enhancerPath);

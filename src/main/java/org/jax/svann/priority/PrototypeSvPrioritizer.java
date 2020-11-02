@@ -24,9 +24,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      * In the first pass, we just look at sequence and do not analyze diseases, so this is the empty set.
      */
     private static final Set<HpoDiseaseSummary> EMPTYSET = Set.of();
-    /**
-     * Genome assembly in use.
-     */
+
     /**
      * The overlapper tests overlap of structural variants with transcripts.
      */
@@ -46,6 +44,8 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      */
     private final Set<TermId> relevantHpoIdsForEnhancers;
 
+    private final Set<TermId> patientPhenotypeTerms;
+
     /**
      * @param geneSymbolMap              A map of gene symbols and NCBI ids
      * @param relevantHpoIdsForEnhancers relevant terms to use for enhancer filtering
@@ -53,10 +53,12 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     public PrototypeSvPrioritizer(Map<String, GeneWithId> geneSymbolMap,
                                   Overlapper overlapper,
                                   EnhancerOverlapper enhancerOverlapper,
+                                  Set<TermId> patientPhenotypeTerms,
                                   Set<TermId> relevantHpoIdsForEnhancers) {
         this.geneSymbolMap = geneSymbolMap;
         this.overlapper = overlapper;
         this.enhancerOverlapper = enhancerOverlapper;
+        this.patientPhenotypeTerms = patientPhenotypeTerms;
         this.relevantHpoIdsForEnhancers = relevantHpoIdsForEnhancers;
     }
 

@@ -102,7 +102,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     public void setUp() {
         Overlapper overlapper = new Overlapper(JANNOVAR_DATA);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(JANNOVAR_DATA, ENHANCER_MAP);
-        prioritizer = new PrototypeSvPrioritizer(GENE_SYMBOL_MAP, overlapper, enhancerOverlapper, PATIENT_TERMS);
+        prioritizer = new PrototypeSvPrioritizer(GENE_SYMBOL_MAP, overlapper, enhancerOverlapper, PATIENT_TERMS, RELEVANT_ENHANCER_TOP_LEVEL_TERMS);
     }
 
     @Test

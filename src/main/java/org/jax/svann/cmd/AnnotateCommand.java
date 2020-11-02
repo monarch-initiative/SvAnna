@@ -47,6 +47,7 @@ public class AnnotateCommand implements Callable<Integer> {
      * This is what we use, candidate for externalization into a CLI parameter
      */
     private static final String ASSEMBLY_ID = "GRCh38.p13";
+    private final HpoDiseaseGeneMap hpoDiseaseGeneMap;
     @CommandLine.Option(names = {"-j", "--jannovar"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
     public Path jannovarPath = Paths.get("data/data/hg38_refseq_curated.ser");
     @CommandLine.Option(names = {"-g", "--gencode"})
@@ -65,21 +66,8 @@ public class AnnotateCommand implements Callable<Integer> {
     public SvImpact threshold = SvImpact.LOW;
 
     public AnnotateCommand() {
-    }
-
-    private static Map<Integer, IntervalArray<Enhancer>> readEnhancerMap(Path enhancerFile) {
-        TSpecParser tparser = new TSpecParser(enhancerFile.toString());
-        return tparser.getChromosomeToEnhancerIntervalArrayMap();
-    }
-
-    /*
-     * Key -- gene symbol, value, {@link GeneWithId} object with symbol and id. This map is used to connect
-     * geneIDs with gene symbols for display in HTML
-     * TODO - this is not very elegant and we may want to refactor.
-     */
-    private static Map<String, GeneWithId> getGeneSymbolMap() {
-        HpoDiseaseGeneMap hpomap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
-        return hpomap.getGeneSymbolMap();
+        // TODO: 2. 11. 2020 externalize
+        hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
     }
 
     private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
@@ -97,17 +85,20 @@ public class AnnotateCommand implements Callable<Integer> {
             return 1;
         }
         GenomeAssembly assembly = assemblyOptional.get();
-        // enhancers
-        Map<Integer, IntervalArray<Enhancer>> enhancerMap = readEnhancerMap(enhancerFile);
+        // patient phenotype
+        Set<TermId> patientTerms = Arrays.stream(hpoTermIdList.split(",")).map(String::trim).map(TermId::of).collect(Collectors.toSet());
+        // enhancers & relevant enhancer terms
+        TSpecParser tparser = new TSpecParser(enhancerFile.toString());
+        Map<Integer, IntervalArray<Enhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
+        Set<TermId> enhancerRelevantAncestors = hpoDiseaseGeneMap.getRelevantAncestors(tparser.getId2enhancerMap().keySet(), patientTerms);
         // gene symbols
-        Map<String, GeneWithId> geneSymbolMap = getGeneSymbolMap();
+        Map<String, GeneWithId> geneSymbolMap = hpoDiseaseGeneMap.getGeneSymbolMap();
         // jannovar data
         JannovarData jannovarData = readJannovarData(jannovarPath);
 
         // 1 - parse input variants
         BreakendAssembler breakendAssembler = new BreakendAssembler();
         StructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, breakendAssembler);
-        Set<TermId> patientTerms = Arrays.stream(hpoTermIdList.split(",")).map(String::trim).map(TermId::of).collect(Collectors.toSet());
 
         List<SequenceRearrangement> rearrangements = parser.parseFile(vcfFile);
 
@@ -115,7 +106,8 @@ public class AnnotateCommand implements Callable<Integer> {
         // setup prioritization parts
         Overlapper overlapper = new Overlapper(jannovarData);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(geneSymbolMap, overlapper, enhancerOverlapper, patientTerms); // how to prioritize
+
+        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(geneSymbolMap, overlapper, enhancerOverlapper, patientTerms, enhancerRelevantAncestors);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();

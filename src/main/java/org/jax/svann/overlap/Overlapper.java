@@ -1,7 +1,9 @@
 package org.jax.svann.overlap;
 
 import com.google.common.collect.ImmutableMap;
-import de.charite.compbio.jannovar.data.*;
+import de.charite.compbio.jannovar.data.Chromosome;
+import de.charite.compbio.jannovar.data.JannovarData;
+import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.GenomePosition;
@@ -16,8 +18,9 @@ import org.jax.svann.reference.genome.Contig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.jax.svann.overlap.OverlapType.*;
 
@@ -264,7 +267,7 @@ public class Overlapper {
             overlaps.add(voverlap);
         }
         if (overlaps.isEmpty()) {
-            System.err.println("Could not find any overlaps with this query result" + qresult);
+            LOGGER.error("Could not find any overlaps with this query result: {}", qresult);
             throw new SvAnnRuntimeException("Empty overlap list");
         }
         return overlaps;

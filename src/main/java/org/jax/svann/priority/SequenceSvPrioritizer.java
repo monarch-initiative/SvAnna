@@ -3,7 +3,6 @@ package org.jax.svann.priority;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
@@ -73,28 +72,35 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
 
 
     @Override
-    public SvPriority prioritize(SvPriority priotizedRearrangement) {
-        SequenceRearrangement rearrangement = priotizedRearrangement.getRearrangement();
+    public SvPriority prioritize(SvPriority prioritizedRearrangement) {
+        SequenceRearrangement rearrangement = prioritizedRearrangement.getRearrangement();
         switch (rearrangement.getType()) {
             case DELETION:
                 return prioritizeDeletion(rearrangement);
             case INVERSION:
                 return prioritizeInversion(rearrangement);
             case INSERTION:
-               return prioritizeInsertion(rearrangement);
+                return prioritizeInsertion(rearrangement);
             case TRANSLOCATION:
                 return prioritizeTranslocation(rearrangement);
             case DUPLICATION:
-                //return prioritizeDuplication(rearrangement);
+                return prioritizeDuplication(rearrangement);
         }
         // for development - TODO, figure out graceful default prioritization!
         LOGGER.error("Could not prioritize rearrangement with type=" + rearrangement.getType());
         return null;
-       // throw new SvAnnRuntimeException("Could not prioritize rearrangement with type=" + rearrangement.getType());
+        // throw new SvAnnRuntimeException("Could not prioritize rearrangement with type=" + rearrangement.getType());
+    }
+
+    private SvPriority prioritizeDuplication(SequenceRearrangement rearrangement) {
+        // TODO: 2. 11. 2020 fix
+        // rules for prioritizing duplication
+        return null;
     }
 
     /**
      * Prioritize deletions according to sequence
+     *
      * @param rearrangement The  deletion
      * @return Prioritization
      */

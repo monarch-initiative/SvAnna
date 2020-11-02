@@ -6,11 +6,13 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
-import org.jax.svann.priority.SvPriority;
+import org.jax.svann.reference.SvType;
+import org.jax.svann.viz.Visualizer;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +25,13 @@ public class HtmlTemplate {
 
     protected static final String EMPTY_STRING="";
 
-    public HtmlTemplate(List<SvPriority> svAnnList) {
+    protected static final String NOT_AVAILABLE = "n/a";
+
+    public HtmlTemplate(List<Visualizer> svAnnList,
+                        Map<SvType, Integer> lowImpact,
+                        Map<SvType, Integer> intermediateImpact,
+                        Map<SvType, Integer> highImpact,
+                        Map<String, String> infoMap) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -33,33 +41,32 @@ public class HtmlTemplate {
         cfg.setTemplateLoader(templateLoader);
         cfg.setClassForTemplateLoading(HtmlTemplate.class, "");
 
-        //templateFile.toURI().toURL().toExternalForm()
-
+        // We simplify and integrate the maps to make it easier to generate a table with Freemarker
+        // We put everything into a list of rows
+        // We want to have one value (can be zero) for each of our SvTypes
+        List<SvTypeCountRow> rows = new ArrayList<>();
+        // TODO -- use the desired order for the output
+        for (SvType svtype : SvType.values()) {
+            SvTypeCountRow row = new SvTypeCountRow(svtype,
+                    lowImpact.getOrDefault(svtype,0),
+                    intermediateImpact.getOrDefault(svtype, 0),
+                    highImpact.getOrDefault(svtype, 0));
+            rows.add(row);
+        }
+        SvTypeCountRow totals = new SvTypeCountRow(lowImpact, intermediateImpact, highImpact);
+        rows.add(totals);
+        templateData.put("svtypecounts", rows);
         templateData.putIfAbsent("svalist", svAnnList);
-        templateData.put("n_non_translocations", svAnnList.size());
-        int n_low = (int) svAnnList
-                .stream()
-               // .filter(IntrachromosomalEvent::isLowPriority)
-                .count();
-        int n_modifer = (int) svAnnList
-                .stream()
-               // .filter(SvAnnOld::isModifierPriority)
-                .count();
-        int n_high = (int) svAnnList
-                .stream()
-              //  .filter(SvAnnOld::isHighPriority)
-                .count();
-        templateData.put("n_high", n_high);
-        templateData.put("n_modifer", n_modifer);
-        templateData.put("n_low",n_low);
-
+        templateData.put("n_structural_vars", svAnnList.size());
+        templateData.put("n_unparsable", infoMap.getOrDefault("unparsable", NOT_AVAILABLE));
+        templateData.put("vcf_file", infoMap.getOrDefault("vcf_file", NOT_AVAILABLE));
     }
 
 
     public void outputFile(String prefix) {
         String outpath = String.format( "%s.html", prefix);
         try (BufferedWriter out = new BufferedWriter(new FileWriter(outpath))) {
-            Template template = cfg.getTemplate("l2oHTML.ftl");
+            Template template = cfg.getTemplate("svannHTML.ftl");
             template.process(templateData, out);
         } catch (TemplateException | IOException te) {
             te.printStackTrace();

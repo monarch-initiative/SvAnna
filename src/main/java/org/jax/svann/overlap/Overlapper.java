@@ -1,7 +1,9 @@
 package org.jax.svann.overlap;
 
 import com.google.common.collect.ImmutableMap;
-import de.charite.compbio.jannovar.data.*;
+import de.charite.compbio.jannovar.data.Chromosome;
+import de.charite.compbio.jannovar.data.JannovarData;
+import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.GenomePosition;
@@ -16,8 +18,9 @@ import org.jax.svann.reference.genome.Contig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.jax.svann.overlap.OverlapType.*;
 
@@ -81,30 +84,23 @@ public class Overlapper {
      * This is the main method for getting a list of overlapping transcripts (with extra data in an {@link Overlap}
      * object) for structural variants that occur on one Chromosome, such as deletions
      *
-     * @param rearrangement
+     * @param rearrangement a structural variant identified in the input file.
      * @return list of overlapping transcripts.
      * TODO REFACTOR
      */
     public List<Overlap> getOverlapList(SequenceRearrangement rearrangement) {
-        // TODO: 26. 10. 2020 check coordinate remapping
         if (rearrangement.getType() == SvType.DELETION) {
             return getDeletionOverlaps(rearrangement);
         } else if (rearrangement.getType() == SvType.INSERTION) {
             return getInsertionOverlaps(rearrangement);
         }  else if (rearrangement.getType() == SvType.TRANSLOCATION) {
             return getTranslocationOverlaps(rearrangement);
+        } else if (rearrangement.getType() == SvType.INVERSION) {
+            return getInversionOverlaps(rearrangement);
         } else {
             LOGGER.warn("Getting overlaps for `{}` is not yet supported", rearrangement.getType());
             return List.of();
         }
-//        int id = 42;//svEvent.getAdjacencies().get(0)..getId();
-//        Strand strand = Strand.FWD; // We assume all SVs are on the forward strand
-//
-//        GenomeInterval structVarInterval = new GenomeInterval(rd, strand, id, 42,43);//svEvent.getBegin(), svEvent.getEnd());
-//        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
-//        IntervalArray<TranscriptModel>.QueryResult queryResult =
-//                iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
-//        return getOverlapList(structVarInterval, queryResult);
     }
 
     /**
@@ -123,17 +119,16 @@ public class Overlapper {
         Breakend breakendB = translocation.getRight();
         List<Overlap> overlapA = getTranslocationPartOverlap(breakendA);
         List<Overlap> overlapB = getTranslocationPartOverlap(breakendB);
-        // we would like to return one Overlap object for each end of the transclocation
-        // if there is a coding overlap return it, otherwise return any of the returned overlaps
-        // TODO consider the optimal behavior!
+        // we would like to return one Overlap object for each end of the translocation
+        // if the translocation overlaps a transcript it is high impact -- similar to inversions.
         List<Overlap> translocationOverlapPair = new ArrayList<>();
-        Optional<Overlap> optOverlap = overlapA.stream().filter(Overlap::overlapsCds).findAny();
+        Optional<Overlap> optOverlap = overlapA.stream().filter(Overlap::inversionDisruptable).findAny();
         if (optOverlap.isPresent()) {
             translocationOverlapPair.add(optOverlap.get());
         } else {
             translocationOverlapPair.add(overlapA.get(0));
         }
-        optOverlap = overlapB.stream().filter(Overlap::overlapsCds).findAny();
+        optOverlap = overlapB.stream().filter(Overlap::inversionDisruptable).findAny();
         if (optOverlap.isPresent()) {
             translocationOverlapPair.add(optOverlap.get());
         } else {
@@ -178,6 +173,44 @@ public class Overlapper {
                 iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
         return getOverlapList(structVarInterval, queryResult);
     }
+
+
+    List<Overlap> getBreakendOverlaps(Breakend be) {
+        Contig chrom = be.getContig();
+        int id = chrom.getId();
+        int begin = be.getBegin();
+        int end = be.getEnd();
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
+        IntervalArray<TranscriptModel>.QueryResult queryResult =
+                iarray.findOverlappingWithInterval(gi.getBeginPos(), gi.getEndPos());
+        return getOverlapList(gi, queryResult);
+    }
+
+    /**
+     * This method checks whether any of the breakends of an inversion overlaps with
+     * any part of a transcript
+     * @param inversion an inversion
+     * @return list of transcript overlaps (can be empty)
+     */
+    List<Overlap> getInversionOverlaps(SequenceRearrangement inversion) {
+        List<Adjacency> adjacencies = inversion.getAdjacencies();
+        if (adjacencies.size() != 2) {
+            throw new SvAnnRuntimeException("Malformed inversion adjacency list with size " + adjacencies.size());
+        }
+        List<Overlap> overlaps = new ArrayList<>();
+        for (var a : adjacencies) {
+            Breakend be = a.getLeft();
+            List<Overlap> leftOverlaps = getBreakendOverlaps(be);
+            leftOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
+            be = a.getRight();
+            List<Overlap> rightOverlaps = getBreakendOverlaps(be);
+            rightOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
+        }
+        return overlaps;
+    }
+
+
 
     /**
      * This method returns all overlapping transcripts for insertions. We assume that insertions
@@ -224,7 +257,7 @@ public class Overlapper {
                 continue;
             }
             if (!tmod.getTXRegion().contains(start) && !tmod.getTXRegion().contains(end)) {
-                System.err.printf("[ERROR] Warning, transcript model (%s;%s) retrieved that does not overlap (chr%s:%d-%d): ",
+                LOGGER.error("Warning, transcript model ({};{}) retrieved that does not overlap (chr{}:{}-{}): ",
                         tmod.getGeneSymbol(), tmod.getAccession(), start.getChr(), start.getPos(), end.getPos());
                 // TODO I observed this once, it should never happen and may be a Jannovar bug or have some other cause
                 //throw new L2ORuntimeException(tmod.getGeneSymbol());
@@ -234,7 +267,7 @@ public class Overlapper {
             overlaps.add(voverlap);
         }
         if (overlaps.isEmpty()) {
-            System.err.println("Could not find any overlaps with this query result" + qresult);
+            LOGGER.error("Could not find any overlaps with this query result: {}", qresult);
             throw new SvAnnRuntimeException("Empty overlap list");
         }
         return overlaps;

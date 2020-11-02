@@ -35,7 +35,7 @@ public interface SequenceRearrangement {
      * @return strand of the leftmost position of the rearrangement
      */
     default Strand getLeftmostStrand() {
-        return getAdjacencies().get(0).getLeft().getStrand();
+        return getRightmostBreakend().getStrand();
     }
 
     /**
@@ -44,15 +44,18 @@ public interface SequenceRearrangement {
      * @return coordinate of the leftmost position of the rearrangement
      */
     default int getLeftmostPosition() {
-        return getAdjacencies().get(0).getLeft().getBegin();
+        return getRightmostBreakend().getBegin();
+    }
+
+    default Breakend getLeftmostBreakend() {
+        return getAdjacencies().get(0).getLeft();
     }
 
     /**
      * @return strand of the rightmost position of the rearrangement
      */
     default Strand getRightmostStrand() {
-        int n = getAdjacencies().size();
-        return getAdjacencies().get(n - 1).getRight().getStrand();
+        return getRightmostBreakend().getStrand();
     }
 
     /**
@@ -61,7 +64,12 @@ public interface SequenceRearrangement {
      * @return coordinate of the rightmost position of the rearrangement
      */
     default int getRightmostPosition() {
-        int n = getAdjacencies().size();
-        return getAdjacencies().get(n - 1).getRight().getBegin();
+        return getRightmostBreakend().getBegin();
     }
+
+    default Breakend getRightmostBreakend() {
+        int n = getAdjacencies().size();
+        return getAdjacencies().get(n - 1).getRight();
+    }
+
 }

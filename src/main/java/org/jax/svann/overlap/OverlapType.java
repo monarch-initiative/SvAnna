@@ -1,5 +1,8 @@
 package org.jax.svann.overlap;
 
+import htsjdk.samtools.cram.encoding.core.huffmanUtils.HuffmanIntHelper;
+import org.jax.svann.priority.SvImpact;
+
 import java.util.Set;
 
 /**
@@ -45,6 +48,7 @@ public enum OverlapType {
     MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript"),
     INTRONIC("located completely within intron"),
     TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV"),
+    TRANSCRIPT_DISRUPTED_BY_INVERSION("transcript disrupted by inversion"),
     UNKNOWN("unknown");
 
     private final static Set<OverlapType> intergenicTypes = Set.of(DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_5KB,
@@ -63,8 +67,40 @@ public enum OverlapType {
         return exonicTypes.contains(vtype);
     }
 
+    /**
+     * Check if this overlap type overlaps with any part of a transcript
+     * @param vtype an overlap type
+     * @return true if there is overlap with some part of a transcript
+     */
+    public static boolean overlapsTranscript(OverlapType vtype) {
+        return exonicTypes.contains(vtype) || intronicTypes.contains(vtype);
+    }
+
+    public static boolean inversionDisruptable(OverlapType vtype) {
+        return exonicTypes.contains(vtype) || intronicTypes.contains(vtype) || vtype == UPSTREAM_GENE_VARIANT_2KB;
+    }
+
     public String getName() {
         return name;
+    }
+
+
+    public SvImpact toImpact() {
+        switch (this) {
+            case SINGLE_EXON_IN_TRANSCRIPT:
+            case MULTIPLE_EXON_IN_TRANSCRIPT:
+                return SvImpact.HIGH_IMPACT;
+            case TRANSCRIPT_CONTAINED_IN_SV:
+                return SvImpact.HIGH_IMPACT;
+            case UPSTREAM_GENE_VARIANT_2KB:
+            case DOWNSTREAM_GENE_VARIANT_2KB:
+                return SvImpact.HIGH_IMPACT;
+            case UPSTREAM_GENE_VARIANT_5KB:
+            case DOWNSTREAM_GENE_VARIANT_5KB:
+                return SvImpact.INTERMEDIATE_IMPACT;
+            default:
+                return SvImpact.LOW_IMPACT;
+        }
     }
 
 

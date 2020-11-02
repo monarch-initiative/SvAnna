@@ -1,4 +1,4 @@
-package org.jax.svann;
+package org.jax.svann.analysis;
 
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
@@ -7,13 +7,12 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
+import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
-import org.jax.svann.priority.PrototypeSvPrioritizer;
-import org.jax.svann.priority.SvPrioritizer;
-import org.jax.svann.priority.SvPriority;
+import org.jax.svann.priority.*;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
@@ -25,15 +24,17 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SvAnnAnalysis {
     private static final Logger LOGGER = LoggerFactory.getLogger(SvAnnAnalysis.class);
     final static double THRESHOLD = 1;
     private final static int DISTANCE_THRESHOLD = 500_000;
     private final String prefix;
+    /** HPO terms that characterize the individual whose VCF we are analyzing. */
     private final List<TermId> targetHpoIdList;
-
-
+    /** Path to the VCF file to be analyzed. */
+    private final String vcfPath;
     /** Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers. */
     private final Map<Integer, IntervalArray<Enhancer>> chromosomeToEnhancerIntervalArrayMap;
 
@@ -48,12 +49,16 @@ public class SvAnnAnalysis {
      */
     private final Set<TermId> relevantHpoIdsForEnhancers;
 
-//    private final List<SvEvent> svEventList;
-//
-//    private final List<BreakendRecord> breakendRecordList;
-    private final Collection<SequenceRearrangement> rearrangements;
-
+    /**
+     * Jannovar representation of all transcripts
+     */
     private final JannovarData jannovarData;
+
+    /**
+     * Key -- gene symbol, vallue, {@link GeneWithId} object with symbol and id. This map is used to connect
+     * geneIDs with gene symbols for display in HTML TODO - this is not very elegant and we may want to refactor.
+     */
+    private final Map<String, GeneWithId> geneSymbolMap;
 
     /**
      * TODO allow as parameter to CTOR
@@ -68,20 +73,36 @@ public class SvAnnAnalysis {
      * @param enhancerPath path to the TSpec enhancer file
      */
     public SvAnnAnalysis(String vcfFile, String prefix,  String enhancerPath, String jannovarPath, List<TermId> tidList) throws SerializationException {
-        this.jannovarData = readJannovarData(jannovarPath);
+        this.vcfPath = vcfFile;
+        this.jannovarData = new JannovarDataSerializer(jannovarPath).load();
         TSpecParser tparser = new TSpecParser(enhancerPath);
         Map<TermId, List<Enhancer>> id2enhancerMap = tparser.getId2enhancerMap();
         Map<TermId, String> hpoId2LabelMap = tparser.getId2labelMap();
         this.chromosomeToEnhancerIntervalArrayMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
         HpoDiseaseGeneMap hpomap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
         relevantGeneIdToAssociatedDiseaseMap = hpomap.getRelevantGenesAndDiseases(tidList);
+        this.geneSymbolMap = hpomap.getGeneSymbolMap();
         relevantHpoIdsForEnhancers = hpomap.getRelevantAncestors(id2enhancerMap.keySet(), tidList);
         this.prefix = prefix;
         this.targetHpoIdList = tidList;
+    }
+
+    /**
+     * These are the prioritized objects that will be prioritized by {@link SvPrioritizer}-implementing
+     * prioritizers that can be chosen by the user via the command line. The constructor of this class
+     * puts all of the structural variants identified in the VCF file, both symbolic and breakend calls
+     * into this list.
+     * @return List of sequence rearrangements from the VCF file before any prioritization
+     */
+    public List<SvPriority> getRawSequenceRearrangments() {
         VcfStructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, new BreakendAssembler());
-        Path vcfPath = Paths.get(vcfFile);
+        Path vcfPath = Paths.get(this.vcfPath);
         try {
-            rearrangements = parser.parseFile(vcfPath);
+            Collection<SequenceRearrangement> rearrangements = parser.parseFile(vcfPath);
+            return rearrangements.
+                    stream().
+                    map(DefaultSvPriority::createBaseSvPriority).
+                    collect(Collectors.toList());
         } catch (IOException e) {
             throw new SvAnnRuntimeException("Error: " + e.getMessage());
         }
@@ -89,30 +110,45 @@ public class SvAnnAnalysis {
 
 
     /**
-     * Prioritize the structural variants in {@link #rearrangements}.
-     *
+     * Prioritize the structural variants according to sequence
+     * @param svList List of structural variants.
      * @return List of prioritized structural variants
      */
-    public List<SvPriority> prioritizeSvs() {
-        List<SvPriority> svList = new ArrayList<>();
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(assembly,
-                relevantHpoIdsForEnhancers,
+    public List<SvPriority> prioritizeSvsBySequence(List<SvPriority> svList) {
+        List<SvPriority> sequencePrioritized = new ArrayList<>();
+        SvPrioritizer prioritizer = new SequenceSvPrioritizer(assembly,
                 chromosomeToEnhancerIntervalArrayMap,
-                relevantGeneIdToAssociatedDiseaseMap,
+                geneSymbolMap,
                 jannovarData);
-        for (var rearrangement : rearrangements) {
-            svList.add(prioritizer.prioritize(rearrangement));
+        for (var prio : svList) {
+            SvPriority prioritized = prioritizer.prioritize(prio);
+            if (prioritized == null) {
+                // TODO figure out any errors here
+                LOGGER.error("Not implemented: " + prio);
+                continue;
+            }
+            sequencePrioritized.add(prioritized);
         }
-        return svList;
+        return sequencePrioritized;
     }
 
-
-
-
-
-    private static JannovarData readJannovarData(String jannovarDataPath) throws SerializationException {
-        return new JannovarDataSerializer(jannovarDataPath).load();
+    /**
+     * Prioritize the structural variants according to phenotype
+     * @param svList List of structural variants.
+     * @return List of prioritized structural variants
+     */
+    public List<SvPriority> prioritizeSvsByPhenotype(List<SvPriority> svList) {
+        List<SvPriority> phenotypePrioritized = new ArrayList<>();
+        SvPrioritizer prioritizer = new PhenotypeSvPrioritizer(this.targetHpoIdList, this.relevantGeneIdToAssociatedDiseaseMap);
+        for (var prio : svList) {
+            SvPriority prioritized = prioritizer.prioritize(prio);
+            if (prioritized == null) {
+                // TODO figure out any errors here
+                LOGGER.error("Not implemented: " + prio);
+                continue;
+            }
+            phenotypePrioritized.add(prioritized);
+        }
+        return phenotypePrioritized;
     }
-
-
 }

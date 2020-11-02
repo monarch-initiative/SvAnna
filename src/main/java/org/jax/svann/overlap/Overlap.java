@@ -46,6 +46,14 @@ public class Overlap {
         return OverlapType.isExonic(this.overlapType);
     }
 
+    public boolean overlapsTranscript() {
+        return OverlapType.overlapsTranscript(this.overlapType);
+    }
+
+    public boolean inversionDisruptable() {
+        return OverlapType.inversionDisruptable(this.overlapType);
+    }
+
     /**
      * @return true if this overlap involves exonic sequence
      */
@@ -66,7 +74,23 @@ public class Overlap {
         return overlapType;
     }
 
-//    public TermId getGeneId() {
+    public int getDistance() {
+        return distance;
+    }
+
+    public TranscriptModel getTranscriptModel() {
+        return transcriptModel;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public boolean isOverlapsCds() {
+        return overlapsCds;
+    }
+
+    //    public TermId getGeneId() {
 //        return TermId.of(this.transcriptModel.getGeneID())
 //    }
 

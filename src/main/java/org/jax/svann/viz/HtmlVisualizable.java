@@ -3,7 +3,6 @@ package org.jax.svann.viz;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
-import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.Adjacency;
 import org.jax.svann.reference.Breakend;
@@ -11,29 +10,20 @@ import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class HtmlVisualizable implements  Visualizable {
-
-    final private SvType svType;
-
-    final private SvImpact svImpact;
-
-    final private SvPriority svPriority;
+public class HtmlVisualizable implements Visualizable {
 
     /**
      * Representation of the structural variant as it came from the VCF file.
      */
-    private SequenceRearrangement rearrangement;
+    private final SequenceRearrangement rearrangement;
 
-    /**
-     *
-     * @param svPriority
-     */
-    public HtmlVisualizable(SvPriority svPriority) {
-        this.svImpact = svPriority.getImpact();
-        this.rearrangement = svPriority.getRearrangement();
-        this.svType = this.rearrangement.getType();
+    private final SvPriority svPriority;
+
+    public HtmlVisualizable(SequenceRearrangement rearrangement, SvPriority svPriority) {
+        this.rearrangement = rearrangement;
         this.svPriority = svPriority;
     }
 
@@ -48,7 +38,7 @@ public class HtmlVisualizable implements  Visualizable {
         Contig chrom = left.getContig();
         int begin = left.getBegin();
         int end = right.getEnd();
-        return new HtmlLocation(chrom, begin,end);
+        return new HtmlLocation(chrom, begin, end);
     }
 
 
@@ -59,13 +49,13 @@ public class HtmlVisualizable implements  Visualizable {
 
     @Override
     public String getType() {
-        return svType.toString();
+        return rearrangement.getType().toString();
     }
 
 
     @Override
     public String getImpact() {
-        return svImpact.toString();
+        return svPriority.getImpact().toString();
     }
 
     @Override
@@ -73,10 +63,13 @@ public class HtmlVisualizable implements  Visualizable {
         return this.svPriority.hasPhenotypicRelevance();
     }
 
-    public List<HpoDiseaseSummary> getDiseaseSummaries() { return this.svPriority.getDiseases(); }
+    public List<HpoDiseaseSummary> getDiseaseSummaries() {
+        return this.svPriority.getDiseases();
+    }
 
     /**
      * Return strings for display of the format chr3:123-456
+     *
      * @return
      */
     @Override
@@ -84,11 +77,10 @@ public class HtmlVisualizable implements  Visualizable {
         List<HtmlLocation> locs = new ArrayList<>();
         if (rearrangement.getType() == SvType.DELETION) {
             locs.add(getDeletionLocation(rearrangement));
-        } else  if (rearrangement.getType() == SvType.INSERTION) {
+        } else if (rearrangement.getType() == SvType.INSERTION) {
             int c = 42;
             int y = 32;
         }
-
 
 
         return locs;

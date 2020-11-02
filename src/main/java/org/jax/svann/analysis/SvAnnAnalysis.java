@@ -4,7 +4,6 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
 import org.jax.svann.hpo.GeneWithId;
@@ -12,7 +11,8 @@ import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
-import org.jax.svann.priority.*;
+import org.jax.svann.priority.SvPrioritizer;
+import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
@@ -23,9 +23,12 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+// TODO: 2. 11. 2020 Should we move this functionality into the driver class?
 public class SvAnnAnalysis {
     private static final Logger LOGGER = LoggerFactory.getLogger(SvAnnAnalysis.class);
     final static double THRESHOLD = 1;
@@ -92,20 +95,13 @@ public class SvAnnAnalysis {
      * prioritizers that can be chosen by the user via the command line. The constructor of this class
      * puts all of the structural variants identified in the VCF file, both symbolic and breakend calls
      * into this list.
+     *
      * @return List of sequence rearrangements from the VCF file before any prioritization
      */
-    public List<SvPriority> getRawSequenceRearrangments() {
+    public Collection<SequenceRearrangement> getRawSequenceRearrangments() throws IOException {
         VcfStructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, new BreakendAssembler());
         Path vcfPath = Paths.get(this.vcfPath);
-        try {
-            Collection<SequenceRearrangement> rearrangements = parser.parseFile(vcfPath);
-            return rearrangements.
-                    stream().
-                    map(DefaultSvPriority::createBaseSvPriority).
-                    collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new SvAnnRuntimeException("Error: " + e.getMessage());
-        }
+        return parser.parseFile(vcfPath);
     }
 
 
@@ -115,21 +111,22 @@ public class SvAnnAnalysis {
      * @return List of prioritized structural variants
      */
     public List<SvPriority> prioritizeSvsBySequence(List<SvPriority> svList) {
-        List<SvPriority> sequencePrioritized = new ArrayList<>();
-        SvPrioritizer prioritizer = new SequenceSvPrioritizer(assembly,
-                chromosomeToEnhancerIntervalArrayMap,
-                geneSymbolMap,
-                jannovarData);
-        for (var prio : svList) {
-            SvPriority prioritized = prioritizer.prioritize(prio);
-            if (prioritized == null) {
-                // TODO figure out any errors here
-                LOGGER.error("Not implemented: " + prio);
-                continue;
-            }
-            sequencePrioritized.add(prioritized);
-        }
-        return sequencePrioritized;
+//        List<SvPriority> sequencePrioritized = new ArrayList<>();
+//        SvPrioritizer prioritizer = new SequenceSvPrioritizer(assembly,
+//                chromosomeToEnhancerIntervalArrayMap,
+//                geneSymbolMap,
+//                jannovarData);
+//        for (var prio : svList) {
+//            SvPriority prioritized = prioritizer.prioritize(prio);
+//            if (prioritized == null) {
+//                // TODO figure out any errors here
+//                LOGGER.error("Not implemented: " + prio);
+//                continue;
+//            }
+//            sequencePrioritized.add(prioritized);
+//        }
+//        return sequencePrioritized;
+        return svList;
     }
 
     /**
@@ -138,17 +135,18 @@ public class SvAnnAnalysis {
      * @return List of prioritized structural variants
      */
     public List<SvPriority> prioritizeSvsByPhenotype(List<SvPriority> svList) {
-        List<SvPriority> phenotypePrioritized = new ArrayList<>();
-        SvPrioritizer prioritizer = new PhenotypeSvPrioritizer(this.targetHpoIdList, this.relevantGeneIdToAssociatedDiseaseMap);
-        for (var prio : svList) {
-            SvPriority prioritized = prioritizer.prioritize(prio);
-            if (prioritized == null) {
-                // TODO figure out any errors here
-                LOGGER.error("Not implemented: " + prio);
-                continue;
-            }
-            phenotypePrioritized.add(prioritized);
-        }
-        return phenotypePrioritized;
+//        List<SvPriority> phenotypePrioritized = new ArrayList<>();
+//        SvPrioritizer prioritizer = new PhenotypeSvPrioritizer(this.targetHpoIdList, this.relevantGeneIdToAssociatedDiseaseMap);
+//        for (var prio : svList) {
+//            SvPriority prioritized = prioritizer.prioritize(prio);
+//            if (prioritized == null) {
+//                // TODO figure out any errors here
+//                LOGGER.error("Not implemented: " + prio);
+//                continue;
+//            }
+//            phenotypePrioritized.add(prioritized);
+//        }
+//        return phenotypePrioritized;
+        return svList;
     }
 }

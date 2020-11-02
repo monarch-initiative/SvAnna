@@ -35,7 +35,7 @@ public interface SequenceRearrangement {
      * @return strand of the leftmost position of the rearrangement
      */
     default Strand getLeftmostStrand() {
-        return getRightmostBreakend().getStrand();
+        return getLeftmostBreakend().getStrand();
     }
 
     /**
@@ -44,7 +44,7 @@ public interface SequenceRearrangement {
      * @return coordinate of the leftmost position of the rearrangement
      */
     default int getLeftmostPosition() {
-        return getRightmostBreakend().getBegin();
+        return getLeftmostBreakend().getBegin();
     }
 
     default Breakend getLeftmostBreakend() {

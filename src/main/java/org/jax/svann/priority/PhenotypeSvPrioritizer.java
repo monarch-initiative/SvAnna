@@ -1,11 +1,8 @@
 package org.jax.svann.priority;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.ArrayList;
@@ -28,6 +25,7 @@ import java.util.Set;
  * @author Peter N Robinson
  * @author Daniel Danis
  */
+@Deprecated // in favor of PrototypeSvPrioritizer
 public class PhenotypeSvPrioritizer implements SvPrioritizer {
 
     private final List<TermId> targetHpoIdList;
@@ -68,15 +66,20 @@ public class PhenotypeSvPrioritizer implements SvPrioritizer {
      * @param svPriority
      * @return phenotypic prioritization
      */
-    @Override
+//    @Override
     public SvPriority prioritize(SvPriority svPriority) {
-       switch (svPriority.getRearrangement().getType()) {
-           case TRANSLOCATION:
-               return prioritizeTranslocation(svPriority);
-           case INVERSION:
-               return prioritizeInversion(svPriority);
-           default:
-               return prioritizeByPhenotype(svPriority);
-       }
+        switch (svPriority.getRearrangement().getType()) {
+            case TRANSLOCATION:
+                return prioritizeTranslocation(svPriority);
+            case INVERSION:
+                return prioritizeInversion(svPriority);
+            default:
+                return prioritizeByPhenotype(svPriority);
+        }
+    }
+
+    @Override
+    public SvPriority prioritize(SequenceRearrangement rearrangement) {
+        return SvPriority.unknown();
     }
 }

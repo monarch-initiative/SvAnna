@@ -39,15 +39,16 @@ public class FilterAndCount {
         });
         for (var prio : priorityList) {
             switch (prio.getImpact()) {
-                case HIGH_IMPACT:
-                    this.highImpactCounts.merge(prio.getType(), 1, Integer::sum);
-                    break;
-                case INTERMEDIATE_IMPACT:
-                    this.intermediateImpactCounts.merge(prio.getType(), 1, Integer::sum);
-                    break;
-                case LOW_IMPACT:
-                    this.lowImpactCounts.merge(prio.getType(), 1, Integer::sum);
-                    break;
+                // sequence rearrangement is not supposed to be a part of SvPriority
+//                case HIGH:
+//                    this.highImpactCounts.merge(prio.getType(), 1, Integer::sum);
+//                    break;
+//                case INTERMEDIATE:
+//                    this.intermediateImpactCounts.merge(prio.getType(), 1, Integer::sum);
+//                    break;
+//                case LOW:
+//                    this.lowImpactCounts.merge(prio.getType(), 1, Integer::sum);
+//                    break;
                 default:
                     unknown++;
             }
@@ -60,7 +61,7 @@ public class FilterAndCount {
     }
 
     public FilterAndCount(List<SvPriority> priorityList) {
-        this(priorityList, SvImpact.HIGH_IMPACT);
+        this(priorityList, SvImpact.HIGH);
     }
 
     public Map<SvType, Integer> getLowImpactCounts() {

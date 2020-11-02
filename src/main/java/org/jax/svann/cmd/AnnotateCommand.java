@@ -10,6 +10,8 @@ import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
+import org.jax.svann.overlap.EnhancerOverlapper;
+import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.StructuralRearrangementParser;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
@@ -23,6 +25,7 @@ import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.jax.svann.viz.HtmlVisualizer;
 import org.jax.svann.viz.Visualizer;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -31,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "annotate", aliases = {"A"}, mixinStandardHelpOptions = true, description = "annotate VCF file")
 public class AnnotateCommand implements Callable<Integer> {
@@ -42,17 +46,21 @@ public class AnnotateCommand implements Callable<Integer> {
      */
     private static final String ASSEMBLY_ID = "GRCh38.p13";
     @CommandLine.Option(names = {"-j", "--jannovar"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
-    private final String jannovarPath = "data/data/hg38_refseq_curated.ser";
+    public Path jannovarPath = Paths.get("data/data/hg38_refseq_curated.ser");
     @CommandLine.Option(names = {"-g", "--gencode"})
-    private final Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
+    public Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
-    private final String outprefix = "SVANN";
+    public String outprefix = "SVANN";
     @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
-    protected Path vcfFile;
+    public Path vcfFile;
     @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
-    private Path enhancerFile;
+    public Path enhancerFile;
     @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list)")
-    private String hpoTermIdList;
+    public String hpoTermIdList;
+    @CommandLine.Option(names = {"--threshold"},
+            type = SvImpact.class,
+            description = "report variants as severe as this or more")
+    public SvImpact threshold = SvImpact.LOW;
 
     public AnnotateCommand() {
     }
@@ -72,8 +80,8 @@ public class AnnotateCommand implements Callable<Integer> {
         return hpomap.getGeneSymbolMap();
     }
 
-    private static JannovarData readJannovarData(String jannovarPath) throws SerializationException {
-        return new JannovarDataSerializer(jannovarPath).load();
+    private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
+        return new JannovarDataSerializer(jannovarPath.toString()).load();
     }
 
     @Override
@@ -97,11 +105,14 @@ public class AnnotateCommand implements Callable<Integer> {
         // 1 - parse input variants
         BreakendAssembler breakendAssembler = new BreakendAssembler();
         StructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, breakendAssembler);
+        Set<TermId> patientTerms = Arrays.stream(hpoTermIdList.split(",")).map(String::trim).map(TermId::of).collect(Collectors.toSet());
 
         Collection<SequenceRearrangement> rearrangements = parser.parseFile(vcfFile);
 
         // 2 - prioritize variants
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(assembly, enhancerMap, geneSymbolMap, jannovarData); // how to prioritize
+        Overlapper overlapper = new Overlapper(jannovarData);
+        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
+        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(geneSymbolMap, overlapper, enhancerOverlapper, patientTerms); // how to prioritize
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         for (SequenceRearrangement rearrangement : rearrangements) {
             SvPriority priority = prioritizer.prioritize(rearrangement);
@@ -120,7 +131,6 @@ public class AnnotateCommand implements Callable<Integer> {
 //        List<Visualizable> visualableList = svList.stream().map(HtmlVisualizable::new).collect(Collectors.toList());
 //        List<Visualizer> visualizerList = visualableList.stream().map(HtmlVisualizer::new).collect(Collectors.toList());
 
-        SvImpact threshold = SvImpact.HIGH_IMPACT;  // TODO  -- set on command line
         FilterAndCount fac = new FilterAndCount(priorities, threshold);
         List<SvPriority> filteredPriorityList = fac.getFilteredPriorityList();// Now the list just contains SVs that pass the threshold
         int unparsableCount = fac.getUnparsableCount();

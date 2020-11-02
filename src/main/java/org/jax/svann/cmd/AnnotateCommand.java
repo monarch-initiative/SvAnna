@@ -21,6 +21,7 @@ import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
+import org.jax.svann.viz.HtmlVisualizable;
 import org.jax.svann.viz.HtmlVisualizer;
 import org.jax.svann.viz.Visualizer;
 import org.slf4j.Logger;
@@ -42,11 +43,11 @@ public class AnnotateCommand implements Callable<Integer> {
      */
     private static final String ASSEMBLY_ID = "GRCh38.p13";
     @CommandLine.Option(names = {"-j", "--jannovar"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
-    private final String jannovarPath = "data/data/hg38_refseq_curated.ser";
+    private String jannovarPath = "data/data/hg38_refseq_curated.ser";
     @CommandLine.Option(names = {"-g", "--gencode"})
-    private final Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
+    private Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
-    private final String outprefix = "SVANN";
+    private String outprefix = "SVANN";
     @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
     protected Path vcfFile;
     @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
@@ -115,7 +116,20 @@ public class AnnotateCommand implements Callable<Integer> {
         // 3 - visualize the results
         // TODO: 2. 11. 2020 this will work once visualizer is refactored,
         //  we can even move this into the loop above
-        Visualizer visualizer = new HtmlVisualizer(null);
+        Visualizer visualizer = new HtmlVisualizer();
+         List<String> htmlList = new ArrayList<>();
+         for (var prio : priorities) {
+             if (prio == null) {
+                 System.err.println("[ERROR] prio is NULL");
+                 continue;
+             }
+             else if (prio.getRearrangement() == null) {
+                 System.err.println("[ERROR] prio-rearrangement is NULL");
+                 continue;
+             }
+             String html = visualizer.getHtml(new HtmlVisualizable(prio));
+             htmlList.add(html);
+         }
 
 //        List<Visualizable> visualableList = svList.stream().map(HtmlVisualizable::new).collect(Collectors.toList());
 //        List<Visualizer> visualizerList = visualableList.stream().map(HtmlVisualizer::new).collect(Collectors.toList());

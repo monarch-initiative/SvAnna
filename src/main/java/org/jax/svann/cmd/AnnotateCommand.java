@@ -12,6 +12,7 @@ import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
+import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.StructuralRearrangementParser;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
@@ -23,6 +24,7 @@ import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
+import org.jax.svann.viz.HtmlVisualizable;
 import org.jax.svann.viz.HtmlVisualizer;
 import org.jax.svann.viz.Visualizer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -126,7 +128,7 @@ public class AnnotateCommand implements Callable<Integer> {
         // 3 - visualize the results
         // TODO: 2. 11. 2020 this will work once visualizer is refactored,
         //  we can even move this into the loop above
-        Visualizer visualizer = new HtmlVisualizer(null);
+        Visualizer visualizer = new HtmlVisualizer();
 
 //        List<Visualizable> visualableList = svList.stream().map(HtmlVisualizable::new).collect(Collectors.toList());
 //        List<Visualizer> visualizerList = visualableList.stream().map(HtmlVisualizer::new).collect(Collectors.toList());
@@ -138,15 +140,29 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<SvType, Integer> intermediateImpactCounts = fac.getIntermediateImpactCounts();
         Map<SvType, Integer> highImpactCounts = fac.getHighImpactCounts();
 
+        List<String> htmlList = new ArrayList<>();
+        for (var prio : priorities) {
+            if (prio == null) {
+                System.err.println("[ERROR] prio is NULL");
+                continue;
+            }
+            else if (prio.getRearrangement() == null) {
+                System.err.println("[ERROR] prio-rearrangement is NULL");
+                continue;
+            }
+            String html = visualizer.getHtml(new HtmlVisualizable(prio));
+            htmlList.add(html);
+        }
+
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("vcf_file", vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
-//        HtmlTemplate template = new HtmlTemplate(visualizerList,
-//                lowImpactCounts,
-//                intermediateImpactCounts,
-//                highImpactCounts,
-//                infoMap);
-//        template.outputFile(this.outprefix);
+        HtmlTemplate template = new HtmlTemplate(htmlList,
+               lowImpactCounts,
+                intermediateImpactCounts,
+                highImpactCounts,
+                infoMap);
+        template.outputFile(this.outprefix);
 
         // We're done!
         return 0;

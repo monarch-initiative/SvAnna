@@ -10,9 +10,9 @@ import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
+import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
-import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.StructuralRearrangementParser;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
@@ -109,60 +109,47 @@ public class AnnotateCommand implements Callable<Integer> {
         StructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, breakendAssembler);
         Set<TermId> patientTerms = Arrays.stream(hpoTermIdList.split(",")).map(String::trim).map(TermId::of).collect(Collectors.toSet());
 
-        Collection<SequenceRearrangement> rearrangements = parser.parseFile(vcfFile);
+        List<SequenceRearrangement> rearrangements = parser.parseFile(vcfFile);
 
-        // 2 - prioritize variants
+        // 2 - prioritize & visualize variants
+        // setup prioritization parts
         Overlapper overlapper = new Overlapper(jannovarData);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
         SvPrioritizer prioritizer = new PrototypeSvPrioritizer(geneSymbolMap, overlapper, enhancerOverlapper, patientTerms); // how to prioritize
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
+        // setup visualization parts
+        Visualizer visualizer = new HtmlVisualizer();
+        List<String> visualizations = new ArrayList<>();
+
         for (SequenceRearrangement rearrangement : rearrangements) {
             SvPriority priority = prioritizer.prioritize(rearrangement);
             priorities.add(priority);
+            HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
+            String visualization = visualizer.getHtml(visualizable);
+            visualizations.add(visualization);
         }
 
         // TODO -- if we have frequency information
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
         // This filters our SVs with lower impact than our threshold
 
-        // 3 - visualize the results
-        // TODO: 2. 11. 2020 this will work once visualizer is refactored,
-        //  we can even move this into the loop above
-        Visualizer visualizer = new HtmlVisualizer();
-
-//        List<Visualizable> visualableList = svList.stream().map(HtmlVisualizable::new).collect(Collectors.toList());
-//        List<Visualizer> visualizerList = visualableList.stream().map(HtmlVisualizer::new).collect(Collectors.toList());
-
-        FilterAndCount fac = new FilterAndCount(priorities, threshold);
-        List<SvPriority> filteredPriorityList = fac.getFilteredPriorityList();// Now the list just contains SVs that pass the threshold
+        FilterAndCount fac = new FilterAndCount(priorities, rearrangements, threshold);
+        // Now the list just contains SVs that pass the threshold
+        List<SvPriority> filteredPriorityList = fac.getFilteredPriorityList();
         int unparsableCount = fac.getUnparsableCount();
         Map<SvType, Integer> lowImpactCounts = fac.getLowImpactCounts();
         Map<SvType, Integer> intermediateImpactCounts = fac.getIntermediateImpactCounts();
         Map<SvType, Integer> highImpactCounts = fac.getHighImpactCounts();
 
-        List<String> htmlList = new ArrayList<>();
-        for (var prio : priorities) {
-            if (prio == null) {
-                System.err.println("[ERROR] prio is NULL");
-                continue;
-            }
-            else if (prio.getRearrangement() == null) {
-                System.err.println("[ERROR] prio-rearrangement is NULL");
-                continue;
-            }
-            String html = visualizer.getHtml(new HtmlVisualizable(prio));
-            htmlList.add(html);
-        }
-
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("vcf_file", vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
-        HtmlTemplate template = new HtmlTemplate(htmlList,
-               lowImpactCounts,
+        HtmlTemplate template = new HtmlTemplate(visualizations,
+                lowImpactCounts,
                 intermediateImpactCounts,
                 highImpactCounts,
                 infoMap);
-        template.outputFile(this.outprefix);
+        template.outputFile(outprefix);
 
         // We're done!
         return 0;

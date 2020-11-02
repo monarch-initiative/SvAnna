@@ -1,8 +1,12 @@
 package org.jax.svann.analysis;
 
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPriority;
+import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class FilterAndCount {
 
-    private final SvImpact thresholdImpact;
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilterAndCount.class);
 
     private final Map<SvType, Integer> lowImpactCounts;
     private final Map<SvType, Integer> intermediateImpactCounts;
@@ -25,8 +29,9 @@ public class FilterAndCount {
 
     private final int unparsableCount;
 
-    public FilterAndCount(List<SvPriority> priorityList, SvImpact threshold) {
-        this.thresholdImpact = threshold;
+    public FilterAndCount(List<SvPriority> priorityList,
+                          List<SequenceRearrangement> rearrangements,
+                          SvImpact threshold) {
         this.lowImpactCounts = new HashMap<>();
         this.intermediateImpactCounts = new HashMap<>();
         this.highImpactCounts = new HashMap<>();
@@ -37,22 +42,32 @@ public class FilterAndCount {
             this.intermediateImpactCounts.put(v, 0);
             this.highImpactCounts.put(v, 0);
         });
-        for (var prio : priorityList) {
-            switch (prio.getImpact()) {
-                // sequence rearrangement is not supposed to be a part of SvPriority
-//                case HIGH:
-//                    this.highImpactCounts.merge(prio.getType(), 1, Integer::sum);
-//                    break;
-//                case INTERMEDIATE:
-//                    this.intermediateImpactCounts.merge(prio.getType(), 1, Integer::sum);
-//                    break;
-//                case LOW:
-//                    this.lowImpactCounts.merge(prio.getType(), 1, Integer::sum);
-//                    break;
+
+        if (priorityList.size() != rearrangements.size()) {
+            LOGGER.warn("Number of priorities and rearrangements does not match: {}!={}", priorityList.size(), rearrangements.size());
+            throw new SvAnnRuntimeException("Number of priorities and rearrangements does not match");
+        }
+
+        // iterate through priorities and rearrangements
+        for (int i = 0; i < priorityList.size(); i++) {
+            SvPriority svPriority = priorityList.get(i);
+            SequenceRearrangement rearrangement = rearrangements.get(i);
+
+            switch (svPriority.getImpact()) {
+                case HIGH:
+                    this.highImpactCounts.merge(rearrangement.getType(), 1, Integer::sum);
+                    break;
+                case INTERMEDIATE:
+                    this.intermediateImpactCounts.merge(rearrangement.getType(), 1, Integer::sum);
+                    break;
+                case LOW:
+                    this.lowImpactCounts.merge(rearrangement.getType(), 1, Integer::sum);
+                    break;
                 default:
                     unknown++;
             }
         }
+
         this.unparsableCount = unknown;
         filteredPriorityList = priorityList
                 .stream()
@@ -60,8 +75,8 @@ public class FilterAndCount {
                 .collect(Collectors.toList());
     }
 
-    public FilterAndCount(List<SvPriority> priorityList) {
-        this(priorityList, SvImpact.HIGH);
+    public FilterAndCount(List<SvPriority> priorityList, List<SequenceRearrangement> rearrangements) {
+        this(priorityList, rearrangements, SvImpact.HIGH);
     }
 
     public Map<SvType, Integer> getLowImpactCounts() {

@@ -4,9 +4,9 @@ import org.jax.svann.reference.SequenceRearrangement;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collection;
+import java.util.List;
 
 public interface StructuralRearrangementParser {
 
-    Collection<SequenceRearrangement> parseFile(Path filePath) throws IOException;
+    List<SequenceRearrangement> parseFile(Path filePath) throws IOException;
 }

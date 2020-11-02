@@ -60,7 +60,7 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
     }
 
     @Override
-    public Collection<SequenceRearrangement> parseFile(Path filePath) throws IOException {
+    public List<SequenceRearrangement> parseFile(Path filePath) throws IOException {
         /* Tab-delimited file with entries like:
         CM000663.2	1080765	1080860	DEL	pbsv:sniffles:svim	SAMPLE1	pbsv.DEL.50;10;PASS;0/1:122;24;PASS;1/1:svim.DEL.166;24;PASS;0/1
         CM000663.2	1099137	1099828	DUP	sniffles:svim	SAMPLE1	125;9;PASS;0/0:svim.DUP_TANDEM.17;5;PASS;./.

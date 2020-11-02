@@ -1,6 +1,7 @@
 package org.jax.svann.viz;
 
 import org.jax.svann.hpo.HpoDiseaseSummary;
+import org.jax.svann.overlap.Overlap;
 import org.jax.svann.reference.SequenceRearrangement;
 
 import java.util.List;
@@ -19,5 +20,7 @@ public interface Visualizable {
     List<HtmlLocation> getLocations();
 
     List<HpoDiseaseSummary> getDiseaseSummaries();
+
+    List<Overlap> getOverlaps();
 
 }

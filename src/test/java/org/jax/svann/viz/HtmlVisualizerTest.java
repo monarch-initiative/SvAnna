@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * TODO -- Can we make better tests?
+ */
 public class HtmlVisualizerTest extends TestBase {
 
     private static final SequenceRearrangement surf1Exon3Deletion = TestVariants.singleExonDeletion_SURF2_exon3();
@@ -28,7 +31,13 @@ public class HtmlVisualizerTest extends TestBase {
     private static final Set<GeneWithId> affectedGeneIds = Set.of(fbn1WithId);
     private static final List<Enhancer> enhancers = List.of(); // no affected enhancers for this
     private static final SvPriority svpriority =
-            new DefaultSvPriority(surf1Exon3Deletion,SvType.DELETION, SvImpact.HIGH_IMPACT, affectedTranscripts, affectedGeneIds, enhancers);
+            new DefaultSvPriority(surf1Exon3Deletion,
+                    SvType.DELETION,
+                    SvImpact.HIGH_IMPACT,
+                    affectedTranscripts,
+                    affectedGeneIds,
+                    enhancers,
+                    List.of());
 
 
     @Test

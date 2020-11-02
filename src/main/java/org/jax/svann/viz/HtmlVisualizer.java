@@ -94,6 +94,11 @@ public class HtmlVisualizer implements Visualizer {
             }
             sb.append("</ul></p>\n");
         }
+        sb.append("<p>");
+        for (var olap : this.visualizable.getOverlaps()) {
+            sb.append(olap.toString()).append("<br/>\n");
+        }
+        sb.append("</p>\n");
         sb.append(HTML_TABLE_HEADER);
         sb.append("<tbody>\n");
 //        Map<String, String> locationMap = visualizable.getLocationStrings();

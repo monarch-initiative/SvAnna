@@ -132,7 +132,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH_IMPACT;
         }
-        return new DefaultSvPriority(rearrangement,svType, impact, affectedTranscripts, geneWithIdsSet, enhancers);
+        return new DefaultSvPriority(rearrangement,svType, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**
@@ -170,7 +170,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH_IMPACT;
         }
-        return new DefaultSvPriority(rearrangement, SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers);
+        return new DefaultSvPriority(rearrangement, SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**
@@ -218,7 +218,8 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
                 impact,
                 affectedTranscripts,
                 geneWithIdsSet,
-                enhancers);
+                enhancers,
+                overlaps);
     }
 
     private DefaultSvPriority prioritizeTranslocation(SequenceRearrangement rearrangement) {
@@ -248,6 +249,12 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH_IMPACT;
         }
-        return new DefaultSvPriority(rearrangement,SvType.TRANSLOCATION, impact, affectedTranscripts, geneWithIdsSet, enhancers);
+        return new DefaultSvPriority(rearrangement,
+                SvType.TRANSLOCATION,
+                impact,
+                affectedTranscripts,
+                geneWithIdsSet,
+                enhancers,
+                overlaps);
     }
 }

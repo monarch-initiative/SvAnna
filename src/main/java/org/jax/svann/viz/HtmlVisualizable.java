@@ -2,6 +2,7 @@ package org.jax.svann.viz;
 
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseSummary;
+import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.Adjacency;
@@ -91,5 +92,10 @@ public class HtmlVisualizable implements  Visualizable {
 
 
         return locs;
+    }
+
+    @Override
+    public List<Overlap> getOverlaps() {
+        return svPriority.getOverlaps();
     }
 }

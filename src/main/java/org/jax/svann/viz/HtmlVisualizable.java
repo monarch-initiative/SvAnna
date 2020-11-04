@@ -33,11 +33,11 @@ public class HtmlVisualizable implements Visualizable {
             throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
         }
         Adjacency deletion = adjacencies.get(0);
-        Breakend left = deletion.getLeft();
-        Breakend right = deletion.getRight();
+        Breakend left = deletion.getStart();
+        Breakend right = deletion.getEnd();
         Contig chrom = left.getContig();
-        int begin = left.getBegin();
-        int end = right.getEnd();
+        int begin = left.getPosition();
+        int end = right.getPosition();
         return new HtmlLocation(chrom, begin, end);
     }
 

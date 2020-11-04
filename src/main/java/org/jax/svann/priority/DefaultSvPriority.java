@@ -22,11 +22,11 @@ class DefaultSvPriority implements SvPriority {
     private final List<HpoDiseaseSummary> diseases;
     private final List<Overlap> overlaps;
 
-    public DefaultSvPriority(SvImpact svImpact,
-                             Set<TranscriptModel> affectedTranscripts,
-                             Set<GeneWithId> affectedGeneIds,
-                             List<Enhancer> affectedEnhancers,
-                             List<Overlap> olaps) {
+    DefaultSvPriority(SvImpact svImpact,
+                      Set<TranscriptModel> affectedTranscripts,
+                      Set<GeneWithId> affectedGeneIds,
+                      List<Enhancer> affectedEnhancers,
+                      List<Overlap> olaps) {
         this.rearrangement = null;
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
@@ -39,13 +39,13 @@ class DefaultSvPriority implements SvPriority {
     }
 
     @Deprecated
-    public DefaultSvPriority(SequenceRearrangement rearrangement,
-                             SvType svType,
-                             SvImpact svImpact,
-                             Set<TranscriptModel> affectedTranscripts,
-                             Set<GeneWithId> affectedGeneIds,
-                             List<Enhancer> affectedEnhancers,
-                             List<Overlap> olaps) {
+    DefaultSvPriority(SequenceRearrangement rearrangement,
+                      SvType svType,
+                      SvImpact svImpact,
+                      Set<TranscriptModel> affectedTranscripts,
+                      Set<GeneWithId> affectedGeneIds,
+                      List<Enhancer> affectedEnhancers,
+                      List<Overlap> olaps) {
         this.rearrangement = rearrangement;
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
@@ -56,8 +56,8 @@ class DefaultSvPriority implements SvPriority {
     }
 
     @Deprecated
-    public DefaultSvPriority(SvPriority svprio,
-                             List<HpoDiseaseSummary> diseaseList) {
+    DefaultSvPriority(SvPriority svprio,
+                      List<HpoDiseaseSummary> diseaseList) {
         this.rearrangement = svprio.getRearrangement();
         if (diseaseList.isEmpty()) {
             switch (svprio.getImpact()) {

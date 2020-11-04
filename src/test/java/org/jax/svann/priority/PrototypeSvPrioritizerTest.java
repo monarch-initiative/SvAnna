@@ -7,10 +7,13 @@ import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
-import org.jax.svann.parse.TestVariants;
+import org.jax.svann.parse.TestVariants.Deletions;
+import org.jax.svann.parse.TestVariants.Insertions;
+import org.jax.svann.parse.TestVariants.Inversions;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAnnotation;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
@@ -25,28 +28,35 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * Let's assume we're running prioritization for a patient with a causal SV in SURF1 gene. Variants in SURF1 lead to
- * Leigh syndrome (OMIM:256000)- a progressive neurological disease defined by specific neuropathological features
- * associating brainstem and basal ganglia lesions.
+ * Let's assume we're running prioritization for a patient with a causal SV in <em>GCK</em> gene. Variants in GCK lead to
+ * Maturity Onset Diabetes of the Young type 2 (MODY2, OMIM:125851) which is a form of NIDDM (OMIM:125853) characterized
+ * by monogenic autosomal dominant transmission and early age of onset.
  * <p>
- * Thus, the patient might have terms such as HP:0002490 (Increased CSF lactate), and HP:0001290 (Generalized hypotonia).
+ * Thus, the patient might have terms such as HP:0003074 (Hyperglycemia), and HP:0001508 (Failure to thrive).
  */
 public class PrototypeSvPrioritizerTest extends TestBase {
 
     /**
-     * Assuming the patient has variant in SURF1, increased CSV lactate and generalized hypotonia, these are the
+     * Assuming the patient has variant in GCK, hyperglycemia and failure to thrive, these are the
      * sensible relevant enhancer top level terms.
      */
     private static final Set<TermId> RELEVANT_ENHANCER_TOP_LEVEL_TERMS = Set.of(
-            TermId.of("HP:0000707"), // Abnormality of the nervous system, based on increased CSF lactate
-            TermId.of("HP:0001507") // Abnormality of the musculoskeletal system, based on hypotonia
+            TermId.of("HP:0001507"), // Growth abnormality, based on failure to thrive
+            TermId.of("HP:0001939") // Abnormality of metabolism/homeostasis, based on hyperglycemia
     );
 
 
     private static final Map<TermId, Set<HpoDiseaseSummary>> DISEASE_MAP = makeDiseaseSummaryMap();
     private static final Map<Integer, IntervalArray<Enhancer>> ENHANCER_MAP = makeEnhancerMap();
-    private static final Map<String, GeneWithId> GENE_SYMBOL_MAP = Map.of();
-    private static final Set<TermId> PATIENT_TERMS = Set.of(TermId.of("HP:0002490"), TermId.of("HP:0001290"));
+    private static final Map<String, GeneWithId> GENE_SYMBOL_MAP = Map.of(
+            "GCK", new GeneWithId("GCK", TermId.of("ENTREZ:2645")),
+            "SURF1", new GeneWithId("SURF1", TermId.of("ENTREZ:6834")),
+            "SURF2", new GeneWithId("SURF2", TermId.of("ENTREZ:6835")));
+
+    private static final Set<TermId> PATIENT_TERMS = Set.of(
+            TermId.of("HP:0003074"), // hyperglycemia
+            TermId.of("HP:0001508")  // failure to thrive
+    );
 
     private PrototypeSvPrioritizer prioritizer;
 
@@ -68,72 +78,204 @@ public class PrototypeSvPrioritizerTest extends TestBase {
 
         Enhancer surf1Enhancer = new Enhancer(chr9, 133_356_501, 133_356_530, .8, TermId.of("HP:0001939"));
         Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"));
+        Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707")); // abnormality of the nervous system
 
-        IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer), new EnhancerEndExtractor());
+        IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());
         return Map.of(7, chr7Array, 9, chr9Array);
     }
 
     private static Map<TermId, Set<HpoDiseaseSummary>> makeDiseaseSummaryMap() {
-        HpoDiseaseSummary leighSyndrome = new HpoDiseaseSummary(
-                new HpoDisease("Leigh syndrome",
-                        TermId.of("OMIM:256000"),
-                        List.of(HpoAnnotation.builder(TermId.of("HP:0001290")) // generalized hypotonia
+        HpoDiseaseSummary mody2 = new HpoDiseaseSummary(
+                new HpoDisease("Maturity onset diabetes of the young, type 2; MODY2",
+                        TermId.of("OMIM:125851"),
+                        List.of(HpoAnnotation.builder(TermId.of("HP:0003074")) // hyperglycemia
                                         .frequency(1., "Obligate")
                                         .onset(HpoOnset.INFANTILE_ONSET)
                                         .build(),
-                                HpoAnnotation.builder(TermId.of("HP:0002490")) // Increased CSF lactate
+                                HpoAnnotation.builder(TermId.of("HP:0001508")) // Failure to thrive
                                         .frequency(.9, "Very frequent")
                                         .onset(HpoOnset.CONGENITAL_ONSET)
                                         .build()),
-                        List.of(
-                                TermId.of("HP:0000007"), // Autosomal recessive inheritance
-                                TermId.of("HP:0001417") // X-linked inheritance
-                        ),
+                        List.of(TermId.of("HP:0000006")), // Autosomal dominant inheritance
                         List.of(), // not terms
                         List.of(), // clinical modifiers
                         List.of() // clinical courses
                 ));
 
-        return Map.of(TermId.of("ENTREZ:6834"), Set.of(leighSyndrome));
+        return Map.of(TermId.of("ENTREZ:2645"), Set.of(mody2));
     }
 
     @BeforeEach
     public void setUp() {
         Overlapper overlapper = new Overlapper(JANNOVAR_DATA);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(JANNOVAR_DATA, ENHANCER_MAP);
-        prioritizer = new PrototypeSvPrioritizer(GENE_SYMBOL_MAP, overlapper, enhancerOverlapper, PATIENT_TERMS, RELEVANT_ENHANCER_TOP_LEVEL_TERMS);
+        prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, GENE_SYMBOL_MAP, PATIENT_TERMS, RELEVANT_ENHANCER_TOP_LEVEL_TERMS, DISEASE_MAP);
     }
 
+    /* *****************************************************************************************************************
+     *
+     *                                          DELETIONS
+     *
+     ******************************************************************************************************************/
+
+    /**
+     * Deletion of a single exon is HIGH impact.
+     */
     @Test
     public void prioritize_singleExonDeletion_SURF1_exon2() {
-        SequenceRearrangement sr = TestVariants.singleExonDeletion_SURF1_exon2();
+        SequenceRearrangement sr = Deletions.surf1SingleExon_exon2();
         SvPriority result = prioritizer.prioritize(sr);
         assertThat(result.getImpact(), is(SvImpact.HIGH));
     }
 
+    /**
+     * Deletion of 2 exons is HIGH impact.
+     */
     @Test
     public void prioritize_twoExonDeletion_SURF1_exons_6_and_7() {
-        SequenceRearrangement sr = TestVariants.twoExonDeletion_SURF1_exons_6_and_7();
+        SequenceRearrangement sr = Deletions.surf1TwoExon_exons_6_and_7();
         SvPriority result = prioritizer.prioritize(sr);
 
-        System.err.println(result);
         assertThat(result.getImpact(), is(SvImpact.HIGH));
     }
 
+    /**
+     * Deletion affecting a relevant enhancer is HIGH impact.
+     */
     @Test
     public void prioritize_upstreamDeletion_GCK_inEnhancer() {
-        SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_affectingEnhancer();
+        SequenceRearrangement sr = Deletions.gckUpstreamIntergenic_affectingEnhancer();
         SvPriority result = prioritizer.prioritize(sr);
 
-        System.err.println(result);
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+    }
+
+    /**
+     * Deletion affecting region <2kb from gene is HIGH impact.
+     */
+    @Test
+    public void prioritize_upstreamDeletion_GCK_notInEnhancer() {
+        SequenceRearrangement sr = Deletions.gckUpstreamIntergenic_NotAffectingEnhancer();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+    }
+
+    /**
+     * Deletion affecting phenotypically non-relevant enhancer is INTERMEDIATE impact.
+     */
+    @Test
+    public void prioritize_upstreamDeletion_GCK_inNonrelevantEnhancer() {
+        SequenceRearrangement sr = Deletions.gckUpstreamIntergenic_affectingPhenotypicallyNonrelevantEnhancer();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
     }
 
     @Test
-    public void prioritize_upstreamDeletion_GCK_notInEnhancer() {
-        SequenceRearrangement sr = TestVariants.deletionGCKUpstreamIntergenic_NotAffectingEnhancer();
+    public void prioritize_deletionAffectingMultipleGenes() {
+        SequenceRearrangement sr = Deletions.surf1Surf2oneEntireTranscriptAndPartOfAnother();
         SvPriority result = prioritizer.prioritize(sr);
 
-        System.err.println(result);
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+    }
+
+    /* *****************************************************************************************************************
+     *
+     *                                          INSERTIONS
+     *
+     ******************************************************************************************************************/
+
+    /**
+     * Insertion into exonic sequence is HIGH.
+     */
+    @Test
+    public void insertionInExonicRegion() {
+        SequenceRearrangement sr = Insertions.surf2Exon4();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+    }
+
+    /**
+     * Insertion deep in intron (>100) is LOW impact
+     */
+    @Test
+    public void insertionInIntronRegion() {
+        SequenceRearrangement sr = Insertions.surf2Intron3();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        //
+        assertThat(result.getImpact(), is(SvImpact.LOW));
+    }
+
+    /**
+     * Insertion in 5UTR or 3UTR is INTERMEDIATE
+     */
+    @Test
+    public void insertionInUtr() {
+        // 5UTR
+        SequenceRearrangement sr = Insertions.surf2InsertionIn5UTR();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
+
+        // 3UTR
+        sr = Insertions.surf1InsertionIn3UTR();
+        result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
+    }
+
+    /**
+     * Insertion in phenotypically relevant enhancer is HIGH.
+     */
+    @Test
+    public void insertionInRelevantEnhancer() {
+        SequenceRearrangement sr = Insertions.gckRelevantEnhancer();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+    }
+
+    /**
+     * Insertion in phenotypically non relevant enhancer is INTERMEDIATE.
+     */
+    @Test
+    public void insertionInNonrelevantEnhancer() {
+        SequenceRearrangement sr = Insertions.gckNonRelevantEnhancer();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
+    }
+
+    /**
+     * Insertion in intergenic region is LOW impact.
+     */
+    @Test
+    public void insertionInIntergenicRegion() {
+        SequenceRearrangement sr = Insertions.gckIntergenic();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.LOW));
+    }
+
+    /* *****************************************************************************************************************
+     *
+     *                                          INVERSIONS
+     *
+     ******************************************************************************************************************/
+
+    /**
+     * Inversion where both ends are within the same intron is LOW impact.
+     */
+    @Test
+    @Disabled
+    public void inversionWhereBothBreakendsAreWithinTheSameIntron() {
+        SequenceRearrangement sr = Inversions.gckIntronic();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.LOW));
     }
 }

@@ -4,7 +4,7 @@ import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.TestBase;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
-import org.jax.svann.parse.TestVariants;
+import org.jax.svann.parse.TestVariants.Deletions;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class HtmlVisualizerTest extends TestBase {
 
-    private static final SequenceRearrangement surf1Exon3Deletion = TestVariants.singleExonDeletion_SURF2_exon3();
+    private static final SequenceRearrangement surf1Exon3Deletion = Deletions.surf2singleExon_exon3();
     private static final Map<String, TranscriptModel> transcriptmap = JANNOVAR_DATA.getTmByAccession();
     private static final TranscriptModel fbn1 = transcriptmap.get("NM_000138.4");
     private static final Set<TranscriptModel> affectedTranscripts = Set.of(fbn1);

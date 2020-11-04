@@ -1,6 +1,6 @@
 package org.jax.svann.reference;
 
-public interface Breakend extends ChromosomalRegion {
+public interface Breakend extends ChromosomalRegion, GenomicPosition {
 
     /**
      * @return id corresponding to id of the record (e.g. VCF) this breakend was created from

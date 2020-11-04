@@ -1,6 +1,6 @@
 package org.jax.svann.parse;
 
-import org.jax.svann.reference.ChromosomalRegion;
+import org.jax.svann.reference.CoordinateSystem;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.SvType;
@@ -107,17 +107,29 @@ public class BreakendAssembler {
 
         // 2 - make positions
         // Note, the position coordinates are always specified on FWD strand.
-        ChromosomalRegion leftPos = left.getPosition().withStrand(leftStrand);
+        ChromosomalPosition leftPos = left.getPosition().withStrand(leftStrand);
         String leftRef = leftStrand.isForward()
                 ? left.getRef()
                 : Utils.reverseComplement(left.getRef());
-        SimpleBreakend leftBreakend = SimpleBreakend.of(leftPos, left.getId(), leftRef);
+        SimpleBreakend leftBreakend = SimpleBreakend.imprecise(leftPos.getContig(),
+                leftPos.getPosition(),
+                leftPos.getCi(),
+                leftStrand,
+                CoordinateSystem.ONE_BASED,
+                left.getId(),
+                leftRef);
 
-        ChromosomalRegion rightPos = right.getPosition().withStrand(rightStrand);
+        ChromosomalPosition rightPos = right.getPosition().withStrand(rightStrand);
         String rightRef = rightStrand.isForward()
                 ? right.getRef()
                 : Utils.reverseComplement(right.getRef());
-        SimpleBreakend rightBreakend = SimpleBreakend.of(rightPos, right.getId(), rightRef);
+        SimpleBreakend rightBreakend = SimpleBreakend.imprecise(rightPos.getContig(),
+                rightPos.getPosition(),
+                rightPos.getCi(),
+                rightStrand,
+                CoordinateSystem.ONE_BASED,
+                right.getId(),
+                rightRef);
 
         // 3 - figure out SvType and the inserted sequence (if any)
         /*
@@ -137,10 +149,10 @@ public class BreakendAssembler {
                 LOGGER.warn("Unexpected breakend coordinates on different strands: {}, {}", left, right);
                 return Optional.empty();
             }
-            if (leftPos.getBegin() < rightPos.getBegin()) {
+            if (leftPos.getPosition() < rightPos.getPosition()) {
                 // left is upstream from right -> DELETION
                 type = SvType.DELETION;
-            } else if (leftPos.getBegin() > rightPos.getBegin()) {
+            } else if (leftPos.getPosition() > rightPos.getPosition()) {
                 // left is downstream from right ->  DUPLICATION
                 type = SvType.DUPLICATION;
             } else {

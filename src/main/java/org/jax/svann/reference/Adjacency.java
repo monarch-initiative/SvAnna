@@ -3,11 +3,23 @@ package org.jax.svann.reference;
 /**
  * Adjacency ties together two breakends, as described in VCF specs.
  */
-public interface Adjacency {
+public interface Adjacency extends CoordinatePair {
 
+    @Deprecated
     Breakend getLeft();
 
+    @Override
+    default Breakend getStart() {
+        return getLeft();
+    }
+
+    @Deprecated
     Breakend getRight();
+
+    @Override
+    default Breakend getEnd() {
+        return getRight();
+    }
 
     byte[] getInserted();
 

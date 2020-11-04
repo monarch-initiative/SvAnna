@@ -6,6 +6,7 @@ import java.util.Objects;
 /**
  * Position with a confidence level expressed using a {@link ConfidenceInterval}.
  */
+@Deprecated
 public class Position implements Comparable<Position> {
 
     private static final Comparator<Position> COMPARATOR = Comparator.comparing(Position::getPos)

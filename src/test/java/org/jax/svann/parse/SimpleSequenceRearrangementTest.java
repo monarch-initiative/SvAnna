@@ -24,12 +24,12 @@ public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
         // this contig has 30 bp
         Contig CONTIG = TOY_ASSEMBLY.getContigByName("ctg1").get();
 
-        Breakend alphaLeft = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 10, Strand.FWD), "alphaLeft");
-        Breakend alphaRight = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 12, Strand.REV), "alphaRight");
+        Breakend alphaLeft = SimpleBreakend.preciseWithNoRef(CONTIG, 10, Strand.FWD, "alphaLeft");
+        Breakend alphaRight = SimpleBreakend.preciseWithNoRef(CONTIG, 12, Strand.REV, "alphaRight");
         Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-        Breakend betaLeft = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 20, Strand.REV), "betaLeft");
-        Breakend betaRight = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 20, Strand.FWD), "betaRight");
+        Breakend betaLeft = SimpleBreakend.preciseWithNoRef(CONTIG, 20, Strand.REV, "betaLeft");
+        Breakend betaRight = SimpleBreakend.preciseWithNoRef(CONTIG, 20, Strand.FWD, "betaRight");
         Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
         instance = SimpleSequenceRearrangement.of(SvType.INVERSION, alpha, beta);
@@ -59,24 +59,24 @@ public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
         Adjacency alpha = adjacencies.get(0);
         assertThat(alpha.getStrand(), is(Strand.REV));
 
-        Breakend alphaLeft = alpha.getLeft();
-        assertThat(alphaLeft.getBegin(), is(11));
+        Breakend alphaLeft = alpha.getStart();
+        assertThat(alphaLeft.getPosition(), is(11));
         assertThat(alphaLeft.getStrand(), is(Strand.REV));
         assertThat(alphaLeft.getId(), is("betaRight"));
 
-        Breakend alphaRight = alpha.getRight();
-        assertThat(alphaRight.getBegin(), is(11));
+        Breakend alphaRight = alpha.getEnd();
+        assertThat(alphaRight.getPosition(), is(11));
         assertThat(alphaRight.getStrand(), is(Strand.FWD));
         assertThat(alphaRight.getId(), is("betaLeft"));
 
         Adjacency beta = adjacencies.get(1);
-        Breakend betaLeft = beta.getLeft();
-        assertThat(betaLeft.getBegin(), is(19));
+        Breakend betaLeft = beta.getStart();
+        assertThat(betaLeft.getPosition(), is(19));
         assertThat(betaLeft.getStrand(), is(Strand.FWD));
         assertThat(betaLeft.getId(), is("alphaRight"));
 
-        Breakend betaRight = beta.getRight();
-        assertThat(betaRight.getBegin(), is(21));
+        Breakend betaRight = beta.getEnd();
+        assertThat(betaRight.getPosition(), is(21));
         assertThat(betaRight.getStrand(), is(Strand.REV));
         assertThat(betaRight.getId(), is("alphaLeft"));
     }

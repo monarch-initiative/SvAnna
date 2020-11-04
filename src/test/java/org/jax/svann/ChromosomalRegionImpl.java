@@ -8,6 +8,7 @@ import org.jax.svann.reference.genome.Contig;
 /**
  * {@link ChromosomalRegion} implementation for testing.
  */
+@Deprecated
 public class ChromosomalRegionImpl implements ChromosomalRegion {
 
     private final Contig contig;
@@ -38,7 +39,7 @@ public class ChromosomalRegionImpl implements ChromosomalRegion {
         return end;
     }
 
-    @Override
+    //    @Override
     public Strand getStrand() {
         return strand;
     }

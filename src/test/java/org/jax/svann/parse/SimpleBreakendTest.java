@@ -9,7 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 
 public class SimpleBreakendTest extends ToyCoordinateTestBase {
 
@@ -25,7 +26,7 @@ public class SimpleBreakendTest extends ToyCoordinateTestBase {
 
     @BeforeEach
     public void setUp() {
-        instance = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 5, Strand.FWD), "Johnny");
+        instance = SimpleBreakend.preciseWithNoRef(CONTIG, 5, Strand.FWD, "Johnny");
     }
 
     @Test
@@ -35,7 +36,7 @@ public class SimpleBreakendTest extends ToyCoordinateTestBase {
 
         breakend = instance.withStrand(Strand.REV);
         assertThat(breakend.getId(), is("Johnny"));
-        assertThat(breakend.getBegin(), is(16));
+        assertThat(breakend.getPosition(), is(16));
         assertThat(breakend.getStrand(), is(Strand.REV));
     }
 

@@ -64,14 +64,14 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
 
         Adjacency adjacency = adjacencyOpt.get();
 
-        Breakend left = adjacency.getLeft();
+        Breakend left = adjacency.getStart();
         assertThat(left.getId(), is("DEL0"));
-        assertThat(left.getBeginPosition(), is(Position.precise(10)));
+        assertThat(left.getPosition(), is(10));
         assertThat(left.getStrand(), is(Strand.FWD));
 
-        Breakend right = adjacency.getRight();
+        Breakend right = adjacency.getEnd();
         assertThat(right.getId(), is("DEL0"));
-        assertThat(right.getBeginPosition(), is(Position.precise(21)));
+        assertThat(right.getPosition(), is(21));
         assertThat(right.getStrand(), is(Strand.FWD));
     }
 
@@ -85,14 +85,16 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
 
         Adjacency adjacency = adjacencyOpt.get();
 
-        Breakend left = adjacency.getLeft();
+        Breakend left = adjacency.getStart();
         assertThat(left.getId(), is("DUP0"));
-        assertThat(left.getBeginPosition(), is(Position.imprecise(19, -1, 1, CoordinateSystem.ONE_BASED)));
+        assertThat(left.getPosition(), is(19));
+        assertThat(left.getCi(), is(ConfidenceInterval.of(-1, 1)));
         assertThat(left.getStrand(), is(Strand.FWD));
 
-        Breakend right = adjacency.getRight();
+        Breakend right = adjacency.getEnd();
         assertThat(right.getId(), is("DUP0"));
-        assertThat(right.getBeginPosition(), is(Position.imprecise(11, -2, 2, CoordinateSystem.ONE_BASED)));
+        assertThat(right.getPosition(), is(11));
+        assertThat(right.getCi(), is(ConfidenceInterval.of(-2, 2)));
         assertThat(right.getStrand(), is(Strand.FWD));
     }
 
@@ -107,24 +109,24 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
         Adjacency alpha = adjacencies.get(0);
         Adjacency beta = adjacencies.get(1);
 
-        Breakend alphaLeft = alpha.getLeft();
+        Breakend alphaLeft = alpha.getStart();
         assertThat(alphaLeft.getId(), is("INS0"));
-        assertThat(alphaLeft.getBeginPosition(), is(Position.precise(15)));
+        assertThat(alphaLeft.getPosition(), is(15));
         assertThat(alphaLeft.getStrand(), is(Strand.FWD));
 
-        Breakend alphaRight = alpha.getRight();
+        Breakend alphaRight = alpha.getEnd();
         assertThat(alphaRight.getId(), is("INS0"));
-        assertThat(alphaRight.getBeginPosition(), is(Position.precise(1)));
+        assertThat(alphaRight.getPosition(), is(1));
         assertThat(alphaRight.getStrand(), is(Strand.FWD));
 
-        Breakend betaLeft = beta.getLeft();
+        Breakend betaLeft = beta.getStart();
         assertThat(betaLeft.getId(), is("INS0"));
-        assertThat(betaLeft.getBeginPosition(), is(Position.precise(10)));
+        assertThat(betaLeft.getPosition(), is(10));
         assertThat(betaLeft.getStrand(), is(Strand.FWD));
 
-        Breakend betaRight = beta.getRight();
+        Breakend betaRight = beta.getEnd();
         assertThat(betaRight.getId(), is("INS0"));
-        assertThat(betaRight.getBeginPosition(), is(Position.precise(16)));
+        assertThat(betaRight.getPosition(), is(16));
         assertThat(betaRight.getStrand(), is(Strand.FWD));
     }
 
@@ -139,24 +141,24 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
         Adjacency alpha = adjacencies.get(0);
         Adjacency beta = adjacencies.get(1);
 
-        Breakend alphaLeft = alpha.getLeft();
+        Breakend alphaLeft = alpha.getStart();
         assertThat(alphaLeft.getId(), is("INV0"));
-        assertThat(alphaLeft.getBeginPosition(), is(Position.precise(10)));
+        assertThat(alphaLeft.getPosition(), is(10));
         assertThat(alphaLeft.getStrand(), is(Strand.FWD));
 
-        Breakend alphaRight = alpha.getRight();
+        Breakend alphaRight = alpha.getEnd();
         assertThat(alphaRight.getId(), is("INV0"));
-        assertThat(alphaRight.getBeginPosition(), is(Position.precise(12)));
+        assertThat(alphaRight.getPosition(), is(12));
         assertThat(alphaRight.getStrand(), is(Strand.REV));
 
-        Breakend betaLeft = beta.getLeft();
+        Breakend betaLeft = beta.getStart();
         assertThat(betaLeft.getId(), is("INV0"));
-        assertThat(betaLeft.getBeginPosition(), is(Position.precise(20)));
+        assertThat(betaLeft.getPosition(), is(20));
         assertThat(betaLeft.getStrand(), is(Strand.REV));
 
-        Breakend betaRight = beta.getRight();
+        Breakend betaRight = beta.getEnd();
         assertThat(betaRight.getId(), is("INV0"));
-        assertThat(betaRight.getBeginPosition(), is(Position.precise(20)));
+        assertThat(betaRight.getPosition(), is(20));
         assertThat(betaRight.getStrand(), is(Strand.FWD));
     }
 }

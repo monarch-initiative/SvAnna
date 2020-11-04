@@ -18,13 +18,9 @@ public class TestVariants extends TestBase {
      */
     public static SequenceRearrangement translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
         Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-        SimpleBreakend left = SimpleBreakend.of(
-                ChromosomalPosition.of(chr9, Position.precise(133_359_000), Strand.FWD),
-                "tra_l", "G");
+        SimpleBreakend left = SimpleBreakend.precise(chr9, 133_359_000, Strand.FWD, "tra_l", "G");
         Contig chr13 = GENOME_ASSEMBLY.getContigByName("13").get();
-        SimpleBreakend right = SimpleBreakend.of(
-                ChromosomalPosition.of(chr13, Position.precise(32_300_000), Strand.FWD),
-                "tra_r", "A");
+        SimpleBreakend right = SimpleBreakend.precise(chr13, 32_300_000, Strand.FWD, "tra_r", "A");
 
         return SimpleSequenceRearrangement.of(SvType.TRANSLOCATION, SimpleAdjacency.empty(left, right));
     }
@@ -38,12 +34,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement gckUpstreamIntergenic_affectingEnhancer() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_189_901), Strand.FWD),
-                    "gck_del_upstream_intergenic_enhancer_l", "G");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_190_100), Strand.FWD),
-                    "gck_del_upstream_intergenic_enhancer_r", "G");
+            SimpleBreakend left = SimpleBreakend.precise(chr7, 44_189_901, Strand.FWD, "gck_del_upstream_intergenic_enhancer_l", "G");
+            SimpleBreakend right = SimpleBreakend.precise(chr7, 44_190_100, Strand.FWD, "gck_del_upstream_intergenic_enhancer_r", "G");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -57,12 +49,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement gckUpstreamIntergenic_NotAffectingEnhancer() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_191_001), Strand.FWD),
-                    "gck_del_upstream_intergenic_l", "t");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_192_000), Strand.FWD),
-                    "gck_del_upstream_intergenic_r", "t");
+            SimpleBreakend left = SimpleBreakend.precise(chr7, 44_191_001, Strand.FWD, "gck_del_upstream_intergenic_l", "t");
+            SimpleBreakend right = SimpleBreakend.precise(chr7, 44_192_000, Strand.FWD, "gck_del_upstream_intergenic_r", "t");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -75,12 +63,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement gckUpstreamIntergenic_affectingPhenotypicallyNonrelevantEnhancer() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_194_501), Strand.FWD),
-                    "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_l", "t");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_195_500), Strand.FWD),
-                    "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_r", "t");
+            SimpleBreakend left = SimpleBreakend.precise(chr7, 44_194_501, Strand.FWD, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_l", "t");
+            SimpleBreakend right = SimpleBreakend.precise(chr7, 44_195_500, Strand.FWD, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_r", "t");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -92,12 +76,8 @@ public class TestVariants extends TestBase {
          * chr9:133_357_501-133_358_000
          */
         public static SequenceRearrangement surf2singleExon_exon3() {
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(GENOME_ASSEMBLY.getContigByName("9").get(), Position.precise(133_357_501), Strand.FWD),
-                    "left_single_exon_del", "C");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(GENOME_ASSEMBLY.getContigByName("9").get(), Position.precise(133_358_000), Strand.FWD),
-                    "right_single_exon_del", "A");
+            SimpleBreakend left = SimpleBreakend.precise(GENOME_ASSEMBLY.getContigByName("9").get(), 133_357_501, Strand.FWD, "left_single_exon_del", "C");
+            SimpleBreakend right = SimpleBreakend.precise(GENOME_ASSEMBLY.getContigByName("9").get(), 133_358_000, Strand.FWD, "right_single_exon_del", "A");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -111,12 +91,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1TwoExon_exons_6_and_7() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_352_301), Strand.FWD),
-                    "two_exon_del_l", "T");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_352_900), Strand.FWD),
-                    "two_exon_del_r", "C");
+            SimpleBreakend left = SimpleBreakend.precise(chr9, 133_352_301, Strand.FWD, "two_exon_del_l", "T");
+            SimpleBreakend right = SimpleBreakend.precise(chr9, 133_352_900, Strand.FWD, "two_exon_del_r", "C");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -129,12 +105,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1SingleExon_exon2() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_356_251), Strand.FWD),
-                    "surf1_exon2_del_l", "C");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_356_350), Strand.FWD),
-                    "surf1_exon2_del_r", "C");
+            SimpleBreakend left = SimpleBreakend.precise(chr9, 133_356_251, Strand.FWD, "surf1_exon2_del_l", "C");
+            SimpleBreakend right = SimpleBreakend.precise(chr9, 133_356_350, Strand.FWD, "surf1_exon2_del_r", "C");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -147,12 +119,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1Surf2oneEntireTranscriptAndPartOfAnother() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_350_001), Strand.FWD),
-                    "entire_tx_del_l", "G");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_358_000), Strand.FWD),
-                    "entire_tx_del_r", "A");
+            SimpleBreakend left = SimpleBreakend.precise(chr9, 133_350_001, Strand.FWD, "entire_tx_del_l", "G");
+            SimpleBreakend right = SimpleBreakend.precise(chr9, 133_358_000, Strand.FWD, "entire_tx_del_r", "A");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -166,12 +134,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf2WithinAnIntron() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_359_001), Strand.FWD),
-                    "del_within_intron_l", "C");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_359_700), Strand.FWD),
-                    "del_within_intron_r", "G");
+            SimpleBreakend left = SimpleBreakend.precise(chr9, 133_359_001, Strand.FWD, "del_within_intron_l", "C");
+            SimpleBreakend right = SimpleBreakend.precise(chr9, 133_359_700, Strand.FWD, "del_within_intron_r", "G");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -184,12 +148,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf2In5UTR() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_356_561), Strand.FWD),
-                    "del_in_5utr_l", "T");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_356_580), Strand.FWD),
-                    "del_in_5utr_r", "G");
+            SimpleBreakend left = SimpleBreakend.precise(chr9, 133_356_561, Strand.FWD, "del_in_5utr_l", "T");
+            SimpleBreakend right = SimpleBreakend.precise(chr9, 133_356_580, Strand.FWD, "del_in_5utr_r", "G");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -202,12 +162,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1In3UTR() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_351_801), Strand.FWD),
-                    "del_in_3utr_l", "G");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_351_900), Strand.FWD),
-                    "del_in_3utr_r", "A");
+            SimpleBreakend left = SimpleBreakend.precise(chr9, 133_351_801, Strand.FWD, "del_in_3utr_l", "G");
+            SimpleBreakend right = SimpleBreakend.precise(chr9, 133_351_900, Strand.FWD, "del_in_3utr_r", "A");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -220,12 +176,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1DownstreamIntergenic() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_300_001), Strand.FWD),
-                    "del_downstream_intergenic_l", "t");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_310_000), Strand.FWD),
-                    "del_downstream_intergenic_l", "C");
+            SimpleBreakend left = SimpleBreakend.precise(chr9, 133_300_001, Strand.FWD, "del_downstream_intergenic_l", "t");
+            SimpleBreakend right = SimpleBreakend.precise(chr9, 133_310_000, Strand.FWD, "del_downstream_intergenic_l", "C");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -239,12 +191,8 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement brca2UpstreamIntergenic() {
             Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").get();
-            SimpleBreakend left = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr15, Position.precise(48_655_000), Strand.FWD),
-                    "del_upstream_intergenic_l", "T");
-            SimpleBreakend right = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr15, Position.precise(48_665_000), Strand.FWD),
-                    "del_upstream_intergenic_r", "G");
+            SimpleBreakend left = SimpleBreakend.precise(chr15, 48_655_000, Strand.FWD, "del_upstream_intergenic_l", "T");
+            SimpleBreakend right = SimpleBreakend.precise(chr15, 48_665_000, Strand.FWD, "del_upstream_intergenic_r", "G");
 
             return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         }
@@ -260,20 +208,12 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf2InsertionIn5UTR() {
             Contig contig = new InsertionContig("ins5UTR", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend alphaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_356_571), Strand.FWD),
-                    "a_ins_5utr_l", "C");
-            SimpleBreakend alphaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(1), Strand.FWD),
-                    "a_ins_5utr_r", "");
+            SimpleBreakend alphaLeft = SimpleBreakend.precise(chr9, 133_356_571, Strand.FWD, "a_ins_5utr_l", "C");
+            SimpleBreakend alphaRight = SimpleBreakend.precise(contig, 1, Strand.FWD, "a_ins_5utr_r", "");
             SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(10), Strand.FWD),
-                    "b_ins_5utr_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_356_572), Strand.FWD),
-                    "b_ins_5utr_r", "T");
+            SimpleBreakend betaLeft = SimpleBreakend.precise(contig, 10, Strand.FWD, "b_ins_5utr_l", "");
+            SimpleBreakend betaRight = SimpleBreakend.precise(chr9, 133_356_572, Strand.FWD, "b_ins_5utr_r", "T");
             SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
@@ -288,20 +228,12 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf1InsertionIn3UTR() {
             Contig contig = new InsertionContig("ins3UTR", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend alphaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_351_851), Strand.FWD),
-                    "a_ins_3utr_l", "C");
-            SimpleBreakend alphaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(1), Strand.FWD),
-                    "a_ins_3utr_r", "");
+            SimpleBreakend alphaLeft = SimpleBreakend.precise(chr9, 133_351_851, Strand.FWD, "a_ins_3utr_l", "C");
+            SimpleBreakend alphaRight = SimpleBreakend.precise(contig, 1, Strand.FWD, "a_ins_3utr_r", "");
             SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(10), Strand.FWD),
-                    "b_ins_3utr_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_351_852), Strand.FWD),
-                    "b_ins_3utr_r", "A");
+            SimpleBreakend betaLeft = SimpleBreakend.precise(contig, 10, Strand.FWD, "b_ins_3utr_l", "");
+            SimpleBreakend betaRight = SimpleBreakend.precise(chr9, 133_351_852, Strand.FWD, "b_ins_3utr_r", "A");
             SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
@@ -316,20 +248,14 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf2Exon4() {
             Contig contig = new InsertionContig("insInExon4", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend alphaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_360_001), Strand.FWD),
+            SimpleBreakend alphaLeft = SimpleBreakend.precise(
+                    chr9, 133_360_001, Strand.FWD,
                     "a_ins_exon_l", "A");
-            SimpleBreakend alphaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(1), Strand.FWD),
-                    "a_ins_exon_r", "");
+            SimpleBreakend alphaRight = SimpleBreakend.precise(contig, 1, Strand.FWD, "a_ins_exon_r", "");
             SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(10), Strand.FWD),
-                    "b_ins_exon_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_360_002), Strand.FWD),
-                    "b_ins_exon_r", "C");
+            SimpleBreakend betaLeft = SimpleBreakend.precise(contig, 10, Strand.FWD, "b_ins_exon_l", "");
+            SimpleBreakend betaRight = SimpleBreakend.precise(chr9, 133_360_002, Strand.FWD, "b_ins_exon_r", "C");
             SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
@@ -345,20 +271,12 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf2Intron3() {
             Contig contig = new InsertionContig("insInIntron3", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").get();
-            SimpleBreakend alphaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_359_001), Strand.FWD),
-                    "a_ins_intron_l", "C");
-            SimpleBreakend alphaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(1), Strand.FWD),
-                    "a_ins_intron_r", "");
+            SimpleBreakend alphaLeft = SimpleBreakend.precise(chr9, 133_359_001, Strand.FWD, "a_ins_intron_l", "C");
+            SimpleBreakend alphaRight = SimpleBreakend.precise(contig, 1, Strand.FWD, "a_ins_intron_r", "");
             SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(10), Strand.FWD),
-                    "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr9, Position.precise(133_359_002), Strand.FWD),
-                    "b_ins_intron_r", "A");
+            SimpleBreakend betaLeft = SimpleBreakend.precise(contig, 10, Strand.FWD, "b_ins_intron_l", "");
+            SimpleBreakend betaRight = SimpleBreakend.precise(chr9, 133_359_002, Strand.FWD, "b_ins_intron_r", "A");
             SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
@@ -375,20 +293,12 @@ public class TestVariants extends TestBase {
             int inserted = 200;
             Contig contig = new InsertionContig("gckEnhancerInsertion", inserted);
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
-            SimpleBreakend alphaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_190_025), Strand.FWD),
-                    "a_ins_intron_l", "T");
-            SimpleBreakend alphaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(1), Strand.FWD),
-                    "a_ins_intron_r", "");
+            SimpleBreakend alphaLeft = SimpleBreakend.precise(chr7, 44_190_025, Strand.FWD, "a_ins_intron_l", "T");
+            SimpleBreakend alphaRight = SimpleBreakend.precise(contig, 1, Strand.FWD, "a_ins_intron_r", "");
             SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(inserted), Strand.FWD),
-                    "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_190_026), Strand.FWD),
-                    "b_ins_intron_r", "G");
+            SimpleBreakend betaLeft = SimpleBreakend.precise(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
+            SimpleBreakend betaRight = SimpleBreakend.precise(chr7, 44_190_026, Strand.FWD, "b_ins_intron_r", "G");
             SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
@@ -404,20 +314,12 @@ public class TestVariants extends TestBase {
             int inserted = 200;
             Contig contig = new InsertionContig("gckNonrelevantEnhancerInsertion", inserted);
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
-            SimpleBreakend alphaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_195_025), Strand.FWD),
-                    "a_ins_intron_l", "T");
-            SimpleBreakend alphaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(1), Strand.FWD),
-                    "a_ins_intron_r", "");
+            SimpleBreakend alphaLeft = SimpleBreakend.precise(chr7, 44_195_025, Strand.FWD, "a_ins_intron_l", "T");
+            SimpleBreakend alphaRight = SimpleBreakend.precise(contig, 1, Strand.FWD, "a_ins_intron_r", "");
             SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(inserted), Strand.FWD),
-                    "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_195_026), Strand.FWD),
-                    "b_ins_intron_r", "G");
+            SimpleBreakend betaLeft = SimpleBreakend.precise(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
+            SimpleBreakend betaRight = SimpleBreakend.precise(chr7, 44_195_026, Strand.FWD, "b_ins_intron_r", "G");
             SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
@@ -433,20 +335,12 @@ public class TestVariants extends TestBase {
             int inserted = 200;
             Contig contig = new InsertionContig("gckIntergenicInsertion", inserted);
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
-            SimpleBreakend alphaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_196_025), Strand.FWD),
-                    "a_ins_intron_l", "t");
-            SimpleBreakend alphaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(1), Strand.FWD),
-                    "a_ins_intron_r", "");
+            SimpleBreakend alphaLeft = SimpleBreakend.precise(chr7, 44_196_025, Strand.FWD, "a_ins_intron_l", "t");
+            SimpleBreakend alphaRight = SimpleBreakend.precise(contig, 1, Strand.FWD, "a_ins_intron_r", "");
             SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.of(
-                    ChromosomalPosition.of(contig, Position.precise(inserted), Strand.FWD),
-                    "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.of(
-                    ChromosomalPosition.of(chr7, Position.precise(44_196_026), Strand.FWD),
-                    "b_ins_intron_r", "c");
+            SimpleBreakend betaLeft = SimpleBreakend.precise(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
+            SimpleBreakend betaRight = SimpleBreakend.precise(chr7, 44_196_026, Strand.FWD, "b_ins_intron_r", "c");
             SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
@@ -476,12 +370,12 @@ public class TestVariants extends TestBase {
             int alphaRightPos = contig.getLength() - end + 1;
             int betaLeftPos = contig.getLength() - begin + 1;
 
-            Breakend alphaLeft = SimpleBreakend.of(ChromosomalPosition.precise(contig, begin - 1, Strand.FWD), "alphaLeft");
-            Breakend alphaRight = SimpleBreakend.of(ChromosomalPosition.precise(contig, alphaRightPos, Strand.REV), "alphaRight");
+            Breakend alphaLeft = SimpleBreakend.preciseWithNoRef(contig, begin - 1, Strand.FWD, "alphaLeft");
+            Breakend alphaRight = SimpleBreakend.preciseWithNoRef(contig, alphaRightPos, Strand.REV, "alphaRight");
             Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
-            Breakend betaLeft = SimpleBreakend.of(ChromosomalPosition.precise(contig, betaLeftPos, Strand.REV), "betaLeft");
-            Breakend betaRight = SimpleBreakend.of(ChromosomalPosition.precise(contig, end + 1, Strand.FWD), "betaRight");
+            Breakend betaLeft = SimpleBreakend.preciseWithNoRef(contig, betaLeftPos, Strand.REV, "betaLeft");
+            Breakend betaRight = SimpleBreakend.preciseWithNoRef(contig, end + 1, Strand.FWD, "betaRight");
             Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INVERSION, alpha, beta);

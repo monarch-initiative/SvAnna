@@ -1,6 +1,6 @@
 package org.jax.svann.parse;
 
-import org.jax.svann.reference.Position;
+import org.jax.svann.reference.ConfidenceInterval;
 import org.jax.svann.reference.genome.Contig;
 
 /**
@@ -9,12 +9,21 @@ import org.jax.svann.reference.genome.Contig;
 class CoreData {
 
     private final Contig contig;
-    private final Position begin, end;
+    private final int start;
+    private final int end;
+    private final ConfidenceInterval ciStart;
+    private final ConfidenceInterval ciEnd;
 
-    CoreData(Contig contig, Position begin, Position end) {
+    CoreData(Contig contig,
+             int start,
+             ConfidenceInterval ciStart,
+             int end,
+             ConfidenceInterval ciEnd) {
         this.contig = contig;
-        this.begin = begin;
+        this.start = start;
+        this.ciStart = ciStart;
         this.end = end;
+        this.ciEnd = ciEnd;
     }
 
     /**
@@ -25,17 +34,32 @@ class CoreData {
     }
 
     /**
-     * @return position (+confidence interval) associated with POS - 2nd VCF column
+     * @return position  associated with POS - 2nd VCF column
      */
-    public Position getBegin() {
-        return begin;
+    public int getStart() {
+        return start;
     }
+
+    /**
+     * @return confidence interval associated with POS - 2nd VCF column
+     */
+    public ConfidenceInterval getCiStart() {
+        return ciStart;
+    }
+
+    /**
+     * @return position associated with `END` INFO field
+     */
+    public int getEnd() {
+        return end;
+    }
+
 
     /**
      * @return position (+confidence interval) associated with `END` INFO field
      */
-    public Position getEnd() {
-        return end;
+    public ConfidenceInterval getCiEnd() {
+        return ciEnd;
     }
 
 }

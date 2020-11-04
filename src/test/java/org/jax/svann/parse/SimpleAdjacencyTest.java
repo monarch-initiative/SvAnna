@@ -31,8 +31,8 @@ public class SimpleAdjacencyTest extends ToyCoordinateTestBase {
     public static void beforeAll() {
         // contig with length 20
         Contig CONTIG = TOY_ASSEMBLY.getContigByName("ctg2").get();
-        LEFT = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 6, Strand.FWD), "LEFT");
-        RIGHT = SimpleBreakend.of(ChromosomalPosition.precise(CONTIG, 12, Strand.FWD), "RIGHT");
+        LEFT = SimpleBreakend.preciseWithNoRef(CONTIG, 6, Strand.FWD, "LEFT");
+        RIGHT = SimpleBreakend.preciseWithNoRef(CONTIG, 12, Strand.FWD, "RIGHT");
     }
 
     @BeforeEach
@@ -52,12 +52,12 @@ public class SimpleAdjacencyTest extends ToyCoordinateTestBase {
         String inserted = CHARSET.decode(ByteBuffer.wrap(adjacency.getInserted())).toString();
         assertThat(inserted, is("ACGT"));
 
-        Breakend left = adjacency.getLeft();
+        Breakend left = adjacency.getStart();
         assertThat(left.getId(), is("RIGHT"));
-        assertThat(left.getBegin(), is(9));
+        assertThat(left.getPosition(), is(9));
 
-        Breakend right = adjacency.getRight();
+        Breakend right = adjacency.getEnd();
         assertThat(right.getId(), is("LEFT"));
-        assertThat(right.getBegin(), is(15));
+        assertThat(right.getPosition(), is(15));
     }
 }

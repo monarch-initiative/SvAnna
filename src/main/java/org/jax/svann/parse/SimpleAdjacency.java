@@ -33,14 +33,25 @@ class SimpleAdjacency implements Adjacency {
         return new SimpleAdjacency(left, right, inserted);
     }
 
-
     @Override
+    @Deprecated
     public Breakend getLeft() {
         return left;
     }
 
     @Override
+    public Breakend getStart() {
+        return left;
+    }
+
+    @Override
+    @Deprecated
     public Breakend getRight() {
+        return right;
+    }
+
+    @Override
+    public Breakend getEnd() {
         return right;
     }
 

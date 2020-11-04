@@ -8,7 +8,6 @@ import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -75,14 +74,14 @@ public class TSpecParserTest {
         Optional<Contig> chr10opt = assembly.getContigByName("chr10");
         assertTrue(chr10opt.isPresent());
         Contig chr10 = chr10opt.get();
-        assertEquals(chr10, thymusEnhancer.getChromosome());
-        assertEquals(100014348, thymusEnhancer.getStart().getPos());
-        assertEquals(100014634, thymusEnhancer.getEnd().getPos());
+        assertEquals(chr10, thymusEnhancer.getContig());
+        assertEquals(100014348, thymusEnhancer.getStart().getPosition());
+        assertEquals(100014634, thymusEnhancer.getEnd().getPosition());
         assertEquals(thymusHpoId, thymusEnhancer.getTermId());
-        assertEquals(0.728857, thymusEnhancer.getTau(),EPSILON);
+        assertEquals(0.728857, thymusEnhancer.getTau(), EPSILON);
         // both the start and end are precise, i.e., the confidence interval is +/- 0
-        assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getStart().getConfidenceInterval());
-        assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getEnd().getConfidenceInterval());
+        assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getStart().getCi());
+        assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getEnd().getCi());
     }
 
     @Test

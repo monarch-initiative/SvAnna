@@ -1,11 +1,13 @@
 package org.jax.svann.genomicreg;
 
+import org.jax.svann.reference.CoordinateSystem;
 import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
+import org.jax.svann.reference.genome.Contig;
 
 import java.util.Comparator;
 import java.util.Objects;
-import org.jax.svann.reference.genome.Contig;
+
 import static java.util.Comparator.comparing;
 
 /**
@@ -16,7 +18,7 @@ public class TssPosition implements Comparable<TssPosition> {
 
     private final String geneSymbol;
     private final String transcriptId;
-    private final GenomicPosition genomicPosition;
+    private final EnhancerGenomicPosition genomicPosition;
 
     /** Be consistent with equals: use the same fields as getSigFields().*/
     private static final Comparator<TssPosition> COMPARATOR =
@@ -27,8 +29,7 @@ public class TssPosition implements Comparable<TssPosition> {
     public TssPosition(String gene, String transcript, Contig chr, Position pos, Strand strand) {
         this.geneSymbol = gene;
         this.transcriptId = transcript;
-        this.genomicPosition = new GenomicPosition(chr, pos, strand);
-
+        this.genomicPosition = new EnhancerGenomicPosition(chr, pos.getPos(), strand, CoordinateSystem.ONE_BASED);
     }
 
 
@@ -40,7 +41,7 @@ public class TssPosition implements Comparable<TssPosition> {
         return transcriptId;
     }
 
-    public GenomicPosition getGenomicPosition() {
+    public EnhancerGenomicPosition getGenomicPosition() {
         return genomicPosition;
     }
 

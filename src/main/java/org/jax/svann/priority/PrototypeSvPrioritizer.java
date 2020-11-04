@@ -239,44 +239,76 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     }
 
     /**
-     * The sequence-based inversion prioritization only checks whether the two breakends of the
-     * inversion disrupt a gene. Here, we take any inversion that disrupts any part of a transcript
-     * to be high impact (regardless of whether the CDS is disrupted).
+     * An inversion that affects a coding sequence of a gene is HIGH impact.
+     * <p>
+     * An inversion that affects intronic part only is HIGH/INTERMEDIATE/LOW impact depending on the distance to the
+     * closest exon.
+     * <p>
+     * A non-coding inversion
+     * <ul>
+     *     <li>upstream of a gene that contains any enhancer is HIGH impact</li>
+     *     <li>affecting 2kb upstream from a gene is HIGH impact</li>
+     *     <li>with no enhancer is LOW impact</li>
+     * </ul>
      *
-     * @param inversion an inversion
-     * @return Prioritization
+     * @param inversion inversion to prioritize
+     * @return prioritization result
      */
     private SvPriority prioritizeInversion(SequenceRearrangement inversion) {
-        // the following gets overlaps of just the breakends of the inversion!
-        List<Overlap> overlaps = overlapper.getOverlapList(inversion);
-        // if overlaps is not empty, then we regard this as high impact, other wise low
-        SvImpact impact = SvImpact.LOW; // default
-        OverlapType otype = OverlapType.UNKNOWN; // default
-        Set<TranscriptModel> affectedTranscripts;
-        Set<GeneWithId> geneWithIdsSet;
-        if (!overlaps.isEmpty()) {
-            Set<String> affectedGeneIds = overlaps.stream()
-                    .map(Overlap::getGeneSymbol)
-                    .collect(Collectors.toSet());
-            geneWithIdsSet = new HashSet<>();
-            for (String symbol : affectedGeneIds) {
-                if (geneSymbolMap.containsKey(symbol)) {
-                    geneWithIdsSet.add(geneSymbolMap.get(symbol));
-                }
+        // Gather information
+        List<Overlap> overlaps = overlapper.getInversionOverlapsRegionBased(inversion);
+        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(Overlap::getOverlapType));
+        if (highestImpactOverlapOpt.isEmpty()) {
+            // should never happen
+            LOGGER.error("Could not identify highest impact overlap for inversion: {}.", inversion);
+            return DefaultSvPriority.unknown();
+        }
+        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        OverlapType highestOT = highestImpactOverlap.getOverlapType();
+
+        Set<String> affectedGeneIds = overlaps.stream()
+                .map(Overlap::getGeneSymbol)
+                .collect(Collectors.toSet());
+        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
+        for (String symbol : affectedGeneIds) {
+            if (geneSymbolMap.containsKey(symbol)) {
+                geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
-            affectedTranscripts = overlaps.stream()
-                    .map(Overlap::getTranscriptModel)
-                    .collect(Collectors.toSet());
-            impact = SvImpact.HIGH;
-            otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_INVERSION;
-        } else {
-            affectedTranscripts = Set.of();
-            geneWithIdsSet = Set.of();
         }
+        Set<TranscriptModel> affectedTranscripts = overlaps.stream()
+                .map(Overlap::getTranscriptModel)
+                .collect(Collectors.toSet());
+
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(inversion);
-        if (enhancers.size() > 0) {
+
+        // Start figuring out the impact
+        SvImpact impact = highestOT.defaultSvImpact(); // default
+
+        if (highestOT.isExonic()) {
+            // (1) the inversion affects an exon
             impact = SvImpact.HIGH;
+        } else if (highestOT.isIntronic()) {
+            // (2) intronic inversion close to CDS has HIGH impact,
+            // an inversion further away is INTERMEDIATE impact
+            int distance = highestImpactOverlap.getDistance();
+            impact = distance <= 25
+                    ? SvImpact.HIGH
+                    : distance <= 100
+                    ? SvImpact.INTERMEDIATE
+                    : SvImpact.LOW;
+        } else if (highestOT.isIntergenic()) {
+            // (3) intergenic inversion, let's consider promoter and enhancers
+            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_2KB)) {
+                // promoter region
+                impact = SvImpact.HIGH;
+            } else {
+                impact = enhancers.isEmpty()
+                        ? SvImpact.LOW
+                        : SvImpact.HIGH;
+            }
         }
+
         return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 

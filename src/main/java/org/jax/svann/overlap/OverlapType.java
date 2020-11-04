@@ -76,7 +76,7 @@ public enum OverlapType {
         return intronicTypes.contains(type);
     }
 
-    private static boolean isIntergenic(OverlapType type) {
+    public static boolean isIntergenic(OverlapType type) {
         return intergenicTypes.contains(type);
     }
 

@@ -5,10 +5,7 @@ import de.charite.compbio.jannovar.data.Chromosome;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import de.charite.compbio.jannovar.reference.GenomeInterval;
-import de.charite.compbio.jannovar.reference.GenomePosition;
-import de.charite.compbio.jannovar.reference.Strand;
-import de.charite.compbio.jannovar.reference.TranscriptModel;
+import de.charite.compbio.jannovar.reference.*;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.reference.Adjacency;
 import org.jax.svann.reference.Breakend;
@@ -211,6 +208,27 @@ public class Overlapper {
             rightOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
         }
         return overlaps;
+    }
+
+    /**
+     * This method checks the content of the inverted region.
+     *
+     * @param inversion inversion
+     * @return list of transcript overlaps (can be empty)
+     */
+    public List<Overlap> getInversionOverlapsRegionBased(SequenceRearrangement inversion) {
+        if (!inversion.getType().equals(SvType.INVERSION)) {
+            return List.of();
+        }
+        SequenceRearrangement onFwd = inversion.withStrand(org.jax.svann.reference.Strand.FWD);
+        Breakend left = onFwd.getLeftmostBreakend();
+        Breakend right = onFwd.getRightmostBreakend();
+        // assume that breakends are on the same contig
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, left.getContig().getId(), left.getBegin(), right.getEnd(), PositionType.ONE_BASED);
+
+        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getBegin(), right.getBegin());
+
+        return getOverlapList(gi, qresult);
     }
 
 

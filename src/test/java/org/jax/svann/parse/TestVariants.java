@@ -464,6 +464,14 @@ public class TestVariants extends TestBase {
             return makeInversion(chr7, begin, end);
         }
 
+        public static SequenceRearrangement gckExonic() {
+            Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").get();
+            int begin = 44_153_401;
+            int end = 44_153_600;
+
+            return makeInversion(chr7, begin, end);
+        }
+
         private static SequenceRearrangement makeInversion(Contig contig, int begin, int end) {
             int alphaRightPos = contig.getLength() - end + 1;
             int betaLeftPos = contig.getLength() - begin + 1;

@@ -13,7 +13,6 @@ import org.jax.svann.parse.TestVariants.Inversions;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAnnotation;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
@@ -206,7 +205,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
         SequenceRearrangement sr = Insertions.surf2Intron3();
         SvPriority result = prioritizer.prioritize(sr);
 
-        //
+        // this fails because getting distance does not work correctly
         assertThat(result.getImpact(), is(SvImpact.LOW));
     }
 
@@ -271,11 +270,37 @@ public class PrototypeSvPrioritizerTest extends TestBase {
      * Inversion where both ends are within the same intron is LOW impact.
      */
     @Test
-    @Disabled
     public void inversionWhereBothBreakendsAreWithinTheSameIntron() {
         SequenceRearrangement sr = Inversions.gckIntronic();
         SvPriority result = prioritizer.prioritize(sr);
 
+        // this fails because getting distance does not work correctly
         assertThat(result.getImpact(), is(SvImpact.LOW));
+    }
+
+    /**
+     * Inversion that affects coding region is HIGH impact.
+     */
+    @Test
+    public void inversionAffectingCodingRegion() {
+        SequenceRearrangement sr = Inversions.gckExonic();
+        SvPriority result = prioritizer.prioritize(sr);
+
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+    }
+
+    @Test
+    public void inversionAffectingAnEnhancer() {
+        // TODO: 4. 11. 2020 implement
+    }
+
+    @Test
+    public void inversionAffectingAPromoter() {
+        // TODO: 4. 11. 2020 implement
+    }
+
+    @Test
+    public void inversionUpstream() {
+        // TODO: 4. 11. 2020 implement
     }
 }

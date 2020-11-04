@@ -1,6 +1,7 @@
 package org.jax.svann.genomicreg;
 
 import org.jax.svann.reference.CoordinateSystem;
+import org.jax.svann.reference.GenomicPosition;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
@@ -8,9 +9,9 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
- * replace by ChromosomalPosition
+ * Package private implementation of {@link GenomicPosition}.
  */
-class EnhancerGenomicPosition implements org.jax.svann.reference.GenomicPosition {
+class EnhancerGenomicPosition implements GenomicPosition {
     private final Contig chromosome;
     private final int pos;
     private final Strand strand;

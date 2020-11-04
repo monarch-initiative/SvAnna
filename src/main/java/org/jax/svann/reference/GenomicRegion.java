@@ -24,6 +24,10 @@ public interface GenomicRegion extends CoordinatePair, Comparable<GenomicRegion>
         return getStart().getContig();
     }
 
+    default int getContigId() {
+        return getContig().getId();
+    }
+
     //    default int getStartMin() {
 //        return getStartCi().getMinPos(getStartPosition());
 //    }
@@ -42,6 +46,32 @@ public interface GenomicRegion extends CoordinatePair, Comparable<GenomicRegion>
 
     default Strand getStrand() {
         return getStart().getStrand();
+    }
+
+    GenomicRegion withStrand(Strand strand);
+
+    /**
+     * @param other chromosomal region
+     * @return true if the region shares at least 1 bp with the <code>other</code> region
+     */
+    default boolean overlapsWith(GenomicRegion other) {
+        if (getContigId() != other.getContigId()) {
+            return false;
+        }
+        GenomicRegion onStrand = other.withStrand(this.getStrand());
+        return getStartPosition() <= onStrand.getEndPosition() && getEndPosition() >= onStrand.getStartPosition();
+    }
+
+    /**
+     * @param other chromosomal region
+     * @return true if the <code>other</code> region is fully contained within this region
+     */
+    default boolean contains(GenomicRegion other) {
+        if (this.getContigId() != other.getContigId()) {
+            return false;
+        }
+        GenomicRegion onStrand = other.withStrand(this.getStrand());
+        return onStrand.getStartPosition() >= getStartPosition() && onStrand.getEndPosition() <= getEndPosition();
     }
 
     @Override

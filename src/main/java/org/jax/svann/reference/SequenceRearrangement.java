@@ -1,6 +1,11 @@
 package org.jax.svann.reference;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * General representation of structural as well as small variants.
@@ -12,6 +17,8 @@ import java.util.List;
  * </ul>
  */
 public interface SequenceRearrangement {
+
+    Logger LOGGER = LoggerFactory.getLogger(SequenceRearrangement.class);
 
     /**
      * @return structural rearrangement type
@@ -44,11 +51,11 @@ public interface SequenceRearrangement {
      * @return coordinate of the leftmost position of the rearrangement
      */
     default int getLeftmostPosition() {
-        return getLeftmostBreakend().getBegin();
+        return getLeftmostBreakend().getPosition();
     }
 
     default Breakend getLeftmostBreakend() {
-        return getAdjacencies().get(0).getLeft();
+        return getAdjacencies().get(0).getStart();
     }
 
     /**
@@ -64,12 +71,37 @@ public interface SequenceRearrangement {
      * @return coordinate of the rightmost position of the rearrangement
      */
     default int getRightmostPosition() {
-        return getRightmostBreakend().getBegin();
+        return getRightmostBreakend().getPosition();
     }
 
     default Breakend getRightmostBreakend() {
         int n = getAdjacencies().size();
-        return getAdjacencies().get(n - 1).getRight();
+        return getAdjacencies().get(n - 1).getEnd();
+    }
+
+    default List<CoordinatePair> getRegions() {
+        if (getAdjacencies().size() == 1) {
+            // cast to CoordinatePair
+            return getAdjacencies().stream()
+                    .map(a -> ((CoordinatePair) a))
+                    .collect(Collectors.toList());
+        }
+        List<CoordinatePair> regions = new ArrayList<>();
+
+        GenomicPosition previous = null;
+        for (int i = 0; i < getAdjacencies().size(); i++) {
+            Adjacency current = getAdjacencies().get(i);
+            if (current.isInterChromosomal()) {
+                regions.add(current);
+            }
+            if (previous == null) {
+                previous = current.getEnd();
+                continue;
+            }
+//            CoordinatePair pair = SimpleCoordinatePair.of(previous)
+        }
+
+        return regions;
     }
 
 }

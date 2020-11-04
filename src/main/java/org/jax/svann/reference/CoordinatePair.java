@@ -1,5 +1,11 @@
 package org.jax.svann.reference;
 
+/**
+ * This interface represents a pair of coordinates, suitable to be used for representing both <em>intra</em>chromosomal
+ * events (e.g inversions, deletions), and <em>inter</em>chromosomal events (translocations).
+ * <p>
+ * Note that multiple coordinate pairs might be used to represent an event.
+ */
 public interface CoordinatePair {
 
     GenomicPosition getStart();
@@ -14,6 +20,9 @@ public interface CoordinatePair {
         return getStart().getContig().getPrimaryName();
     }
 
+    /**
+     * @return one-based (inclusive) start coordinate
+     */
     default int getStartPosition() {
         return getStart().getPosition();
     }
@@ -34,6 +43,9 @@ public interface CoordinatePair {
         return getEnd().getContig().getPrimaryName();
     }
 
+    /**
+     * @return one-based (inclusive) start coordinate
+     */
     default int getEndPosition() {
         return getEnd().getPosition();
     }
@@ -44,5 +56,19 @@ public interface CoordinatePair {
 
     default int getLength() {
         return getEnd().getPosition() - getStart().getPosition();
+    }
+
+    /**
+     * @return <code>true</code> if both coordinates are located on a single contig
+     */
+    default boolean isIntraChromosomal() {
+        return getStartContigId() == getEndContigId();
+    }
+
+    /**
+     * @return <code>true</code> if the coordinates are located on two distinct contigs
+     */
+    default boolean isInterChromosomal() {
+        return getStartContigId() != getEndContigId();
     }
 }

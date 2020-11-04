@@ -14,18 +14,26 @@ public class Enhancer implements GenomicRegion {
      * The contig (chromosome) on which this enhancer is located.
      */
     private final Contig contig;
-    private final EnhancerGenomicPosition start;
-    private final EnhancerGenomicPosition end;
+    private final GenomicPosition start;
+    private final GenomicPosition end;
     private final double tau;
     private final TermId termId;
 
-    public Enhancer(Contig cony, int s, int e, double t, TermId tid) {
-        this.contig = cony;
-        this.start = new EnhancerGenomicPosition(cony, s, Strand.FWD, CoordinateSystem.ONE_BASED);
-        this.end = new EnhancerGenomicPosition(cony, e, Strand.FWD, CoordinateSystem.ONE_BASED);
-        this.tau = t;
-        this.termId = tid;
+    public Enhancer(Contig contig, int start, int end, double t, TermId tid) {
+        this(contig,
+                new EnhancerGenomicPosition(contig, start, Strand.FWD, CoordinateSystem.ONE_BASED),
+                new EnhancerGenomicPosition(contig, end, Strand.FWD, CoordinateSystem.ONE_BASED),
+                t, tid);
     }
+
+    private Enhancer(Contig contig, GenomicPosition start, GenomicPosition end, double tau, TermId termId) {
+        this.contig = contig;
+        this.start = start;
+        this.end = end;
+        this.tau = tau;
+        this.termId = termId;
+    }
+
 
     // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
     public boolean matchesPos(Contig otherContig, Position pos, int THRESHOLD) {
@@ -42,6 +50,21 @@ public class Enhancer implements GenomicRegion {
     @Override
     public Contig getContig() {
         return contig;
+    }
+
+    @Override
+    public Enhancer withStrand(Strand strand) {
+        if (getStrand().equals(strand)) {
+            return this;
+        } else {
+            // change position order!!
+            return new Enhancer(contig, end.withStrand(strand), start.withStrand(strand), tau, termId);
+        }
+    }
+
+    @Override
+    public Strand getStrand() {
+        return start.getStrand();
     }
 
     @Override

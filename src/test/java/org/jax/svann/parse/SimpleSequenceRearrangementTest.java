@@ -100,4 +100,11 @@ public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
     public void getRightmostPosition() {
         assertThat(instance.getRightmostPosition(), is(20));
     }
+
+    @Test
+    public void getRegions() {
+        List<CoordinatePair> regions = instance.getRegions();
+        // TODO: 5. 11. 2020 implement
+        regions.forEach(System.err::println);
+    }
 }

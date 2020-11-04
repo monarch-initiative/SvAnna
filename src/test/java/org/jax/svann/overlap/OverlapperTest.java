@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.jax.svann.overlap.OverlapType.*;
 import static org.jax.svann.parse.TestVariants.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -295,12 +293,6 @@ public class OverlapperTest extends TestBase {
             assertEquals(INTRONIC, o.getOverlapType());
             assertFalse(o.overlapsCds());
         }
-
-        Overlap overlap = overlaps.get(0);
-        // there are 249 bases between the deletion and the downstream exon, not including deletion or exonic regions
-        // there are 1186 bases between the deletion and the upstream exon, not including deletion or exonic regions
-        assertThat(overlap.getAccession(), is("NM_017503.4"));
-        assertThat(overlap.getDistance(), is(249));
     }
 
     /**

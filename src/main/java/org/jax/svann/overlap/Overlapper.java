@@ -93,7 +93,7 @@ public class Overlapper {
             return getDeletionOverlaps(rearrangement);
         } else if (rearrangement.getType() == SvType.INSERTION) {
             return getInsertionOverlaps(rearrangement);
-        }  else if (rearrangement.getType() == SvType.TRANSLOCATION) {
+        } else if (rearrangement.getType() == SvType.TRANSLOCATION) {
             return getTranslocationOverlaps(rearrangement);
         } else if (rearrangement.getType() == SvType.INVERSION) {
             return getInversionOverlaps(rearrangement);
@@ -106,6 +106,7 @@ public class Overlapper {
     /**
      * This method returns all overlapping transcripts for simple deletions. We assume that deletions
      * are forward strand (it does not matter but is needed by the API).
+     *
      * @param srearrangement The candidate deletion
      * @return List over overlapping transcripts
      */
@@ -142,7 +143,7 @@ public class Overlapper {
         int id = chrom.getId();
         int begin = bend.getBegin();
         int end = bend.getEnd();
-        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
                 iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
@@ -152,6 +153,7 @@ public class Overlapper {
     /**
      * This method returns all overlapping transcripts for simple deletions. We assume that deletions
      * are forward strand (it does not matter but is needed by the API).
+     *
      * @param srearrangement The candidate deletion
      * @return List over overlapping transcripts
      */
@@ -167,7 +169,7 @@ public class Overlapper {
         int id = chrom.getId();
         int begin = left.getBegin();
         int end = right.getEnd();
-        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
                 iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
@@ -180,7 +182,7 @@ public class Overlapper {
         int id = chrom.getId();
         int begin = be.getBegin();
         int end = be.getEnd();
-        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
                 iarray.findOverlappingWithInterval(gi.getBeginPos(), gi.getEndPos());
@@ -190,6 +192,7 @@ public class Overlapper {
     /**
      * This method checks whether any of the breakends of an inversion overlaps with
      * any part of a transcript
+     *
      * @param inversion an inversion
      * @return list of transcript overlaps (can be empty)
      */
@@ -211,11 +214,11 @@ public class Overlapper {
     }
 
 
-
     /**
      * This method returns all overlapping transcripts for insertions. We assume that insertions
      * are forward strand (it does not matter but is needed by the API). Insertions have two
      * adjancencies in our implementation
+     *
      * @param srearrangement The candidate insertion
      * @return List over overlapping transcripts
      */
@@ -232,7 +235,7 @@ public class Overlapper {
         int begin = left.getBegin();
         Adjacency insertion2 = adjacencies.get(1);
         int end = insertion2.getRight().getEnd();
-        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin,end);
+        GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
                 iarray.findOverlappingWithInterval(structVarInterval.getBeginPos(), structVarInterval.getEndPos());
@@ -275,6 +278,7 @@ public class Overlapper {
 
     /**
      * This is called if the transcriptmodel is entirely contained within an SV
+     *
      * @param tmod
      * @param start
      * @param end
@@ -301,28 +305,34 @@ public class Overlapper {
         if (tmodelLeft != null) {
             leftDistance = start.getPos() - tmodelLeft.getTXRegion().withStrand(Strand.FWD).getEndPos();
             description = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
+            OverlapType type;
             if (leftDistance <= 2_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_2KB, tmodelLeft, leftDistance, description));
+                type = UPSTREAM_GENE_VARIANT_2KB;
             } else if (leftDistance <= 5_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_5KB, tmodelLeft, leftDistance, description));
+                type = OverlapType.UPSTREAM_GENE_VARIANT_5KB;
             } else if (leftDistance <= 500_000) {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT_500KB, tmodelLeft, leftDistance, description));
+                type = OverlapType.UPSTREAM_GENE_VARIANT_500KB;
             } else {
-                overlaps.add(new Overlap(OverlapType.UPSTREAM_GENE_VARIANT, tmodelLeft, leftDistance, description));
+                type = OverlapType.UPSTREAM_GENE_VARIANT;
             }
+            overlaps.add(new Overlap(type, tmodelLeft, leftDistance, description));
         }
         if (tmodelRight != null) {
             int rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
             description = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
+            OverlapType overlapType;
             if (rightDistance <= 500) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_500B, tmodelRight, rightDistance, description));
+                overlapType = OverlapType.DOWNSTREAM_GENE_VARIANT_500B;
             } else if (rightDistance <= 2_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_2KB, tmodelRight, rightDistance, description));
+                overlapType = DOWNSTREAM_GENE_VARIANT_2KB;
             } else if (rightDistance <= 5_000) {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT_5KB, tmodelRight, rightDistance, description));
+                overlapType = DOWNSTREAM_GENE_VARIANT_5KB;
+            } else if (rightDistance <= 500_000) {
+                overlapType = DOWNSTREAM_GENE_VARIANT_500KB;
             } else {
-                overlaps.add(new Overlap(OverlapType.DOWNSTREAM_GENE_VARIANT, tmodelRight, rightDistance, description));
+                overlapType = DOWNSTREAM_GENE_VARIANT;
             }
+            overlaps.add(new Overlap(overlapType, tmodelRight, rightDistance, description));
         }
         return overlaps;
     }

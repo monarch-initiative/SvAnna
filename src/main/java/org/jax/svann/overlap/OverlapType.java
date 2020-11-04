@@ -109,7 +109,7 @@ public enum OverlapType {
         return name;
     }
 
-    public SvImpact toImpact() {
+    public SvImpact defaultSvImpact() {
         switch (this) {
             case SINGLE_EXON_IN_TRANSCRIPT:
             case MULTIPLE_EXON_IN_TRANSCRIPT:
@@ -121,6 +121,7 @@ public enum OverlapType {
             case UPSTREAM_GENE_VARIANT_5KB:
             case DOWNSTREAM_GENE_VARIANT_5KB:
                 return SvImpact.INTERMEDIATE;
+            case INTRONIC:
             default:
                 return SvImpact.LOW;
         }

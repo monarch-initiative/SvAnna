@@ -129,8 +129,8 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
         if (affectedGeneIds.size() > 1) {
             impact = SvImpact.HIGH;
-        } else if (highestOT.toImpact() == SvImpact.HIGH) {
-            if (highestImpactOverlap.isOverlapsCds())
+        } else if (highestOT.defaultSvImpact() == SvImpact.HIGH) {
+            if (highestImpactOverlap.overlapsCds())
                 impact = SvImpact.HIGH;
             else
                 impact = SvImpact.INTERMEDIATE;
@@ -210,8 +210,8 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
         if (affectedGeneIds.size() > 1) {
             impact = SvImpact.HIGH;
-        } else if (highestOT.toImpact() == SvImpact.HIGH) {
-            if (highestImpactOverlap.isOverlapsCds())
+        } else if (highestOT.defaultSvImpact() == SvImpact.HIGH) {
+            if (highestImpactOverlap.overlapsCds())
                 impact = SvImpact.HIGH;
             else
                 impact = SvImpact.INTERMEDIATE;

@@ -10,6 +10,7 @@ import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
+import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
@@ -95,6 +96,9 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<String, GeneWithId> geneSymbolMap = hpoDiseaseGeneMap.getGeneSymbolMap();
         // jannovar data
         JannovarData jannovarData = readJannovarData(jannovarPath);
+        // disease summary map
+        // TODO: 4. 11. 2020 implement
+        Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap = Map.of();
 
         // 1 - parse input variants
         BreakendAssembler breakendAssembler = new BreakendAssembler();
@@ -107,7 +111,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Overlapper overlapper = new Overlapper(jannovarData);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
 
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(geneSymbolMap, overlapper, enhancerOverlapper, patientTerms, enhancerRelevantAncestors);
+        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, diseaseSummaryMap);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();

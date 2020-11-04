@@ -25,11 +25,11 @@ class SimpleSequenceRearrangement implements SequenceRearrangement {
 
     }
 
-    public static SimpleSequenceRearrangement of(SvType type, Adjacency... adjacencies) {
+    static SimpleSequenceRearrangement of(SvType type, Adjacency... adjacencies) {
         return new SimpleSequenceRearrangement(type, Arrays.asList(adjacencies));
     }
 
-    public static SimpleSequenceRearrangement of(SvType type, List<Adjacency> adjacencies) {
+    static SimpleSequenceRearrangement of(SvType type, List<Adjacency> adjacencies) {
         return new SimpleSequenceRearrangement(type, adjacencies);
     }
 

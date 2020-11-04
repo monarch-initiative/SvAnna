@@ -1,11 +1,26 @@
 package org.jax.svann.viz;
 
-import org.jax.svann.priority.SvPriority;
+import org.jax.svann.hpo.HpoDiseaseSummary;
+import org.jax.svann.overlap.Overlap;
+import org.jax.svann.reference.SequenceRearrangement;
+
+import java.util.List;
+import java.util.Map;
 
 public interface Visualizable {
 
-    SvPriority getPriority();
+    String getImpact();
 
-    // List<ChromosomalRegion> getCoordinates();
+    String getType();
+
+    boolean hasPhenotypicRelevance();
+
+    SequenceRearrangement getRearrangement();
+
+    List<HtmlLocation> getLocations();
+
+    List<HpoDiseaseSummary> getDiseaseSummaries();
+
+    List<Overlap> getOverlaps();
 
 }

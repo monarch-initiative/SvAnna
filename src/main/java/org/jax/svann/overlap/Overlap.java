@@ -9,7 +9,8 @@ import de.charite.compbio.jannovar.reference.TranscriptModel;
 public class Overlap {
 
     private final OverlapType overlapType;
-    /** This field's meaning depends on the type. For INTERGENIC, it is the distance to the 5' (left) nearest gene.
+    /**
+     * This field's meaning depends on the type. For INTERGENIC, it is the distance to the 5' (left) nearest gene.
      * For INTRONIC, it is the distance to the nearest exon.
      */
     private final int distance;
@@ -38,12 +39,19 @@ public class Overlap {
     }
 
 
-
     /**
      * @return true if this overlap involves exonic sequence
      */
     public boolean isExonic() {
         return OverlapType.isExonic(this.overlapType);
+    }
+
+    public boolean overlapsTranscript() {
+        return OverlapType.overlapsTranscript(this.overlapType);
+    }
+
+    public boolean inversionDisruptable() {
+        return OverlapType.inversionDisruptable(this.overlapType);
     }
 
     /**
@@ -65,6 +73,22 @@ public class Overlap {
     public OverlapType getOverlapType() {
         return overlapType;
     }
+
+    public int getDistance() {
+        return distance;
+    }
+
+    public TranscriptModel getTranscriptModel() {
+        return transcriptModel;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    //    public TermId getGeneId() {
+//        return TermId.of(this.transcriptModel.getGeneID())
+//    }
 
     @Override
     public String toString() {

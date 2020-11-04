@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +28,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
     }
 
     @Override
-    public Collection<SequenceRearrangement> parseFile(Path filePath) throws IOException {
+    public List<SequenceRearrangement> parseFile(Path filePath) throws IOException {
         List<SequenceRearrangement> rearrangements = new ArrayList<>();
         List<BreakendRecord> breakendRecords = new ArrayList<>();
         try (VCFFileReader reader = new VCFFileReader(filePath, false)) {

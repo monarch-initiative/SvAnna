@@ -1,7 +1,6 @@
 package org.jax.svann.overlap;
 
 import org.jax.svann.TestBase;
-import org.jax.svann.parse.TestVariants;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,7 +45,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testSurf2Exon3Overlaps() {
-        SequenceRearrangement surf1Exon3Deletion = TestVariants.singleExonDeletion_SURF2_exon3();
+        SequenceRearrangement surf1Exon3Deletion = Deletions.surf2singleExon_exon3();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1Exon3Deletion);
         assertEquals(2, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");
@@ -63,7 +62,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testSurf1TwoExonDeletion() {
-        SequenceRearrangement twoExonSurf1 = twoExonDeletion_SURF1_exons_6_and_7();
+        SequenceRearrangement twoExonSurf1 = Deletions.surf1TwoExon_exons_6_and_7();
         List<Overlap> overlaps = overlapper.getOverlapList(twoExonSurf1);
         assertEquals(3, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_003172.3","NM_001280787.1", "XM_011518942.1");
@@ -83,7 +82,7 @@ public class OverlapperTest extends TestBase {
      * */
     @Test
     public void testTwoTranscriptDeletion() {
-        SequenceRearrangement surf1and2deletion = deletionOfOneEntireTranscriptAndPartOfAnother();
+        SequenceRearrangement surf1and2deletion = Deletions.surf1Surf2oneEntireTranscriptAndPartOfAnother();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1and2deletion);
         assertEquals(5, overlaps.size());
         Set<String> expectedAccessionNumbers =
@@ -108,7 +107,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testdeletionWithinAnIntron() {
-        SequenceRearrangement surf1DeletionWithinIntron = deletionWithinAnIntron();
+        SequenceRearrangement surf1DeletionWithinIntron = Deletions.surf2WithinAnIntron();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1DeletionWithinIntron);
         assertEquals(2, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");
@@ -130,7 +129,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testdeletionIn5UTR() {
-        SequenceRearrangement surf1DeletionWithinIntron = deletionIn5UTR();
+        SequenceRearrangement surf1DeletionWithinIntron = Deletions.surf2In5UTR();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1DeletionWithinIntron);
         assertEquals(2, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");
@@ -155,7 +154,7 @@ public class OverlapperTest extends TestBase {
 
     @Test
     public void testDeletionIn3UTR() {
-        SequenceRearrangement surf1DeletionWithinIntron = deletionIn3UTR();
+        SequenceRearrangement surf1DeletionWithinIntron = Deletions.surf1In3UTR();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1DeletionWithinIntron);
         assertEquals(3, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_003172.3","NM_001280787.1", "XM_011518942.1");
@@ -180,29 +179,30 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testDeletionDownstreamIntergenic() {
-        SequenceRearrangement surf1Downstream = deletionDownstreamIntergenic();
+        SequenceRearrangement surf1Downstream = Deletions.surf1DownstreamIntergenic();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1Downstream);
         assertEquals(1, overlaps.size());
         Overlap overlap = overlaps.get(0);
         assertEquals("SURF1", overlap.getGeneSymbol());
-        assertEquals(DOWNSTREAM_GENE_VARIANT, overlap.getOverlapType());
+        assertEquals(DOWNSTREAM_GENE_VARIANT_500KB, overlap.getOverlapType());
         assertFalse(overlap.overlapsCds());
     }
 
 
     /**
-     * Deletion upstream intergenic.
+     * Deletion upstream intergenic. FBN1
      * <p>
-     * BRCA2:NM_0000059 upstream, 10kb deletion
-     * chr13:32_280_001-32_290_000
+     * hg38 chr15:48,408,306-48,645,849 Size: 237,544 Total Exon Count: 66 Strand: -
+     * upstream, 10kb deletion
+     * chr15:48_655_000-48_665_000
      */
     @Test
     public void testDeletionUpstreamIntergenic() {
-        SequenceRearrangement surf1Upstream = deletionUpstreamIntergenic();
+        SequenceRearrangement surf1Upstream = Deletions.brca2UpstreamIntergenic();
         List<Overlap> overlaps = overlapper.getOverlapList(surf1Upstream);
         assertEquals(1, overlaps.size());
         Overlap overlap = overlaps.get(0);
-        assertEquals("BRCA2", overlap.getGeneSymbol());
+        assertEquals("FBN1", overlap.getGeneSymbol());
         assertEquals(UPSTREAM_GENE_VARIANT_500KB, overlap.getOverlapType());
         assertFalse(overlap.overlapsCds());
     }
@@ -218,7 +218,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testInsertionIn5UTR() {
-        SequenceRearrangement surf2insertion5utr = insertionIn5UTR();
+        SequenceRearrangement surf2insertion5utr = Insertions.surf2InsertionIn5UTR();
         List<Overlap> overlaps = overlapper.getOverlapList(surf2insertion5utr);
         assertEquals(2, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");
@@ -239,7 +239,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testInsertionIn3UTR() {
-        SequenceRearrangement surf2insertion3utr = insertionIn3UTR();
+        SequenceRearrangement surf2insertion3utr = Insertions.surf1InsertionIn3UTR();
         List<Overlap> overlaps = overlapper.getOverlapList(surf2insertion3utr);
         assertEquals(3, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_003172.3","NM_001280787.1", "XM_011518942.1");
@@ -261,7 +261,7 @@ public class OverlapperTest extends TestBase {
 
     @Test
     public void testInsertionInExon4() {
-        SequenceRearrangement surf2insertionExon4 = insertionInExon4();
+        SequenceRearrangement surf2insertionExon4 = Insertions.surf2Exon4();
         List<Overlap> overlaps = overlapper.getOverlapList(surf2insertionExon4);
         assertEquals(2, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");
@@ -283,7 +283,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testInsertionInIntron3() {
-        SequenceRearrangement surf2insertionIntron3 = insertionInIntron3();
+        SequenceRearrangement surf2insertionIntron3 = Insertions.surf2Intron3();
         List<Overlap> overlaps = overlapper.getOverlapList(surf2insertionIntron3);
         assertEquals(2, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");

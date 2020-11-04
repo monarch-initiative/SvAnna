@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>LIRICAL</title>
+  <title>svann: Structural Variant Annotator</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -358,7 +358,7 @@ a.svg:hover, a.svg:active {
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 <header class="banner">
-    <h1><font color="#FFDA1A">L2O</font></h1>
+    <h1><font color="#FFDA1A">SvAnna</font></h1>
 </header>
 
   <nav>
@@ -374,64 +374,30 @@ a.svg:hover, a.svg:active {
     <section>
       <a name="sample"></a>
         <article>
-        <ul>
-        <li>Structural variants: n=${n_non_translocations}</li>
-        <ol>
-        <li>High impact: ${n_high}</li>
-        <li>Modifier impact: ${n_modifer}</li>
-        <li>Low impact: ${n_low}</li>
-        </ol>
+        <p>SvAnna (Structural Variant Annotation Amenuensis) analysis of structural variants.</p>
+        <p>structural variants were extracted from ${vcf_file}.</p>
+        <table border=1>
+        <thead>
+            <tr>
+              <th>Type</th>
+              <th>Low impact</th>
+              <th>Intermediate impact</th>
+              <th>High impact</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+        <#list svtypecounts as svt>
+        <tr><td>${svt.name}</td><td>${svt.low}</td><td>${svt.intermediate}</td><td>${svt.high}</td><td>${svt.total}</td><td></tr>
+          </#list>
+        </table>
+        <p>We were unable to parse ${n_unparsable} entries.</p>
         </article>
     </section>
-
-
-
 
         <#list svalist as sva>
         <section>
               <article>
-                <a name="diff"></a>
-
-          <a name="test"></a>
-            <header>
-              <h3>${sva.igvLine}</h3>
-              <p>
-              <ol>
-              <li>${sva.chrom}</li>
-                <li>${sva.pos}</li>
-              <li>ref: ${sva.ref}</li>
-              <li>alt: ${sva.alt}</li>
-              <li>SV type: ${sva.svtype}</li>
-              <li>SV len: ${sva.svlen} bp</li>
-              <#if sva.ciUp gt 0>
-                <li>confidence interval ${sva.ciUp}/${sva.ciDown}</li>
-              </#if>
-              <li>format: ${sva.format}</li>
-              <li>gt: ${sva.gt}</li>
-              </ol>
-              <p>
-            </header>
-             <p>
-             info: ${sva.info}
-             </p>
-             <p>
-             Candidates:
-             <ul>
-             <#list sva.hitlist as hit>
-                <li>${hit.diseaseName}</li>
-                <li>Post test probasbility: ${hit.posttestProbability}%</li>
-
-             </#list>
-             </ul>
-             <#if sva.enhancers??>
-             <p>Enhancers:
-             <ul>
-             <#list sva.enhancers as enhancer>
-                <li>${enhancer.summary}</li>
-             </#list>
-             </ul></p>
-             </#if>
-             </p>
+              ${sva?no_esc}
              </article>
              </section>
         </#list>
@@ -441,7 +407,7 @@ a.svg:hover, a.svg:active {
         <a name="about"></a>
         <article>
           <h2>About</h2>
-            <p>L2O shows candidate SVs that affect genes associated witht the top LIRICAL candidates.</p>
+            <p>SvAnna shows candidate SVs that affect genes associated witht the top svann candidates.</p>
 
 
         </article>
@@ -449,7 +415,7 @@ a.svg:hover, a.svg:active {
       <span id="tooltip" display="none" style="position: absolute; display: none;"></span>
   </main>
   <footer>
-    <p>L2O &copy; 2020</p>
+    <p>SvAnn &copy; 2020</p>
   </footer>
 
   <script>

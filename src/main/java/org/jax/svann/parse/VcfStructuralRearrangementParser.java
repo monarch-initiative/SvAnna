@@ -160,7 +160,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         return extractCoreData(vc).map(coords -> {
             // then convert the coordinates to adjacency
             Contig contig = coords.getContig();
-            SimpleBreakend left = SimpleBreakend.imprecise(contig,
+            SimpleBreakend left = SimpleBreakend.impreciseWithRef(contig,
                     coords.getStart() - 1,
                     coords.getCiStart(),
                     Strand.FWD,
@@ -168,7 +168,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
                     vc.getID(),
                     vc.getReference().getDisplayString());
 
-            SimpleBreakend right = SimpleBreakend.impreciseWithNoRef(contig,
+            SimpleBreakend right = SimpleBreakend.imprecise(contig,
                     coords.getEnd() + 1,
                     coords.getCiEnd(),
                     Strand.FWD,
@@ -190,7 +190,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
             Contig contig = cd.getContig();
 
             // the 1st adjacency (alpha) starts at the end coordinate, by convention on + strand
-            SimpleBreakend alphaLeft = SimpleBreakend.imprecise(contig,
+            SimpleBreakend alphaLeft = SimpleBreakend.impreciseWithRef(contig,
                     cd.getEnd(),
                     cd.getCiEnd(),
                     Strand.FWD,
@@ -199,7 +199,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
                     vc.getReference().getDisplayString());
 
             // the right position is the begin position of the duplicated segment on + strand
-            SimpleBreakend alphaRight = SimpleBreakend.impreciseWithNoRef(contig,
+            SimpleBreakend alphaRight = SimpleBreakend.imprecise(contig,
                     cd.getStart(),
                     cd.getCiStart(),
                     Strand.FWD,
@@ -223,17 +223,12 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         String id = vc.getID();
         CoreData cd = cdOpt.get();
         Contig contig = cd.getContig();
-//        Position begin = cd.getBegin();
-//        Position end = cd.getEnd();
 
         // TODO: 27. 10. 2020 this method involves shifting coordinates +- 1 base pair, while not adjusting the CIs.
         //  This should not be an issue, but evaluate just to be sure
 
         // the 1st adjacency (alpha) starts one base before begin coordinate (POS), by convention on the (+) strand
-//        ChromosomalPosition alphaLeftPos = ChromosomalPosition.of(contig,
-//                Position.imprecise(begin.getPos() - 1, begin.getConfidenceInterval()),
-//                Strand.FWD);
-        Breakend alphaLeft = SimpleBreakend.imprecise(contig,
+        Breakend alphaLeft = SimpleBreakend.impreciseWithRef(contig,
                 cd.getStart() - 1,
                 cd.getCiStart(),
                 Strand.FWD,
@@ -241,8 +236,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
                 id,
                 vc.getReference().getDisplayString());
         // the right position is the last base of the inverted segment on the (-) strand
-//        ChromosomalPosition alphaRightPos = ChromosomalPosition.of(contig, end, Strand.FWD).withStrand(Strand.REV);
-        SimpleBreakend alphaRight = SimpleBreakend.impreciseWithNoRef(contig,
+        SimpleBreakend alphaRight = SimpleBreakend.imprecise(contig,
                 cd.getEnd(),
                 cd.getCiEnd(),
                 Strand.FWD,
@@ -251,17 +245,13 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
 
 
         // the 2nd adjacency (beta) starts at the begin coordinate on (-) strand
-//        ChromosomalPosition betaLeftPos = ChromosomalPosition.of(contig, begin, Strand.FWD).withStrand(Strand.REV);
-        SimpleBreakend betaLeft = SimpleBreakend.impreciseWithNoRef(contig,
+        SimpleBreakend betaLeft = SimpleBreakend.imprecise(contig,
                 cd.getStart(),
                 cd.getCiStart(),
                 Strand.FWD,
                 id).withStrand(Strand.REV);
         // the right position is one base past end coordinate, by convention on (+) strand
-//        ChromosomalPosition betaRightPos = ChromosomalPosition.of(contig,
-//                Position.imprecise(end.getPos() + 1, end.getConfidenceInterval()),
-//                Strand.FWD);
-        Breakend betaRight = SimpleBreakend.impreciseWithNoRef(contig,
+        Breakend betaRight = SimpleBreakend.imprecise(contig,
                 cd.getEnd() + 1,
                 cd.getCiEnd(),
                 Strand.FWD,
@@ -299,8 +289,7 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
         Contig insContig = new InsertionContig(id, insLength);
 
         // the 1st adjacency (alpha) starts at the POS coordinate, by convention on the (+) strand
-//        ChromosomalPosition alphaLeftPos = ChromosomalPosition.of(contig, begin, Strand.FWD);
-        Breakend alphaLeft = SimpleBreakend.imprecise(contig,
+        Breakend alphaLeft = SimpleBreakend.impreciseWithRef(contig,
                 cd.getStart(),
                 cd.getCiStart(),
                 Strand.FWD,
@@ -308,16 +297,13 @@ public class VcfStructuralRearrangementParser implements StructuralRearrangement
                 id,
                 vc.getReference().getDisplayString());
         // the right position is the first base of the insertion contig
-//        ChromosomalPosition alphaRightPos = ChromosomalPosition.of(insContig, Position.precise(1), Strand.FWD);
-        SimpleBreakend alphaRight = SimpleBreakend.preciseWithNoRef(insContig, 1, Strand.FWD, id);
+        SimpleBreakend alphaRight = SimpleBreakend.precise(insContig, 1, Strand.FWD, id);
         Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
         // the 2nd adjacency (beta) starts at the end of the insertion contig
-//        ChromosomalPosition betaLeftPos = ChromosomalPosition.of(insContig, Position.precise(insLength), Strand.FWD);
-        SimpleBreakend betaLeft = SimpleBreakend.preciseWithNoRef(insContig, insLength, Strand.FWD, id);
+        SimpleBreakend betaLeft = SimpleBreakend.precise(insContig, insLength, Strand.FWD, id);
         // the right position is one base past the POS coordinate, by convention on (+) strand
-//        ChromosomalPosition betaRightPos = ChromosomalPosition.of(contig, Position.imprecise(begin.getPos() + 1, begin.getConfidenceInterval()), Strand.FWD);
-        Breakend betaRight = SimpleBreakend.impreciseWithNoRef(contig, cd.getStart() + 1, cd.getCiStart(), Strand.FWD, id);
+        Breakend betaRight = SimpleBreakend.imprecise(contig, cd.getStart() + 1, cd.getCiStart(), Strand.FWD, id);
         Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
         return List.of(alpha, beta);
     }

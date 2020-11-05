@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * General representation of structural as well as small variants.
@@ -79,29 +78,44 @@ public interface SequenceRearrangement {
         return getAdjacencies().get(n - 1).getEnd();
     }
 
+    /**
+     * Get coordinate pairs representing the rearranged regions. The coordinate pairs be intrachromosomal as well as
+     * interchromosomal if translocation is present.
+     *
+     * @return list with coordinate pairs
+     */
     default List<CoordinatePair> getRegions() {
-        if (getAdjacencies().size() == 1) {
-            // cast to CoordinatePair
-            return getAdjacencies().stream()
-                    .map(a -> ((CoordinatePair) a))
-                    .collect(Collectors.toList());
+        if (getType().equals(SvType.INSERTION)) {
+            // insertion is a special creature
+            return List.of(SimpleCoordinatePair.of(getLeftmostBreakend(), getRightmostBreakend()));
         }
-        List<CoordinatePair> regions = new ArrayList<>();
 
-        GenomicPosition previous = null;
-        for (int i = 0; i < getAdjacencies().size(); i++) {
-            Adjacency current = getAdjacencies().get(i);
-            if (current.isInterChromosomal()) {
-                regions.add(current);
-            }
+        int nAdjacencies = getAdjacencies().size();
+        boolean evenNumberOfAdjacencies = nAdjacencies % 2 == 0;
+
+        // gather all breakends
+        List<Breakend> breakends = new ArrayList<>(nAdjacencies * 2);
+        for (Adjacency adjacency : getAdjacencies()) {
+            breakends.add(adjacency.getStart());
+            breakends.add(adjacency.getEnd());
+        }
+
+        List<CoordinatePair> pairs = new ArrayList<>();
+        Breakend previous = null;
+        // we start iteration depending on whether we're dealing with even or odd number of adjacencies
+        int iStart = evenNumberOfAdjacencies ? 1 : 0;
+        for (int i = iStart; i < breakends.size(); i++) {
+            Breakend breakend = breakends.get(i);
             if (previous == null) {
-                previous = current.getEnd();
-                continue;
+                previous = breakend;
+            } else {
+                SimpleCoordinatePair pair = SimpleCoordinatePair.of(previous, breakend);
+                pairs.add(pair);
+                previous = null;
             }
-//            CoordinatePair pair = SimpleCoordinatePair.of(previous)
         }
 
-        return regions;
+        return pairs;
     }
 
 }

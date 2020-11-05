@@ -111,7 +111,7 @@ public class BreakendAssembler {
         String leftRef = leftStrand.isForward()
                 ? left.getRef()
                 : Utils.reverseComplement(left.getRef());
-        SimpleBreakend leftBreakend = SimpleBreakend.imprecise(leftPos.getContig(),
+        SimpleBreakend leftBreakend = SimpleBreakend.impreciseWithRef(leftPos.getContig(),
                 leftPos.getPosition(),
                 leftPos.getCi(),
                 leftStrand,
@@ -123,7 +123,7 @@ public class BreakendAssembler {
         String rightRef = rightStrand.isForward()
                 ? right.getRef()
                 : Utils.reverseComplement(right.getRef());
-        SimpleBreakend rightBreakend = SimpleBreakend.imprecise(rightPos.getContig(),
+        SimpleBreakend rightBreakend = SimpleBreakend.impreciseWithRef(rightPos.getContig(),
                 rightPos.getPosition(),
                 rightPos.getCi(),
                 rightStrand,

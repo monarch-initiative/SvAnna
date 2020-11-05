@@ -50,6 +50,10 @@ public interface GenomicPosition extends Comparable<GenomicPosition> {
 
     GenomicPosition withStrand(Strand strand);
 
+    default GenomicPosition toOppositeStrand() {
+        return withStrand(getStrand().getOpposite());
+    }
+
     @Override
     default int compareTo(GenomicPosition o) {
         return NATURAL_COMPARATOR.compare(this, o);

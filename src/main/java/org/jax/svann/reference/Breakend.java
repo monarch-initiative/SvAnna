@@ -18,6 +18,7 @@ public interface Breakend extends ChromosomalRegion, GenomicPosition {
     /**
      * Convert the breakend to opposite strand no matter what.
      */
+    @Override
     default Breakend toOppositeStrand() {
         return getStrand().equals(Strand.FWD)
                 ? withStrand(Strand.REV)

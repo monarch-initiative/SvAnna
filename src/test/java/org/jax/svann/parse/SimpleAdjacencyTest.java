@@ -30,9 +30,9 @@ public class SimpleAdjacencyTest extends ToyCoordinateTestBase {
     @BeforeAll
     public static void beforeAll() {
         // contig with length 20
-        Contig CONTIG = TOY_ASSEMBLY.getContigByName("ctg2").get();
-        LEFT = SimpleBreakend.preciseWithNoRef(CONTIG, 6, Strand.FWD, "LEFT");
-        RIGHT = SimpleBreakend.preciseWithNoRef(CONTIG, 12, Strand.FWD, "RIGHT");
+        Contig CONTIG = TOY_ASSEMBLY.getContigByName("ctg2").orElseThrow();
+        LEFT = SimpleBreakend.precise(CONTIG, 6, Strand.FWD, "LEFT");
+        RIGHT = SimpleBreakend.precise(CONTIG, 12, Strand.FWD, "RIGHT");
     }
 
     @BeforeEach

@@ -120,34 +120,24 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
         String id = coreCoords.id;
 
         // the 1st adjacency (alpha) starts one base before begin coordinate (POS), by convention on the (+) strand
-//        ChromosomalPosition alphaLeftPos = ChromosomalPosition.precise(coreCoords.contig,
-//                coreCoords.begin.getPosition() - 1, Strand.FWD);
-        Breakend alphaLeft = SimpleBreakend.preciseWithNoRef(coreCoords.contig,
+        Breakend alphaLeft = SimpleBreakend.precise(coreCoords.contig,
                 coreCoords.begin.getPosition() - 1,
                 Strand.FWD,
                 id);
         // the right position is the last base of the inverted segment on the (-) strand
-//        ChromosomalPosition alphaRightPos = ChromosomalPosition.precise(coreCoords.contig,
-//                coreCoords.end.getPosition(),
-//                Strand.FWD).withStrand(Strand.REV);
-        SimpleBreakend alphaRight = SimpleBreakend.preciseWithNoRef(coreCoords.contig,
+        SimpleBreakend alphaRight = SimpleBreakend.precise(coreCoords.contig,
                 coreCoords.end.getPosition(),
                 Strand.FWD,
                 id).withStrand(Strand.REV);
         Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
         // the 2nd adjacency (beta) starts at the begin coordinate on (-) strand
-//        ChromosomalPosition betaLeftPos = ChromosomalPosition.precise(coreCoords.contig,
-//                coreCoords.begin.getPosition(),
-//                Strand.FWD).withStrand(Strand.REV);
-        SimpleBreakend betaLeft = SimpleBreakend.preciseWithNoRef(coreCoords.contig,
+        SimpleBreakend betaLeft = SimpleBreakend.precise(coreCoords.contig,
                 coreCoords.begin.getPosition(),
                 Strand.FWD,
                 id).withStrand(Strand.REV);
         // the right position is one base past end coordinate, by convention on (+) strand
-//        ChromosomalPosition betaRightPos = ChromosomalPosition.precise(coreCoords.contig,
-//                coreCoords.end.getPosition() + 1, Strand.FWD);
-        Breakend betaRight = SimpleBreakend.preciseWithNoRef(coreCoords.contig,
+        Breakend betaRight = SimpleBreakend.precise(coreCoords.contig,
                 coreCoords.end.getPosition() + 1,
                 Strand.FWD,
                 id);
@@ -161,8 +151,8 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
         return makeCoreCoords(tokens).map(data -> {
             // the order for a duplication is inverted
             Contig contig = data.contig;
-            SimpleBreakend left = SimpleBreakend.preciseWithNoRef(contig, data.end.getPosition(), Strand.FWD, data.id);
-            SimpleBreakend right = SimpleBreakend.preciseWithNoRef(contig, data.begin.getPosition(), Strand.FWD, data.id);
+            SimpleBreakend left = SimpleBreakend.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
+            SimpleBreakend right = SimpleBreakend.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
 
             return SimpleAdjacency.empty(left, right);
         });
@@ -171,8 +161,8 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
     private Optional<Adjacency> makeDeletion(String[] tokens) {
         return makeCoreCoords(tokens).map(data -> {
             Contig contig = data.contig;
-            SimpleBreakend left = SimpleBreakend.preciseWithNoRef(contig, data.begin.getPosition(), Strand.FWD, data.id);
-            SimpleBreakend right = SimpleBreakend.preciseWithNoRef(contig, data.end.getPosition(), Strand.FWD, data.id);
+            SimpleBreakend left = SimpleBreakend.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
+            SimpleBreakend right = SimpleBreakend.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
 
             return SimpleAdjacency.empty(left, right);
         });

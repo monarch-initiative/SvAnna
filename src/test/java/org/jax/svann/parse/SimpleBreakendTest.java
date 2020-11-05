@@ -21,12 +21,12 @@ public class SimpleBreakendTest extends ToyCoordinateTestBase {
     @BeforeAll
     public static void beforeAll() {
         // contig with length 20
-        CONTIG = TOY_ASSEMBLY.getContigByName("ctg2").get();
+        CONTIG = TOY_ASSEMBLY.getContigByName("ctg2").orElseThrow();
     }
 
     @BeforeEach
     public void setUp() {
-        instance = SimpleBreakend.preciseWithNoRef(CONTIG, 5, Strand.FWD, "Johnny");
+        instance = SimpleBreakend.precise(CONTIG, 5, Strand.FWD, "Johnny");
     }
 
     @Test

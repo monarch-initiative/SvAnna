@@ -60,36 +60,36 @@ class SimpleBreakend implements Breakend {
         return new SimpleBreakend(position, id, EMPTY);
     }
 
-    static SimpleBreakend precise(Contig contig,
-                                  int position,
-                                  Strand strand,
-                                  String id,
-                                  String ref) {
+    static SimpleBreakend preciseWithRef(Contig contig,
+                                         int position,
+                                         Strand strand,
+                                         String id,
+                                         String ref) {
         return new SimpleBreakend(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, ref);
     }
 
-    static SimpleBreakend preciseWithNoRef(Contig contig,
-                                           int position,
-                                           Strand strand,
-                                           String id) {
+    static SimpleBreakend precise(Contig contig,
+                                  int position,
+                                  Strand strand,
+                                  String id) {
         return new SimpleBreakend(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, EMPTY);
+    }
+
+    static SimpleBreakend impreciseWithRef(Contig contig,
+                                           int position,
+                                           ConfidenceInterval ci,
+                                           Strand strand,
+                                           CoordinateSystem coordinateSystem,
+                                           String id,
+                                           String ref) {
+        return new SimpleBreakend(contig, position, ci, strand, coordinateSystem, id, ref);
     }
 
     static SimpleBreakend imprecise(Contig contig,
                                     int position,
                                     ConfidenceInterval ci,
                                     Strand strand,
-                                    CoordinateSystem coordinateSystem,
-                                    String id,
-                                    String ref) {
-        return new SimpleBreakend(contig, position, ci, strand, coordinateSystem, id, ref);
-    }
-
-    static SimpleBreakend impreciseWithNoRef(Contig contig,
-                                             int position,
-                                             ConfidenceInterval ci,
-                                             Strand strand,
-                                             String id) {
+                                    String id) {
         return new SimpleBreakend(contig, position, ci, strand, CoordinateSystem.ONE_BASED, id, EMPTY);
     }
 

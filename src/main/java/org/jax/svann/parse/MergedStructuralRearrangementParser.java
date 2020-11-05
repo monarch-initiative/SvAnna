@@ -120,21 +120,27 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
         String id = coreCoords.id;
 
         // the 1st adjacency (alpha) starts one base before begin coordinate (POS), by convention on the (+) strand
-        ChromosomalPosition alphaLeftPos = ChromosomalPosition.precise(coreCoords.contig,
-                coreCoords.begin.getBegin() - 1, Strand.FWD);
-        Breakend alphaLeft = SimpleBreakend.of(alphaLeftPos, id);
+        Breakend alphaLeft = SimpleBreakend.precise(coreCoords.contig,
+                coreCoords.begin.getPosition() - 1,
+                Strand.FWD,
+                id);
         // the right position is the last base of the inverted segment on the (-) strand
-        ChromosomalPosition alphaRightPos = ChromosomalPosition.of(coreCoords.contig, coreCoords.end.getBeginPosition(), Strand.FWD).withStrand(Strand.REV);
-        SimpleBreakend alphaRight = SimpleBreakend.of(alphaRightPos, id);
+        SimpleBreakend alphaRight = SimpleBreakend.precise(coreCoords.contig,
+                coreCoords.end.getPosition(),
+                Strand.FWD,
+                id).withStrand(Strand.REV);
         Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
 
         // the 2nd adjacency (beta) starts at the begin coordinate on (-) strand
-        ChromosomalPosition betaLeftPos = ChromosomalPosition.of(coreCoords.contig, coreCoords.begin.getBeginPosition(), Strand.FWD).withStrand(Strand.REV);
-        SimpleBreakend betaLeft = SimpleBreakend.of(betaLeftPos, id);
+        SimpleBreakend betaLeft = SimpleBreakend.precise(coreCoords.contig,
+                coreCoords.begin.getPosition(),
+                Strand.FWD,
+                id).withStrand(Strand.REV);
         // the right position is one base past end coordinate, by convention on (+) strand
-        ChromosomalPosition betaRightPos = ChromosomalPosition.precise(coreCoords.contig,
-                coreCoords.end.getBegin() + 1, Strand.FWD);
-        Breakend betaRight = SimpleBreakend.of(betaRightPos, id);
+        Breakend betaRight = SimpleBreakend.precise(coreCoords.contig,
+                coreCoords.end.getPosition() + 1,
+                Strand.FWD,
+                id);
         Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
         return List.of(alpha, beta);
@@ -144,8 +150,9 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
         // tokens represent record with a duplication
         return makeCoreCoords(tokens).map(data -> {
             // the order for a duplication is inverted
-            SimpleBreakend left = SimpleBreakend.of(data.end, data.id);
-            SimpleBreakend right = SimpleBreakend.of(data.begin, data.id);
+            Contig contig = data.contig;
+            SimpleBreakend left = SimpleBreakend.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
+            SimpleBreakend right = SimpleBreakend.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
 
             return SimpleAdjacency.empty(left, right);
         });
@@ -153,8 +160,9 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
 
     private Optional<Adjacency> makeDeletion(String[] tokens) {
         return makeCoreCoords(tokens).map(data -> {
-            SimpleBreakend left = SimpleBreakend.of(data.begin, data.id);
-            SimpleBreakend right = SimpleBreakend.of(data.end, data.id);
+            Contig contig = data.contig;
+            SimpleBreakend left = SimpleBreakend.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
+            SimpleBreakend right = SimpleBreakend.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
 
             return SimpleAdjacency.empty(left, right);
         });
@@ -173,9 +181,9 @@ public class MergedStructuralRearrangementParser implements StructuralRearrangem
         ChromosomalPosition begin, end;
         try {
             int beginPos = Integer.parseInt(tokens[1]);
-            begin = ChromosomalPosition.of(contig, Position.precise(beginPos, CoordinateSystem.ZERO_BASED), Strand.FWD);
+            begin = ChromosomalPosition.precise(contig, beginPos + 1, Strand.FWD);
             int endPos = Integer.parseInt(tokens[2]);
-            end = ChromosomalPosition.of(contig, Position.precise(endPos, CoordinateSystem.ONE_BASED), Strand.FWD);
+            end = ChromosomalPosition.precise(contig, endPos, Strand.FWD);
         } catch (NumberFormatException e) {
             LOGGER.warn("Invalid begin/end coordinate in line {}", String.join(DELIMITER, tokens));
             return Optional.empty();

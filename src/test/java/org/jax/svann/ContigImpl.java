@@ -65,10 +65,6 @@ public class ContigImpl implements Contig {
 
     @Override
     public String toString() {
-        return "ContigImpl{" +
-                "id=" + id +
-                ", primaryName='" + primaryName + '\'' +
-                ", length=" + length +
-                '}';
+        return primaryName + '(' + id + ')';
     }
 }

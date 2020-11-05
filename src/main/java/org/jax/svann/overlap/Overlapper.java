@@ -113,8 +113,8 @@ public class Overlapper {
             throw new SvAnnRuntimeException("Malformed delection adjacency list with size " + adjacencies.size());
         }
         Adjacency translocation = adjacencies.get(0);
-        Breakend breakendA = translocation.getLeft();
-        Breakend breakendB = translocation.getRight();
+        Breakend breakendA = translocation.getStart();
+        Breakend breakendB = translocation.getEnd();
         List<Overlap> overlapA = getTranslocationPartOverlap(breakendA);
         List<Overlap> overlapB = getTranslocationPartOverlap(breakendB);
         // we would like to return one Overlap object for each end of the translocation
@@ -138,8 +138,9 @@ public class Overlapper {
     private List<Overlap> getTranslocationPartOverlap(Breakend bend) {
         Contig chrom = bend.getContig();
         int id = chrom.getId();
-        int begin = bend.getBegin();
-        int end = bend.getEnd();
+        int begin = bend.getPosition();
+        int end = bend.getPosition();
+        // TODO: 4. 11. 2020 this is in fact a position
         GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
@@ -160,12 +161,12 @@ public class Overlapper {
             throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
         }
         Adjacency deletion = adjacencies.get(0);
-        Breakend left = deletion.getLeft();
-        Breakend right = deletion.getRight();
+        Breakend left = deletion.getStart();
+        Breakend right = deletion.getEnd();
         Contig chrom = left.getContig();
         int id = chrom.getId();
-        int begin = left.getBegin();
-        int end = right.getEnd();
+        int begin = left.getPosition();
+        int end = right.getPosition();
         GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
@@ -177,8 +178,9 @@ public class Overlapper {
     List<Overlap> getBreakendOverlaps(Breakend be) {
         Contig chrom = be.getContig();
         int id = chrom.getId();
-        int begin = be.getBegin();
-        int end = be.getEnd();
+        int begin = be.getPosition();
+        int end = be.getPosition();
+        // TODO: 4. 11. 2020 this is in fact a point
         GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
@@ -200,10 +202,10 @@ public class Overlapper {
         }
         List<Overlap> overlaps = new ArrayList<>();
         for (var a : adjacencies) {
-            Breakend be = a.getLeft();
+            Breakend be = a.getStart();
             List<Overlap> leftOverlaps = getBreakendOverlaps(be);
             leftOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
-            be = a.getRight();
+            be = a.getEnd();
             List<Overlap> rightOverlaps = getBreakendOverlaps(be);
             rightOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
         }
@@ -224,9 +226,9 @@ public class Overlapper {
         Breakend left = onFwd.getLeftmostBreakend();
         Breakend right = onFwd.getRightmostBreakend();
         // assume that breakends are on the same contig
-        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, left.getContig().getId(), left.getBegin(), right.getEnd(), PositionType.ONE_BASED);
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, left.getContig().getId(), left.getPosition(), right.getPosition(), PositionType.ONE_BASED);
 
-        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getBegin(), right.getBegin());
+        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getPosition(), right.getPosition());
 
         return getOverlapList(gi, qresult);
     }
@@ -246,13 +248,13 @@ public class Overlapper {
             throw new SvAnnRuntimeException("Malformed insertion adjacency list with size " + adjacencies.size());
         }
         Adjacency insertion1 = adjacencies.get(0);
-        Breakend left = insertion1.getLeft();
-        Breakend right = insertion1.getRight();
+        Breakend left = insertion1.getStart();
+        Breakend right = insertion1.getEnd();
         Contig chrom = left.getContig();
         int id = chrom.getId();
-        int begin = left.getBegin();
+        int begin = left.getPosition();
         Adjacency insertion2 = adjacencies.get(1);
-        int end = insertion2.getRight().getEnd();
+        int end = insertion2.getEnd().getPosition();
         GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =

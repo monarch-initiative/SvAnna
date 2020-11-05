@@ -1,8 +1,8 @@
 package org.jax.svann.parse;
 
 import org.jax.svann.reference.Breakend;
-import org.jax.svann.reference.ChromosomalRegion;
-import org.jax.svann.reference.Position;
+import org.jax.svann.reference.ConfidenceInterval;
+import org.jax.svann.reference.CoordinateSystem;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
@@ -12,55 +12,96 @@ class SimpleBreakend implements Breakend {
 
     private static final String EMPTY = "";
 
-    private final ChromosomalRegion position;
+    private final Contig contig;
+    private final int position;
+    private final ConfidenceInterval ci;
+    private final Strand strand;
+    private final CoordinateSystem coordinateSystem;
     private final String id;
     private final String ref;
 
-    private SimpleBreakend(ChromosomalRegion position,
+    private SimpleBreakend(Contig contig,
+                           int position,
+                           ConfidenceInterval ci,
+                           Strand strand,
+                           CoordinateSystem coordinateSystem,
                            String id,
                            String ref) {
+        this.contig = contig;
         this.position = position;
+        this.ci = ci;
+        this.strand = strand;
+        this.coordinateSystem = coordinateSystem;
         this.id = id;
         this.ref = ref;
+
     }
 
-    static SimpleBreakend of(ChromosomalRegion position,
-                             String id,
-                             String ref) {
-        return new SimpleBreakend(position, id, ref);
+    static SimpleBreakend preciseWithRef(Contig contig,
+                                         int position,
+                                         Strand strand,
+                                         String id,
+                                         String ref) {
+        return new SimpleBreakend(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, ref);
     }
 
-    static SimpleBreakend of(ChromosomalRegion position,
-                             String id) {
-        return new SimpleBreakend(position, id, EMPTY);
+    static SimpleBreakend precise(Contig contig,
+                                  int position,
+                                  Strand strand,
+                                  String id) {
+        return new SimpleBreakend(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, EMPTY);
+    }
+
+    static SimpleBreakend impreciseWithRef(Contig contig,
+                                           int position,
+                                           ConfidenceInterval ci,
+                                           Strand strand,
+                                           CoordinateSystem coordinateSystem,
+                                           String id,
+                                           String ref) {
+        return new SimpleBreakend(contig, position, ci, strand, coordinateSystem, id, ref);
+    }
+
+    static SimpleBreakend imprecise(Contig contig,
+                                    int position,
+                                    ConfidenceInterval ci,
+                                    Strand strand,
+                                    String id) {
+        return new SimpleBreakend(contig, position, ci, strand, CoordinateSystem.ONE_BASED, id, EMPTY);
     }
 
     @Override
     public Contig getContig() {
-        return position.getContig();
+        return contig;
     }
 
     @Override
-    public Position getBeginPosition() {
-        return position.getBeginPosition();
+    public int getPosition() {
+        return position;
     }
 
     @Override
-    public Position getEndPosition() {
-        return position.getEndPosition();
+    public ConfidenceInterval getCi() {
+        return ci;
+    }
+
+    @Override
+    public CoordinateSystem getCoordinateSystem() {
+        return CoordinateSystem.ONE_BASED;
     }
 
     @Override
     public Strand getStrand() {
-        return position.getStrand();
+        return strand;
     }
 
     @Override
-    public Breakend withStrand(Strand strand) {
-        if (position.getStrand().equals(strand)) {
+    public SimpleBreakend withStrand(Strand strand) {
+        if (this.strand.equals(strand)) {
             return this;
         } else {
-            return new SimpleBreakend(position.withStrand(strand), id, Utils.reverseComplement(ref));
+            int pos = contig.getLength() - position + 1;
+            return new SimpleBreakend(contig, pos, ci.toOppositeStrand(), strand, coordinateSystem, id, Utils.reverseComplement(ref));
         }
     }
 
@@ -79,20 +120,23 @@ class SimpleBreakend implements Breakend {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SimpleBreakend that = (SimpleBreakend) o;
-        return Objects.equals(position, that.position) &&
+        return position == that.position &&
+                Objects.equals(contig, that.contig) &&
+                Objects.equals(ci, that.ci) &&
+                strand == that.strand &&
+                coordinateSystem == that.coordinateSystem &&
                 Objects.equals(id, that.id) &&
                 Objects.equals(ref, that.ref);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(position, id, ref);
+        return Objects.hash(contig, position, ci, strand, coordinateSystem, id, ref);
     }
 
     @Override
     public String toString() {
-        return "BND[" + position +
-                "(" + id + ")" +
+        return "BND(" + id + ")[" + contig + ":" + position + "(" + strand + ")" +
                 "'" + ref + "']";
     }
 }

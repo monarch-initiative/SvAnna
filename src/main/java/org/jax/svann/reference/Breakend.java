@@ -1,6 +1,6 @@
 package org.jax.svann.reference;
 
-public interface Breakend extends ChromosomalRegion {
+public interface Breakend extends GenomicPosition {
 
     /**
      * @return id corresponding to id of the record (e.g. VCF) this breakend was created from
@@ -18,6 +18,7 @@ public interface Breakend extends ChromosomalRegion {
     /**
      * Convert the breakend to opposite strand no matter what.
      */
+    @Override
     default Breakend toOppositeStrand() {
         return getStrand().equals(Strand.FWD)
                 ? withStrand(Strand.REV)

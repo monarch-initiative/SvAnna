@@ -1,57 +1,72 @@
 package org.jax.svann.parse;
 
-import org.jax.svann.reference.ChromosomalRegion;
-import org.jax.svann.reference.Position;
+import org.jax.svann.reference.ConfidenceInterval;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
 import java.util.Objects;
 
-class ChromosomalPosition implements ChromosomalRegion {
+class ChromosomalPosition {
 
     private final Contig contig;
-
-    private final Position position;
-
+    private final int position;
+    private final ConfidenceInterval ci;
     private final Strand strand;
 
-    private ChromosomalPosition(Contig contig, Position position, Strand strand) {
+    private ChromosomalPosition(Contig contig,
+                                int position,
+                                ConfidenceInterval ci,
+                                Strand strand) {
         this.contig = contig;
         this.position = position;
+        this.ci = ci;
         this.strand = strand;
     }
 
-    static ChromosomalPosition of(Contig contig, Position position, Strand strand) {
-        return new ChromosomalPosition(contig, position, strand);
+    /**
+     * @param contig   contig
+     * @param position 1-based position
+     * @param ci       confidence interval
+     * @param strand   strand
+     * @return position
+     */
+    static ChromosomalPosition imprecise(Contig contig, int position, ConfidenceInterval ci, Strand strand) {
+        return new ChromosomalPosition(contig, position, ci, strand);
     }
 
+    /**
+     * @param contig   contig
+     * @param position 1-based position
+     * @param strand   strand
+     * @return position
+     */
     static ChromosomalPosition precise(Contig contig, int position, Strand strand) {
-        return new ChromosomalPosition(contig, Position.precise(position), strand);
+        return new ChromosomalPosition(contig, position, ConfidenceInterval.precise(), strand);
     }
 
-    @Override
+    public int getPosition() {
+        return position;
+    }
+
+    public ConfidenceInterval getCi() {
+        return ci;
+    }
+
     public Contig getContig() {
         return contig;
     }
 
-    @Override
-    public Position getBeginPosition() {
-        return position;
-    }
-
-    @Override
     public Strand getStrand() {
         return strand;
     }
 
-    @Override
+
     public ChromosomalPosition withStrand(Strand strand) {
         if (this.strand.equals(strand)) {
             return this;
         } else {
-            Position pos = Position.imprecise(contig.getLength() - position.getPos() + 1,
-                    position.getConfidenceInterval().toOppositeStrand());
-            return new ChromosomalPosition(contig, pos, strand);
+            int pos = contig.getLength() - position + 1;
+            return new ChromosomalPosition(contig, pos, ci.toOppositeStrand(), strand);
         }
     }
 
@@ -60,14 +75,15 @@ class ChromosomalPosition implements ChromosomalRegion {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChromosomalPosition that = (ChromosomalPosition) o;
-        return Objects.equals(contig, that.contig) &&
-                Objects.equals(position, that.position) &&
+        return position == that.position &&
+                Objects.equals(contig, that.contig) &&
+                Objects.equals(ci, that.ci) &&
                 strand == that.strand;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(contig, position, strand);
+        return Objects.hash(contig, position, ci, strand);
     }
 
     @Override

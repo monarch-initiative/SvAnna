@@ -7,11 +7,11 @@ class EnhancerEndExtractor implements IntervalEndExtractor<Enhancer> {
 
     @Override
     public int getBegin(Enhancer enhancer) {
-        return enhancer.getStart().getPos();
+        return enhancer.getStart().getPosition();
     }
 
     @Override
     public int getEnd(Enhancer enhancer) {
-        return enhancer.getEnd().getPos();
+        return enhancer.getEnd().getPosition();
     }
 }

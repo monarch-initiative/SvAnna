@@ -1,51 +1,82 @@
 package org.jax.svann.genomicreg;
 
 import org.jax.svann.reference.CoordinateSystem;
-import org.jax.svann.reference.Position;
+import org.jax.svann.reference.GenomicPosition;
+import org.jax.svann.reference.GenomicRegion;
+import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Objects;
+import java.util.StringJoiner;
 
-public class Enhancer {
+public class Enhancer implements GenomicRegion {
 
     private final static int DEFAULT_DISTANCE_THRESHOLD = 500_000;
-    /** The contig (chromosome) on which this enhancer is located. */
+    /**
+     * The contig (chromosome) on which this enhancer is located.
+     */
     private final Contig contig;
-    private final Position start;
-    private final Position end;
+    private final GenomicPosition start;
+    private final GenomicPosition end;
     private final double tau;
     private final TermId termId;
 
-    public Enhancer(Contig cony, int s, int e, double t, TermId tid) {
-        this.contig = cony;
-        this.start = Position.precise(s, CoordinateSystem.ONE_BASED);
-        this.end = Position.precise(e, CoordinateSystem.ONE_BASED);
-        this.tau = t;
-        this.termId = tid;
+    public Enhancer(Contig contig, int start, int end, double t, TermId tid) {
+        this(contig,
+                new EnhancerGenomicPosition(contig, start, Strand.FWD, CoordinateSystem.ONE_BASED),
+                new EnhancerGenomicPosition(contig, end, Strand.FWD, CoordinateSystem.ONE_BASED),
+                t, tid);
     }
 
+    private Enhancer(Contig contig, GenomicPosition start, GenomicPosition end, double tau, TermId termId) {
+        this.contig = contig;
+        this.start = start;
+        this.end = end;
+        this.tau = tau;
+        this.termId = termId;
+    }
+
+
     // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
-    public boolean matchesPos(Contig otherContig, Position pos, int THRESHOLD) {
+    public boolean matchesPos(Contig otherContig, int pos, int THRESHOLD) {
         return this.contig.equals(otherContig)
-                && Math.abs(start.getPos() - pos.getPos()) < THRESHOLD;
+                && Math.abs(start.getPosition() - pos) < THRESHOLD;
     }
 
 
     // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
-    public boolean matchesPos(Contig otherContig, Position pos) {
+    public boolean matchesPos(Contig otherContig, int pos) {
         return matchesPos(otherContig, pos, DEFAULT_DISTANCE_THRESHOLD);
     }
 
-    public Contig getChromosome() {
+    @Override
+    public Contig getContig() {
         return contig;
     }
 
-    public Position getStart() {
+    @Override
+    public Enhancer withStrand(Strand strand) {
+        if (getStrand().equals(strand)) {
+            return this;
+        } else {
+            // change position order!!
+            return new Enhancer(contig, end.withStrand(strand), start.withStrand(strand), tau, termId);
+        }
+    }
+
+    @Override
+    public Strand getStrand() {
+        return start.getStrand();
+    }
+
+    @Override
+    public GenomicPosition getStart() {
         return start;
     }
 
-    public Position getEnd() {
+    @Override
+    public GenomicPosition getEnd() {
         return end;
     }
 
@@ -58,7 +89,19 @@ public class Enhancer {
     }
 
     public String getSummary() {
-        return String.format("%s:%d-%d [%s]", contig, start.getPos(), end.getPos(), termId.getValue());
+        return String.format("%s:%d-%d [%s]", contig, start.getPosition(), end.getPosition(), termId.getValue());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Enhancer enhancer = (Enhancer) o;
+        return Double.compare(enhancer.tau, tau) == 0 &&
+                Objects.equals(contig, enhancer.contig) &&
+                Objects.equals(start, enhancer.start) &&
+                Objects.equals(end, enhancer.end) &&
+                Objects.equals(termId, enhancer.termId);
     }
 
     @Override
@@ -67,14 +110,13 @@ public class Enhancer {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (! (obj instanceof Enhancer))
-            return false;
-        Enhancer that = (Enhancer) obj;
-        return this.contig.equals(that.contig) &&
-                this.start.equals(that.start) &&
-                this.end.equals(that.end) &&
-                this.tau == that.tau &&
-                this.termId.equals(that.termId);
+    public String toString() {
+        return new StringJoiner(", ", Enhancer.class.getSimpleName() + "[", "]")
+                .add("contig=" + contig)
+                .add("start=" + start)
+                .add("end=" + end)
+                .add("tau=" + tau)
+                .add("termId=" + termId)
+                .toString();
     }
 }

@@ -97,8 +97,8 @@ public class SvSvgGenerator {
             if (end > MAXtranscript) MAXtranscript = end;
         }
         for (var e : affectedEnhancers) {
-            int begin = e.getStart().getPos();
-            int end = e.getEnd().getPos();
+            int begin = e.getStart().getPosition();
+            int end = e.getEnd().getPosition();
             if (begin > end) throw new SvAnnRuntimeException("blablsbas");
             if (begin < MINtranscript) MINtranscript = begin;
             if (end > MAXtranscript) MAXtranscript = end;

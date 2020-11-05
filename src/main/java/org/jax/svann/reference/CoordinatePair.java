@@ -1,8 +1,8 @@
 package org.jax.svann.reference;
 
 /**
- * This interface represents a pair of coordinates, suitable to be used for representing both <em>intra</em>chromosomal
- * events (e.g inversions, deletions), and <em>inter</em>chromosomal events (translocations).
+ * This interface represents an ordered pair of coordinates, suitable to be used for representing both
+ * <em>intra</em>chromosomal events (e.g inversions, deletions), and <em>inter</em>chromosomal events (translocations).
  * <p>
  * Note that multiple coordinate pairs might be used to represent an event.
  */
@@ -44,7 +44,7 @@ public interface CoordinatePair {
     }
 
     /**
-     * @return one-based (inclusive) start coordinate
+     * @return one-based (inclusive) end coordinate
      */
     default int getEndPosition() {
         return getEnd().getPosition();

@@ -71,6 +71,4 @@ public interface CoordinatePair {
     default boolean isInterChromosomal() {
         return getStartContigId() != getEndContigId();
     }
-
-    CoordinatePair toOppositeStrand();
 }

@@ -29,7 +29,6 @@ class SimpleCoordinatePair implements CoordinatePair {
         return end;
     }
 
-    @Override
     public SimpleCoordinatePair toOppositeStrand() {
         // !switch begin and end!
         return new SimpleCoordinatePair(end.toOppositeStrand(), start.toOppositeStrand());

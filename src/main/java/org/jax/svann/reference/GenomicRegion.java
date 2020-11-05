@@ -50,7 +50,6 @@ public interface GenomicRegion extends CoordinatePair, Comparable<GenomicRegion>
 
     GenomicRegion withStrand(Strand strand);
 
-    @Override
     default GenomicRegion toOppositeStrand() {
         return withStrand(getStrand().getOpposite());
     }

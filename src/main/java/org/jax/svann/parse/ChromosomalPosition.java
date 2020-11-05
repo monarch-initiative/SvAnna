@@ -1,7 +1,6 @@
 package org.jax.svann.parse;
 
 import org.jax.svann.reference.ConfidenceInterval;
-import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
@@ -22,11 +21,6 @@ class ChromosomalPosition {
         this.position = position;
         this.ci = ci;
         this.strand = strand;
-    }
-
-    @Deprecated
-    static ChromosomalPosition of(Contig contig, Position position, Strand strand) {
-        return new ChromosomalPosition(contig, position.getPos(), position.getConfidenceInterval(), strand);
     }
 
     /**
@@ -60,11 +54,6 @@ class ChromosomalPosition {
 
     public Contig getContig() {
         return contig;
-    }
-
-    @Deprecated
-    public Position getBeginPosition() {
-        return Position.imprecise(position, ci);
     }
 
     public Strand getStrand() {

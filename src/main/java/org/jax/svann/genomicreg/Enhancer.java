@@ -1,6 +1,9 @@
 package org.jax.svann.genomicreg;
 
-import org.jax.svann.reference.*;
+import org.jax.svann.reference.CoordinateSystem;
+import org.jax.svann.reference.GenomicPosition;
+import org.jax.svann.reference.GenomicRegion;
+import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -36,14 +39,14 @@ public class Enhancer implements GenomicRegion {
 
 
     // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
-    public boolean matchesPos(Contig otherContig, Position pos, int THRESHOLD) {
+    public boolean matchesPos(Contig otherContig, int pos, int THRESHOLD) {
         return this.contig.equals(otherContig)
-                && Math.abs(start.getPosition() - pos.getPos()) < THRESHOLD;
+                && Math.abs(start.getPosition() - pos) < THRESHOLD;
     }
 
 
     // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
-    public boolean matchesPos(Contig otherContig, Position pos) {
+    public boolean matchesPos(Contig otherContig, int pos) {
         return matchesPos(otherContig, pos, DEFAULT_DISTANCE_THRESHOLD);
     }
 

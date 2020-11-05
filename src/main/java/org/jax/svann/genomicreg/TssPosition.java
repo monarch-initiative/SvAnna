@@ -1,7 +1,6 @@
 package org.jax.svann.genomicreg;
 
 import org.jax.svann.reference.CoordinateSystem;
-import org.jax.svann.reference.Position;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
@@ -26,10 +25,10 @@ public class TssPosition implements Comparable<TssPosition> {
                     .thenComparing(TssPosition::getTranscriptId);
 
 
-    public TssPosition(String gene, String transcript, Contig chr, Position pos, Strand strand) {
+    public TssPosition(String gene, String transcript, Contig chr, int pos, Strand strand) {
         this.geneSymbol = gene;
         this.transcriptId = transcript;
-        this.genomicPosition = new EnhancerGenomicPosition(chr, pos.getPos(), strand, CoordinateSystem.ONE_BASED);
+        this.genomicPosition = new EnhancerGenomicPosition(chr, pos, strand, CoordinateSystem.ONE_BASED);
     }
 
 

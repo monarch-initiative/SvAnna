@@ -1,6 +1,9 @@
 package org.jax.svann.parse;
 
-import org.jax.svann.reference.*;
+import org.jax.svann.reference.Breakend;
+import org.jax.svann.reference.ConfidenceInterval;
+import org.jax.svann.reference.CoordinateSystem;
+import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
 import java.util.Objects;
@@ -17,19 +20,6 @@ class SimpleBreakend implements Breakend {
     private final String id;
     private final String ref;
 
-    @Deprecated
-    private SimpleBreakend(ChromosomalPosition position,
-                           String id,
-                           String ref) {
-        this(position.getContig(),
-                position.getBeginPosition().getPos(),
-                position.getBeginPosition().getConfidenceInterval(),
-                position.getStrand(),
-                CoordinateSystem.ONE_BASED,
-                id,
-                ref);
-    }
-
     private SimpleBreakend(Contig contig,
                            int position,
                            ConfidenceInterval ci,
@@ -45,19 +35,6 @@ class SimpleBreakend implements Breakend {
         this.id = id;
         this.ref = ref;
 
-    }
-
-    @Deprecated
-    static SimpleBreakend of(ChromosomalPosition position,
-                             String id,
-                             String ref) {
-        return new SimpleBreakend(position, id, ref);
-    }
-
-    @Deprecated
-    static SimpleBreakend of(ChromosomalPosition position,
-                             String id) {
-        return new SimpleBreakend(position, id, EMPTY);
     }
 
     static SimpleBreakend preciseWithRef(Contig contig,
@@ -111,16 +88,6 @@ class SimpleBreakend implements Breakend {
     @Override
     public CoordinateSystem getCoordinateSystem() {
         return CoordinateSystem.ONE_BASED;
-    }
-
-    @Override
-    public Position getBeginPosition() {
-        return Position.imprecise(position, ci, CoordinateSystem.ONE_BASED);
-    }
-
-    @Override
-    public Position getEndPosition() {
-        return Position.imprecise(position, ci, CoordinateSystem.ONE_BASED);
     }
 
     @Override

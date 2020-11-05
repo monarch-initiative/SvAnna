@@ -92,9 +92,8 @@ public class EnhancerOverlapper {
     List<Enhancer> getBreakendOverlaps(Breakend be) {
         Contig chrom = be.getContig();
         int id = chrom.getId();
-        int begin = be.getBegin();
-        int end = be.getEnd();
-        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, end);
+        int begin = be.getPosition();
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, be.getPosition(), PositionType.ONE_BASED);
         return getSimpleEnhancerOverlap(gi);
     }
 

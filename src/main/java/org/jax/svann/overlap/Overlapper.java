@@ -228,7 +228,7 @@ public class Overlapper {
         // assume that breakends are on the same contig
         GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, left.getContig().getId(), left.getPosition(), right.getPosition(), PositionType.ONE_BASED);
 
-        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getBegin(), right.getBegin());
+        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getPosition(), right.getPosition());
 
         return getOverlapList(gi, qresult);
     }

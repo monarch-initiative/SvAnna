@@ -1,13 +1,12 @@
 package org.jax.svann.viz;
 
+import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.Breakend;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 
 import java.util.ArrayList;
@@ -25,6 +24,7 @@ public class HtmlVisualizable implements Visualizable {
     public HtmlVisualizable(SequenceRearrangement rearrangement, SvPriority svPriority) {
         this.rearrangement = rearrangement;
         this.svPriority = svPriority;
+        //rearrangement.getAdjacencies().get(0).
     }
 
     private HtmlLocation getDeletionLocation(SequenceRearrangement rearrangement) {
@@ -62,10 +62,14 @@ public class HtmlVisualizable implements Visualizable {
     public boolean hasPhenotypicRelevance() {
         return this.svPriority.hasPhenotypicRelevance();
     }
-
+    @Override
     public List<HpoDiseaseSummary> getDiseaseSummaries() {
         return this.svPriority.getDiseases();
     }
+    @Override
+    public List<TranscriptModel> getTranscripts() { return new ArrayList<>(this.svPriority.getAffectedTranscripts()); }
+    @Override
+    public List<Enhancer> getEnhancers() { return this.svPriority.getAffectedEnhancers(); }
 
     /**
      * Return strings for display of the format chr3:123-456

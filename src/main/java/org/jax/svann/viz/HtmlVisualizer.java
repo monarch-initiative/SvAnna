@@ -6,11 +6,10 @@ import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.Breakend;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.viz.svg.DeletionSvgGenerator;
+import org.jax.svann.viz.svg.SvSvgGenerator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -156,7 +155,10 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(keyValueRow("Impact", visualizable.getImpact()));
         //sb.append(keyValueRow("Associated diseases", getUnorderedListWithDiseases()));
         sb.append("</table>");
-
+        SvType svtype = visualizable.getRearrangement().getType();
+        List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(),coordinatePairs);
+        sb.append("<br/>\n").append(gen.getSvg());
         return sb.toString();
     }
 }

@@ -7,6 +7,9 @@ import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.TestBase;
 import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.genomicreg.TestCoordinatePair;
+import org.jax.svann.genomicreg.TestGenomicPosition;
+import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -20,9 +23,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import static org.jax.svann.reference.Strand.FWD;
+
 public class SvSvgGeneratorTest extends TestBase {
 
     private static SvSvgGenerator generator;
+
+
 
     @BeforeAll
     public static void init() {
@@ -34,8 +41,12 @@ public class SvSvgGeneratorTest extends TestBase {
         int start = 133_353_500;
         int end = 133_354_500;
         GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, chr9.getId(), start, end, PositionType.ONE_BASED);
+        CoordinatePair cpair = TestCoordinatePair.of(new TestGenomicPosition(chr9, start, FWD),
+                new TestGenomicPosition(chr9, end, FWD));
+        ArrayList<CoordinatePair> cpairlist = new ArrayList<>();
+        cpairlist.add(cpair);
         String deletion = "Deletion, ch9:133_353_500-133_354_500";
-        generator = new SvSvgGenerator(new ArrayList<>(surf1list), enhancers, gi, deletion);
+        generator = new DeletionSvgGenerator(new ArrayList<>(surf1list), enhancers, cpairlist);
     }
 
 

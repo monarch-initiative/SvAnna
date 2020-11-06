@@ -1,5 +1,7 @@
 package org.jax.svann.viz;
 
+import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.reference.SequenceRearrangement;
@@ -22,5 +24,9 @@ public interface Visualizable {
     List<HpoDiseaseSummary> getDiseaseSummaries();
 
     List<Overlap> getOverlaps();
+
+    List<TranscriptModel> getTranscripts();
+
+    List<Enhancer> getEnhancers();
 
 }

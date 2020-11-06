@@ -6,6 +6,9 @@ import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.reference.CoordinatePair;
+import org.jax.svann.reference.GenomicPosition;
+import org.jax.svann.reference.SvType;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -18,42 +21,44 @@ import java.util.List;
  * Structural variant (SV) Scalar Vector Graphic (SVG) generator.
  * @author Peter N Robinson
  */
-public class SvSvgGenerator {
+public abstract class SvSvgGenerator {
 
     /** Canvas width of the SVG */
     private final int SVG_WIDTH = 1400;
 
     private final static int HEIGHT_FOR_SV_DISPLAY = 200;
-    private final static int HEIGHT_PER_DISPLAY_ITEM = 100;
+    protected final static int HEIGHT_PER_DISPLAY_ITEM = 100;
     /** Canvas height of the SVG.*/
-    private final int SVG_HEIGHT;
+    protected int SVG_HEIGHT;
 
-    private final List<TranscriptModel> affectedTranscripts;
-    private final List<Enhancer> affectedEnhancers;
-    private final GenomeInterval svInterval;
+    protected final List<TranscriptModel> affectedTranscripts;
+    protected final List<Enhancer> affectedEnhancers;
+    protected final List<CoordinatePair> coordinatePairs;
+
     /** Boundaries of SVG we do not write to. */
     private final double OFFSET_FACTOR = 0.1;
 
     private final double SVG_OFFSET = SVG_WIDTH * OFFSET_FACTOR;
     /** Number of base pairs from left to right boundary */
     private final double genomicSpan;
-    /** Left most position, including offset. */
-    private final int genomicMinPos;
-    private final int genomicMaxPos;
+    /** Leftmost position (most 5' on chromosome), including offset. */
+    protected final int genomicMinPos;
+    /** Rightmost position (most 3' on chromosome), including offset. */
+    protected final int genomicMaxPos;
     /** This will be 10% of genomicSpan, extra area on the sides of the graphic to make things look nicer. */
-    private final int genomicOffset;
+    private int genomicOffset;
 
     final String pattern = "###,###.###";
     final DecimalFormat decimalFormat = new DecimalFormat(pattern);
 
-    private final String variantDescription;
-    private final String chrom;
+    private String variantDescription;
+    private String chrom;
 
     private final double INTRON_MIDPOINT_ELEVATION = 10.0;
 
     private final double EXON_HEIGHT = 20;
-
-    private final double SV_HEIGHT = 30;
+    /** Height of the symbol that represents the structural variant. */
+    protected final double SV_HEIGHT = 30;
 
     public final static String PURPLE = "#790079";
     public final static String GREEN = "#00A087";
@@ -72,60 +77,98 @@ public class SvSvgGenerator {
 
     public final static String BRIGHT_GREEN = "#00a087";
 
+
+    private final SvType svtype;
+
+
     /**
      * The constructor calculates the left and right boundaries for display
      * TODO document logic, cleanup
+     *
      * @param transcripts
-     * @param enhancers
-     * @param genomeInterval
+     * @param enhancers   // * @param genomeInterval
      */
-    public SvSvgGenerator(List<TranscriptModel> transcripts,
+    public SvSvgGenerator(SvType svtype,
+                          List<TranscriptModel> transcripts,
                           List<Enhancer> enhancers,
-                          GenomeInterval genomeInterval,
-                          String varString) {
+                          List<CoordinatePair> coordinatePairs) {
+        this.svtype = svtype;
         this.affectedTranscripts = transcripts;
         this.affectedEnhancers = enhancers;
-        this.svInterval = genomeInterval;
-        this.variantDescription = varString;
-
-        int MINtranscript = Integer.MAX_VALUE;
-        int MAXtranscript = Integer.MIN_VALUE;
-        for (var tmod : affectedTranscripts) {
-            int begin = tmod.getTXRegion().withStrand(Strand.FWD).getBeginPos();
-            int end = tmod.getTXRegion().withStrand(Strand.FWD).getEndPos();
-            if (begin < MINtranscript) MINtranscript = begin;
-            if (end > MAXtranscript) MAXtranscript = end;
-        }
-        for (var e : affectedEnhancers) {
-            int begin = e.getStart().getPosition();
-            int end = e.getEnd().getPosition();
-            if (begin > end) throw new SvAnnRuntimeException("blablsbas");
-            if (begin < MINtranscript) MINtranscript = begin;
-            if (end > MAXtranscript) MAXtranscript = end;
-        }
-        int MINsv = this.svInterval.withStrand(Strand.FWD).getBeginPos();
-        int MAXsv = this.svInterval.withStrand(Strand.FWD).getEndPos();
-        int MIN = Math.min(MINtranscript,  MINsv);
-        int MAX = Math.max(MAXtranscript,  MAXsv);
-        int DELTA = MAX - MIN;
-        this.genomicOffset = (int) (OFFSET_FACTOR* DELTA);
-        this.genomicMinPos = MIN - genomicOffset;
-        this.genomicMaxPos = MAX + genomicOffset;
-        this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
-        if (genomicSpan <0)
-            throw new SvAnnRuntimeException("Error, genomic span less than zero");
-        if (genomeInterval.getChr() < 23)
-            this.chrom = String.format("chr%d",genomeInterval.getChr());
-        else if (genomeInterval.getChr() == 23)
-            this.chrom = "chrX";
-        else if (genomeInterval.getChr() == 24)
-            this.chrom = "chrY";
-        else if (genomeInterval.getChr() == 25)
-            this.chrom = "chrM";
-        else
-            this.chrom = String.valueOf(genomeInterval.getChr()); // should never happen
+        this.coordinatePairs = coordinatePairs;
         this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        switch (svtype) {
+            case DELETION:
+            default:
+                // get min/max for SVs with one region
+                // todo  -- do we need to check how many coordinate pairs there are?
+                CoordinatePair cpair = coordinatePairs.get(0);
+                int minPos = getGenomicMinPos(transcripts, enhancers, cpair);
+                int maxPos = getGenomicMaxPos(transcripts, enhancers, cpair);
+                // add a little real estate to each side for esthetic purposes
+                int delta = maxPos - minPos;
+                int offset = (int) (OFFSET_FACTOR * delta);
+                this.genomicMinPos = minPos - offset < 0 ? 0 : minPos - offset;
+                this.genomicMaxPos = maxPos + offset; // don't care if we fall off the end, this is not important for visualization
+                this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
+        }
     }
+
+    /**
+     * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
+     * (rather than taking say the enahncers from {@link #affectedEnhancers}, because for some types of
+     * SVs like translocations, we will only use part of the list to calculate maximum and minimum positions.
+     * @param transcripts Transcripts on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param enhancers Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param cpair coordinates of a structural variant or (in some cases such as Translocations) a component of a SV
+     * @return minimum coordinate (i.e., most 5' coordinate)
+     */
+    int getGenomicMinPos(List<TranscriptModel> transcripts,
+                         List<Enhancer> enhancers,
+                         CoordinatePair cpair) {
+        int transcriptMin = transcripts.stream().
+                map(TranscriptModel::getTXRegion).
+                map(t -> t.withStrand(Strand.FWD)).
+                mapToInt(GenomeInterval::getBeginPos).
+                min().
+                orElse(Integer.MAX_VALUE);
+        int enhancerMin = enhancers.stream().
+                map(Enhancer::getStart).
+                mapToInt(GenomicPosition::getPosition).
+                min().
+                orElse(Integer.MAX_VALUE);
+        int minPair = cpair.getStart().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
+        return Math.min(transcriptMin, Math.min(enhancerMin, minPair));
+    }
+
+    /**
+     * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
+     * (rather than taking say the enahncers from {@link #affectedEnhancers}, because for some types of
+     * SVs like translocations, we will only use part of the list to calculate maximum and minimum positions.
+     * @param transcripts Transcripts on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param enhancers Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param cpair coordinates of a structural variant or (in some cases such as Translocations) a component of a SV
+     * @return minimum coordinate (i.e., most 5' coordinate)
+     */
+    int getGenomicMaxPos(List<TranscriptModel> transcripts,
+                         List<Enhancer> enhancers,
+                         CoordinatePair cpair) {
+        int transcriptMax = transcripts.stream().
+                map(TranscriptModel::getTXRegion).
+                map(t -> t.withStrand(Strand.FWD)).
+                mapToInt(GenomeInterval::getEndPos).
+                min().
+                orElse(Integer.MIN_VALUE);
+        int enhancerMax = enhancers.stream().
+                map(Enhancer::getEnd).
+                mapToInt(GenomicPosition::getPosition).
+                min().
+                orElse(Integer.MIN_VALUE);
+        int maxPair = cpair.getEnd().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
+        return Math.max(transcriptMax, Math.max(enhancerMax, maxPair));
+    }
+
+
 
     /** Write the header of the SVG.
      */
@@ -159,7 +202,7 @@ public class SvSvgGenerator {
      * Transform a genomic cooordinate to an SVG X coordinate
      * @return
      */
-    private double translateGenomicToSvg(int genomicCoordinate) {
+    protected double translateGenomicToSvg(int genomicCoordinate) {
         double pos = genomicCoordinate - this.genomicMinPos;
         if (pos < 0) {
             throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
@@ -264,7 +307,7 @@ public class SvSvgGenerator {
      * @param writer file handle
      * @throws IOException if we cannot write.
      */
-    private void writeTranscript(TranscriptModel tmod, int ypos, Writer writer) throws IOException {
+    protected void writeTranscript(TranscriptModel tmod, int ypos, Writer writer) throws IOException {
         GenomeInterval cds = tmod.getCDSRegion().withStrand(Strand.FWD);
         GenomeInterval tx = tmod.getTXRegion().withStrand(Strand.FWD);
         double cdsStart = translateGenomicToSvg(cds.getBeginPos());
@@ -315,17 +358,7 @@ public class SvSvgGenerator {
      * @param writer a file handle
      * @throws IOException if we cannot write.
      */
-    public void write(Writer writer) throws IOException {
-        int starty = 50;
-        int y = starty;
-        writeDeletion(this.svInterval, starty, this.variantDescription, writer);
-        y += 100;
-        for (var tmod : this.affectedTranscripts) {
-            writeTranscript(tmod, y, writer);
-            y += HEIGHT_PER_DISPLAY_ITEM;
-        }
-    }
-
+    public abstract void write(Writer writer) throws IOException;
 
     /**
      * If there is some IO Exception, return an SVG with a text that indicates the error

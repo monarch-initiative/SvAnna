@@ -9,7 +9,9 @@ import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.viz.svg.DeletionSvgGenerator;
+import org.jax.svann.viz.svg.InsertionSvgGenerator;
 import org.jax.svann.viz.svg.SvSvgGenerator;
+import org.jax.svann.viz.svg.TranslocationSvgGenerator;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -129,9 +131,59 @@ public class HtmlVisualizer implements Visualizer {
         return "gc5Base=dense&snp150Common=hide&gtexGene=hide&dgvPlus=hide&pubs=hide&knownGene=hide&ncbiRefSeqView=pack&OmimAvSnp=hide";
     }
 
+    private int getInsertionLength(Visualizable visualizable) {
+        SequenceRearrangement rearrangement = visualizable.getRearrangement();
+        // we assume that a valid insertion has one adjacency
+        // we also assume that each breakend of the adjacency contains one contig that
+        // represents the insertion using a non-canonical contig
+        Breakend leftmostBreakend = rearrangement.getLeftmostBreakend();
+        List<Adjacency> adjacencies = rearrangement.getAdjacencies();
+        if (adjacencies.size() != 2) {
+            throw new SvAnnRuntimeException("We expected 2 adjacencies for an insertion but got " + adjacencies.size());
+        }
+        Adjacency leftAdjacency = adjacencies.get(0);
+        Contig rightOfLeft = leftAdjacency.getEnd().getContig();
+        if (rightOfLeft.getId()>25) {
+            return rightOfLeft.getLength();
+        }
+       return -1;
+    }
+
+    String getSvgString(Visualizable visualizable) {
+        List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
+        SvType svtype = visualizable.getRearrangement().getType();
+        try {
+            SvSvgGenerator gen;
+            switch (svtype) {
+                case DELETION:
+                    gen = new DeletionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
+                    return gen.getSvg();
+                case INSERTION:
+                    int insertionLength = getInsertionLength(visualizable);
+                    gen = new InsertionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs, insertionLength);
+                    return gen.getSvg();
+
+                case TRANSLOCATION:
+                    gen = new TranslocationSvgGenerator(visualizable.getRearrangement(), visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
+                    return gen.getSvg();
+                default:
+                    System.err.println("[ERROR] SVG not implemented for type=" + svtype);
+                    return "";
+
+            }
+        } catch (SvAnnRuntimeException e) {
+            System.err.println("[ERROR] " + e.getLocalizedMessage());
+
+        }
+        return "";
+    }
+
+
+
     @Override
     public String getHtml(Visualizable visualizable) {
         StringBuilder sb = new StringBuilder();
+        //visualizable.getRearrangement().
         List<HtmlLocation> locations = visualizable.getLocations();
         sb.append("<p>").append(visualizable.getType()).append("<br/>");
         if (locations.isEmpty()) {
@@ -153,16 +205,11 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(HTML_TABLE_HEADER);
         sb.append("<tbody>\n");
         sb.append(keyValueRow("Impact", visualizable.getImpact()));
-        //sb.append(keyValueRow("Associated diseases", getUnorderedListWithDiseases()));
+        sb.append(keyValueRow("Associated diseases", getUnorderedListWithDiseases(visualizable)));
         sb.append("</table>");
-        SvType svtype = visualizable.getRearrangement().getType();
-        List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
-        try {
-            SvSvgGenerator gen = new DeletionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
-            sb.append("<br/>\n").append(gen.getSvg());
-        } catch (SvAnnRuntimeException e) {
-            System.err.println("[ERROR] " + e.getLocalizedMessage());
-        }
+        String svg = getSvgString(visualizable);
+        sb.append(svg);
+
         return sb.toString();
     }
 }

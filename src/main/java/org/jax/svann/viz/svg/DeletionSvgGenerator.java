@@ -29,7 +29,7 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
 
 
     /**
-     * Wirte an SVG (without header) representing this SV. Not intended to be used to create a stand-alone
+     * Write an SVG (without header) representing this SV. Not intended to be used to create a stand-alone
      * SVG (for this, user {@link #getSvg()}
      * @param writer a file handle
      * @throws IOException if we cannot write.

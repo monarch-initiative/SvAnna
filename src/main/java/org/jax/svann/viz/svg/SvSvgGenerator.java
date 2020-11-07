@@ -107,6 +107,7 @@ public abstract class SvSvgGenerator {
         this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
         switch (svtype) {
             case DELETION:
+            case INSERTION:
             default:
                 // get min/max for SVs with one region
                 // todo  -- do we need to check how many coordinate pairs there are?
@@ -117,7 +118,7 @@ public abstract class SvSvgGenerator {
                 // add a little real estate to each side for esthetic purposes
                 int delta = maxPos - minPos;
                 int offset = (int) (OFFSET_FACTOR * delta);
-                this.genomicMinPos = minPos - offset < 0 ? 0 : minPos - offset;
+                this.genomicMinPos = Math.max(minPos - offset, 0);
                 this.genomicMaxPos = maxPos + offset; // don't care if we fall off the end, this is not important for visualization
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
                 this.scaleBasePairs = 1 + maxPos - minPos;
@@ -138,6 +139,14 @@ public abstract class SvSvgGenerator {
     int getGenomicMinPos(List<TranscriptModel> transcripts,
                          List<Enhancer> enhancers,
                          CoordinatePair cpair) {
+        int minPos = cpair.getStart().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
+        return getGenomicMinPos(transcripts, enhancers, minPos);
+    }
+
+
+    int getGenomicMinPos(List<TranscriptModel> transcripts,
+                         List<Enhancer> enhancers,
+                         int pos) {
         int transcriptMin = transcripts.stream().
                 map(TranscriptModel::getTXRegion).
                 map(t -> t.withStrand(Strand.FWD)).
@@ -149,9 +158,9 @@ public abstract class SvSvgGenerator {
                 mapToInt(GenomicPosition::getPosition).
                 min().
                 orElse(Integer.MAX_VALUE);
-        int minPair = cpair.getStart().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
-        return Math.min(transcriptMin, Math.min(enhancerMin, minPair));
+        return Math.min(transcriptMin, Math.min(enhancerMin, pos));
     }
+
 
     /**
      * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
@@ -165,6 +174,13 @@ public abstract class SvSvgGenerator {
     int getGenomicMaxPos(List<TranscriptModel> transcripts,
                          List<Enhancer> enhancers,
                          CoordinatePair cpair) {
+        int maxPos = cpair.getEnd().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
+        return getGenomicMaxPos(transcripts, enhancers, maxPos);
+    }
+
+    int getGenomicMaxPos(List<TranscriptModel> transcripts,
+                         List<Enhancer> enhancers,
+                         int pos) {
         int transcriptMax = transcripts.stream().
                 map(TranscriptModel::getTXRegion).
                 map(t -> t.withStrand(Strand.FWD)).
@@ -176,8 +192,7 @@ public abstract class SvSvgGenerator {
                 mapToInt(GenomicPosition::getPosition).
                 min().
                 orElse(Integer.MIN_VALUE);
-        int maxPair = cpair.getEnd().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
-        return Math.max(transcriptMax, Math.max(enhancerMax, maxPair));
+        return Math.max(transcriptMax, Math.max(enhancerMax, pos));
     }
 
 
@@ -196,8 +211,19 @@ public abstract class SvSvgGenerator {
         writer.write("<style>\n" +
                 "  text { font: 24px; }\n" +
                 "  text.t20 { font: 20px; }\n" +
-                "  text.t14 { font: 14px; }\n" +
-                "  </style>\n");
+                "  text.t14 { font: 14px; }\n");
+        writer.write("  .mytriangle{\n" +
+                "    margin: 0 auto;\n" +
+                "    width: 100px;\n" +
+                "    height: 100px;\n" +
+                "  }\n" +
+                "\n" +
+                "  .mytriangle polygon {\n" +
+                "    fill:#b31900;\n" +
+                "    stroke:#65b81d;\n" +
+                "    stroke-width:2;\n" +
+                "  }\n");
+        writer.write("  </style>\n");
         writer.write("<g>\n");
     }
 
@@ -334,7 +360,6 @@ public abstract class SvSvgGenerator {
     private void writeTranscriptName(TranscriptModel tmod, double xpos, int ypos, Writer writer) throws IOException {
         String symbol = tmod.getGeneSymbol();
         String accession = tmod.getAccession();;
-        String geneId = tmod.getGeneID();
         int chr = tmod.getChr();
         String chrom = "chr";
         if (chr == 23){
@@ -350,7 +375,7 @@ public abstract class SvSvgGenerator {
         int end = tmod.getTXRegion().withStrand(Strand.FWD).getEndPos();
         String strand = tmod.getStrand() == Strand.FWD ? "+" : "-";
         String positionString = String.format("%s:%d-%d (%s strand)", chrom, start, end, strand);
-        String geneName = String.format("%s (%s; %s)", symbol, accession, geneId);
+        String geneName = String.format("%s (%s)", symbol, accession);
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
         String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
                 xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
@@ -385,13 +410,13 @@ public abstract class SvSvgGenerator {
      */
     protected String getSequenceLengthString(int seqlen) {
         if (seqlen < 1_000) {
-            return String.format("%d bp", scaleBasePairs);
-        } else if (scaleBasePairs < 1_000_000) {
-            double kb = (double)scaleBasePairs/1000.0;
+            return String.format("%d bp", seqlen);
+        } else if (seqlen < 1_000_000) {
+            double kb = (double)seqlen/1000.0;
             return String.format("%.2f kp", kb);
         } else  {
             // if we get here, the sequence is at least one million bp
-            double mb = (double)scaleBasePairs/1000000.0;
+            double mb = (double)seqlen/1000000.0;
             return String.format("%.2f Mp", mb);
         }
     }

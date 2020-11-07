@@ -24,7 +24,6 @@ public class HtmlVisualizable implements Visualizable {
     public HtmlVisualizable(SequenceRearrangement rearrangement, SvPriority svPriority) {
         this.rearrangement = rearrangement;
         this.svPriority = svPriority;
-        //rearrangement.getAdjacencies().get(0).
     }
 
     private HtmlLocation getDeletionLocation(SequenceRearrangement rearrangement) {

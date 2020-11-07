@@ -349,6 +349,19 @@ a.svg:hover, a.svg:active {
 #hide-symbol-table, #symbol-table {
   display: none;
 }
+.column {
+  float: left;
+  width: 50%;
+  padding: 60px;
+  height: 300px; /* Should be removed. Only for demonstration */
+}
+
+/* Clear floats after the columns */
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
 
 </style>
 </head>
@@ -387,7 +400,7 @@ a.svg:hover, a.svg:active {
             </tr>
           </thead>
         <#list svtypecounts as svt>
-        <tr><td>${svt.name}</td><td>${svt.low}</td><td>${svt.intermediate}</td><td>${svt.high}</td><td>${svt.total}</td><td></tr>
+        <tr><td>${svt.name}</td><td>${svt.low}</td><td>${svt.intermediate}</td><td>${svt.high}</td><td>${svt.total}</td></tr>
           </#list>
         </table>
         <p>We were unable to parse ${n_unparsable} entries.</p>

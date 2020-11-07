@@ -55,30 +55,20 @@ class DefaultSvPriority implements SvPriority {
         overlaps = olaps;
     }
 
-    @Deprecated
-    DefaultSvPriority(SvPriority svprio,
+    DefaultSvPriority(SvImpact svImpact,
+                      SequenceRearrangement rearrangement,
+                      Set<TranscriptModel> affectedTranscripts,
+                      Set<GeneWithId> affectedGeneIds,
+                      List<Enhancer> affectedEnhancers,
+                      List<Overlap> olaps,
                       List<HpoDiseaseSummary> diseaseList) {
-        this.rearrangement = svprio.getRearrangement();
-        if (diseaseList.isEmpty()) {
-            switch (svprio.getImpact()) {
-                case HIGH:
-                    this.svImpact = SvImpact.INTERMEDIATE;
-                    break;
-                case INTERMEDIATE:
-                    this.svImpact = SvImpact.LOW;
-                    break;
-                default:
-                    this.svImpact = svprio.getImpact();
-            }
-        } else {
-            this.svImpact = svprio.getImpact();
-        }
-
-        this.affectedTranscripts = svprio.getAffectedTranscripts();
-        this.affectedGeneIds = svprio.getAffectedGeneIds();
-        this.affectedEnhancers = svprio.getAffectedEnhancers();
-        this.overlaps = svprio.getOverlaps();
+        this.rearrangement = rearrangement;
+        this.svImpact = svImpact;
+        this.affectedTranscripts = affectedTranscripts;
+        this.affectedGeneIds = affectedGeneIds;
+        this.affectedEnhancers = affectedEnhancers;
         this.diseases = diseaseList;
+        overlaps = olaps;
     }
 
     static DefaultSvPriority unknown() {

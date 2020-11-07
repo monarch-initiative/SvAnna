@@ -101,6 +101,68 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         }
     }
 
+
+    /**
+     * This can be used to prioritize the phenotypic relevance of SVs that overlap
+     * part of a gene that is phenotypically relevant. It should be used for SVs such
+     * as deletions where overlapping with the CDS of a gene can be high priority.
+     * We also prioritize enhancers at this step
+
+     * @return a phenotypically prioritized {@link SvPriority} object
+     */
+    SvPriority prioritizeSimpleOverlapByPhenotype(SvImpact svImpact,
+                                                  SequenceRearrangement rearrangement,
+                                                  Set<TranscriptModel> affectedTranscripts,
+                                                  Set<GeneWithId> affectedGeneIds,
+                                                  List<Enhancer> affectedEnhancers,
+                                                  List<Overlap> olaps) {
+
+        List<HpoDiseaseSummary> diseaseList = new ArrayList<>();
+        SvImpact phenotypeImpact;
+        for (var gene : affectedGeneIds) {
+            TermId tid = gene.getGeneId();
+            if (this.diseaseSummaryMap.containsKey(tid)) {
+                diseaseList.addAll(this.diseaseSummaryMap.get(tid));
+            }
+        }
+        if (diseaseList.isEmpty()) {
+            switch (svImpact) {
+                case HIGH:
+                    phenotypeImpact = SvImpact.INTERMEDIATE;
+                    break;
+                case INTERMEDIATE:
+                    phenotypeImpact = SvImpact.LOW;
+                    break;
+                default:
+                    phenotypeImpact = svImpact;
+            }
+        } else {
+            phenotypeImpact = svImpact;
+        }
+        if (affectedTranscripts.isEmpty() && affectedEnhancers.size() > 0 ) {
+            // in this case, we have prioritize the SV based on overlap with
+            // an enhancer. We will rate the SV high if the enhancer is
+            // annotated to a tissue that has phenotypic relevant
+            boolean relevant = false;
+            for (Enhancer e : affectedEnhancers) {
+                if (this.relevantHpoIdsForEnhancers.contains(e.getTermId())) {
+                    relevant = true;
+                    break;
+                }
+            }
+            if (! relevant) {
+                // downgrade the impact
+                if (svImpact == SvImpact.HIGH) {
+                    phenotypeImpact = SvImpact.INTERMEDIATE;
+                } else {
+                    phenotypeImpact = SvImpact.LOW;
+                }
+            }
+        }
+        return new DefaultSvPriority(phenotypeImpact, rearrangement, affectedTranscripts,
+                affectedGeneIds, affectedEnhancers, olaps, diseaseList);
+    }
+
     /**
      * When prioritizing a deletion, we start with default {@link SvImpact} for given {@link OverlapType} and adjust the
      * impact to the following if:
@@ -171,8 +233,8 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
         }
-
-        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        return prioritizeSimpleOverlapByPhenotype(impact, deletion, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+       // return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**

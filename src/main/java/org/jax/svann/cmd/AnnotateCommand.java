@@ -5,6 +5,7 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
+import org.apache.logging.log4j.core.net.Priority;
 import org.jax.svann.analysis.FilterAndCount;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
@@ -64,7 +65,7 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--threshold"},
             type = SvImpact.class,
             description = "report variants as severe as this or more")
-    public SvImpact threshold = SvImpact.LOW;
+    public SvImpact threshold = SvImpact.HIGH;
 
     public AnnotateCommand() {
         // TODO: 2. 11. 2020 externalize
@@ -116,14 +117,21 @@ public class AnnotateCommand implements Callable<Integer> {
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();
         List<String> visualizations = new ArrayList<>();
-
+        int above=0,below=0;
         for (SequenceRearrangement rearrangement : rearrangements) {
             SvPriority priority = prioritizer.prioritize(rearrangement);
             priorities.add(priority);
-            HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
-            String visualization = visualizer.getHtml(visualizable);
-            visualizations.add(visualization);
+            if (priority.getImpact().satisfiesThreshold(threshold)) {
+                HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
+                String visualization = visualizer.getHtml(visualizable);
+                above++; if (above>100) continue;
+               visualizations.add(visualization);
+
+            } else {
+                below++;
+            }
         }
+        System.out.printf("[INFO] Above threshold SVs: %d, below threshold SVs: %d.\n", above, below);
 
         // TODO -- if we have frequency information
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
@@ -140,6 +148,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("vcf_file", vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
+
         HtmlTemplate template = new HtmlTemplate(visualizations,
                 lowImpactCounts,
                 intermediateImpactCounts,

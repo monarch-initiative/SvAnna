@@ -157,8 +157,12 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("</table>");
         SvType svtype = visualizable.getRearrangement().getType();
         List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
-        SvSvgGenerator gen = new DeletionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(),coordinatePairs);
-        sb.append("<br/>\n").append(gen.getSvg());
+        try {
+            SvSvgGenerator gen = new DeletionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
+            sb.append("<br/>\n").append(gen.getSvg());
+        } catch (SvAnnRuntimeException e) {
+            System.err.println("[ERROR] " + e.getLocalizedMessage());
+        }
         return sb.toString();
     }
 }

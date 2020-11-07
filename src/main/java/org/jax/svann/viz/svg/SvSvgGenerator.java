@@ -45,6 +45,12 @@ public abstract class SvSvgGenerator {
     protected final int genomicMinPos;
     /** Rightmost position (most 3' on chromosome), including offset. */
     protected final int genomicMaxPos;
+    /** Minimum position of the scale */
+    private final double scaleMinPos;
+
+    private final double scaleMaxPos;
+
+    private final int scaleBasePairs;
     /** This will be 10% of genomicSpan, extra area on the sides of the graphic to make things look nicer. */
     private int genomicOffset;
 
@@ -55,8 +61,10 @@ public abstract class SvSvgGenerator {
     private String chrom;
 
     private final double INTRON_MIDPOINT_ELEVATION = 10.0;
-
+    /** Height of the symbols that represent the transcripts */
     private final double EXON_HEIGHT = 20;
+    /** Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}*/
+    private final double Y_SKIP_BENEATH_TRANSCRIPTS = 50;
     /** Height of the symbol that represents the structural variant. */
     protected final double SV_HEIGHT = 30;
 
@@ -105,12 +113,16 @@ public abstract class SvSvgGenerator {
                 CoordinatePair cpair = coordinatePairs.get(0);
                 int minPos = getGenomicMinPos(transcripts, enhancers, cpair);
                 int maxPos = getGenomicMaxPos(transcripts, enhancers, cpair);
+
                 // add a little real estate to each side for esthetic purposes
                 int delta = maxPos - minPos;
                 int offset = (int) (OFFSET_FACTOR * delta);
                 this.genomicMinPos = minPos - offset < 0 ? 0 : minPos - offset;
                 this.genomicMaxPos = maxPos + offset; // don't care if we fall off the end, this is not important for visualization
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
+                this.scaleBasePairs = 1 + maxPos - minPos;
+                this.scaleMinPos = translateGenomicToSvg(minPos);
+                this.scaleMaxPos = translateGenomicToSvg(maxPos);
         }
     }
 
@@ -278,26 +290,6 @@ public abstract class SvSvgGenerator {
         writer.write(rect);
     }
 
-    /**
-     * PROTOTYPE -- THIS MAYBE NOT BE THE BEST WAY TO REPRESENT OTHER TUPES OF SV
-     * @param gi a genomic interval representing the SV
-     * @param ypos  The y position where we will write the cartoon
-     * @param msg A String describing the SV
-     * @param writer a filehandle
-     * @throws IOException if we cannt write
-     */
-    private void writeDeletion(GenomeInterval gi, int ypos, String msg, Writer writer) throws IOException {
-        double start = translateGenomicToSvg(gi.getBeginPos());
-        double end = translateGenomicToSvg(gi.getEndPos());
-        double width = end - start;
-        double Y = ypos + 0.5 * SV_HEIGHT;
-        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
-                        "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, SV_HEIGHT, DARKGREEN, RED);
-        writer.write(rect);
-        Y += 1.75*SV_HEIGHT;
-        writer.write(String.format("<text x=\"%f\" y=\"%f\"  fill=\"%s\">%s</text>\n",start -10,Y, PURPLE, msg));
-    }
 
     /**
      * This method writes one Jannovar transcript as a cartoon where the UTRs are shown in one color and the
@@ -316,10 +308,12 @@ public abstract class SvSvgGenerator {
         if (tmod.getStrand() == Strand.REV) {
             exons = Lists.reverse(exons);
         }
+        double minX = Double.MAX_VALUE;
         // write a line for UTR, otherwise write a box
         for (GenomeInterval exon : exons) {
             double exonStart = translateGenomicToSvg(exon.withStrand(Strand.FWD).getBeginPos());
             double exonEnd = translateGenomicToSvg(exon.withStrand(Strand.FWD).getEndPos());
+            if (exonStart < minX) minX = exonStart;
             if (exonStart>= cdsStart && exonEnd <= cdsEnd) {
                 writeCdsExon(exonStart, exonEnd, ypos, writer);
             } else if (exonStart <= cdsEnd && exonEnd > cdsEnd) {
@@ -334,6 +328,63 @@ public abstract class SvSvgGenerator {
             }
         }
         writeIntrons(exons, ypos, writer);
+        writeTranscriptName(tmod, minX, ypos, writer);
+    }
+
+    private void writeTranscriptName(TranscriptModel tmod, double xpos, int ypos, Writer writer) throws IOException {
+        String symbol = tmod.getGeneSymbol();
+        String accession = tmod.getAccession();;
+        String geneId = tmod.getGeneID();
+        int chr = tmod.getChr();
+        String chrom = "chr";
+        if (chr == 23){
+            chrom = "chrX";
+        } else if (chr == 24) {
+            chrom = "chrY";
+        } else if (chr == 25) {
+            chrom = "chrM";
+        } else {
+            chrom = String.format("chr%d", tmod.getChr());
+        }
+        int start = tmod.getTXRegion().withStrand(Strand.FWD).getBeginPos();
+        int end = tmod.getTXRegion().withStrand(Strand.FWD).getEndPos();
+        String strand = tmod.getStrand() == Strand.FWD ? "+" : "-";
+        String positionString = String.format("%s:%d-%d (%s strand)", chrom, start, end, strand);
+        String geneName = String.format("%s (%s; %s)", symbol, accession, geneId);
+        double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
+        String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
+                xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
+        writer.write(txt);
+    }
+
+
+    protected void writeScale(Writer writer, int ypos) throws IOException {
+        int verticalOffset = 10;
+        String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;" +
+                " stroke-dasharray: 5 2\" />\n", this.scaleMinPos, ypos, this.scaleMaxPos, ypos);
+        String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos+verticalOffset, this.scaleMinPos, ypos-verticalOffset);
+        String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos+verticalOffset, this.scaleMaxPos, ypos-verticalOffset);
+        String sequenceLength = "";
+        if (scaleBasePairs < 1_000) {
+            sequenceLength = String.format("%d bp", scaleBasePairs);
+        } else if (scaleBasePairs < 1_000_000) {
+            double kb = (double)scaleBasePairs/1000.0;
+            sequenceLength = String.format("%.2f kp", kb);
+        } else if (scaleBasePairs >= 1_000_000) {
+            double mb = (double)scaleBasePairs/1000000.0;
+            sequenceLength = String.format("%.2f Mp", mb);
+        }
+        writer.write(line);
+        writer.write(leftVertical);
+        writer.write(rightVertical);
+        int y=ypos - 15;
+        double xmiddle = 0.45*(this.scaleMinPos + this.scaleMaxPos);
+        String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
+                xmiddle, y, PURPLE, sequenceLength);
+        writer.write(txt);
     }
 
     /**

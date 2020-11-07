@@ -44,6 +44,7 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
             writeTranscript(tmod, y, writer);
             y += HEIGHT_PER_DISPLAY_ITEM;
         }
+        writeScale(writer, y);
     }
 
     /**

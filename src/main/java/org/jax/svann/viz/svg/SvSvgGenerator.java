@@ -367,16 +367,7 @@ public abstract class SvSvgGenerator {
                 " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos+verticalOffset, this.scaleMinPos, ypos-verticalOffset);
         String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
                 " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos+verticalOffset, this.scaleMaxPos, ypos-verticalOffset);
-        String sequenceLength = "";
-        if (scaleBasePairs < 1_000) {
-            sequenceLength = String.format("%d bp", scaleBasePairs);
-        } else if (scaleBasePairs < 1_000_000) {
-            double kb = (double)scaleBasePairs/1000.0;
-            sequenceLength = String.format("%.2f kp", kb);
-        } else if (scaleBasePairs >= 1_000_000) {
-            double mb = (double)scaleBasePairs/1000000.0;
-            sequenceLength = String.format("%.2f Mp", mb);
-        }
+        String sequenceLength = getSequenceLengthString(scaleBasePairs);
         writer.write(line);
         writer.write(leftVertical);
         writer.write(rightVertical);
@@ -385,6 +376,24 @@ public abstract class SvSvgGenerator {
         String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
                 xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
+    }
+
+    /**
+     * Get a string that represents a sequence length using bp, kb, or Mb as appropriate
+     * @param seqlen number of base bairs
+     * @return String such as 432 bp, 4.56 kb or 1.23 Mb
+     */
+    protected String getSequenceLengthString(int seqlen) {
+        if (seqlen < 1_000) {
+            return String.format("%d bp", scaleBasePairs);
+        } else if (scaleBasePairs < 1_000_000) {
+            double kb = (double)scaleBasePairs/1000.0;
+            return String.format("%.2f kp", kb);
+        } else  {
+            // if we get here, the sequence is at least one million bp
+            double mb = (double)scaleBasePairs/1000000.0;
+            return String.format("%.2f Mp", mb);
+        }
     }
 
     /**

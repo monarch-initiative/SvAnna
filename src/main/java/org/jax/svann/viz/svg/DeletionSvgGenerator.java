@@ -37,8 +37,9 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
     public void write(Writer writer) throws IOException {
         int starty = 50;
         int y = starty;
-        String deletionDesccription = "todo deletion description";
-        writeDeletion(starty, deletionDesccription, writer);
+        String deletionLength = getSequenceLengthString(deletionCoordinates.getLength());
+        String deletionDescription = String.format("%s deletion", deletionLength);
+        writeDeletion(starty, deletionDescription, writer);
         y += 100;
         for (var tmod : this.affectedTranscripts) {
             writeTranscript(tmod, y, writer);

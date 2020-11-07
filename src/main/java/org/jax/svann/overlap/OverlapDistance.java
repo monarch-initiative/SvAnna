@@ -1,0 +1,103 @@
+package org.jax.svann.overlap;
+
+/**
+ * This class encapsulates information about the distance of a structural variant to transcripts or
+ * enhancers. In many cases, we have two distances (e.g., an intronic SV has a certain distance to
+ * the upstream and to the downstream exon). In other cases, we have only one distance (e.g., upstream
+ * and downstream).
+ * @authr Peter N Robinson
+ */
+public class OverlapDistance {
+
+    private static final int UNITIALIZED = -42;
+
+    static enum OverlapDistanceType { INTERGENIC, INTRONIC, EXONIC, CONTAINED_IN }
+
+    private final OverlapDistanceType overlapDistanceType;
+
+    private final int distanceA;
+
+    private final int distanceB;
+
+    private final boolean overlapsCds;
+
+    private final String description;
+
+    public OverlapDistance(OverlapDistanceType odtype, int distance, String description, boolean cds) {
+        overlapDistanceType = odtype;
+        this.distanceA = distance;
+        this.distanceB = UNITIALIZED;
+        this.description = description;
+        this.overlapsCds = cds;
+    }
+
+    public OverlapDistance(OverlapDistanceType odtype, int distancea, int distanceb, String description, boolean cds) {
+        overlapDistanceType = odtype;
+        this.distanceA = distancea;
+        this.distanceB = distanceb;
+        this.description = description;
+        this.overlapsCds = cds;
+    }
+
+
+    public static OverlapDistance fromUpstreamFlankingGene(int distance, String geneSymbol) {
+        String description = String.format("Intergenic - %s upstream of %s", distanceString(distance), geneSymbol);
+        return new OverlapDistance(OverlapDistanceType.INTERGENIC, distance, description, false);
+    }
+
+
+    public static OverlapDistance fromDownstreamFlankingGene(int distance, String geneSymbol) {
+        String description = String.format("Intergenic - %s downstream of %s", distanceString(distance), geneSymbol);
+        return new OverlapDistance(OverlapDistanceType.INTERGENIC, distance, description, false);
+    }
+
+
+    /**
+     * If an SV overlaps an exon, then we classify it as having a distance of zero.
+     * @param geneSymbol
+     * @return
+     */
+    public static OverlapDistance fromExonic(String geneSymbol, boolean overlapsCds) {
+        String description = String.format("Exonic", distanceString(0), geneSymbol);
+        return new OverlapDistance(OverlapDistanceType.EXONIC, 0, description, overlapsCds);
+    }
+
+    public static OverlapDistance fromIntronic(String geneSymbol, IntronDistance idistance) {
+        String description = String.format("Intronic - %s and %s removed from flanking exons of %s",
+                distanceString( idistance.getDistanceToUpstreamExon()), distanceString( idistance.getDistanceToDownstreamExon()), geneSymbol);
+        return new OverlapDistance(OverlapDistanceType.INTRONIC,
+                idistance.getDistanceToUpstreamExon(),
+                idistance.getDistanceToDownstreamExon(), description, false);
+    }
+
+
+    public static OverlapDistance fromContainedIn() {
+        return new OverlapDistance(OverlapDistanceType.CONTAINED_IN, 0,"",false);
+    }
+
+
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getShortestDistance() {
+        if (this.distanceB == UNITIALIZED) {
+            return this.distanceA;
+        }
+        else return Math.min(distanceA, distanceB);
+    }
+
+    private static String distanceString(int d) {
+        if (d<1_000) {
+            return String.format("%d bp", d);
+        } else if (d < 1_000_000) {
+            double x = (double)d/1_000.0;
+            return String.format("%.2f kb", x);
+        } else {
+            double x = (double)d/1_000_000.0;
+            return String.format("%.2f Mb", x);
+        }
+    }
+}

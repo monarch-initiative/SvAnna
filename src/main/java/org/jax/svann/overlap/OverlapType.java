@@ -50,6 +50,7 @@ public enum OverlapType {
      * 500B_downstream_variant (SO:0001634)
      */
     DOWNSTREAM_GENE_VARIANT_500B("500b downstream gene variant"),
+    UPSTREAM_GENE_VARIANT_500B("500b upstream gene variant"),
     INTRONIC("located completely within intron"),
     SINGLE_EXON_IN_TRANSCRIPT("single-exon affected in transcript"),
     MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript"),
@@ -60,6 +61,8 @@ public enum OverlapType {
             DOWNSTREAM_GENE_VARIANT_500B, UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_500KB);
     private final static Set<OverlapType> exonicTypes = Set.of(SINGLE_EXON_IN_TRANSCRIPT, MULTIPLE_EXON_IN_TRANSCRIPT, TRANSCRIPT_CONTAINED_IN_SV);
     private final static Set<OverlapType> intronicTypes = Set.of(INTRONIC);
+    private final static Set<OverlapType> upstreamTypes = Set.of(UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_500B, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_500KB);
+    private final static Set<OverlapType> downstreamTypes = Set.of(DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_500B, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_5KB, DOWNSTREAM_GENE_VARIANT_500KB);
 
     private final String name;
 
@@ -68,9 +71,6 @@ public enum OverlapType {
         name = type;
     }
 
-    public static boolean isExonic(OverlapType vtype) {
-        return exonicTypes.contains(vtype);
-    }
 
     public static boolean isIntronic(OverlapType type) {
         return intronicTypes.contains(type);
@@ -80,9 +80,14 @@ public enum OverlapType {
         return intergenicTypes.contains(type);
     }
 
+    public boolean isUpstream() { return upstreamTypes.contains(this); }
+    public boolean isDownstream() { return downstreamTypes.contains(this); }
+
     public boolean isExonic() {
-        return isExonic(this);
+        return exonicTypes.contains(this);
     }
+
+    public boolean isSingleExon() { return this == SINGLE_EXON_IN_TRANSCRIPT; }
 
     public boolean isIntronic() {
         return isIntronic(this);

@@ -12,7 +12,11 @@ public class HtmlLocation {
     private final int end;
 
     public HtmlLocation(Contig chrom, int begin, int end) {
-        this.chrom = chrom.getPrimaryName();
+        String c = chrom.getPrimaryName();
+        if (c.startsWith("chr"))
+            this.chrom = c;
+        else
+            this.chrom = "chr" + c;
         this.begin = begin;
         this.end = end;
     }

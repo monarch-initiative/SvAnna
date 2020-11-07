@@ -8,6 +8,7 @@ import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
+import org.w3c.dom.html.HTMLLinkElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +35,20 @@ public class HtmlVisualizable implements Visualizable {
         Adjacency deletion = adjacencies.get(0);
         Breakend left = deletion.getStart();
         Breakend right = deletion.getEnd();
+        Contig chrom = left.getContig();
+        int begin = left.getPosition();
+        int end = right.getPosition();
+        return new HtmlLocation(chrom, begin, end);
+    }
+
+    private HtmlLocation getInsertionLocation(SequenceRearrangement rearrangement) {
+        List<Adjacency> adjacencies = rearrangement.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            System.err.println("Malformed insertion adjacency list with size " + adjacencies.size());
+        }
+        Adjacency insertion = adjacencies.get(0);
+        Breakend left = insertion.getStart();
+        Breakend right = insertion.getEnd();
         Contig chrom = left.getContig();
         int begin = left.getPosition();
         int end = right.getPosition();
@@ -81,11 +96,8 @@ public class HtmlVisualizable implements Visualizable {
         if (rearrangement.getType() == SvType.DELETION) {
             locs.add(getDeletionLocation(rearrangement));
         } else if (rearrangement.getType() == SvType.INSERTION) {
-            int c = 42;
-            int y = 32;
+            locs.add(getInsertionLocation(rearrangement));
         }
-
-
         return locs;
     }
 

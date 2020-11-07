@@ -65,7 +65,7 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--threshold"},
             type = SvImpact.class,
             description = "report variants as severe as this or more")
-    public SvImpact threshold = SvImpact.HIGH;
+    public SvImpact threshold = SvImpact.LOW;
 
     public AnnotateCommand() {
         // TODO: 2. 11. 2020 externalize

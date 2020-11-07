@@ -40,21 +40,6 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
-    private String keyValueRow(String key, String value) {
-        return String.format("<tr><td>%s</td><td>%s</td></tr>\n", key, value);
-    }
-
-
-
-    /**
-     * This method decides if we can ask for a single line location string.
-     * If we need to return two strings (e.g., a translocation) or more, it returns false
-     * @return
-     */
-    private boolean requiresSingleLocationRow() {
-        return true;
-    }
-
 
     private String getUnorderedListWithDiseases(Visualizable visualizable) {
         List<HpoDiseaseSummary> diseases = visualizable.getDiseaseSummaries();
@@ -146,7 +131,7 @@ public class HtmlVisualizer implements Visualizer {
         if (rightOfLeft.getId()>25) {
             return rightOfLeft.getLength();
         }
-       return -1;
+       return -1; // should never happen
     }
 
     String getSvgString(Visualizable visualizable) {
@@ -179,12 +164,71 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
+    private String getVariantRepresentation(Visualizable visualizable, List<HtmlLocation> locations) {
+        SvType svtype = visualizable.getRearrangement().getType();
+        HtmlLocation loc;
+        switch (svtype) {
+            case INSERTION:
+                int len = getInsertionLength(visualizable);
+                if (locations.size() != 1) {
+                    throw new SvAnnRuntimeException("Was expecting one location for insertion but got " + locations.size());
+                }
+                loc = locations.get(0);
+                return String.format("%s:%dind%dbp", loc.getChrom(), loc.getBegin(), len);
+            case DELETION:
+                if (locations.size() != 1) {
+                    throw new SvAnnRuntimeException("Wasa expecting one location for deletion but got " + locations.size());
+                }
+                loc = locations.get(0);
+                return String.format("%s:%d-%ddel", loc.getChrom(), loc.getBegin(), loc.getEnd());
+        }
+
+        return "TODO";
+    }
+
+
 
     @Override
     public String getHtml(Visualizable visualizable) {
-        StringBuilder sb = new StringBuilder();
-        //visualizable.getRearrangement().
         List<HtmlLocation> locations = visualizable.getLocations();
+        String variantString = getVariantRepresentation(visualizable,  locations );
+        StringBuilder sb = new StringBuilder();
+        sb.append("<h1>").append(variantString).append("</h1>\n");
+        sb.append("<div class=\"row\">\n");
+        sb.append("<div class=\"column\" style=\"background-color:#F8F8F8;\">\n");
+        sb.append("<h2>Sequence</h2>\n");
+        sb.append(getSequencePrioritization(visualizable)).append("\n");
+        sb.append("</div>\n");
+        sb.append("<div class=\"column\" style=\"background-color:#F0F0F0;\">\n");
+        sb.append("<h2>Phenotypic data</h2>\n");
+        sb.append(getPhenotypePrioritization(visualizable)).append("\n");
+        sb.append("</div>\n");
+        sb.append("</div>\n");
+        String svg = getSvgString(visualizable);
+        sb.append(svg);
+
+        return sb.toString();
+    }
+
+
+    String getSequencePrioritization(Visualizable visualizable) {
+        StringBuilder sb = new StringBuilder();
+        List<HtmlLocation> locations = visualizable.getLocations();
+        String variantString = getVariantRepresentation(visualizable,  locations );
+        Set<String> vcfIdSet = new HashSet<>();
+        SequenceRearrangement rearrangement = visualizable.getRearrangement();
+        List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
+        for (var a : adjacencies) {
+            vcfIdSet.add(a.getStart().getContigName());
+            vcfIdSet.add(a.getEnd().getContigName());
+        }
+        String idString = String.join(";", vcfIdSet);
+        if (vcfIdSet.size()>1) {
+            idString = String.format("IDs: %s", idString);
+        } else {
+            idString = String.format("ID: %s", idString);
+        }
+        sb.append("<p>").append(idString).append("</p>\n");
         sb.append("<p>").append(visualizable.getType()).append("<br/>");
         if (locations.isEmpty()) {
             sb.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
@@ -202,14 +246,11 @@ public class HtmlVisualizer implements Visualizer {
             sb.append(olap.toString()).append("<br/>\n");
         }
         sb.append("</p>\n");
-        sb.append(HTML_TABLE_HEADER);
-        sb.append("<tbody>\n");
-        sb.append(keyValueRow("Impact", visualizable.getImpact()));
-        sb.append(keyValueRow("Associated diseases", getUnorderedListWithDiseases(visualizable)));
-        sb.append("</table>");
-        String svg = getSvgString(visualizable);
-        sb.append(svg);
-
         return sb.toString();
+    }
+
+    String getPhenotypePrioritization(Visualizable visualizable) {
+        String s = getUnorderedListWithDiseases(visualizable);
+        return s;
     }
 }

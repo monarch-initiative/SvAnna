@@ -103,6 +103,9 @@ public class Overlap {
         if (this.overlapType.isSingleExon()) {
             return description;
         }
+        if (this.overlapType.isIntronic()) {
+            return this.overlapDistance.getDescription();
+        }
 
 
         return String.format("VcfOverlap [%s:%s] %dbp; 3'",

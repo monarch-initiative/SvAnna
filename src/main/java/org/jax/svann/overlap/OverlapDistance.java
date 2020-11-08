@@ -5,13 +5,13 @@ package org.jax.svann.overlap;
  * enhancers. In many cases, we have two distances (e.g., an intronic SV has a certain distance to
  * the upstream and to the downstream exon). In other cases, we have only one distance (e.g., upstream
  * and downstream).
- * @authr Peter N Robinson
+ * @author Peter N Robinson
  */
 public class OverlapDistance {
 
     private static final int UNITIALIZED = -42;
 
-    static enum OverlapDistanceType { INTERGENIC, INTRONIC, EXONIC, CONTAINED_IN }
+    enum OverlapDistanceType { INTERGENIC, INTRONIC, EXONIC, CONTAINED_IN }
 
     private final OverlapDistanceType overlapDistanceType;
 
@@ -54,16 +54,16 @@ public class OverlapDistance {
 
     /**
      * If an SV overlaps an exon, then we classify it as having a distance of zero.
-     * @param geneSymbol
-     * @return
+     * @param geneSymbol symbol of the overlapped gene
+     * @return OverlapDistance object to signify zero distance to a transcript (exon)
      */
     public static OverlapDistance fromExonic(String geneSymbol, boolean overlapsCds) {
-        String description = String.format("Exonic", distanceString(0), geneSymbol);
+        String description = "Exonic"; // we do not use the OverlapDistance to provide descriptions about exonic events
         return new OverlapDistance(OverlapDistanceType.EXONIC, 0, description, overlapsCds);
     }
 
     public static OverlapDistance fromIntronic(String geneSymbol, IntronDistance idistance) {
-        String description = String.format("Intronic - %s and %s removed from flanking exons of %s",
+        String description = String.format("Intronic: %s and %s removed from flanking exons of %s",
                 distanceString( idistance.getDistanceToUpstreamExon()), distanceString( idistance.getDistanceToDownstreamExon()), geneSymbol);
         return new OverlapDistance(OverlapDistanceType.INTRONIC,
                 idistance.getDistanceToUpstreamExon(),

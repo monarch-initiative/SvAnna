@@ -36,20 +36,20 @@ class DefaultSvPriority implements SvPriority {
         diseases = List.of(); // not relevant at this stage
     }
 
-    @Deprecated
-    DefaultSvPriority(SvType svType,
-                      SvImpact svImpact,
-                      Set<TranscriptModel> affectedTranscripts,
-                      Set<GeneWithId> affectedGeneIds,
-                      List<Enhancer> affectedEnhancers,
-                      List<Overlap> olaps) {
-        this.svImpact = svImpact;
-        this.affectedTranscripts = affectedTranscripts;
-        this.affectedGeneIds = affectedGeneIds;
-        this.affectedEnhancers = affectedEnhancers;
-        diseases = List.of(); // not relevant at this stage
-        overlaps = olaps;
-    }
+//    @Deprecated
+//    DefaultSvPriority(SvType svType,
+//                      SvImpact svImpact,
+//                      Set<TranscriptModel> affectedTranscripts,
+//                      Set<GeneWithId> affectedGeneIds,
+//                      List<Enhancer> affectedEnhancers,
+//                      List<Overlap> olaps) {
+//        this.svImpact = svImpact;
+//        this.affectedTranscripts = affectedTranscripts;
+//        this.affectedGeneIds = affectedGeneIds;
+//        this.affectedEnhancers = affectedEnhancers;
+//        diseases = List.of(); // not relevant at this stage
+//        overlaps = olaps;
+//    }
 
     DefaultSvPriority(SvImpact svImpact,
                       Set<TranscriptModel> affectedTranscripts,

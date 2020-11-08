@@ -126,7 +126,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(svType, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        return null;//new DefaultSvPriority(svType, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**
@@ -164,7 +164,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        return null;//new DefaultSvPriority(SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**
@@ -207,12 +207,13 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(SvType.INSERTION,
-                impact,
-                affectedTranscripts,
-                geneWithIdsSet,
-                enhancers,
-                overlaps);
+//        ;new DefaultSvPriority(SvType.INSERTION,
+//                impact,
+//                affectedTranscripts,
+//                geneWithIdsSet,
+//                enhancers,
+//                overlaps);
+        return null;
     }
 
     private DefaultSvPriority prioritizeTranslocation(SequenceRearrangement rearrangement) {
@@ -242,12 +243,13 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(SvType.TRANSLOCATION,
-                impact,
-                affectedTranscripts,
-                geneWithIdsSet,
-                enhancers,
-                overlaps);
+//        return new DefaultSvPriority(SvType.TRANSLOCATION,
+//                impact,
+//                affectedTranscripts,
+//                geneWithIdsSet,
+//                enhancers,
+//                overlaps);
+        return null;
     }
 
     @Override

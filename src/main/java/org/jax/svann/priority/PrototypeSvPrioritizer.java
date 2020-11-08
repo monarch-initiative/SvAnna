@@ -16,6 +16,18 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * This class implements both sequence-based and phenotype-based prioritization. The sequence-based prioritizations
+ * are different for each SV type, but each results in potentially empty lists of affected transcripts and enhancers.
+ * The class then checks if any of the affected transcripts corresponds to a gene in {@link #diseaseSummaryMap}, and
+ * if an enhancer is associated with an HPO term in {@link #relevantHpoIdsForEnhancers}. If so, we call the SV
+ * {@code phenotypically relevant}. If an SV is relevant, then the IMPACT calculated by the sequence-based prioritization
+ * is not changed. If not, then we apply the following rules
+ * <ol>
+ *     <li>HIGH-IMPACT is changed to INTERMEDIATE-IMPACT</li>
+ *     <li>INTERMEDIATE-IMPACT is changed to LOW IMPACT</li>
+ * </ol>
+ */
 public class PrototypeSvPrioritizer implements SvPrioritizer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrototypeSvPrioritizer.class);
@@ -46,9 +58,21 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     private final Set<TermId> relevantHpoIdsForEnhancers;
 
     private final Set<TermId> patientPhenotypeTerms;
-
+    /**
+     *  map with key=GeneId, value=Set of {@link HpoDiseaseSummary} objects. Only contains data for genes/diseases
+     *  determined to be phenotypically relevant and is empty (but not null) if the user does not enter HPO terms.
+     */
     private final Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap;
 
+    /**
+     *
+     * @param overlapper object that calculates overlap of SVs with transcripts
+     * @param enhancerOverlapper object that calculates overlap of SVs with enhancers
+     * @param geneSymbolMap Map that allows us to go from gene symbol to GeneID TODO -- this is not robust, consider refactor
+     * @param patientPhenotypeTerms Terms observed in patient
+     * @param relevantHpoIdsForEnhancers HPO TermIds used to describe enhancers (contains only HPO terms equal/ancestors to patient terms)
+     * @param diseaseSummaryMap key:NCBI Gene id; value:set of associated diseases (set contains only phenotypically relevant diseases)
+     */
     public PrototypeSvPrioritizer(Overlapper overlapper,
                                   EnhancerOverlapper enhancerOverlapper,
                                   Map<String, GeneWithId> geneSymbolMap,
@@ -111,7 +135,6 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      * @return a phenotypically prioritized {@link SvPriority} object
      */
     SvPriority prioritizeSimpleOverlapByPhenotype(SvImpact svImpact,
-                                                  SequenceRearrangement rearrangement,
                                                   Set<TranscriptModel> affectedTranscripts,
                                                   Set<GeneWithId> affectedGeneIds,
                                                   List<Enhancer> affectedEnhancers,
@@ -229,13 +252,36 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(deletion);
         if (!enhancers.isEmpty()) {
-            impact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getTermId()))
+            SvImpact enhancerImpact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getTermId()))
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
+            if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.HIGH) {
+                impact = SvImpact.HIGH;
+            } else if (impact == SvImpact.LOW && enhancerImpact == SvImpact.HIGH) {
+                impact = SvImpact.HIGH;
+            }
         }
-        return prioritizeSimpleOverlapByPhenotype(impact, deletion, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
-       // return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+
     }
+
+    private boolean affectedGenesRelevant(Set<GeneWithId> genesAffeectedBySv) {
+        for (var gwi : genesAffeectedBySv) {
+            TermId tid = gwi.getGeneId();
+             if (this.diseaseSummaryMap.containsKey(tid)) {
+                 return true;
+             }
+        }
+        return false;
+    }
+
+    private boolean affectedEnhancersRelevant(List<Enhancer> enhancers) {
+        return enhancers.
+                stream().
+                map(Enhancer::getTermId).
+                anyMatch(relevantHpoIdsForEnhancers::contains);
+    }
+
 
     /**
      * Sequence based insertion prioritization. Any insertion that occurs in exonic regions is considered HIGH impact
@@ -296,8 +342,26 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
         }
-
-        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        // When we get here, we will perform phenotypic prioritization.
+        List<HpoDiseaseSummary> diseaseList;
+        if (this.diseaseSummaryMap.isEmpty()) {
+            // i.e., the user did not provide phenotypic data
+            diseaseList = List.of(); // empty list
+        } else {
+            // check relevance with respect to transcripts
+            boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
+            boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
+            boolean relevant = affectsEnhancers || affectsTranscripts;
+            if (! relevant) {
+                // downgrade the impact
+                if (impact == SvImpact.HIGH) {
+                    impact = SvImpact.INTERMEDIATE;
+                } else {
+                    impact = SvImpact.LOW;
+                }
+            }
+        }
+        return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**

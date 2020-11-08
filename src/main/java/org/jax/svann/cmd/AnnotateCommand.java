@@ -109,9 +109,7 @@ public class AnnotateCommand implements Callable<Integer> {
         // jannovar data
         JannovarData jannovarData = readJannovarData(jannovarPath);
         // disease summary map
-        // TODO: 4. 11. 2020 implement
-        Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap = Map.of();
-
+        Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
         // 1 - parse input variants
         BreakendAssembler breakendAssembler = new BreakendAssembler();
         StructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, breakendAssembler);
@@ -123,7 +121,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Overlapper overlapper = new Overlapper(jannovarData);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
 
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, diseaseSummaryMap);
+        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, relevantGenesAndDiseases);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();

@@ -457,7 +457,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             affectedTranscripts =
                     overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
             impact = SvImpact.HIGH;
-            otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_INVERSION;
+            otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
         } else {
             affectedTranscripts = Set.of();
             geneWithIdsSet = Set.of();

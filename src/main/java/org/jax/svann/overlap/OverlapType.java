@@ -55,6 +55,7 @@ public enum OverlapType {
     SINGLE_EXON_IN_TRANSCRIPT("single-exon affected in transcript"),
     MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript"),
     TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV"),
+    TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION("transcript disrupted by translocation"),
     TRANSCRIPT_DISRUPTED_BY_INVERSION("transcript disrupted by inversion");
 
     private final static Set<OverlapType> intergenicTypes = Set.of(DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_5KB,

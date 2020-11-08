@@ -69,6 +69,10 @@ public class AnnotateCommand implements Callable<Integer> {
 
     public AnnotateCommand() {
         // TODO: 2. 11. 2020 externalize
+        // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids
+        // that are provided by the user into their corresponding labels on the output file.
+        // I will add a method to this class for now, but when we refactor this, we should make it
+        // more elegant
         hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
     }
 
@@ -79,6 +83,7 @@ public class AnnotateCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         // 0 - set up data
+
         // assembly
         Optional<GenomeAssembly> assemblyOptional = GenomeAssemblyProvider.getDefaultProvider().getAssembly(ASSEMBLY_ID);
         if (assemblyOptional.isEmpty()) {
@@ -89,6 +94,12 @@ public class AnnotateCommand implements Callable<Integer> {
         GenomeAssembly assembly = assemblyOptional.get();
         // patient phenotype
         Set<TermId> patientTerms = Arrays.stream(hpoTermIdList.split(",")).map(String::trim).map(TermId::of).collect(Collectors.toSet());
+        // check that the HPO terms entered by the user (if any) are valid
+        Map<TermId, String> hpoTermsAndLabels;
+        if (! patientTerms.isEmpty())
+            hpoTermsAndLabels = hpoDiseaseGeneMap.getTermLabelMap(patientTerms);
+        else
+            hpoTermsAndLabels = Map.of();
         // enhancers & relevant enhancer terms
         TSpecParser tparser = new TSpecParser(enhancerFile.toString());
         Map<Integer, IntervalArray<Enhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
@@ -153,7 +164,8 @@ public class AnnotateCommand implements Callable<Integer> {
                 lowImpactCounts,
                 intermediateImpactCounts,
                 highImpactCounts,
-                infoMap);
+                infoMap,
+                hpoTermsAndLabels);
         template.outputFile(outprefix);
 
         // We're done!

@@ -159,7 +159,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                 }
             }
         }
-        return new DefaultSvPriority(phenotypeImpact, rearrangement, affectedTranscripts,
+        return new DefaultSvPriority(phenotypeImpact, affectedTranscripts,
                 affectedGeneIds, affectedEnhancers, olaps, diseaseList);
     }
 

@@ -19,20 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * This class prioritizes structural variants according to the sequences they affect. It does not take
- * into account any notion of phenotypic relevance. The rules are
- * <ol>
- *     <li>HIGH: High -- multiple genes, exonic, Disruption of a promoter (2kb upstream). Disruption of an enhancer.
- *     For SVs that affect exons, we only count HIGH priority if the SV affects the coding sequence (CDS).</li>
- *     <li>INTERMEDIATE. Intronic, downstream (up to 2kb). For coding genes, exonic SVs that do not afffect the CDS</li>
- *     <li>LOW: intergenic but not enhancer. Upstream/downstream, more than 2kb.</li>
- * </ol>
- * If the user has provided HPO terms describing the phenotypes observed in a proband, then we intend objects
- * of this class to subsequently be passed to {@link PhenotypeSvPrioritizer}.
- * @author Daniel Danis
- * @author Peter N Robinson
- */
+
 @Deprecated // in favor of PrototypeSvPrioritizer
 public class SequenceSvPrioritizer implements SvPrioritizer {
     private static final Logger LOGGER = LoggerFactory.getLogger(SequenceSvPrioritizer.class);
@@ -72,26 +59,26 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
     }
 
 
-    //    @Override
-    public SvPriority prioritize(SvPriority prioritizedRearrangement) {
-        SequenceRearrangement rearrangement = prioritizedRearrangement.getRearrangement();
-        switch (rearrangement.getType()) {
-            case DELETION:
-                return prioritizeDeletion(rearrangement);
-            case INVERSION:
-                return prioritizeInversion(rearrangement);
-            case INSERTION:
-                return prioritizeInsertion(rearrangement);
-            case TRANSLOCATION:
-                return prioritizeTranslocation(rearrangement);
-            case DUPLICATION:
-                return prioritizeDuplication(rearrangement);
-        }
-        // for development - TODO, figure out graceful default prioritization!
-        LOGGER.error("Could not prioritize rearrangement with type=" + rearrangement.getType());
-        return null;
-        // throw new SvAnnRuntimeException("Could not prioritize rearrangement with type=" + rearrangement.getType());
-    }
+//    //    @Override
+//    public SvPriority prioritize(SvPriority prioritizedRearrangement) {
+//        SequenceRearrangement rearrangement = prioritizedRearrangement.getRearrangement();
+//        switch (rearrangement.getType()) {
+//            case DELETION:
+//                return prioritizeDeletion(rearrangement);
+//            case INVERSION:
+//                return prioritizeInversion(rearrangement);
+//            case INSERTION:
+//                return prioritizeInsertion(rearrangement);
+//            case TRANSLOCATION:
+//                return prioritizeTranslocation(rearrangement);
+//            case DUPLICATION:
+//                return prioritizeDuplication(rearrangement);
+//        }
+//        // for development - TODO, figure out graceful default prioritization!
+//        LOGGER.error("Could not prioritize rearrangement with type=" + rearrangement.getType());
+//        return null;
+//        // throw new SvAnnRuntimeException("Could not prioritize rearrangement with type=" + rearrangement.getType());
+//    }
 
     private SvPriority prioritizeDuplication(SequenceRearrangement rearrangement) {
         // TODO: 2. 11. 2020 fix
@@ -139,7 +126,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(rearrangement,svType, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        return new DefaultSvPriority(svType, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**
@@ -177,7 +164,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(rearrangement, SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        return new DefaultSvPriority(SvType.INVERSION, impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**
@@ -220,8 +207,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(rearrangement,
-                SvType.INSERTION,
+        return new DefaultSvPriority(SvType.INSERTION,
                 impact,
                 affectedTranscripts,
                 geneWithIdsSet,
@@ -256,8 +242,7 @@ public class SequenceSvPrioritizer implements SvPrioritizer {
         if (enhancers.size()>0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(rearrangement,
-                SvType.TRANSLOCATION,
+        return new DefaultSvPriority(SvType.TRANSLOCATION,
                 impact,
                 affectedTranscripts,
                 geneWithIdsSet,

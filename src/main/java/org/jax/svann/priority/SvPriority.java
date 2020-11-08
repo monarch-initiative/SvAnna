@@ -17,12 +17,6 @@ public interface SvPriority {
         return DefaultSvPriority.unknown();
     }
 
-    @Deprecated
-    SequenceRearrangement getRearrangement();
-
-    @Deprecated
-    SvType getType();
-
     SvImpact getImpact();
 
     List<HpoDiseaseSummary> getDiseases();

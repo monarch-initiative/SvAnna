@@ -14,7 +14,6 @@ import java.util.Set;
 
 class DefaultSvPriority implements SvPriority {
     private static final DefaultSvPriority UNKNOWN = new DefaultSvPriority(SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), List.of());
-    private final SequenceRearrangement rearrangement;
     private final SvImpact svImpact;
     private final Set<TranscriptModel> affectedTranscripts;
     private final Set<GeneWithId> affectedGeneIds;
@@ -27,7 +26,6 @@ class DefaultSvPriority implements SvPriority {
                       Set<GeneWithId> affectedGeneIds,
                       List<Enhancer> affectedEnhancers,
                       List<Overlap> olaps) {
-        this.rearrangement = null;
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
         this.affectedGeneIds = affectedGeneIds;
@@ -39,14 +37,12 @@ class DefaultSvPriority implements SvPriority {
     }
 
     @Deprecated
-    DefaultSvPriority(SequenceRearrangement rearrangement,
-                      SvType svType,
+    DefaultSvPriority(SvType svType,
                       SvImpact svImpact,
                       Set<TranscriptModel> affectedTranscripts,
                       Set<GeneWithId> affectedGeneIds,
                       List<Enhancer> affectedEnhancers,
                       List<Overlap> olaps) {
-        this.rearrangement = rearrangement;
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
         this.affectedGeneIds = affectedGeneIds;
@@ -56,13 +52,11 @@ class DefaultSvPriority implements SvPriority {
     }
 
     DefaultSvPriority(SvImpact svImpact,
-                      SequenceRearrangement rearrangement,
                       Set<TranscriptModel> affectedTranscripts,
                       Set<GeneWithId> affectedGeneIds,
                       List<Enhancer> affectedEnhancers,
                       List<Overlap> olaps,
                       List<HpoDiseaseSummary> diseaseList) {
-        this.rearrangement = rearrangement;
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
         this.affectedGeneIds = affectedGeneIds;
@@ -73,16 +67,6 @@ class DefaultSvPriority implements SvPriority {
 
     static DefaultSvPriority unknown() {
         return UNKNOWN;
-    }
-
-    @Override
-    public SequenceRearrangement getRearrangement() {
-        return this.rearrangement;
-    }
-
-    @Override
-    public SvType getType() {
-        return rearrangement.getType();
     }
 
     @Override
@@ -128,7 +112,7 @@ class DefaultSvPriority implements SvPriority {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DefaultSvPriority that = (DefaultSvPriority) o;
-        return Objects.equals(this.rearrangement, that.rearrangement) &&
+        return
                 this.svImpact == that.svImpact &&
                 Objects.equals(affectedTranscripts, that.affectedTranscripts) &&
                 Objects.equals(affectedGeneIds, that.affectedGeneIds) &&
@@ -137,7 +121,7 @@ class DefaultSvPriority implements SvPriority {
 
     @Override
     public int hashCode() {
-        return Objects.hash(rearrangement, svImpact, affectedTranscripts, affectedGeneIds, affectedEnhancers);
+        return Objects.hash(svImpact, affectedTranscripts, affectedGeneIds, affectedEnhancers);
     }
 
     @Override

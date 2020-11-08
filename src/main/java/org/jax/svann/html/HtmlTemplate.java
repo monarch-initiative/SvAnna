@@ -8,6 +8,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.viz.Visualizer;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -27,11 +28,14 @@ public class HtmlTemplate {
 
     protected static final String NOT_AVAILABLE = "n/a";
 
+
+
     public HtmlTemplate(List<String> htmlList,
                         Map<SvType, Integer> lowImpact,
                         Map<SvType, Integer> intermediateImpact,
                         Map<SvType, Integer> highImpact,
-                        Map<String, String> infoMap) {
+                        Map<String, String> infoMap,
+                        Map<TermId, String> userHpoTerms) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_30)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -59,6 +63,19 @@ public class HtmlTemplate {
         templateData.putIfAbsent("svalist", htmlList);
         templateData.put("n_unparsable", infoMap.getOrDefault("unparsable", NOT_AVAILABLE));
         templateData.put("vcf_file", infoMap.getOrDefault("vcf_file", NOT_AVAILABLE));
+        List<String> hpos = createHpoLinks(userHpoTerms);
+        templateData.put("hpoterms", hpos);
+    }
+
+    private List<String> createHpoLinks(Map<TermId, String> userHpoTerms) {
+      List<String> observedHPOs = new ArrayList<>();
+        for (var e : userHpoTerms.entrySet()) {
+            String termId = e.getKey().getValue();
+            String label = e.getValue();
+            String tstr = String.format("%s (<a href=\"https://hpo.jax.org/app/browse/term/%s\">%s</a>)",label,termId,termId);
+            observedHPOs.add(tstr);
+        }
+       return observedHPOs;
     }
 
 

@@ -389,6 +389,19 @@ a.svg:hover, a.svg:active {
         <article>
         <p>SvAnna (Structural Variant Annotation Amenuensis) analysis of structural variants.</p>
         <p>structural variants were extracted from ${vcf_file}.</p>
+        <#if hpoterms?has_content>
+        <ol>
+        <#list hpoterms as hpo>
+        <li>${hpo?no_esc}</li>
+        </ol>
+        </#list>
+        </#if>
+      </article>
+  </section>
+
+       <section>
+            <a name="summary"></a>
+              <article>
         <table border=1>
         <thead>
             <tr>

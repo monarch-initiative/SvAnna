@@ -10,11 +10,8 @@ public class Overlap {
 
     private final OverlapType overlapType;
     /**
-     * This field's meaning depends on the type. For INTERGENIC, it is the distance to the 5' (left) nearest gene.
-     * For INTRONIC, it is the distance to the nearest exon.
+     * This field's meaning depends on the type, INTERGENIC, INTRONIC, EXONIC, SPANNING.
      */
-//    private final int distance;
-
     private OverlapDistance overlapDistance;
 
     private final TranscriptModel transcriptModel;
@@ -27,7 +24,6 @@ public class Overlap {
 
     public Overlap(OverlapType type, TranscriptModel tmod, OverlapDistance odist) {
         this.overlapType = type;
-//        this.distance = odist.getShortestDistance();
         this.transcriptModel = tmod;
         this.description = odist.getDescription();
         this.overlapsCds = false;

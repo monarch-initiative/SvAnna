@@ -56,7 +56,6 @@ public class SvSvgGeneratorTest extends TestBase {
         String svg = generator.getSvg();
         assertNotNull(svg);
         System.out.println(svg);
-        assertNotNull(svg);
         try {
             String path = "target/deletion.svg";
             BufferedWriter writer = new BufferedWriter(new FileWriter(path));

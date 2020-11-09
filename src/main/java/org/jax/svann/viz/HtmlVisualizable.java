@@ -1,6 +1,5 @@
 package org.jax.svann.viz;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
@@ -11,6 +10,7 @@ import org.jax.svann.reference.Breakend;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,14 +78,21 @@ public class HtmlVisualizable implements Visualizable {
     public boolean hasPhenotypicRelevance() {
         return this.svPriority.hasPhenotypicRelevance();
     }
+
     @Override
     public List<HpoDiseaseSummary> getDiseaseSummaries() {
         return this.svPriority.getDiseases();
     }
+
     @Override
-    public List<TranscriptModel> getTranscripts() { return new ArrayList<>(this.svPriority.getAffectedTranscripts()); }
+    public List<SvAnnTxModel> getTranscripts() {
+        return new ArrayList<>(this.svPriority.getAffectedTranscripts());
+    }
+
     @Override
-    public List<Enhancer> getEnhancers() { return this.svPriority.getAffectedEnhancers(); }
+    public List<Enhancer> getEnhancers() {
+        return this.svPriority.getAffectedEnhancers();
+    }
 
     /**
      * Return strings for display of the format chr3:123-456

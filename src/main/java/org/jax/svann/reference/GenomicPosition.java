@@ -54,6 +54,31 @@ public interface GenomicPosition extends Comparable<GenomicPosition> {
         return withStrand(getStrand().getOpposite());
     }
 
+    /**
+     * Return distance to <code>other</code> position from <code>this</code> position. In other words, how many 1-bp
+     * hops must be made in order to move to <code>other</code> position when starting at <code>this</code>.
+     * <p>
+     * The distance is <em>negative</em> when hopping in 5' direction, and <em>positive</em> when hopping in 3' direction.
+     *
+     * @param other position
+     * @return distance
+     */
+    default int distanceTo(GenomicPosition other) {
+        if (getContigId() != other.getContigId()) {
+            throw new ContigMismatchException("Contig IDs do not match: " + getContigId() + "!=" + other.getContigId());
+        }
+        GenomicPosition onStrand = other.withStrand(getStrand());
+        return onStrand.getPosition() - getPosition();
+    }
+
+    default boolean isDownstreamOf(GenomicPosition other) {
+        return distanceTo(other) < 0;
+    }
+
+    default boolean isUpstreamOf(GenomicPosition other) {
+        return distanceTo(other) > 0;
+    }
+
     @Override
     default int compareTo(GenomicPosition o) {
         return NATURAL_COMPARATOR.compare(this, o);

@@ -11,7 +11,6 @@ import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.GenomeAssembly;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This class provides transcripts defined in given {@link JannovarData}. The transcripts are remapped into the
@@ -26,10 +25,14 @@ public class JannovarTranscriptService implements TranscriptService {
 
     private final Map<String, SvAnnTxModel> txByAccession;
 
+    private final Map<String, Set<SvAnnTxModel>> txBySymbol;
+
     private JannovarTranscriptService(Map<Integer, IntervalArray<SvAnnTxModel>> chromosomeMap,
-                                      Map<String, SvAnnTxModel> txByAccession) {
+                                      Map<String, SvAnnTxModel> txByAccession,
+                                      Map<String, Set<SvAnnTxModel>> txBySymbol) {
         this.chromosomeMap = Map.copyOf(chromosomeMap);
         this.txByAccession = Map.copyOf(txByAccession);
+        this.txBySymbol = txBySymbol;
     }
 
     /**
@@ -43,6 +46,7 @@ public class JannovarTranscriptService implements TranscriptService {
         JannovarTxMapper remapper = new JannovarTxMapper(assembly);
         Map<Integer, List<SvAnnTxModel>> map = new HashMap<>();
         Map<String, SvAnnTxModel> txByAccession = new HashMap<>();
+        Map<String, Set<SvAnnTxModel>> txBySymbol = new HashMap<>();
 
         // remap all the transcripts into SvAnn's coordinate system
         for (JannovarData database : databases) {
@@ -57,16 +61,24 @@ public class JannovarTranscriptService implements TranscriptService {
                     }
                     map.get(contigId).add(tx);
                     txByAccession.put(tx.getAccession(), tx);
+                    if (!txBySymbol.containsKey(tx.getGeneSymbol())) {
+                        txBySymbol.put(tx.getGeneSymbol(), new HashSet<>());
+                    }
+                    txBySymbol.get(tx.getGeneSymbol()).add(tx);
                 });
             }
         }
 
         // build interval arrays
         SvAnnTxModelExtractor endExtractor = new SvAnnTxModelExtractor();
-        Map<Integer, IntervalArray<SvAnnTxModel>> intervalArrayMap = map.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey,
-                        e -> new IntervalArray<>(e.getValue(), endExtractor)));
-        return new JannovarTranscriptService(intervalArrayMap, txByAccession);
+        Map<Integer, IntervalArray<SvAnnTxModel>> intervalArrayMap = new HashMap<>();
+        for (int contig : map.keySet()) {
+            List<SvAnnTxModel> transcripts = map.get(contig);
+            IntervalArray<SvAnnTxModel> intervalArray = new IntervalArray<>(transcripts, endExtractor);
+            intervalArrayMap.put(contig, intervalArray);
+        }
+
+        return new JannovarTranscriptService(intervalArrayMap, txByAccession, txBySymbol);
 
     }
 
@@ -80,11 +92,16 @@ public class JannovarTranscriptService implements TranscriptService {
         return txByAccession;
     }
 
+    @Override
+    public Map<String, Set<SvAnnTxModel>> getTxBySymbolMap() {
+        return txBySymbol;
+    }
+
     private static class SvAnnTxModelExtractor implements IntervalEndExtractor<SvAnnTxModel> {
 
         @Override
         public int getBegin(SvAnnTxModel svAnnTxModel) {
-            GenomicPosition startOnFwd = svAnnTxModel.getStart().withStrand(Strand.FWD);
+            GenomicPosition startOnFwd = svAnnTxModel.withStrand(Strand.FWD).getStart();
             if (startOnFwd.getCoordinateSystem().equals(CoordinateSystem.ONE_BASED)) {
                 // convert to zero-based
                 return startOnFwd.getPosition() - 1;
@@ -96,7 +113,7 @@ public class JannovarTranscriptService implements TranscriptService {
         @Override
         public int getEnd(SvAnnTxModel svAnnTxModel) {
             // this position should be correct all the time
-            return svAnnTxModel.getEnd().withStrand(Strand.FWD).getPosition();
+            return svAnnTxModel.withStrand(Strand.FWD).getEnd().getPosition();
         }
     }
 

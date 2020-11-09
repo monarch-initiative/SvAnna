@@ -1,4 +1,3 @@
-
 package org.jax.svann.reference;
 
 
@@ -76,6 +75,33 @@ public interface GenomicRegion extends CoordinatePair, Comparable<GenomicRegion>
         }
         GenomicRegion onStrand = other.withStrand(this.getStrand());
         return onStrand.getStartPosition() >= getStartPosition() && onStrand.getEndPosition() <= getEndPosition();
+    }
+
+    default boolean contains(GenomicPosition position) {
+        if (this.getContigId() != position.getContigId()) {
+            return false;
+        }
+        GenomicPosition onStrand = position.withStrand(this.getStrand());
+        return getStartPosition() <= onStrand.getPosition() && onStrand.getPosition() <= getEndPosition();
+    }
+
+    /**
+     * Get how many 1bp-long steps must be made on the current strand in order to arrive to the first/last coordinate
+     * of this region.
+     * <p>
+     * Note that the positions <em>must</em> be located on the same contig.
+     *
+     * @param position genome position
+     * @return distance as number of 1bp-long steps
+     */
+    default int differenceTo(GenomicPosition position) {
+        int startDistance = getStart().distanceTo(position);
+        int endDistance = getEnd().distanceTo(position);
+
+        // return the closest value
+        return Math.abs(startDistance) < Math.abs(endDistance)
+                ? startDistance
+                : endDistance;
     }
 
     @Override

@@ -13,7 +13,7 @@ import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.overlap.EnhancerOverlapper;
-import org.jax.svann.overlap.Overlapper;
+import org.jax.svann.overlap.PrototypeOverlapper;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.StructuralRearrangementParser;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
@@ -117,7 +117,7 @@ public class AnnotateCommand implements Callable<Integer> {
 
         // 2 - prioritize & visualize variants
         // setup prioritization parts
-        Overlapper overlapper = new Overlapper(jannovarData);
+        PrototypeOverlapper overlapper = new PrototypeOverlapper(jannovarData);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
 
         SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, relevantGenesAndDiseases);

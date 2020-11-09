@@ -2,6 +2,8 @@ package org.jax.svann.reference.transcripts;
 
 import org.jax.svann.TestBase;
 import org.jax.svann.reference.GenomicRegion;
+import org.jax.svann.reference.StandardGenomicPosition;
+import org.jax.svann.reference.StandardGenomicRegion;
 import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,31 +24,24 @@ public class SvAnnTxModelTest extends TestBase {
     @BeforeEach
     public void setUp() {
 
-        TxGenomicPosition txStart = new TxGenomicPosition(CHR1, 1_000, Strand.FWD);
-        TxGenomicPosition txEnd = new TxGenomicPosition(CHR1, 2_000, Strand.FWD);
+        StandardGenomicPosition txStart = StandardGenomicPosition.precise(CHR1, 1_000, Strand.FWD);
+        StandardGenomicPosition txEnd = StandardGenomicPosition.precise(CHR1, 2_000, Strand.FWD);
 
 
-        TxGenomicPosition cdsStart = new TxGenomicPosition(CHR1, 1_200, Strand.FWD);
-        TxGenomicPosition cdsEnd = new TxGenomicPosition(CHR1, 1_800, Strand.FWD);
+        StandardGenomicPosition cdsStart = StandardGenomicPosition.precise(CHR1, 1_200, Strand.FWD);
+        StandardGenomicPosition cdsEnd = StandardGenomicPosition.precise(CHR1, 1_800, Strand.FWD);
 
 
         transcript = new SvAnnTxModel("acc", "GENE",
-                txStart, txEnd,
+                true, txStart, txEnd,
                 cdsStart, cdsEnd,
                 List.of(
                         // exon 1
-                        new TxGenomicRegion(
-                                new TxGenomicPosition(CHR1, 1_000, Strand.FWD),
-                                new TxGenomicPosition(CHR1, 1_300, Strand.FWD)),
+                        StandardGenomicRegion.precise(CHR1, 1_000, 1_300, Strand.FWD),
                         // exon 2
-                        new TxGenomicRegion(
-                                new TxGenomicPosition(CHR1, 1_400, Strand.FWD),
-                                new TxGenomicPosition(CHR1, 1_500, Strand.FWD)),
+                        StandardGenomicRegion.precise(CHR1, 1_400, 1_500, Strand.FWD),
                         // exon 3
-                        new TxGenomicRegion(
-                                new TxGenomicPosition(CHR1, 1_700, Strand.FWD),
-                                new TxGenomicPosition(CHR1, 2_000, Strand.FWD))
-                ));
+                        StandardGenomicRegion.precise(CHR1, 1_700, 2_000, Strand.FWD)));
     }
 
     @Test
@@ -59,7 +54,7 @@ public class SvAnnTxModelTest extends TestBase {
         assertThat(tx.getStart().getPosition(), is(flipPosition(2_000)));
         assertThat(tx.getEnd().getPosition(), is(flipPosition(1_000)));
 
-        List<GenomicRegion> exons = tx.getExons();
+        List<GenomicRegion> exons = tx.getExonRegions();
         assertThat(exons, hasSize(3));
 
         GenomicRegion first = exons.get(0);

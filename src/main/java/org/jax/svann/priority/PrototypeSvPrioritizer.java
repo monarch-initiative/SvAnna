@@ -1,6 +1,5 @@
 package org.jax.svann.priority;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
@@ -9,6 +8,7 @@ import org.jax.svann.overlap.Overlap;
 import org.jax.svann.overlap.OverlapType;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,7 +135,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      * @return a phenotypically prioritized {@link SvPriority} object
      */
     SvPriority prioritizeSimpleOverlapByPhenotype(SvImpact svImpact,
-                                                  Set<TranscriptModel> affectedTranscripts,
+                                                  Set<SvAnnTxModel> affectedTranscripts,
                                                   Set<GeneWithId> affectedGeneIds,
                                                   List<Enhancer> affectedEnhancers,
                                                   List<Overlap> olaps) {
@@ -211,7 +211,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
         }
-        Set<TranscriptModel> affectedTranscripts = overlaps.stream()
+        Set<SvAnnTxModel> affectedTranscripts = overlaps.stream()
                 .map(Overlap::getTranscriptModel)
                 .collect(Collectors.toSet());
 
@@ -295,7 +295,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
         }
-        Set<TranscriptModel> affectedTranscripts = overlaps.stream()
+        Set<SvAnnTxModel> affectedTranscripts = overlaps.stream()
                 .map(Overlap::getTranscriptModel)
                 .collect(Collectors.toSet());
 
@@ -362,7 +362,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      */
     private SvPriority prioritizeInversion(SequenceRearrangement inversion) {
         // Gather information
-        List<Overlap> overlaps = overlapper.getInversionOverlapsRegionBased(inversion);
+        List<Overlap> overlaps = overlapper.getOverlapList(inversion);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
@@ -382,7 +382,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
         }
-        Set<TranscriptModel> affectedTranscripts = overlaps.stream()
+        Set<SvAnnTxModel> affectedTranscripts = overlaps.stream()
                 .map(Overlap::getTranscriptModel)
                 .collect(Collectors.toSet());
 
@@ -425,7 +425,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         SvImpact impact = SvImpact.LOW; // default
         OverlapType otype = OverlapType.UNKNOWN; // default
-        Set<TranscriptModel> affectedTranscripts;
+        Set<SvAnnTxModel> affectedTranscripts;
         Set<GeneWithId> geneWithIdsSet;
         if (!overlaps.isEmpty()) {
             Set<String> affectedGeneIds = overlaps.stream().map(Overlap::getGeneSymbol).collect(Collectors.toSet());

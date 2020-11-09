@@ -5,6 +5,8 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
+import org.jax.svann.reference.transcripts.JannovarTranscriptService;
+import org.jax.svann.reference.transcripts.TranscriptService;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -33,6 +35,8 @@ public abstract class TestBase {
      * </ul>
      */
     protected static final JannovarData JANNOVAR_DATA = getJannovarData();
+
+    protected static final TranscriptService TX_SERVICE = JannovarTranscriptService.of(GENOME_ASSEMBLY, JANNOVAR_DATA);
 
     private static JannovarData getJannovarData() {
         try {

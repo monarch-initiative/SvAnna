@@ -1,10 +1,10 @@
 package org.jax.svann.viz.svg;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.CoordinatePair;
 import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -15,14 +15,14 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
 
     private final CoordinatePair deletionCoordinates;
 
-    public DeletionSvgGenerator(List<TranscriptModel> transcripts,
+    public DeletionSvgGenerator(List<SvAnnTxModel> transcripts,
                                 List<Enhancer> enhancers,
                                 List<CoordinatePair> coordinatePairs) {
-       super(SvType.DELETION, transcripts, enhancers, coordinatePairs);
-       if (coordinatePairs.size() != 1) {
-           throw new SvAnnRuntimeException("Malformed initialization of DeletionSvgGenerator -- we expect one CoordinatePair but got " +
-                   coordinatePairs.size());
-       }
+        super(SvType.DELETION, transcripts, enhancers, coordinatePairs);
+        if (coordinatePairs.size() != 1) {
+            throw new SvAnnRuntimeException("Malformed initialization of DeletionSvgGenerator -- we expect one CoordinatePair but got " +
+                    coordinatePairs.size());
+        }
         deletionCoordinates = coordinatePairs.get(0);
 
     }

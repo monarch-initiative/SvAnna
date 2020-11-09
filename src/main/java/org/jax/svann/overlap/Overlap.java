@@ -1,6 +1,6 @@
 package org.jax.svann.overlap;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 /**
  * An object that represents the type and degree of overlap of a structural variant and
@@ -14,26 +14,21 @@ public class Overlap {
      */
     private final OverlapDistance overlapDistance;
 
-    private final TranscriptModel transcriptModel;
+    private final SvAnnTxModel transcriptModel;
 
     private final String description;
 
-    private final boolean overlapsCds;
 
-
-
-    public Overlap(OverlapType type, TranscriptModel tmod, OverlapDistance odist) {
-        this(type, tmod, odist, odist.getDescription());
+    public Overlap(OverlapType type, SvAnnTxModel tx, OverlapDistance odist) {
+        this(type, tx, odist, odist.getDescription());
     }
 
 
-
-    public Overlap(OverlapType type, TranscriptModel tmod, OverlapDistance odist, String desc) {
+    public Overlap(OverlapType type, SvAnnTxModel tx, OverlapDistance odist, String desc) {
         this.overlapType = type;
+        this.transcriptModel = tx;
         this.overlapDistance = odist;
-        this.transcriptModel = tmod;
         this.description = desc;
-        this.overlapsCds = false;
     }
 
 
@@ -56,7 +51,7 @@ public class Overlap {
      * @return true if this overlap involves exonic sequence
      */
     public boolean overlapsCds() {
-        return overlapsCds;
+        return overlapDistance.isOverlapsCds();
     }
 
 
@@ -80,7 +75,7 @@ public class Overlap {
         return overlapDistance;
     }
 
-    public TranscriptModel getTranscriptModel() {
+    public SvAnnTxModel getTranscriptModel() {
         return transcriptModel;
     }
 

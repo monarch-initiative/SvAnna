@@ -17,6 +17,8 @@ public class SvAnnTxModel implements GenomicRegion {
 
     private final String hgvsSymbol;
 
+    private final boolean isCoding;
+
     private final GenomicPosition txStart;
 
     private final GenomicPosition txEnd;
@@ -27,13 +29,14 @@ public class SvAnnTxModel implements GenomicRegion {
 
     SvAnnTxModel(String accessionId,
                  String hgvsSymbol,
-                 GenomicPosition txStart,
+                 boolean isCoding, GenomicPosition txStart,
                  GenomicPosition txEnd,
                  GenomicPosition cdsStart,
                  GenomicPosition cdsEnd,
                  List<GenomicRegion> exons) {
         this.accessionId = accessionId;
         this.hgvsSymbol = hgvsSymbol;
+        this.isCoding = isCoding;
         this.txStart = txStart;
         this.txEnd = txEnd;
         this.cdsStart = cdsStart;
@@ -74,6 +77,10 @@ public class SvAnnTxModel implements GenomicRegion {
         return hgvsSymbol;
     }
 
+    public boolean isCoding() {
+        return isCoding;
+    }
+
     /**
      * @return position of the first base of the first codon
      */
@@ -91,7 +98,7 @@ public class SvAnnTxModel implements GenomicRegion {
     /**
      * @return list of regions corresponding to sequence that made it to the ribosome
      */
-    public List<GenomicRegion> getExons() {
+    public List<GenomicRegion> getExonRegions() {
         return exons;
     }
 
@@ -106,7 +113,7 @@ public class SvAnnTxModel implements GenomicRegion {
             }
             // cds & tx positions are provided in the switched order
             return new SvAnnTxModel(accessionId, hgvsSymbol,
-                    txEnd.withStrand(strand),
+                    isCoding, txEnd.withStrand(strand),
                     txStart.withStrand(strand),
                     cdsEnd.withStrand(strand),
                     cdsStart.withStrand(strand),
@@ -138,6 +145,6 @@ public class SvAnnTxModel implements GenomicRegion {
         return hgvsSymbol + '(' + accessionId + ") "
                 + getContig().getPrimaryName() + ":"
                 + txStart.getPosition() + '-' + txEnd.getPosition()
-                + '(' + getStrand() +')';
+                + '(' + getStrand() + ')';
     }
 }

@@ -1,12 +1,12 @@
 package org.jax.svann.viz.svg;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.CoordinatePair;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -23,10 +23,14 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
 
     private final int positionContigB;
 
-    /** transcripts on the 5' side on contig A or the 3' side of contig B */
-    private final List<TranscriptModel> transcriptModelsAB;
-    /** transcripts on the 5' side on contig B or the 3' side of contig A */
-    private final List<TranscriptModel> transcriptModelsBA;
+    /**
+     * transcripts on the 5' side on contig A or the 3' side of contig B
+     */
+    private final List<SvAnnTxModel> transcriptModelsAB;
+    /**
+     * transcripts on the 5' side on contig B or the 3' side of contig A
+     */
+    private final List<SvAnnTxModel> transcriptModelsBA;
 
     /** transcripts on the 5' side on contig A or the 3' side of contig B */
     private final List<Enhancer> enhancersAB;
@@ -47,7 +51,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
      * @param coordinatePairs
      */
     public TranslocationSvgGenerator(SequenceRearrangement rearrangement,
-                                     List<TranscriptModel> transcripts,
+                                     List<SvAnnTxModel> transcripts,
                                      List<Enhancer> enhancers,
                                      List<CoordinatePair> coordinatePairs) {
         super(SvType.TRANSLOCATION, transcripts, enhancers, coordinatePairs);
@@ -63,23 +67,23 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         this.enhancersAB = new ArrayList<>();
         this.enhancersBA = new ArrayList<>();
         for (var tmod : transcripts) {
-            if (tmod.getChr() == contigA.getId()) {
+            if (tmod.getContigId() == contigA.getId()) {
                 // TODO -- we are comparing contig int ids from two different sources.
-                if (tmod.getTXRegion().getBeginPos() < positionContigA) {
+                if (tmod.getStartPosition() < positionContigA) {
                     // the transcript is either completely to the left of the breakpoint on contig A
                     // or it straddles the breakpoint
                     this.transcriptModelsAB.add(tmod);
                 } else {
                     this.transcriptModelsBA.add(tmod);
                 }
-            } else if (tmod.getChr() == contigB.getId()) {
-                if (tmod.getTXRegion().getBeginPos() < positionContigB) {
+            } else if (tmod.getContigId() == contigB.getId()) {
+                if (tmod.getStartPosition() < positionContigB) {
                     this.transcriptModelsBA.add(tmod);
                 } else {
                     this.transcriptModelsAB.add(tmod);
                 }
             } else {
-                throw new SvAnnRuntimeException("Could not identify TranscriptModel contig: " + tmod.getChr());
+                throw new SvAnnRuntimeException("Could not identify TranscriptModel contig: " + tmod.getStartContigName());
             }
         }
         for (var e : enhancers) {
@@ -110,26 +114,26 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
 
 
     private int getGenomicMinPosOnContig(Contig contig, int pos) {
-        List<TranscriptModel> transcripts;
+        List<SvAnnTxModel> transcripts;
         List<Enhancer> enhancers;
         if (contig == contigA) {
-            transcripts = transcriptModelsAB.stream().filter(t -> t.getChr() == contig.getId()).collect(Collectors.toList());
+            transcripts = transcriptModelsAB.stream().filter(t -> t.getContigId() == contig.getId()).collect(Collectors.toList());
             enhancers = enhancersAB.stream().filter(e -> e.getContig() == contig).collect(Collectors.toList());
         } else {
-            transcripts = transcriptModelsBA.stream().filter(t -> t.getChr() == contig.getId()).collect(Collectors.toList());
+            transcripts = transcriptModelsBA.stream().filter(t -> t.getContigId() == contig.getId()).collect(Collectors.toList());
             enhancers = enhancersBA.stream().filter(e -> e.getContig() == contig).collect(Collectors.toList());
         }
         return getGenomicMinPos(transcripts, enhancers, pos);
     }
 
     private int getGenomicMaxPosOnContig(Contig contig, int pos) {
-        List<TranscriptModel> transcripts;
+        List<SvAnnTxModel> transcripts;
         List<Enhancer> enhancers;
         if (contig == contigA) {
-            transcripts = transcriptModelsBA.stream().filter(t -> t.getChr() == contig.getId()).collect(Collectors.toList());
+            transcripts = transcriptModelsBA.stream().filter(t -> t.getContigId() == contig.getId()).collect(Collectors.toList());
             enhancers = enhancersBA.stream().filter(e -> e.getContig() == contig).collect(Collectors.toList());
         } else {
-            transcripts = transcriptModelsAB.stream().filter(t -> t.getChr() == contig.getId()).collect(Collectors.toList());
+            transcripts = transcriptModelsAB.stream().filter(t -> t.getContigId() == contig.getId()).collect(Collectors.toList());
             enhancers = enhancersAB.stream().filter(e -> e.getContig() == contig).collect(Collectors.toList());
         }
         return getGenomicMaxPos(transcripts, enhancers, pos);

@@ -1,16 +1,20 @@
-package org.jax.svann.reference.transcripts;
+package org.jax.svann.reference;
 
-import org.jax.svann.reference.CoordinateSystem;
-import org.jax.svann.reference.GenomicPosition;
-import org.jax.svann.reference.Strand;
 import org.jax.svann.reference.genome.Contig;
 
+import java.text.NumberFormat;
 import java.util.Objects;
 
 /**
  * Yet another implementation of a genomic position.
  */
-class TxGenomicPosition implements GenomicPosition {
+public class StandardGenomicPosition implements GenomicPosition {
+
+    private static final NumberFormat POS_FMT = NumberFormat.getInstance();
+
+    static {
+        POS_FMT.setGroupingUsed(true);
+    }
 
     private final Contig contig;
 
@@ -18,10 +22,14 @@ class TxGenomicPosition implements GenomicPosition {
 
     private final Strand strand;
 
-    TxGenomicPosition(Contig contig, int position, Strand strand) {
+    private StandardGenomicPosition(Contig contig, int position, Strand strand) {
         this.contig = contig;
         this.position = position;
         this.strand = strand;
+    }
+
+    public static StandardGenomicPosition precise(Contig contig, int position, Strand strand) {
+        return new StandardGenomicPosition(contig, position, strand);
     }
 
     @Override
@@ -50,7 +58,7 @@ class TxGenomicPosition implements GenomicPosition {
             return this;
         } else {
             int pos = contig.getLength() - position + 1;
-            return new TxGenomicPosition(contig, pos, strand);
+            return new StandardGenomicPosition(contig, pos, strand);
         }
     }
 
@@ -58,7 +66,7 @@ class TxGenomicPosition implements GenomicPosition {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TxGenomicPosition that = (TxGenomicPosition) o;
+        StandardGenomicPosition that = (StandardGenomicPosition) o;
         return position == that.position &&
                 Objects.equals(contig, that.contig) &&
                 strand == that.strand;
@@ -71,10 +79,6 @@ class TxGenomicPosition implements GenomicPosition {
 
     @Override
     public String toString() {
-        return "TxGenomicPosition{" +
-                "contig=" + contig +
-                ", position=" + position +
-                ", strand=" + strand +
-                '}';
+        return contig.getPrimaryName() + ":" + POS_FMT.format(position) + "(" + strand + ')';
     }
 }

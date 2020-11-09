@@ -144,25 +144,16 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         SvImpact phenotypeImpact;
         for (var gene : affectedGeneIds) {
             TermId tid = gene.getGeneId();
-            if (this.diseaseSummaryMap.containsKey(tid)) {
-                diseaseList.addAll(this.diseaseSummaryMap.get(tid));
+            if (diseaseSummaryMap.containsKey(tid)) {
+                diseaseList.addAll(diseaseSummaryMap.get(tid));
             }
         }
-        if (diseaseList.isEmpty()) {
-            switch (svImpact) {
-                case HIGH:
-                    phenotypeImpact = SvImpact.INTERMEDIATE;
-                    break;
-                case INTERMEDIATE:
-                    phenotypeImpact = SvImpact.LOW;
-                    break;
-                default:
-                    phenotypeImpact = svImpact;
-            }
-        } else {
-            phenotypeImpact = svImpact;
-        }
-        if (affectedTranscripts.isEmpty() && affectedEnhancers.size() > 0 ) {
+        // decrement severity of the SV if it is not relevant to the disease
+        phenotypeImpact = diseaseList.isEmpty()
+                ? svImpact.decrementSeverity()
+                : svImpact;
+
+        if (affectedTranscripts.isEmpty() && affectedEnhancers.size() > 0) {
             // in this case, we have prioritize the SV based on overlap with
             // an enhancer. We will rate the SV high if the enhancer is
             // annotated to a tissue that has phenotypic relevant
@@ -263,21 +254,16 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
     }
 
-    private boolean affectedGenesRelevant(Set<GeneWithId> genesAffeectedBySv) {
-        for (var gwi : genesAffeectedBySv) {
-            TermId tid = gwi.getGeneId();
-             if (this.diseaseSummaryMap.containsKey(tid)) {
-                 return true;
-             }
-        }
-        return false;
+    private boolean affectedGenesRelevant(Set<GeneWithId> genesAffectedBySv) {
+        return genesAffectedBySv.stream()
+                .map(GeneWithId::getGeneId)
+                .anyMatch(diseaseSummaryMap::containsKey);
     }
 
     private boolean affectedEnhancersRelevant(List<Enhancer> enhancers) {
-        return enhancers.
-                stream().
-                map(Enhancer::getTermId).
-                anyMatch(relevantHpoIdsForEnhancers::contains);
+        return enhancers.stream()
+                .map(Enhancer::getTermId)
+                .anyMatch(relevantHpoIdsForEnhancers::contains);
     }
 
 
@@ -350,13 +336,9 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
             boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
             boolean relevant = affectsEnhancers || affectsTranscripts;
-            if (! relevant) {
+            if (!relevant) {
                 // downgrade the impact
-                if (impact == SvImpact.HIGH) {
-                    impact = SvImpact.INTERMEDIATE;
-                } else {
-                    impact = SvImpact.LOW;
-                }
+                impact = impact.decrementSeverity();
             }
         }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);

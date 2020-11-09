@@ -6,9 +6,11 @@ import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.*;
+import org.jax.svann.reference.Adjacency;
+import org.jax.svann.reference.Breakend;
+import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
-import org.w3c.dom.html.HTMLLinkElement;
 
 import java.util.ArrayList;
 import java.util.List;

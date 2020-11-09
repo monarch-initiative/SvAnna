@@ -23,15 +23,11 @@ public class OverlapDistance {
 
     private final String description;
 
-    public OverlapDistance(OverlapDistanceType odtype, int distance, String description, boolean cds) {
-        overlapDistanceType = odtype;
-        this.distanceA = distance;
-        this.distanceB = UNITIALIZED;
-        this.description = description;
-        this.overlapsCds = cds;
+    private OverlapDistance(OverlapDistanceType odtype, int distance, String description, boolean cds) {
+        this(odtype, distance, UNITIALIZED, description, cds);
     }
 
-    public OverlapDistance(OverlapDistanceType odtype, int distancea, int distanceb, String description, boolean cds) {
+    private OverlapDistance(OverlapDistanceType odtype, int distancea, int distanceb, String description, boolean cds) {
         overlapDistanceType = odtype;
         this.distanceA = distancea;
         this.distanceB = distanceb;
@@ -83,10 +79,9 @@ public class OverlapDistance {
     }
 
     public int getShortestDistance() {
-        if (this.distanceB == UNITIALIZED) {
-            return this.distanceA;
-        }
-        else return Math.min(distanceA, distanceB);
+        if (distanceB == UNITIALIZED) {
+            return distanceA;
+        } else return Math.min(distanceA, distanceB);
     }
 
     private static String distanceString(int d) {

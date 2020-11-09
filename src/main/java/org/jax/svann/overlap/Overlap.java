@@ -12,7 +12,7 @@ public class Overlap {
     /**
      * This field's meaning depends on the type, INTERGENIC, INTRONIC, EXONIC, SPANNING.
      */
-    private OverlapDistance overlapDistance;
+    private final OverlapDistance overlapDistance;
 
     private final TranscriptModel transcriptModel;
 
@@ -23,11 +23,7 @@ public class Overlap {
 
 
     public Overlap(OverlapType type, TranscriptModel tmod, OverlapDistance odist) {
-        this.overlapType = type;
-        this.transcriptModel = tmod;
-        this.description = odist.getDescription();
-        this.overlapsCds = false;
-        this.overlapDistance = odist;
+        this(type, tmod, odist, odist.getDescription());
     }
 
 
@@ -45,15 +41,15 @@ public class Overlap {
      * @return true if this overlap involves exonic sequence
      */
     public boolean isExonic() {
-        return this.overlapType.isExonic();
+        return overlapType.isExonic();
     }
 
     public boolean overlapsTranscript() {
-        return OverlapType.overlapsTranscript(this.overlapType);
+        return OverlapType.overlapsTranscript(overlapType);
     }
 
     public boolean inversionDisruptable() {
-        return OverlapType.inversionDisruptable(this.overlapType);
+        return OverlapType.inversionDisruptable(overlapType);
     }
 
     /**
@@ -80,7 +76,9 @@ public class Overlap {
         return overlapDistance.getShortestDistance();
     }
 
-    public OverlapDistance getOverlapDistance() { return this.overlapDistance; }
+    public OverlapDistance getOverlapDistance() {
+        return overlapDistance;
+    }
 
     public TranscriptModel getTranscriptModel() {
         return transcriptModel;

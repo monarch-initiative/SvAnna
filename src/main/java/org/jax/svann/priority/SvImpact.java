@@ -24,6 +24,37 @@ public enum SvImpact {
             return false;
     }
 
+    /**
+     * @return {@link SvImpact} that has one step lower severity in comparison with the current {@link SvImpact} category
+     */
+    public SvImpact decrementSeverity() {
+        switch (this) {
+            case HIGH:
+                return INTERMEDIATE;
+            case INTERMEDIATE:
+            case LOW:
+                return LOW;
+            case UNKNOWN:
+            default:
+                return this;
+        }
+    }
+
+    /**
+     * @return {@link SvImpact} that has one step higher severity in comparison with the current {@link SvImpact} category
+     */
+    public SvImpact incrementSeverity() {
+        switch (this) {
+            case HIGH:
+            case INTERMEDIATE:
+                return HIGH;
+            case LOW:
+                return INTERMEDIATE;
+            case UNKNOWN:
+            default:
+                return this;
+        }
+    }
 
 
 }

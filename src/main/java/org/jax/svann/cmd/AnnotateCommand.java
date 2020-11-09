@@ -5,7 +5,6 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.apache.logging.log4j.core.net.Priority;
 import org.jax.svann.analysis.FilterAndCount;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;

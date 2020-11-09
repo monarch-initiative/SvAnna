@@ -325,9 +325,10 @@ public class Overlapper {
     /**
      * This method is called if there is no overlap with any part of a transcript. If a structural variant
      * is located 5' to the nearest transcript, it is called upstream, and if it is 3' to the nearest
-     * transcript, it is called downstrean
-     * @param start start position of the SV on the current chromosome
-     * @param end end position of the SV on the current chromosome
+     * transcript, it is called downstream
+     *
+     * @param start   start position of the SV on the current chromosome
+     * @param end     end position of the SV on the current chromosome
      * @param qresult Jannovar object with left and right neighbors of the SV
      * @return list of overlaps -- usually both the upstream and the downstream neighbors (unless the SV is at the very end/beginning of a chromosome)
      */
@@ -347,7 +348,9 @@ public class Overlapper {
             leftDistance = start.getPos() - tmodelLeft.getTXRegion().withStrand(Strand.FWD).getEndPos();
             description = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
             OverlapType type;
-            if (leftDistance <= 2_000) {
+            if (leftDistance <= 500) {
+                type = DOWNSTREAM_GENE_VARIANT_500B;
+            } else if (leftDistance <= 2_000) {
                 type = DOWNSTREAM_GENE_VARIANT_2KB;
             } else if (leftDistance <= 5_000) {
                 type = OverlapType.DOWNSTREAM_GENE_VARIANT_5KB;

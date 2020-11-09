@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.jax.svann.overlap.OverlapType.*;
 
@@ -23,10 +22,7 @@ public class SvAnnOverlapper implements Overlapper {
 
     /*
      * Implementation notes
-     * - there is a method {@link #getOverlapList(GenomeInterval, IntervalArray.QueryResult)} that should be used to get
-     *   overlaps for any structural variant.
-     * - variant must be flipped to transcript's strand before calculating any overlaps and distances. coordinates of
-     *   the most SV events are on FWD strand by default.
+     * - variant must be flipped to FWD strand before querying the interval tree
      */
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SvAnnOverlapper.class);
@@ -49,12 +45,12 @@ public class SvAnnOverlapper implements Overlapper {
         int distance = Math.abs(startDistance) < Math.abs(endDistance)
                 ? startDistance
                 : endDistance;
-        // If we get here, we know that the txLt does not overlap with the event.
+        // If we get here, we know that the tx does not overlap with the event.
         // If the distance is positive, then the event is upstream from the tx.
         // Otherwise, the event is downstream wrt. the tx.
         OverlapType type;
         if (distance > 0) {
-            // event is upstream
+            // event is upstream from the transcript
             if (distance <= 500) {
                 type = UPSTREAM_GENE_VARIANT_500B;
             } else if (distance <= 2_000) {
@@ -95,8 +91,6 @@ public class SvAnnOverlapper implements Overlapper {
      * @return object representing the number of the first and last affected exon
      */
     private static ExonPair getAffectedExons(SvAnnTxModel tx, GenomicRegion event) {
-        Optional<Integer> firstAffectedExonNumber = Optional.empty();
-        Optional<Integer> lastAffectedExonNumber = Optional.empty();
         List<GenomicRegion> exons = tx.getExonRegions();
         GenomicPosition svStartPos = event.getStart();
         GenomicPosition svEndPos = event.getEnd();
@@ -149,7 +143,7 @@ public class SvAnnOverlapper implements Overlapper {
             GenomicPosition intronEnd = exons.get(i + 1).getStart();
 
             if (intronStart.isUpstreamOf(event.getStart()) && intronEnd.isDownstreamOf(event.getEnd())) {
-                // we start intron numbering at 1
+                // we start the intron numbering at 1
                 int intronNumber = i + 1;
                 int up = event.getStart().distanceTo(intronStart);
                 int down = event.getEnd().distanceTo(intronEnd);
@@ -162,6 +156,9 @@ public class SvAnnOverlapper implements Overlapper {
 
     @Override
     public List<Overlap> getOverlapList(SequenceRearrangement rearrangement) {
+        /*
+         * The driver method.
+         */
         switch (rearrangement.getType()) {
             case DELETION:
                 return getDeletionOverlaps(rearrangement);

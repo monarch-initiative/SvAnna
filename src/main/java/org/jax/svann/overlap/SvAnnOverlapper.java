@@ -49,6 +49,7 @@ public class SvAnnOverlapper implements Overlapper {
         // If the distance is positive, then the event is upstream from the tx.
         // Otherwise, the event is downstream wrt. the tx.
         OverlapType type;
+        OverlapDistance overlapDistance;
         if (distance > 0) {
             // event is upstream from the transcript
             if (distance <= 500) {
@@ -62,6 +63,7 @@ public class SvAnnOverlapper implements Overlapper {
             } else {
                 type = UPSTREAM_GENE_VARIANT;
             }
+            overlapDistance = OverlapDistance.fromUpstreamFlankingGene(distance, tx.getGeneSymbol());
         } else {
             // event is downstream from the tx
             if (distance >= -500) {
@@ -75,9 +77,9 @@ public class SvAnnOverlapper implements Overlapper {
             } else {
                 type = DOWNSTREAM_GENE_VARIANT;
             }
+            overlapDistance = OverlapDistance.fromDownstreamFlankingGene(distance, tx.getGeneSymbol());
         }
 
-        OverlapDistance overlapDistance = OverlapDistance.fromDownstreamFlankingGene(distance, tx.getGeneSymbol());
         return new Overlap(type, tx, overlapDistance);
     }
 
@@ -266,24 +268,48 @@ public class SvAnnOverlapper implements Overlapper {
 
 
     private List<Overlap> getTranslocationOverlaps(SequenceRearrangement translocation) {
-        return List.of();
+        List<Adjacency> adjacencies = translocation.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            LOGGER.warn("Malformed translocation adjacency list with size {}!=1", adjacencies.size());
+            return List.of();
+        }
+
+        // the translocation must be interchromosomal
+        Adjacency adjacency = adjacencies.get(0);
+        if (!adjacency.isInterchromosomal()) {
+            LOGGER.warn("Malformed translocation adjacency - not interchromosomal");
+            return List.of();
+        }
+
+        List<Overlap> overlaps = new ArrayList<>();
+        // process overlaps
+        for (Breakend bnd : List.of(adjacency.getStart(), adjacency.getEnd())) {
+            Breakend onFwd = bnd.withStrand(Strand.FWD);
+
+            IntervalArray<SvAnnTxModel>.QueryResult leftQueryResults = intervalArrayMap.get(bnd.getContigId()).findOverlappingWithPoint(onFwd.getPosition());
+            GenomicRegion leftRegion = StandardGenomicRegion.precise(bnd.getContig(), bnd.getPosition(), bnd.getPosition(), bnd.getStrand());
+
+            overlaps.addAll(parseIntrachromosomalEventQueryResult(leftRegion, leftQueryResults));
+        }
+
+        return overlaps;
     }
 
     /**
      * If we get here, we know that the SV event is intrachromosomal.
      *
-     * @param event   SV event
-     * @param qresult result with transcript features
+     * @param event       SV event
+     * @param queryResult result with transcript features
      * @return overlap list
      */
     private List<Overlap> parseIntrachromosomalEventQueryResult(GenomicRegion event,
-                                                                IntervalArray<SvAnnTxModel>.QueryResult qresult) {
+                                                                IntervalArray<SvAnnTxModel>.QueryResult queryResult) {
         List<Overlap> overlaps = new ArrayList<>();
-        if (qresult.getEntries().isEmpty()) {
-            return intergenic(event, qresult);
+        if (queryResult.getEntries().isEmpty()) {
+            return intergenic(event, queryResult);
         }
         // if we get here, then we overlap with one or more genes
-        List<SvAnnTxModel> overlappingTranscripts = qresult.getEntries();
+        List<SvAnnTxModel> overlappingTranscripts = queryResult.getEntries();
         for (var tx : overlappingTranscripts) {
             if (event.contains(tx)) {
                 // the transcript is completely contained in the SV
@@ -302,7 +328,7 @@ public class SvAnnOverlapper implements Overlapper {
             overlaps.add(overlap);
         }
         if (overlaps.isEmpty()) {
-            LOGGER.error("Could not find any overlaps with this query result: {}", qresult);
+            LOGGER.error("Could not find any overlaps with this query result: {}", queryResult);
             throw new SvAnnRuntimeException("Empty overlap list");
         }
         return overlaps;
@@ -360,52 +386,26 @@ public class SvAnnOverlapper implements Overlapper {
      * is located 5' to the nearest transcript, it is called upstream, and if it is 3' to the nearest
      * transcript, it is called downstream
      *
-     * @param event   region representing the SV event, always on FWD strand
-     * @param qresult Jannovar object with left and right neighbors of the SV
+     * @param event       region representing the SV event, always on FWD strand
+     * @param queryResult Jannovar object with left and right neighbors of the SV
      * @return list of overlaps -- usually both the upstream and the downstream neighbors (unless the SV is at the very end/beginning of a chromosome)
      */
-    private List<Overlap> intergenic(GenomicRegion event, IntervalArray<SvAnnTxModel>.QueryResult qresult) {
+    private List<Overlap> intergenic(GenomicRegion event, IntervalArray<SvAnnTxModel>.QueryResult queryResult) {
         List<Overlap> overlaps = new ArrayList<>(2);
 
         // This means that the SV does not overlap with any annotated transcript
-        SvAnnTxModel txLeft = qresult.getLeft();
-        SvAnnTxModel txRight = qresult.getRight();
+        SvAnnTxModel txLeft = queryResult.getLeft();
+        SvAnnTxModel txRight = queryResult.getRight();
         // if we are 5' or 3' to the first or last gene on the chromosome, then
         // there is not left or right gene anymore
-        // TODO: 9. 11. 2020 test this situation!
 
         if (txLeft != null) {
             // process the transcript if not null
-            Overlap overlap = getOverlapForTranscript(event, txLeft);
-            overlaps.add(overlap);
+            overlaps.add(getOverlapForTranscript(event, txLeft));
         }
         if (txRight != null) {
-            Overlap overlap = getOverlapForTranscript(event, txRight);
-            overlaps.add(overlap);
+            overlaps.add(getOverlapForTranscript(event, txRight));
         }
         return overlaps;
-    }
-
-    /**
-     * This method checks the content of the inverted region.
-     *
-     * @param inversion inversion
-     * @return list of transcript overlaps (can be empty)
-     */
-    private List<Overlap> getInversionOverlapsRegionBased(SequenceRearrangement inversion) {
-        if (!inversion.getType().equals(SvType.INVERSION)) {
-            return List.of();
-        }
-        SequenceRearrangement onFwd = inversion.withStrand(Strand.FWD);
-        Breakend left = onFwd.getLeftmostBreakend();
-        Breakend right = onFwd.getRightmostBreakend();
-        // assume that breakends are on the same contig
-//        GenomeInterval gi = new GenomeInterval(rd, de.charite.compbio.jannovar.reference.Strand.FWD, left.getContig().getId(), left.getPosition(), right.getPosition(), PositionType.ONE_BASED);
-
-//        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getPosition(), right.getPosition());
-
-//        return getOverlapList(inversion, qresult);
-        // TODO: 9. 11. 2020 fix
-        return List.of();
     }
 }

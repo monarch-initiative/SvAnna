@@ -7,23 +7,6 @@ import org.jax.svann.reference.genome.Contig;
 
 public class TestVariants extends TestBase {
 
-    /**
-     * Translocation where one CDS is disrupted and the other is not
-     * <p>
-     * left mate, SURF2:NM_017503.5 intron 3 (disrupted CDS)
-     * chr9:133_359_000 (+)
-     * right mate, upstream from BRCA2 (not disrupted)
-     * chr13:32_300_000 (+)
-     */
-    public static SequenceRearrangement translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
-        Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_359_000, Strand.FWD, "tra_l", "G");
-        Contig chr13 = GENOME_ASSEMBLY.getContigByName("13").orElseThrow();
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr13, 32_300_000, Strand.FWD, "tra_r", "A");
-
-        return SimpleSequenceRearrangement.of(SvType.TRANSLOCATION, SimpleAdjacency.empty(left, right));
-    }
-
     public static class Deletions {
         /**
          * Deletion upstream intergenic | GCK.
@@ -388,6 +371,27 @@ public class TestVariants extends TestBase {
             Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
 
             return SimpleSequenceRearrangement.of(SvType.INVERSION, alpha, beta);
+        }
+
+    }
+
+    public static class Translocations {
+
+        /**
+         * Translocation where one CDS is disrupted and the other is not
+         * <p>
+         * left mate, SURF2:NM_017503.5 intron 3 (disrupted CDS)
+         * chr9:133_359_000 (+)
+         * right mate, upstream from BRCA2 (not disrupted)
+         * chr13:32_300_000 (+)
+         */
+        public static SequenceRearrangement translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+            Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
+            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_359_000, Strand.FWD, "tra_l", "G");
+            Contig chr13 = GENOME_ASSEMBLY.getContigByName("13").orElseThrow();
+            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr13, 32_300_000, Strand.FWD, "tra_r", "A");
+
+            return SimpleSequenceRearrangement.of(SvType.TRANSLOCATION, SimpleAdjacency.empty(left, right));
         }
 
     }

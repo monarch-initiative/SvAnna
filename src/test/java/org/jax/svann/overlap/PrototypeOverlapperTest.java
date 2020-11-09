@@ -325,7 +325,7 @@ public class PrototypeOverlapperTest extends TestBase {
      */
     @Test
     public void testTranslocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
-        SequenceRearrangement translocation = translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
+        SequenceRearrangement translocation = Translocations.translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
         List<Overlap> overlaps = overlapper.getOverlapList(translocation);
         assertEquals(2, overlaps.size());
         // The following do not work because the breakend is in an intron of SURF2

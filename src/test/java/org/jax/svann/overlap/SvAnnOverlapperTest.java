@@ -4,6 +4,7 @@ import org.jax.svann.TestBase;
 import org.jax.svann.parse.TestVariants.Deletions;
 import org.jax.svann.parse.TestVariants.Insertions;
 import org.jax.svann.parse.TestVariants.Inversions;
+import org.jax.svann.parse.TestVariants.Translocations;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.jax.svann.overlap.OverlapType.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -327,4 +330,29 @@ public class SvAnnOverlapperTest extends TestBase {
         }
     }
 
+    /*
+     *
+     *                                         TRANSLOCATIONS
+     *
+     */
+
+    @Test
+    public void testTranslocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+        SequenceRearrangement translocation = Translocations.translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
+        List<Overlap> overlaps = overlapper.getOverlapList(translocation);
+
+        assertThat(overlaps, hasSize(3));
+
+        Overlap surf2_NM_017503_4 = overlaps.get(0);
+        assertThat(surf2_NM_017503_4.getOverlapType(), is(INTRONIC));
+        assertThat(surf2_NM_017503_4.getDistance(), is(949));
+
+        Overlap surf2_NM_001278928_1 = overlaps.get(1);
+        assertThat(surf2_NM_001278928_1.getOverlapType(), is(INTRONIC));
+        assertThat(surf2_NM_001278928_1.getDistance(), is(949));
+
+        Overlap brca2_NM_000059_3 = overlaps.get(2);
+        assertThat(brca2_NM_000059_3.getOverlapType(), is(UPSTREAM_GENE_VARIANT_500KB));
+        assertThat(brca2_NM_000059_3.getDistance(), is(15479));
+    }
 }

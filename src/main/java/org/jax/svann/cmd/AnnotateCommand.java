@@ -122,7 +122,7 @@ public class AnnotateCommand implements Callable<Integer> {
         // 2 - prioritize & visualize variants
         // setup prioritization parts
         Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
-        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
+        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
 
         SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, relevantGenesAndDiseases);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results

@@ -173,15 +173,13 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     break;
                 }
             }
-            if (! relevant) {
-                // downgrade the impact
-                if (svImpact == SvImpact.HIGH) {
-                    phenotypeImpact = SvImpact.INTERMEDIATE;
-                } else {
-                    phenotypeImpact = SvImpact.LOW;
-                }
+            if (relevant) {
+                // if there is at least one affected enhancer, then the impact is high
+                // no matter what else there is
+                 phenotypeImpact = SvImpact.HIGH;
             }
         }
+
         return new DefaultSvPriority(phenotypeImpact, affectedTranscripts,
                 affectedGeneIds, affectedEnhancers, olaps, diseaseList);
     }
@@ -213,11 +211,11 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
 
         // select the relevant genes and transcripts
-        Set<String> affectedGeneIds = overlaps.stream()
+        Set<String> affectedGeneSymbols = overlaps.stream()
                 .map(Overlap::getGeneSymbol)
                 .collect(Collectors.toSet());
         Set<GeneWithId> geneWithIdsSet = new HashSet<>();
-        for (String symbol : affectedGeneIds) {
+        for (String symbol : affectedGeneSymbols) {
             if (geneSymbolMap.containsKey(symbol)) {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
@@ -229,7 +227,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
 
-        if (affectedGeneIds.size() > 1) {
+        if (affectedGeneSymbols.size() > 1) {
             // impact is high if >1 gene is affected
             impact = SvImpact.HIGH;
         } else if (highestOT.isExonic()) {
@@ -434,8 +432,9 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                         : SvImpact.HIGH;
             }
         }
-
-        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        // TODO -- we need a bespoke prioritizer for inversions
+        // FOR NOW there are no diseases
+        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
 
@@ -466,11 +465,14 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         if (enhancers.size() > 0) {
             impact = SvImpact.HIGH;
         }
-        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        // TODO -- we need a bespoke prioritizer for translocations
+        // FOR NOW there are no diseases
+        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
     private SvPriority prioritizeDuplication(SequenceRearrangement rearrangement) {
         // TODO: 2. 11. 2020 implement
+        System.err.println("[WARNING] Not prioritizing duplication TODO - implement me");
         return SvPriority.unknown();
     }
 

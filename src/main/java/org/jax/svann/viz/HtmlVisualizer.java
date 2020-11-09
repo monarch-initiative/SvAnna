@@ -1,11 +1,8 @@
 package org.jax.svann.viz;
 
-import de.charite.compbio.jannovar.reference.GenomeInterval;
-import de.charite.compbio.jannovar.reference.Strand;
+
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.priority.SvImpact;
-import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.viz.svg.DeletionSvgGenerator;
@@ -14,10 +11,10 @@ import org.jax.svann.viz.svg.SvSvgGenerator;
 import org.jax.svann.viz.svg.TranslocationSvgGenerator;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
- * To get started, lets just make a simple HTML table with no CSS or styles.
+ * This class creates the HTML code for each prioritized structural variant that is shown in the output.
  */
 public class HtmlVisualizer implements Visualizer {
 
@@ -40,7 +37,12 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
-
+    /**
+     * Display a list of diseases that are associated with genes that are affected by the structural variant.
+     * Currently we show an unordered list
+     * @param visualizable object representing the SV
+     * @return HTML code that displays associated diseases
+     */
     private String getUnorderedListWithDiseases(Visualizable visualizable) {
         List<HpoDiseaseSummary> diseases = visualizable.getDiseaseSummaries();
         if (diseases.isEmpty()) {
@@ -58,9 +60,9 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     /**
-     * TODO -- mark position of SV in color similar to
-     * @param hloc
-     * @return
+     * Creates a link to the UCSCS browser that shows the posiution of the SV using a color highlight
+     * @param hloc Location of (part of) the SV
+     * @return an HTML link to the UCSC Genome browser
      */
     String getUcscLink(HtmlLocation hloc) {
         String chrom = hloc.getChrom().startsWith("chr") ? hloc.getChrom() : "chr" + hloc.getChrom();
@@ -147,7 +149,6 @@ public class HtmlVisualizer implements Visualizer {
                     int insertionLength = getInsertionLength(visualizable);
                     gen = new InsertionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs, insertionLength);
                     return gen.getSvg();
-
                 case TRANSLOCATION:
                     gen = new TranslocationSvgGenerator(visualizable.getRearrangement(), visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
                     return gen.getSvg();

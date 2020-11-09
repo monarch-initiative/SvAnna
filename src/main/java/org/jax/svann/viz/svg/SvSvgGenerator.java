@@ -21,76 +21,70 @@ import java.util.stream.Collectors;
  */
 public abstract class SvSvgGenerator {
 
-    public final static String PURPLE = "#790079";
-    public final static String GREEN = "#00A087";
-    public final static String DARKGREEN = "#006600";
-    public final static String RED = "#e64b35";
-    public final static String BLACK = "#000000";
-    public final static String NEARLYBLACK = "#040C04";
-    public final static String BLUE = "#4dbbd5";
-    public final static String BROWN = "#7e6148";
-    public final static String DARKBLUE = "#3c5488";
-    public final static String VIOLET = "#8491b4";
-    public final static String ORANGE = "#ff9900";
-    public final static String BRIGHT_GREEN = "#00a087";
-    protected final static int HEIGHT_PER_DISPLAY_ITEM = 100;
+    /** Canvas width of the SVG */
+    protected final int SVG_WIDTH = 1400;
+
     private final static int HEIGHT_FOR_SV_DISPLAY = 200;
+    protected final static int HEIGHT_PER_DISPLAY_ITEM = 100;
+    /** Canvas height of the SVG.*/
+    protected int SVG_HEIGHT;
+
     protected final List<SvAnnTxModel> affectedTranscripts;
     protected final List<Enhancer> affectedEnhancers;
     protected final List<CoordinatePair> coordinatePairs;
-    /**
-     * Leftmost position (most 5' on chromosome), including offset.
-     */
+
+    /** Boundaries of SVG we do not write to. */
+    private final double OFFSET_FACTOR = 0.1;
+
+    private final double SVG_OFFSET = SVG_WIDTH * OFFSET_FACTOR;
+    /** Number of base pairs from left to right boundary */
+    private final double genomicSpan;
+    /** Leftmost position (most 5' on chromosome), including offset. */
     protected final int genomicMinPos;
-    /**
-     * Rightmost position (most 3' on chromosome), including offset.
-     */
+    /** Rightmost position (most 3' on chromosome), including offset. */
     protected final int genomicMaxPos;
-    /**
-     * Height of the symbol that represents the structural variant.
-     */
-    protected final double SV_HEIGHT = 30;
+    /** Minimum position of the scale */
+    private final double scaleMinPos;
+
+    private final double scaleMaxPos;
+
+    private final int scaleBasePairs;
+    /** This will be 10% of genomicSpan, extra area on the sides of the graphic to make things look nicer. */
+    private int genomicOffset;
+
     final String pattern = "###,###.###";
     final DecimalFormat decimalFormat = new DecimalFormat(pattern);
-    /**
-     * Canvas width of the SVG
-     */
-    private final int SVG_WIDTH = 1400;
-    /**
-     * Boundaries of SVG we do not write to.
-     */
-    private final double OFFSET_FACTOR = 0.1;
-    private final double SVG_OFFSET = SVG_WIDTH * OFFSET_FACTOR;
-    /**
-     * Number of base pairs from left to right boundary
-     */
-    private final double genomicSpan;
-    /**
-     * Minimum position of the scale
-     */
-    private final double scaleMinPos;
-    private final double scaleMaxPos;
-    private final int scaleBasePairs;
-    private final double INTRON_MIDPOINT_ELEVATION = 10.0;
-    /**
-     * Height of the symbols that represent the transcripts
-     */
-    private final double EXON_HEIGHT = 20;
-    /**
-     * Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}
-     */
-    private final double Y_SKIP_BENEATH_TRANSCRIPTS = 50;
-    private final SvType svtype;
-    /**
-     * Canvas height of the SVG.
-     */
-    protected int SVG_HEIGHT;
-    /**
-     * This will be 10% of genomicSpan, extra area on the sides of the graphic to make things look nicer.
-     */
-    private int genomicOffset;
+
     private String variantDescription;
     private String chrom;
+
+    protected final double INTRON_MIDPOINT_ELEVATION = 10.0;
+    /** Height of the symbols that represent the transcripts */
+    private final double EXON_HEIGHT = 20;
+    /** Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}*/
+    protected final double Y_SKIP_BENEATH_TRANSCRIPTS = 50;
+    /** Height of the symbol that represents the structural variant. */
+    protected final double SV_HEIGHT = 30;
+
+    public final static String PURPLE = "#790079";
+    public final static String GREEN = "#00A087";
+    public final static String DARKGREEN = "#006600";
+    public final static String RED ="#e64b35";
+    public final static String BLACK = "#000000";
+    public final static String NEARLYBLACK = "#040C04";
+
+    public final static String BLUE ="#4dbbd5";
+
+    public final static String BROWN="#7e6148";
+    public final static String DARKBLUE = "#3c5488";
+    public final static String VIOLET = "#8491b4";
+    public final static String ORANGE = "#ff9900";
+
+
+    public final static String BRIGHT_GREEN = "#00a087";
+
+
+    private final SvType svtype;
 
 
     /**
@@ -108,7 +102,11 @@ public abstract class SvSvgGenerator {
         this.affectedTranscripts = transcripts;
         this.affectedEnhancers = enhancers;
         this.coordinatePairs = coordinatePairs;
-        this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        if (svtype == SvType.TRANSLOCATION) {
+            this.SVG_HEIGHT = 500 + HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        } else {
+            this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        }
         switch (svtype) {
             case DELETION:
             case INSERTION:
@@ -297,7 +295,7 @@ public abstract class SvSvgGenerator {
      * @param writer
      * @throws IOException
      */
-    private void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
+    protected void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
@@ -315,7 +313,7 @@ public abstract class SvSvgGenerator {
      * @param writer
      * @throws IOException
      */
-    private void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
+    protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +

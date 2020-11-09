@@ -74,14 +74,14 @@ public class Overlapper {
             for (int i = 0; i < exons.size() - 1; i++) {
                 if (startPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && startPos > exons.get(i + 1).withStrand(Strand.FWD).getBeginPos()) {
                     int intronNumber = i+1;
-                    int down = startPos - exons.get(i).getEndPos();
-                    int up = exons.get(i + 1).getBeginPos() - endPos;
+                    int down = exons.get(i).withStrand(Strand.FWD).getEndPos() -  startPos;
+                    int up = endPos - exons.get(i + 1).withStrand(Strand.FWD).getBeginPos();
                     return new IntronDistance(intronNumber, up, down);
                 }
                 if (endPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && endPos > exons.get(i + 1).withStrand(Strand.FWD).getBeginPos()) {
                     int intronNumber = i+1;
-                    int down = startPos - exons.get(i).getEndPos();
-                    int up = exons.get(i + 1).getBeginPos() - endPos;
+                    int down =  exons.get(i).withStrand(Strand.FWD).getEndPos() - startPos;
+                    int up = endPos - exons.get(i + 1).withStrand(Strand.FWD).getBeginPos();
                     return new IntronDistance(intronNumber, up, down);
                 }
             }

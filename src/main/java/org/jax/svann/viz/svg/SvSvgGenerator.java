@@ -24,7 +24,7 @@ import java.util.List;
 public abstract class SvSvgGenerator {
 
     /** Canvas width of the SVG */
-    private final int SVG_WIDTH = 1400;
+    protected final int SVG_WIDTH = 1400;
 
     private final static int HEIGHT_FOR_SV_DISPLAY = 200;
     protected final static int HEIGHT_PER_DISPLAY_ITEM = 100;
@@ -60,11 +60,11 @@ public abstract class SvSvgGenerator {
     private String variantDescription;
     private String chrom;
 
-    private final double INTRON_MIDPOINT_ELEVATION = 10.0;
+    protected final double INTRON_MIDPOINT_ELEVATION = 10.0;
     /** Height of the symbols that represent the transcripts */
     private final double EXON_HEIGHT = 20;
     /** Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}*/
-    private final double Y_SKIP_BENEATH_TRANSCRIPTS = 50;
+    protected final double Y_SKIP_BENEATH_TRANSCRIPTS = 50;
     /** Height of the symbol that represents the structural variant. */
     protected final double SV_HEIGHT = 30;
 
@@ -104,7 +104,11 @@ public abstract class SvSvgGenerator {
         this.affectedTranscripts = transcripts;
         this.affectedEnhancers = enhancers;
         this.coordinatePairs = coordinatePairs;
-        this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        if (svtype == SvType.TRANSLOCATION) {
+            this.SVG_HEIGHT = 500 + HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        } else {
+            this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        }
         switch (svtype) {
             case DELETION:
             case INSERTION:
@@ -290,7 +294,7 @@ public abstract class SvSvgGenerator {
      * @param writer
      * @throws IOException
      */
-    private void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
+    protected void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5*EXON_HEIGHT;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
@@ -307,7 +311,7 @@ public abstract class SvSvgGenerator {
      * @param writer
      * @throws IOException
      */
-    private void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
+    protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5*EXON_HEIGHT;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +

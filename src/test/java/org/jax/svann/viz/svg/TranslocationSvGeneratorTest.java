@@ -23,6 +23,7 @@ import org.jax.svann.genomicreg.TestGenomicPosition;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.EnhancerOverlapper;
+import org.jax.svann.overlap.Overlap;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvPrioritizer;
@@ -38,6 +39,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.jax.svann.parse.TestVariants.translocationWhereOneCdsIsDisruptedAndTheOtherIsNot;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -72,7 +74,13 @@ public class TranslocationSvGeneratorTest extends TestBase{
 
     @Test
     public void testWriteSvg() {
-        String svg = visualizer.getHtml(visualizable);
+       // String svg = visualizer.getHtml(visualizable);
+        List<Overlap> overlaps = overlapper.getOverlapList(translocation);
+        List<TranscriptModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = translocation.getRegions();
+        SvSvgGenerator gen = new TranslocationSvgGenerator(translocation,transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
         assertNotNull(svg);
         System.out.println(svg);
         try {

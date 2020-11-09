@@ -67,12 +67,12 @@ public class EnhancerOverlapper {
             throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
         }
         Adjacency deletion = adjacencies.get(0);
-        Breakend left = deletion.getLeft();
-        Breakend right = deletion.getRight();
+        Breakend left = deletion.getStart();
+        Breakend right = deletion.getEnd();
         Contig chrom = left.getContig();
         int id = chrom.getId();
-        int begin = left.getBegin();
-        int end = right.getEnd();
+        int begin = left.getPosition();
+        int end = right.getPosition();
         return new GenomeInterval(rd, Strand.FWD, id, begin, end);
     }
 
@@ -92,9 +92,8 @@ public class EnhancerOverlapper {
     List<Enhancer> getBreakendOverlaps(Breakend be) {
         Contig chrom = be.getContig();
         int id = chrom.getId();
-        int begin = be.getBegin();
-        int end = be.getEnd();
-        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, end);
+        int begin = be.getPosition();
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, be.getPosition(), PositionType.ONE_BASED);
         return getSimpleEnhancerOverlap(gi);
     }
 
@@ -116,7 +115,7 @@ public class EnhancerOverlapper {
             case INVERSION:
                 // we assume that all coordinates of these types are on a single contig
                 Contig contig = lb.getContig();
-                overlaps.addAll(getEnhancerOverlapsForInsertionAndInversions(contig, lb.getBegin(), rb.getBegin()));
+                overlaps.addAll(getEnhancerOverlapsForInsertionAndInversions(contig, lb.getPosition(), rb.getPosition()));
                 break;
             case TRANSLOCATION:
                 // by definition, translocation has coordinates on different contigs, correct?

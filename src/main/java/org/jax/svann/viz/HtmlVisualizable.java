@@ -1,6 +1,8 @@
 package org.jax.svann.viz;
 
+import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvPriority;
@@ -33,11 +35,25 @@ public class HtmlVisualizable implements Visualizable {
             throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
         }
         Adjacency deletion = adjacencies.get(0);
-        Breakend left = deletion.getLeft();
-        Breakend right = deletion.getRight();
+        Breakend left = deletion.getStart();
+        Breakend right = deletion.getEnd();
         Contig chrom = left.getContig();
-        int begin = left.getBegin();
-        int end = right.getEnd();
+        int begin = left.getPosition();
+        int end = right.getPosition();
+        return new HtmlLocation(chrom, begin, end);
+    }
+
+    private HtmlLocation getInsertionLocation(SequenceRearrangement rearrangement) {
+        List<Adjacency> adjacencies = rearrangement.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            System.err.println("Malformed insertion adjacency list with size " + adjacencies.size());
+        }
+        Adjacency insertion = adjacencies.get(0);
+        Breakend left = insertion.getStart();
+        Breakend right = insertion.getEnd();
+        Contig chrom = left.getContig();
+        int begin = left.getPosition();
+        int end = right.getPosition();
         return new HtmlLocation(chrom, begin, end);
     }
 
@@ -62,10 +78,14 @@ public class HtmlVisualizable implements Visualizable {
     public boolean hasPhenotypicRelevance() {
         return this.svPriority.hasPhenotypicRelevance();
     }
-
+    @Override
     public List<HpoDiseaseSummary> getDiseaseSummaries() {
         return this.svPriority.getDiseases();
     }
+    @Override
+    public List<TranscriptModel> getTranscripts() { return new ArrayList<>(this.svPriority.getAffectedTranscripts()); }
+    @Override
+    public List<Enhancer> getEnhancers() { return this.svPriority.getAffectedEnhancers(); }
 
     /**
      * Return strings for display of the format chr3:123-456
@@ -78,11 +98,8 @@ public class HtmlVisualizable implements Visualizable {
         if (rearrangement.getType() == SvType.DELETION) {
             locs.add(getDeletionLocation(rearrangement));
         } else if (rearrangement.getType() == SvType.INSERTION) {
-            int c = 42;
-            int y = 32;
+            locs.add(getInsertionLocation(rearrangement));
         }
-
-
         return locs;
     }
 

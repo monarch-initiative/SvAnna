@@ -52,25 +52,37 @@ public class Overlapper {
      * @param tmod
      * @return
      */
-    public static int getIntronNumber(TranscriptModel tmod, int startPos, int endPos) {
+    public static IntronDistance getIntronNumber(TranscriptModel tmod, int startPos, int endPos) {
         List<GenomeInterval> exons = tmod.getExonRegions();
         if (tmod.getStrand().equals(Strand.FWD)) {
             for (int i = 0; i < exons.size() - 1; i++) {
                 if (startPos > exons.get(i).getEndPos() && startPos < exons.get(i + 1).getBeginPos()) {
-                    return i + 1;
+                    int intronNumber = i+1;
+                    int up = startPos - exons.get(i).getEndPos();
+                    int down = exons.get(i + 1).getBeginPos() - endPos;
+                    return new IntronDistance(intronNumber, up, down);
                 }
                 if (endPos > exons.get(i).getEndPos() && endPos < exons.get(i + 1).getBeginPos()) {
-                    return i + 1;
+                    int intronNumber = i+1;
+                    int up = startPos - exons.get(i).getEndPos();
+                    int down = exons.get(i + 1).getBeginPos() - endPos;
+                    return new IntronDistance(intronNumber, up, down);
                 }
             }
         } else {
             // reverse order for neg-strand genes.
             for (int i = 0; i < exons.size() - 1; i++) {
                 if (startPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && startPos > exons.get(i + 1).withStrand(Strand.FWD).getBeginPos()) {
-                    return i + 1;
+                    int intronNumber = i+1;
+                    int down = exons.get(i).withStrand(Strand.FWD).getEndPos() -  startPos;
+                    int up = endPos - exons.get(i + 1).withStrand(Strand.FWD).getBeginPos();
+                    return new IntronDistance(intronNumber, up, down);
                 }
                 if (endPos < exons.get(i).withStrand(Strand.FWD).getEndPos() && endPos > exons.get(i + 1).withStrand(Strand.FWD).getBeginPos()) {
-                    return i + 1;
+                    int intronNumber = i+1;
+                    int down =  exons.get(i).withStrand(Strand.FWD).getEndPos() - startPos;
+                    int up = endPos - exons.get(i + 1).withStrand(Strand.FWD).getBeginPos();
+                    return new IntronDistance(intronNumber, up, down);
                 }
             }
         }
@@ -113,8 +125,8 @@ public class Overlapper {
             throw new SvAnnRuntimeException("Malformed delection adjacency list with size " + adjacencies.size());
         }
         Adjacency translocation = adjacencies.get(0);
-        Breakend breakendA = translocation.getLeft();
-        Breakend breakendB = translocation.getRight();
+        Breakend breakendA = translocation.getStart();
+        Breakend breakendB = translocation.getEnd();
         List<Overlap> overlapA = getTranslocationPartOverlap(breakendA);
         List<Overlap> overlapB = getTranslocationPartOverlap(breakendB);
         // we would like to return one Overlap object for each end of the translocation
@@ -138,8 +150,9 @@ public class Overlapper {
     private List<Overlap> getTranslocationPartOverlap(Breakend bend) {
         Contig chrom = bend.getContig();
         int id = chrom.getId();
-        int begin = bend.getBegin();
-        int end = bend.getEnd();
+        int begin = bend.getPosition();
+        int end = bend.getPosition();
+        // TODO: 4. 11. 2020 this is in fact a position
         GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
@@ -160,12 +173,12 @@ public class Overlapper {
             throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
         }
         Adjacency deletion = adjacencies.get(0);
-        Breakend left = deletion.getLeft();
-        Breakend right = deletion.getRight();
+        Breakend left = deletion.getStart();
+        Breakend right = deletion.getEnd();
         Contig chrom = left.getContig();
         int id = chrom.getId();
-        int begin = left.getBegin();
-        int end = right.getEnd();
+        int begin = left.getPosition();
+        int end = right.getPosition();
         GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
@@ -177,8 +190,9 @@ public class Overlapper {
     List<Overlap> getBreakendOverlaps(Breakend be) {
         Contig chrom = be.getContig();
         int id = chrom.getId();
-        int begin = be.getBegin();
-        int end = be.getEnd();
+        int begin = be.getPosition();
+        int end = be.getPosition();
+        // TODO: 4. 11. 2020 this is in fact a point
         GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
@@ -200,10 +214,10 @@ public class Overlapper {
         }
         List<Overlap> overlaps = new ArrayList<>();
         for (var a : adjacencies) {
-            Breakend be = a.getLeft();
+            Breakend be = a.getStart();
             List<Overlap> leftOverlaps = getBreakendOverlaps(be);
             leftOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
-            be = a.getRight();
+            be = a.getEnd();
             List<Overlap> rightOverlaps = getBreakendOverlaps(be);
             rightOverlaps.stream().filter(Overlap::inversionDisruptable).forEach(overlaps::add);
         }
@@ -224,9 +238,9 @@ public class Overlapper {
         Breakend left = onFwd.getLeftmostBreakend();
         Breakend right = onFwd.getRightmostBreakend();
         // assume that breakends are on the same contig
-        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, left.getContig().getId(), left.getBegin(), right.getEnd(), PositionType.ONE_BASED);
+        GenomeInterval gi = new GenomeInterval(rd, Strand.FWD, left.getContig().getId(), left.getPosition(), right.getPosition(), PositionType.ONE_BASED);
 
-        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getBegin(), right.getBegin());
+        IntervalArray<TranscriptModel>.QueryResult qresult = chromosomeMap.get(left.getContig().getId()).getTMIntervalTree().findOverlappingWithInterval(left.getPosition(), right.getPosition());
 
         return getOverlapList(gi, qresult);
     }
@@ -246,13 +260,13 @@ public class Overlapper {
             throw new SvAnnRuntimeException("Malformed insertion adjacency list with size " + adjacencies.size());
         }
         Adjacency insertion1 = adjacencies.get(0);
-        Breakend left = insertion1.getLeft();
-        Breakend right = insertion1.getRight();
+        Breakend left = insertion1.getStart();
+        Breakend right = insertion1.getEnd();
         Contig chrom = left.getContig();
         int id = chrom.getId();
-        int begin = left.getBegin();
+        int begin = left.getPosition();
         Adjacency insertion2 = adjacencies.get(1);
-        int end = insertion2.getRight().getEnd();
+        int end = insertion2.getEnd().getPosition();
         GenomeInterval structVarInterval = new GenomeInterval(rd, Strand.FWD, id, begin, end);
         IntervalArray<TranscriptModel> iarray = chromosomeMap.get(id).getTMIntervalTree();
         IntervalArray<TranscriptModel>.QueryResult queryResult =
@@ -304,10 +318,20 @@ public class Overlapper {
      */
     private Overlap containedIn(TranscriptModel tmod, GenomePosition start, GenomePosition end) {
         String msg = String.format("%s/%s", tmod.getGeneSymbol(), tmod.getAccession());
-        return new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tmod, true, msg);
+        return new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tmod, OverlapDistance.fromContainedIn(), msg);
     }
 
 
+    /**
+     * This method is called if there is no overlap with any part of a transcript. If a structural variant
+     * is located 5' to the nearest transcript, it is called upstream, and if it is 3' to the nearest
+     * transcript, it is called downstream
+     *
+     * @param start   start position of the SV on the current chromosome
+     * @param end     end position of the SV on the current chromosome
+     * @param qresult Jannovar object with left and right neighbors of the SV
+     * @return list of overlaps -- usually both the upstream and the downstream neighbors (unless the SV is at the very end/beginning of a chromosome)
+     */
     private List<Overlap> intergenic(GenomePosition start,
                                      GenomePosition end,
                                      IntervalArray<TranscriptModel>.QueryResult qresult) {
@@ -324,33 +348,37 @@ public class Overlapper {
             leftDistance = start.getPos() - tmodelLeft.getTXRegion().withStrand(Strand.FWD).getEndPos();
             description = String.format("%s[%s]", tmodelLeft.getGeneSymbol(), tmodelLeft.getGeneID());
             OverlapType type;
-            if (leftDistance <= 2_000) {
-                type = UPSTREAM_GENE_VARIANT_2KB;
+            if (leftDistance <= 500) {
+                type = DOWNSTREAM_GENE_VARIANT_500B;
+            } else if (leftDistance <= 2_000) {
+                type = DOWNSTREAM_GENE_VARIANT_2KB;
             } else if (leftDistance <= 5_000) {
-                type = OverlapType.UPSTREAM_GENE_VARIANT_5KB;
+                type = OverlapType.DOWNSTREAM_GENE_VARIANT_5KB;
             } else if (leftDistance <= 500_000) {
-                type = OverlapType.UPSTREAM_GENE_VARIANT_500KB;
+                type = OverlapType.DOWNSTREAM_GENE_VARIANT_500KB;
             } else {
-                type = OverlapType.UPSTREAM_GENE_VARIANT;
+                type = OverlapType.DOWNSTREAM_GENE_VARIANT;
             }
-            overlaps.add(new Overlap(type, tmodelLeft, leftDistance, description));
+            OverlapDistance odist = OverlapDistance.fromDownstreamFlankingGene(leftDistance, tmodelLeft.getGeneSymbol());
+            overlaps.add(new Overlap(type, tmodelLeft, odist));
         }
         if (tmodelRight != null) {
             int rightDistance = tmodelRight.getTXRegion().withStrand(Strand.FWD).getBeginPos() - end.getPos();
             description = String.format("%s[%s]", tmodelRight.getGeneSymbol(), tmodelRight.getGeneID());
             OverlapType overlapType;
             if (rightDistance <= 500) {
-                overlapType = OverlapType.DOWNSTREAM_GENE_VARIANT_500B;
+                overlapType = OverlapType.UPSTREAM_GENE_VARIANT_500B;
             } else if (rightDistance <= 2_000) {
-                overlapType = DOWNSTREAM_GENE_VARIANT_2KB;
+                overlapType = UPSTREAM_GENE_VARIANT_2KB;
             } else if (rightDistance <= 5_000) {
-                overlapType = DOWNSTREAM_GENE_VARIANT_5KB;
+                overlapType = UPSTREAM_GENE_VARIANT_5KB;
             } else if (rightDistance <= 500_000) {
-                overlapType = DOWNSTREAM_GENE_VARIANT_500KB;
+                overlapType = UPSTREAM_GENE_VARIANT_500KB;
             } else {
-                overlapType = DOWNSTREAM_GENE_VARIANT;
+                overlapType = UPSTREAM_GENE_VARIANT;
             }
-            overlaps.add(new Overlap(overlapType, tmodelRight, rightDistance, description));
+            OverlapDistance odist = OverlapDistance.fromUpstreamFlankingGene(rightDistance, tmodelRight.getGeneSymbol());
+            overlaps.add(new Overlap(overlapType, tmodelRight, odist));
         }
         return overlaps;
     }
@@ -432,20 +460,23 @@ public class Overlapper {
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon);
-                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tmod, affectsCds, msg);
+                OverlapDistance odist = OverlapDistance.fromExonic(tmod.getGeneSymbol(), affectsCds);
+                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tmod, odist, msg);
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         tmod.getGeneSymbol(),
                         tmod.getAccession(),
                         firstAffectedExon,
                         lastAffectedExon);
-                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, tmod, affectsCds, msg);
+                OverlapDistance odist = OverlapDistance.fromExonic(tmod.getGeneSymbol(), affectsCds);
+                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, tmod, odist, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron
-            int intronNum = getIntronNumber(tmod, start.getPos(), end.getPos());
-            String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronNum);
-            return new Overlap(INTRONIC, tmod, false, msg);
+            IntronDistance intronDist = getIntronNumber(tmod, start.getPos(), end.getPos());
+            String msg = String.format("%s/%s[intron %d]", tmod.getGeneSymbol(), tmod.getAccession(), intronDist.getIntronNumber());
+            OverlapDistance odist = OverlapDistance.fromIntronic(tmod.getGeneSymbol(), intronDist);
+            return new Overlap(INTRONIC, tmod, odist, msg);
         }
     }
 

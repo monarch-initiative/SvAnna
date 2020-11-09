@@ -68,6 +68,10 @@ public class AnnotateCommand implements Callable<Integer> {
 
     public AnnotateCommand() {
         // TODO: 2. 11. 2020 externalize
+        // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids
+        // that are provided by the user into their corresponding labels on the output file.
+        // I will add a method to this class for now, but when we refactor this, we should make it
+        // more elegant
         hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
     }
 
@@ -78,6 +82,7 @@ public class AnnotateCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         // 0 - set up data
+
         // assembly
         Optional<GenomeAssembly> assemblyOptional = GenomeAssemblyProvider.getDefaultProvider().getAssembly(ASSEMBLY_ID);
         if (assemblyOptional.isEmpty()) {
@@ -88,6 +93,12 @@ public class AnnotateCommand implements Callable<Integer> {
         GenomeAssembly assembly = assemblyOptional.get();
         // patient phenotype
         Set<TermId> patientTerms = Arrays.stream(hpoTermIdList.split(",")).map(String::trim).map(TermId::of).collect(Collectors.toSet());
+        // check that the HPO terms entered by the user (if any) are valid
+        Map<TermId, String> hpoTermsAndLabels;
+        if (! patientTerms.isEmpty())
+            hpoTermsAndLabels = hpoDiseaseGeneMap.getTermLabelMap(patientTerms);
+        else
+            hpoTermsAndLabels = Map.of();
         // enhancers & relevant enhancer terms
         TSpecParser tparser = new TSpecParser(enhancerFile.toString());
         Map<Integer, IntervalArray<Enhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
@@ -97,9 +108,7 @@ public class AnnotateCommand implements Callable<Integer> {
         // jannovar data
         JannovarData jannovarData = readJannovarData(jannovarPath);
         // disease summary map
-        // TODO: 4. 11. 2020 implement
-        Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap = Map.of();
-
+        Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
         // 1 - parse input variants
         BreakendAssembler breakendAssembler = new BreakendAssembler();
         StructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, breakendAssembler);
@@ -111,19 +120,26 @@ public class AnnotateCommand implements Callable<Integer> {
         Overlapper overlapper = new Overlapper(jannovarData);
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
 
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, diseaseSummaryMap);
+        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, relevantGenesAndDiseases);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();
         List<String> visualizations = new ArrayList<>();
-
+        int above=0,below=0;
         for (SequenceRearrangement rearrangement : rearrangements) {
             SvPriority priority = prioritizer.prioritize(rearrangement);
             priorities.add(priority);
-            HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
-            String visualization = visualizer.getHtml(visualizable);
-            visualizations.add(visualization);
+            if (priority.getImpact().satisfiesThreshold(threshold)) {
+                HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
+                String visualization = visualizer.getHtml(visualizable);
+                above++; if (above>100) continue;
+               visualizations.add(visualization);
+
+            } else {
+                below++;
+            }
         }
+        System.out.printf("[INFO] Above threshold SVs: %d, below threshold SVs: %d.\n", above, below);
 
         // TODO -- if we have frequency information
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
@@ -140,11 +156,13 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("vcf_file", vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
+
         HtmlTemplate template = new HtmlTemplate(visualizations,
                 lowImpactCounts,
                 intermediateImpactCounts,
                 highImpactCounts,
-                infoMap);
+                infoMap,
+                hpoTermsAndLabels);
         template.outputFile(outprefix);
 
         // We're done!

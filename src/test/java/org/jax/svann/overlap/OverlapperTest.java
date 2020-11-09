@@ -295,6 +295,19 @@ public class OverlapperTest extends TestBase {
         }
     }
 
+
+
+    @Test
+    public void testGetIntronicDistance() {
+        SequenceRearrangement surf2insertionIntron3 = Insertions.surf2Intron3();
+        List<Overlap> overlaps = overlapper.getOverlapList(surf2insertionIntron3);
+        Overlap overlap = overlaps.get(0);
+        // there are 249 bases between the deletion and the downstream exon, not including deletion or exonic regions
+        // there are 1186 bases between the deletion and the upstream exon, not including deletion or exonic regions
+        assertEquals("NM_017503.4", overlap.getAccession());
+        assertEquals(249, overlap.getDistance());
+    }
+
     /**
      * Translocation where one CDS is disrupted and the other is not
      * <p>

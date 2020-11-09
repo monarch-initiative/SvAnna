@@ -50,16 +50,21 @@ public enum OverlapType {
      * 500B_downstream_variant (SO:0001634)
      */
     DOWNSTREAM_GENE_VARIANT_500B("500b downstream gene variant"),
+    UPSTREAM_GENE_VARIANT_500B("500b upstream gene variant"),
     INTRONIC("located completely within intron"),
     SINGLE_EXON_IN_TRANSCRIPT("single-exon affected in transcript"),
     MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript"),
     TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV"),
+    TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION("transcript disrupted by translocation"),
     TRANSCRIPT_DISRUPTED_BY_INVERSION("transcript disrupted by inversion");
 
-    private final static Set<OverlapType> intergenicTypes = Set.of(DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_5KB,
-            DOWNSTREAM_GENE_VARIANT_500B, UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_500KB);
+    private final static Set<OverlapType> intergenicTypes = Set.of(
+            DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_500KB, DOWNSTREAM_GENE_VARIANT_5KB, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_500B,
+            UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_500KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_500B);
     private final static Set<OverlapType> exonicTypes = Set.of(SINGLE_EXON_IN_TRANSCRIPT, MULTIPLE_EXON_IN_TRANSCRIPT, TRANSCRIPT_CONTAINED_IN_SV);
     private final static Set<OverlapType> intronicTypes = Set.of(INTRONIC);
+    private final static Set<OverlapType> upstreamTypes = Set.of(UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_500KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_500B);
+    private final static Set<OverlapType> downstreamTypes = Set.of(DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_500KB, DOWNSTREAM_GENE_VARIANT_5KB, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_500B);
 
     private final String name;
 
@@ -68,9 +73,6 @@ public enum OverlapType {
         name = type;
     }
 
-    public static boolean isExonic(OverlapType vtype) {
-        return exonicTypes.contains(vtype);
-    }
 
     public static boolean isIntronic(OverlapType type) {
         return intronicTypes.contains(type);
@@ -80,20 +82,9 @@ public enum OverlapType {
         return intergenicTypes.contains(type);
     }
 
-    public boolean isExonic() {
-        return isExonic(this);
-    }
-
-    public boolean isIntronic() {
-        return isIntronic(this);
-    }
-
-    public boolean isIntergenic() {
-        return isIntergenic(this);
-    }
-
     /**
      * Check if this overlap type overlaps with any part of a transcript
+     *
      * @param vtype an overlap type
      * @return true if there is overlap with some part of a transcript
      */
@@ -103,6 +94,30 @@ public enum OverlapType {
 
     public static boolean inversionDisruptable(OverlapType vtype) {
         return exonicTypes.contains(vtype) || intronicTypes.contains(vtype) || vtype == UPSTREAM_GENE_VARIANT_2KB;
+    }
+
+    public boolean isUpstream() {
+        return upstreamTypes.contains(this);
+    }
+
+    public boolean isDownstream() {
+        return downstreamTypes.contains(this);
+    }
+
+    public boolean isExonic() {
+        return exonicTypes.contains(this);
+    }
+
+    public boolean isSingleExon() {
+        return this == SINGLE_EXON_IN_TRANSCRIPT;
+    }
+
+    public boolean isIntronic() {
+        return isIntronic(this);
+    }
+
+    public boolean isIntergenic() {
+        return isIntergenic(this);
     }
 
     public String getName() {

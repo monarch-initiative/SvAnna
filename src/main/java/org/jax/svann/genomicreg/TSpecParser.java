@@ -85,10 +85,10 @@ public class TSpecParser {
         for (Integer chrID : this.assembly.getContigIds())
             enhancerMap.put(chrID, new ArrayList<>());
        for (Enhancer e : enhancers)
-           enhancerMap.get(e.getChromosome().getId()).add(e);
+           enhancerMap.get(e.getContig().getId()).add(e);
        Set<Contig> chromosomeIdSet = enhancers
                .stream()
-               .map(Enhancer::getChromosome)
+               .map(Enhancer::getContig)
                .collect(Collectors.toSet());
         for (Contig  ctig: chromosomeIdSet) {
             IntervalArray<Enhancer> iTree = new IntervalArray<>(enhancerMap.get(ctig.getId()),
@@ -121,12 +121,12 @@ public class TSpecParser {
     static class EnhancerIntervalEndExtractor implements IntervalEndExtractor<Enhancer> {
         @Override
         public int getBegin(Enhancer x) {
-            return x.getStart().getPos();
+            return x.getStart().getPosition();
         }
 
         @Override
         public int getEnd(Enhancer x) {
-            return x.getEnd().getPos();
+            return x.getEnd().getPosition();
         }
     }
 

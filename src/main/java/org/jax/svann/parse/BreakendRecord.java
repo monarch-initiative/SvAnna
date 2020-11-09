@@ -1,6 +1,5 @@
 package org.jax.svann.parse;
 
-import org.jax.svann.reference.ChromosomalRegion;
 
 import java.util.Objects;
 
@@ -9,14 +8,14 @@ import java.util.Objects;
  */
 public class BreakendRecord {
 
-    private final ChromosomalRegion position;
+    private final ChromosomalPosition position;
     private final String id;
     private final String eventId;
     private final String mateId;
     private final String ref;
     private final String alt;
 
-    public BreakendRecord(ChromosomalRegion position,
+    public BreakendRecord(ChromosomalPosition position,
                           String id,
                           String eventId,
                           String mateId,
@@ -34,7 +33,7 @@ public class BreakendRecord {
         return eventId;
     }
 
-    public ChromosomalRegion getPosition() {
+    public ChromosomalPosition getPosition() {
         return position;
     }
 

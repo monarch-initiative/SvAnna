@@ -10,10 +10,9 @@ public class Overlap {
 
     private final OverlapType overlapType;
     /**
-     * This field's meaning depends on the type. For INTERGENIC, it is the distance to the 5' (left) nearest gene.
-     * For INTRONIC, it is the distance to the nearest exon.
+     * This field's meaning depends on the type, INTERGENIC, INTRONIC, EXONIC, SPANNING.
      */
-    private final int distance;
+    private final OverlapDistance overlapDistance;
 
     private final TranscriptModel transcriptModel;
 
@@ -22,20 +21,19 @@ public class Overlap {
     private final boolean overlapsCds;
 
 
-    public Overlap(OverlapType type, TranscriptModel tmod, int d, String desc) {
+
+    public Overlap(OverlapType type, TranscriptModel tmod, OverlapDistance odist) {
+        this(type, tmod, odist, odist.getDescription());
+    }
+
+
+
+    public Overlap(OverlapType type, TranscriptModel tmod, OverlapDistance odist, String desc) {
         this.overlapType = type;
-        this.distance = d;
+        this.overlapDistance = odist;
         this.transcriptModel = tmod;
         this.description = desc;
         this.overlapsCds = false;
-    }
-
-    public Overlap(OverlapType type, TranscriptModel tmod, boolean overlapsCds, String desc) {
-        this.overlapType = type;
-        this.transcriptModel = tmod;
-        this.distance = 0;
-        this.overlapsCds = overlapsCds;
-        this.description = desc;
     }
 
 
@@ -43,15 +41,15 @@ public class Overlap {
      * @return true if this overlap involves exonic sequence
      */
     public boolean isExonic() {
-        return OverlapType.isExonic(this.overlapType);
+        return overlapType.isExonic();
     }
 
     public boolean overlapsTranscript() {
-        return OverlapType.overlapsTranscript(this.overlapType);
+        return OverlapType.overlapsTranscript(overlapType);
     }
 
     public boolean inversionDisruptable() {
-        return OverlapType.inversionDisruptable(this.overlapType);
+        return OverlapType.inversionDisruptable(overlapType);
     }
 
     /**
@@ -75,7 +73,11 @@ public class Overlap {
     }
 
     public int getDistance() {
-        return distance;
+        return overlapDistance.getShortestDistance();
+    }
+
+    public OverlapDistance getOverlapDistance() {
+        return overlapDistance;
     }
 
     public TranscriptModel getTranscriptModel() {
@@ -86,13 +88,28 @@ public class Overlap {
         return description;
     }
 
-    //    public TermId getGeneId() {
-//        return TermId.of(this.transcriptModel.getGeneID())
-//    }
 
     @Override
     public String toString() {
+        String distanceS = "";//distanceString(this.distance);
+        if (this.overlapType.isUpstream()) {
+            return "Intergenic/Upstream " + distanceS + "; " + description;
+        }
+        if (this.overlapType.isDownstream()) {
+            return "Intergenic/Downstream " + distanceS + "; " + description;
+        }
+        if (this.overlapType.isSingleExon()) {
+            return description;
+        }
+        if (this.overlapType.isIntronic()) {
+            return this.overlapDistance.getDescription();
+        }
+
+
         return String.format("VcfOverlap [%s:%s] %dbp; 3'",
-                overlapType, description, distance);
+                overlapType, description, overlapDistance.getShortestDistance());
     }
+
+
+
 }

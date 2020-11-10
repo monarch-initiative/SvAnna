@@ -3,6 +3,7 @@ package org.jax.svann.viz.svg;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.*;
+import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ public abstract class SvSvgGenerator {
     protected final int SVG_WIDTH = 1400;
 
     private final static int HEIGHT_FOR_SV_DISPLAY = 200;
-    protected final static int HEIGHT_PER_DISPLAY_ITEM = 100;
+    protected final static int HEIGHT_PER_DISPLAY_ITEM = 80;
     /** Canvas height of the SVG.*/
     protected int SVG_HEIGHT;
 
@@ -403,6 +404,35 @@ public abstract class SvSvgGenerator {
                 xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
     }
+
+    protected void writeScale(Writer writer, Contig contig, int ypos) throws IOException {
+        int verticalOffset = 10;
+        String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;" +
+                " stroke-dasharray: 5 2\" />\n", this.scaleMinPos, ypos, this.scaleMaxPos, ypos);
+        String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos + verticalOffset, this.scaleMinPos, ypos - verticalOffset);
+        String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos + verticalOffset, this.scaleMaxPos, ypos - verticalOffset);
+        String sequenceLength = getSequenceLengthString(scaleBasePairs);
+        writer.write(line);
+        writer.write(leftVertical);
+        writer.write(rightVertical);
+        int y = ypos - 15;
+        double xmiddle = 0.45 * (this.scaleMinPos + this.scaleMaxPos);
+        double xcloseToStart = 0.1 * (this.scaleMinPos + this.scaleMaxPos);
+        String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
+                xmiddle, y, PURPLE, sequenceLength);
+        writer.write(txt);
+        String contigName = contig.getPrimaryName();
+        if (! contigName.startsWith("chr")) {
+            contigName = "chr" + contigName;
+        }
+        txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
+                xcloseToStart, y, PURPLE, contigName);
+        writer.write(txt);
+    }
+
 
     /**
      * Get a string that represents a sequence length using bp, kb, or Mb as appropriate

@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-public interface StructuralRearrangementParser {
+public interface SequenceRearrangementParser<T extends SequenceRearrangement> {
 
-    List<SequenceRearrangement> parseFile(Path filePath) throws IOException;
+    List<T> parseFile(Path filePath) throws IOException;
 }

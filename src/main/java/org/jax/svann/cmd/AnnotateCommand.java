@@ -16,8 +16,8 @@ import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.overlap.SvAnnOverlapper;
 import org.jax.svann.parse.BreakendAssembler;
-import org.jax.svann.parse.StructuralRearrangementParser;
-import org.jax.svann.parse.VcfStructuralRearrangementParser;
+import org.jax.svann.parse.SequenceRearrangementParser;
+import org.jax.svann.parse.VcfSequenceRearrangementParser;
 import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPrioritizer;
@@ -115,7 +115,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
         // 1 - parse input variants
         BreakendAssembler breakendAssembler = new BreakendAssembler();
-        StructuralRearrangementParser parser = new VcfStructuralRearrangementParser(assembly, breakendAssembler);
+        SequenceRearrangementParser parser = new VcfSequenceRearrangementParser(assembly, breakendAssembler);
 
         List<SequenceRearrangement> rearrangements = parser.parseFile(vcfFile);
 

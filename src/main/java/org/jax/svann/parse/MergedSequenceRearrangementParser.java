@@ -22,15 +22,15 @@ import java.util.stream.Collectors;
  *     <li>INV</li>
  * </ul>
  */
-public class MergedStructuralRearrangementParser implements StructuralRearrangementParser {
+public class MergedSequenceRearrangementParser implements SequenceRearrangementParser<SequenceRearrangement> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MergedStructuralRearrangementParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MergedSequenceRearrangementParser.class);
 
     private static final String DELIMITER = "\t";
 
     private final GenomeAssembly assembly;
 
-    public MergedStructuralRearrangementParser(GenomeAssembly assembly) {
+    public MergedSequenceRearrangementParser(GenomeAssembly assembly) {
         this.assembly = assembly;
     }
 

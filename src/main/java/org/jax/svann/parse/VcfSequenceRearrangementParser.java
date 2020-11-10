@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class VcfStructuralRearrangementParser implements StructuralRearrangementParser {
+public class VcfSequenceRearrangementParser implements SequenceRearrangementParser<SequenceRearrangement> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VcfStructuralRearrangementParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(VcfSequenceRearrangementParser.class);
 
     private final GenomeAssembly assembly;
 
     private final BreakendAssembler assembler;
 
-    public VcfStructuralRearrangementParser(GenomeAssembly assembly, BreakendAssembler assembler) {
+    public VcfSequenceRearrangementParser(GenomeAssembly assembly, BreakendAssembler assembler) {
         this.assembly = assembly;
         this.assembler = assembler;
     }

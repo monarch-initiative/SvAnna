@@ -21,16 +21,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 
-public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase {
+public class VcfSequenceRearrangementParserTest extends ToyCoordinateTestBase {
 
     private static final VCFCodec VCF_CODEC = new VCFCodec();
     private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/sv_example.vcf");
-    private static BreakendAssembler ASSEMBLER;
-    private VcfStructuralRearrangementParser parser;
+    private static BreakendAssembler<StructuralVariant> ASSEMBLER;
+    private VcfSequenceRearrangementParser parser;
 
     @BeforeAll
     public static void beforeAll() {
-        ASSEMBLER = new BreakendAssembler();
+        ASSEMBLER = new BreakendAssemblerImpl();
         try (VCFFileReader reader = new VCFFileReader(SV_EXAMPLE_PATH, false)) {
             VCF_CODEC.setVCFHeader(reader.getFileHeader(), VCFHeaderVersion.VCF4_3);
         }
@@ -38,13 +38,13 @@ public class VcfStructuralRearrangementParserTest extends ToyCoordinateTestBase 
 
     @BeforeEach
     public void setUp() {
-        parser = new VcfStructuralRearrangementParser(TOY_ASSEMBLY, ASSEMBLER);
+        parser = new VcfSequenceRearrangementParser(TOY_ASSEMBLY, ASSEMBLER);
     }
 
     @Test
     public void parseFile() throws Exception {
-        VcfStructuralRearrangementParser parser = new VcfStructuralRearrangementParser(GenomeAssemblyProvider.getGrch38Assembly(), ASSEMBLER);
-        Collection<SequenceRearrangement> rearrangements = parser.parseFile(SV_EXAMPLE_PATH);
+        VcfSequenceRearrangementParser parser = new VcfSequenceRearrangementParser(GenomeAssemblyProvider.getGrch38Assembly(), ASSEMBLER);
+        Collection<StructuralVariant> rearrangements = parser.parseFile(SV_EXAMPLE_PATH);
 
         // we expect to see 6 rearrangement when things are ready
         assertThat(rearrangements, hasSize(6));

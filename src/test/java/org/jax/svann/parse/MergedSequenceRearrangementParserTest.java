@@ -14,15 +14,15 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
-public class MergedStructuralRearrangementParserTest extends TestBase {
+public class MergedSequenceRearrangementParserTest extends TestBase {
 
     private static final Path SV_SMALL_MERGED = Paths.get("src/test/resources/sv_small_merged.bed");
 
-    private MergedStructuralRearrangementParser parser;
+    private MergedSequenceRearrangementParser parser;
 
     @BeforeEach
     public void setUp() {
-        parser = new MergedStructuralRearrangementParser(GENOME_ASSEMBLY);
+        parser = new MergedSequenceRearrangementParser(GENOME_ASSEMBLY);
     }
 
     @Test

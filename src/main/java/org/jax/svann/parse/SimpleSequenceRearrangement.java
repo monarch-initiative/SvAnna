@@ -16,7 +16,7 @@ class SimpleSequenceRearrangement implements SequenceRearrangement {
 
     private final List<Adjacency> adjacencies;
 
-    private SimpleSequenceRearrangement(SvType type, List<Adjacency> adjacencies) {
+    protected SimpleSequenceRearrangement(SvType type, List<Adjacency> adjacencies) {
         if (adjacencies.isEmpty()) {
             throw new IllegalArgumentException("Adjacency list cannot be empty");
         }

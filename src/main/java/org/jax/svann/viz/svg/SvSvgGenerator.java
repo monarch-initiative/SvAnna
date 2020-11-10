@@ -3,6 +3,7 @@ package org.jax.svann.viz.svg;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.*;
+import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ public abstract class SvSvgGenerator {
     protected final int SVG_WIDTH = 1400;
 
     private final static int HEIGHT_FOR_SV_DISPLAY = 200;
-    protected final static int HEIGHT_PER_DISPLAY_ITEM = 100;
+    protected final static int HEIGHT_PER_DISPLAY_ITEM = 80;
     /** Canvas height of the SVG.*/
     protected int SVG_HEIGHT;
 
@@ -43,6 +44,11 @@ public abstract class SvSvgGenerator {
     protected final int genomicMinPos;
     /** Rightmost position (most 3' on chromosome), including offset. */
     protected final int genomicMaxPos;
+
+
+    protected final int paddedGenomicMinPos;
+
+    protected final int paddedGenomicMaxPos;
     /** Minimum position of the scale */
     private final double scaleMinPos;
 
@@ -120,14 +126,56 @@ public abstract class SvSvgGenerator {
                 // add a little real estate to each side for esthetic purposes
                 int delta = maxPos - minPos;
                 int offset = (int) (OFFSET_FACTOR * delta);
-                this.genomicMinPos = Math.max(minPos - offset, 0);
-                this.genomicMaxPos = maxPos + offset; // don't care if we fall off the end, this is not important for visualization
+                this.genomicMinPos = minPos;
+                this.genomicMaxPos = maxPos; // don't care if we fall off the end, this is not important for visualization
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
+                int extraSpaceOnSide = (int)(0.1*(this.genomicSpan));
+                this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
+                this.paddedGenomicMaxPos = genomicMaxPos + extraSpaceOnSide;
                 this.scaleBasePairs = 1 + maxPos - minPos;
-                this.scaleMinPos = translateGenomicToSvg(minPos);
-                this.scaleMaxPos = translateGenomicToSvg(maxPos);
+                this.scaleMinPos = translateGenomicToSvg(paddedGenomicMinPos);
+                this.scaleMaxPos = translateGenomicToSvg(paddedGenomicMaxPos);
         }
     }
+
+    public SvSvgGenerator(int minPos,
+                          int maxPos,
+                          SvType svtype,
+                          List<SvAnnTxModel> transcripts,
+                          List<Enhancer> enhancers,
+                          List<CoordinatePair> coordinatePairs) {
+        this.svtype = svtype;
+        this.affectedTranscripts = transcripts;
+        this.affectedEnhancers = enhancers;
+        this.coordinatePairs = coordinatePairs;
+        if (svtype == SvType.TRANSLOCATION) {
+            this.SVG_HEIGHT = 500 + HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        } else {
+            this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        }
+        int delta = maxPos - minPos;
+        int offset = (int) (OFFSET_FACTOR * delta);
+        this.genomicMinPos = minPos;
+        this.genomicMaxPos = maxPos;
+        // don't care if we fall off the end, this is not important for visualization
+        this.paddedGenomicMinPos = minPos - offset;
+        this.paddedGenomicMaxPos = maxPos + offset;
+        this.genomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
+        this.scaleBasePairs = 1 + maxPos - minPos;
+        this.scaleMinPos = translateGenomicToSvg(this.genomicMinPos);
+        this.scaleMaxPos = translateGenomicToSvg(this.genomicMaxPos);
+        switch (svtype) {
+            case DELETION:
+            case INSERTION:
+            default:
+                // get min/max for SVs with one region
+                // todo  -- do we need to check how many coordinate pairs there are?
+                CoordinatePair cpair = coordinatePairs.get(0);
+        }
+
+    }
+
+
 
     /**
      * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
@@ -245,7 +293,7 @@ public abstract class SvSvgGenerator {
      * @return
      */
     protected double translateGenomicToSvg(int genomicCoordinate) {
-        double pos = genomicCoordinate - this.genomicMinPos;
+        double pos = genomicCoordinate - this.paddedGenomicMinPos;
         if (pos < 0) {
             throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
         }
@@ -320,6 +368,10 @@ public abstract class SvSvgGenerator {
                         "style=\"stroke:%s; fill: %s\" />\n",
                 start, Y, width, EXON_HEIGHT, DARKGREEN, ORANGE);
         writer.write(rect);
+    }
+
+    protected void writeEnhancer(Enhancer enhancer, int ypos, Writer writer) throws IOException {
+
     }
 
 
@@ -403,6 +455,35 @@ public abstract class SvSvgGenerator {
                 xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
     }
+
+    protected void writeScale(Writer writer, Contig contig, int ypos) throws IOException {
+        int verticalOffset = 10;
+        String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;" +
+                " stroke-dasharray: 5 2\" />\n", this.scaleMinPos, ypos, this.scaleMaxPos, ypos);
+        String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos + verticalOffset, this.scaleMinPos, ypos - verticalOffset);
+        String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos + verticalOffset, this.scaleMaxPos, ypos - verticalOffset);
+        String sequenceLength = getSequenceLengthString(scaleBasePairs);
+        writer.write(line);
+        writer.write(leftVertical);
+        writer.write(rightVertical);
+        int y = ypos - 15;
+        double xmiddle = 0.45 * (this.scaleMinPos + this.scaleMaxPos);
+        double xcloseToStart = 0.1 * (this.scaleMinPos + this.scaleMaxPos);
+        String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
+                xmiddle, y, PURPLE, sequenceLength);
+        writer.write(txt);
+        String contigName = contig.getPrimaryName();
+        if (! contigName.startsWith("chr")) {
+            contigName = "chr" + contigName;
+        }
+        txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
+                xcloseToStart, y, PURPLE, contigName);
+        writer.write(txt);
+    }
+
 
     /**
      * Get a string that represents a sequence length using bp, kb, or Mb as appropriate

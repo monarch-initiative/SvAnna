@@ -3,6 +3,7 @@ package org.jax.svann.overlap;
 import org.jax.svann.TestBase;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -31,13 +32,14 @@ import static org.junit.jupiter.api.Assertions.*;
  *          XM_011530849.2, NM_000495.4
  * SRY: NM_003140.2
  */
-public class OverlapperTest extends TestBase {
+@Disabled
+public class PrototypeOverlapperTest extends TestBase {
 
     private Overlapper overlapper;
 
     @BeforeEach
     public void setUp() {
-        overlapper = new Overlapper(JANNOVAR_DATA);
+        overlapper = new PrototypeOverlapper(JANNOVAR_DATA);
     }
 
     /**
@@ -323,7 +325,7 @@ public class OverlapperTest extends TestBase {
      */
     @Test
     public void testTranslocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
-        SequenceRearrangement translocation = translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
+        SequenceRearrangement translocation = Translocations.translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
         List<Overlap> overlaps = overlapper.getOverlapList(translocation);
         assertEquals(2, overlaps.size());
         // The following do not work because the breakend is in an intron of SURF2

@@ -1,10 +1,10 @@
 package org.jax.svann.priority;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.util.List;
 import java.util.Set;
@@ -19,7 +19,7 @@ public interface SvPriority {
 
     List<HpoDiseaseSummary> getDiseases();
 
-    Set<TranscriptModel> getAffectedTranscripts();
+    Set<SvAnnTxModel> getAffectedTranscripts();
 
     Set<GeneWithId> getAffectedGeneIds();
 

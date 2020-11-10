@@ -6,6 +6,8 @@ import de.charite.compbio.jannovar.data.SerializationException;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
+import org.jax.svann.reference.transcripts.JannovarTranscriptService;
+import org.jax.svann.reference.transcripts.TranscriptService;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.nio.file.Path;
@@ -41,6 +43,8 @@ public abstract class TestBase {
     protected static final JannovarData JANNOVAR_DATA = getJannovarData();
 
     protected static final Map<String, GeneWithId> GENE_WITH_ID_MAP = getGeneMap();
+
+    protected static final TranscriptService TX_SERVICE = JannovarTranscriptService.of(GENOME_ASSEMBLY, JANNOVAR_DATA);
 
     private static JannovarData getJannovarData() {
         try {

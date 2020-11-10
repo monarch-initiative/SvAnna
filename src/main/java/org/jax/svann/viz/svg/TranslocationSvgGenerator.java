@@ -1,15 +1,10 @@
 package org.jax.svann.viz.svg;
 
-import de.charite.compbio.jannovar.reference.GenomeInterval;
-import de.charite.compbio.jannovar.reference.Strand;
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
-import org.jax.svann.reference.CoordinatePair;
-import org.jax.svann.reference.GenomicPosition;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -30,9 +25,9 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
     private final int positionContigB;
 
     /** transcripts on contig A */
-    private final List<TranscriptModel> transcriptModelsA;
+    private final List<SvAnnTxModel> transcriptModelsA;
     /** transcripts on contig B  */
-    private final List<TranscriptModel> transcriptModelsB;
+    private final List<SvAnnTxModel> transcriptModelsB;
 
     /** enhancers on contig A */
     private final List<Enhancer> enhancersA;
@@ -65,7 +60,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
      * @param coordinatePairs
      */
     public TranslocationSvgGenerator(SequenceRearrangement rearrangement,
-                                     List<TranscriptModel> transcripts,
+                                     List<SvAnnTxModel> transcripts,
                                      List<Enhancer> enhancers,
                                      List<CoordinatePair> coordinatePairs) {
         super(SvType.TRANSLOCATION, transcripts, enhancers, coordinatePairs);
@@ -76,29 +71,25 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         this.positionContigA = rearrangement.getLeftmostPosition();
         this.contigB = rearrangement.getRightmostBreakend().getContig();
         this.positionContigB = rearrangement.getRightmostPosition();
-        this.transcriptModelsA = transcripts.stream().filter(t -> t.getChr() == contigA.getId()).collect(Collectors.toList());
-        this.transcriptModelsB = transcripts.stream().filter(t -> t.getChr() == contigB.getId()).collect(Collectors.toList());
+        this.transcriptModelsA = transcripts.stream().filter(t -> t.getContigId() == contigA.getId()).collect(Collectors.toList());
+        this.transcriptModelsB = transcripts.stream().filter(t -> t.getContigId() == contigB.getId()).collect(Collectors.toList());
         this.enhancersA = enhancers.stream().filter(e -> e.getContig() == contigA).collect(Collectors.toList());
         this.enhancersB = enhancers.stream().filter(e -> e.getContig() == contigB).collect(Collectors.toList());
         this.minTranscriptPosA = transcriptModelsA.stream().
-                map(TranscriptModel::getTXRegion).
-                map(gi -> gi.withStrand(Strand.FWD)).
-                mapToInt(GenomeInterval::getBeginPos).
+                map(tx -> tx.withStrand(Strand.FWD)).
+                mapToInt(SvAnnTxModel::getStartPosition).
                 min().orElse(UNINITIALIZED);
         this.minTranscriptPosB = transcriptModelsB.stream().
-                map(TranscriptModel::getTXRegion).
-                map(gi -> gi.withStrand(Strand.FWD)).
-                mapToInt(GenomeInterval::getBeginPos).
+                map(tx -> tx.withStrand(Strand.FWD)).
+                mapToInt(SvAnnTxModel::getStartPosition).
                 min().orElse(UNINITIALIZED);
         this.maxTranscriptPosA = transcriptModelsA.stream().
-                map(TranscriptModel::getTXRegion).
-                map(gi -> gi.withStrand(Strand.FWD)).
-                mapToInt(GenomeInterval::getEndPos).
+                map(tx -> tx.withStrand(Strand.FWD)).
+                mapToInt(SvAnnTxModel::getEndPosition).
                 max().orElse(UNINITIALIZED);
         this.maxTranscriptPosB = transcriptModelsB.stream().
-                map(TranscriptModel::getTXRegion).
-                map(gi -> gi.withStrand(Strand.FWD)).
-                mapToInt(GenomeInterval::getEndPos).
+                map(tx -> tx.withStrand(Strand.FWD)).
+                mapToInt(SvAnnTxModel::getEndPosition).
                 max().orElse(UNINITIALIZED);
         this.minEnhancerPosA = enhancersA.stream()
                 .map(Enhancer::getStart)
@@ -152,16 +143,15 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         int increment = 3;
         writer.write(String.format("<path d=\"M %d,%d \n", x, y1));
         int y = y1;
-        while (y<y2) {
-            writer.write(String.format(" l %d,%d\n",increment,increment));
-            writer.write(String.format(" l %d,%d\n",-increment,increment));
-            writer.write(String.format(" l %d,%d\n",-increment,increment));
-            writer.write(String.format(" l %d,%d\n",increment,increment));
-            y += 2*increment;
+        while (y < y2) {
+            writer.write(String.format(" l %d,%d\n", increment, increment));
+            writer.write(String.format(" l %d,%d\n", -increment, increment));
+            writer.write(String.format(" l %d,%d\n", -increment, increment));
+            writer.write(String.format(" l %d,%d\n", increment, increment));
+            y += 2 * increment;
         }
         writer.write(" \" style=\"fill: red\" />\n");
     }
-
     /**
      * Transform a genomic cooordinate to an SVG X coordinate
      * @return
@@ -178,7 +168,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
 
 
 
-    private int writeTranslocation(int ypos, String description, List<TranscriptModel> transcripts,
+    private int writeTranslocation(int ypos, String description, List<SvAnnTxModel> transcripts,
                                     List<Enhancer> enhancers, Writer writer) throws IOException {
         int ystart = ypos - 20;
         int offset = 0;

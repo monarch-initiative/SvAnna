@@ -1,8 +1,5 @@
 package org.jax.svann.reference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,8 +13,6 @@ import java.util.List;
  * </ul>
  */
 public interface SequenceRearrangement {
-
-    Logger LOGGER = LoggerFactory.getLogger(SequenceRearrangement.class);
 
     /**
      * @return structural rearrangement type

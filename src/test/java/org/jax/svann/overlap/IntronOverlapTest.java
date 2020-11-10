@@ -2,12 +2,16 @@ package org.jax.svann.overlap;
 
 
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
-import de.charite.compbio.jannovar.reference.*;
+import de.charite.compbio.jannovar.reference.GenomePosition;
+import de.charite.compbio.jannovar.reference.Strand;
+import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 
+@Disabled
 public class IntronOverlapTest {
 
     private static ReferenceDictionary rdict;
@@ -23,16 +27,16 @@ public class IntronOverlapTest {
     /**
      * Mock a TranscriptModel to be able to test getting the correct intron number
 
-    TranscriptModel​(String accession,
-                     String geneSymbol,
-                     GenomeInterval txRegion,
-                     GenomeInterval cdsRegion,
-                     com.google.common.collect.ImmutableList<GenomeInterval> exonRegions,
-                     String sequence,
-                     String geneID,
-                     int transcriptSupportLevel,
-                     boolean hasIndels,
-                     boolean hasSubstitutions)
+     TranscriptModel​(String accession,
+     String geneSymbol,
+     GenomeInterval txRegion,
+     GenomeInterval cdsRegion,
+     com.google.common.collect.ImmutableList<GenomeInterval> exonRegions,
+     String sequence,
+     String geneID,
+     int transcriptSupportLevel,
+     boolean hasIndels,
+     boolean hasSubstitutions)
      */
     @BeforeAll
     private static void init() {
@@ -40,10 +44,6 @@ public class IntronOverlapTest {
         ZBTB48 = TranscriptModelFactory.ZBTB48();
         ZNF436 = TranscriptModelFactory.ZNF436();
     }
-
-
-
-
 
 
     /**
@@ -54,7 +54,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_640_400);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_640_500);
         int expectedIntronNumber = 1;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
     /**
@@ -65,7 +65,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_641_400);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_641_500);
         int expectedIntronNumber = 2;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
     /**
@@ -76,7 +76,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_643_200);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_643_700);
         int expectedIntronNumber = 3;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
 
     /**
@@ -87,9 +87,8 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_646_200);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_646_700);
         int expectedIntronNumber = 4;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
-
 
 
     /**
@@ -100,9 +99,8 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_648_915);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_648_925);
         int expectedIntronNumber = 10;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
     }
-
 
 
     /**
@@ -113,7 +111,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_570);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_580);
         int expectedIntronNumber = 1;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
     }
 
     /**
@@ -125,7 +123,7 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_161);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_280);
         int expectedIntronNumber = 2;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
     }
 
     /**
@@ -136,6 +134,6 @@ public class IntronOverlapTest {
         GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_693_234);
         GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_693_334);
         int expectedIntronNumber = 3;
-        assertEquals(expectedIntronNumber, Overlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
+        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
     }
 }

@@ -1,24 +1,22 @@
 package org.jax.svann.viz.svg;
 
-import com.google.common.collect.Lists;
-import de.charite.compbio.jannovar.reference.GenomeInterval;
-import de.charite.compbio.jannovar.reference.Strand;
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
-import org.jax.svann.reference.CoordinatePair;
-import org.jax.svann.reference.GenomicPosition;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Structural variant (SV) Scalar Vector Graphic (SVG) generator.
+ *
  * @author Peter N Robinson
  */
 public abstract class SvSvgGenerator {
@@ -31,7 +29,7 @@ public abstract class SvSvgGenerator {
     /** Canvas height of the SVG.*/
     protected int SVG_HEIGHT;
 
-    protected final List<TranscriptModel> affectedTranscripts;
+    protected final List<SvAnnTxModel> affectedTranscripts;
     protected final List<Enhancer> affectedEnhancers;
     protected final List<CoordinatePair> coordinatePairs;
 
@@ -97,7 +95,7 @@ public abstract class SvSvgGenerator {
      * @param enhancers   // * @param genomeInterval
      */
     public SvSvgGenerator(SvType svtype,
-                          List<TranscriptModel> transcripts,
+                          List<SvAnnTxModel> transcripts,
                           List<Enhancer> enhancers,
                           List<CoordinatePair> coordinatePairs) {
         this.svtype = svtype;
@@ -135,12 +133,13 @@ public abstract class SvSvgGenerator {
      * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
      * (rather than taking say the enahncers from {@link #affectedEnhancers}, because for some types of
      * SVs like translocations, we will only use part of the list to calculate maximum and minimum positions.
+     *
      * @param transcripts Transcripts on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
-     * @param enhancers Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
-     * @param cpair coordinates of a structural variant or (in some cases such as Translocations) a component of a SV
+     * @param enhancers   Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param cpair       coordinates of a structural variant or (in some cases such as Translocations) a component of a SV
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMinPos(List<TranscriptModel> transcripts,
+    int getGenomicMinPos(List<SvAnnTxModel> transcripts,
                          List<Enhancer> enhancers,
                          CoordinatePair cpair) {
         int minPos = cpair.getStart().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
@@ -148,13 +147,12 @@ public abstract class SvSvgGenerator {
     }
 
 
-    int getGenomicMinPos(List<TranscriptModel> transcripts,
+    int getGenomicMinPos(List<SvAnnTxModel> transcripts,
                          List<Enhancer> enhancers,
                          int pos) {
         int transcriptMin = transcripts.stream().
-                map(TranscriptModel::getTXRegion).
-                map(t -> t.withStrand(Strand.FWD)).
-                mapToInt(GenomeInterval::getBeginPos).
+                map(t -> t.withStrand(org.jax.svann.reference.Strand.FWD)).
+                mapToInt(GenomicRegion::getStartPosition).
                 min().
                 orElse(Integer.MAX_VALUE);
         int enhancerMin = enhancers.stream().
@@ -170,27 +168,26 @@ public abstract class SvSvgGenerator {
      * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
      * (rather than taking say the enahncers from {@link #affectedEnhancers}, because for some types of
      * SVs like translocations, we will only use part of the list to calculate maximum and minimum positions.
+     *
      * @param transcripts Transcripts on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
-     * @param enhancers Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
-     * @param cpair coordinates of a structural variant or (in some cases such as Translocations) a component of a SV
+     * @param enhancers   Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param cpair       coordinates of a structural variant or (in some cases such as Translocations) a component of a SV
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMaxPos(List<TranscriptModel> transcripts,
+    int getGenomicMaxPos(List<SvAnnTxModel> transcripts,
                          List<Enhancer> enhancers,
                          CoordinatePair cpair) {
         int maxPos = cpair.getEnd().withStrand(org.jax.svann.reference.Strand.FWD).getPosition();
         return getGenomicMaxPos(transcripts, enhancers, maxPos);
     }
 
-    int getGenomicMaxPos(List<TranscriptModel> transcripts,
+    int getGenomicMaxPos(List<SvAnnTxModel> transcripts,
                          List<Enhancer> enhancers,
                          int pos) {
-        int transcriptMax = transcripts.stream().
-                map(TranscriptModel::getTXRegion).
-                map(t -> t.withStrand(Strand.FWD)).
-                mapToInt(GenomeInterval::getEndPos).
-                min().
-                orElse(Integer.MIN_VALUE);
+        int transcriptMax = transcripts.stream().map(t -> t.withStrand(org.jax.svann.reference.Strand.FWD))
+                .mapToInt(GenomicRegion::getEndPosition)
+                .min()
+                .orElse(Integer.MIN_VALUE);
         int enhancerMax = enhancers.stream().
                 map(Enhancer::getEnd).
                 mapToInt(GenomicPosition::getPosition).
@@ -200,17 +197,17 @@ public abstract class SvSvgGenerator {
     }
 
 
-
-    /** Write the header of the SVG.
+    /**
+     * Write the header of the SVG.
      */
     private void writeHeader(Writer writer, boolean blackBorder) throws IOException {
-        writer.write("<svg width=\"" + this.SVG_WIDTH +"\" height=\""+ this.SVG_HEIGHT +"\" ");
+        writer.write("<svg width=\"" + this.SVG_WIDTH + "\" height=\"" + this.SVG_HEIGHT + "\" ");
         if (blackBorder) {
-            writer.write("style=\"border:1px solid black\" " );
+            writer.write("style=\"border:1px solid black\" ");
         }
         writer.write(
                 "xmlns=\"http://www.w3.org/2000/svg\" " +
-                "xmlns:svg=\"http://www.w3.org/2000/svg\">\n");
+                        "xmlns:svg=\"http://www.w3.org/2000/svg\">\n");
         writer.write("<!-- Created by SvAnna -->\n");
         writer.write("<style>\n" +
                 "  text { font: 24px; }\n" +
@@ -235,13 +232,16 @@ public abstract class SvSvgGenerator {
         writeHeader(writer, true);
     }
 
-    /** Write the footer of the SVG */
+    /**
+     * Write the footer of the SVG
+     */
     private void writeFooter(Writer writer) throws IOException {
         writer.write("</g>\n</svg>\n");
     }
 
     /**
      * Transform a genomic cooordinate to an SVG X coordinate
+     *
      * @return
      */
     protected double translateGenomicToSvg(int genomicCoordinate) {
@@ -254,40 +254,41 @@ public abstract class SvSvgGenerator {
     }
 
 
-
     /**
      * Write a line to indicate transcript (UTR) or a dotted line to indicate introns. The line forms
      * a triangle (inspired by the way Ensembl represents introns).
+     *
      * @param exons list of exons in sorted order (chromosome 5' to 3')
-     * @param ypos vertical midline
+     * @param ypos  vertical midline
      * @throws IOException if we cannot write
      */
-    private void writeIntrons(List<GenomeInterval> exons, int ypos, Writer writer) throws  IOException {
+    private void writeIntrons(List<GenomicRegion> exons, int ypos, Writer writer) throws IOException {
         // if the gene does not have an intron, we are done
         if (exons.size() == 1)
             return;
         List<Integer> intronStarts = new ArrayList<>();
         List<Integer> intronEnds = new ArrayList<>();
-        for (int i=1; i<exons.size(); i++) {
-            GenomeInterval previous = exons.get(i-1).withStrand(Strand.FWD);
-            GenomeInterval current = exons.get(i).withStrand(Strand.FWD);
-            intronStarts.add(previous.getEndPos() + 1);
-            intronEnds.add(current.getBeginPos() - 1);
+        for (int i = 1; i < exons.size(); i++) {
+            GenomicRegion previous = exons.get(i - 1).withStrand(Strand.FWD);
+            GenomicRegion current = exons.get(i).withStrand(Strand.FWD);
+            intronStarts.add(previous.getEndPosition() + 1);
+            intronEnds.add(current.getStartPosition() - 1);
         }
-        for (int i=0; i<intronStarts.size(); i++) {
+        for (int i = 0; i < intronStarts.size(); i++) {
             double startpos = translateGenomicToSvg(intronStarts.get(i));
-            double endpos   = translateGenomicToSvg(intronEnds.get(i));
-            double midpoint = 0.5*(startpos + endpos);
+            double endpos = translateGenomicToSvg(intronEnds.get(i));
+            double midpoint = 0.5 * (startpos + endpos);
             double Y = ypos;
             writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    startpos, Y, midpoint, Y-INTRON_MIDPOINT_ELEVATION));
+                    startpos, Y, midpoint, Y - INTRON_MIDPOINT_ELEVATION));
             writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    midpoint, Y-INTRON_MIDPOINT_ELEVATION, endpos, Y));
+                    midpoint, Y - INTRON_MIDPOINT_ELEVATION, endpos, Y));
         }
     }
 
     /**
      * Write a coding exon
+     *
      * @param start
      * @param end
      * @param ypos
@@ -296,7 +297,7 @@ public abstract class SvSvgGenerator {
      */
     protected void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
-        double Y = ypos - 0.5*EXON_HEIGHT;
+        double Y = ypos - 0.5 * EXON_HEIGHT;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
                         "style=\"stroke:%s; fill: %s\" />\n",
                 start, Y, width, EXON_HEIGHT, DARKGREEN, GREEN);
@@ -305,6 +306,7 @@ public abstract class SvSvgGenerator {
 
     /**
      * WRite a non-coding (i.e., UTR) exon of a non-coding gene
+     *
      * @param start
      * @param end
      * @param ypos
@@ -313,7 +315,7 @@ public abstract class SvSvgGenerator {
      */
     protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
-        double Y = ypos - 0.5*EXON_HEIGHT;
+        double Y = ypos - 0.5 * EXON_HEIGHT;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
                         "style=\"stroke:%s; fill: %s\" />\n",
                 start, Y, width, EXON_HEIGHT, DARKGREEN, ORANGE);
@@ -324,27 +326,31 @@ public abstract class SvSvgGenerator {
     /**
      * This method writes one Jannovar transcript as a cartoon where the UTRs are shown in one color and the
      * the coding exons are shown in another color. TODO -- decide what to do with non-coding genes
-     * @param tmod The Jannovar representation of a transcript
-     * @param ypos The y position where we will write the cartoon
+     *
+     * @param tmod   The Jannovar representation of a transcript
+     * @param ypos   The y position where we will write the cartoon
      * @param writer file handle
      * @throws IOException if we cannot write.
      */
-    protected void writeTranscript(TranscriptModel tmod, int ypos, Writer writer) throws IOException {
-        GenomeInterval cds = tmod.getCDSRegion().withStrand(Strand.FWD);
-        GenomeInterval tx = tmod.getTXRegion().withStrand(Strand.FWD);
-        double cdsStart = translateGenomicToSvg(cds.getBeginPos());
-        double cdsEnd = translateGenomicToSvg(cds.getEndPos());
-        List<GenomeInterval> exons = tmod.getExonRegions();
+    protected void writeTranscript(SvAnnTxModel tmod, int ypos, Writer writer) throws IOException {
+        GenomicRegion cds = StandardGenomicRegion.of(tmod.getCdsStart(), tmod.getCdsEnd()).withStrand(Strand.FWD);
+
+        double cdsStart = translateGenomicToSvg(cds.getStartPosition());
+        double cdsEnd = translateGenomicToSvg(cds.getEndPosition());
+        List<GenomicRegion> exons = tmod.getExonRegions();
         if (tmod.getStrand() == Strand.REV) {
-            exons = Lists.reverse(exons);
+            Comparator<GenomicRegion> tComparator = Comparator.naturalOrder();
+            exons = exons.stream()
+                    .sorted(tComparator.reversed())
+                    .collect(Collectors.toList());
         }
         double minX = Double.MAX_VALUE;
         // write a line for UTR, otherwise write a box
-        for (GenomeInterval exon : exons) {
-            double exonStart = translateGenomicToSvg(exon.withStrand(Strand.FWD).getBeginPos());
-            double exonEnd = translateGenomicToSvg(exon.withStrand(Strand.FWD).getEndPos());
+        for (GenomicRegion exon : exons) {
+            double exonStart = translateGenomicToSvg(exon.withStrand(Strand.FWD).getStartPosition());
+            double exonEnd = translateGenomicToSvg(exon.withStrand(Strand.FWD).getEndPosition());
             if (exonStart < minX) minX = exonStart;
-            if (exonStart>= cdsStart && exonEnd <= cdsEnd) {
+            if (exonStart >= cdsStart && exonEnd <= cdsEnd) {
                 writeCdsExon(exonStart, exonEnd, ypos, writer);
             } else if (exonStart <= cdsEnd && exonEnd > cdsEnd) {
                 // in this case, the 3' portion of the exon is UTR and the 5' is CDS
@@ -361,22 +367,13 @@ public abstract class SvSvgGenerator {
         writeTranscriptName(tmod, minX, ypos, writer);
     }
 
-    private void writeTranscriptName(TranscriptModel tmod, double xpos, int ypos, Writer writer) throws IOException {
+    private void writeTranscriptName(SvAnnTxModel tmod, double xpos, int ypos, Writer writer) throws IOException {
         String symbol = tmod.getGeneSymbol();
-        String accession = tmod.getAccession();;
-        int chr = tmod.getChr();
-        String chrom = "chr";
-        if (chr == 23){
-            chrom = "chrX";
-        } else if (chr == 24) {
-            chrom = "chrY";
-        } else if (chr == 25) {
-            chrom = "chrM";
-        } else {
-            chrom = String.format("chr%d", tmod.getChr());
-        }
-        int start = tmod.getTXRegion().withStrand(Strand.FWD).getBeginPos();
-        int end = tmod.getTXRegion().withStrand(Strand.FWD).getEndPos();
+        String accession = tmod.getAccession();
+        String chrom = tmod.getContig().getPrimaryName();
+        SvAnnTxModel txOnFwdStrand = tmod.withStrand(Strand.FWD);
+        int start = txOnFwdStrand.getStartPosition();
+        int end = txOnFwdStrand.getEndPosition();
         String strand = tmod.getStrand() == Strand.FWD ? "+" : "-";
         String positionString = String.format("%s:%d-%d (%s strand)", chrom, start, end, strand);
         String geneName = String.format("%s (%s)", symbol, accession);
@@ -393,15 +390,15 @@ public abstract class SvSvgGenerator {
                 " stroke-width: 1px;" +
                 " stroke-dasharray: 5 2\" />\n", this.scaleMinPos, ypos, this.scaleMaxPos, ypos);
         String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos+verticalOffset, this.scaleMinPos, ypos-verticalOffset);
+                " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos + verticalOffset, this.scaleMinPos, ypos - verticalOffset);
         String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos+verticalOffset, this.scaleMaxPos, ypos-verticalOffset);
+                " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos + verticalOffset, this.scaleMaxPos, ypos - verticalOffset);
         String sequenceLength = getSequenceLengthString(scaleBasePairs);
         writer.write(line);
         writer.write(leftVertical);
         writer.write(rightVertical);
-        int y=ypos - 15;
-        double xmiddle = 0.45*(this.scaleMinPos + this.scaleMaxPos);
+        int y = ypos - 15;
+        double xmiddle = 0.45 * (this.scaleMinPos + this.scaleMaxPos);
         String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
                 xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
@@ -409,6 +406,7 @@ public abstract class SvSvgGenerator {
 
     /**
      * Get a string that represents a sequence length using bp, kb, or Mb as appropriate
+     *
      * @param seqlen number of base bairs
      * @return String such as 432 bp, 4.56 kb or 1.23 Mb
      */
@@ -416,17 +414,18 @@ public abstract class SvSvgGenerator {
         if (seqlen < 1_000) {
             return String.format("%d bp", seqlen);
         } else if (seqlen < 1_000_000) {
-            double kb = (double)seqlen/1000.0;
+            double kb = (double) seqlen / 1000.0;
             return String.format("%.2f kp", kb);
-        } else  {
+        } else {
             // if we get here, the sequence is at least one million bp
-            double mb = (double)seqlen/1000000.0;
+            double mb = (double) seqlen / 1000000.0;
             return String.format("%.2f Mp", mb);
         }
     }
 
     /**
      * Get a string containing an SVG representing the SV.
+     *
      * @return an SVG string
      */
     public String getSvg() {
@@ -444,6 +443,7 @@ public abstract class SvSvgGenerator {
     /**
      * Wirte an SVG (without header) representing this SV. Not intended to be used to create a stand-alone
      * SVG (for this, user {@link #getSvg()}
+     *
      * @param writer a file handle
      * @throws IOException if we cannot write.
      */
@@ -451,6 +451,7 @@ public abstract class SvSvgGenerator {
 
     /**
      * If there is some IO Exception, return an SVG with a text that indicates the error
+     *
      * @param msg The error
      * @return An SVG element that contains the error
      */

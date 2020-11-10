@@ -1,10 +1,10 @@
 package org.jax.svann.viz.svg;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.CoordinatePair;
 import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -18,15 +18,15 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
     private final int insertionLen;
 
 
-    public InsertionSvgGenerator(List<TranscriptModel> transcripts,
-                                List<Enhancer> enhancers,
-                                List<CoordinatePair> coordinatePairs,
-                                int insertionLength) {
+    public InsertionSvgGenerator(List<SvAnnTxModel> transcripts,
+                                 List<Enhancer> enhancers,
+                                 List<CoordinatePair> coordinatePairs,
+                                 int insertionLength) {
         super(SvType.INSERTION, transcripts, enhancers, coordinatePairs);
         if (coordinatePairs.size() != 1) {
             throw new SvAnnRuntimeException("Malformed initialization of InsertionSvgGenerator -- we expect one CoordinatePair but got " +
                     coordinatePairs.size());
-       }
+        }
         insertionCoordinates = coordinatePairs.get(0);
         this.insertionLen = insertionLength;
     }

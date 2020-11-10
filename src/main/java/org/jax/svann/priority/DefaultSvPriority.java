@@ -1,12 +1,10 @@
 package org.jax.svann.priority;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +13,7 @@ import java.util.Set;
 class DefaultSvPriority implements SvPriority {
     private static final DefaultSvPriority UNKNOWN = new DefaultSvPriority(SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), List.of(), List.of());
     private final SvImpact svImpact;
-    private final Set<TranscriptModel> affectedTranscripts;
+    private final Set<SvAnnTxModel> affectedTranscripts;
     private final Set<GeneWithId> affectedGeneIds;
     private final List<Enhancer> affectedEnhancers;
     private final List<HpoDiseaseSummary> diseases;
@@ -38,7 +36,7 @@ class DefaultSvPriority implements SvPriority {
 
 
     DefaultSvPriority(SvImpact svImpact,
-                      Set<TranscriptModel> affectedTranscripts,
+                      Set<SvAnnTxModel> affectedTranscripts,
                       Set<GeneWithId> affectedGeneIds,
                       List<Enhancer> affectedEnhancers,
                       List<Overlap> olaps,
@@ -66,7 +64,7 @@ class DefaultSvPriority implements SvPriority {
     }
 
     @Override
-    public Set<TranscriptModel> getAffectedTranscripts() {
+    public Set<SvAnnTxModel> getAffectedTranscripts() {
         return affectedTranscripts;
     }
 

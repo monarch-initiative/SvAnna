@@ -14,6 +14,7 @@ import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.html.HtmlTemplate;
 import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
+import org.jax.svann.overlap.SvAnnOverlapper;
 import org.jax.svann.parse.BreakendAssembler;
 import org.jax.svann.parse.StructuralRearrangementParser;
 import org.jax.svann.parse.VcfStructuralRearrangementParser;
@@ -25,6 +26,8 @@ import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
+import org.jax.svann.reference.transcripts.JannovarTranscriptService;
+import org.jax.svann.reference.transcripts.TranscriptService;
 import org.jax.svann.viz.HtmlVisualizable;
 import org.jax.svann.viz.HtmlVisualizer;
 import org.jax.svann.viz.Visualizer;
@@ -107,6 +110,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<String, GeneWithId> geneSymbolMap = hpoDiseaseGeneMap.getGeneSymbolMap();
         // jannovar data
         JannovarData jannovarData = readJannovarData(jannovarPath);
+        TranscriptService transcriptService = JannovarTranscriptService.of(assembly, jannovarData);
         // disease summary map
         Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
         // 1 - parse input variants
@@ -117,8 +121,8 @@ public class AnnotateCommand implements Callable<Integer> {
 
         // 2 - prioritize & visualize variants
         // setup prioritization parts
-        Overlapper overlapper = new Overlapper(jannovarData);
-        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(jannovarData, enhancerMap);
+        Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
+        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
 
         SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, relevantGenesAndDiseases);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results

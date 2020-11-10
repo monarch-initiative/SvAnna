@@ -30,7 +30,7 @@ public class FilterAndCount {
     private final int unparsableCount;
 
     public FilterAndCount(List<SvPriority> priorityList,
-                          List<SequenceRearrangement> rearrangements,
+                          List<? extends SequenceRearrangement> rearrangements,
                           SvImpact threshold) {
         this.lowImpactCounts = new HashMap<>();
         this.intermediateImpactCounts = new HashMap<>();

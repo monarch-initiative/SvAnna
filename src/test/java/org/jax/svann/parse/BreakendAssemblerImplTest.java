@@ -16,10 +16,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
-public class BreakendAssemblerTest extends TestBase {
+public class BreakendAssemblerImplTest extends TestBase {
 
     private static Contig CHR2, CHR13, CHR17;
-    private BreakendAssembler assembler;
+    private BreakendAssemblerImpl assembler;
 
     @BeforeAll
     public static void beforeAll() throws Exception {
@@ -30,7 +30,7 @@ public class BreakendAssemblerTest extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        assembler = new BreakendAssembler();
+        assembler = new BreakendAssemblerImpl();
     }
 
     @Test
@@ -50,7 +50,7 @@ public class BreakendAssemblerTest extends TestBase {
         final BreakendRecord bnd_Z = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198983, Strand.FWD),
                 "bnd_Z", "TRA2", "bnd_X", "C", "[13:123457[C");
 
-        final List<SequenceRearrangement> rearrangements = assembler.assemble(Set.of(bnd_W, bnd_Y, bnd_V, bnd_U, bnd_X, bnd_Z));
+        final List<? extends SequenceRearrangement> rearrangements = assembler.assemble(Set.of(bnd_W, bnd_Y, bnd_V, bnd_U, bnd_X, bnd_Z));
         rearrangements.forEach(System.err::println);
     }
 
@@ -71,7 +71,7 @@ public class BreakendAssemblerTest extends TestBase {
         final BreakendRecord bnd_Z = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198983, Strand.FWD),
                 "bnd_Z", null, "bnd_X", "C", "[13:123457[C");
 
-        final List<SequenceRearrangement> rearrangements = assembler.assemble(Set.of(bnd_W, bnd_Y, bnd_V, bnd_U, bnd_X, bnd_Z));
+        final List<? extends SequenceRearrangement> rearrangements = assembler.assemble(Set.of(bnd_W, bnd_Y, bnd_V, bnd_U, bnd_X, bnd_Z));
         assertThat(rearrangements, hasSize(3));
 
         // not testing anything else now, as these are being tested below
@@ -86,7 +86,7 @@ public class BreakendAssemblerTest extends TestBase {
                 "bnd_W", "TRA0", "bnd_Y", "G", "G]17:198982]");
         BreakendRecord bnd_Y = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198982, Strand.FWD),
                 "bnd_Y", "TRA0", "bnd_W", "A", "A]2:321681]");
-        Optional<SequenceRearrangement> rearrangementOpt = BreakendAssembler.assembleBreakendRecords(bnd_W, bnd_Y);
+        Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_W, bnd_Y);
         assertThat(rearrangementOpt.isPresent(), is(true));
 
         SequenceRearrangement rearrangement = rearrangementOpt.get();
@@ -125,7 +125,7 @@ public class BreakendAssemblerTest extends TestBase {
         BreakendRecord bnd_V = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321682, Strand.FWD),
                 "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]T");
 
-        Optional<SequenceRearrangement> rearrangementOpt = BreakendAssembler.assembleBreakendRecords(bnd_U, bnd_V);
+        Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_U, bnd_V);
         assertThat(rearrangementOpt.isPresent(), is(true));
 
         SequenceRearrangement rearrangement = rearrangementOpt.get();
@@ -164,7 +164,7 @@ public class BreakendAssemblerTest extends TestBase {
         BreakendRecord bnd_Z = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198983, Strand.FWD),
                 "bnd_Z", "TRA2", "bnd_X", "C", "[13:123457[C");
 
-        Optional<SequenceRearrangement> rearrangementOpt = BreakendAssembler.assembleBreakendRecords(bnd_X, bnd_Z);
+        Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_X, bnd_Z);
         assertThat(rearrangementOpt.isPresent(), is(true));
 
         SequenceRearrangement rearrangement = rearrangementOpt.get();
@@ -200,7 +200,7 @@ public class BreakendAssemblerTest extends TestBase {
         BreakendRecord bnd_V = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321682, Strand.FWD),
                 "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]AGTNNNNNCAT");
 
-        Optional<SequenceRearrangement> rearrangementOpt = BreakendAssembler.assembleBreakendRecords(bnd_U, bnd_V);
+        Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_U, bnd_V);
         assertThat(rearrangementOpt.isPresent(), is(true));
 
         SequenceRearrangement rearrangement = rearrangementOpt.get();
@@ -209,7 +209,7 @@ public class BreakendAssemblerTest extends TestBase {
         assertThat(adjacency.getInserted(), is("CAGTNNNNNCA".getBytes(StandardCharsets.US_ASCII)));
 
         // now let's do that the other way around, submitting `bnd_V` as the 1st breakend
-        rearrangementOpt = BreakendAssembler.assembleBreakendRecords(bnd_V, bnd_U);
+        rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_V, bnd_U);
         assertThat(rearrangementOpt.isPresent(), is(true));
 
         rearrangement = rearrangementOpt.get();

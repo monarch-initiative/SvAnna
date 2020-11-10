@@ -6,6 +6,9 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svann.analysis.FilterAndCount;
+import org.jax.svann.filter.AllPassFilter;
+import org.jax.svann.filter.Filter;
+import org.jax.svann.filter.FilterResult;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.genomicreg.TSpecParser;
 import org.jax.svann.hpo.GeneWithId;
@@ -16,13 +19,14 @@ import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.overlap.SvAnnOverlapper;
 import org.jax.svann.parse.BreakendAssembler;
+import org.jax.svann.parse.BreakendAssemblerImpl;
 import org.jax.svann.parse.SequenceRearrangementParser;
 import org.jax.svann.parse.VcfSequenceRearrangementParser;
 import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPrioritizer;
 import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.StructuralVariant;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
@@ -114,12 +118,15 @@ public class AnnotateCommand implements Callable<Integer> {
         // disease summary map
         Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
         // 1 - parse input variants
-        BreakendAssembler breakendAssembler = new BreakendAssembler();
-        SequenceRearrangementParser parser = new VcfSequenceRearrangementParser(assembly, breakendAssembler);
+        BreakendAssembler<StructuralVariant> breakendAssembler = new BreakendAssemblerImpl();
+        SequenceRearrangementParser<StructuralVariant> parser = new VcfSequenceRearrangementParser(assembly, breakendAssembler);
 
-        List<SequenceRearrangement> rearrangements = parser.parseFile(vcfFile);
+        List<StructuralVariant> rearrangements = parser.parseFile(vcfFile);
 
-        // 2 - prioritize & visualize variants
+        // 2 - setup variant filtering
+        Filter<StructuralVariant> variantFilter = new AllPassFilter();
+
+        // 3 - prioritize & visualize variants
         // setup prioritization parts
         Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
@@ -129,15 +136,21 @@ public class AnnotateCommand implements Callable<Integer> {
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();
         List<String> visualizations = new ArrayList<>();
-        int above=0,below=0;
-        for (SequenceRearrangement rearrangement : rearrangements) {
+        int above = 0, below = 0;
+        for (StructuralVariant rearrangement : rearrangements) {
+            // run filtering
+            FilterResult filterResult = variantFilter.runFilter(rearrangement);
+            rearrangement.addFilterResult(filterResult);
+
+            // run prioritization
             SvPriority priority = prioritizer.prioritize(rearrangement);
             priorities.add(priority);
             if (priority.getImpact().satisfiesThreshold(threshold)) {
                 HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
                 String visualization = visualizer.getHtml(visualizable);
-                above++; if (above>100) continue;
-               visualizations.add(visualization);
+                above++;
+                if (above > 100) continue;
+                visualizations.add(visualization);
 
             } else {
                 below++;

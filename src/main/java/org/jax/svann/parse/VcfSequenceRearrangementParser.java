@@ -13,22 +13,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class VcfSequenceRearrangementParser implements SequenceRearrangementParser<SequenceRearrangement> {
+public class VcfSequenceRearrangementParser implements SequenceRearrangementParser<StructuralVariant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfSequenceRearrangementParser.class);
 
     private final GenomeAssembly assembly;
 
-    private final BreakendAssembler assembler;
+    private final BreakendAssembler<StructuralVariant> assembler;
 
-    public VcfSequenceRearrangementParser(GenomeAssembly assembly, BreakendAssembler assembler) {
+    public VcfSequenceRearrangementParser(GenomeAssembly assembly, BreakendAssembler<StructuralVariant> assembler) {
         this.assembly = assembly;
         this.assembler = assembler;
     }
 
     @Override
-    public List<SequenceRearrangement> parseFile(Path filePath) {
-        List<SequenceRearrangement> rearrangements = new ArrayList<>();
+    public List<StructuralVariant> parseFile(Path filePath) {
+        List<StructuralVariant> rearrangements = new ArrayList<>();
         List<BreakendRecord> breakendRecords = new ArrayList<>();
         try (VCFFileReader reader = new VCFFileReader(filePath, false)) {
             /*
@@ -51,7 +51,7 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
         }
 
         // now assemble all breakends into rearrangements
-        List<SequenceRearrangement> assembled = assembler.assemble(breakendRecords);
+        List<StructuralVariant> assembled = assembler.assemble(breakendRecords);
         rearrangements.addAll(assembled);
 
         return rearrangements;
@@ -114,7 +114,7 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
      * @param svType previously parsed SV type to make the processing more convenient
      * @return optional with parsed rearrangement or empty optional if
      */
-    private Optional<SequenceRearrangement> parseStructuralVariant(VariantContext vc, SvType svType) {
+    private Optional<StructuralVariant> parseStructuralVariant(VariantContext vc, SvType svType) {
         List<Adjacency> adjacencies = new ArrayList<>();
         switch (svType) {
             // cases with a single adjacency
@@ -151,7 +151,7 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
                 return Optional.empty();
         }
 
-        return Optional.of(SimpleSequenceRearrangement.of(svType, adjacencies));
+        return Optional.of(SimpleStructuralVariant.of(svType, adjacencies));
     }
 
     Optional<Adjacency> makeDeletionAdjacency(VariantContext vc) {

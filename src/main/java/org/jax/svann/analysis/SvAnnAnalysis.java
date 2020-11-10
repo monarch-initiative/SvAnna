@@ -9,7 +9,7 @@ import org.jax.svann.genomicreg.TSpecParser;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseGeneMap;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.parse.BreakendAssembler;
+import org.jax.svann.parse.BreakendAssemblerImpl;
 import org.jax.svann.parse.VcfSequenceRearrangementParser;
 import org.jax.svann.priority.SvPrioritizer;
 import org.jax.svann.priority.SvPriority;
@@ -101,8 +101,8 @@ public class SvAnnAnalysis {
      *
      * @return List of sequence rearrangements from the VCF file before any prioritization
      */
-    public Collection<SequenceRearrangement> getRawSequenceRearrangments() throws IOException {
-        VcfSequenceRearrangementParser parser = new VcfSequenceRearrangementParser(assembly, new BreakendAssembler());
+    public Collection<? extends SequenceRearrangement> getRawSequenceRearrangments() throws IOException {
+        VcfSequenceRearrangementParser parser = new VcfSequenceRearrangementParser(assembly, new BreakendAssemblerImpl());
         Path vcfPath = Paths.get(this.vcfPath);
         return parser.parseFile(vcfPath);
     }

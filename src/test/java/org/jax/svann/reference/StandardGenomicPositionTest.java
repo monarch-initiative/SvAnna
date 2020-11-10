@@ -72,4 +72,26 @@ public class StandardGenomicPositionTest extends ToyCoordinateTestBase {
         assertThat(actual, is(expected));
     }
 
+
+    @ParameterizedTest
+    @CsvSource({
+            "10,14,FWD,-1",
+            "14,15,FWD,0",
+            "15,15,FWD,0",
+            "15,16,FWD,0",
+            "16,20,FWD,1",
+            "17,21,REV,-1",
+            "16,17,REV,0",
+            "16,16,REV,0",
+            "15,16,REV,0",
+            "14,15,REV,1"
+    })
+    public void distanceTo(int start, int end, Strand strand, int expected) {
+        GenomicRegion region = StandardGenomicRegion.precise(CTG1, start, end, strand);
+        int distance = position.distanceTo(region);
+
+        assertThat(distance, is(expected));
+    }
+
+
 }

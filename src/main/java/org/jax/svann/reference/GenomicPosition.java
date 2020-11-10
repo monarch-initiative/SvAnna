@@ -59,9 +59,12 @@ public interface GenomicPosition extends Comparable<GenomicPosition> {
      * hops must be made in order to move to <code>other</code> position when starting at <code>this</code>.
      * <p>
      * The distance is <em>negative</em> when hopping in 5' direction, and <em>positive</em> when hopping in 3' direction.
+     * <p>
+     * The <code>region</code> is converted into position's strand, if necessary.
      *
      * @param other position
      * @return distance
+     * @throws ContigMismatchException if contigs of <code>this</code> and <code>other</code> are not the same
      */
     default int distanceTo(GenomicPosition other) {
         if (getContigId() != other.getContigId()) {
@@ -69,6 +72,33 @@ public interface GenomicPosition extends Comparable<GenomicPosition> {
         }
         GenomicPosition onStrand = other.withStrand(getStrand());
         return onStrand.getPosition() - getPosition();
+    }
+
+    /**
+     * Return distance as described in {@link #distanceTo(GenomicPosition)} to the closest position of the
+     * <code>region</code>.
+     * <p>
+     * The <code>region</code> is converted into position's strand, if necessary. The distance is <code>0</code> if
+     * <code>region</code> contains the position.
+     *
+     * @param region to measure distance to
+     * @return distance to the <code>region</code> or <code>0</code> if the <code>region</code> contains this position
+     * @throws ContigMismatchException if contigs of <code>this</code> and <code>region</code> are not the same
+     */
+    default int distanceTo(GenomicRegion region) {
+        GenomicRegion onStrand = region.withStrand(getStrand());
+
+        if (region.contains(this)) {
+            // this position is contained in the region
+            return 0;
+        }
+
+        int startDistance = distanceTo(onStrand.getStart());
+        int endDistance = distanceTo(onStrand.getEnd());
+
+        return Math.abs(startDistance) < Math.abs(endDistance)
+                ? startDistance
+                : endDistance;
     }
 
     default boolean isDownstreamOf(GenomicPosition other) {

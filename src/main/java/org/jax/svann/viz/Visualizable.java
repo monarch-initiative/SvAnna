@@ -1,11 +1,12 @@
 package org.jax.svann.viz;
 
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.util.List;
-import java.util.Map;
 
 public interface Visualizable {
 
@@ -22,5 +23,9 @@ public interface Visualizable {
     List<HpoDiseaseSummary> getDiseaseSummaries();
 
     List<Overlap> getOverlaps();
+
+    List<SvAnnTxModel> getTranscripts();
+
+    List<Enhancer> getEnhancers();
 
 }

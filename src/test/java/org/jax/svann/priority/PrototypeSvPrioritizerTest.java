@@ -7,6 +7,7 @@ import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlapper;
+import org.jax.svann.overlap.SvAnnOverlapper;
 import org.jax.svann.parse.TestVariants.Deletions;
 import org.jax.svann.parse.TestVariants.Insertions;
 import org.jax.svann.parse.TestVariants.Inversions;
@@ -107,8 +108,8 @@ public class PrototypeSvPrioritizerTest extends TestBase {
 
     @BeforeEach
     public void setUp() {
-        Overlapper overlapper = new Overlapper(JANNOVAR_DATA);
-        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(JANNOVAR_DATA, ENHANCER_MAP);
+        Overlapper overlapper = new SvAnnOverlapper(TX_SERVICE.getChromosomeMap());
+        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(ENHANCER_MAP);
         prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, GENE_SYMBOL_MAP, PATIENT_TERMS, RELEVANT_ENHANCER_TOP_LEVEL_TERMS, DISEASE_MAP);
     }
 

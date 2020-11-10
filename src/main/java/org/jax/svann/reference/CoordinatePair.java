@@ -61,14 +61,14 @@ public interface CoordinatePair {
     /**
      * @return <code>true</code> if both coordinates are located on a single contig
      */
-    default boolean isIntraChromosomal() {
+    default boolean isIntrachromosomal() {
         return getStartContigId() == getEndContigId();
     }
 
     /**
      * @return <code>true</code> if the coordinates are located on two distinct contigs
      */
-    default boolean isInterChromosomal() {
+    default boolean isInterchromosomal() {
         return getStartContigId() != getEndContigId();
     }
 }

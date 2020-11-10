@@ -1,12 +1,10 @@
 package org.jax.svann.priority;
 
-import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.util.List;
 import java.util.Set;
@@ -17,17 +15,11 @@ public interface SvPriority {
         return DefaultSvPriority.unknown();
     }
 
-    @Deprecated
-    SequenceRearrangement getRearrangement();
-
-    @Deprecated
-    SvType getType();
-
     SvImpact getImpact();
 
     List<HpoDiseaseSummary> getDiseases();
 
-    Set<TranscriptModel> getAffectedTranscripts();
+    Set<SvAnnTxModel> getAffectedTranscripts();
 
     Set<GeneWithId> getAffectedGeneIds();
 
@@ -35,8 +27,10 @@ public interface SvPriority {
 
     List<Overlap> getOverlaps();
 
-    /** If true, the SV overlaps with a transcript or genomic regulatory element that is annotated
+    /**
+     * If true, the SV overlaps with a transcript or genomic regulatory element that is annotated
      * to an HPO term representing the phenotypic observations in the proband.
+     *
      * @return true if the SV disrupts a gene or enhancer of potential phenotypic relevance.
      */
     boolean hasPhenotypicRelevance();

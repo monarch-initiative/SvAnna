@@ -1,6 +1,7 @@
 package org.jax.svann.viz;
 
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvPriority;
@@ -9,6 +10,7 @@ import org.jax.svann.reference.Breakend;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,20 @@ public class HtmlVisualizable implements Visualizable {
         return new HtmlLocation(chrom, begin, end);
     }
 
+    private HtmlLocation getInsertionLocation(SequenceRearrangement rearrangement) {
+        List<Adjacency> adjacencies = rearrangement.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            System.err.println("Malformed insertion adjacency list with size " + adjacencies.size());
+        }
+        Adjacency insertion = adjacencies.get(0);
+        Breakend left = insertion.getStart();
+        Breakend right = insertion.getEnd();
+        Contig chrom = left.getContig();
+        int begin = left.getPosition();
+        int end = right.getPosition();
+        return new HtmlLocation(chrom, begin, end);
+    }
+
 
     @Override
     public SequenceRearrangement getRearrangement() {
@@ -63,8 +79,19 @@ public class HtmlVisualizable implements Visualizable {
         return this.svPriority.hasPhenotypicRelevance();
     }
 
+    @Override
     public List<HpoDiseaseSummary> getDiseaseSummaries() {
         return this.svPriority.getDiseases();
+    }
+
+    @Override
+    public List<SvAnnTxModel> getTranscripts() {
+        return new ArrayList<>(this.svPriority.getAffectedTranscripts());
+    }
+
+    @Override
+    public List<Enhancer> getEnhancers() {
+        return this.svPriority.getAffectedEnhancers();
     }
 
     /**
@@ -78,11 +105,8 @@ public class HtmlVisualizable implements Visualizable {
         if (rearrangement.getType() == SvType.DELETION) {
             locs.add(getDeletionLocation(rearrangement));
         } else if (rearrangement.getType() == SvType.INSERTION) {
-            int c = 42;
-            int y = 32;
+            locs.add(getInsertionLocation(rearrangement));
         }
-
-
         return locs;
     }
 

@@ -134,4 +134,23 @@ public class HpoDiseaseGeneMap {
         return Set.copyOf(relevantSet); // return immutable set
     }
 
+    /**
+     * This method can be used to get the labels for the terms that the user enters. If the user
+     * enters a term that is not in the ontology, we throw a runtime error
+     * @param relevantTerms Should be used for terms entered by the user as HP:1,HP:2, etc
+     * @return map with the corresponding term labels
+     */
+    public Map<TermId, String> getTermLabelMap(Set<TermId> relevantTerms) {
+        Map<TermId, String> labelmap = new HashMap<>();
+        for (var t : relevantTerms) {
+            if (this.ontology.getTermMap().containsKey(t)) {
+                String label = this.ontology.getTermMap().get(t).getName();
+                labelmap.put(t, label);
+            } else {
+                throw new SvAnnRuntimeException("Could not identify term " + t.getValue());
+            }
+        }
+        return labelmap;
+    }
+
 }

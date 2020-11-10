@@ -44,6 +44,11 @@ public abstract class SvSvgGenerator {
     protected final int genomicMinPos;
     /** Rightmost position (most 3' on chromosome), including offset. */
     protected final int genomicMaxPos;
+
+
+    protected final int paddedGenomicMinPos;
+
+    protected final int paddedGenomicMaxPos;
     /** Minimum position of the scale */
     private final double scaleMinPos;
 
@@ -121,14 +126,56 @@ public abstract class SvSvgGenerator {
                 // add a little real estate to each side for esthetic purposes
                 int delta = maxPos - minPos;
                 int offset = (int) (OFFSET_FACTOR * delta);
-                this.genomicMinPos = Math.max(minPos - offset, 0);
-                this.genomicMaxPos = maxPos + offset; // don't care if we fall off the end, this is not important for visualization
+                this.genomicMinPos = minPos;
+                this.genomicMaxPos = maxPos; // don't care if we fall off the end, this is not important for visualization
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
+                int extraSpaceOnSide = (int)(0.1*(this.genomicSpan));
+                this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
+                this.paddedGenomicMaxPos = genomicMaxPos + extraSpaceOnSide;
                 this.scaleBasePairs = 1 + maxPos - minPos;
-                this.scaleMinPos = translateGenomicToSvg(minPos);
-                this.scaleMaxPos = translateGenomicToSvg(maxPos);
+                this.scaleMinPos = translateGenomicToSvg(paddedGenomicMinPos);
+                this.scaleMaxPos = translateGenomicToSvg(paddedGenomicMaxPos);
         }
     }
+
+    public SvSvgGenerator(int minPos,
+                          int maxPos,
+                          SvType svtype,
+                          List<SvAnnTxModel> transcripts,
+                          List<Enhancer> enhancers,
+                          List<CoordinatePair> coordinatePairs) {
+        this.svtype = svtype;
+        this.affectedTranscripts = transcripts;
+        this.affectedEnhancers = enhancers;
+        this.coordinatePairs = coordinatePairs;
+        if (svtype == SvType.TRANSLOCATION) {
+            this.SVG_HEIGHT = 500 + HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        } else {
+            this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+        }
+        int delta = maxPos - minPos;
+        int offset = (int) (OFFSET_FACTOR * delta);
+        this.genomicMinPos = minPos;
+        this.genomicMaxPos = maxPos;
+        // don't care if we fall off the end, this is not important for visualization
+        this.paddedGenomicMinPos = minPos - offset;
+        this.paddedGenomicMaxPos = maxPos + offset;
+        this.genomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
+        this.scaleBasePairs = 1 + maxPos - minPos;
+        this.scaleMinPos = translateGenomicToSvg(this.genomicMinPos);
+        this.scaleMaxPos = translateGenomicToSvg(this.genomicMaxPos);
+        switch (svtype) {
+            case DELETION:
+            case INSERTION:
+            default:
+                // get min/max for SVs with one region
+                // todo  -- do we need to check how many coordinate pairs there are?
+                CoordinatePair cpair = coordinatePairs.get(0);
+        }
+
+    }
+
+
 
     /**
      * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
@@ -246,7 +293,7 @@ public abstract class SvSvgGenerator {
      * @return
      */
     protected double translateGenomicToSvg(int genomicCoordinate) {
-        double pos = genomicCoordinate - this.genomicMinPos;
+        double pos = genomicCoordinate - this.paddedGenomicMinPos;
         if (pos < 0) {
             throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
         }
@@ -321,6 +368,10 @@ public abstract class SvSvgGenerator {
                         "style=\"stroke:%s; fill: %s\" />\n",
                 start, Y, width, EXON_HEIGHT, DARKGREEN, ORANGE);
         writer.write(rect);
+    }
+
+    protected void writeEnhancer(Enhancer enhancer, int ypos, Writer writer) throws IOException {
+
     }
 
 

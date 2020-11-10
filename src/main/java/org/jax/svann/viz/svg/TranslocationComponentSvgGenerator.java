@@ -45,13 +45,14 @@ public class TranslocationComponentSvgGenerator extends  SvSvgGenerator {
      * @param enhancers       // * @param genomeInterval
      * @param coordinatePairs
      */
-    public TranslocationComponentSvgGenerator(List<SvAnnTxModel> transcripts,
+    public TranslocationComponentSvgGenerator(int minPos, int maxPos,
+                                              List<SvAnnTxModel> transcripts,
                                               List<Enhancer> enhancers,
                                               List<CoordinatePair> coordinatePairs,
                                               Contig contig,
                                               int contigPos,
                                               int ystart) {
-        super(SvType.TRANSLOCATION, transcripts, enhancers, coordinatePairs);
+        super(minPos, maxPos, SvType.TRANSLOCATION, transcripts, enhancers, coordinatePairs);
         this.contig = contig;
         this.positionOnContig = contigPos;
         this.ystart = ystart;
@@ -71,43 +72,13 @@ public class TranslocationComponentSvgGenerator extends  SvSvgGenerator {
                 .map(Enhancer::getEnd)
                 .mapToInt(GenomicPosition::getPosition)
                 .max().orElse(UNINITIALIZED);
-        int min = getMinimumInitializedValue(this.minTranscriptPos, this.minEnhancerPos);
-        if (this.positionOnContig < min) {
-            this.minPos = this.positionOnContig - 1000;
-        } else {
-            this.minPos = min;
-        }
-        int max = getMaximumInitializedValue(this.maxEnhancerPos, this.maxTranscriptPos);
-        if (max < this.positionOnContig) {
-            this.maxPos = this.positionOnContig + 1000;
-        } else {
-            this.maxPos = max;
-        }
+        this.minPos = minPos;
+        this.maxPos = maxPos;
+
     }
 
 
-    private int getMinimumInitializedValue(int val1, int val2) {
-        if (val1 == UNINITIALIZED && val2 == UNINITIALIZED) {
-            throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
-        } else if (val1 == UNINITIALIZED) {
-            return val2;
-        } else if (val2 == UNINITIALIZED) {
-            return val1;
-        } else {
-            return Math.min(val1, val2);
-        }
-    }
-    private int getMaximumInitializedValue(int val1, int val2) {
-        if (val1 == UNINITIALIZED && val2 == UNINITIALIZED) {
-            throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
-        } else if (val1 == UNINITIALIZED) {
-            return val2;
-        } else if (val2 == UNINITIALIZED) {
-            return val1;
-        } else {
-            return Math.max(val1, val2);
-        }
-    }
+
 
     @Override
     public void write(Writer writer) throws IOException {
@@ -135,15 +106,16 @@ public class TranslocationComponentSvgGenerator extends  SvSvgGenerator {
     /**
      * Write a zigzag line to indicate the position of the breakpoint
      * @param y1
-     * @param y2
+     * @param n_display_items number of enhancers/transcripts through which the translocation goes
      * @param x
      * @param writer
      * @throws IOException
      */
-    private void writeZigZagLine(int y1, int y2, int x, String description, Writer writer) throws IOException {
+    private void writeZigZagLine(int y1, int n_display_items, int x, String description, Writer writer) throws IOException {
         int increment = 3;
         writer.write(String.format("<path d=\"M %d,%d \n", x, y1));
         int y = y1;
+        int y2 = y1 + n_display_items*40;
         while (y < y2) {
             writer.write(String.format(" l %d,%d\n", increment, increment));
             writer.write(String.format(" l %d,%d\n", -increment, increment));
@@ -161,20 +133,22 @@ public class TranslocationComponentSvgGenerator extends  SvSvgGenerator {
         String description = String.format("Translocation breakpoint at %s:%d", contig.getPrimaryName(), positionOnContig);
         int ypos = this.ystart;
         int offset = 0;
+        int n_display_items = 0;
         for (var enh : this.affectedEnhancers) {
             // writeEnhancer(enh, ypos, writer);
             System.err.println("[ERR] Warning not implemented yet");
             ypos += HEIGHT_PER_DISPLAY_ITEM;
             offset += HEIGHT_PER_DISPLAY_ITEM;
+            n_display_items++;
         }
         for (var tmod : this.affectedTranscripts) {
             writeTranscript(tmod, ypos, writer);
             ypos += HEIGHT_PER_DISPLAY_ITEM;
             offset += HEIGHT_PER_DISPLAY_ITEM;
+            n_display_items++;
         }
-        int yend = ystart + offset - (int)(1.5*HEIGHT_PER_DISPLAY_ITEM);
-        int xpos = (int)translatePositionToSvg(this.positionOnContig, this.minPos, this.maxPos);
-        writeZigZagLine(ystart-30,  yend, xpos, description, writer);
+        int xpos = (int)translateGenomicToSvg(this.positionOnContig);
+        writeZigZagLine(ystart-30,  n_display_items, xpos, description, writer);
         ypos += 50;
         writeScale(writer, this.contig, ypos);
         offset += 50; // for scale

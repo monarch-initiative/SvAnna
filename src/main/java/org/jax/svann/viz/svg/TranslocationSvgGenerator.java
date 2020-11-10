@@ -1,5 +1,6 @@
 package org.jax.svann.viz.svg;
 
+import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.*;
@@ -89,8 +90,55 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         int displayElementsB = transcriptModelsB.size() + enhancersB.size();
         this.separationLineY = displayElementsA*VERTICAL_INCREMENT_PER_DISPLAY_ITEM + YSTART + 100;
         this.ystartB = this.separationLineY + 50;
-        this.componentA = new TranslocationComponentSvgGenerator(transcriptModelsA, enhancersA, coordinatePairs, contigA, positionContigA, YSTART);
-        this.componentB = new TranslocationComponentSvgGenerator(transcriptModelsB, enhancersB, coordinatePairs, contigB, positionContigB, ystartB);
+
+        int minA = getMin(transcriptModelsA, enhancersA, this.positionContigA);
+        int maxA = getMax(transcriptModelsA, enhancersA, this.positionContigA);
+        int minB = getMin(transcriptModelsB, enhancersB, this.positionContigB);
+        int maxB = getMax(transcriptModelsB, enhancersB, this.positionContigB);
+        this.componentA = new TranslocationComponentSvgGenerator(minA, maxA, transcriptModelsA, enhancersA, coordinatePairs, contigA, positionContigA, YSTART);
+        this.componentB = new TranslocationComponentSvgGenerator(minB, maxB, transcriptModelsB, enhancersB, coordinatePairs, contigB, positionContigB, ystartB);
+    }
+
+    private int getMin(List<SvAnnTxModel> transcripts, List<Enhancer> enhancers, int contigPos) {
+        contigPos = Math.max(0, contigPos - 1000); // add 1000 bp padding
+        int minTranscriptPos = transcripts.stream().
+                map(tx -> tx.withStrand(Strand.FWD)).
+                mapToInt(SvAnnTxModel::getStartPosition).
+                min().orElse(UNINITIALIZED);
+        int minEnhancerPos = enhancers.stream()
+                .map(Enhancer::getStart)
+                .mapToInt(GenomicPosition::getPosition)
+                .min().orElse(UNINITIALIZED);
+        if (minTranscriptPos == UNINITIALIZED && minEnhancerPos == UNINITIALIZED) {
+            throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
+        } else if (minEnhancerPos == UNINITIALIZED) {
+            return Math.min(minTranscriptPos, contigPos);
+        } else if (minTranscriptPos == UNINITIALIZED) {
+            return Math.min(minEnhancerPos, contigPos);
+        } else {
+            return Math.min(contigPos, Math.min(minEnhancerPos, minTranscriptPos));
+        }
+    }
+
+    private int getMax(List<SvAnnTxModel> transcripts, List<Enhancer> enhancers, int contigPos) {
+        contigPos =  contigPos + 1000; // add 1000 bp padding
+        int maxTranscriptPos = transcripts.stream().
+                map(tx -> tx.withStrand(Strand.FWD)).
+                mapToInt(SvAnnTxModel::getEndPosition).
+                max().orElse(UNINITIALIZED);
+        int maxEnhancerPos = enhancers.stream()
+                .map(Enhancer::getEnd)
+                .mapToInt(GenomicPosition::getPosition)
+                .max().orElse(UNINITIALIZED);
+        if (maxTranscriptPos == UNINITIALIZED && maxEnhancerPos == UNINITIALIZED) {
+            throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
+        } else if (maxEnhancerPos == UNINITIALIZED) {
+            return Math.max(maxTranscriptPos, contigPos);
+        } else if (maxTranscriptPos == UNINITIALIZED) {
+            return Math.max(maxEnhancerPos, contigPos);
+        } else {
+            return Math.max(contigPos, Math.min(maxEnhancerPos, maxTranscriptPos));
+        }
     }
 
 

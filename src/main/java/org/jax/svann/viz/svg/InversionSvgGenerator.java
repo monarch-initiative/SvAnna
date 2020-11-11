@@ -1,6 +1,5 @@
 package org.jax.svann.viz.svg;
 
-import org.antlr.v4.runtime.atn.SemanticContext;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.CoordinatePair;
@@ -59,12 +58,14 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         double end = translateGenomicToSvg(this.inversionGenomicEnd);
         double width = end - start;
         double Y = ypos + 0.5 * SV_HEIGHT;
+        String color = RED;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" " +
                         "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, SV_HEIGHT, DARKGREEN, DARKGREEN);
+                start, Y, width, SV_HEIGHT, color, color);
         writer.write(rect);
-        writeRightwardsArrow(start, Y, start+1.5*width, Y, DARKGREEN, 2 , writer);
-        writeLeftwardsArrow(end-1.5*width, Y+SV_HEIGHT, end, Y+SV_HEIGHT, DARKGREEN, 2, writer);
+        double overhang = Math.min(0.1*SVG_WIDTH, 2*width);
+        writeRightwardsArrow(start, Y, start+overhang, Y, color, 2 , writer);
+        writeLeftwardsArrow(end-overhang, Y+SV_HEIGHT, end, Y+SV_HEIGHT, color, 2, writer);
         Y += 1.75*SV_HEIGHT;
         writer.write(String.format("<text x=\"%f\" y=\"%f\"  fill=\"%s\">%s</text>\n",start -10,Y, BLACK, msg));
     }
@@ -80,8 +81,8 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         String line = String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"%s\" stroke-width=\"%d\"/>\n",
                 x1, y1, x2, y2, color, lineThickness);
         writer.write(line);
-        String polygon = String.format("<polygon points=\"%f,%f %f,%f %f,%f\" style=\"fill:%s;stroke:black;stroke-width:1\" />",
-                x2-1,y2+ARROWHEAD_SIZE,x2-1,y2-ARROWHEAD_SIZE,x2+ARROWHEAD_SIZE-1.0,y2, color);
+        String polygon = String.format("<polygon points=\"%f,%f %f,%f %f,%f\" style=\"fill:%s;stroke:%s;stroke-width:1\" />",
+                x2-1,y2+ARROWHEAD_SIZE,x2-1,y2-ARROWHEAD_SIZE,x2+ARROWHEAD_SIZE-1.0,y2, color, color);
         writer.write(polygon);
     }
 
@@ -95,8 +96,8 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         String line = String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"%s\" stroke-width=\"%d\"/>\n",
                 x1, y1, x2, y2, color, lineThickness);
         writer.write(line);
-        String polygon = String.format("<polygon points=\"%f,%f %f,%f %f,%f\" style=\"fill:%s;stroke:black;stroke-width:1\" />",
-                x1+1,y2+ARROWHEAD_SIZE,x1+1,y2-ARROWHEAD_SIZE,x1-ARROWHEAD_SIZE+1.0,y2, color);
+        String polygon = String.format("<polygon points=\"%f,%f %f,%f %f,%f\" style=\"fill:%s;stroke:%s;stroke-width:1\" />",
+                x1+1,y2+ARROWHEAD_SIZE,x1+1,y2-ARROWHEAD_SIZE,x1-ARROWHEAD_SIZE+1.0,y2, color, color);
         writer.write(polygon);
     }
 

@@ -164,14 +164,14 @@ public abstract class SvSvgGenerator {
         this.scaleBasePairs = 1 + maxPos - minPos;
         this.scaleMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.scaleMaxPos = translateGenomicToSvg(this.genomicMaxPos);
-        switch (svtype) {
-            case DELETION:
-            case INSERTION:
-            default:
-                // get min/max for SVs with one region
-                // todo  -- do we need to check how many coordinate pairs there are?
-                CoordinatePair cpair = coordinatePairs.get(0);
-        }
+//        switch (svtype) {
+//            case DELETION:
+//            case INSERTION:
+//            default:
+//                // get min/max for SVs with one region
+//                // todo  -- do we need to check how many coordinate pairs there are?
+//                CoordinatePair cpair = coordinatePairs.get(0);
+//        }
 
     }
 

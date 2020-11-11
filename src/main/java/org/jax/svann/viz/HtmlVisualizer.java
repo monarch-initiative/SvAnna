@@ -5,10 +5,7 @@ import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
-import org.jax.svann.viz.svg.DeletionSvgGenerator;
-import org.jax.svann.viz.svg.InsertionSvgGenerator;
-import org.jax.svann.viz.svg.SvSvgGenerator;
-import org.jax.svann.viz.svg.TranslocationSvgGenerator;
+import org.jax.svann.viz.svg.*;
 
 import java.util.*;
 
@@ -148,6 +145,9 @@ public class HtmlVisualizer implements Visualizer {
                 case INSERTION:
                     int insertionLength = getInsertionLength(visualizable);
                     gen = new InsertionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs, insertionLength);
+                    return gen.getSvg();
+                case INVERSION:
+                    gen = new InversionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
                     return gen.getSvg();
                 case TRANSLOCATION:
                     gen = new TranslocationSvgGenerator(visualizable.getRearrangement(), visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);

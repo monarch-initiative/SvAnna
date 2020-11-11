@@ -24,7 +24,6 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
                     coordinatePairs.size());
         }
         deletionCoordinates = coordinatePairs.get(0);
-
     }
 
 

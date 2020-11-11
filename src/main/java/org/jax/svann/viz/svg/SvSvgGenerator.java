@@ -29,27 +29,30 @@ public abstract class SvSvgGenerator {
     protected final static int HEIGHT_PER_DISPLAY_ITEM = 80;
     /** Canvas height of the SVG.*/
     protected int SVG_HEIGHT;
-
+    /** List of transcripts that are affected by the SV and that are to be shown in the SVG. */
     protected final List<SvAnnTxModel> affectedTranscripts;
+    /** List of enhancers that are affected by the SV and that are to be shown in the SVG. */
     protected final List<Enhancer> affectedEnhancers;
+    /** TODO do we need this here? */
     protected final List<CoordinatePair> coordinatePairs;
 
     /** Boundaries of SVG we do not write to. */
     private final double OFFSET_FACTOR = 0.1;
 
     private final double SVG_OFFSET = SVG_WIDTH * OFFSET_FACTOR;
-    /** Number of base pairs from left to right boundary */
+    /** Number of base pairs from left to right boundary of the display area */
     private final double genomicSpan;
-    /** Leftmost position (most 5' on chromosome), including offset. */
+    /** Leftmost position (most 5' on chromosome). */
     protected final int genomicMinPos;
-    /** Rightmost position (most 3' on chromosome), including offset. */
+    /** Rightmost position (most 3' on chromosome). */
     protected final int genomicMaxPos;
-
-
+    /** Equivalent to {@link #genomicMinPos} minus an offset so that the display items are not at the very edge. */
     protected final int paddedGenomicMinPos;
-
+    /** Equivalent to {@link #genomicMaxPos} plus an offset so that the display items are not at the very edge. */
     protected final int paddedGenomicMaxPos;
-    /** Minimum position of the scale */
+    /** Number of base pairs from left to right boundary of the entire canvas */
+    private final double paddedGenomicSpan;
+    /** Minimum position of the scale TODO shouldnt this be {@link #genomicMinPos} ??? */
     private final double scaleMinPos;
 
     private final double scaleMaxPos;
@@ -61,8 +64,8 @@ public abstract class SvSvgGenerator {
     final String pattern = "###,###.###";
     final DecimalFormat decimalFormat = new DecimalFormat(pattern);
 
-    private String variantDescription;
-    private String chrom;
+//    private String variantDescription;
+//    private String chrom;
 
     protected final double INTRON_MIDPOINT_ELEVATION = 10.0;
     /** Height of the symbols that represent the transcripts */
@@ -78,15 +81,11 @@ public abstract class SvSvgGenerator {
     public final static String RED ="#e64b35";
     public final static String BLACK = "#000000";
     public final static String NEARLYBLACK = "#040C04";
-
     public final static String BLUE ="#4dbbd5";
-
     public final static String BROWN="#7e6148";
     public final static String DARKBLUE = "#3c5488";
     public final static String VIOLET = "#8491b4";
     public final static String ORANGE = "#ff9900";
-
-
     public final static String BRIGHT_GREEN = "#00a087";
 
 
@@ -97,8 +96,8 @@ public abstract class SvSvgGenerator {
      * The constructor calculates the left and right boundaries for display
      * TODO document logic, cleanup
      *
-     * @param transcripts
-     * @param enhancers   // * @param genomeInterval
+     * @param transcripts transcripts affected by the structural variant we are displaying
+     * @param enhancers   enhancers  affected by the structural variant we are displaying
      */
     public SvSvgGenerator(SvType svtype,
                           List<SvAnnTxModel> transcripts,
@@ -120,21 +119,16 @@ public abstract class SvSvgGenerator {
                 // get min/max for SVs with one region
                 // todo  -- do we need to check how many coordinate pairs there are?
                 CoordinatePair cpair = coordinatePairs.get(0);
-                int minPos = getGenomicMinPos(transcripts, enhancers, cpair);
-                int maxPos = getGenomicMaxPos(transcripts, enhancers, cpair);
-
-                // add a little real estate to each side for esthetic purposes
-                int delta = maxPos - minPos;
-                int offset = (int) (OFFSET_FACTOR * delta);
-                this.genomicMinPos = minPos;
-                this.genomicMaxPos = maxPos; // don't care if we fall off the end, this is not important for visualization
+                this.genomicMinPos= getGenomicMinPos(transcripts, enhancers, cpair);
+                this.genomicMaxPos = getGenomicMaxPos(transcripts, enhancers, cpair);
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
                 int extraSpaceOnSide = (int)(0.1*(this.genomicSpan));
                 this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
                 this.paddedGenomicMaxPos = genomicMaxPos + extraSpaceOnSide;
-                this.scaleBasePairs = 1 + maxPos - minPos;
-                this.scaleMinPos = translateGenomicToSvg(paddedGenomicMinPos);
-                this.scaleMaxPos = translateGenomicToSvg(paddedGenomicMaxPos);
+                this.paddedGenomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
+                this.scaleBasePairs = 1 + this.genomicMaxPos  -  this.genomicMinPos;
+                this.scaleMinPos = translateGenomicToSvg(genomicMinPos);
+                this.scaleMaxPos = translateGenomicToSvg(genomicMaxPos);
         }
     }
 
@@ -160,18 +154,19 @@ public abstract class SvSvgGenerator {
         // don't care if we fall off the end, this is not important for visualization
         this.paddedGenomicMinPos = minPos - offset;
         this.paddedGenomicMaxPos = maxPos + offset;
+        this.paddedGenomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
         this.genomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
         this.scaleBasePairs = 1 + maxPos - minPos;
         this.scaleMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.scaleMaxPos = translateGenomicToSvg(this.genomicMaxPos);
-        switch (svtype) {
-            case DELETION:
-            case INSERTION:
-            default:
-                // get min/max for SVs with one region
-                // todo  -- do we need to check how many coordinate pairs there are?
-                CoordinatePair cpair = coordinatePairs.get(0);
-        }
+//        switch (svtype) {
+//            case DELETION:
+//            case INSERTION:
+//            default:
+//                // get min/max for SVs with one region
+//                // todo  -- do we need to check how many coordinate pairs there are?
+//                CoordinatePair cpair = coordinatePairs.get(0);
+//        }
 
     }
 
@@ -234,12 +229,12 @@ public abstract class SvSvgGenerator {
                          int pos) {
         int transcriptMax = transcripts.stream().map(t -> t.withStrand(org.jax.svann.reference.Strand.FWD))
                 .mapToInt(GenomicRegion::getEndPosition)
-                .min()
+                .max()
                 .orElse(Integer.MIN_VALUE);
         int enhancerMax = enhancers.stream().
                 map(Enhancer::getEnd).
                 mapToInt(GenomicPosition::getPosition).
-                min().
+                max().
                 orElse(Integer.MIN_VALUE);
         return Math.max(transcriptMax, Math.max(enhancerMax, pos));
     }
@@ -297,7 +292,7 @@ public abstract class SvSvgGenerator {
         if (pos < 0) {
             throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
         }
-        double prop = pos / genomicSpan;
+        double prop = pos / this.paddedGenomicSpan;
         return prop * SVG_WIDTH;
     }
 

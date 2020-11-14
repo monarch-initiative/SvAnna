@@ -218,7 +218,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
 
-        if (affectedGeneSymbols.size() > 1) {
+       /* if (affectedGeneSymbols.size() > 1) {
             // impact is high if >1 gene is affected
             impact = SvImpact.HIGH;
         } else if (highestOT.isExonic()) {
@@ -235,7 +235,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     : distance <= 100
                     ? SvImpact.INTERMEDIATE
                     : SvImpact.LOW;
-        }
+        }*/
 
         // now the impact might still be HIGH if the deletion overlaps with a phenotypically relevant enhancer
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer
@@ -437,8 +437,13 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             }
             affectedTranscripts =
                     overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
-            impact = SvImpact.HIGH;
-            otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
+            if (otype.translocationDisruptable()) {
+                impact = SvImpact.HIGH;
+                otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
+            } else {
+                impact = SvImpact.INTERMEDIATE;
+                otype = OverlapType.TRANSLOCATION_WITHOUT_TRANSCRIPT_DISRUPTION;
+            }
         } else {
             affectedTranscripts = Set.of();
             geneWithIdsSet = Set.of();
@@ -446,6 +451,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(rearrangement);
         if (enhancers.size() > 0) {
             impact = SvImpact.HIGH;
+            otype = OverlapType.ENHANCER_DISRUPTED_BY_TRANSLOCATION;
         }
         // TODO -- we need a bespoke prioritizer for translocations
         // FOR NOW there are no diseases

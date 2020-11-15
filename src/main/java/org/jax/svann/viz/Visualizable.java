@@ -25,6 +25,8 @@ public interface Visualizable {
     List<Overlap> getOverlaps();
 
     List<SvAnnTxModel> getTranscripts();
+    /** @return the total number of genes affected by this structural variant. */
+    int getGeneCount();
 
     List<Enhancer> getEnhancers();
 

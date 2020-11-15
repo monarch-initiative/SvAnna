@@ -218,24 +218,6 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
 
-       /* if (affectedGeneSymbols.size() > 1) {
-            // impact is high if >1 gene is affected
-            impact = SvImpact.HIGH;
-        } else if (highestOT.isExonic()) {
-            // set impact to INTERMEDIATE if the deletion does not affect the coding sequence (is UTR)
-            impact = highestImpactOverlap.overlapsCds()
-                    ? SvImpact.HIGH
-                    : SvImpact.INTERMEDIATE;
-        } else if (highestOT.isIntronic()) {
-            // intronic deletion close to CDS has HIGH impact,
-            // an insertion further away is INTERMEDIATE impact
-            int distance = highestImpactOverlap.getDistance();
-            impact = distance <= 25
-                    ? SvImpact.HIGH
-                    : distance <= 100
-                    ? SvImpact.INTERMEDIATE
-                    : SvImpact.LOW;
-        }*/
 
         // now the impact might still be HIGH if the deletion overlaps with a phenotypically relevant enhancer
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer

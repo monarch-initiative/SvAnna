@@ -87,6 +87,7 @@ public abstract class SvSvgGenerator {
     public final static String VIOLET = "#8491b4";
     public final static String ORANGE = "#ff9900";
     public final static String BRIGHT_GREEN = "#00a087";
+    public final static String YELLOW = "#FFFFE0"; //lightyellow
 
 
     private final SvType svtype;
@@ -359,9 +360,9 @@ public abstract class SvSvgGenerator {
     protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
-        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
+        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\"  " +
                         "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, EXON_HEIGHT, DARKGREEN, ORANGE);
+                start, Y, width, EXON_HEIGHT, DARKGREEN, YELLOW);
         writer.write(rect);
     }
 

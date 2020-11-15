@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * TODO - this class needs to be checked.
+ * Calculate the overlap of structural variants with enhancers.
  */
 public class EnhancerOverlapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerOverlapper.class);
@@ -52,10 +52,35 @@ public class EnhancerOverlapper {
         return getSimpleEnhancerOverlap(region);
     }
 
-    private List<Enhancer> getEnhancerOverlapsForTranslocation() {
-        // TODO: 2. 11. 2020 implement enhancer overlap for translocations
-        LOGGER.warn("Enhancer overlaps for translocations is not yet implemented");
+
+    private List<Enhancer> getLongRangeEnhancerEffects(SequenceRearrangement rearrangement) {
+        System.out.println("[WARNING] Long range enhancer prioritization not implemented");
         return List.of();
+    }
+
+
+
+
+    private List<Enhancer> getEnhancerOverlapsForTranslocation(SequenceRearrangement rearrangement) {
+        Breakend lb = rearrangement.getLeftmostBreakend();
+        Breakend rb = rearrangement.getRightmostBreakend();
+        GenomicPosition posA = StandardGenomicPosition.precise(lb.getContig(), lb.getPosition(), Strand.FWD);
+        GenomicPosition posB = StandardGenomicPosition.precise(rb.getContig(), rb.getPosition(), Strand.FWD);
+        GenomicRegion regionA = StandardGenomicRegion.of(posA, posA);
+        GenomicRegion regionB = StandardGenomicRegion.of(posB, posB);
+        List<Enhancer> overlapA = getSimpleEnhancerOverlap(regionA);
+        List<Enhancer> overlapB = getSimpleEnhancerOverlap(regionB);
+        List<Enhancer> overlappingEnhancers = new ArrayList<>();
+        if (! overlapA.isEmpty()) {
+            overlappingEnhancers.addAll(overlapA);
+        }
+        if (! overlapB.isEmpty()) {
+            overlappingEnhancers.addAll(overlapB);
+        }
+        if (overlappingEnhancers.isEmpty()) {
+            return getLongRangeEnhancerEffects(rearrangement);
+        }
+        return overlappingEnhancers;
     }
 
     /**
@@ -78,8 +103,8 @@ public class EnhancerOverlapper {
                 Contig contig = lb.getContig();
                 return getEnhancerOverlapsForInsertionAndInversions(contig, lb.getPosition(), rb.getPosition());
             case TRANSLOCATION:
-                // by definition, translocation has coordinates on different contigs, correct?
-                return getEnhancerOverlapsForTranslocation();
+                // by definition, translocation has coordinates on different contigs
+                return getEnhancerOverlapsForTranslocation(rearrangement);
             default:
                 LOGGER.warn("");
         }

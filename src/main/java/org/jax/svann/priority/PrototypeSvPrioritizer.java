@@ -440,10 +440,63 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
-    private SvPriority prioritizeDuplication(SequenceRearrangement rearrangement) {
+    private SvPriority prioritizeDuplication(SequenceRearrangement duplication) {
         // TODO: 2. 11. 2020 implement
-        System.err.println("[WARNING] Not prioritizing duplication TODO - implement me");
-        return SvPriority.unknown();
+        // Gather information
+        List<Overlap> overlaps = overlapper.getOverlapList(duplication);
+        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(Overlap::getOverlapType));
+        if (highestImpactOverlapOpt.isEmpty()) {
+            // should never happen
+            LOGGER.error("Could not identify highest impact overlap for duplication: {}.", duplication);
+            return DefaultSvPriority.unknown();
+        }
+        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        OverlapType highestOT = highestImpactOverlap.getOverlapType();
+
+        Set<String> affectedGeneIds = overlaps.stream()
+                .map(Overlap::getGeneSymbol)
+                .collect(Collectors.toSet());
+        Set<SvAnnTxModel> affectedTranscripts = overlaps.stream()
+                .map(Overlap::getTranscriptModel)
+                .collect(Collectors.toSet());
+
+        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(duplication);
+
+        // Start figuring out the impact
+        SvImpact impact = highestOT.defaultSvImpact(); // default
+
+        if (highestOT.isExonic()) {
+            // (1) the inversion affects an exon
+            impact = SvImpact.HIGH;
+        } else if (highestOT.isIntronic()) {
+            // (2) intronic inversion close to CDS has HIGH impact,
+            // an inversion further away is INTERMEDIATE impact
+            int distance = highestImpactOverlap.getDistance();
+            impact = distance <= 25
+                    ? SvImpact.HIGH
+                    : distance <= 100
+                    ? SvImpact.INTERMEDIATE
+                    : SvImpact.LOW;
+        } else if (highestOT.isIntergenic()) {
+            // (3) intergenic inversion, let's consider promoter and enhancers
+            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
+                // promoter region
+                impact = SvImpact.HIGH;
+            } else {
+                impact = enhancers.isEmpty()
+                        ? SvImpact.LOW
+                        : SvImpact.HIGH;
+            }
+        }
+        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
+        for (String symbol : affectedGeneIds) {
+            if (geneSymbolMap.containsKey(symbol)) {
+                geneWithIdsSet.add(geneSymbolMap.get(symbol));
+            }
+        }
+        return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        //return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
 }

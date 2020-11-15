@@ -148,8 +148,8 @@ public class AnnotateCommand implements Callable<Integer> {
             if (priority.getImpact().satisfiesThreshold(threshold)) {
                 HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
                 String visualization = visualizer.getHtml(visualizable);
-                above++;
-                if (above > 100) continue;
+//                above++;
+//                if (above > 100) continue;
                 visualizations.add(visualization);
 
             } else {

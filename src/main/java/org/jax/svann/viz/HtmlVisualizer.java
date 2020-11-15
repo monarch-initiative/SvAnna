@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  */
 public class HtmlVisualizer implements Visualizer {
 
-    private final static String colors[] = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF","F7DC6F", "CFFF98", "A1D6E2",
+    private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF","F7DC6F", "CFFF98", "A1D6E2",
             "EC96A4", "E6DF44", "F76FDA","FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6","FFC300" ,"F76FF5" , "FFFF99",
             "FF99FF", "99FFFF","CCFF99","FFE5CC","FFD700","9ACD32","7FFFD4","FFB6C1","FFFACD",
             "FFE4E1","F0FFF0","F0FFFF"};
@@ -80,7 +80,7 @@ public class HtmlVisualizer implements Visualizer {
             OFFSET = 5000;
         } else if (len < 1000) {
             OFFSET = len*5;
-        } else if (len < 1000) {
+        } else if (len < 5000) {
             OFFSET = len*3;
         } else if (len < 10000) {
             OFFSET = len*2;
@@ -159,6 +159,9 @@ public class HtmlVisualizer implements Visualizer {
                 case TRANSLOCATION:
                     gen = new TranslocationSvgGenerator(visualizable.getRearrangement(), visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
                     return gen.getSvg();
+                case DUPLICATION:
+                    gen = new DuplicationSvgGenerator(visualizable.getTranscripts(),visualizable.getEnhancers(), coordinatePairs);
+                    return gen.getSvg();
                 default:
                     System.err.println("[ERROR] SVG not implemented for type=" + svtype);
                     return "";
@@ -214,6 +217,24 @@ public class HtmlVisualizer implements Visualizer {
                 String translocationA = String.format("%s:%d", locA.getChrom(), locA.getBegin());
                 String translocationB = String.format("%s:%d", locB.getChrom(), locB.getBegin());
                 return String.format("t(%s, %s)", translocationA, translocationB);
+            case DUPLICATION:
+                if (locations.size() != 1) {
+                    throw new SvAnnRuntimeException("Was expecting one location for duplication but got " + locations.size());
+                }
+                HtmlLocation dupLoc = locations.get(0);
+                int dupBegin = Math.min(dupLoc.getBegin(), dupLoc.getEnd());
+                int dupEnd = Math.max(dupLoc.getBegin(), dupLoc.getEnd());
+                String lengthDup = getLengthDisplayString(dupBegin, dupEnd);
+                return String.format("%s:%d-%d duplication (%s)", dupLoc.getChrom(), dupBegin, dupEnd, lengthDup);
+            case INVERSION:
+                if (locations.size() != 1) {
+                    throw new SvAnnRuntimeException("Was expecting one location for inversion but got " + locations.size());
+                }
+                HtmlLocation invLoc = locations.get(0);
+                int invBegin = Math.min(invLoc.getBegin(), invLoc.getEnd());
+                int invEnd = Math.max(invLoc.getBegin(), invLoc.getEnd());
+                String lengthInv = getLengthDisplayString(invBegin, invEnd);
+                return String.format("inv(%s)(%d; %d) (%s)", invLoc.getChrom(), invBegin, invEnd, lengthInv);
         }
 
         return "TODO";
@@ -245,7 +266,9 @@ public class HtmlVisualizer implements Visualizer {
 
 
     String getSequencePrioritization(Visualizable visualizable) {
-        if (visualizable.getGeneCount() > 2 && visualizable.getRearrangement().getType() == SvType.DELETION) {
+        if (visualizable.getGeneCount() > 2 &&
+                (visualizable.getRearrangement().getType() == SvType.DELETION ||
+                        visualizable.getRearrangement().getType() == SvType.DUPLICATION) ){
             return getMultigeneSequencePriotization(visualizable);
         }
         StringBuilder sb = new StringBuilder();
@@ -295,7 +318,7 @@ public class HtmlVisualizer implements Visualizer {
     private String getMultigeneSequencePriotization(Visualizable visualizable) {
         StringBuilder sb = new StringBuilder();
         List<HtmlLocation> locations = visualizable.getLocations();
-        String variantString = getVariantRepresentation(visualizable,  locations );
+        //String variantString = getVariantRepresentation(visualizable,  locations );
         Set<String> vcfIdSet = new HashSet<>();
         List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
         for (var a : adjacencies) {
@@ -330,7 +353,7 @@ public class HtmlVisualizer implements Visualizer {
                 .collect(Collectors.toList());
         // show up to ten affected genes -- if there are more just show the count
         if (genes.size()>10) {
-            sb.append("<p>").append(String.valueOf(genes.size())).append(" affected genes</p>\n");
+            sb.append("<p>").append(genes.size()).append(" affected genes</p>\n");
         } else {
             sb.append("<p>Affected genes: <br/><ol>");
             for (var g : genes) {
@@ -342,7 +365,6 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     String getPhenotypePrioritization(Visualizable visualizable) {
-        String s = getUnorderedListWithDiseases(visualizable);
-        return s;
+        return getUnorderedListWithDiseases(visualizable);
     }
 }

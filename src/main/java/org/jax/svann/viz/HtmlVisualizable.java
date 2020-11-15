@@ -15,9 +15,6 @@ import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.groupingBy;
-
 public class HtmlVisualizable implements Visualizable {
 
     /**
@@ -57,6 +54,13 @@ public class HtmlVisualizable implements Visualizable {
         Contig chrom = left.getContig();
         int begin = left.getPosition();
         int end = right.getPosition();
+        return new HtmlLocation(chrom, begin, end);
+    }
+
+    private HtmlLocation getInversionLocation(SequenceRearrangement rearrangement) {
+        Contig chrom = rearrangement.getLeftmostBreakend().getContig();
+        int begin = rearrangement.getLeftmostPosition();
+        int end = rearrangement.getRightmostPosition();
         return new HtmlLocation(chrom, begin, end);
     }
 
@@ -138,6 +142,10 @@ public class HtmlVisualizable implements Visualizable {
             locs.add(getInsertionLocation(rearrangement));
         } else if (rearrangement.getType() == SvType.TRANSLOCATION) {
             locs.addAll(getTranslocationLocations(rearrangement));
+        } else if (rearrangement.getType() == SvType.DUPLICATION) {
+            locs.add(getDeletionLocation(rearrangement)); // works for both
+        } else if (rearrangement.getType() == SvType.INVERSION) {
+            locs.add(getInversionLocation(rearrangement));
         }
         return locs;
     }

@@ -13,10 +13,8 @@ import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.overlap.SvAnnOverlapper;
-import org.jax.svann.parse.*;
 import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvPrioritizer;
-import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
@@ -24,31 +22,33 @@ import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.jax.svann.reference.transcripts.JannovarTranscriptService;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.reference.transcripts.TranscriptService;
-import org.jax.svann.viz.HtmlVisualizable;
-import org.jax.svann.viz.HtmlVisualizer;
 import org.jax.svann.viz.svg.DeletionSvgGenerator;
 import org.jax.svann.viz.svg.SvSvgGenerator;
-import org.jax.svann.viz.svg.TranslocationSvgGenerator;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * I am using this to create splicing graphics. We do not need this to test the app and the class can be deleted before
+ * publication TODO
+ */
+@Disabled
 public class DeletionSvgGeneratorTest {
     private static GenomeAssembly GENOME_ASSEMBLY;
     private static SvPrioritizer prioritizer;
     private static Overlapper overlapper;
 
     private static JannovarData readJannovarData(String jannovarPath) throws SerializationException {
-        return new JannovarDataSerializer(jannovarPath.toString()).load();
+        return new JannovarDataSerializer(jannovarPath).load();
     }
 
     protected static final Map<String, GeneWithId> GENE_WITH_ID_MAP = Map.of();
@@ -183,7 +183,7 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testESYT2() {
         Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr7, 158752780, Strand.FWD, "upstream", "t");
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr7, 158742780, Strand.FWD, "upstream", "t");
         SimpleBreakend right = SimpleBreakend.preciseWithRef(chr7, 158752843, Strand.FWD, "down", "t");
         SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
@@ -196,6 +196,197 @@ public class DeletionSvgGeneratorTest {
         outputSvg(svg, "target/ESYT2.svg");
     }
 
+    /**
+     * chr10:121518681-121518829  first of two fgfr2 (event 28971)
+     */
+    @Test
+    public void testFGFR2a() {
+        Contig chr10 = GENOME_ASSEMBLY.getContigByName("10").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr10, 121518681, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr10, 121518829, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/FGFR2_28971.svg");
+    }
+
+    /**
+     *  chr10:121517318-121517463 2 of two fgfr2 (event 28972)
+     */
+    @Test
+    public void testFGFR2b() {
+        Contig chr10 = GENOME_ASSEMBLY.getContigByName("10").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr10, 121517318, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr10, 121517463, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/FGFR2_28972.svg");
+    }
+
+    /**
+     * ITGB4 chr17:75755054-75755213
+     */
+    @Test
+    public void testITGB4() {
+        Contig chr17 = GENOME_ASSEMBLY.getContigByName("17").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr17, 75755054, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr17, 75755213, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/ITGB4.svg");
+    }
+
+    /**
+     * chr8:143938400-143938415  PLEC
+     */
+    @Test
+    public void testPLEC() {
+        Contig chr8 = GENOME_ASSEMBLY.getContigByName("8").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr8, 143938400, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr8, 143938415, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/PLEC.svg");
+    }
+
+
+    /**
+     * chr19:50224153-50224177  MYH14
+     */
+    @Test
+    public void testMYH14() {
+        Contig chr19 = GENOME_ASSEMBLY.getContigByName("19").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr19, 50224153, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr19, 50224177, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/MYH14.svg");
+    }
+
+    /**
+     * SLK chr10:104010815-104010908
+     */
+    @Test
+    public void testSLK() {
+        Contig chr10 = GENOME_ASSEMBLY.getContigByName("10").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr10, 104010815, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr10, 104010908, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/SLK.svg");
+    }
+
+    /**
+     * chr9:128790734-128790775  TBC1D13
+     */
+    @Test
+    public void testTBC1D13() {
+        Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 128790734, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 128790775, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/TBC1D13.svg");
+    }
+
+
+    /**
+     * chrX:53218275-53218398  KDM5C
+     */
+    @Test
+    public void testKDM5C() {
+        Contig chrX = GENOME_ASSEMBLY.getContigByName("X").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chrX, 53218275, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chrX, 53218398, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/KDM5C.svg");
+    }
+
+    /**
+     * chrX:53221687-53221730  KDM5C-22850
+     */
+    @Test
+    public void testKDM5Cb() {
+        Contig chrX = GENOME_ASSEMBLY.getContigByName("X").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chrX, 53221687, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chrX, 53221730, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/KDM5C_22850.svg");
+    }
+
+    /**
+     * XIST chrX:73_826_115-73_827_984
+     */
+    @Test
+    public void testXIST() {
+        Contig chrX = GENOME_ASSEMBLY.getContigByName("X").orElseThrow();
+        SimpleBreakend left = SimpleBreakend.preciseWithRef(chrX, 73_810_115, Strand.FWD, "upstream", "t");
+        SimpleBreakend right = SimpleBreakend.preciseWithRef(chrX, 73_840_984, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<Enhancer> enhancerList = List.of();
+        List<CoordinatePair> cpairs = rearrangement.getRegions();
+        SvSvgGenerator gen = new DeletionSvgGenerator(transcriptModels, enhancerList, cpairs);
+        String svg = gen.getSvg();
+        assertNotNull(svg);
+        outputSvg(svg, "target/XIST.svg");
+    }
 
 
 }

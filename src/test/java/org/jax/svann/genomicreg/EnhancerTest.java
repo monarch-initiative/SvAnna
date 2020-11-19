@@ -41,7 +41,8 @@ public class EnhancerTest {
     public void testEnhancer1() {
         Contig chrom10 = assembly.getContigById(10).orElseThrow();
         double tau = 0.288152;
-        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0025015"));
+        String tissueLabel = "vascular"; // represents an UBERON or CL term label
+        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0025015"), tissueLabel);
         IntervalArray<Enhancer> iarray = iamap.get(10);
         assertNotNull(iarray);
         IntervalArray<Enhancer>.QueryResult qresult = iarray.findOverlappingWithInterval(100006350, 100006400);
@@ -61,7 +62,8 @@ public class EnhancerTest {
     public void testEnhancerPartialOverlaps() {
         Contig chrom10 = assembly.getContigById(10).orElseThrow();
         double tau = 0.288152;
-        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0025015"));
+        String tissueLabel = "vascular"; // represents an UBERON or CL term label
+        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0025015"), tissueLabel);
         IntervalArray<Enhancer> iarray = iamap.get(10);
         assertNotNull(iarray);
         IntervalArray<Enhancer>.QueryResult qresult = iarray.findOverlappingWithInterval(100006600, 100006607);

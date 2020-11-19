@@ -22,11 +22,9 @@ import java.util.stream.Collectors;
  * https://github.com/pnrobinson/tspec. The file represents FANTOM5 enhancer and has information
  * about tissue specificity
  * <pre>
- * chrom	start	end	tau	HPO.id	HPO.label
- * chr10	100006233	100006603	0.288152	HP:0025015	Abnormal vascular morphology
- * chr10	100008181	100008444	0.328839	HP:0025015	Abnormal vascular morphology
- * chr10	100014348	100014634	0.728857	HP:0000777	Abnormality of the thymus
- * chr10	100020065	100020562	0.498244	HP:0001627	Abnormal heart morphology
+ * chrom	start	end	tau	ontology.id	ontology.label	HPO.id	HPO.label
+ * chr10	100006233	100006603	0.343407	CL:0000071	blood vessel endothelial cell	HP:0002597	Abnormality of the vasculature
+ * chr10	100008181	100008444	0.317072	CL:0000359	vascular associated smooth muscle cell	HP:0002597	Abnormality of the vasculature
  * (...)
  * </pre>
  * tau reflects the degree of tissue specificity, where 0 means unspecific (ubiquitously expressed across tissues/cells)
@@ -55,7 +53,7 @@ public class TSpecParser {
             br.readLine(); // skip header
             while ((line = br.readLine()) != null) {
                 String [] fields = line.split("\t");
-                if (fields.length != 6) {
+                if (fields.length != 8) {
                     throw new SvAnnRuntimeException("Bad tspec line: " + line);
                 }
                 String chr = fields[0];
@@ -69,9 +67,11 @@ public class TSpecParser {
                 int end  = Integer.parseInt(fields[2]);
                 double tau = Double.parseDouble(fields[3]);
                 TermId tid = TermId.of(fields[4]);
-                String label = fields[5];
-                id2labelMap.putIfAbsent(tid, label);
-                Enhancer enhancer = new Enhancer(contig, start, end, tau, tid);
+                String otherOntologyLabel = fields[5]; // UBERON or CL
+                TermId hpoId = TermId.of(fields[6]);
+                String hpoLabel = fields[7];
+                id2labelMap.putIfAbsent(tid, otherOntologyLabel);
+                Enhancer enhancer = new Enhancer(contig, start, end, tau, hpoId, otherOntologyLabel);
                 id2enhancerMap.putIfAbsent(tid, new ArrayList<>());
                 id2enhancerMap.get(tid).add(enhancer);
                 enhancers.add(enhancer);

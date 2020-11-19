@@ -159,7 +159,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             // annotated to a tissue that has phenotypic relevant
             boolean relevant = false;
             for (Enhancer e : affectedEnhancers) {
-                if (this.relevantHpoIdsForEnhancers.contains(e.getTermId())) {
+                if (this.relevantHpoIdsForEnhancers.contains(e.getHpoId())) {
                     relevant = true;
                     break;
                 }
@@ -223,7 +223,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(deletion);
         if (!enhancers.isEmpty()) {
-            SvImpact enhancerImpact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getTermId()))
+            SvImpact enhancerImpact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getHpoId()))
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
             if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.HIGH) {
@@ -244,7 +244,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
     private boolean affectedEnhancersRelevant(List<Enhancer> enhancers) {
         return enhancers.stream()
-                .map(Enhancer::getTermId)
+                .map(Enhancer::getHpoId)
                 .anyMatch(relevantHpoIdsForEnhancers::contains);
     }
 
@@ -304,7 +304,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(insertion);
         if (!enhancers.isEmpty()) {
-            impact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getTermId()))
+            impact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getHpoId()))
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
         }

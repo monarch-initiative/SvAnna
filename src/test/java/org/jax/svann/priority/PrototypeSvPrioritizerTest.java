@@ -75,10 +75,11 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     private static Map<Integer, IntervalArray<Enhancer>> makeEnhancerMap() {
         Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
         Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-
-        Enhancer surf1Enhancer = new Enhancer(chr9, 133_356_501, 133_356_530, .8, TermId.of("HP:0001939"));
-        Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"));
-        Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707")); // abnormality of the nervous system
+        String metabolism = "metabolism"; // represents an UBERON/CL term.
+        String cns = "CNS";
+        Enhancer surf1Enhancer = new Enhancer(chr9, 133_356_501, 133_356_530, .8, TermId.of("HP:0001939"),metabolism);
+        Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"),metabolism);
+        Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707"), cns); // abnormality of the nervous system
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());

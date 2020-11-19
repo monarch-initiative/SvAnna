@@ -77,7 +77,7 @@ public class TSpecParserTest {
         assertEquals(chr10, thymusEnhancer.getContig());
         assertEquals(100014348, thymusEnhancer.getStart().getPosition());
         assertEquals(100014634, thymusEnhancer.getEnd().getPosition());
-        assertEquals(thymusHpoId, thymusEnhancer.getTermId());
+        assertEquals(thymusHpoId, thymusEnhancer.getHpoId());
         assertEquals(0.728857, thymusEnhancer.getTau(), EPSILON);
         // both the start and end are precise, i.e., the confidence interval is +/- 0
         assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getStart().getCi());

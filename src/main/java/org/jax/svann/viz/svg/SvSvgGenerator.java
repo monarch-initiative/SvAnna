@@ -9,7 +9,6 @@ import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -383,7 +382,7 @@ public abstract class SvSvgGenerator {
         int start = enhancer.getStartPosition();
         int end = enhancer.getEndPosition();
         String positionString = String.format("%s:%d-%d", chrom, start, end);
-        String geneName = String.format("%s (tau %.2f)", enhancer.getTermId().getValue(), enhancer.getTau());
+        String geneName = String.format("%s (tau %.2f)", enhancer.getTissueLabel(), enhancer.getTau());
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
         String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
                 xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));

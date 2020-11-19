@@ -273,7 +273,6 @@ public class HtmlVisualizer implements Visualizer {
         }
         StringBuilder sb = new StringBuilder();
         List<HtmlLocation> locations = visualizable.getLocations();
-        String variantString = getVariantRepresentation(visualizable,  locations );
         Set<String> vcfIdSet = new HashSet<>();
         List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
         for (var a : adjacencies) {
@@ -304,6 +303,9 @@ public class HtmlVisualizer implements Visualizer {
             sb.append(olap.toString()).append("<br/>\n");
         }
         sb.append("</p>\n");
+        for (var e : visualizable.getEnhancers()) {
+            sb.append("<p> ENHANCER " + e.getSummary() +"</p>\n");
+        }
         return sb.toString();
     }
 

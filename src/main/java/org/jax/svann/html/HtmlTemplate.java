@@ -62,6 +62,8 @@ public class HtmlTemplate {
         templateData.putIfAbsent("svalist", htmlList);
         templateData.put("n_unparsable", infoMap.getOrDefault("unparsable", NOT_AVAILABLE));
         templateData.put("vcf_file", infoMap.getOrDefault("vcf_file", NOT_AVAILABLE));
+        templateData.put("n_affectedGenes", infoMap.getOrDefault("n_affectedGenes", NOT_AVAILABLE));
+        templateData.put("n_affectedEnhancers", infoMap.getOrDefault("n_affectedEnhancers", NOT_AVAILABLE));
         List<String> hpos = createHpoLinks(userHpoTerms);
         templateData.put("hpoterms", hpos);
     }

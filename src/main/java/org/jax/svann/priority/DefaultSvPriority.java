@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * This class organizes the prioritization approach to
+ */
 class DefaultSvPriority implements SvPriority {
     private static final DefaultSvPriority UNKNOWN = new DefaultSvPriority(SvImpact.UNKNOWN, Set.of(), Set.of(), List.of(), List.of(), List.of());
     private final SvImpact svImpact;
@@ -18,22 +21,6 @@ class DefaultSvPriority implements SvPriority {
     private final List<Enhancer> affectedEnhancers;
     private final List<HpoDiseaseSummary> diseases;
     private final List<Overlap> overlaps;
-
-//    DefaultSvPriority(SvImpact svImpact,
-//                      Set<TranscriptModel> affectedTranscripts,
-//                      Set<GeneWithId> affectedGeneIds,
-//                      List<Enhancer> affectedEnhancers,
-//                      List<Overlap> olaps) {
-//        this.svImpact = svImpact;
-//        this.affectedTranscripts = affectedTranscripts;
-//        this.affectedGeneIds = affectedGeneIds;
-//        this.affectedEnhancers = affectedEnhancers;
-//        this.overlaps = olaps;
-//
-//        // TODO: 2. 11. 2020 check
-//        diseases = List.of(); // not relevant at this stage
-//    }
-
 
     DefaultSvPriority(SvImpact svImpact,
                       Set<SvAnnTxModel> affectedTranscripts,

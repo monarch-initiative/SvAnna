@@ -35,10 +35,14 @@ public class InversionSvgGenerator extends SvSvgGenerator {
     public void write(Writer writer) throws IOException {
         int starty = 50;
         int y = starty;
-        String deletionLength = getSequenceLengthString(inversionCoordinates.getLength());
-        String deletionDescription = String.format("%s inversion", deletionLength);
-        writeInversion(starty, deletionDescription, writer);
+        String inversionLength = getSequenceLengthString(inversionCoordinates.getLength());
+        String inversionDescription = String.format("%s inversion", inversionLength);
+        writeInversion(starty, inversionDescription, writer);
         y += 100;
+        for (var e : this.affectedEnhancers) {
+            writeEnhancer(e, y, writer);
+            y += HEIGHT_PER_DISPLAY_ITEM;
+        }
         for (var tmod : this.affectedTranscripts) {
             writeTranscript(tmod, y, writer);
             y += HEIGHT_PER_DISPLAY_ITEM;

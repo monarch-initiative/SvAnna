@@ -152,9 +152,7 @@ public class AnnotateCommand implements Callable<Integer> {
                 String visualization = visualizer.getHtml(visualizable);
 //                above++;
 //                if (above > 100) continue;
-               // visualizations.add(visualization);
                 prioritizedSequenceRearrangements.add(new PrioritizedSequenceRearrangement(rearrangement, priority));
-
             } else {
                 below++;
             }
@@ -177,6 +175,8 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("vcf_file", vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
+        infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
+        infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
 
         List<String> visualizations = new ArrayList<>();
         Collections.sort(prioritizedSequenceRearrangements);

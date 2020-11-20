@@ -396,8 +396,15 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                         : SvImpact.HIGH;
             }
         }
-        // TODO -- we need a bespoke prioritizer for inversions
-        // FOR NOW there are no diseases
+        // if the inversion already has high priority, then return it
+        // otherwise look for longer range position effects
+        SvPriority prio = prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        if (prio.getImpact() == SvImpact.HIGH) {
+            return prio;
+        }
+        //if we get here, we look and see if there are both relevant genes within the inversion
+        // and relevant enhancers within a window, or vice version.
+
         return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
@@ -496,7 +503,6 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             }
         }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
-        //return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
 }

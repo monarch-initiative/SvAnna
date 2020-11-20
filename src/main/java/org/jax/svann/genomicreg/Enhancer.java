@@ -1,5 +1,6 @@
 package org.jax.svann.genomicreg;
 
+import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.reference.CoordinateSystem;
 import org.jax.svann.reference.GenomicPosition;
 import org.jax.svann.reference.GenomicRegion;
@@ -12,7 +13,7 @@ import java.util.StringJoiner;
 
 public class Enhancer implements GenomicRegion {
 
-    private final static int DEFAULT_DISTANCE_THRESHOLD = 500_000;
+    private final static int DEFAULT_DISTANCE_THRESHOLD = 50_000;
     /**
      * The contig (chromosome) on which this enhancer is located.
      */
@@ -42,15 +43,30 @@ public class Enhancer implements GenomicRegion {
 
 
     // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
-    public boolean matchesPos(Contig otherContig, int pos, int THRESHOLD) {
-        return this.contig.equals(otherContig)
-                && Math.abs(start.getPosition() - pos) < THRESHOLD;
+    public boolean matchesPos(GenomicRegion region, int THRESHOLD) {
+        if (region.getStartPosition() >= start.getPosition() && region.getStartPosition() <= end.getPosition())
+            return true;
+        else if (region.getEndPosition() >= start.getPosition() && region.getEndPosition() <= end.getPosition())
+            return true;
+        // if we get here, then region is entirely to the left or to the right of this enhancer
+        if (region.getStartPosition() > start.getPosition()) {
+            int distance = region.getStartPosition() - end.getPosition();
+            if (distance < 0) {
+                throw new SvAnnRuntimeException("Negative distance should never happen");
+            }
+            return (distance < THRESHOLD);
+        } else {
+            int distance = start.getPosition() - region.getEndPosition();
+            if (distance < 0) {
+                throw new SvAnnRuntimeException("Negative distance should never happen");
+            }
+            return (distance < THRESHOLD);
+        }
     }
 
 
-    // TODO: 26. 10. 2020 this should not get contig & position, but ChromosomalRegion (or subclass)
-    public boolean matchesPos(Contig otherContig, int pos) {
-        return matchesPos(otherContig, pos, DEFAULT_DISTANCE_THRESHOLD);
+    public boolean matchesPos(GenomicRegion region) {
+        return matchesPos(region, DEFAULT_DISTANCE_THRESHOLD);
     }
 
     @Override

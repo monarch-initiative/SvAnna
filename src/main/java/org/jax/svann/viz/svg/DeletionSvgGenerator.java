@@ -40,6 +40,10 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s deletion", deletionLength);
         writeDeletion(starty, deletionDescription, writer);
         y += 100;
+        for (var e : this.affectedEnhancers) {
+            writeEnhancer(e, y, writer);
+            y += HEIGHT_PER_DISPLAY_ITEM;
+        }
         for (var tmod : this.affectedTranscripts) {
             writeTranscript(tmod, y, writer);
             y += HEIGHT_PER_DISPLAY_ITEM;

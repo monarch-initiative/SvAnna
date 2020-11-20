@@ -2,6 +2,7 @@ package org.jax.svann.viz;
 
 
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
@@ -303,8 +304,15 @@ public class HtmlVisualizer implements Visualizer {
             sb.append(olap.toString()).append("<br/>\n");
         }
         sb.append("</p>\n");
-        for (var e : visualizable.getEnhancers()) {
-            sb.append("<p> ENHANCER " + e.getSummary() +"</p>\n");
+        List<Enhancer> enhancers = visualizable.getEnhancers();
+        if (enhancers.isEmpty()) {
+            sb.append("<p>No enhancers found within genomic window.</p>\n");
+        } else {
+            sb.append("<p>Enhancers within genomic window:</p>\n<ul>");
+            for (var e : visualizable.getEnhancers()) {
+                sb.append("<li>").append(e.getSummary()).append("</li>\n");
+            }
+            sb.append("</ul>\n");
         }
         return sb.toString();
     }

@@ -26,7 +26,9 @@ import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPrioritizer;
 import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.*;
+import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.StructuralVariant;
+import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
@@ -43,6 +45,7 @@ import picocli.CommandLine;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -51,6 +54,8 @@ import java.util.stream.Collectors;
 public class AnnotateCommand implements Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
+
+    private static final NumberFormat NF = NumberFormat.getNumberInstance();
 
     /**
      * This is what we use, candidate for externalization into a CLI parameter
@@ -148,16 +153,12 @@ public class AnnotateCommand implements Callable<Integer> {
             SvPriority priority = prioritizer.prioritize(rearrangement);
             priorities.add(priority);
             if (priority.getImpact().satisfiesThreshold(threshold)) {
-                HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
-                String visualization = visualizer.getHtml(visualizable);
-//                above++;
-//                if (above > 100) continue;
                 prioritizedSequenceRearrangements.add(new PrioritizedSequenceRearrangement(rearrangement, priority));
             } else {
                 below++;
             }
         }
-        System.out.printf("[INFO] Above threshold SVs: %d, below threshold SVs: %d.\n", above, below);
+        LOGGER.info(" Above threshold SVs: {}, below threshold SVs: {}", NF.format(above), NF.format(below));
 
         // TODO -- if we have frequency information
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);

@@ -8,6 +8,8 @@ import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import org.jax.svann.reference.SvType;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -27,7 +29,7 @@ public class HtmlTemplate {
 
     protected static final String NOT_AVAILABLE = "n/a";
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(HtmlTemplate.class);
 
     public HtmlTemplate(List<String> htmlList,
                         Map<SvType, Integer> lowImpact,
@@ -81,7 +83,8 @@ public class HtmlTemplate {
 
 
     public void outputFile(String prefix) {
-        String outpath = String.format( "%s.html", prefix);
+        String outpath = String.format("%s.html", prefix);
+        LOGGER.info("Writing HTML results to `{}`", outpath);
         try (BufferedWriter out = new BufferedWriter(new FileWriter(outpath))) {
             Template template = cfg.getTemplate("svannHTML.ftl");
             template.process(templateData, out);

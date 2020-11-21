@@ -141,7 +141,7 @@ public class HtmlVisualizer implements Visualizer {
     String getSvgString(Visualizable visualizable) {
         List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
         SvType svtype = visualizable.getRearrangement().getType();
-        if (visualizable.getGeneCount()>2) {
+        if (visualizable.getGeneCount()>10) {
             return EMPTY_STRING;
         }
         try {

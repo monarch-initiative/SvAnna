@@ -123,6 +123,21 @@ public class TestVariants extends TestBase {
         }
 
         /**
+         * ZBTB48, is forward strand. Test a variant in intron 1, i.e.,  between	6_580_137-6_580_540
+         */
+        public static SequenceRearrangement zbtb48intron1() {
+            Contig chr1 = GENOME_ASSEMBLY.getContigByName("1").orElseThrow();
+            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr1, 6_580_300, Strand.FWD, "del_within_intron_l", "C");
+            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr1, 6_580_400, Strand.FWD, "del_within_intron_r", "G");
+
+            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        }
+
+
+
+
+
+        /**
          * Deletion in 5UTR.
          * <p>
          * SURF2:NM_017503.5 20bp deletion in 5UTR

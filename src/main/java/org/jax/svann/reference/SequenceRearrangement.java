@@ -116,7 +116,7 @@ public interface SequenceRearrangement {
     /**
      * @return number of reads covering the adjacency with the minimum coverage
      */
-    default int getMinDepthOfCoverage() {
+    default int minDepthOfCoverage() {
         return getAdjacencies().stream()
                 .mapToInt(Adjacency::depthOfCoverage)
                 .min()

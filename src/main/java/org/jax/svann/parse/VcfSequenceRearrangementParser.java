@@ -1,5 +1,7 @@
 package org.jax.svann.parse;
 
+import htsjdk.variant.variantcontext.Genotype;
+import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 import org.jax.svann.reference.*;
@@ -24,6 +26,19 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
     public VcfSequenceRearrangementParser(GenomeAssembly assembly, BreakendAssembler<StructuralVariant> assembler) {
         this.assembly = assembly;
         this.assembler = assembler;
+    }
+
+    private static Zygosity parseZygosity(Genotype gt) {
+        switch (gt.getType()) {
+            case HET:
+                return Zygosity.HETEROZYGOUS;
+            case HOM_VAR:
+                return Zygosity.HOMOZYGOUS;
+            case NO_CALL:
+            case UNAVAILABLE:
+            default:
+                return Zygosity.UNKNOWN;
+        }
     }
 
     @Override
@@ -58,28 +73,20 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
     }
 
     private Optional<BreakendRecord> parseBreakend(VariantContext vc) {
+        Optional<CoreData> cdo = extractCoreData(vc, false);
+        if (cdo.isEmpty()) {
+            return Optional.empty();
+        }
+        CoreData cd = cdo.get();
         Optional<Contig> contigOptional = assembly.getContigByName(vc.getContig());
         if (contigOptional.isEmpty()) {
             LOGGER.warn("Unknown contig `{}` for variant {}", vc.getContig(), vc);
             return Optional.empty();
         }
-        Contig contig = contigOptional.get();
+        Contig contig = cd.getContig();
         // position
-        int pos;
-        ConfidenceInterval ci;
-        if (vc.hasAttribute("CIPOS")) {
-            final List<Integer> cipos = vc.getAttributeAsIntList("CIPOS", 0);
-            if (cipos.size() != 2) {
-                LOGGER.warn("CIPOS size != 2 for variant {}", vc);
-                return Optional.empty();
-            } else {
-                pos = vc.getStart();
-                ci = ConfidenceInterval.of(cipos.get(0), cipos.get(1));
-            }
-        } else {
-            pos = vc.getStart();
-            ci = ConfidenceInterval.precise();
-        }
+        int pos = cd.getStart();
+        ConfidenceInterval ci = cd.getCiStart();
 
         // event ID
         String eventId = vc.getAttributeAsString("EVENT", null);
@@ -97,12 +104,13 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
             LOGGER.warn("Breakend with >1 alt allele: {}", vc);
             return Optional.empty();
         }
-        final String ref = vc.getReference().getDisplayString();
-        final String alt = vc.getAlternateAllele(0).getDisplayString();
+        String ref = vc.getReference().getDisplayString();
+        String alt = vc.getAlternateAllele(0).getDisplayString();
 
         // in VCF specs, the position is always on the FWD(+) strand
-        final ChromosomalPosition breakendPosition = ChromosomalPosition.imprecise(contig, pos, ci, Strand.FWD);
-        final BreakendRecord breakendRecord = new BreakendRecord(breakendPosition, vc.getID(), eventId, mateId, ref, alt);
+        ChromosomalPosition breakendPosition = ChromosomalPosition.imprecise(contig, pos, ci, Strand.FWD);
+
+        BreakendRecord breakendRecord = new BreakendRecord(breakendPosition, vc.getID(), eventId, mateId, ref, alt, cd.depthOfCoverage());
 
         return Optional.of(breakendRecord);
     }
@@ -151,30 +159,35 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
                 return Optional.empty();
         }
 
-        return Optional.of(SimpleStructuralVariant.of(svType, adjacencies));
+        Optional<CoreData> cdOpt = extractCoreData(vc);
+        if (cdOpt.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(StructuralVariantDefault.of(svType, adjacencies, cdOpt.get().zygosity()));
     }
 
     Optional<Adjacency> makeDeletionAdjacency(VariantContext vc) {
         // We know that this context represents symbolic deletion.
         // Let's get the required coordinates first
-        return extractCoreData(vc).map(coords -> {
+        return extractCoreData(vc).map(cd -> {
             // then convert the coordinates to adjacency
-            Contig contig = coords.getContig();
-            SimpleBreakend left = SimpleBreakend.impreciseWithRef(contig,
-                    coords.getStart() - 1,
-                    coords.getCiStart(),
+            Contig contig = cd.getContig();
+            BreakendDefault left = BreakendDefault.impreciseWithRef(contig,
+                    cd.getStart() - 1,
+                    cd.getCiStart(),
                     Strand.FWD,
                     CoordinateSystem.ONE_BASED,
                     vc.getID(),
                     vc.getReference().getDisplayString());
 
-            SimpleBreakend right = SimpleBreakend.imprecise(contig,
-                    coords.getEnd() + 1,
-                    coords.getCiEnd(),
+            BreakendDefault right = BreakendDefault.imprecise(contig,
+                    cd.getEnd() + 1,
+                    cd.getCiEnd(),
                     Strand.FWD,
                     vc.getID());
 
-            return SimpleAdjacency.empty(left, right);
+            return AdjacencyDefault.emptyWithDepth(left, right, cd.depthOfCoverage());
         });
     }
 
@@ -190,7 +203,7 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
             Contig contig = cd.getContig();
 
             // the 1st adjacency (alpha) starts at the end coordinate, by convention on + strand
-            SimpleBreakend alphaLeft = SimpleBreakend.impreciseWithRef(contig,
+            BreakendDefault alphaLeft = BreakendDefault.impreciseWithRef(contig,
                     cd.getEnd(),
                     cd.getCiEnd(),
                     Strand.FWD,
@@ -199,12 +212,12 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
                     vc.getReference().getDisplayString());
 
             // the right position is the begin position of the duplicated segment on + strand
-            SimpleBreakend alphaRight = SimpleBreakend.imprecise(contig,
+            BreakendDefault alphaRight = BreakendDefault.imprecise(contig,
                     cd.getStart(),
                     cd.getCiStart(),
                     Strand.FWD,
                     id);
-            return SimpleAdjacency.empty(alphaLeft, alphaRight);
+            return AdjacencyDefault.emptyWithDepth(alphaLeft, alphaRight, cd.depthOfCoverage());
         });
     }
 
@@ -228,7 +241,7 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
         //  This should not be an issue, but evaluate just to be sure
 
         // the 1st adjacency (alpha) starts one base before begin coordinate (POS), by convention on the (+) strand
-        Breakend alphaLeft = SimpleBreakend.impreciseWithRef(contig,
+        Breakend alphaLeft = BreakendDefault.impreciseWithRef(contig,
                 cd.getStart() - 1,
                 cd.getCiStart(),
                 Strand.FWD,
@@ -236,27 +249,27 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
                 id,
                 vc.getReference().getDisplayString());
         // the right position is the last base of the inverted segment on the (-) strand
-        SimpleBreakend alphaRight = SimpleBreakend.imprecise(contig,
+        BreakendDefault alphaRight = BreakendDefault.imprecise(contig,
                 cd.getEnd(),
                 cd.getCiEnd(),
                 Strand.FWD,
                 id).withStrand(Strand.REV);
-        Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+        Adjacency alpha = AdjacencyDefault.emptyWithDepth(alphaLeft, alphaRight, cd.depthOfCoverage());
 
 
         // the 2nd adjacency (beta) starts at the begin coordinate on (-) strand
-        SimpleBreakend betaLeft = SimpleBreakend.imprecise(contig,
+        BreakendDefault betaLeft = BreakendDefault.imprecise(contig,
                 cd.getStart(),
                 cd.getCiStart(),
                 Strand.FWD,
                 id).withStrand(Strand.REV);
         // the right position is one base past end coordinate, by convention on (+) strand
-        Breakend betaRight = SimpleBreakend.imprecise(contig,
+        Breakend betaRight = BreakendDefault.imprecise(contig,
                 cd.getEnd() + 1,
                 cd.getCiEnd(),
                 Strand.FWD,
                 id);
-        Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+        Adjacency beta = AdjacencyDefault.emptyWithDepth(betaLeft, betaRight, cd.depthOfCoverage());
         return List.of(alpha, beta);
     }
 
@@ -289,7 +302,7 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
         Contig insContig = new InsertionContig(id, insLength);
 
         // the 1st adjacency (alpha) starts at the POS coordinate, by convention on the (+) strand
-        Breakend alphaLeft = SimpleBreakend.impreciseWithRef(contig,
+        Breakend alphaLeft = BreakendDefault.impreciseWithRef(contig,
                 cd.getStart(),
                 cd.getCiStart(),
                 Strand.FWD,
@@ -297,21 +310,25 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
                 id,
                 vc.getReference().getDisplayString());
         // the right position is the first base of the insertion contig
-        SimpleBreakend alphaRight = SimpleBreakend.precise(insContig, 1, Strand.FWD, id);
-        Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+        BreakendDefault alphaRight = BreakendDefault.precise(insContig, 1, Strand.FWD, id);
+        Adjacency alpha = AdjacencyDefault.emptyWithDepth(alphaLeft, alphaRight, cd.depthOfCoverage());
 
         // the 2nd adjacency (beta) starts at the end of the insertion contig
-        SimpleBreakend betaLeft = SimpleBreakend.precise(insContig, insLength, Strand.FWD, id);
+        BreakendDefault betaLeft = BreakendDefault.precise(insContig, insLength, Strand.FWD, id);
         // the right position is one base past the POS coordinate, by convention on (+) strand
-        Breakend betaRight = SimpleBreakend.imprecise(contig, cd.getStart() + 1, cd.getCiStart(), Strand.FWD, id);
-        Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+        Breakend betaRight = BreakendDefault.imprecise(contig, cd.getStart() + 1, cd.getCiStart(), Strand.FWD, id);
+        Adjacency beta = AdjacencyDefault.emptyWithDepth(betaLeft, betaRight, cd.depthOfCoverage());
         return List.of(alpha, beta);
+    }
+
+    private Optional<CoreData> extractCoreData(VariantContext vc) {
+        return extractCoreData(vc, true);
     }
 
     /**
      * Convenience method to extract contig, start and `END` (+confidence intervals) values from variant context.
      */
-    private Optional<CoreData> extractCoreData(VariantContext vc) {
+    private Optional<CoreData> extractCoreData(VariantContext vc, boolean requireEnd) {
         // parse contig
         final Optional<Contig> contigOptional = assembly.getContigByName(vc.getContig());
         if (contigOptional.isEmpty()) {
@@ -320,7 +337,7 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
         }
         final Contig contig = contigOptional.get();
 
-        if (!vc.hasAttribute("END")) {
+        if (!vc.hasAttribute("END") && requireEnd) {
             LOGGER.warn("Missing `END` attribute for variant {}", vc);
             return Optional.empty();
         }
@@ -355,7 +372,26 @@ public class VcfSequenceRearrangementParser implements SequenceRearrangementPars
             ciEnd = ConfidenceInterval.precise();
         }
 
-        return Optional.of(new CoreData(contig, begin, ciStart, endPos, ciEnd));
+        // parse depth & zygosity
+        Zygosity zygosity;
+        int depthOfCoverage;
+        GenotypesContext gts = vc.getGenotypes();
+        if (gts.isEmpty()) {
+            zygosity = Zygosity.UNKNOWN;
+            depthOfCoverage = Adjacency.MISSING_DEPTH_PLACEHOLDER;
+        } else if (gts.size() == 1) {
+            Genotype gt = gts.get(0);
+            zygosity = parseZygosity(gt);
+            // get depth of coverage, either from genotype field or from INFO field
+            depthOfCoverage = gt.hasDP()
+                    ? gt.getDP()
+                    : vc.getAttributeAsInt("DP", Adjacency.MISSING_DEPTH_PLACEHOLDER);
+        } else {
+            LOGGER.warn("Parsing records with >1 sample is not supported: {}:{}-{}", vc.getContig(), vc.getStart(), vc.getID());
+            return Optional.empty();
+        }
+
+        return Optional.of(new CoreData(contig, begin, ciStart, endPos, ciEnd, depthOfCoverage, zygosity));
     }
 
 }

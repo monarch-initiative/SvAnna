@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,12 +41,32 @@ public class VcfSequenceRearrangementParserTest extends ToyCoordinateTestBase {
     }
 
     @Test
-    public void parseFile() throws Exception {
+    public void parseFile() {
         VcfSequenceRearrangementParser parser = new VcfSequenceRearrangementParser(GenomeAssemblyProvider.getGrch38Assembly(), ASSEMBLER);
-        Collection<StructuralVariant> rearrangements = parser.parseFile(SV_EXAMPLE_PATH);
+        List<StructuralVariant> rearrangements = parser.parseFile(SV_EXAMPLE_PATH);
 
         // we expect to see 6 rearrangement when things are ready
         assertThat(rearrangements, hasSize(6));
+
+        StructuralVariant deletion = rearrangements.get(0);
+        Adjacency adjacency = deletion.getAdjacencies().get(0);
+        assertThat(adjacency.depthOfCoverage(), is(11));
+        assertThat(deletion.zygosity(), is(Zygosity.HETEROZYGOUS));
+
+        StructuralVariant insertion = rearrangements.get(1);
+        Adjacency left = insertion.getAdjacencies().get(0);
+        Adjacency right = insertion.getAdjacencies().get(1);
+        assertThat(left.depthOfCoverage(), is(-1));
+        assertThat(right.depthOfCoverage(), is(-1));
+        assertThat(insertion.zygosity(), is(Zygosity.HOMOZYGOUS));
+
+        StructuralVariant duplication = rearrangements.get(2);
+        adjacency = duplication.getAdjacencies().get(0);
+        assertThat(adjacency.depthOfCoverage(), is(5));
+        assertThat(duplication.zygosity(), is(Zygosity.UNKNOWN));
+
+        StructuralVariant breakend = rearrangements.get(3);
+        assertThat(breakend.zygosity(), is(Zygosity.UNKNOWN));
     }
 
     /*
@@ -56,7 +75,7 @@ public class VcfSequenceRearrangementParserTest extends ToyCoordinateTestBase {
 
     @Test
     public void makeDeletionAdjacency() {
-        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=20\t";
+        String line = "ctg2\t11\tDEL0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=20\tGT\t0/1";
         VariantContext vc = VCF_CODEC.decode(line);
 
         Optional<Adjacency> adjacencyOpt = parser.makeDeletionAdjacency(vc);
@@ -77,7 +96,7 @@ public class VcfSequenceRearrangementParserTest extends ToyCoordinateTestBase {
 
     @Test
     public void makeDuplicationAdjacency() {
-        String line = "ctg1\t11\tDUP0\tT\t<DUP>\t6\tPASS\tSVTYPE=DUP;END=19;CIPOS=-2,2;CIEND=-1,1\t";
+        String line = "ctg1\t11\tDUP0\tT\t<DUP>\t6\tPASS\tSVTYPE=DUP;END=19;CIPOS=-2,2;CIEND=-1,1\tGT\t0/1";
         VariantContext vc = VCF_CODEC.decode(line);
 
         Optional<Adjacency> adjacencyOpt = parser.makeDuplicationAdjacency(vc);
@@ -100,7 +119,7 @@ public class VcfSequenceRearrangementParserTest extends ToyCoordinateTestBase {
 
     @Test
     public void makeInsertionAdjacencies() {
-        String line = "ctg1\t15\tINS0\tT\t<INS>\t6\tPASS\tSVTYPE=INS;END=15;SVLEN=10\t";
+        String line = "ctg1\t15\tINS0\tT\t<INS>\t6\tPASS\tSVTYPE=INS;END=15;SVLEN=10\tGT\t0/1";
         VariantContext vc = VCF_CODEC.decode(line);
 
         List<? extends Adjacency> adjacencies = parser.makeInsertionAdjacencies(vc);
@@ -132,7 +151,7 @@ public class VcfSequenceRearrangementParserTest extends ToyCoordinateTestBase {
 
     @Test
     public void makeInversionAdjacencies() {
-        String line = "ctg1\t11\tINV0\tT\t<INV>\t6\tPASS\tSVTYPE=INV;END=19\t";
+        String line = "ctg1\t11\tINV0\tT\t<INV>\t6\tPASS\tSVTYPE=INV;END=19\tGT\t0/1";
         VariantContext vc = VCF_CODEC.decode(line);
 
         List<? extends Adjacency> adjacencies = parser.makeInversionAdjacencies(vc);

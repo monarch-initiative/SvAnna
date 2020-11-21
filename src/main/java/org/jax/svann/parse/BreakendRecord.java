@@ -14,19 +14,22 @@ public class BreakendRecord {
     private final String mateId;
     private final String ref;
     private final String alt;
+    private final int depthOfCoverage;
 
     public BreakendRecord(ChromosomalPosition position,
                           String id,
                           String eventId,
                           String mateId,
                           String ref,
-                          String alt) {
+                          String alt,
+                          int depthOfCoverage) {
         this.position = position;
         this.id = id;
         this.eventId = eventId;
         this.mateId = mateId;
         this.ref = ref;
         this.alt = alt;
+        this.depthOfCoverage = depthOfCoverage;
     }
 
     public String getEventId() {
@@ -53,6 +56,10 @@ public class BreakendRecord {
         return alt;
     }
 
+    public int depthOfCoverage() {
+        return depthOfCoverage;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,12 +70,13 @@ public class BreakendRecord {
                 Objects.equals(eventId, that.eventId) &&
                 Objects.equals(mateId, that.mateId) &&
                 Objects.equals(ref, that.ref) &&
-                Objects.equals(alt, that.alt);
+                Objects.equals(alt, that.alt) &&
+                Objects.equals(depthOfCoverage, that.depthOfCoverage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(position, id, eventId, mateId, ref, alt);
+        return Objects.hash(position, id, eventId, mateId, ref, alt, depthOfCoverage);
     }
 
     @Override

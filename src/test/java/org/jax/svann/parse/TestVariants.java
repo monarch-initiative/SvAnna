@@ -18,10 +18,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement gckUpstreamIntergenic_affectingEnhancer() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr7, 44_189_901, Strand.FWD, "gck_del_upstream_intergenic_enhancer_l", "G");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr7, 44_190_100, Strand.FWD, "gck_del_upstream_intergenic_enhancer_r", "G");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr7, 44_189_901, Strand.FWD, "gck_del_upstream_intergenic_enhancer_l", "G");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr7, 44_190_100, Strand.FWD, "gck_del_upstream_intergenic_enhancer_r", "G");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
 
@@ -33,10 +33,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement gckUpstreamIntergenic_NotAffectingEnhancer() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr7, 44_191_001, Strand.FWD, "gck_del_upstream_intergenic_l", "t");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr7, 44_192_000, Strand.FWD, "gck_del_upstream_intergenic_r", "t");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr7, 44_191_001, Strand.FWD, "gck_del_upstream_intergenic_l", "t");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr7, 44_192_000, Strand.FWD, "gck_del_upstream_intergenic_r", "t");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -47,10 +47,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement gckUpstreamIntergenic_affectingPhenotypicallyNonrelevantEnhancer() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr7, 44_194_501, Strand.FWD, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_l", "t");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr7, 44_195_500, Strand.FWD, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_r", "t");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr7, 44_194_501, Strand.FWD, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_l", "t");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr7, 44_195_500, Strand.FWD, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer_r", "t");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -60,10 +60,10 @@ public class TestVariants extends TestBase {
          * chr9:133_357_501-133_358_000
          */
         public static SequenceRearrangement surf2singleExon_exon3() {
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(GENOME_ASSEMBLY.getContigByName("9").orElseThrow(), 133_357_501, Strand.FWD, "left_single_exon_del", "C");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(GENOME_ASSEMBLY.getContigByName("9").orElseThrow(), 133_358_000, Strand.FWD, "right_single_exon_del", "A");
+            BreakendDefault left = BreakendDefault.preciseWithRef(GENOME_ASSEMBLY.getContigByName("9").orElseThrow(), 133_357_501, Strand.FWD, "left_single_exon_del", "C");
+            BreakendDefault right = BreakendDefault.preciseWithRef(GENOME_ASSEMBLY.getContigByName("9").orElseThrow(), 133_358_000, Strand.FWD, "right_single_exon_del", "A");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
 
@@ -75,10 +75,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1TwoExon_exons_6_and_7() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_352_301, Strand.FWD, "two_exon_del_l", "T");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 133_352_900, Strand.FWD, "two_exon_del_r", "C");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_352_301, Strand.FWD, "two_exon_del_l", "T");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 133_352_900, Strand.FWD, "two_exon_del_r", "C");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -89,10 +89,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1SingleExon_exon2() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_356_251, Strand.FWD, "surf1_exon2_del_l", "C");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 133_356_350, Strand.FWD, "surf1_exon2_del_r", "C");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_356_251, Strand.FWD, "surf1_exon2_del_l", "C");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 133_356_350, Strand.FWD, "surf1_exon2_del_r", "C");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -103,10 +103,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1Surf2oneEntireTranscriptAndPartOfAnother() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_350_001, Strand.FWD, "entire_tx_del_l", "G");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 133_358_000, Strand.FWD, "entire_tx_del_r", "A");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_350_001, Strand.FWD, "entire_tx_del_l", "G");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 133_358_000, Strand.FWD, "entire_tx_del_r", "A");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
 
@@ -118,10 +118,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf2WithinAnIntron() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_359_001, Strand.FWD, "del_within_intron_l", "C");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 133_359_700, Strand.FWD, "del_within_intron_r", "G");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_359_001, Strand.FWD, "del_within_intron_l", "C");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 133_359_700, Strand.FWD, "del_within_intron_r", "G");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -129,10 +129,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement zbtb48intron1() {
             Contig chr1 = GENOME_ASSEMBLY.getContigByName("1").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr1, 6_580_300, Strand.FWD, "del_within_intron_l", "C");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr1, 6_580_400, Strand.FWD, "del_within_intron_r", "G");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr1, 6_580_300, Strand.FWD, "del_within_intron_l", "C");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr1, 6_580_400, Strand.FWD, "del_within_intron_r", "G");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
 
@@ -147,10 +147,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf2In5UTR() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_356_561, Strand.FWD, "del_in_5utr_l", "T");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 133_356_580, Strand.FWD, "del_in_5utr_r", "G");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_356_561, Strand.FWD, "del_in_5utr_l", "T");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 133_356_580, Strand.FWD, "del_in_5utr_r", "G");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -161,10 +161,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1In3UTR() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_351_801, Strand.FWD, "del_in_3utr_l", "G");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 133_351_900, Strand.FWD, "del_in_3utr_r", "A");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_351_801, Strand.FWD, "del_in_3utr_l", "G");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 133_351_900, Strand.FWD, "del_in_3utr_r", "A");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -175,10 +175,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement surf1DownstreamIntergenic() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_300_001, Strand.FWD, "del_downstream_intergenic_l", "t");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 133_310_000, Strand.FWD, "del_downstream_intergenic_l", "C");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_300_001, Strand.FWD, "del_downstream_intergenic_l", "t");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 133_310_000, Strand.FWD, "del_downstream_intergenic_l", "C");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
 
         /**
@@ -190,10 +190,10 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement brca2UpstreamIntergenic() {
             Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr15, 48_655_000, Strand.FWD, "del_upstream_intergenic_l", "T");
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr15, 48_665_000, Strand.FWD, "del_upstream_intergenic_r", "G");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr15, 48_655_000, Strand.FWD, "del_upstream_intergenic_l", "T");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr15, 48_665_000, Strand.FWD, "del_upstream_intergenic_r", "G");
 
-            return SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         }
     }
 
@@ -207,15 +207,15 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf2InsertionIn5UTR() {
             Contig contig = new InsertionContig("ins5UTR", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend alphaLeft = SimpleBreakend.preciseWithRef(chr9, 133_356_571, Strand.FWD, "a_ins_5utr_l", "C");
-            SimpleBreakend alphaRight = SimpleBreakend.preciseWithRef(contig, 1, Strand.FWD, "a_ins_5utr_r", "");
-            SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            BreakendDefault alphaLeft = BreakendDefault.preciseWithRef(chr9, 133_356_571, Strand.FWD, "a_ins_5utr_l", "C");
+            BreakendDefault alphaRight = BreakendDefault.preciseWithRef(contig, 1, Strand.FWD, "a_ins_5utr_r", "");
+            AdjacencyDefault alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.preciseWithRef(contig, 10, Strand.FWD, "b_ins_5utr_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.preciseWithRef(chr9, 133_356_572, Strand.FWD, "b_ins_5utr_r", "T");
-            SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            BreakendDefault betaLeft = BreakendDefault.preciseWithRef(contig, 10, Strand.FWD, "b_ins_5utr_l", "");
+            BreakendDefault betaRight = BreakendDefault.preciseWithRef(chr9, 133_356_572, Strand.FWD, "b_ins_5utr_r", "T");
+            AdjacencyDefault beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INSERTION, alpha, beta);
         }
 
         /**
@@ -227,15 +227,15 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf1InsertionIn3UTR() {
             Contig contig = new InsertionContig("ins3UTR", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend alphaLeft = SimpleBreakend.preciseWithRef(chr9, 133_351_851, Strand.FWD, "a_ins_3utr_l", "C");
-            SimpleBreakend alphaRight = SimpleBreakend.preciseWithRef(contig, 1, Strand.FWD, "a_ins_3utr_r", "");
-            SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            BreakendDefault alphaLeft = BreakendDefault.preciseWithRef(chr9, 133_351_851, Strand.FWD, "a_ins_3utr_l", "C");
+            BreakendDefault alphaRight = BreakendDefault.preciseWithRef(contig, 1, Strand.FWD, "a_ins_3utr_r", "");
+            AdjacencyDefault alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.preciseWithRef(contig, 10, Strand.FWD, "b_ins_3utr_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.preciseWithRef(chr9, 133_351_852, Strand.FWD, "b_ins_3utr_r", "A");
-            SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            BreakendDefault betaLeft = BreakendDefault.preciseWithRef(contig, 10, Strand.FWD, "b_ins_3utr_l", "");
+            BreakendDefault betaRight = BreakendDefault.preciseWithRef(chr9, 133_351_852, Strand.FWD, "b_ins_3utr_r", "A");
+            AdjacencyDefault beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INSERTION, alpha, beta);
         }
 
         /**
@@ -247,17 +247,17 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf2Exon4() {
             Contig contig = new InsertionContig("insInExon4", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend alphaLeft = SimpleBreakend.preciseWithRef(
+            BreakendDefault alphaLeft = BreakendDefault.preciseWithRef(
                     chr9, 133_360_001, Strand.FWD,
                     "a_ins_exon_l", "A");
-            SimpleBreakend alphaRight = SimpleBreakend.preciseWithRef(contig, 1, Strand.FWD, "a_ins_exon_r", "");
-            SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            BreakendDefault alphaRight = BreakendDefault.preciseWithRef(contig, 1, Strand.FWD, "a_ins_exon_r", "");
+            AdjacencyDefault alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.preciseWithRef(contig, 10, Strand.FWD, "b_ins_exon_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.preciseWithRef(chr9, 133_360_002, Strand.FWD, "b_ins_exon_r", "C");
-            SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            BreakendDefault betaLeft = BreakendDefault.preciseWithRef(contig, 10, Strand.FWD, "b_ins_exon_l", "");
+            BreakendDefault betaRight = BreakendDefault.preciseWithRef(chr9, 133_360_002, Strand.FWD, "b_ins_exon_r", "C");
+            AdjacencyDefault beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INSERTION, alpha, beta);
         }
 
 
@@ -270,15 +270,15 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement surf2Intron3() {
             Contig contig = new InsertionContig("insInIntron3", 10);
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend alphaLeft = SimpleBreakend.preciseWithRef(chr9, 133_359_001, Strand.FWD, "a_ins_intron_l", "C");
-            SimpleBreakend alphaRight = SimpleBreakend.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
-            SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            BreakendDefault alphaLeft = BreakendDefault.preciseWithRef(chr9, 133_359_001, Strand.FWD, "a_ins_intron_l", "C");
+            BreakendDefault alphaRight = BreakendDefault.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
+            AdjacencyDefault alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.preciseWithRef(contig, 10, Strand.FWD, "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.preciseWithRef(chr9, 133_359_002, Strand.FWD, "b_ins_intron_r", "A");
-            SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            BreakendDefault betaLeft = BreakendDefault.preciseWithRef(contig, 10, Strand.FWD, "b_ins_intron_l", "");
+            BreakendDefault betaRight = BreakendDefault.preciseWithRef(chr9, 133_359_002, Strand.FWD, "b_ins_intron_r", "A");
+            AdjacencyDefault beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INSERTION, alpha, beta);
         }
 
 
@@ -292,15 +292,15 @@ public class TestVariants extends TestBase {
             int inserted = 200;
             Contig contig = new InsertionContig("gckEnhancerInsertion", inserted);
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-            SimpleBreakend alphaLeft = SimpleBreakend.preciseWithRef(chr7, 44_190_025, Strand.FWD, "a_ins_intron_l", "T");
-            SimpleBreakend alphaRight = SimpleBreakend.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
-            SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            BreakendDefault alphaLeft = BreakendDefault.preciseWithRef(chr7, 44_190_025, Strand.FWD, "a_ins_intron_l", "T");
+            BreakendDefault alphaRight = BreakendDefault.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
+            AdjacencyDefault alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.preciseWithRef(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.preciseWithRef(chr7, 44_190_026, Strand.FWD, "b_ins_intron_r", "G");
-            SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            BreakendDefault betaLeft = BreakendDefault.preciseWithRef(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
+            BreakendDefault betaRight = BreakendDefault.preciseWithRef(chr7, 44_190_026, Strand.FWD, "b_ins_intron_r", "G");
+            AdjacencyDefault beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INSERTION, alpha, beta);
         }
 
         /**
@@ -313,15 +313,15 @@ public class TestVariants extends TestBase {
             int inserted = 200;
             Contig contig = new InsertionContig("gckNonrelevantEnhancerInsertion", inserted);
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-            SimpleBreakend alphaLeft = SimpleBreakend.preciseWithRef(chr7, 44_195_025, Strand.FWD, "a_ins_intron_l", "T");
-            SimpleBreakend alphaRight = SimpleBreakend.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
-            SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            BreakendDefault alphaLeft = BreakendDefault.preciseWithRef(chr7, 44_195_025, Strand.FWD, "a_ins_intron_l", "T");
+            BreakendDefault alphaRight = BreakendDefault.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
+            AdjacencyDefault alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.preciseWithRef(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.preciseWithRef(chr7, 44_195_026, Strand.FWD, "b_ins_intron_r", "G");
-            SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            BreakendDefault betaLeft = BreakendDefault.preciseWithRef(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
+            BreakendDefault betaRight = BreakendDefault.preciseWithRef(chr7, 44_195_026, Strand.FWD, "b_ins_intron_r", "G");
+            AdjacencyDefault beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INSERTION, alpha, beta);
         }
 
         /**
@@ -334,15 +334,15 @@ public class TestVariants extends TestBase {
             int inserted = 200;
             Contig contig = new InsertionContig("gckIntergenicInsertion", inserted);
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-            SimpleBreakend alphaLeft = SimpleBreakend.preciseWithRef(chr7, 44_196_025, Strand.FWD, "a_ins_intron_l", "t");
-            SimpleBreakend alphaRight = SimpleBreakend.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
-            SimpleAdjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            BreakendDefault alphaLeft = BreakendDefault.preciseWithRef(chr7, 44_196_025, Strand.FWD, "a_ins_intron_l", "t");
+            BreakendDefault alphaRight = BreakendDefault.preciseWithRef(contig, 1, Strand.FWD, "a_ins_intron_r", "");
+            AdjacencyDefault alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            SimpleBreakend betaLeft = SimpleBreakend.preciseWithRef(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
-            SimpleBreakend betaRight = SimpleBreakend.preciseWithRef(chr7, 44_196_026, Strand.FWD, "b_ins_intron_r", "c");
-            SimpleAdjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            BreakendDefault betaLeft = BreakendDefault.preciseWithRef(contig, inserted, Strand.FWD, "b_ins_intron_l", "");
+            BreakendDefault betaRight = BreakendDefault.preciseWithRef(chr7, 44_196_026, Strand.FWD, "b_ins_intron_r", "c");
+            AdjacencyDefault beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INSERTION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INSERTION, alpha, beta);
         }
 
     }
@@ -449,15 +449,15 @@ public class TestVariants extends TestBase {
             int alphaRightPos = contig.getLength() - end + 1;
             int betaLeftPos = contig.getLength() - begin + 1;
 
-            Breakend alphaLeft = SimpleBreakend.precise(contig, begin - 1, Strand.FWD, "alphaLeft");
-            Breakend alphaRight = SimpleBreakend.precise(contig, alphaRightPos, Strand.REV, "alphaRight");
-            Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+            Breakend alphaLeft = BreakendDefault.precise(contig, begin - 1, Strand.FWD, "alphaLeft");
+            Breakend alphaRight = BreakendDefault.precise(contig, alphaRightPos, Strand.REV, "alphaRight");
+            Adjacency alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-            Breakend betaLeft = SimpleBreakend.precise(contig, betaLeftPos, Strand.REV, "betaLeft");
-            Breakend betaRight = SimpleBreakend.precise(contig, end + 1, Strand.FWD, "betaRight");
-            Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+            Breakend betaLeft = BreakendDefault.precise(contig, betaLeftPos, Strand.REV, "betaLeft");
+            Breakend betaRight = BreakendDefault.precise(contig, end + 1, Strand.FWD, "betaRight");
+            Adjacency beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SimpleSequenceRearrangement.of(SvType.INVERSION, alpha, beta);
+            return SequenceRearrangementDefault.of(SvType.INVERSION, alpha, beta);
         }
 
     }
@@ -474,11 +474,11 @@ public class TestVariants extends TestBase {
          */
         public static SequenceRearrangement translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-            SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 133_359_000, Strand.FWD, "tra_l", "G");
+            BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_359_000, Strand.FWD, "tra_l", "G");
             Contig chr13 = GENOME_ASSEMBLY.getContigByName("13").orElseThrow();
-            SimpleBreakend right = SimpleBreakend.preciseWithRef(chr13, 32_300_000, Strand.FWD, "tra_r", "A");
+            BreakendDefault right = BreakendDefault.preciseWithRef(chr13, 32_300_000, Strand.FWD, "tra_r", "A");
 
-            return SimpleSequenceRearrangement.of(SvType.TRANSLOCATION, SimpleAdjacency.empty(left, right));
+            return SequenceRearrangementDefault.of(SvType.TRANSLOCATION, AdjacencyDefault.empty(left, right));
         }
 
     }

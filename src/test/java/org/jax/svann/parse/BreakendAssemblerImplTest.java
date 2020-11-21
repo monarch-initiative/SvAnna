@@ -36,40 +36,42 @@ public class BreakendAssemblerImplTest extends TestBase {
     @Test
     public void assemble_usingEventIds() {
         final BreakendRecord bnd_W = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321681, Strand.FWD),
-                "bnd_W", "TRA0", "bnd_Y", "G", "G]17:198982]");
+                "bnd_W", "TRA0", "bnd_Y", "G", "G]17:198982]", 5);
         final BreakendRecord bnd_Y = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198982, Strand.FWD),
-                "bnd_Y", "TRA0", "bnd_W", "A", "A]2:321681]");
+                "bnd_Y", "TRA0", "bnd_W", "A", "A]2:321681]", 5);
 
         final BreakendRecord bnd_V = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321682, Strand.FWD),
-                "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]T");
+                "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]T", 6);
         final BreakendRecord bnd_U = new BreakendRecord(ChromosomalPosition.precise(CHR13, 123456, Strand.FWD),
-                "bnd_U", "TRA1", "bnd_V", "C", "C[2:321682[");
+                "bnd_U", "TRA1", "bnd_V", "C", "C[2:321682[", 6);
 
         final BreakendRecord bnd_X = new BreakendRecord(ChromosomalPosition.precise(CHR13, 198982, Strand.FWD),
-                "bnd_X", "TRA2", "bnd_Z", "A", "[17:198983[A");
+                "bnd_X", "TRA2", "bnd_Z", "A", "[17:198983[A", 7);
         final BreakendRecord bnd_Z = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198983, Strand.FWD),
-                "bnd_Z", "TRA2", "bnd_X", "C", "[13:123457[C");
+                "bnd_Z", "TRA2", "bnd_X", "C", "[13:123457[C", 7);
 
         final List<? extends SequenceRearrangement> rearrangements = assembler.assemble(Set.of(bnd_W, bnd_Y, bnd_V, bnd_U, bnd_X, bnd_Z));
+
+//        assertThat(rearrangements, hasSize(3));
         rearrangements.forEach(System.err::println);
     }
 
     @Test
     public void assemble_withoutEventIds() {
         final BreakendRecord bnd_W = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321681, Strand.FWD),
-                "bnd_W", null, "bnd_Y", "G", "G]17:198982]");
+                "bnd_W", null, "bnd_Y", "G", "G]17:198982]", 5);
         final BreakendRecord bnd_Y = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198982, Strand.FWD),
-                "bnd_Y", null, "bnd_W", "A", "A]2:321681]");
+                "bnd_Y", null, "bnd_W", "A", "A]2:321681]", 5);
 
         final BreakendRecord bnd_V = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321682, Strand.FWD),
-                "bnd_V", null, "bnd_U", "T", "]13:123456]T");
+                "bnd_V", null, "bnd_U", "T", "]13:123456]T", 6);
         final BreakendRecord bnd_U = new BreakendRecord(ChromosomalPosition.precise(CHR13, 123456, Strand.FWD),
-                "bnd_U", null, "bnd_V", "C", "C[2:321682[");
+                "bnd_U", null, "bnd_V", "C", "C[2:321682[", 6);
 
         final BreakendRecord bnd_X = new BreakendRecord(ChromosomalPosition.precise(CHR13, 198982, Strand.FWD),
-                "bnd_X", null, "bnd_Z", "A", "[17:198983[A");
+                "bnd_X", null, "bnd_Z", "A", "[17:198983[A", 7);
         final BreakendRecord bnd_Z = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198983, Strand.FWD),
-                "bnd_Z", null, "bnd_X", "C", "[13:123457[C");
+                "bnd_Z", null, "bnd_X", "C", "[13:123457[C", 7);
 
         final List<? extends SequenceRearrangement> rearrangements = assembler.assemble(Set.of(bnd_W, bnd_Y, bnd_V, bnd_U, bnd_X, bnd_Z));
         assertThat(rearrangements, hasSize(3));
@@ -83,9 +85,9 @@ public class BreakendAssemblerImplTest extends TestBase {
     @Test
     public void assembleBreakendRecords_WY() {
         BreakendRecord bnd_W = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321681, Strand.FWD),
-                "bnd_W", "TRA0", "bnd_Y", "G", "G]17:198982]");
+                "bnd_W", "TRA0", "bnd_Y", "G", "G]17:198982]", 6);
         BreakendRecord bnd_Y = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198982, Strand.FWD),
-                "bnd_Y", "TRA0", "bnd_W", "A", "A]2:321681]");
+                "bnd_Y", "TRA0", "bnd_W", "A", "A]2:321681]", 7);
         Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_W, bnd_Y);
         assertThat(rearrangementOpt.isPresent(), is(true));
 
@@ -99,6 +101,7 @@ public class BreakendAssemblerImplTest extends TestBase {
 
         Adjacency adjacency = adjacencies.get(0);
         assertThat(adjacency.getStrand(), is(Strand.FWD)); // again, W is on FWD strand
+        assertThat(adjacency.depthOfCoverage(), is(6)); // smaller depth is reported
 
         Breakend left = adjacency.getStart(); // W
         assertThat(left.getId(), is("bnd_W"));
@@ -121,9 +124,9 @@ public class BreakendAssemblerImplTest extends TestBase {
     @Test
     public void assembleBreakendRecords_UV() {
         BreakendRecord bnd_U = new BreakendRecord(ChromosomalPosition.precise(CHR13, 123456, Strand.FWD),
-                "bnd_U", "TRA1", "bnd_V", "C", "C[2:321682[");
+                "bnd_U", "TRA1", "bnd_V", "C", "C[2:321682[", 5);
         BreakendRecord bnd_V = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321682, Strand.FWD),
-                "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]T");
+                "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]T", 6);
 
         Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_U, bnd_V);
         assertThat(rearrangementOpt.isPresent(), is(true));
@@ -138,6 +141,7 @@ public class BreakendAssemblerImplTest extends TestBase {
 
         Adjacency adjacency = adjacencies.get(0);
         assertThat(adjacency.getStrand(), is(Strand.FWD)); // again, U is on FWD strand
+        assertThat(adjacency.depthOfCoverage(), is(5)); // smaller depth is reported
 
         Breakend left = adjacency.getStart(); // U
         assertThat(left.getId(), is("bnd_U"));
@@ -160,9 +164,9 @@ public class BreakendAssemblerImplTest extends TestBase {
     @Test
     public void assembleBreakendRecords_XZ() {
         BreakendRecord bnd_X = new BreakendRecord(ChromosomalPosition.precise(CHR13, 198982, Strand.FWD),
-                "bnd_X", "TRA2", "bnd_Z", "A", "[17:198983[A");
+                "bnd_X", "TRA2", "bnd_Z", "A", "[17:198983[A", 5);
         BreakendRecord bnd_Z = new BreakendRecord(ChromosomalPosition.precise(CHR17, 198983, Strand.FWD),
-                "bnd_Z", "TRA2", "bnd_X", "C", "[13:123457[C");
+                "bnd_Z", "TRA2", "bnd_X", "C", "[13:123457[C", 5);
 
         Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_X, bnd_Z);
         assertThat(rearrangementOpt.isPresent(), is(true));
@@ -177,6 +181,7 @@ public class BreakendAssemblerImplTest extends TestBase {
 
         Adjacency adjacency = adjacencies.get(0);
         assertThat(adjacency.getStrand(), is(Strand.REV)); // again, X is on REV strand
+        assertThat(adjacency.depthOfCoverage(), is(5)); // smaller depth is reported
 
         Breakend left = adjacency.getStart(); // X
         assertThat(left.getId(), is("bnd_X"));
@@ -196,9 +201,9 @@ public class BreakendAssemblerImplTest extends TestBase {
     @Test
     public void assembleBreakendRecords_withInsertedSequence() {
         BreakendRecord bnd_U = new BreakendRecord(ChromosomalPosition.precise(CHR13, 123456, Strand.FWD),
-                "bnd_U", "TRA1", "bnd_V", "C", "CAGTNNNNNCA[2:321682[");
+                "bnd_U", "TRA1", "bnd_V", "C", "CAGTNNNNNCA[2:321682[", 5);
         BreakendRecord bnd_V = new BreakendRecord(ChromosomalPosition.precise(CHR2, 321682, Strand.FWD),
-                "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]AGTNNNNNCAT");
+                "bnd_V", "TRA1", "bnd_U", "T", "]13:123456]AGTNNNNNCAT", 5);
 
         Optional<? extends StructuralVariant> rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_U, bnd_V);
         assertThat(rearrangementOpt.isPresent(), is(true));
@@ -207,6 +212,7 @@ public class BreakendAssemblerImplTest extends TestBase {
         Adjacency adjacency = rearrangement.getAdjacencies().get(0);
         assertThat(adjacency.getStrand(), is(Strand.FWD)); // again, U is on FWD strand
         assertThat(adjacency.getInserted(), is("CAGTNNNNNCA".getBytes(StandardCharsets.US_ASCII)));
+        assertThat(adjacency.depthOfCoverage(), is(5)); // smaller depth is reported
 
         // now let's do that the other way around, submitting `bnd_V` as the 1st breakend
         rearrangementOpt = BreakendAssemblerImpl.assembleBreakendRecords(bnd_V, bnd_U);

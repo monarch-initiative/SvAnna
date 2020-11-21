@@ -17,7 +17,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class SimpleAdjacencyTest extends ToyCoordinateTestBase {
+public class AdjacencyDefaultTest extends ToyCoordinateTestBase {
     private static final Charset CHARSET = StandardCharsets.US_ASCII;
 
     private static Breakend LEFT, RIGHT;
@@ -25,19 +25,19 @@ public class SimpleAdjacencyTest extends ToyCoordinateTestBase {
     /**
      * This adjacency represents deletion of 7 bases from the toy contig
      */
-    private SimpleAdjacency instance;
+    private AdjacencyDefault instance;
 
     @BeforeAll
     public static void beforeAll() {
         // contig with length 20
         Contig CONTIG = TOY_ASSEMBLY.getContigByName("ctg2").orElseThrow();
-        LEFT = SimpleBreakend.precise(CONTIG, 6, Strand.FWD, "LEFT");
-        RIGHT = SimpleBreakend.precise(CONTIG, 12, Strand.FWD, "RIGHT");
+        LEFT = BreakendDefault.precise(CONTIG, 6, Strand.FWD, "LEFT");
+        RIGHT = BreakendDefault.precise(CONTIG, 12, Strand.FWD, "RIGHT");
     }
 
     @BeforeEach
     public void setUp() {
-        instance = SimpleAdjacency.withInsertedSequence(LEFT, RIGHT, "ACGT".getBytes(CHARSET));
+        instance = AdjacencyDefault.withInsertedSequence(LEFT, RIGHT, "ACGT".getBytes(CHARSET));
     }
 
     @Test
@@ -51,6 +51,7 @@ public class SimpleAdjacencyTest extends ToyCoordinateTestBase {
         assertThat(adjacency.getStrand(), is(Strand.REV));
         String inserted = CHARSET.decode(ByteBuffer.wrap(adjacency.getInserted())).toString();
         assertThat(inserted, is("ACGT"));
+        assertThat(adjacency.depthOfCoverage(), is(-1));
 
         Breakend left = adjacency.getStart();
         assertThat(left.getId(), is("RIGHT"));

@@ -106,7 +106,7 @@ public class BreakendAssemblerImpl implements BreakendAssembler<StructuralVarian
         String leftRef = leftStrand.isForward()
                 ? left.getRef()
                 : Utils.reverseComplement(left.getRef());
-        SimpleBreakend leftBreakend = SimpleBreakend.impreciseWithRef(leftPos.getContig(),
+        Breakend leftBreakend = BreakendDefault.impreciseWithRef(leftPos.getContig(),
                 leftPos.getPosition(),
                 leftPos.getCi(),
                 leftStrand,
@@ -118,7 +118,7 @@ public class BreakendAssemblerImpl implements BreakendAssembler<StructuralVarian
         String rightRef = rightStrand.isForward()
                 ? right.getRef()
                 : Utils.reverseComplement(right.getRef());
-        SimpleBreakend rightBreakend = SimpleBreakend.impreciseWithRef(rightPos.getContig(),
+        Breakend rightBreakend = BreakendDefault.impreciseWithRef(rightPos.getContig(),
                 rightPos.getPosition(),
                 rightPos.getCi(),
                 rightStrand,
@@ -160,9 +160,10 @@ public class BreakendAssemblerImpl implements BreakendAssembler<StructuralVarian
         // 4 - figure out if there is an inserted sequence
         // we can get the inserted sequence from any allele, let's use left
         byte[] inserted = getInsertedSequence(leftAltMatcher, leftStrand);
+        int depthOfCoverage = Math.min(left.depthOfCoverage(), right.depthOfCoverage());
 
-        SimpleAdjacency adjacency = SimpleAdjacency.withInsertedSequence(leftBreakend, rightBreakend, inserted);
-        return Optional.of(SimpleStructuralVariant.of(type, adjacency));
+        AdjacencyDefault adjacency = AdjacencyDefault.withInsertedSequenceAndDepth(leftBreakend, rightBreakend, inserted, depthOfCoverage);
+        return Optional.of(StructuralVariantDefault.of(type, adjacency));
     }
 
     private static byte[] getInsertedSequence(Matcher altMatcher, Strand strand) {

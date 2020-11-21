@@ -12,11 +12,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 
-public class SimpleBreakendTest extends ToyCoordinateTestBase {
+public class BreakendDefaultTest extends ToyCoordinateTestBase {
 
     private static Contig CONTIG;
 
-    private SimpleBreakend instance;
+    private BreakendDefault instance;
 
     @BeforeAll
     public static void beforeAll() {
@@ -26,7 +26,7 @@ public class SimpleBreakendTest extends ToyCoordinateTestBase {
 
     @BeforeEach
     public void setUp() {
-        instance = SimpleBreakend.precise(CONTIG, 5, Strand.FWD, "Johnny");
+        instance = BreakendDefault.precise(CONTIG, 5, Strand.FWD, "Johnny");
     }
 
     @Test

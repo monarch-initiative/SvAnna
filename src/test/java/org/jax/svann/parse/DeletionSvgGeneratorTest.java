@@ -15,7 +15,10 @@ import org.jax.svann.overlap.Overlapper;
 import org.jax.svann.overlap.SvAnnOverlapper;
 import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvPrioritizer;
-import org.jax.svann.reference.*;
+import org.jax.svann.reference.CoordinatePair;
+import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.Strand;
+import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
@@ -105,9 +108,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testANO1() {
         Contig chr11 = GENOME_ASSEMBLY.getContigByName("11").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr11, 70_078_300, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr11, 70_189_000, Strand.FWD, "gck_del_upstream_intergenic_r", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr11, 70_078_300, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr11, 70_189_000, Strand.FWD, "gck_del_upstream_intergenic_r", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -124,9 +127,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testAP3S2() {
         Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr15, 89_830_599, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr15, 89_894_638, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr15, 89_830_599, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr15, 89_894_638, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -143,9 +146,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testDDX3X() {
         Contig chrX = GENOME_ASSEMBLY.getContigByName("X").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chrX, 41339038, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chrX, 41339083, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chrX, 41339038, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chrX, 41339083, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -163,9 +166,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testESRP2() {
         Contig chr16 = GENOME_ASSEMBLY.getContigByName("16").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr16, 68232370, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr16, 68232503, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr16, 68232370, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr16, 68232503, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -183,9 +186,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testESYT2() {
         Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr7, 158742780, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr7, 158752843, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr7, 158742780, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr7, 158752843, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -202,9 +205,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testFGFR2a() {
         Contig chr10 = GENOME_ASSEMBLY.getContigByName("10").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr10, 121518681, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr10, 121518829, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr10, 121518681, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr10, 121518829, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -221,9 +224,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testFGFR2b() {
         Contig chr10 = GENOME_ASSEMBLY.getContigByName("10").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr10, 121517318, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr10, 121517463, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr10, 121517318, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr10, 121517463, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -240,9 +243,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testITGB4() {
         Contig chr17 = GENOME_ASSEMBLY.getContigByName("17").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr17, 75755054, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr17, 75755213, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr17, 75755054, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr17, 75755213, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -259,9 +262,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testPLEC() {
         Contig chr8 = GENOME_ASSEMBLY.getContigByName("8").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr8, 143938400, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr8, 143938415, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr8, 143938400, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr8, 143938415, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -279,9 +282,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testMYH14() {
         Contig chr19 = GENOME_ASSEMBLY.getContigByName("19").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr19, 50224153, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr19, 50224177, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr19, 50224153, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr19, 50224177, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -298,9 +301,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testSLK() {
         Contig chr10 = GENOME_ASSEMBLY.getContigByName("10").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr10, 104010815, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr10, 104010908, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr10, 104010815, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr10, 104010908, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -317,9 +320,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testTBC1D13() {
         Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chr9, 128790734, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chr9, 128790775, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 128790734, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chr9, 128790775, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -337,9 +340,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testKDM5C() {
         Contig chrX = GENOME_ASSEMBLY.getContigByName("X").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chrX, 53218275, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chrX, 53218398, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chrX, 53218275, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chrX, 53218398, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -356,9 +359,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testKDM5Cb() {
         Contig chrX = GENOME_ASSEMBLY.getContigByName("X").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chrX, 53221687, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chrX, 53221730, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chrX, 53221687, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chrX, 53221730, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
@@ -375,9 +378,9 @@ public class DeletionSvgGeneratorTest {
     @Test
     public void testXIST() {
         Contig chrX = GENOME_ASSEMBLY.getContigByName("X").orElseThrow();
-        SimpleBreakend left = SimpleBreakend.preciseWithRef(chrX, 73_810_115, Strand.FWD, "upstream", "t");
-        SimpleBreakend right = SimpleBreakend.preciseWithRef(chrX, 73_840_984, Strand.FWD, "down", "t");
-        SequenceRearrangement rearrangement = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(left, right));
+        BreakendDefault left = BreakendDefault.preciseWithRef(chrX, 73_810_115, Strand.FWD, "upstream", "t");
+        BreakendDefault right = BreakendDefault.preciseWithRef(chrX, 73_840_984, Strand.FWD, "down", "t");
+        SequenceRearrangement rearrangement = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(left, right));
         List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();

@@ -11,15 +11,15 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
+public class SequenceRearrangementDefaultTest extends ToyCoordinateTestBase {
 
     /**
      * This rearrangement represents an inversion of 10 bp-long segment on the contig
      */
-    private SimpleSequenceRearrangement inversion;
-    private SimpleSequenceRearrangement deletion;
-    private SimpleSequenceRearrangement translocation;
-    private SimpleSequenceRearrangement insertion;
+    private SequenceRearrangementDefault inversion;
+    private SequenceRearrangementDefault deletion;
+    private SequenceRearrangementDefault translocation;
+    private SequenceRearrangementDefault insertion;
 
 
     @BeforeEach
@@ -29,30 +29,30 @@ public class SimpleSequenceRearrangementTest extends ToyCoordinateTestBase {
         Contig ctg2 = TOY_ASSEMBLY.getContigByName("ctg2").orElseThrow(); // length 20 bp
 
         // Make INVERSION
-        Breakend alphaLeft = SimpleBreakend.precise(ctg1, 10, Strand.FWD, "alphaLeft");
-        Breakend alphaRight = SimpleBreakend.precise(ctg1, 12, Strand.REV, "alphaRight");
-        Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+        Breakend alphaLeft = BreakendDefault.precise(ctg1, 10, Strand.FWD, "alphaLeft");
+        Breakend alphaRight = BreakendDefault.precise(ctg1, 12, Strand.REV, "alphaRight");
+        Adjacency alpha = AdjacencyDefault.empty(alphaLeft, alphaRight);
 
-        Breakend betaLeft = SimpleBreakend.precise(ctg1, 20, Strand.REV, "betaLeft");
-        Breakend betaRight = SimpleBreakend.precise(ctg1, 20, Strand.FWD, "betaRight");
-        Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
-        inversion = SimpleSequenceRearrangement.of(SvType.INVERSION, alpha, beta);
+        Breakend betaLeft = BreakendDefault.precise(ctg1, 20, Strand.REV, "betaLeft");
+        Breakend betaRight = BreakendDefault.precise(ctg1, 20, Strand.FWD, "betaRight");
+        Adjacency beta = AdjacencyDefault.empty(betaLeft, betaRight);
+        inversion = SequenceRearrangementDefault.of(SvType.INVERSION, alpha, beta);
 
         // Make DELETION
-        Breakend delRight = SimpleBreakend.precise(ctg1, 21, Strand.FWD, "delRight");
-        deletion = SimpleSequenceRearrangement.of(SvType.DELETION, SimpleAdjacency.empty(alphaLeft, delRight));
+        Breakend delRight = BreakendDefault.precise(ctg1, 21, Strand.FWD, "delRight");
+        deletion = SequenceRearrangementDefault.of(SvType.DELETION, AdjacencyDefault.empty(alphaLeft, delRight));
 
         // Make TRANSLOCATION
-        Breakend transloc = SimpleBreakend.precise(ctg2, 15, Strand.FWD, "translocation");
-        translocation = SimpleSequenceRearrangement.of(SvType.TRANSLOCATION, SimpleAdjacency.empty(alphaLeft, transloc));
+        Breakend transloc = BreakendDefault.precise(ctg2, 15, Strand.FWD, "translocation");
+        translocation = SequenceRearrangementDefault.of(SvType.TRANSLOCATION, AdjacencyDefault.empty(alphaLeft, transloc));
 
         // Make INSERTION of 10bp
         Contig insertionContig = new InsertionContig("insertionCtg1", 10);
-        Breakend insLeft = SimpleBreakend.precise(ctg1, 15, Strand.FWD, "insLeft");
-        Breakend insMiddleLeft = SimpleBreakend.precise(insertionContig, 1, Strand.FWD, "insMiddleLeft");
-        Breakend insMiddleRight = SimpleBreakend.precise(insertionContig, insertionContig.getLength(), Strand.FWD, "insMiddleRight");
-        Breakend insRight = SimpleBreakend.precise(ctg1, 16, Strand.FWD, "insRight");
-        insertion = SimpleSequenceRearrangement.of(SvType.INSERTION, SimpleAdjacency.empty(insLeft, insMiddleLeft), SimpleAdjacency.empty(insMiddleRight, insRight));
+        Breakend insLeft = BreakendDefault.precise(ctg1, 15, Strand.FWD, "insLeft");
+        Breakend insMiddleLeft = BreakendDefault.precise(insertionContig, 1, Strand.FWD, "insMiddleLeft");
+        Breakend insMiddleRight = BreakendDefault.precise(insertionContig, insertionContig.getLength(), Strand.FWD, "insMiddleRight");
+        Breakend insRight = BreakendDefault.precise(ctg1, 16, Strand.FWD, "insRight");
+        insertion = SequenceRearrangementDefault.of(SvType.INSERTION, AdjacencyDefault.empty(insLeft, insMiddleLeft), AdjacencyDefault.empty(insMiddleRight, insRight));
     }
 
     @Test

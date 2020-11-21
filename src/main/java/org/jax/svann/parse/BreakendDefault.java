@@ -8,7 +8,7 @@ import org.jax.svann.reference.genome.Contig;
 
 import java.util.Objects;
 
-class SimpleBreakend implements Breakend {
+class BreakendDefault implements Breakend {
 
     private static final String EMPTY = "";
 
@@ -20,13 +20,13 @@ class SimpleBreakend implements Breakend {
     private final String id;
     private final String ref;
 
-    private SimpleBreakend(Contig contig,
-                           int position,
-                           ConfidenceInterval ci,
-                           Strand strand,
-                           CoordinateSystem coordinateSystem,
-                           String id,
-                           String ref) {
+    private BreakendDefault(Contig contig,
+                            int position,
+                            ConfidenceInterval ci,
+                            Strand strand,
+                            CoordinateSystem coordinateSystem,
+                            String id,
+                            String ref) {
         this.contig = contig;
         this.position = position;
         this.ci = ci;
@@ -37,37 +37,37 @@ class SimpleBreakend implements Breakend {
 
     }
 
-    static SimpleBreakend preciseWithRef(Contig contig,
-                                         int position,
-                                         Strand strand,
-                                         String id,
-                                         String ref) {
-        return new SimpleBreakend(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, ref);
+    static BreakendDefault preciseWithRef(Contig contig,
+                                          int position,
+                                          Strand strand,
+                                          String id,
+                                          String ref) {
+        return new BreakendDefault(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, ref);
     }
 
-    static SimpleBreakend precise(Contig contig,
-                                  int position,
-                                  Strand strand,
-                                  String id) {
-        return new SimpleBreakend(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, EMPTY);
+    static BreakendDefault precise(Contig contig,
+                                   int position,
+                                   Strand strand,
+                                   String id) {
+        return new BreakendDefault(contig, position, ConfidenceInterval.precise(), strand, CoordinateSystem.ONE_BASED, id, EMPTY);
     }
 
-    static SimpleBreakend impreciseWithRef(Contig contig,
-                                           int position,
-                                           ConfidenceInterval ci,
-                                           Strand strand,
-                                           CoordinateSystem coordinateSystem,
-                                           String id,
-                                           String ref) {
-        return new SimpleBreakend(contig, position, ci, strand, coordinateSystem, id, ref);
+    static BreakendDefault impreciseWithRef(Contig contig,
+                                            int position,
+                                            ConfidenceInterval ci,
+                                            Strand strand,
+                                            CoordinateSystem coordinateSystem,
+                                            String id,
+                                            String ref) {
+        return new BreakendDefault(contig, position, ci, strand, coordinateSystem, id, ref);
     }
 
-    static SimpleBreakend imprecise(Contig contig,
-                                    int position,
-                                    ConfidenceInterval ci,
-                                    Strand strand,
-                                    String id) {
-        return new SimpleBreakend(contig, position, ci, strand, CoordinateSystem.ONE_BASED, id, EMPTY);
+    static BreakendDefault imprecise(Contig contig,
+                                     int position,
+                                     ConfidenceInterval ci,
+                                     Strand strand,
+                                     String id) {
+        return new BreakendDefault(contig, position, ci, strand, CoordinateSystem.ONE_BASED, id, EMPTY);
     }
 
     @Override
@@ -96,12 +96,12 @@ class SimpleBreakend implements Breakend {
     }
 
     @Override
-    public SimpleBreakend withStrand(Strand strand) {
+    public BreakendDefault withStrand(Strand strand) {
         if (this.strand.equals(strand)) {
             return this;
         } else {
             int pos = contig.getLength() - position + 1;
-            return new SimpleBreakend(contig, pos, ci.toOppositeStrand(), strand, coordinateSystem, id, Utils.reverseComplement(ref));
+            return new BreakendDefault(contig, pos, ci.toOppositeStrand(), strand, coordinateSystem, id, Utils.reverseComplement(ref));
         }
     }
 
@@ -119,7 +119,7 @@ class SimpleBreakend implements Breakend {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SimpleBreakend that = (SimpleBreakend) o;
+        BreakendDefault that = (BreakendDefault) o;
         return position == that.position &&
                 Objects.equals(contig, that.contig) &&
                 Objects.equals(ci, that.ci) &&

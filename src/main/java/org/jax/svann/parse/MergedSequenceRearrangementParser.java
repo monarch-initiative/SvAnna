@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,10 +23,14 @@ import java.util.stream.Collectors;
  *     <li>DEL</li>
  *     <li>INV</li>
  * </ul>
+ * <p>
+ * TODO - each caller reports its own depth of coverage. Which one to report? Median? Min? Evaluate..
  */
 public class MergedSequenceRearrangementParser implements SequenceRearrangementParser<SequenceRearrangement> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MergedSequenceRearrangementParser.class);
+
+    private static final NumberFormat NF = NumberFormat.getInstance();
 
     private static final String DELIMITER = "\t";
 
@@ -48,8 +54,8 @@ public class MergedSequenceRearrangementParser implements SequenceRearrangementP
             String[] fields = splits[i].split(";");
             RecordData recordData;
             try {
-                recordData = new RecordData(fields[0], Integer.parseInt(fields[1]), fields[2], fields[3]);
-            } catch (NumberFormatException e) {
+                recordData = new RecordData(fields[0], NF.parse(fields[1]).intValue(), fields[2], fields[3]);
+            } catch (ParseException e) {
                 LOGGER.warn("Invalid depth `{}`", fields[1]);
                 continue;
             }
@@ -105,7 +111,7 @@ public class MergedSequenceRearrangementParser implements SequenceRearrangementP
                     return Optional.empty();
             }
 
-            return Optional.of(SimpleSequenceRearrangement.of(svType, adjacencies));
+            return Optional.of(SequenceRearrangementDefault.of(svType, adjacencies));
         };
     }
 
@@ -118,30 +124,31 @@ public class MergedSequenceRearrangementParser implements SequenceRearrangementP
         }
         CoreCoords coreCoords = coreCoordsOpt.get();
         String id = coreCoords.id;
+        int depth = coreCoords.medianDepth();
 
         // the 1st adjacency (alpha) starts one base before begin coordinate (POS), by convention on the (+) strand
-        Breakend alphaLeft = SimpleBreakend.precise(coreCoords.contig,
+        Breakend alphaLeft = BreakendDefault.precise(coreCoords.contig,
                 coreCoords.begin.getPosition() - 1,
                 Strand.FWD,
                 id);
         // the right position is the last base of the inverted segment on the (-) strand
-        SimpleBreakend alphaRight = SimpleBreakend.precise(coreCoords.contig,
+        BreakendDefault alphaRight = BreakendDefault.precise(coreCoords.contig,
                 coreCoords.end.getPosition(),
                 Strand.FWD,
                 id).withStrand(Strand.REV);
-        Adjacency alpha = SimpleAdjacency.empty(alphaLeft, alphaRight);
+        Adjacency alpha = AdjacencyDefault.emptyWithDepth(alphaLeft, alphaRight, depth);
 
         // the 2nd adjacency (beta) starts at the begin coordinate on (-) strand
-        SimpleBreakend betaLeft = SimpleBreakend.precise(coreCoords.contig,
+        BreakendDefault betaLeft = BreakendDefault.precise(coreCoords.contig,
                 coreCoords.begin.getPosition(),
                 Strand.FWD,
                 id).withStrand(Strand.REV);
         // the right position is one base past end coordinate, by convention on (+) strand
-        Breakend betaRight = SimpleBreakend.precise(coreCoords.contig,
+        Breakend betaRight = BreakendDefault.precise(coreCoords.contig,
                 coreCoords.end.getPosition() + 1,
                 Strand.FWD,
                 id);
-        Adjacency beta = SimpleAdjacency.empty(betaLeft, betaRight);
+        Adjacency beta = AdjacencyDefault.emptyWithDepth(betaLeft, betaRight, depth);
 
         return List.of(alpha, beta);
     }
@@ -151,20 +158,20 @@ public class MergedSequenceRearrangementParser implements SequenceRearrangementP
         return makeCoreCoords(tokens).map(data -> {
             // the order for a duplication is inverted
             Contig contig = data.contig;
-            SimpleBreakend left = SimpleBreakend.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
-            SimpleBreakend right = SimpleBreakend.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
+            BreakendDefault left = BreakendDefault.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
+            BreakendDefault right = BreakendDefault.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
 
-            return SimpleAdjacency.empty(left, right);
+            return AdjacencyDefault.emptyWithDepth(left, right, data.medianDepth());
         });
     }
 
     private Optional<Adjacency> makeDeletion(String[] tokens) {
         return makeCoreCoords(tokens).map(data -> {
             Contig contig = data.contig;
-            SimpleBreakend left = SimpleBreakend.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
-            SimpleBreakend right = SimpleBreakend.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
+            BreakendDefault left = BreakendDefault.precise(contig, data.begin.getPosition(), Strand.FWD, data.id);
+            BreakendDefault right = BreakendDefault.precise(contig, data.end.getPosition(), Strand.FWD, data.id);
 
-            return SimpleAdjacency.empty(left, right);
+            return AdjacencyDefault.emptyWithDepth(left, right, data.medianDepth());
         });
     }
 
@@ -180,11 +187,11 @@ public class MergedSequenceRearrangementParser implements SequenceRearrangementP
         // coordinates
         ChromosomalPosition begin, end;
         try {
-            int beginPos = Integer.parseInt(tokens[1]);
+            int beginPos = NF.parse(tokens[1]).intValue();
             begin = ChromosomalPosition.precise(contig, beginPos + 1, Strand.FWD);
-            int endPos = Integer.parseInt(tokens[2]);
+            int endPos = NF.parse(tokens[2]).intValue();
             end = ChromosomalPosition.precise(contig, endPos, Strand.FWD);
-        } catch (NumberFormatException e) {
+        } catch (ParseException e) {
             LOGGER.warn("Invalid begin/end coordinate in line {}", String.join(DELIMITER, tokens));
             return Optional.empty();
         }
@@ -217,9 +224,34 @@ public class MergedSequenceRearrangementParser implements SequenceRearrangementP
             this.end = end;
             this.dataMap = dataMap;
             this.id = dataMap.entrySet().stream()
-                    .map(e -> String.format("%s(%s)", e.getKey().shortName(), e.getValue().id))
+                    .map(e -> String.format("%s(%s)", e.getKey().shortName(), e.getValue().id()))
                     .sorted()
                     .collect(Collectors.joining(";"));
+        }
+
+        int medianDepth() {
+            List<Integer> depths = dataMap.values().stream()
+                    .map(RecordData::depth)
+                    .sorted()
+                    .collect(Collectors.toList());
+
+            if (depths.isEmpty()) {
+                return Adjacency.MISSING_DEPTH_PLACEHOLDER;
+            }
+            int middle = depths.size() / 2;
+            if (depths.size() % 2 == 0) {
+                // even number of depths - return rounded arithmetic mean of the two middle elements
+                return Math.round(((float) depths.get(middle - 1) + depths.get(middle)) / 2);
+            } else {
+                return depths.get(middle);
+            }
+        }
+
+        int minDepth() {
+            return dataMap.values().stream()
+                    .mapToInt(RecordData::depth)
+                    .min()
+                    .orElse(Adjacency.MISSING_DEPTH_PLACEHOLDER);
         }
     }
 
@@ -238,6 +270,37 @@ public class MergedSequenceRearrangementParser implements SequenceRearrangementP
             this.genotype = genotype;
         }
 
+        public String id() {
+            return id;
+        }
+
+        public int depth() {
+            return depth;
+        }
+
+        public String filter() {
+            return filter;
+        }
+
+        public String genotype() {
+            return genotype;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            RecordData that = (RecordData) o;
+            return depth == that.depth &&
+                    Objects.equals(id, that.id) &&
+                    Objects.equals(filter, that.filter) &&
+                    Objects.equals(genotype, that.genotype);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, depth, filter, genotype);
+        }
     }
 
 }

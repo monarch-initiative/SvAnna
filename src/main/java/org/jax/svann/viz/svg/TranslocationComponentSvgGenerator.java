@@ -135,8 +135,7 @@ public class TranslocationComponentSvgGenerator extends  SvSvgGenerator {
         int offset = 0;
         int n_display_items = 0;
         for (var enh : this.affectedEnhancers) {
-            // writeEnhancer(enh, ypos, writer);
-            System.err.println("[ERR] Warning not implemented yet");
+            writeEnhancer(enh, ypos, writer);
             ypos += HEIGHT_PER_DISPLAY_ITEM;
             offset += HEIGHT_PER_DISPLAY_ITEM;
             n_display_items++;

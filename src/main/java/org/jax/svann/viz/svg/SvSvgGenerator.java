@@ -105,7 +105,7 @@ public abstract class SvSvgGenerator {
         this.affectedEnhancers = enhancers;
         this.coordinatePairs = coordinatePairs;
         if (svtype == SvType.TRANSLOCATION) {
-            this.SVG_HEIGHT = 500 + HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = 100 + HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
         } else {
             this.SVG_HEIGHT = HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * HEIGHT_PER_DISPLAY_ITEM;
         }

@@ -111,10 +111,6 @@ public class Enhancer implements GenomicRegion {
         return tissueLabel;
     }
 
-    public String getSummary() {
-        return String.format("%s:%d-%d [%s]", contig, start.getPosition(), end.getPosition(), hpoId.getValue());
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -140,6 +136,7 @@ public class Enhancer implements GenomicRegion {
                 .add("end=" + end)
                 .add("tau=" + tau)
                 .add("termId=" + hpoId)
+                .add("tissue=" + tissueLabel)
                 .toString();
     }
 }

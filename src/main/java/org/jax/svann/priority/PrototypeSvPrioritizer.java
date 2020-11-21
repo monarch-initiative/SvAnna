@@ -436,8 +436,6 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
     }
 
     private SvPriority prioritizeDuplication(SequenceRearrangement duplication) {
-        // TODO: 2. 11. 2020 implement
-        // Gather information
         List<Overlap> overlaps = overlapper.getOverlapList(duplication);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
@@ -462,12 +460,12 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         SvImpact impact = highestOT.defaultSvImpact(); // default
 
         if (highestOT.isExonic()) {
-            // (1) the inversion affects an exon
+            // (1) the duplication affects an exon
             impact = SvImpact.HIGH;
         } else if (highestOT.isIntronic()) {
-            // (2) intronic inversion close to CDS has HIGH impact,
+            // (2) intronic duplication close to CDS has HIGH impact,
             // an inversion further away is INTERMEDIATE impact
-            int distance = highestImpactOverlap.getDistance();
+            int distance = Math.abs(highestImpactOverlap.getDistance());
             impact = distance <= 25
                     ? SvImpact.HIGH
                     : distance <= 100

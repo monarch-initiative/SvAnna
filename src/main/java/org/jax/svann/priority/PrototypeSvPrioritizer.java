@@ -7,7 +7,8 @@ import org.jax.svann.overlap.EnhancerOverlapper;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.overlap.OverlapType;
 import org.jax.svann.overlap.Overlapper;
-import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.*;
+import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
@@ -346,9 +347,13 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // Start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact(); // default
 
-        if (highestOT.isExonic()) {
+        if (highestOT.isExonic() && highestOT != OverlapType.TRANSCRIPT_CONTAINED_IN_SV) {
             // (1) the inversion affects an exon
+            // If an inversion completely contains a gene, we do not rank it as high impact
+            // but we will look at regulatory effects
             impact = SvImpact.HIGH;
+        } else if (highestOT == OverlapType.TRANSCRIPT_CONTAINED_IN_SV) {
+            impact = SvImpact.INTERMEDIATE;
         } else if (highestOT.isIntronic()) {
             // (2) intronic inversion close to CDS has HIGH impact,
             // an inversion further away is INTERMEDIATE impact
@@ -378,11 +383,65 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         if (prio.getImpact() == SvImpact.HIGH) {
             return prio;
         }
+        // if the inversion is located within an intron of a gene, we will assume its effects
+        // are only due to the intron. Similarly, if the inversion is upstream or downstream of the
+        // it will not affect the distance to enhancers on the "other side" -- by definition,
+        // enhancers are not sensitive to orientation
+        if (highestOT.isIntronic() || highestOT.isDownstream() || highestOT.isUpstream()) {
+            return prio;
+        }
         //if we get here, we look and see if there are both relevant genes within the inversion
         // and relevant enhancers within a window, or vice version.
 
-        return prio;
+        final int OFFSET = 100_000; // TODO make class variable, adjust from command line
+        GenomicRegion inversionRegion = getRegion(inversion);
+        // check if there are genes within the inversion. If so, look for enhancers outside
+        // of the inversion boundaries
+       if (! affectedTranscripts.isEmpty()) {
+           // in this case, at least one gene is inside the inversion
+           // we look and see if there are relevant enhancers outside of the inversion
+           List<Enhancer> outsideEnhancers = enhancerOverlapper.getEnhancerRegionOverlaps(inversionRegion, OFFSET);
+           boolean relevantEnhancer = false;
+           for (var e : outsideEnhancers) {
+               if (this.relevantHpoIdsForEnhancers.contains(e.getHpoId())) {
+                   relevantEnhancer = true;
+                   break;
+               }
+           }
+           if (relevantEnhancer) {
+               // this can now make the gene inside the inversion be a disease gene
+               List<HpoDiseaseSummary> diseases = new ArrayList<>();
+               for (var gwi : geneWithIdsSet) {
+                   TermId geneid = gwi.getGeneId();
+                   if (this.diseaseSummaryMap.containsKey(geneid)) {
+                       diseases.addAll(diseaseSummaryMap.get(geneid));
+                   }
+               }
+               return new DefaultSvPriority(SvImpact.HIGH, affectedTranscripts, geneWithIdsSet, outsideEnhancers, overlaps, diseases);
+           }
+       }
+           return prio; // stick to the local interpretation
     }
+
+    /**
+     * By assumption, this method can only be used for SVs on a single chromosome
+     * @param rearrangement
+     * @return
+     */
+    private GenomicRegion getRegion(SequenceRearrangement rearrangement) {
+        Contig chrom = rearrangement.getLeftmostBreakend().getContig();
+        int begin = rearrangement.getLeftmostPosition();
+        int end = rearrangement.getRightmostPosition();
+        if (begin > end) {
+            int tmp = end;
+            end = begin;
+            begin = tmp;
+        }
+        GenomicPosition leftPos = StandardGenomicPosition.precise(chrom, begin, Strand.FWD);
+        GenomicPosition rightPos = StandardGenomicPosition.precise(chrom, end, Strand.FWD);
+        return StandardGenomicRegion.of(leftPos, rightPos);
+    }
+
 
     private OverlapType getHighestOverlapType(List<Overlap> overlaps) {
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()

@@ -44,6 +44,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
      */
     private static final Set<TermId> RELEVANT_ENHANCER_TOP_LEVEL_TERMS = Set.of(
             TermId.of("HP:0001507"), // Growth abnormality, based on failure to thrive
+            TermId.of("HP:0011004"), //"Abnormal systemic arterial morphology"
             TermId.of("HP:0001939") // Abnormality of metabolism/homeostasis, based on hyperglycemia
     );
 
@@ -76,8 +77,9 @@ public class PrototypeSvPrioritizerTest extends TestBase {
      * Both enhancers have fictional tau=0.8 and TermId `HP:0001939` (Abnormality of metabolism/homeostasis)
      */
     private static Map<Integer, IntervalArray<Enhancer>> makeEnhancerMap() {
-        Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
         Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
+        Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
+        Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
         Contig chr20 = GENOME_ASSEMBLY.getContigByName("20").orElseThrow();
         String metabolism = "metabolism"; // represents an UBERON/CL term.
         String cns = "CNS";
@@ -85,11 +87,19 @@ public class PrototypeSvPrioritizerTest extends TestBase {
         Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"),metabolism);
         Enhancer chr20Enhancer = new Enhancer(chr20, 51_642_723,	51_642_826,0.42, TermId.of("UBERON:0000955"), "brain");
         Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707"), cns); // abnormality of the nervous system
+        int fbn1TSS = 48_646_788;
+        int fbn1EnhancerStart = fbn1TSS + 90_000;
+        int fbn1EnhancerEnd = fbn1EnhancerStart + 300;
+        // the relevant HPO term for aorta is Abnormal systemic arterial morphology
+        // Enhancers expect to get an HPO term and an UBERON/CL label
+        Enhancer fbn190kbUpstream =
+                new Enhancer(chr15, fbn1EnhancerStart, fbn1EnhancerEnd, 0.42, TermId.of("HP:0011004"), "aorta");
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());
+        IntervalArray<Enhancer> chr15Array = new IntervalArray<>(List.of(fbn190kbUpstream), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr20array = new IntervalArray<>(List.of(chr20Enhancer), new EnhancerEndExtractor());
-        return Map.of(7, chr7Array, 9, chr9Array, 20, chr20array);
+        return Map.of(7, chr7Array, 9, chr9Array, 15, chr15Array,20, chr20array);
     }
 
     private static HpoDiseaseSummary makeDiseaseSummary(String name, TermId diseaseId) {
@@ -353,5 +363,20 @@ public class PrototypeSvPrioritizerTest extends TestBase {
         SequenceRearrangement sr = Inversions.fbn1UpstreamInversion();
         SvPriority result = prioritizer.prioritize(sr);
         assertThat(result.getImpact(), is(SvImpact.LOW));
+    }
+
+    /**
+     * This tests that an inversion of the entire FBN1 which does not diusrupt the
+     * gene, but is near to an enhancer (90kb away), is pathogenic for Marfan syndrome
+     * (according to the logic of this test, anyway).
+     */
+    @Test
+    public void inversionOfEntireFbn1() {
+        SequenceRearrangement sr = Inversions.fbn1WholeGeneEnhancerAt90kb();
+        SvPriority result = prioritizer.prioritize(sr);
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+        assertTrue(result.getDiseases().stream().
+                map(HpoDiseaseSummary::getDiseaseId)
+                .anyMatch(value -> value.equals("OMIM:157000")));
     }
 }

@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
  * </pre>
  * tau reflects the degree of tissue specificity, where 0 means unspecific (ubiquitously expressed across tissues/cells)
  * and 1 means specific (exclusively expressed in one tissue/cell).
+ * [0] chrom; [1]start; [2]end; [3]tau; [4]ontology.id; [5]ontology.label; [6]HPO.id; [7]HPO.label
  */
 public class TSpecParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(TSpecParser.class);

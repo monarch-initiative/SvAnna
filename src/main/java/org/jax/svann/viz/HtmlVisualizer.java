@@ -4,10 +4,8 @@ package org.jax.svann.viz;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.CoordinatePair;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
+import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
 
@@ -259,9 +257,13 @@ public class HtmlVisualizer implements Visualizer {
         List<HtmlLocation> locations = visualizable.getLocations();
         String variantString = getVariantRepresentation(visualizable, locations);
         String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
-        //String zygosity = visualizable.getRearrangement().get
+        Zygosity zygosity = visualizable.getRearrangement().zygosity();
+        String zygo = zygosity.equals(Zygosity.UNKNOWN) ?
+                "[unknown genotype]" :
+                String.format("[%s]", zygosity.name().toLowerCase());
         StringBuilder sb = new StringBuilder();
-        sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact).append("</h1>\n");
+        sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact)
+                .append(" &emsp; ").append(zygo).append("</h1>\n");
         sb.append("<div class=\"row\">\n");
         sb.append("<div class=\"column\" style=\"background-color:#F8F8F8;\">\n");
         sb.append("<h2>Sequence</h2>\n");

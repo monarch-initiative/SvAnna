@@ -4,6 +4,7 @@ import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.StructuralVariant;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface Visualizable {
 
     boolean hasPhenotypicRelevance();
 
-    SequenceRearrangement getRearrangement();
+    StructuralVariant getRearrangement();
 
     List<HtmlLocation> getLocations();
 

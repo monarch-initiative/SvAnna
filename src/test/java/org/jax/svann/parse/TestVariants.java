@@ -437,7 +437,7 @@ public class TestVariants extends TestBase {
          *
          * @return inversion affecting an exon of GCK
          */
-        public static SequenceRearrangement gckExonic() {
+        public static StructuralVariant gckExonic() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
             int begin = 44_153_401;
             int end = 44_153_600;
@@ -445,7 +445,7 @@ public class TestVariants extends TestBase {
             return makeInversion(chr7, begin, end);
         }
 
-        private static SequenceRearrangement makeInversion(Contig contig, int begin, int end) {
+        private static StructuralVariant makeInversion(Contig contig, int begin, int end) {
             int alphaRightPos = contig.getLength() - end + 1;
             int betaLeftPos = contig.getLength() - begin + 1;
 
@@ -457,7 +457,7 @@ public class TestVariants extends TestBase {
             Breakend betaRight = BreakendDefault.precise(contig, end + 1, Strand.FWD, "betaRight");
             Adjacency beta = AdjacencyDefault.empty(betaLeft, betaRight);
 
-            return SequenceRearrangementDefault.of(SvType.INVERSION, alpha, beta);
+            return StructuralVariantDefault.of(SvType.INVERSION, alpha, beta);
         }
 
     }
@@ -472,13 +472,13 @@ public class TestVariants extends TestBase {
          * right mate, upstream from BRCA2 (not disrupted)
          * chr13:32_300_000 (+)
          */
-        public static SequenceRearrangement translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+        public static StructuralVariant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
             Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
             BreakendDefault left = BreakendDefault.preciseWithRef(chr9, 133_359_000, Strand.FWD, "tra_l", "G");
             Contig chr13 = GENOME_ASSEMBLY.getContigByName("13").orElseThrow();
             BreakendDefault right = BreakendDefault.preciseWithRef(chr13, 32_300_000, Strand.FWD, "tra_r", "A");
 
-            return SequenceRearrangementDefault.of(SvType.TRANSLOCATION, AdjacencyDefault.empty(left, right));
+            return StructuralVariantDefault.of(SvType.TRANSLOCATION, AdjacencyDefault.empty(left, right));
         }
 
     }

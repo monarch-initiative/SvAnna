@@ -228,8 +228,8 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     : SvImpact.INTERMEDIATE;
             if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.HIGH) {
                 impact = SvImpact.HIGH;
-            } else if (impact == SvImpact.LOW && enhancerImpact == SvImpact.HIGH) {
-                impact = SvImpact.HIGH;
+            } else if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.INTERMEDIATE) {
+                impact = SvImpact.INTERMEDIATE;
             }
         }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
@@ -309,20 +309,20 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     : SvImpact.INTERMEDIATE;
         }
         // When we get here, we will perform phenotypic prioritization.
-        List<HpoDiseaseSummary> diseaseList;
-        if (this.diseaseSummaryMap.isEmpty()) {
-            // i.e., the user did not provide phenotypic data
-            diseaseList = List.of(); // empty list
-        } else {
-            // check relevance with respect to transcripts
-            boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
-            boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
-            boolean relevant = affectsEnhancers || affectsTranscripts;
-            if (!relevant) {
-                // downgrade the impact
-                impact = impact.decrementSeverity();
-            }
-        }
+//        List<HpoDiseaseSummary> diseaseList;
+//        if (this.diseaseSummaryMap.isEmpty()) {
+//            // i.e., the user did not provide phenotypic data
+//            diseaseList = List.of(); // empty list
+//        } else {
+//            // check relevance with respect to transcripts
+//            boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
+//            boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
+//            boolean relevant = affectsEnhancers || affectsTranscripts;
+//            if (!relevant) {
+//                // downgrade the impact
+//                impact = impact.decrementSeverity();
+//            }
+//        }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 

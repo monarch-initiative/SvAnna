@@ -163,7 +163,6 @@ public class SvAnnOverlapper implements Overlapper {
          */
         switch (rearrangement.getType()) {
             case DELETION:
-
                 return getDeletionOverlaps(rearrangement);
             case DUPLICATION:
                 return getDuplicationOverlaps(rearrangement);

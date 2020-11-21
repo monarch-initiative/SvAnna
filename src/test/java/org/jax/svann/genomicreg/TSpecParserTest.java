@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class TSpecParserTest {
     static Path EXAMPLE_TSPEC = Paths.get("src/test/resources/tspec-small.tsv");
     private static final TSpecParser parser = new TSpecParser(EXAMPLE_TSPEC.toAbsolutePath().toString());
-    private static final Map<TermId, String> hpoIdToLabelMap = parser.getId2labelMap();
+    private static final Map<TermId, String> idToLabelMap = parser.getId2labelMap();
     private static final Map<TermId, List<Enhancer>> id2enhancerMap = parser.getId2enhancerMap();
     private static final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
     private static final double EPSILON = 0.000_001;
@@ -53,11 +53,14 @@ public class TSpecParserTest {
      */
     @Test
     public void testHpoLabels() {
-        assertEquals(7, hpoIdToLabelMap.size());
-        TermId vascular = TermId.of("HP:0025015");
-        assertEquals("Abnormal vascular morphology", hpoIdToLabelMap.get(vascular));
-        TermId heart = TermId.of("HP:0001627");
-        assertEquals("Abnormal heart morphology", hpoIdToLabelMap.get(heart));
+        assertEquals(7, idToLabelMap.size());
+        for (var e : idToLabelMap.entrySet()) {
+            System.out.println(e.getKey() + ": " + e.getValue());
+        }
+        TermId brain = TermId.of("UBERON:0000955");
+        assertEquals("brain", idToLabelMap.get(brain));
+        TermId vSMC = TermId.of("CL:0000359");
+        assertEquals("vascular associated smooth muscle cell", idToLabelMap.get(vSMC));
     }
 
     /**
@@ -67,7 +70,8 @@ public class TSpecParserTest {
     @Test
     public void testThymusEnhancer() {
         TermId thymusHpoId = TermId.of("HP:0000777");
-        List<Enhancer> enhancers = id2enhancerMap.get(thymusHpoId);
+        TermId thymus = TermId.of("UBERON:0002370");
+        List<Enhancer> enhancers = id2enhancerMap.get(thymus);
         assertEquals(1, enhancers.size());
         Enhancer thymusEnhancer = enhancers.get(0);
         assertNotNull(thymusEnhancer);
@@ -78,17 +82,18 @@ public class TSpecParserTest {
         assertEquals(100014348, thymusEnhancer.getStart().getPosition());
         assertEquals(100014634, thymusEnhancer.getEnd().getPosition());
         assertEquals(thymusHpoId, thymusEnhancer.getHpoId());
-        assertEquals(0.728857, thymusEnhancer.getTau(), EPSILON);
+        assertEquals(0.708151, thymusEnhancer.getTau(), EPSILON);
         // both the start and end are precise, i.e., the confidence interval is +/- 0
         assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getStart().getCi());
         assertEquals(ConfidenceInterval.precise(), thymusEnhancer.getEnd().getCi());
     }
 
     @Test
-    public void if_three_brain_enhancers_retrieved_then_ok() {
+    public void if_four_brain_enhancers_retrieved_then_ok() {
         TermId brainHpd = TermId.of("HP:0012443"); // 	Abnormality of brain morphology
-        List<Enhancer> enhancers = id2enhancerMap.get(brainHpd);
-        assertEquals(3, enhancers.size());
+        TermId brain = TermId.of("UBERON:0000955");
+        List<Enhancer> enhancers = id2enhancerMap.get(brain);
+        assertEquals(4, enhancers.size());
     }
 
 

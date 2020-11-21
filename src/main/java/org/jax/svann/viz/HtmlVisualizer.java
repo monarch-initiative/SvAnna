@@ -4,12 +4,17 @@ package org.jax.svann.viz;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.reference.*;
-import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.Adjacency;
+import org.jax.svann.reference.CoordinatePair;
+import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -18,10 +23,10 @@ import java.util.stream.Collectors;
  */
 public class HtmlVisualizer implements Visualizer {
 
-    private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF","F7DC6F", "CFFF98", "A1D6E2",
-            "EC96A4", "E6DF44", "F76FDA","FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6","FFC300" ,"F76FF5" , "FFFF99",
-            "FF99FF", "99FFFF","CCFF99","FFE5CC","FFD700","9ACD32","7FFFD4","FFB6C1","FFFACD",
-            "FFE4E1","F0FFF0","F0FFFF"};
+    private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF", "F7DC6F", "CFFF98", "A1D6E2",
+            "EC96A4", "E6DF44", "F76FDA", "FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6", "FFC300", "F76FF5", "FFFF99",
+            "FF99FF", "99FFFF", "CCFF99", "FFE5CC", "FFD700", "9ACD32", "7FFFD4", "FFB6C1", "FFFACD",
+            "FFE4E1", "F0FFF0", "F0FFFF"};
 
     private final static String EMPTY_STRING = "";
 
@@ -42,6 +47,7 @@ public class HtmlVisualizer implements Visualizer {
     /**
      * Display a list of diseases that are associated with genes that are affected by the structural variant.
      * Currently we show an unordered list
+     *
      * @param visualizable object representing the SV
      * @return HTML code that displays associated diseases
      */
@@ -52,7 +58,7 @@ public class HtmlVisualizer implements Visualizer {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("<ul>\n");
-        for (var disease: visualizable.getDiseaseSummaries()) {
+        for (var disease : visualizable.getDiseaseSummaries()) {
             String url = String.format("<a href=\"https://hpo.jax.org/app/browse/disease/%s\" target=\"__blank\">%s (%s)</a>",
                     disease.getDiseaseId(), disease.getDiseaseName(), disease.getDiseaseId());
             sb.append("<li>").append(url).append("</li>\n");
@@ -63,6 +69,7 @@ public class HtmlVisualizer implements Visualizer {
 
     /**
      * Creates a link to the UCSCS browser that shows the posiution of the SV using a color highlight
+     *
      * @param hloc Location of (part of) the SV
      * @return an HTML link to the UCSC Genome browser
      */
@@ -80,13 +87,13 @@ public class HtmlVisualizer implements Visualizer {
         if (len < 100) {
             OFFSET = 5000;
         } else if (len < 1000) {
-            OFFSET = len*5;
+            OFFSET = len * 5;
         } else if (len < 5000) {
-            OFFSET = len*3;
+            OFFSET = len * 3;
         } else if (len < 10000) {
-            OFFSET = len*2;
+            OFFSET = len * 2;
         } else {
-            OFFSET = (int)(len*1.5);
+            OFFSET = (int) (len * 1.5);
         }
         int viewBegin = sVbegin - OFFSET;
         int viewEnd = sVend + OFFSET;
@@ -94,54 +101,59 @@ public class HtmlVisualizer implements Visualizer {
         String url = String.format("https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&virtMode=0&position=%s%%3A%d-%d&%s",
                 chrom, viewBegin, viewEnd, highlight);
         return String.format("<a href=\"%s\" target=\"__blank\">%s:%d-%d</a>",
-                url,chrom, hloc.getBegin(), hloc.getEnd());
+                url, chrom, hloc.getBegin(), hloc.getEnd());
     }
 
     /**
      * Creates a string to show highlights. Nonselected regions are highlighted in very light grey.
+     *
      * @return something like this {@code highlight=<DB>.<CHROM>:<START>-<END>#<COLOR>}.
-     * . */
+     * .
+     */
     private String getHighlightRegion(String chromosome, int start, int end) {
         String genome = "hg38"; // TODO make flexible
         Random r = new Random();
         String color = colors[r.nextInt(colors.length)];
         String highlight = String.format("%s.%s%%3A%d-%d%s",
-                        genome,
-                        chromosome,
-                        start,
-                        end,
-                        color);
+                genome,
+                chromosome,
+                start,
+                end,
+                color);
         return String.format("highlight=%s", highlight);
     }
 
 
-    /** These are the things to hide and show to get a nice hg19 image. */
+    /**
+     * These are the things to hide and show to get a nice hg19 image.
+     */
     private String getURLFragmentHg38() {
         return "gc5Base=dense&snp150Common=hide&gtexGene=hide&dgvPlus=hide&pubs=hide&knownGene=hide&ncbiRefSeqView=pack&OmimAvSnp=hide";
     }
 
-    private int getInsertionLength(Visualizable visualizable) {
-        SequenceRearrangement rearrangement = visualizable.getRearrangement();
+    /**
+     * @param rearrangement insertion rearrangement
+     * @return length of the inserted segment
+     */
+    private int getInsertionLength(SequenceRearrangement rearrangement) {
         // we assume that a valid insertion has one adjacency
-        // we also assume that each breakend of the adjacency contains one contig that
-        // represents the insertion using a non-canonical contig
-        Breakend leftmostBreakend = rearrangement.getLeftmostBreakend();
+        if (rearrangement.getType() != SvType.INSERTION) {
+            return -1; // should never happen
+        }
         List<Adjacency> adjacencies = rearrangement.getAdjacencies();
-        if (adjacencies.size() != 2) {
-            throw new SvAnnRuntimeException("We expected 2 adjacencies for an insertion but got " + adjacencies.size());
-        }
-        Adjacency leftAdjacency = adjacencies.get(0);
-        Contig rightOfLeft = leftAdjacency.getEnd().getContig();
-        if (rightOfLeft.getId()>25) {
-            return rightOfLeft.getLength();
-        }
-       return -1; // should never happen
+        Adjacency left = adjacencies.get(0);
+        Adjacency right = adjacencies.get(1);
+
+        // start position of the right adjacency is the end of the inserted sequence
+        // end position of the left adjacency is the beginning of the inserted sequence
+        // the coordinates are 1-based, hence + 1
+        return right.getStart().getPosition() - left.getEnd().getPosition() + 1;
     }
 
     String getSvgString(Visualizable visualizable) {
         List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
         SvType svtype = visualizable.getRearrangement().getType();
-        if (visualizable.getGeneCount()>10) {
+        if (visualizable.getGeneCount() > 10) {
             return EMPTY_STRING;
         }
         try {
@@ -151,7 +163,7 @@ public class HtmlVisualizer implements Visualizer {
                     gen = new DeletionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
                     return gen.getSvg();
                 case INSERTION:
-                    int insertionLength = getInsertionLength(visualizable);
+                    int insertionLength = getInsertionLength(visualizable.getRearrangement());
                     gen = new InsertionSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs, insertionLength);
                     return gen.getSvg();
                 case INVERSION:
@@ -161,7 +173,7 @@ public class HtmlVisualizer implements Visualizer {
                     gen = new TranslocationSvgGenerator(visualizable.getRearrangement(), visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
                     return gen.getSvg();
                 case DUPLICATION:
-                    gen = new DuplicationSvgGenerator(visualizable.getTranscripts(),visualizable.getEnhancers(), coordinatePairs);
+                    gen = new DuplicationSvgGenerator(visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
                     return gen.getSvg();
                 default:
                     System.err.println("[ERROR] SVG not implemented for type=" + svtype);
@@ -183,10 +195,10 @@ public class HtmlVisualizer implements Visualizer {
         else if (len < 1000) {
             return String.format("%d bp", len);
         } else if (len < 1_000_000) {
-            double kb = (double)len/1000.0;
+            double kb = (double) len / 1000.0;
             return String.format("%.2f kb", kb);
         } else {
-            double mb = (double)len/1000000.0;
+            double mb = (double) len / 1000000.0;
             return String.format("%.2f Mb", mb);
         }
     }
@@ -196,7 +208,7 @@ public class HtmlVisualizer implements Visualizer {
         HtmlLocation loc;
         switch (svtype) {
             case INSERTION:
-                int len = getInsertionLength(visualizable);
+                int len = getInsertionLength(visualizable.getRearrangement());
                 if (locations.size() != 1) {
                     throw new SvAnnRuntimeException("Was expecting one location for insertion but got " + locations.size());
                 }
@@ -242,11 +254,10 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
-
     @Override
     public String getHtml(Visualizable visualizable) {
         List<HtmlLocation> locations = visualizable.getLocations();
-        String variantString = getVariantRepresentation(visualizable,  locations );
+        String variantString = getVariantRepresentation(visualizable, locations);
         String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
         StringBuilder sb = new StringBuilder();
         sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact).append("</h1>\n");
@@ -270,7 +281,7 @@ public class HtmlVisualizer implements Visualizer {
     String getSequencePrioritization(Visualizable visualizable) {
         if (visualizable.getGeneCount() > 2 &&
                 (visualizable.getRearrangement().getType() == SvType.DELETION ||
-                        visualizable.getRearrangement().getType() == SvType.DUPLICATION) ){
+                        visualizable.getRearrangement().getType() == SvType.DUPLICATION)) {
             return getMultigeneSequencePriotization(visualizable);
         }
         StringBuilder sb = new StringBuilder();
@@ -282,7 +293,7 @@ public class HtmlVisualizer implements Visualizer {
             vcfIdSet.add(a.getEnd().getContigName());
         }
         String idString = String.join(";", vcfIdSet);
-        if (vcfIdSet.size()>1) {
+        if (vcfIdSet.size() > 1) {
             idString = String.format("IDs: %s", idString);
         } else {
             idString = String.format("ID: %s", idString);
@@ -323,6 +334,7 @@ public class HtmlVisualizer implements Visualizer {
      * In this case, it is very probably a large deletion. There is no use in displaying all of the
      * transcripts that are affected as we do for single-gene or two-gene deletions. Instead, we just assume that
      * there is a null mutation for all of the genes affected by the SV and we list them.
+     *
      * @param visualizable
      * @return
      */
@@ -337,7 +349,7 @@ public class HtmlVisualizer implements Visualizer {
             vcfIdSet.add(a.getEnd().getContigName());
         }
         String idString = String.join(";", vcfIdSet);
-        if (vcfIdSet.size()>1) {
+        if (vcfIdSet.size() > 1) {
             idString = String.format("IDs: %s", idString);
         } else {
             idString = String.format("ID: %s", idString);
@@ -363,7 +375,7 @@ public class HtmlVisualizer implements Visualizer {
                 .distinct()
                 .collect(Collectors.toList());
         // show up to ten affected genes -- if there are more just show the count
-        if (genes.size()>10) {
+        if (genes.size() > 10) {
             sb.append("<p>").append(genes.size()).append(" affected genes</p>\n");
         } else {
             sb.append("<p>Affected genes: <br/><ol>");

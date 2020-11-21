@@ -30,16 +30,16 @@ public class TSpecParserTest {
     private static final double EPSILON = 0.000_001;
 
     /**
-     * There are a total of ten difference enhancers in 7 tissues.
+     * There are a total of 11 difference enhancers in 7 tissues.
      * id2enhancerMap contains lists of enhancers, we add up their sizes
      */
     @Test
-    public void if_ten_enhancers_retrieved_then_ok() {
+    public void if_eleven_enhancers_retrieved_then_ok() {
         int N = 0;
         for (var e : id2enhancerMap.values()) {
             N += e.size();
         }
-        assertEquals(10, N);
+        assertEquals(11, N);
     }
 
     @Test
@@ -89,11 +89,11 @@ public class TSpecParserTest {
     }
 
     @Test
-    public void if_four_brain_enhancers_retrieved_then_ok() {
+    public void if_five_brain_enhancers_retrieved_then_ok() {
         TermId brainHpd = TermId.of("HP:0012443"); // 	Abnormality of brain morphology
         TermId brain = TermId.of("UBERON:0000955");
         List<Enhancer> enhancers = id2enhancerMap.get(brain);
-        assertEquals(4, enhancers.size());
+        assertEquals(5, enhancers.size());
     }
 
 

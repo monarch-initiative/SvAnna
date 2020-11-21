@@ -2,8 +2,10 @@ package org.jax.svann.parse;
 
 
 import org.jax.svann.TestBase;
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 
 public class TestVariants extends TestBase {
 
@@ -345,6 +347,19 @@ public class TestVariants extends TestBase {
 
     }
 
+    public static class Enhancers {
+        public static Enhancer enhancer90kbUpstreamOfFBN1() {
+            Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
+            int fbn1Tss = 48_646_788;
+            int enhancerBegin = fbn1Tss + 90_000;
+            int enhancerEnd = enhancerBegin + 300;
+            double tau = 0.8;
+            TermId skeletonId = TermId.of("UBERON:0004288");
+
+           return new Enhancer(chr15, enhancerBegin, enhancerEnd, tau, skeletonId, "skeleton");
+        }
+    }
+
     public static class Inversions {
 
         public static SequenceRearrangement gckIntronic() {
@@ -367,6 +382,35 @@ public class TestVariants extends TestBase {
 
             return makeInversion(chr15, begin, end);
         }
+
+        /**
+         * Simulate the case where there is an inversion of the entire gene. The gene
+         * itself is not disrupted, but there is an enhancer that was 90kb upstream of
+         * the gene that is now more distant from the promoter -- a possible regulatory
+         * mutation.
+         * FBN1 is NM_000138.4  , chr15:48408306-48645788  (-)
+         * @return
+         */
+        public static SequenceRearrangement fbn1WholeGeneEnhancerAt90kb() {
+            Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
+            int begin = 48_407_306 ;
+            int end = 48_646_788;
+
+            return makeInversion(chr15, begin, end);
+        }
+
+
+        /**
+         * Inversion that disrupts the sequence of this enhancer
+         * chr20	51642723	51642826	0.557366	UBERON:0000955	brain	HP:0012443	Abnormality of brain morphology
+         */
+        public static SequenceRearrangement brainEnhancerDisruptedByInversion() {
+            Contig chr20 = GENOME_ASSEMBLY.getContigByName("20").orElseThrow();
+            int begin = 51_642_780 ;
+            int end = 51_642_880;
+            return makeInversion(chr20, begin, end);
+        }
+
 
 
         /**

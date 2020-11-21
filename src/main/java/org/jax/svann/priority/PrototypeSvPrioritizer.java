@@ -308,21 +308,6 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
         }
-        // When we get here, we will perform phenotypic prioritization.
-//        List<HpoDiseaseSummary> diseaseList;
-//        if (this.diseaseSummaryMap.isEmpty()) {
-//            // i.e., the user did not provide phenotypic data
-//            diseaseList = List.of(); // empty list
-//        } else {
-//            // check relevance with respect to transcripts
-//            boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
-//            boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
-//            boolean relevant = affectsEnhancers || affectsTranscripts;
-//            if (!relevant) {
-//                // downgrade the impact
-//                impact = impact.decrementSeverity();
-//            }
-//        }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
@@ -408,7 +393,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         //if we get here, we look and see if there are both relevant genes within the inversion
         // and relevant enhancers within a window, or vice version.
 
-        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
+        return prio;
     }
 
 

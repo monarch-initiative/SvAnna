@@ -26,6 +26,7 @@ import java.util.Set;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
+import static org.jax.svann.parse.TestVariants.Inversions.brainEnhancerDisruptedByInversion;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -77,15 +78,18 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     private static Map<Integer, IntervalArray<Enhancer>> makeEnhancerMap() {
         Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
         Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
+        Contig chr20 = GENOME_ASSEMBLY.getContigByName("20").orElseThrow();
         String metabolism = "metabolism"; // represents an UBERON/CL term.
         String cns = "CNS";
         Enhancer surf1Enhancer = new Enhancer(chr9, 133_356_501, 133_356_530, .8, TermId.of("HP:0001939"),metabolism);
         Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"),metabolism);
+        Enhancer chr20Enhancer = new Enhancer(chr20, 51_642_723,	51_642_826,0.42, TermId.of("UBERON:0000955"), "brain");
         Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707"), cns); // abnormality of the nervous system
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());
-        return Map.of(7, chr7Array, 9, chr9Array);
+        IntervalArray<Enhancer> chr20array = new IntervalArray<>(List.of(chr20Enhancer), new EnhancerEndExtractor());
+        return Map.of(7, chr7Array, 9, chr9Array, 20, chr20array);
     }
 
     private static HpoDiseaseSummary makeDiseaseSummary(String name, TermId diseaseId) {
@@ -311,9 +315,17 @@ public class PrototypeSvPrioritizerTest extends TestBase {
         assertThat(result.getImpact(), is(SvImpact.HIGH));
     }
 
+    /**
+     * Test inversion that disrupts the sequence of this enhancer
+     * chr10	100184852	100185124	0.420772	UBERON:0000955	brain	HP:0012443	Abnormality of brain morphology
+     * The sequence impact is HIGH but there is not associated disease here so the final impact
+     * should be INTERMEDIATE
+     */
     @Test
     public void inversionAffectingAnEnhancer() {
-        // TODO: 4. 11. 2020 implement
+        SequenceRearrangement sr = brainEnhancerDisruptedByInversion();
+        SvPriority result = prioritizer.prioritize(sr);
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
     }
 
     /**

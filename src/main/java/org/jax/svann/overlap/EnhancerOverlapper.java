@@ -115,10 +115,11 @@ public class EnhancerOverlapper {
     public List<Enhancer> getEnhancerOverlaps(SequenceRearrangement rearrangement) {
         switch (rearrangement.getType()) {
             case DELETION:
-                GenomicRegion region = StandardGenomicRegion.of(rearrangement.getLeftmostBreakend(), rearrangement.getRightmostBreakend());
-                return getSimpleEnhancerOverlap(region);
             case INVERSION:
             case INSERTION:
+            case DUPLICATION:
+                GenomicRegion region = StandardGenomicRegion.of(rearrangement.getLeftmostBreakend(), rearrangement.getRightmostBreakend());
+                return getSimpleEnhancerOverlap(region);
             case TRANSLOCATION:
                 return getEnhancersAffectedByBreakends(rearrangement);
             default:

@@ -8,6 +8,7 @@ import org.jax.svann.reference.Adjacency;
 import org.jax.svann.reference.CoordinatePair;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
 

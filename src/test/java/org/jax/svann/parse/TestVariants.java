@@ -355,6 +355,19 @@ public class TestVariants extends TestBase {
             return makeInversion(chr7, begin, end);
         }
 
+        /**
+         * FBN1 is NM_000138.4  , chr15:48408306-48645788  (-)
+         *  Here, we want a 100bp inversion that is 50bp upstream of the TSS in the promoter
+         * @return Inversion 48bp upstream of FBN1 TSS
+         */
+        public static SequenceRearrangement fbn1PromoterInversion() {
+            Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
+            int begin = 48_645_838 ;
+            int end = 48_645_938;
+
+            return makeInversion(chr15, begin, end);
+        }
+
 
         /**
          * This inversion affects part of exon 2 and intron 1. The <em>GCK</em> gene is on REV strand.
@@ -363,7 +376,7 @@ public class TestVariants extends TestBase {
          * GCK:NM_000162 upstream, 200b inversion
          * chr7:44_153_401-44_153_600
          *
-         * @return
+         * @return inversion affecting an exon of GCK
          */
         public static SequenceRearrangement gckExonic() {
             Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();

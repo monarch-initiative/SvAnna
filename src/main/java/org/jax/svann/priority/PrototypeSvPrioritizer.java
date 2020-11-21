@@ -387,9 +387,12 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     : SvImpact.LOW;
         } else if (highestOT.isIntergenic()) {
             // (3) intergenic inversion, let's consider promoter and enhancers
-            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_2KB)) {
+            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
                 // promoter region
                 impact = SvImpact.HIGH;
+            } else if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_2KB)) {
+                // promoter region
+                impact = SvImpact.INTERMEDIATE;
             } else {
                 impact = enhancers.isEmpty()
                         ? SvImpact.LOW

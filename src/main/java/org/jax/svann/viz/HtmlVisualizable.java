@@ -1,6 +1,5 @@
 package org.jax.svann.viz;
 
-import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
@@ -30,30 +29,16 @@ public class HtmlVisualizable implements Visualizable {
     }
 
     private HtmlLocation getDeletionLocation(SequenceRearrangement rearrangement) {
-        List<Adjacency> adjacencies = rearrangement.getAdjacencies();
-        if (adjacencies.size() != 1) {
-            throw new SvAnnRuntimeException("Malformed deletion adjacency list with size " + adjacencies.size());
-        }
-        Adjacency deletion = adjacencies.get(0);
-        Breakend left = deletion.getStart();
-        Breakend right = deletion.getEnd();
-        Contig chrom = left.getContig();
-        int begin = left.getPosition();
-        int end = right.getPosition();
+        Contig chrom = rearrangement.getLeftmostBreakend().getContig();
+        int begin = rearrangement.getLeftmostPosition();
+        int end = rearrangement.getRightmostPosition();
         return new HtmlLocation(chrom, begin, end);
     }
 
     private HtmlLocation getInsertionLocation(SequenceRearrangement rearrangement) {
-        List<Adjacency> adjacencies = rearrangement.getAdjacencies();
-        if (adjacencies.size() != 1) {
-            System.err.println("Malformed insertion adjacency list with size " + adjacencies.size());
-        }
-        Adjacency insertion = adjacencies.get(0);
-        Breakend left = insertion.getStart();
-        Breakend right = insertion.getEnd();
-        Contig chrom = left.getContig();
-        int begin = left.getPosition();
-        int end = right.getPosition();
+        int begin = rearrangement.getLeftmostPosition();
+        int end = rearrangement.getRightmostPosition();
+        Contig chrom = rearrangement.getLeftmostBreakend().getContig();
         return new HtmlLocation(chrom, begin, end);
     }
 

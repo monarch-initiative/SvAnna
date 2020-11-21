@@ -384,6 +384,21 @@ public class TestVariants extends TestBase {
         }
 
         /**
+         * FBN1 is NM_000138.4  , chr15:48408306-48645788  (-)
+         *  Here, we want a 100bp inversion that is 25000bp upstream of the TSS in the promoter
+         *  This should be a LOW impact
+         * @return Inversion 25000bp upstream of FBN1 TSS
+         */
+        public static SequenceRearrangement fbn1UpstreamInversion() {
+            Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
+            int TSS = 48_645_788;
+            int begin = TSS + 25_000; ;
+            int end = begin + 300;
+
+            return makeInversion(chr15, begin, end);
+        }
+
+        /**
          * Simulate the case where there is an inversion of the entire gene. The gene
          * itself is not disrupted, but there is an enhancer that was 90kb upstream of
          * the gene that is now more distant from the promoter -- a possible regulatory

@@ -345,8 +345,13 @@ public class PrototypeSvPrioritizerTest extends TestBase {
         assertThat(olap.getGeneSymbol(), is("FBN1"));
     }
 
+    /**
+     * A 300bp inversion, 25000 upstream of FBN1, does not affect an enhancer, expect low impact
+     */
     @Test
     public void inversionUpstream() {
-        // TODO: 4. 11. 2020 implement
+        SequenceRearrangement sr = Inversions.fbn1UpstreamInversion();
+        SvPriority result = prioritizer.prioritize(sr);
+        assertThat(result.getImpact(), is(SvImpact.LOW));
     }
 }

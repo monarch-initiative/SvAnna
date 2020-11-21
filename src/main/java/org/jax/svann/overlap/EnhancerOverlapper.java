@@ -114,6 +114,21 @@ public class EnhancerOverlapper {
         return overlaps;
     }
 
+    public List<Enhancer> getEnhancerRegionOverlaps(GenomicRegion region, int offset) {
+        Contig chrom = region.getContig();
+        int start = region.getStartPosition() - offset;
+        if (start < 0)
+            start = 0;
+        int end = region.getEndPosition() + offset;
+        if (end > chrom.getLength()) {
+            end = chrom.getLength();
+        }
+        GenomicPosition leftPos = StandardGenomicPosition.precise(chrom, start, Strand.FWD);
+        GenomicPosition rightPos = StandardGenomicPosition.precise(chrom, end, Strand.FWD);
+        GenomicRegion outsideRegion = StandardGenomicRegion.of(leftPos, rightPos);
+        return getSimpleEnhancerOverlap(outsideRegion);
+    }
+
 
     public List<Enhancer> getEnhancerOverlaps(SequenceRearrangement rearrangement) {
         switch (rearrangement.getType()) {

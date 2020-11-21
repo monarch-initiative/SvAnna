@@ -259,6 +259,7 @@ public class HtmlVisualizer implements Visualizer {
         List<HtmlLocation> locations = visualizable.getLocations();
         String variantString = getVariantRepresentation(visualizable, locations);
         String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
+        //String zygosity = visualizable.getRearrangement().get
         StringBuilder sb = new StringBuilder();
         sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact).append("</h1>\n");
         sb.append("<div class=\"row\">\n");
@@ -277,6 +278,14 @@ public class HtmlVisualizer implements Visualizer {
         return sb.toString();
     }
 
+    String getEnhancerSummary(Enhancer e) {
+       Contig contig = e.getContig();
+       String chrom = contig.getPrimaryName().startsWith("chr") ?
+                    contig.getPrimaryName() : "chr" + contig.getPrimaryName();
+       String tissueLabel = String.format("%s; tau %.2f", e.getTissueLabel(), e.getTau());
+       return String.format("%s:%d-%d [%s]", chrom, e.getStartPosition(), e.getEndPosition(), tissueLabel);
+    }
+
 
     String getSequencePrioritization(Visualizable visualizable) {
         if (visualizable.getGeneCount() > 2 &&
@@ -285,6 +294,7 @@ public class HtmlVisualizer implements Visualizer {
             return getMultigeneSequencePriotization(visualizable);
         }
         StringBuilder sb = new StringBuilder();
+        int minSequenceDepth = visualizable.getRearrangement().minDepthOfCoverage();
         List<HtmlLocation> locations = visualizable.getLocations();
         Set<String> vcfIdSet = new HashSet<>();
         List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
@@ -312,6 +322,7 @@ public class HtmlVisualizer implements Visualizer {
             sb.append("</ul></p>\n");
         }
         sb.append("<p>");
+        sb.append("<p>Minimum sequence depth: ").append(minSequenceDepth).append(".</p>\n");
         for (var olap : visualizable.getOverlaps()) {
             sb.append(olap.toString()).append("<br/>\n");
         }
@@ -322,7 +333,7 @@ public class HtmlVisualizer implements Visualizer {
         } else {
             sb.append("<p>Enhancers within genomic window:</p>\n<ul>");
             for (var e : visualizable.getEnhancers()) {
-                sb.append("<li>").append(e.getSummary()).append("</li>\n");
+                sb.append("<li>").append(getEnhancerSummary(e)).append("</li>\n");
             }
             sb.append("</ul>\n");
         }

@@ -1,6 +1,7 @@
 package org.jax.svann.parse;
 
 import org.jax.svann.reference.ConfidenceInterval;
+import org.jax.svann.reference.Zygosity;
 import org.jax.svann.reference.genome.Contig;
 
 /**
@@ -13,17 +14,31 @@ class CoreData {
     private final int end;
     private final ConfidenceInterval ciStart;
     private final ConfidenceInterval ciEnd;
+    private final int depthOfCoverage;
+    private final Zygosity zygosity;
 
     CoreData(Contig contig,
              int start,
              ConfidenceInterval ciStart,
              int end,
-             ConfidenceInterval ciEnd) {
+             ConfidenceInterval ciEnd,
+             int depthOfCoverage,
+             Zygosity zygosity) {
         this.contig = contig;
         this.start = start;
         this.ciStart = ciStart;
         this.end = end;
         this.ciEnd = ciEnd;
+        this.depthOfCoverage = depthOfCoverage;
+        this.zygosity = zygosity;
+    }
+
+    public int depthOfCoverage() {
+        return depthOfCoverage;
+    }
+
+    public Zygosity zygosity() {
+        return zygosity;
     }
 
     /**

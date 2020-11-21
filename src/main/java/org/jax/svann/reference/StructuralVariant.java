@@ -7,5 +7,9 @@ import org.jax.svann.filter.Filterable;
  */
 public interface StructuralVariant extends Filterable, SequenceRearrangement {
 
+    /**
+     * @return variant zygosity
+     */
+    Zygosity zygosity();
 
 }

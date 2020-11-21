@@ -10,13 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-class SimpleSequenceRearrangement implements SequenceRearrangement {
+class SequenceRearrangementDefault implements SequenceRearrangement {
 
     private final SvType type;
 
     private final List<Adjacency> adjacencies;
 
-    protected SimpleSequenceRearrangement(SvType type, List<Adjacency> adjacencies) {
+    protected SequenceRearrangementDefault(SvType type, List<Adjacency> adjacencies) {
         if (adjacencies.isEmpty()) {
             throw new IllegalArgumentException("Adjacency list cannot be empty");
         }
@@ -25,12 +25,12 @@ class SimpleSequenceRearrangement implements SequenceRearrangement {
 
     }
 
-    static SimpleSequenceRearrangement of(SvType type, Adjacency... adjacencies) {
-        return new SimpleSequenceRearrangement(type, Arrays.asList(adjacencies));
+    static SequenceRearrangementDefault of(SvType type, Adjacency... adjacencies) {
+        return new SequenceRearrangementDefault(type, Arrays.asList(adjacencies));
     }
 
-    static SimpleSequenceRearrangement of(SvType type, List<Adjacency> adjacencies) {
-        return new SimpleSequenceRearrangement(type, adjacencies);
+    static SequenceRearrangementDefault of(SvType type, List<Adjacency> adjacencies) {
+        return new SequenceRearrangementDefault(type, adjacencies);
     }
 
     @Override
@@ -53,7 +53,7 @@ class SimpleSequenceRearrangement implements SequenceRearrangement {
             for (int i = adjacencies.size() - 1; i >= 0; i--) {
                 reversed.add(adjacencies.get(i).toOppositeStrand());
             }
-            return new SimpleSequenceRearrangement(type, reversed);
+            return new SequenceRearrangementDefault(type, reversed);
         }
     }
 
@@ -61,7 +61,7 @@ class SimpleSequenceRearrangement implements SequenceRearrangement {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SimpleSequenceRearrangement that = (SimpleSequenceRearrangement) o;
+        SequenceRearrangementDefault that = (SequenceRearrangementDefault) o;
         return Objects.equals(adjacencies, that.adjacencies) &&
                 type == that.type;
     }

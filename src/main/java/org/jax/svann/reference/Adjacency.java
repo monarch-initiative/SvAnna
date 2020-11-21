@@ -5,6 +5,11 @@ package org.jax.svann.reference;
  */
 public interface Adjacency extends CoordinatePair {
 
+    /**
+     * Depth is set to -1 when the information is not available.
+     */
+    int MISSING_DEPTH_PLACEHOLDER = -1;
+
     @Deprecated
     Breakend getLeft();
 
@@ -22,6 +27,11 @@ public interface Adjacency extends CoordinatePair {
     }
 
     byte[] getInserted();
+
+    /**
+     * @return number of reads used to call the adjacency. The value <code>-1</code> indicates missing coverage information
+     */
+    int depthOfCoverage();
 
     Adjacency withStrand(Strand strand);
 

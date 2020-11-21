@@ -38,6 +38,7 @@ public class MergedSequenceRearrangementParserTest extends TestBase {
         assertThat(deletion.getType(), is(SvType.DELETION));
         assertThat(deletion.getAdjacencies(), hasSize(1));
         Adjacency adjacency = deletion.getAdjacencies().get(0);
+        assertThat(adjacency.depthOfCoverage(), is(33));
         Breakend left = adjacency.getStart();
         assertThat(left.getPosition(), is(87615925));
         assertThat(left.getStrand(), is(Strand.FWD));
@@ -51,6 +52,7 @@ public class MergedSequenceRearrangementParserTest extends TestBase {
         assertThat(duplication.getType(), is(SvType.DUPLICATION));
         assertThat(duplication.getAdjacencies(), hasSize(1));
         adjacency = duplication.getAdjacencies().get(0);
+        assertThat(adjacency.depthOfCoverage(), is(34));
         left = adjacency.getStart();
         assertThat(left.getPosition(), is(89186234));
         assertThat(left.getStrand(), is(Strand.FWD));
@@ -64,6 +66,7 @@ public class MergedSequenceRearrangementParserTest extends TestBase {
         assertThat(inversion.getType(), is(SvType.INVERSION));
         assertThat(inversion.getAdjacencies(), hasSize(2));
         Adjacency alpha = inversion.getAdjacencies().get(0);
+        assertThat(alpha.depthOfCoverage(), is(4));
         left = alpha.getStart();
         assertThat(left.getPosition(), is(95391950));
         assertThat(left.getStrand(), is(Strand.FWD));
@@ -73,6 +76,7 @@ public class MergedSequenceRearrangementParserTest extends TestBase {
         assertThat(right.getStrand(), is(Strand.REV));
 
         Adjacency beta = inversion.getAdjacencies().get(1);
+        assertThat(beta.depthOfCoverage(), is(4));
         left = beta.getStart();
         assertThat(left.getPosition(), is(94822605));
         assertThat(left.getStrand(), is(Strand.REV));

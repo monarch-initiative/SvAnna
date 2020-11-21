@@ -113,4 +113,14 @@ public interface SequenceRearrangement {
         return pairs;
     }
 
+    /**
+     * @return number of reads covering the adjacency with the minimum coverage
+     */
+    default int minDepthOfCoverage() {
+        return getAdjacencies().stream()
+                .mapToInt(Adjacency::depthOfCoverage)
+                .min()
+                .orElse(Adjacency.MISSING_DEPTH_PLACEHOLDER);
+    }
+
 }

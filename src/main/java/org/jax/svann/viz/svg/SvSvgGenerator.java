@@ -9,7 +9,6 @@ import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -61,11 +60,8 @@ public abstract class SvSvgGenerator {
     /** This will be 10% of genomicSpan, extra area on the sides of the graphic to make things look nicer. */
     private int genomicOffset;
 
-    final String pattern = "###,###.###";
-    final DecimalFormat decimalFormat = new DecimalFormat(pattern);
-
-//    private String variantDescription;
-//    private String chrom;
+//    final String pattern = "###,###.###";
+//    final DecimalFormat decimalFormat = new DecimalFormat(pattern);
 
     protected final double INTRON_MIDPOINT_ELEVATION = 10.0;
     /** Height of the symbols that represent the transcripts */
@@ -84,9 +80,10 @@ public abstract class SvSvgGenerator {
     public final static String BLUE ="#4dbbd5";
     public final static String BROWN="#7e6148";
     public final static String DARKBLUE = "#3c5488";
-    public final static String VIOLET = "#8491b4";
+    public final static String VIOLET = "#8333ff";
     public final static String ORANGE = "#ff9900";
     public final static String BRIGHT_GREEN = "#00a087";
+    public final static String YELLOW = "#FFFFE0"; //lightyellow
 
 
     private final SvType svtype;
@@ -359,14 +356,37 @@ public abstract class SvSvgGenerator {
     protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
-        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
+        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\"  " +
                         "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, EXON_HEIGHT, DARKGREEN, ORANGE);
+                start, Y, width, EXON_HEIGHT, DARKGREEN, YELLOW);
         writer.write(rect);
     }
 
     protected void writeEnhancer(Enhancer enhancer, int ypos, Writer writer) throws IOException {
 
+        int xstartGenomic = enhancer.getStartPosition();
+        int xendGenomic = enhancer.getEndPosition();
+        double xstart = translateGenomicToSvg(xstartGenomic);
+        double xend = translateGenomicToSvg(xendGenomic);
+        double width = xend - xstart;
+        String rect = String.format("<rect x=\"%f\" y=\"%d\" width=\"%f\" height=\"%f\"  " +
+                        "style=\"stroke:%s; fill: %s\" />\n",
+                xstart, ypos, width, EXON_HEIGHT, BLACK, VIOLET);
+        writer.write(rect);
+        writeEnhancerName(enhancer, xstart, ypos, writer);
+    }
+
+    private void writeEnhancerName(Enhancer enhancer, double xpos, int ypos, Writer writer) throws IOException {
+        String chrom = enhancer.getStartContigName();
+        chrom = chrom.startsWith("chr") ? chrom : "chr" + chrom;
+        int start = enhancer.getStartPosition();
+        int end = enhancer.getEndPosition();
+        String positionString = String.format("%s:%d-%d", chrom, start, end);
+        String geneName = String.format("%s (tau %.2f)", enhancer.getTissueLabel(), enhancer.getTau());
+        double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
+        String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
+                xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
+        writer.write(txt);
     }
 
 

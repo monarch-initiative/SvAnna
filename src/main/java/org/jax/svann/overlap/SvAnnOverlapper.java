@@ -164,6 +164,8 @@ public class SvAnnOverlapper implements Overlapper {
         switch (rearrangement.getType()) {
             case DELETION:
                 return getDeletionOverlaps(rearrangement);
+            case DUPLICATION:
+                return getDuplicationOverlaps(rearrangement);
             case INSERTION:
                 return getInsertionOverlaps(rearrangement);
             case INVERSION:
@@ -174,6 +176,35 @@ public class SvAnnOverlapper implements Overlapper {
                 LOGGER.warn("Getting overlaps for `{}` is not yet supported", rearrangement.getType());
                 return List.of();
         }
+    }
+
+    private List<Overlap> getDuplicationOverlaps(SequenceRearrangement deletion) {
+        List<Adjacency> adjacencies = deletion.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            LOGGER.warn("Malformed duplication adjacency list with size {}!=1", adjacencies.size());
+            return List.of();
+        }
+
+        // the adjacency must contain breakends located on the same contigs & strands
+        Adjacency adjacency = adjacencies.get(0);
+        if (!adjacency.isIntrachromosomal() || !adjacency.getStart().getStrand().equals(adjacency.getEnd().getStrand())) {
+            LOGGER.warn("Malformed deletion adjacency, either not intrachromosomal or not on the same strand");
+            return List.of();
+        }
+
+        int start = Math.min(adjacency.getStartPosition(), adjacency.getEndPosition());
+        int end = Math.max(adjacency.getStartPosition(), adjacency.getEndPosition());
+
+        // let's construct the duplicated region
+        StandardGenomicRegion duplicatedRegion = StandardGenomicRegion.precise(adjacency.getStart().getContig(), start, end, adjacency.getStrand());
+
+        // get the overlapping transcripts. Note that the interval tree contains coordinates on FWD strand even for txs
+        // located on REV strand.
+        StandardGenomicRegion deletedRegionOnFwd = duplicatedRegion.withStrand(Strand.FWD);
+        IntervalArray<SvAnnTxModel> contigIArray = intervalArrayMap.get(adjacency.getStartContigId());
+        IntervalArray<SvAnnTxModel>.QueryResult queryResult = contigIArray.findOverlappingWithInterval(deletedRegionOnFwd.getStartPosition(), deletedRegionOnFwd.getEndPosition());
+
+        return parseIntrachromosomalEventQueryResult(duplicatedRegion, queryResult);
     }
 
     private List<Overlap> getDeletionOverlaps(SequenceRearrangement deletion) {

@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EnhancerTest {
     private static final Path EXAMPLE_TSPEC = Paths.get("src/test/resources/tspec-small.tsv");
     private static final TSpecParser parser = new TSpecParser(EXAMPLE_TSPEC.toAbsolutePath().toString());
-    private static final Map<TermId, String> hpoIdToLabelMap = parser.getId2labelMap();
-    private static final Map<TermId, List<Enhancer>> id2enhancerMap = parser.getId2enhancerMap();
+//    private static final Map<TermId, String> hpoIdToLabelMap = parser.getId2labelMap();
+//    private static final Map<TermId, List<Enhancer>> id2enhancerMap = parser.getId2enhancerMap();
     private static final Map<Integer, IntervalArray<Enhancer>> iamap = parser.getChromosomeToEnhancerIntervalArrayMap();
     private static final GenomeAssembly assembly = GenomeAssemblyProvider.getGrch38Assembly();
     private static final double EPSILON = 0.000_001;
@@ -35,13 +35,14 @@ public class EnhancerTest {
 
     /**
      * Search for this enhancer
-     * chr10	100006233	100006603	0.288152	HP:0025015	Abnormal vascular morphology
+     * chr10	100006233	100006603	0.343407	CL:0000071	blood vessel endothelial cell	HP:0002597	Abnormality of the vasculature
      */
     @Test
     public void testEnhancer1() {
         Contig chrom10 = assembly.getContigById(10).orElseThrow();
-        double tau = 0.288152;
-        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0025015"));
+        double tau = 0.343407;
+        String tissueLabel = "blood vessel endothelial cell"; // represents an UBERON or CL term label
+        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0002597"), tissueLabel);
         IntervalArray<Enhancer> iarray = iamap.get(10);
         assertNotNull(iarray);
         IntervalArray<Enhancer>.QueryResult qresult = iarray.findOverlappingWithInterval(100006350, 100006400);
@@ -55,13 +56,14 @@ public class EnhancerTest {
 
     /**
      * Search for this enhancer
-     * chr10	100006233	100006603	0.288152	HP:0025015	Abnormal vascular morphology
+     * chr10	100006233	100006603	0.343407	CL:0000071	blood vessel endothelial cell	HP:0002597	Abnormality of the vasculature
      */
     @Test
     public void testEnhancerPartialOverlaps() {
         Contig chrom10 = assembly.getContigById(10).orElseThrow();
-        double tau = 0.288152;
-        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0025015"));
+        double tau = 0.343407;
+        String tissueLabel = "blood vessel endothelial cell"; // represents an UBERON or CL term label
+        Enhancer e = new Enhancer(chrom10, 100006233, 100006603, tau, TermId.of("HP:0002597"), tissueLabel);
         IntervalArray<Enhancer> iarray = iamap.get(10);
         assertNotNull(iarray);
         IntervalArray<Enhancer>.QueryResult qresult = iarray.findOverlappingWithInterval(100006600, 100006607);

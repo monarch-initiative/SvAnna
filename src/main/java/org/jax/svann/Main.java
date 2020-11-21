@@ -5,6 +5,7 @@ import org.jax.svann.cmd.AnnotateCommand;
 import org.jax.svann.cmd.DownloadCommand;
 import picocli.CommandLine;
 
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "svann", mixinStandardHelpOptions = true, version = "0.2.9",
@@ -16,6 +17,7 @@ public class Main implements Callable<Integer>  {
 
 
     public static void main(String [] args) {
+        Locale.setDefault(Locale.US);
         CommandLine cline = new CommandLine(new Main())
                 .addSubcommand("download", new DownloadCommand())
                 .addSubcommand("annotate", new AnnotateCommand());

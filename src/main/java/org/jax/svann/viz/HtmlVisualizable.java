@@ -57,6 +57,27 @@ public class HtmlVisualizable implements Visualizable {
         return new HtmlLocation(chrom, begin, end);
     }
 
+    private HtmlLocation getInversionLocation(SequenceRearrangement rearrangement) {
+        Contig chrom = rearrangement.getLeftmostBreakend().getContig();
+        int begin = rearrangement.getLeftmostPosition();
+        int end = rearrangement.getRightmostPosition();
+        return new HtmlLocation(chrom, begin, end);
+    }
+
+    private List<HtmlLocation> getTranslocationLocations(SequenceRearrangement rearrangement) {
+        List<HtmlLocation> locations = new ArrayList<>();
+        List<Adjacency> adjacencies = rearrangement.getAdjacencies();
+        if (adjacencies.size() != 1) {
+            System.err.println("Malformed insertion adjacency list with size " + adjacencies.size());
+        }
+        Adjacency insertion = adjacencies.get(0);
+        Breakend left = insertion.getStart();
+        Breakend right = insertion.getEnd();
+        locations.add(new HtmlLocation(left.getContig(), left.getPosition()));
+        locations.add(new HtmlLocation(right.getContig(), right.getPosition()));
+        return locations;
+    }
+
 
     @Override
     public SequenceRearrangement getRearrangement() {
@@ -89,6 +110,19 @@ public class HtmlVisualizable implements Visualizable {
         return new ArrayList<>(this.svPriority.getAffectedTranscripts());
     }
 
+    /**
+     * Count up the number of unique (distinct) genes affected by this structural variant.
+     * @return
+     */
+    @Override
+    public int getGeneCount() {
+        return (int)this.svPriority.getAffectedTranscripts()
+                .stream()
+                .map(SvAnnTxModel::getGeneSymbol)
+                .distinct()
+                .count();
+    }
+
     @Override
     public List<Enhancer> getEnhancers() {
         return this.svPriority.getAffectedEnhancers();
@@ -96,7 +130,7 @@ public class HtmlVisualizable implements Visualizable {
 
     /**
      * Return strings for display of the format chr3:123-456
-     *
+     * We return two strings for translocations.
      * @return
      */
     @Override
@@ -106,6 +140,12 @@ public class HtmlVisualizable implements Visualizable {
             locs.add(getDeletionLocation(rearrangement));
         } else if (rearrangement.getType() == SvType.INSERTION) {
             locs.add(getInsertionLocation(rearrangement));
+        } else if (rearrangement.getType() == SvType.TRANSLOCATION) {
+            locs.addAll(getTranslocationLocations(rearrangement));
+        } else if (rearrangement.getType() == SvType.DUPLICATION) {
+            locs.add(getDeletionLocation(rearrangement)); // works for both
+        } else if (rearrangement.getType() == SvType.INVERSION) {
+            locs.add(getInversionLocation(rearrangement));
         }
         return locs;
     }

@@ -159,7 +159,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             // annotated to a tissue that has phenotypic relevant
             boolean relevant = false;
             for (Enhancer e : affectedEnhancers) {
-                if (this.relevantHpoIdsForEnhancers.contains(e.getTermId())) {
+                if (this.relevantHpoIdsForEnhancers.contains(e.getHpoId())) {
                     relevant = true;
                     break;
                 }
@@ -218,36 +218,18 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
 
-        if (affectedGeneSymbols.size() > 1) {
-            // impact is high if >1 gene is affected
-            impact = SvImpact.HIGH;
-        } else if (highestOT.isExonic()) {
-            // set impact to INTERMEDIATE if the deletion does not affect the coding sequence (is UTR)
-            impact = highestImpactOverlap.overlapsCds()
-                    ? SvImpact.HIGH
-                    : SvImpact.INTERMEDIATE;
-        } else if (highestOT.isIntronic()) {
-            // intronic deletion close to CDS has HIGH impact,
-            // an insertion further away is INTERMEDIATE impact
-            int distance = highestImpactOverlap.getDistance();
-            impact = distance <= 25
-                    ? SvImpact.HIGH
-                    : distance <= 100
-                    ? SvImpact.INTERMEDIATE
-                    : SvImpact.LOW;
-        }
 
         // now the impact might still be HIGH if the deletion overlaps with a phenotypically relevant enhancer
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(deletion);
         if (!enhancers.isEmpty()) {
-            SvImpact enhancerImpact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getTermId()))
+            SvImpact enhancerImpact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getHpoId()))
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
             if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.HIGH) {
                 impact = SvImpact.HIGH;
-            } else if (impact == SvImpact.LOW && enhancerImpact == SvImpact.HIGH) {
-                impact = SvImpact.HIGH;
+            } else if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.INTERMEDIATE) {
+                impact = SvImpact.INTERMEDIATE;
             }
         }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
@@ -262,7 +244,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
     private boolean affectedEnhancersRelevant(List<Enhancer> enhancers) {
         return enhancers.stream()
-                .map(Enhancer::getTermId)
+                .map(Enhancer::getHpoId)
                 .anyMatch(relevantHpoIdsForEnhancers::contains);
     }
 
@@ -322,25 +304,25 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(insertion);
         if (!enhancers.isEmpty()) {
-            impact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getTermId()))
+            impact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getHpoId()))
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
         }
         // When we get here, we will perform phenotypic prioritization.
-        List<HpoDiseaseSummary> diseaseList;
-        if (this.diseaseSummaryMap.isEmpty()) {
-            // i.e., the user did not provide phenotypic data
-            diseaseList = List.of(); // empty list
-        } else {
-            // check relevance with respect to transcripts
-            boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
-            boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
-            boolean relevant = affectsEnhancers || affectsTranscripts;
-            if (!relevant) {
-                // downgrade the impact
-                impact = impact.decrementSeverity();
-            }
-        }
+//        List<HpoDiseaseSummary> diseaseList;
+//        if (this.diseaseSummaryMap.isEmpty()) {
+//            // i.e., the user did not provide phenotypic data
+//            diseaseList = List.of(); // empty list
+//        } else {
+//            // check relevance with respect to transcripts
+//            boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
+//            boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
+//            boolean relevant = affectsEnhancers || affectsTranscripts;
+//            if (!relevant) {
+//                // downgrade the impact
+//                impact = impact.decrementSeverity();
+//            }
+//        }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
@@ -414,8 +396,15 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                         : SvImpact.HIGH;
             }
         }
-        // TODO -- we need a bespoke prioritizer for inversions
-        // FOR NOW there are no diseases
+        // if the inversion already has high priority, then return it
+        // otherwise look for longer range position effects
+        SvPriority prio = prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        if (prio.getImpact() == SvImpact.HIGH) {
+            return prio;
+        }
+        //if we get here, we look and see if there are both relevant genes within the inversion
+        // and relevant enhancers within a window, or vice version.
+
         return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
@@ -437,8 +426,13 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             }
             affectedTranscripts =
                     overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
-            impact = SvImpact.HIGH;
-            otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
+            if (otype.translocationDisruptable()) {
+                impact = SvImpact.HIGH;
+                otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
+            } else {
+                impact = SvImpact.INTERMEDIATE;
+                otype = OverlapType.TRANSLOCATION_WITHOUT_TRANSCRIPT_DISRUPTION;
+            }
         } else {
             affectedTranscripts = Set.of();
             geneWithIdsSet = Set.of();
@@ -446,16 +440,69 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(rearrangement);
         if (enhancers.size() > 0) {
             impact = SvImpact.HIGH;
+            otype = OverlapType.ENHANCER_DISRUPTED_BY_TRANSLOCATION;
         }
         // TODO -- we need a bespoke prioritizer for translocations
         // FOR NOW there are no diseases
         return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
-    private SvPriority prioritizeDuplication(SequenceRearrangement rearrangement) {
+    private SvPriority prioritizeDuplication(SequenceRearrangement duplication) {
         // TODO: 2. 11. 2020 implement
-        System.err.println("[WARNING] Not prioritizing duplication TODO - implement me");
-        return SvPriority.unknown();
+        // Gather information
+        List<Overlap> overlaps = overlapper.getOverlapList(duplication);
+        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(Overlap::getOverlapType));
+        if (highestImpactOverlapOpt.isEmpty()) {
+            // should never happen
+            LOGGER.error("Could not identify highest impact overlap for duplication: {}.", duplication);
+            return DefaultSvPriority.unknown();
+        }
+        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        OverlapType highestOT = highestImpactOverlap.getOverlapType();
+
+        Set<String> affectedGeneIds = overlaps.stream()
+                .map(Overlap::getGeneSymbol)
+                .collect(Collectors.toSet());
+        Set<SvAnnTxModel> affectedTranscripts = overlaps.stream()
+                .map(Overlap::getTranscriptModel)
+                .collect(Collectors.toSet());
+
+        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(duplication);
+
+        // Start figuring out the impact
+        SvImpact impact = highestOT.defaultSvImpact(); // default
+
+        if (highestOT.isExonic()) {
+            // (1) the inversion affects an exon
+            impact = SvImpact.HIGH;
+        } else if (highestOT.isIntronic()) {
+            // (2) intronic inversion close to CDS has HIGH impact,
+            // an inversion further away is INTERMEDIATE impact
+            int distance = highestImpactOverlap.getDistance();
+            impact = distance <= 25
+                    ? SvImpact.HIGH
+                    : distance <= 100
+                    ? SvImpact.INTERMEDIATE
+                    : SvImpact.LOW;
+        } else if (highestOT.isIntergenic()) {
+            // (3) intergenic inversion, let's consider promoter and enhancers
+            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
+                // promoter region
+                impact = SvImpact.HIGH;
+            } else {
+                impact = enhancers.isEmpty()
+                        ? SvImpact.LOW
+                        : SvImpact.HIGH;
+            }
+        }
+        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
+        for (String symbol : affectedGeneIds) {
+            if (geneSymbolMap.containsKey(symbol)) {
+                geneWithIdsSet.add(geneSymbolMap.get(symbol));
+            }
+        }
+        return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
 }

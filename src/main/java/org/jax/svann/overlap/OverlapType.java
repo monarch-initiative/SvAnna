@@ -56,6 +56,8 @@ public enum OverlapType {
     MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript"),
     TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV"),
     TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION("transcript disrupted by translocation"),
+    ENHANCER_DISRUPTED_BY_TRANSLOCATION("enhancers disrupted by translocation"),
+    TRANSLOCATION_WITHOUT_TRANSCRIPT_DISRUPTION("translocation without transcript disruption"),
     TRANSCRIPT_DISRUPTED_BY_INVERSION("transcript disrupted by inversion");
 
     private final static Set<OverlapType> intergenicTypes = Set.of(
@@ -96,6 +98,10 @@ public enum OverlapType {
         return exonicTypes.contains(vtype) || intronicTypes.contains(vtype) || vtype == UPSTREAM_GENE_VARIANT_2KB;
     }
 
+    public boolean translocationDisruptable() {
+        return exonicTypes.contains(this) || intronicTypes.contains(this) || this == UPSTREAM_GENE_VARIANT_2KB;
+    }
+
     public boolean isUpstream() {
         return upstreamTypes.contains(this);
     }
@@ -129,12 +135,13 @@ public enum OverlapType {
             case SINGLE_EXON_IN_TRANSCRIPT:
             case MULTIPLE_EXON_IN_TRANSCRIPT:
             case TRANSCRIPT_CONTAINED_IN_SV:
-            case UPSTREAM_GENE_VARIANT_2KB:
-            case DOWNSTREAM_GENE_VARIANT_2KB:
+            case UPSTREAM_GENE_VARIANT_500B:
             case TRANSCRIPT_DISRUPTED_BY_INVERSION:
                 return SvImpact.HIGH;
             case UPSTREAM_GENE_VARIANT_5KB:
             case DOWNSTREAM_GENE_VARIANT_5KB:
+            case UPSTREAM_GENE_VARIANT_2KB:
+            case DOWNSTREAM_GENE_VARIANT_2KB:
                 return SvImpact.INTERMEDIATE;
             case INTRONIC:
             default:

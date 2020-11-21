@@ -416,6 +416,8 @@ a.svg:hover, a.svg:active {
         <tr><td>${svt.name}</td><td>${svt.low}</td><td>${svt.intermediate}</td><td>${svt.high}</td><td>${svt.total}</td></tr>
           </#list>
         </table>
+        <p>Total number of genes affected by structural variants: ${n_affectedGenes}</p>
+        <p>Total number of enhancers affected by structural variants: ${n_affectedEnhancers}</p>
         <p>We were unable to parse ${n_unparsable} entries.</p>
         </article>
     </section>

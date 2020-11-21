@@ -10,12 +10,15 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 
-public class DeletionSvgGenerator extends SvSvgGenerator {
+public class DuplicationSvgGenerator extends SvSvgGenerator {
 
 
-    private final CoordinatePair deletionCoordinates;
+    private final int duplicationStart;
+    private final int duplicationEnd;
+    private final int duplicationLength;
 
-    public DeletionSvgGenerator(List<SvAnnTxModel> transcripts,
+
+    public DuplicationSvgGenerator(List<SvAnnTxModel> transcripts,
                                 List<Enhancer> enhancers,
                                 List<CoordinatePair> coordinatePairs) {
         super(SvType.DELETION, transcripts, enhancers, coordinatePairs);
@@ -23,7 +26,10 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
             throw new SvAnnRuntimeException("Malformed initialization of DeletionSvgGenerator -- we expect one CoordinatePair but got " +
                     coordinatePairs.size());
         }
-        deletionCoordinates = coordinatePairs.get(0);
+        CoordinatePair cp = coordinatePairs.get(0);
+        duplicationStart = Math.min(cp.getStartPosition(), cp.getEndPosition());
+        duplicationEnd = Math.max(cp.getStartPosition(), cp.getEndPosition());
+        duplicationLength = duplicationEnd - duplicationStart + 1;
     }
 
 
@@ -36,14 +42,10 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
     public void write(Writer writer) throws IOException {
         int starty = 50;
         int y = starty;
-        String deletionLength = getSequenceLengthString(deletionCoordinates.getLength());
-        String deletionDescription = String.format("%s deletion", deletionLength);
-        writeDeletion(starty, deletionDescription, writer);
+        String deletionLength = getSequenceLengthString(duplicationLength);
+        String deletionDescription = String.format("%s duplication", deletionLength);
+        writeDuplication(starty, deletionDescription, writer);
         y += 100;
-        for (var e : this.affectedEnhancers) {
-            writeEnhancer(e, y, writer);
-            y += HEIGHT_PER_DISPLAY_ITEM;
-        }
         for (var tmod : this.affectedTranscripts) {
             writeTranscript(tmod, y, writer);
             y += HEIGHT_PER_DISPLAY_ITEM;
@@ -58,14 +60,14 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
      * @param writer a file handle
      * @throws IOException if we can't write
      */
-    private void writeDeletion(int ypos, String msg, Writer writer) throws IOException {
-        double start = translateGenomicToSvg(this.deletionCoordinates.getStartPosition());
-        double end = translateGenomicToSvg(this.deletionCoordinates.getEndPosition());
+    private void writeDuplication(int ypos, String msg, Writer writer) throws IOException {
+        double start = translateGenomicToSvg(this.duplicationStart);
+        double end = translateGenomicToSvg(this.duplicationEnd);
         double width = end - start;
         double Y = ypos + 0.5 * SV_HEIGHT;
         String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
                         "style=\"stroke:%s; fill: %s\" />\n",
-               start, Y, width, SV_HEIGHT, DARKGREEN, RED);
+                start, Y, width, SV_HEIGHT, DARKGREEN, ORANGE);
         writer.write(rect);
         Y += 1.75*SV_HEIGHT;
         writer.write(String.format("<text x=\"%f\" y=\"%f\"  fill=\"%s\">%s</text>\n",start -10,Y, PURPLE, msg));

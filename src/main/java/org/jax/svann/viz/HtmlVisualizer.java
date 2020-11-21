@@ -2,12 +2,15 @@ package org.jax.svann.viz;
 
 
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -15,10 +18,12 @@ import java.util.*;
  */
 public class HtmlVisualizer implements Visualizer {
 
-    private final static String colors[] = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF","F7DC6F", "CFFF98", "A1D6E2",
+    private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF","F7DC6F", "CFFF98", "A1D6E2",
             "EC96A4", "E6DF44", "F76FDA","FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6","FFC300" ,"F76FF5" , "FFFF99",
             "FF99FF", "99FFFF","CCFF99","FFE5CC","FFD700","9ACD32","7FFFD4","FFB6C1","FFFACD",
             "FFE4E1","F0FFF0","F0FFFF"};
+
+    private final static String EMPTY_STRING = "";
 
     private final static String HTML_TABLE_HEADER = "<table>\n" +
             "  <thead>\n" +
@@ -76,7 +81,7 @@ public class HtmlVisualizer implements Visualizer {
             OFFSET = 5000;
         } else if (len < 1000) {
             OFFSET = len*5;
-        } else if (len < 1000) {
+        } else if (len < 5000) {
             OFFSET = len*3;
         } else if (len < 10000) {
             OFFSET = len*2;
@@ -136,6 +141,9 @@ public class HtmlVisualizer implements Visualizer {
     String getSvgString(Visualizable visualizable) {
         List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
         SvType svtype = visualizable.getRearrangement().getType();
+        if (visualizable.getGeneCount()>2) {
+            return EMPTY_STRING;
+        }
         try {
             SvSvgGenerator gen;
             switch (svtype) {
@@ -152,6 +160,9 @@ public class HtmlVisualizer implements Visualizer {
                 case TRANSLOCATION:
                     gen = new TranslocationSvgGenerator(visualizable.getRearrangement(), visualizable.getTranscripts(), visualizable.getEnhancers(), coordinatePairs);
                     return gen.getSvg();
+                case DUPLICATION:
+                    gen = new DuplicationSvgGenerator(visualizable.getTranscripts(),visualizable.getEnhancers(), coordinatePairs);
+                    return gen.getSvg();
                 default:
                     System.err.println("[ERROR] SVG not implemented for type=" + svtype);
                     return "";
@@ -165,6 +176,21 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
+    private String getLengthDisplayString(int begin, int end) {
+        int len = end - begin;
+        if (len < 1)
+            return "n/a";
+        else if (len < 1000) {
+            return String.format("%d bp", len);
+        } else if (len < 1_000_000) {
+            double kb = (double)len/1000.0;
+            return String.format("%.2f kb", kb);
+        } else {
+            double mb = (double)len/1000000.0;
+            return String.format("%.2f Mb", mb);
+        }
+    }
+
     private String getVariantRepresentation(Visualizable visualizable, List<HtmlLocation> locations) {
         SvType svtype = visualizable.getRearrangement().getType();
         HtmlLocation loc;
@@ -175,13 +201,41 @@ public class HtmlVisualizer implements Visualizer {
                     throw new SvAnnRuntimeException("Was expecting one location for insertion but got " + locations.size());
                 }
                 loc = locations.get(0);
-                return String.format("%s:%dind%dbp", loc.getChrom(), loc.getBegin(), len);
+                return String.format("%s:%dins%dbp", loc.getChrom(), loc.getBegin(), len);
             case DELETION:
                 if (locations.size() != 1) {
-                    throw new SvAnnRuntimeException("Wasa expecting one location for deletion but got " + locations.size());
+                    throw new SvAnnRuntimeException("Was expecting one location for deletion but got " + locations.size());
                 }
                 loc = locations.get(0);
-                return String.format("%s:%d-%ddel", loc.getChrom(), loc.getBegin(), loc.getEnd());
+                String lend = getLengthDisplayString(loc.getBegin(), loc.getEnd());
+                return String.format("%s:%d-%ddel (%s)", loc.getChrom(), loc.getBegin(), loc.getEnd(), lend);
+            case TRANSLOCATION:
+                if (locations.size() != 2) {
+                    throw new SvAnnRuntimeException("Was expecting two locations for translocation but got " + locations.size());
+                }
+                HtmlLocation locA = locations.get(0);
+                HtmlLocation locB = locations.get(1);
+                String translocationA = String.format("%s:%d", locA.getChrom(), locA.getBegin());
+                String translocationB = String.format("%s:%d", locB.getChrom(), locB.getBegin());
+                return String.format("t(%s, %s)", translocationA, translocationB);
+            case DUPLICATION:
+                if (locations.size() != 1) {
+                    throw new SvAnnRuntimeException("Was expecting one location for duplication but got " + locations.size());
+                }
+                HtmlLocation dupLoc = locations.get(0);
+                int dupBegin = Math.min(dupLoc.getBegin(), dupLoc.getEnd());
+                int dupEnd = Math.max(dupLoc.getBegin(), dupLoc.getEnd());
+                String lengthDup = getLengthDisplayString(dupBegin, dupEnd);
+                return String.format("%s:%d-%d duplication (%s)", dupLoc.getChrom(), dupBegin, dupEnd, lengthDup);
+            case INVERSION:
+                if (locations.size() != 1) {
+                    throw new SvAnnRuntimeException("Was expecting one location for inversion but got " + locations.size());
+                }
+                HtmlLocation invLoc = locations.get(0);
+                int invBegin = Math.min(invLoc.getBegin(), invLoc.getEnd());
+                int invEnd = Math.max(invLoc.getBegin(), invLoc.getEnd());
+                String lengthInv = getLengthDisplayString(invBegin, invEnd);
+                return String.format("inv(%s)(%d; %d) (%s)", invLoc.getChrom(), invBegin, invEnd, lengthInv);
         }
 
         return "TODO";
@@ -213,11 +267,14 @@ public class HtmlVisualizer implements Visualizer {
 
 
     String getSequencePrioritization(Visualizable visualizable) {
+        if (visualizable.getGeneCount() > 2 &&
+                (visualizable.getRearrangement().getType() == SvType.DELETION ||
+                        visualizable.getRearrangement().getType() == SvType.DUPLICATION) ){
+            return getMultigeneSequencePriotization(visualizable);
+        }
         StringBuilder sb = new StringBuilder();
         List<HtmlLocation> locations = visualizable.getLocations();
-        String variantString = getVariantRepresentation(visualizable,  locations );
         Set<String> vcfIdSet = new HashSet<>();
-        SequenceRearrangement rearrangement = visualizable.getRearrangement();
         List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
         for (var a : adjacencies) {
             vcfIdSet.add(a.getStart().getContigName());
@@ -247,11 +304,77 @@ public class HtmlVisualizer implements Visualizer {
             sb.append(olap.toString()).append("<br/>\n");
         }
         sb.append("</p>\n");
+        List<Enhancer> enhancers = visualizable.getEnhancers();
+        if (enhancers.isEmpty()) {
+            sb.append("<p>No enhancers found within genomic window.</p>\n");
+        } else {
+            sb.append("<p>Enhancers within genomic window:</p>\n<ul>");
+            for (var e : visualizable.getEnhancers()) {
+                sb.append("<li>").append(e.getSummary()).append("</li>\n");
+            }
+            sb.append("</ul>\n");
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Use this to show the visualization of structural variants that affect more than two different genes.
+     * In this case, it is very probably a large deletion. There is no use in displaying all of the
+     * transcripts that are affected as we do for single-gene or two-gene deletions. Instead, we just assume that
+     * there is a null mutation for all of the genes affected by the SV and we list them.
+     * @param visualizable
+     * @return
+     */
+    private String getMultigeneSequencePriotization(Visualizable visualizable) {
+        StringBuilder sb = new StringBuilder();
+        List<HtmlLocation> locations = visualizable.getLocations();
+        //String variantString = getVariantRepresentation(visualizable,  locations );
+        Set<String> vcfIdSet = new HashSet<>();
+        List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
+        for (var a : adjacencies) {
+            vcfIdSet.add(a.getStart().getContigName());
+            vcfIdSet.add(a.getEnd().getContigName());
+        }
+        String idString = String.join(";", vcfIdSet);
+        if (vcfIdSet.size()>1) {
+            idString = String.format("IDs: %s", idString);
+        } else {
+            idString = String.format("ID: %s", idString);
+        }
+        sb.append("<p>").append(idString).append("</p>\n");
+        sb.append("<p>").append(visualizable.getType()).append("<br/>");
+        if (locations.isEmpty()) {
+            sb.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
+        } else if (locations.size() == 1) {
+            sb.append(getUcscLink(locations.get(0))).append("</p>");
+        } else {
+            sb.append("<ul>\n");
+            for (var loc : locations) {
+                sb.append("<li>").append(getUcscLink(loc)).append("</li>\n");
+            }
+            sb.append("</ul></p>\n");
+        }
+
+        // get list of genes
+        List<String> genes = visualizable.getTranscripts()
+                .stream()
+                .map(SvAnnTxModel::getGeneSymbol)
+                .distinct()
+                .collect(Collectors.toList());
+        // show up to ten affected genes -- if there are more just show the count
+        if (genes.size()>10) {
+            sb.append("<p>").append(genes.size()).append(" affected genes</p>\n");
+        } else {
+            sb.append("<p>Affected genes: <br/><ol>");
+            for (var g : genes) {
+                sb.append("<li>").append(g).append("</li>\n");
+            }
+            sb.append("</ol></p>\n");
+        }
         return sb.toString();
     }
 
     String getPhenotypePrioritization(Visualizable visualizable) {
-        String s = getUnorderedListWithDiseases(visualizable);
-        return s;
+        return getUnorderedListWithDiseases(visualizable);
     }
 }

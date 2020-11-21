@@ -20,6 +20,7 @@ import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnset;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,10 +76,11 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     private static Map<Integer, IntervalArray<Enhancer>> makeEnhancerMap() {
         Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
         Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
-
-        Enhancer surf1Enhancer = new Enhancer(chr9, 133_356_501, 133_356_530, .8, TermId.of("HP:0001939"));
-        Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"));
-        Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707")); // abnormality of the nervous system
+        String metabolism = "metabolism"; // represents an UBERON/CL term.
+        String cns = "CNS";
+        Enhancer surf1Enhancer = new Enhancer(chr9, 133_356_501, 133_356_530, .8, TermId.of("HP:0001939"),metabolism);
+        Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"),metabolism);
+        Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707"), cns); // abnormality of the nervous system
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());
@@ -103,7 +105,28 @@ public class PrototypeSvPrioritizerTest extends TestBase {
                         List.of() // clinical courses
                 ));
 
-        return Map.of(TermId.of("ENTREZ:2645"), Set.of(mody2));
+
+        // SURF1 deletion example
+        HpoDiseaseSummary cmt4k = new HpoDiseaseSummary(
+                new HpoDisease("Charcot-Marie-Tooth disease, type 4K",
+                        TermId.of("OMIM:616684"),
+                        List.of(HpoAnnotation.builder(TermId.of("HP:0003074")) // hyperglycemia
+                                        .frequency(1., "Obligate")
+                                        .onset(HpoOnset.INFANTILE_ONSET)
+                                        .build(),
+                                HpoAnnotation.builder(TermId.of("HP:0001508")) // Failure to thrive
+                                        .frequency(.9, "Very frequent")
+                                        .onset(HpoOnset.CONGENITAL_ONSET)
+                                        .build()),
+                        List.of(TermId.of("HP:0000006")), // Autosomal dominant inheritance
+                        List.of(), // not terms
+                        List.of(), // clinical modifiers
+                        List.of() // clinical courses
+                ));
+        Map<TermId, Set<HpoDiseaseSummary>> diseaseMap = new HashMap<>();
+        diseaseMap.put(TermId.of("ENTREZ:2645"), Set.of(mody2));
+        diseaseMap.put(TermId.of("ENTREZ:6834"), Set.of(cmt4k));
+        return diseaseMap;
     }
 
     @BeforeEach
@@ -152,14 +175,16 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     }
 
     /**
-     * Deletion affecting region <2kb from gene is HIGH impact.
+     * Deletion affecting region <2kb from gene is INTERMEDIATE impact. (<500bp is high)
+     * This gene is phenotypically relevant.
+     * This is 1.56kb, so LOW
      */
     @Test
     public void prioritize_upstreamDeletion_GCK_notInEnhancer() {
         SequenceRearrangement sr = Deletions.gckUpstreamIntergenic_NotAffectingEnhancer();
         SvPriority result = prioritizer.prioritize(sr);
 
-        assertThat(result.getImpact(), is(SvImpact.HIGH));
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
     }
 
     /**
@@ -188,14 +213,15 @@ public class PrototypeSvPrioritizerTest extends TestBase {
      ******************************************************************************************************************/
 
     /**
-     * Insertion into exonic sequence is HIGH.
+     * Insertion into exonic sequence is HIGH. but in this case it is downgraded to
+     * INTERMEDIATE because the gene is not phenotypically relevant.
      */
     @Test
     public void insertionInExonicRegion() {
         SequenceRearrangement sr = Insertions.surf2Exon4();
         SvPriority result = prioritizer.prioritize(sr);
 
-        assertThat(result.getImpact(), is(SvImpact.HIGH));
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
     }
 
     /**
@@ -211,7 +237,9 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     }
 
     /**
-     * Insertion in 5UTR or 3UTR is INTERMEDIATE
+     * Insertion in 5UTR or 3UTR is INTERMEDIATE, but is LOW if there is no associated disease
+     * SURF2 does not have any associated disease, so it is LOW
+     * SURF1 has an associated disease, so it is INTERMEDIATE
      */
     @Test
     public void insertionInUtr() {
@@ -219,7 +247,7 @@ public class PrototypeSvPrioritizerTest extends TestBase {
         SequenceRearrangement sr = Insertions.surf2InsertionIn5UTR();
         SvPriority result = prioritizer.prioritize(sr);
 
-        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
+        assertThat(result.getImpact(), is(SvImpact.LOW));
 
         // 3UTR
         sr = Insertions.surf1InsertionIn3UTR();

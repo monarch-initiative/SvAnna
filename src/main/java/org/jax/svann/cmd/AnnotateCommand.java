@@ -26,14 +26,17 @@ import org.jax.svann.priority.PrototypeSvPrioritizer;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPrioritizer;
 import org.jax.svann.priority.SvPriority;
+import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.StructuralVariant;
 import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.genome.GenomeAssembly;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.jax.svann.reference.transcripts.JannovarTranscriptService;
 import org.jax.svann.reference.transcripts.TranscriptService;
 import org.jax.svann.viz.HtmlVisualizable;
 import org.jax.svann.viz.HtmlVisualizer;
+import org.jax.svann.viz.Visualizable;
 import org.jax.svann.viz.Visualizer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
@@ -42,6 +45,7 @@ import picocli.CommandLine;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -50,6 +54,8 @@ import java.util.stream.Collectors;
 public class AnnotateCommand implements Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
+
+    private static final NumberFormat NF = NumberFormat.getNumberInstance();
 
     /**
      * This is what we use, candidate for externalization into a CLI parameter
@@ -71,7 +77,7 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--threshold"},
             type = SvImpact.class,
             description = "report variants as severe as this or more")
-    public SvImpact threshold = SvImpact.LOW;
+    public SvImpact threshold = SvImpact.HIGH;
 
     public AnnotateCommand() {
         // TODO: 2. 11. 2020 externalize
@@ -135,7 +141,8 @@ public class AnnotateCommand implements Callable<Integer> {
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();
-        List<String> visualizations = new ArrayList<>();
+
+        List<PrioritizedSequenceRearrangement> prioritizedSequenceRearrangements = new ArrayList<>();
         int above = 0, below = 0;
         for (StructuralVariant rearrangement : rearrangements) {
             // run filtering
@@ -146,17 +153,12 @@ public class AnnotateCommand implements Callable<Integer> {
             SvPriority priority = prioritizer.prioritize(rearrangement);
             priorities.add(priority);
             if (priority.getImpact().satisfiesThreshold(threshold)) {
-                HtmlVisualizable visualizable = new HtmlVisualizable(rearrangement, priority);
-                String visualization = visualizer.getHtml(visualizable);
-                above++;
-                if (above > 100) continue;
-                visualizations.add(visualization);
-
+                prioritizedSequenceRearrangements.add(new PrioritizedSequenceRearrangement(rearrangement, priority));
             } else {
                 below++;
             }
         }
-        System.out.printf("[INFO] Above threshold SVs: %d, below threshold SVs: %d.\n", above, below);
+        LOGGER.info(" Above threshold SVs: {}, below threshold SVs: {}", NF.format(above), NF.format(below));
 
         // TODO -- if we have frequency information
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
@@ -164,7 +166,8 @@ public class AnnotateCommand implements Callable<Integer> {
 
         FilterAndCount fac = new FilterAndCount(priorities, rearrangements, threshold);
         // Now the list just contains SVs that pass the threshold
-        List<SvPriority> filteredPriorityList = fac.getFilteredPriorityList();
+       // List<SvPriority> filteredPriorityList = fac.getFilteredPriorityList();
+
         int unparsableCount = fac.getUnparsableCount();
         Map<SvType, Integer> lowImpactCounts = fac.getLowImpactCounts();
         Map<SvType, Integer> intermediateImpactCounts = fac.getIntermediateImpactCounts();
@@ -173,6 +176,15 @@ public class AnnotateCommand implements Callable<Integer> {
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("vcf_file", vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
+        infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
+        infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
+
+        List<String> visualizations = new ArrayList<>();
+        Collections.sort(prioritizedSequenceRearrangements);
+        for (var pr : prioritizedSequenceRearrangements) {
+            Visualizable vizbell = pr.getVisualizable();
+            visualizations.add(visualizer.getHtml(vizbell));
+        }
 
         HtmlTemplate template = new HtmlTemplate(visualizations,
                 lowImpactCounts,
@@ -184,6 +196,65 @@ public class AnnotateCommand implements Callable<Integer> {
 
         // We're done!
         return 0;
+    }
+
+    /**
+     * An inner class that is designed for ssorting the prioritized structural variants acccording to
+     * (1) impact, (2) chromosome, and (3) position. For translocations, we take the "first" chromosome.
+     */
+    private static class PrioritizedSequenceRearrangement implements Comparable<PrioritizedSequenceRearrangement> {
+        private final SequenceRearrangement rearrangement;
+        private final SvPriority priority;
+        private final SvImpact impact;
+        /** leftmost chromosome */
+        private final Contig contig;
+        /** leftmost (5') position */
+        private final int position;
+
+
+        private PrioritizedSequenceRearrangement(SequenceRearrangement rearrangement, SvPriority priority) {
+            this.rearrangement = rearrangement;
+            this.priority = priority;
+            this.impact = priority.getImpact();
+            this.contig = rearrangement.getLeftmostBreakend().getContig();
+            this.position = rearrangement.getLeftmostPosition();
+        }
+        public SequenceRearrangement rearrangement() {
+            return rearrangement;
+        }
+        public SvPriority priority() {
+            return priority;
+        }
+
+        public HtmlVisualizable getVisualizable() {
+            return new HtmlVisualizable(rearrangement, priority);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PrioritizedSequenceRearrangement that = (PrioritizedSequenceRearrangement) o;
+            return Objects.equals(rearrangement, that.rearrangement) &&
+                    Objects.equals(priority, that.priority);
+        }
+        @Override
+        public int hashCode() {
+            return Objects.hash(rearrangement, priority);
+        }
+
+        @Override
+        public int compareTo(PrioritizedSequenceRearrangement that) {
+            int priorityComparison = this.impact.compareTo(that.impact);
+            if (priorityComparison != 0) {
+                return priorityComparison;
+            }
+            int chromosomeComparison = Integer.compare(this.contig.getId(), that.contig.getId());
+            if (chromosomeComparison != 0) {
+                return chromosomeComparison;
+            }
+            return Integer.compare(this.position, that.position);
+        }
     }
 
 }

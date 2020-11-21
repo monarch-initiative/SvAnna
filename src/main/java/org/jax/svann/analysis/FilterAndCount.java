@@ -1,6 +1,8 @@
 package org.jax.svann.analysis;
 
 import org.jax.svann.except.SvAnnRuntimeException;
+import org.jax.svann.genomicreg.Enhancer;
+import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvImpact;
 import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.SequenceRearrangement;
@@ -8,10 +10,7 @@ import org.jax.svann.reference.SvType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +25,13 @@ public class FilterAndCount {
     private final Map<SvType, Integer> highImpactCounts;
 
     private final List<SvPriority> filteredPriorityList;
+    /** Number of distinct gene symbols annotated as affected in any way by a structural variant. */
+    private final int nAffectedGenes;
+    /** Number of distinct enhancers annotated as affected in any way by a structural variant. */
+    private final int nAffectedEnhancers;
+
+
+
 
     private final int unparsableCount;
 
@@ -35,6 +41,8 @@ public class FilterAndCount {
         this.lowImpactCounts = new HashMap<>();
         this.intermediateImpactCounts = new HashMap<>();
         this.highImpactCounts = new HashMap<>();
+        Set<Enhancer> affectedEnhancers = new HashSet<>();
+        Set<String> affectedGenes = new HashSet<>();
         int unknown = 0;
         // Initialize the count maps to be zero for all SvType
         Arrays.stream(SvType.values()).forEach(v -> {
@@ -66,6 +74,13 @@ public class FilterAndCount {
                 default:
                     unknown++;
             }
+            Set<String> symbols = svPriority.getOverlaps()
+                    .stream()
+                    .map(Overlap::getGeneSymbol)
+                    .collect(Collectors.toSet());
+            affectedGenes.addAll(symbols);
+            affectedEnhancers.addAll(svPriority.getAffectedEnhancers());
+
         }
 
         this.unparsableCount = unknown;
@@ -73,6 +88,8 @@ public class FilterAndCount {
                 .stream()
                 .filter(svp -> svp.getImpact().satisfiesThreshold(threshold))
                 .collect(Collectors.toList());
+        this.nAffectedGenes = affectedGenes.size();
+        this.nAffectedEnhancers = affectedEnhancers.size();
     }
 
     public FilterAndCount(List<SvPriority> priorityList, List<SequenceRearrangement> rearrangements) {
@@ -97,5 +114,13 @@ public class FilterAndCount {
 
     public int getUnparsableCount() {
         return unparsableCount;
+    }
+
+    public int getnAffectedGenes() {
+        return nAffectedGenes;
+    }
+
+    public int getnAffectedEnhancers() {
+        return nAffectedEnhancers;
     }
 }

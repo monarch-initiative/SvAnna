@@ -30,12 +30,12 @@ public class OverlapDistance {
     }
 
     public static OverlapDistance fromUpstreamFlankingGene(int distance, String geneSymbol) {
-        String description = String.format("Intergenic - %s upstream of %s", distanceString(distance), geneSymbol);
+        String description = String.format("Intergenic: %s upstream of %s", distanceString(distance), geneSymbol);
         return new OverlapDistance(OverlapDistanceType.INTERGENIC, distance, description, false);
     }
 
     public static OverlapDistance fromDownstreamFlankingGene(int distance, String geneSymbol) {
-        String description = String.format("Intergenic - %s downstream of %s", distanceString(distance), geneSymbol);
+        String description = String.format("Intergenic: %s downstream of %s", distanceString(distance), geneSymbol);
         return new OverlapDistance(OverlapDistanceType.INTERGENIC, distance, description, false);
     }
 
@@ -63,6 +63,7 @@ public class OverlapDistance {
     }
 
     private static String distanceString(int d) {
+        d = Math.abs(d);
         if (d < 1_000) {
             return String.format("%d bp", d);
         } else if (d < 1_000_000) {

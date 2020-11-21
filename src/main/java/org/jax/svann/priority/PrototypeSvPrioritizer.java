@@ -283,7 +283,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
-        if (affectedGeneIds.size() > 1) {
+        if (affectedGeneIds.size() > 1 && highestOT.isExonic()) {
             // Insertion affects >1 genes, although I'm not sure if this can actually happen
             impact = SvImpact.HIGH;
         } else if (highestOT.isExonic()) {

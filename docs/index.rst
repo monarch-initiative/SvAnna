@@ -17,5 +17,5 @@ of germline variants.
    setup
    running
    BND<bndannotations>
-
+   structuralvariation
 

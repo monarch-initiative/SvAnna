@@ -41,7 +41,10 @@ public class EnhancerOverlapper {
         GenomicRegion onStrand = region.withStrand(Strand.FWD);
 
         IntervalArray<Enhancer> intervalArray = chromosomeToEnhancerIntervalArrayMap.get(region.getContigId());
-        IntervalArray<Enhancer>.QueryResult queryResult = intervalArray.findOverlappingWithInterval(onStrand.getStartPosition(), onStrand.getEndPosition());
+        // TODO -- Probably add convenience function to GenomicRegion
+        int onStrandMin = Math.min(onStrand.getStartPosition(), onStrand.getEndPosition());
+        int onStrandMax = Math.max(onStrand.getStartPosition(), onStrand.getEndPosition());
+        IntervalArray<Enhancer>.QueryResult queryResult = intervalArray.findOverlappingWithInterval(onStrandMin, onStrandMax);
 
         return queryResult.getEntries();
     }

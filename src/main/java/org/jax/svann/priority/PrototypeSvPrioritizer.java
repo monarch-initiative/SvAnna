@@ -283,7 +283,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
 
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
-        if (affectedGeneIds.size() > 1) {
+        if (affectedGeneIds.size() > 1 && highestOT.isExonic()) {
             // Insertion affects >1 genes, although I'm not sure if this can actually happen
             impact = SvImpact.HIGH;
         } else if (highestOT.isExonic()) {
@@ -308,21 +308,6 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
         }
-        // When we get here, we will perform phenotypic prioritization.
-//        List<HpoDiseaseSummary> diseaseList;
-//        if (this.diseaseSummaryMap.isEmpty()) {
-//            // i.e., the user did not provide phenotypic data
-//            diseaseList = List.of(); // empty list
-//        } else {
-//            // check relevance with respect to transcripts
-//            boolean affectsTranscripts = affectedGenesRelevant(geneWithIdsSet);
-//            boolean affectsEnhancers = affectedEnhancersRelevant(enhancers);
-//            boolean relevant = affectsEnhancers || affectsTranscripts;
-//            if (!relevant) {
-//                // downgrade the impact
-//                impact = impact.decrementSeverity();
-//            }
-//        }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
@@ -387,9 +372,12 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                     : SvImpact.LOW;
         } else if (highestOT.isIntergenic()) {
             // (3) intergenic inversion, let's consider promoter and enhancers
-            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_2KB)) {
+            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
                 // promoter region
                 impact = SvImpact.HIGH;
+            } else if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_2KB)) {
+                // promoter region
+                impact = SvImpact.INTERMEDIATE;
             } else {
                 impact = enhancers.isEmpty()
                         ? SvImpact.LOW
@@ -405,7 +393,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         //if we get here, we look and see if there are both relevant genes within the inversion
         // and relevant enhancers within a window, or vice version.
 
-        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
+        return prio;
     }
 
 

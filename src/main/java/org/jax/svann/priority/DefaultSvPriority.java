@@ -75,7 +75,7 @@ class DefaultSvPriority implements SvPriority {
      */
     @Override
     public boolean hasPhenotypicRelevance() {
-        return false;
+        return this.diseases.size() > 0;
     }
 
     @Override

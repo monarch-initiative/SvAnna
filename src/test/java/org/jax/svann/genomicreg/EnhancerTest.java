@@ -25,12 +25,12 @@ public class EnhancerTest {
 
 
     /**
-     * Test that we retrieve an interval array for one chromosome
+     * Test that we retrieve an interval array for two chromosomes
      * (our test file only has one chromosome)
      */
     @Test
     public void testConstructIntervalTree() {
-        assertEquals(1, iamap.size());
+        assertEquals(2, iamap.size());
     }
 
     /**

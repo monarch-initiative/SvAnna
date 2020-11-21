@@ -5,9 +5,7 @@ import org.jax.svann.TestBase;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.GeneWithId;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.overlap.EnhancerOverlapper;
-import org.jax.svann.overlap.Overlapper;
-import org.jax.svann.overlap.SvAnnOverlapper;
+import org.jax.svann.overlap.*;
 import org.jax.svann.parse.TestVariants.Deletions;
 import org.jax.svann.parse.TestVariants.Insertions;
 import org.jax.svann.parse.TestVariants.Inversions;
@@ -27,6 +25,9 @@ import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThan;
+import static org.jax.svann.parse.TestVariants.Inversions.brainEnhancerDisruptedByInversion;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Let's assume we're running prioritization for a patient with a causal SV in <em>GCK</em> gene. Variants in GCK lead to
@@ -50,9 +51,10 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     private static final Map<TermId, Set<HpoDiseaseSummary>> DISEASE_MAP = makeDiseaseSummaryMap();
     private static final Map<Integer, IntervalArray<Enhancer>> ENHANCER_MAP = makeEnhancerMap();
     private static final Map<String, GeneWithId> GENE_SYMBOL_MAP = Map.of(
-            "GCK", new GeneWithId("GCK", TermId.of("ENTREZ:2645")),
-            "SURF1", new GeneWithId("SURF1", TermId.of("ENTREZ:6834")),
-            "SURF2", new GeneWithId("SURF2", TermId.of("ENTREZ:6835")));
+            "GCK", new GeneWithId("GCK", TermId.of("NCBIGene:2645")),
+            "FBN1", new GeneWithId("FBN1", TermId.of("NCBIGene:2200")),
+            "SURF1", new GeneWithId("SURF1", TermId.of("NCBIGene:6834")),
+            "SURF2", new GeneWithId("SURF2", TermId.of("NCBIGene:6835")));
 
     private static final Set<TermId> PATIENT_TERMS = Set.of(
             TermId.of("HP:0003074"), // hyperglycemia
@@ -76,56 +78,51 @@ public class PrototypeSvPrioritizerTest extends TestBase {
     private static Map<Integer, IntervalArray<Enhancer>> makeEnhancerMap() {
         Contig chr9 = GENOME_ASSEMBLY.getContigByName("9").orElseThrow();
         Contig chr7 = GENOME_ASSEMBLY.getContigByName("7").orElseThrow();
+        Contig chr20 = GENOME_ASSEMBLY.getContigByName("20").orElseThrow();
         String metabolism = "metabolism"; // represents an UBERON/CL term.
         String cns = "CNS";
         Enhancer surf1Enhancer = new Enhancer(chr9, 133_356_501, 133_356_530, .8, TermId.of("HP:0001939"),metabolism);
         Enhancer gckEnhancer = new Enhancer(chr7, 44_190_001, 44_190_050, .8, TermId.of("HP:0001939"),metabolism);
+        Enhancer chr20Enhancer = new Enhancer(chr20, 51_642_723,	51_642_826,0.42, TermId.of("UBERON:0000955"), "brain");
         Enhancer closeToGckNotPhenotypicallyRelevant = new Enhancer(chr7, 44_195_001, 44_195_500, .8, TermId.of("HP:0000707"), cns); // abnormality of the nervous system
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());
-        return Map.of(7, chr7Array, 9, chr9Array);
+        IntervalArray<Enhancer> chr20array = new IntervalArray<>(List.of(chr20Enhancer), new EnhancerEndExtractor());
+        return Map.of(7, chr7Array, 9, chr9Array, 20, chr20array);
+    }
+
+    private static HpoDiseaseSummary makeDiseaseSummary(String name, TermId diseaseId) {
+        return new HpoDiseaseSummary(
+                new HpoDisease(name,
+                        diseaseId,
+                        List.of(HpoAnnotation.builder(TermId.of("HP:0003074")) // hyperglycemia
+                                        .frequency(1., "Obligate")
+                                        .onset(HpoOnset.INFANTILE_ONSET)
+                                        .build(),
+                                HpoAnnotation.builder(TermId.of("HP:0001508")) // Failure to thrive
+                                        .frequency(.9, "Very frequent")
+                                        .onset(HpoOnset.CONGENITAL_ONSET)
+                                        .build()),
+                        List.of(TermId.of("HP:0000006")), // Autosomal dominant inheritance
+                        List.of(), // not terms
+                        List.of(), // clinical modifiers
+                        List.of() // clinical courses
+                ));
     }
 
     private static Map<TermId, Set<HpoDiseaseSummary>> makeDiseaseSummaryMap() {
-        HpoDiseaseSummary mody2 = new HpoDiseaseSummary(
-                new HpoDisease("Maturity onset diabetes of the young, type 2; MODY2",
-                        TermId.of("OMIM:125851"),
-                        List.of(HpoAnnotation.builder(TermId.of("HP:0003074")) // hyperglycemia
-                                        .frequency(1., "Obligate")
-                                        .onset(HpoOnset.INFANTILE_ONSET)
-                                        .build(),
-                                HpoAnnotation.builder(TermId.of("HP:0001508")) // Failure to thrive
-                                        .frequency(.9, "Very frequent")
-                                        .onset(HpoOnset.CONGENITAL_ONSET)
-                                        .build()),
-                        List.of(TermId.of("HP:0000006")), // Autosomal dominant inheritance
-                        List.of(), // not terms
-                        List.of(), // clinical modifiers
-                        List.of() // clinical courses
-                ));
-
-
+        HpoDiseaseSummary mody2 =
+                makeDiseaseSummary("Maturity onset diabetes of the young, type 2; MODY2",TermId.of("OMIM:125851"));
         // SURF1 deletion example
-        HpoDiseaseSummary cmt4k = new HpoDiseaseSummary(
-                new HpoDisease("Charcot-Marie-Tooth disease, type 4K",
-                        TermId.of("OMIM:616684"),
-                        List.of(HpoAnnotation.builder(TermId.of("HP:0003074")) // hyperglycemia
-                                        .frequency(1., "Obligate")
-                                        .onset(HpoOnset.INFANTILE_ONSET)
-                                        .build(),
-                                HpoAnnotation.builder(TermId.of("HP:0001508")) // Failure to thrive
-                                        .frequency(.9, "Very frequent")
-                                        .onset(HpoOnset.CONGENITAL_ONSET)
-                                        .build()),
-                        List.of(TermId.of("HP:0000006")), // Autosomal dominant inheritance
-                        List.of(), // not terms
-                        List.of(), // clinical modifiers
-                        List.of() // clinical courses
-                ));
+        HpoDiseaseSummary cmt4k =
+                makeDiseaseSummary("Charcot-Marie-Tooth disease, type 4K",TermId.of("OMIM:616684"));
+        HpoDiseaseSummary marfan =
+                makeDiseaseSummary("Marfan syndrome", TermId.of("OMIM:157000"));
         Map<TermId, Set<HpoDiseaseSummary>> diseaseMap = new HashMap<>();
-        diseaseMap.put(TermId.of("ENTREZ:2645"), Set.of(mody2));
-        diseaseMap.put(TermId.of("ENTREZ:6834"), Set.of(cmt4k));
+        diseaseMap.put(TermId.of("NCBIGene:2645"), Set.of(mody2));
+        diseaseMap.put(TermId.of("NCBIGene:6834"), Set.of(cmt4k));
+        diseaseMap.put(TermId.of("NCBIGene:2200"), Set.of(marfan));
         return diseaseMap;
     }
 
@@ -318,18 +315,43 @@ public class PrototypeSvPrioritizerTest extends TestBase {
         assertThat(result.getImpact(), is(SvImpact.HIGH));
     }
 
+    /**
+     * Test inversion that disrupts the sequence of this enhancer
+     * chr10	100184852	100185124	0.420772	UBERON:0000955	brain	HP:0012443	Abnormality of brain morphology
+     * The sequence impact is HIGH but there is not associated disease here so the final impact
+     * should be INTERMEDIATE
+     */
     @Test
     public void inversionAffectingAnEnhancer() {
-        // TODO: 4. 11. 2020 implement
+        SequenceRearrangement sr = brainEnhancerDisruptedByInversion();
+        SvPriority result = prioritizer.prioritize(sr);
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
     }
 
+    /**
+     * An inversion in the FBN1 promoter, 50 bp upstream
+     */
     @Test
     public void inversionAffectingAPromoter() {
-        // TODO: 4. 11. 2020 implement
+        SequenceRearrangement sr = Inversions.fbn1PromoterInversion();
+        SvPriority result = prioritizer.prioritize(sr);
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
+        assertTrue(result.hasPhenotypicRelevance());
+        List<Overlap> overlaps = result.getOverlaps();
+        assertThat(overlaps.size(), is(1));
+        Overlap olap = overlaps.get(0);
+        assertThat(olap.getOverlapType(), is(OverlapType.UPSTREAM_GENE_VARIANT_500B));
+        assertThat(olap.getDistance(), is(lessThan(500))); // 500bp class, actually it is 48bp
+        assertThat(olap.getGeneSymbol(), is("FBN1"));
     }
 
+    /**
+     * A 300bp inversion, 25000 upstream of FBN1, does not affect an enhancer, expect low impact
+     */
     @Test
     public void inversionUpstream() {
-        // TODO: 4. 11. 2020 implement
+        SequenceRearrangement sr = Inversions.fbn1UpstreamInversion();
+        SvPriority result = prioritizer.prioritize(sr);
+        assertThat(result.getImpact(), is(SvImpact.LOW));
     }
 }

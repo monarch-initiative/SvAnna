@@ -5,14 +5,24 @@ import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.reference.GenomePosition;
 import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svann.TestBase;
+import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.List;
 
-@Disabled
-public class IntronOverlapTest {
+import static org.jax.svann.parse.TestVariants.Deletions.zbtb48intron1;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+/**
+ * Test the ability of Overlapper to calculate the correct intron number.
+ */
+public class IntronOverlapTest extends TestBase {
 
     private static ReferenceDictionary rdict;
     /**
@@ -23,6 +33,8 @@ public class IntronOverlapTest {
      * transcript info on reverse strand
      */
     private static  TranscriptModel ZNF436;
+
+    private static SvAnnOverlapper overlapper;
 
     /**
      * Mock a TranscriptModel to be able to test getting the correct intron number
@@ -43,97 +55,24 @@ public class IntronOverlapTest {
         rdict = TranscriptModelFactory.rdict();
         ZBTB48 = TranscriptModelFactory.ZBTB48();
         ZNF436 = TranscriptModelFactory.ZNF436();
+        overlapper = new SvAnnOverlapper(TX_SERVICE.getChromosomeMap());
     }
-
 
     /**
      * ZBTB48 is forward strand. Test a variant in intron 1, i.e.,  between 6_640_196-6_640_600
+     * THere are 12 overlapping transcripts, and this is intron 1 in all of them
      */
     @Test
     public void testZBTB48_Intron1() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_640_400);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_640_500);
-        int expectedIntronNumber = 1;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
+        SequenceRearrangement zbtb48intron1 = zbtb48intron1();
+        List<Overlap> overlaps = overlapper.getOverlapList(zbtb48intron1);
+        assertEquals(12, overlaps.size());
+        Overlap olap = overlaps
+                .stream()
+                .filter(ol -> ol.getTranscriptModel().getAccession().equals("NM_005341.3"))
+                .findFirst()
+                .orElseThrow();
+        assertEquals("ZBTB48/NM_005341.3[intron 1]",olap.getDescription());
     }
 
-    /**
-     * ZBTB48 is forward strand. Test a variant in intron 2, i.e., between 6641359-6642117
-     */
-    @Test
-    public void testIntronicZBTB48_Intron2() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_641_400);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_641_500);
-        int expectedIntronNumber = 2;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
-    }
-
-    /**
-     * ZBTB48 is forward strand. Test a variant in intron 3, i.e., between 6_642_359-6_645_978
-     */
-    @Test
-    public void testIntronicZBTB48_Intron3() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_643_200);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_643_700);
-        int expectedIntronNumber = 3;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
-    }
-
-    /**
-     * ZBTB48 is forward strand. Test a variant in intron 4, i.e., between 6646090-6646754
-     */
-    @Test
-    public void testIntronicZBTB48_Intron4() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_646_200);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_646_700);
-        int expectedIntronNumber = 4;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
-    }
-
-
-    /**
-     * ZBTB48 is forward strand. Test a variant in intron 10, i.e., between 6_648_815-6_649_340
-     */
-    @Test
-    public void testIntronicZBTB48_Intron10() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 6_648_915);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 6_648_925);
-        int expectedIntronNumber = 10;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZBTB48, start.getPos(), end.getPos()));
-    }
-
-
-    /**
-     * ZNF436 is reverse strand. Test a variant in intron 1, 23_694_558-23_695_858
-     */
-    @Test
-    public void testZNF436_Intron1() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_570);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_580);
-        int expectedIntronNumber = 1;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
-    }
-
-    /**
-     * ZNF436 is reverse strand. Test a variant in intron 2, 23_693_661- 23_694_465
-     *
-     */
-    @Test
-    public void testZNF436_Intron2() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_694_161);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_694_280);
-        int expectedIntronNumber = 2;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
-    }
-
-    /**
-     * ZNF436 is reverse strand. Test a variant in intron 1, 23_689_714-23_693_534
-     */
-    @Test
-    public void testZNF436_Intron3() {
-        GenomePosition start = new GenomePosition(rdict, Strand.FWD, 1, 23_693_234);
-        GenomePosition end = new GenomePosition(rdict, Strand.FWD, 1, 23_693_334);
-        int expectedIntronNumber = 3;
-        assertEquals(expectedIntronNumber, PrototypeOverlapper.getIntronNumber(ZNF436, start.getPos(), end.getPos()));
-    }
 }

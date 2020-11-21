@@ -141,7 +141,7 @@ public class HtmlVisualizer implements Visualizer {
     String getSvgString(Visualizable visualizable) {
         List<CoordinatePair> coordinatePairs = visualizable.getRearrangement().getRegions();
         SvType svtype = visualizable.getRearrangement().getType();
-        if (visualizable.getGeneCount()>2) {
+        if (visualizable.getGeneCount()>10) {
             return EMPTY_STRING;
         }
         try {
@@ -247,8 +247,9 @@ public class HtmlVisualizer implements Visualizer {
     public String getHtml(Visualizable visualizable) {
         List<HtmlLocation> locations = visualizable.getLocations();
         String variantString = getVariantRepresentation(visualizable,  locations );
+        String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
         StringBuilder sb = new StringBuilder();
-        sb.append("<h1>").append(variantString).append("</h1>\n");
+        sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact).append("</h1>\n");
         sb.append("<div class=\"row\">\n");
         sb.append("<div class=\"column\" style=\"background-color:#F8F8F8;\">\n");
         sb.append("<h2>Sequence</h2>\n");

@@ -203,7 +203,7 @@ public class AnnotateCommand implements Callable<Integer> {
      * (1) impact, (2) chromosome, and (3) position. For translocations, we take the "first" chromosome.
      */
     private static class PrioritizedSequenceRearrangement implements Comparable<PrioritizedSequenceRearrangement> {
-        private final SequenceRearrangement rearrangement;
+        private final StructuralVariant structuralVariant;
         private final SvPriority priority;
         private final SvImpact impact;
         /** leftmost chromosome */
@@ -212,22 +212,22 @@ public class AnnotateCommand implements Callable<Integer> {
         private final int position;
 
 
-        private PrioritizedSequenceRearrangement(SequenceRearrangement rearrangement, SvPriority priority) {
-            this.rearrangement = rearrangement;
+        private PrioritizedSequenceRearrangement(StructuralVariant sv, SvPriority priority) {
+            this.structuralVariant = sv;
             this.priority = priority;
             this.impact = priority.getImpact();
-            this.contig = rearrangement.getLeftmostBreakend().getContig();
-            this.position = rearrangement.getLeftmostPosition();
+            this.contig = sv.getLeftmostBreakend().getContig();
+            this.position = sv.getLeftmostPosition();
         }
-        public SequenceRearrangement rearrangement() {
-            return rearrangement;
+        public SequenceRearrangement structuralVariant() {
+            return structuralVariant;
         }
         public SvPriority priority() {
             return priority;
         }
 
         public HtmlVisualizable getVisualizable() {
-            return new HtmlVisualizable(rearrangement, priority);
+            return new HtmlVisualizable(structuralVariant, priority);
         }
 
         @Override
@@ -235,12 +235,12 @@ public class AnnotateCommand implements Callable<Integer> {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             PrioritizedSequenceRearrangement that = (PrioritizedSequenceRearrangement) o;
-            return Objects.equals(rearrangement, that.rearrangement) &&
+            return Objects.equals(structuralVariant, that.structuralVariant) &&
                     Objects.equals(priority, that.priority);
         }
         @Override
         public int hashCode() {
-            return Objects.hash(rearrangement, priority);
+            return Objects.hash(structuralVariant, priority);
         }
 
         @Override

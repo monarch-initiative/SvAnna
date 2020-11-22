@@ -4,10 +4,7 @@ import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.Breakend;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
@@ -19,11 +16,11 @@ public class HtmlVisualizable implements Visualizable {
     /**
      * Representation of the structural variant as it came from the VCF file.
      */
-    private final SequenceRearrangement rearrangement;
+    private final StructuralVariant rearrangement;
 
     private final SvPriority svPriority;
 
-    public HtmlVisualizable(SequenceRearrangement rearrangement, SvPriority svPriority) {
+    public HtmlVisualizable(StructuralVariant rearrangement, SvPriority svPriority) {
         this.rearrangement = rearrangement;
         this.svPriority = svPriority;
     }
@@ -65,7 +62,7 @@ public class HtmlVisualizable implements Visualizable {
 
 
     @Override
-    public SequenceRearrangement getRearrangement() {
+    public StructuralVariant getRearrangement() {
         return this.rearrangement;
     }
 

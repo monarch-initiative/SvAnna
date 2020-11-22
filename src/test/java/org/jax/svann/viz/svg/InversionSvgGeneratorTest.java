@@ -16,6 +16,7 @@ import org.jax.svann.priority.SvPrioritizer;
 import org.jax.svann.priority.SvPriority;
 import org.jax.svann.reference.CoordinatePair;
 import org.jax.svann.reference.SequenceRearrangement;
+import org.jax.svann.reference.StructuralVariant;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.HtmlVisualizable;
 import org.jax.svann.viz.HtmlVisualizer;
@@ -39,7 +40,7 @@ public class InversionSvgGeneratorTest extends TestBase {
     private static final ReferenceDictionary rd = JANNOVAR_DATA.getRefDict();
     private static final List<Enhancer> enhancers = List.of();
     private static final Set<TermId> enhancerRelevantAncestors = Set.of();
-    private static final SequenceRearrangement exonicInversion = TestVariants.Inversions.gckExonic();
+    private static final StructuralVariant exonicInversion = TestVariants.Inversions.gckExonic();
     private static final Map<Integer, IntervalArray<Enhancer>> enhancerMap = Map.of();
     private static final Set<TermId> patientTerms = Set.of();
     private static final Overlapper overlapper = new SvAnnOverlapper(TX_SERVICE.getChromosomeMap());

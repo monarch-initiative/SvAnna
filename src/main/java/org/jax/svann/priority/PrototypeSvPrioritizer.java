@@ -197,6 +197,21 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                 affectedGeneIds, affectedEnhancers, olaps, diseaseList);
     }
 
+    Map<Enhancer, Boolean> enhancerRelevanceMap(List<Enhancer> enhancers) {
+        Map<Enhancer, Boolean> relevanceMap = new HashMap<>();
+        for (var e : enhancers) {
+            TermId hpoId = e.getHpoId();
+            if (this.relevantHpoIdsForEnhancers.contains(hpoId)) {
+                relevanceMap.put(e, Boolean.TRUE);
+            } else {
+                relevanceMap.put(e, Boolean.FALSE);
+            }
+        }
+        return Map.copyOf(relevanceMap); // immutable
+    }
+
+
+
     /**
      * When prioritizing a deletion, we start with default {@link SvImpact} for given {@link OverlapType} and adjust the
      * impact to the following if:
@@ -236,11 +251,14 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // now the impact might still be HIGH if the deletion overlaps with a phenotypically relevant enhancer
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(deletion);
-        if (!enhancers.isEmpty()) {
-            SvImpact enhancerImpact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getHpoId()))
+        Map<Enhancer, Boolean> enhancerRelevanceMap = enhancerRelevanceMap(enhancers);
+        if (!enhancerRelevanceMap.isEmpty()) {
+            SvImpact enhancerImpact = enhancerRelevanceMap.entrySet().stream()
+                    .filter(map -> map.getValue())  // getValue is True or False
+                    .findAny().isPresent()
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
-            if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.HIGH) {
+            if (enhancerImpact == SvImpact.HIGH) {
                 impact = SvImpact.HIGH;
             } else if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.INTERMEDIATE) {
                 impact = SvImpact.INTERMEDIATE;

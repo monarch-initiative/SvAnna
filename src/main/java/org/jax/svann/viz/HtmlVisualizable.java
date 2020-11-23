@@ -4,10 +4,7 @@ import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
 import org.jax.svann.priority.SvPriority;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.Breakend;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 
@@ -36,9 +33,10 @@ public class HtmlVisualizable implements Visualizable {
     }
 
     private HtmlLocation getInsertionLocation(SequenceRearrangement rearrangement) {
-        int begin = rearrangement.getLeftmostPosition();
-        int end = rearrangement.getRightmostPosition();
-        Contig chrom = rearrangement.getLeftmostBreakend().getContig();
+        SequenceRearrangement onFwdStrand = rearrangement.withStrand(Strand.FWD);
+        int begin = onFwdStrand.getLeftmostPosition();
+        int end = onFwdStrand.getRightmostPosition();
+        Contig chrom = onFwdStrand.getLeftmostBreakend().getContig();
         return new HtmlLocation(chrom, begin, end);
     }
 
@@ -56,8 +54,8 @@ public class HtmlVisualizable implements Visualizable {
             System.err.println("Malformed insertion adjacency list with size " + adjacencies.size());
         }
         Adjacency insertion = adjacencies.get(0);
-        Breakend left = insertion.getStart();
-        Breakend right = insertion.getEnd();
+        Breakend left = insertion.getStart().withStrand(Strand.FWD);
+        Breakend right = insertion.getEnd().withStrand(Strand.FWD);
         locations.add(new HtmlLocation(left.getContig(), left.getPosition()));
         locations.add(new HtmlLocation(right.getContig(), right.getPosition()));
         return locations;

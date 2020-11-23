@@ -4,10 +4,7 @@ package org.jax.svann.viz;
 import org.jax.svann.except.SvAnnRuntimeException;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
-import org.jax.svann.reference.Adjacency;
-import org.jax.svann.reference.CoordinatePair;
-import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.SvType;
+import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
@@ -127,8 +124,8 @@ public class HtmlVisualizer implements Visualizer {
             return -1; // should never happen
         }
         List<Adjacency> adjacencies = rearrangement.getAdjacencies();
-        Adjacency left = adjacencies.get(0);
-        Adjacency right = adjacencies.get(1);
+        Adjacency left = adjacencies.get(0).withStrand(Strand.FWD);
+        Adjacency right = adjacencies.get(1).withStrand(Strand.FWD);
 
         // start position of the right adjacency is the end of the inserted sequence
         // end position of the left adjacency is the beginning of the inserted sequence
@@ -285,8 +282,8 @@ public class HtmlVisualizer implements Visualizer {
         Set<String> vcfIdSet = new HashSet<>();
         List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
         for (var a : adjacencies) {
-            vcfIdSet.add(a.getStart().getContigName());
-            vcfIdSet.add(a.getEnd().getContigName());
+            vcfIdSet.add(a.getStart().getId());
+            vcfIdSet.add(a.getEnd().getId());
         }
         String idString = String.join(";", vcfIdSet);
         if (vcfIdSet.size() > 1) {

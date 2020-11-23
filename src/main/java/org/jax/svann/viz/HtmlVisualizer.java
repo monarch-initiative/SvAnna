@@ -11,7 +11,7 @@ import org.jax.svann.reference.SvType;
 import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
+
 
 import java.util.HashSet;
 import java.util.List;
@@ -45,10 +45,9 @@ public class HtmlVisualizer implements Visualizer {
             "    </tr>\n" +
             "  </thead>\n";
 
-    private final Ontology hpo;
 
-    public HtmlVisualizer(Ontology hpo ) {
-        this.hpo = hpo;
+
+    public HtmlVisualizer() {
     }
 
 

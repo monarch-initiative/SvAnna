@@ -9,6 +9,7 @@ import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
 
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -20,6 +21,11 @@ import java.util.stream.Collectors;
  * This class creates the HTML code for each prioritized structural variant that is shown in the output.
  */
 public class HtmlVisualizer implements Visualizer {
+    /** Many SV callers pick up very large deletions/duplications that are almost certainly artifacts. We do not want
+     * to print detailed information for these. We user an arbitrary threshold -- if we have more than this many
+     * genes, we do not show details.
+     */
+    private final static int THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS = 100;
 
     private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF", "F7DC6F", "CFFF98", "A1D6E2",
             "EC96A4", "E6DF44", "F76FDA", "FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6", "FFC300", "F76FF5", "FFFF99",
@@ -37,33 +43,12 @@ public class HtmlVisualizer implements Visualizer {
             "  </thead>\n";
 
 
+
     public HtmlVisualizer() {
-
     }
 
 
-    /**
-     * Display a list of diseases that are associated with genes that are affected by the structural variant.
-     * Currently we show an unordered list
-     *
-     * @param visualizable object representing the SV
-     * @return HTML code that displays associated diseases
-     */
-    private String getUnorderedListWithDiseases(Visualizable visualizable) {
-        List<HpoDiseaseSummary> diseases = visualizable.getDiseaseSummaries();
-        if (diseases.isEmpty()) {
-            return "n/a";
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append("<ul>\n");
-        for (var disease : visualizable.getDiseaseSummaries()) {
-            String url = String.format("<a href=\"https://hpo.jax.org/app/browse/disease/%s\" target=\"__blank\">%s (%s)</a>",
-                    disease.getDiseaseId(), disease.getDiseaseName(), disease.getDiseaseId());
-            sb.append("<li>").append(url).append("</li>\n");
-        }
-        sb.append("</ul>\n");
-        return sb.toString();
-    }
+
 
     /**
      * Creates a link to the UCSCS browser that shows the posiution of the SV using a color highlight
@@ -139,8 +124,8 @@ public class HtmlVisualizer implements Visualizer {
             return -1; // should never happen
         }
         List<Adjacency> adjacencies = rearrangement.getAdjacencies();
-        Adjacency left = adjacencies.get(0);
-        Adjacency right = adjacencies.get(1);
+        Adjacency left = adjacencies.get(0).withStrand(Strand.FWD);
+        Adjacency right = adjacencies.get(1).withStrand(Strand.FWD);
 
         // start position of the right adjacency is the end of the inserted sequence
         // end position of the left adjacency is the beginning of the inserted sequence
@@ -293,7 +278,7 @@ public class HtmlVisualizer implements Visualizer {
         if (visualizable.getGeneCount() > 2 &&
                 (visualizable.getRearrangement().getType() == SvType.DELETION ||
                         visualizable.getRearrangement().getType() == SvType.DUPLICATION)) {
-            return getMultigeneSequencePriotization(visualizable);
+            return getMultigeneSequencePrioritization(visualizable);
         }
         StringBuilder sb = new StringBuilder();
         int minSequenceDepth = visualizable.getRearrangement().minDepthOfCoverage();
@@ -301,8 +286,8 @@ public class HtmlVisualizer implements Visualizer {
         Set<String> vcfIdSet = new HashSet<>();
         List<Adjacency> adjacencies = visualizable.getRearrangement().getAdjacencies();
         for (var a : adjacencies) {
-            vcfIdSet.add(a.getStart().getContigName());
-            vcfIdSet.add(a.getEnd().getContigName());
+            vcfIdSet.add(a.getStart().getId());
+            vcfIdSet.add(a.getEnd().getId());
         }
         String idString = String.join(";", vcfIdSet);
         if (vcfIdSet.size() > 1) {
@@ -351,7 +336,7 @@ public class HtmlVisualizer implements Visualizer {
      * @param visualizable
      * @return
      */
-    private String getMultigeneSequencePriotization(Visualizable visualizable) {
+    private String getMultigeneSequencePrioritization(Visualizable visualizable) {
         StringBuilder sb = new StringBuilder();
         List<HtmlLocation> locations = visualizable.getLocations();
         //String variantString = getVariantRepresentation(visualizable,  locations );
@@ -400,7 +385,56 @@ public class HtmlVisualizer implements Visualizer {
         return sb.toString();
     }
 
+
+    private String getEnhancerPrioritizationHtml(Visualizable visualizable) {
+        List<Enhancer> enhancerList = visualizable.getEnhancers();
+        if (enhancerList.isEmpty()) {
+            return "";
+        } else  if (visualizable.getGeneCount() > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
+            return String.format("<p>Total of %d relevant enhancers associated this variant.</p>\n",
+                    visualizable.getEnhancers().size());
+        } else if (enhancerList.size() > 10) {
+            return String.format("<p>Total of %d enhancers associated this variant.</p>\n",
+                    enhancerList.size());
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<ul>\n");
+        for (Enhancer e : enhancerList) {
+            sb.append("<li>").append(getEnhancerSummary(e)).append("</li>\n");
+        }
+        sb.append("</ul>\n");
+        return sb.toString();
+    }
+
+    /**
+     * Display a list of diseases that are associated with genes that are affected by the structural variant.
+     * Currently we show an unordered list
+     *
+     * @param visualizable object representing the SV
+     * @return HTML code that displays associated diseases
+     */
+    private String getDiseaseGenePrioritizationHtml(Visualizable visualizable) {
+        List<HpoDiseaseSummary> diseases = visualizable.getDiseaseSummaries();
+        if (diseases.isEmpty()) {
+            return "n/a";
+        } else if (visualizable.getGeneCount() > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
+            return String.format("<p>Total of %d relevant diseases associated with genes in this variant.</p>\n",
+                    visualizable.getDiseaseSummaries().size());
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<ul>\n");
+        for (var disease : visualizable.getDiseaseSummaries()) {
+            String url = String.format("<a href=\"https://hpo.jax.org/app/browse/disease/%s\" target=\"__blank\">%s (%s)</a>",
+                    disease.getDiseaseId(), disease.getDiseaseName(), disease.getDiseaseId());
+            sb.append("<li>").append(url).append("</li>\n");
+        }
+        sb.append("</ul>\n");
+        return sb.toString();
+    }
+
     String getPhenotypePrioritization(Visualizable visualizable) {
-        return getUnorderedListWithDiseases(visualizable);
+        String diseases = getDiseaseGenePrioritizationHtml(visualizable);
+        String enhancers = getEnhancerPrioritizationHtml(visualizable);
+        return String.format("%s<br />%s", diseases, enhancers);
     }
 }

@@ -38,6 +38,7 @@ import org.jax.svann.viz.HtmlVisualizable;
 import org.jax.svann.viz.HtmlVisualizer;
 import org.jax.svann.viz.Visualizable;
 import org.jax.svann.viz.Visualizer;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,8 @@ public class AnnotateCommand implements Callable<Integer> {
             type = SvImpact.class,
             description = "report variants as severe as this or more")
     public SvImpact threshold = SvImpact.HIGH;
+    @CommandLine.Option(names = {"-max_genes"}, description = "maximum gene count to prioritize an SV (default: ${DEFAULT-VALUE} )")
+    public int maxGenes = 100;
 
     public AnnotateCommand() {
         // TODO: 2. 11. 2020 externalize
@@ -112,6 +115,7 @@ public class AnnotateCommand implements Callable<Integer> {
             hpoTermsAndLabels = hpoDiseaseGeneMap.getTermLabelMap(patientTerms);
         else
             hpoTermsAndLabels = Map.of();
+        final Ontology hpo = hpoDiseaseGeneMap.getOntology();
         // enhancers & relevant enhancer terms
         TSpecParser tparser = new TSpecParser(enhancerFile.toString());
         Map<Integer, IntervalArray<Enhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
@@ -137,7 +141,13 @@ public class AnnotateCommand implements Callable<Integer> {
         Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
 
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, enhancerRelevantAncestors, relevantGenesAndDiseases);
+        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper,
+                enhancerOverlapper,
+                geneSymbolMap,
+                patientTerms,
+                enhancerRelevantAncestors,
+                relevantGenesAndDiseases,
+                maxGenes);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();

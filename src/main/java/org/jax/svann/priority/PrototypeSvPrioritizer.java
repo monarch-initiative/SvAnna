@@ -64,6 +64,11 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
      *  determined to be phenotypically relevant and is empty (but not null) if the user does not enter HPO terms.
      */
     private final Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap;
+    /**
+     * If an SV affects more genes than this, we assume it is likely to be an artifact, and downweight its
+     * impact.
+     */
+    private final int maxGenes;
 
     /**
      *
@@ -79,13 +84,33 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                                   Map<String, GeneWithId> geneSymbolMap,
                                   Set<TermId> patientPhenotypeTerms,
                                   Set<TermId> relevantHpoIdsForEnhancers,
-                                  Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap) {
+                                  Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap,
+                                  int maxGenes) {
         this.geneSymbolMap = geneSymbolMap;
         this.overlapper = overlapper;
         this.enhancerOverlapper = enhancerOverlapper;
         this.patientPhenotypeTerms = patientPhenotypeTerms;
         this.relevantHpoIdsForEnhancers = relevantHpoIdsForEnhancers;
         this.diseaseSummaryMap = diseaseSummaryMap;
+        this.maxGenes = maxGenes;
+    }
+
+    /**
+     * Constructor with default value of 100 for the Max genes parameter.
+     * @param overlapper
+     * @param enhancerOverlapper
+     * @param geneSymbolMap
+     * @param patientPhenotypeTerms
+     * @param relevantHpoIdsForEnhancers
+     * @param diseaseSummaryMap
+     */
+    public PrototypeSvPrioritizer(Overlapper overlapper,
+                                  EnhancerOverlapper enhancerOverlapper,
+                                  Map<String, GeneWithId> geneSymbolMap,
+                                  Set<TermId> patientPhenotypeTerms,
+                                  Set<TermId> relevantHpoIdsForEnhancers,
+                                  Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap) {
+        this(overlapper, enhancerOverlapper, geneSymbolMap, patientPhenotypeTerms, relevantHpoIdsForEnhancers, diseaseSummaryMap, 100);
     }
 
     @Override
@@ -172,6 +197,21 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                 affectedGeneIds, affectedEnhancers, olaps, diseaseList);
     }
 
+    Map<Enhancer, Boolean> enhancerRelevanceMap(List<Enhancer> enhancers) {
+        Map<Enhancer, Boolean> relevanceMap = new HashMap<>();
+        for (var e : enhancers) {
+            TermId hpoId = e.getHpoId();
+            if (this.relevantHpoIdsForEnhancers.contains(hpoId)) {
+                relevanceMap.put(e, Boolean.TRUE);
+            } else {
+                relevanceMap.put(e, Boolean.FALSE);
+            }
+        }
+        return Map.copyOf(relevanceMap); // immutable
+    }
+
+
+
     /**
      * When prioritizing a deletion, we start with default {@link SvImpact} for given {@link OverlapType} and adjust the
      * impact to the following if:
@@ -211,15 +251,29 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         // now the impact might still be HIGH if the deletion overlaps with a phenotypically relevant enhancer
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(deletion);
-        if (!enhancers.isEmpty()) {
-            SvImpact enhancerImpact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.getHpoId()))
+        Map<Enhancer, Boolean> enhancerRelevanceMap = enhancerRelevanceMap(enhancers);
+        if (!enhancerRelevanceMap.isEmpty()) {
+            SvImpact enhancerImpact = enhancerRelevanceMap.entrySet().stream()
+                    .filter(map -> map.getValue())  // getValue is True or False
+                    .findAny().isPresent()
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
-            if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.HIGH) {
+            if (enhancerImpact == SvImpact.HIGH) {
                 impact = SvImpact.HIGH;
             } else if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.INTERMEDIATE) {
                 impact = SvImpact.INTERMEDIATE;
             }
+        }
+        // counts of gene regardless of relevance
+        int genecount =  (int)affectedTranscripts
+                .stream()
+                .map(SvAnnTxModel::getGeneSymbol)
+                .distinct()
+                .count();
+
+        if (genecount > maxGenes) {
+            impact = impact.decrementSeverity();
+            System.out.println(geneWithIdsSet.size());
         }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
 
@@ -550,6 +604,17 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             if (geneSymbolMap.containsKey(symbol)) {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
+        }
+        // counts of gene regardless of relevance
+        int genecount =  (int)affectedTranscripts
+                .stream()
+                .map(SvAnnTxModel::getGeneSymbol)
+                .distinct()
+                .count();
+
+        if (genecount > maxGenes) {
+            impact = impact.decrementSeverity();
+            System.out.println(geneWithIdsSet.size());
         }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }

@@ -27,8 +27,6 @@ import org.jax.svann.reference.CoordinatePair;
 import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.StructuralVariant;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
-import org.jax.svann.viz.HtmlVisualizable;
-import org.jax.svann.viz.HtmlVisualizer;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -63,18 +61,10 @@ public class TranslocationSvGeneratorTest extends TestBase {
             enhancerRelevantAncestors,
             relevantGenesAndDiseases);
     private static final SvPriority priority = prioritizer.prioritize(translocation);
-    private static final HtmlVisualizable visualizable = new HtmlVisualizable(translocation, priority);
-    private static final HtmlVisualizer visualizer = new HtmlVisualizer();
 
-    @Test
-    public void testCreateNonNullSvg() {
-        String svg = visualizer.getHtml(visualizable);
-        assertNotNull(svg);
-    }
 
     @Test
     public void testWriteSvg() {
-       // String svg = visualizer.getHtml(visualizable);
         List<Overlap> overlaps = overlapper.getOverlapList(translocation);
         List<SvAnnTxModel> transcriptModels = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();

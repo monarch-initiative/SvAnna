@@ -153,4 +153,7 @@ public class HpoDiseaseGeneMap {
         return labelmap;
     }
 
+    public Ontology getOntology() {
+        return ontology;
+    }
 }

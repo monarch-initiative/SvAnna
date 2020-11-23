@@ -9,6 +9,7 @@ import org.jax.svann.reference.*;
 import org.jax.svann.reference.genome.GenomeAssemblyProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
@@ -179,5 +180,15 @@ public class VcfSequenceRearrangementParserTest extends ToyCoordinateTestBase {
         assertThat(betaRight.getId(), is("INV0"));
         assertThat(betaRight.getPosition(), is(20));
         assertThat(betaRight.getStrand(), is(Strand.FWD));
+    }
+
+    @Test
+    @Disabled // only run this manually
+    public void breakendTest() {
+        Path vcfPath = Paths.get("src/test/resources/sv_example_breakend_resolution.vcf");
+        VcfSequenceRearrangementParser parser = new VcfSequenceRearrangementParser(GenomeAssemblyProvider.getGrch38Assembly(), ASSEMBLER);
+        List<StructuralVariant> variants = parser.parseFile(vcfPath);
+
+        variants.forEach(System.err::println);
     }
 }

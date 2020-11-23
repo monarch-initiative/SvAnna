@@ -150,7 +150,7 @@ public class AnnotateCommand implements Callable<Integer> {
                 maxGenes);
         List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
         // setup visualization parts
-        Visualizer visualizer = new HtmlVisualizer(hpo);
+        Visualizer visualizer = new HtmlVisualizer();
 
         List<PrioritizedSequenceRearrangement> prioritizedSequenceRearrangements = new ArrayList<>();
         int above = 0, below = 0;

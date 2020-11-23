@@ -587,8 +587,16 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
         }
-        if (geneWithIdsSet.size() > maxGenes) {
+        // counts of gene regardless of relevance
+        int genecount =  (int)affectedTranscripts
+                .stream()
+                .map(SvAnnTxModel::getGeneSymbol)
+                .distinct()
+                .count();
+
+        if (genecount > maxGenes) {
             impact = impact.decrementSeverity();
+            System.out.println(geneWithIdsSet.size());
         }
         return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }

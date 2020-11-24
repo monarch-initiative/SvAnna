@@ -1,0 +1,159 @@
+package org.jax.svanna.core.parse;
+
+import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFFileReader;
+import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.variant.api.impl.SequenceVariant;
+import org.monarchinitiative.variant.api.impl.SymbolicVariant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+/**
+ * Parse variants stored in a VCF file.
+ */
+public class VcfVariantParser implements VariantParser<Variant> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VcfVariantParser.class);
+
+    private final GenomicAssembly assembly;
+
+    private final BreakendAssembler breakendAssembler;
+
+    private final boolean requireVcfIndex;
+
+    public VcfVariantParser(GenomicAssembly assembly) {
+        this(assembly, false);
+    }
+
+    public VcfVariantParser(GenomicAssembly assembly, boolean requireVcfIndex) {
+        this.assembly = assembly;
+        this.breakendAssembler = new BreakendAssembler(assembly);
+        this.requireVcfIndex = requireVcfIndex;
+    }
+
+    static String makeVariantRepresentation(VariantContext vc) {
+        return String.format("%s-%d:(%s)", vc.getContig(), vc.getStart(), vc.getID());
+    }
+
+    @Override
+    public Stream<Variant> createVariantAlleles(Path filePath) throws IOException {
+        try (VCFFileReader reader = new VCFFileReader(filePath, requireVcfIndex)) {
+            return reader.iterator().stream()
+                    .map(toVariants())
+                    .flatMap(Collection::stream);
+        }
+    }
+
+    /**
+     * One variant context might represent multiple sequence variants or a single symbolic variant/breakend.
+     * This function melts the variant context to a collection of variants.
+     * <p>
+     * Multi-allelic sequence variants are supported, while multi-allelic symbolic variants are not.
+     *
+     * @return function that maps variant context to collection of {@link Variant}s
+     */
+    Function<VariantContext, Collection<Variant>> toVariants() {
+        return vc -> {
+            String vRepr = makeVariantRepresentation(vc);
+
+            List<Allele> alts = vc.getAlternateAlleles();
+            List<Variant> variants = new ArrayList<>(alts.size());
+            for (int altAlleleIdx = 0; altAlleleIdx < alts.size(); altAlleleIdx++) {
+                Allele altAllele = alts.get(altAlleleIdx);
+                String alt = altAllele.getDisplayString();
+                if (VariantType.isBreakend(alt)) {
+                    // breakend
+                    if (alts.size() > 1) {
+                        LOGGER.warn("Parsing breakend variant with {} (>1) alt alleles is not supported: {}", alts.size(), vRepr);
+                        return List.of();
+                    }
+                    breakendAssembler.resolveBreakends(vc).ifPresent(variants::add);
+                } else if (VariantType.isLargeSymbolic(alt)) {
+                    // symbolic
+                    if (alts.size() > 1) {
+                        LOGGER.warn("Parsing symbolic variant with >1 ({}) alt alleles is not supported: {}", alts.size(), vRepr);
+                        return List.of();
+                    }
+                    parseIntrachromosomalVariantAllele(vc).ifPresent(variants::add);
+                } else {
+                    // sequence variant
+                    parseSequenceVariantAllele(vc, altAlleleIdx).ifPresent(variants::add);
+                }
+            }
+            return variants;
+        };
+    }
+
+    private Optional<? extends Variant> parseSequenceVariantAllele(VariantContext vc, int altAlleleIdx) {
+        String contigName = vc.getContig();
+        Contig contig = assembly.contigByName(contigName);
+        if (contig == null) {
+            LOGGER.warn("Unknown contig `{}` in variant `{}-{}:({})`", contigName, vc.getContig(), vc.getStart(), vc.getID());
+            return Optional.empty();
+        }
+
+        Allele alt = vc.getAlternateAllele(altAlleleIdx);
+        return Optional.of(SequenceVariant.oneBased(contig, vc.getID(), vc.getStart(), vc.getReference().getDisplayString(), alt.getDisplayString()));
+    }
+
+    private Optional<? extends Variant> parseIntrachromosomalVariantAllele(VariantContext vc) {
+        String vr = makeVariantRepresentation(vc);
+
+        // parse contig
+        String contigName = vc.getContig();
+        Contig contig = assembly.contigByName(contigName);
+        if (contig == null) {
+            LOGGER.warn("Unknown contig `{}` in variant `{}`", contigName, vr);
+            return Optional.empty();
+        }
+
+        // parse start pos and CIPOS
+        ConfidenceInterval cipos;
+        List<Integer> cp = vc.getAttributeAsIntList("CIPOS", 0);
+        if (cp.isEmpty()) {
+            cipos = ConfidenceInterval.precise();
+        } else if (cp.size() == 2) {
+            cipos = ConfidenceInterval.of(cp.get(0), cp.get(1));
+        } else {
+            LOGGER.warn("Invalid CIPOS field `{}` in variant `{}`", vc.getAttributeAsString("CIPOS", ""), vr);
+            return Optional.empty();
+        }
+        Position start = Position.of(CoordinateSystem.ONE_BASED, vc.getStart(), cipos);
+
+        // parse end pos and CIEND
+        ConfidenceInterval ciend;
+        int endPos = vc.getAttributeAsInt("END", 0); // 0 is not allowed in 1-based VCF coordinate system
+        if (endPos < 1) {
+            LOGGER.warn("Missing END field for variant `{}`", vr);
+            return Optional.empty();
+        }
+        List<Integer> ce = vc.getAttributeAsIntList("CIEND", 0);
+        if (ce.isEmpty()) {
+            ciend = ConfidenceInterval.precise();
+        } else if (ce.size() == 2) {
+            ciend = ConfidenceInterval.of(ce.get(0), ce.get(1));
+        } else {
+            LOGGER.warn("Invalid CIEND field `{}` in variant `{}`", vc.getAttributeAsString("CIEND", ""), vr);
+            return Optional.empty();
+        }
+        Position end = Position.of(CoordinateSystem.ONE_BASED, endPos, ciend);
+
+        // assemble the results
+        String ref = vc.getReference().getDisplayString();
+        String alt = vc.getAlternateAllele(0).getDisplayString();
+        int svlen = vc.getAttributeAsInt("SVLEN", 0);
+
+        return Optional.of(SymbolicVariant.of(contig, vc.getID(), start, end, ref, alt, svlen));
+    }
+
+}

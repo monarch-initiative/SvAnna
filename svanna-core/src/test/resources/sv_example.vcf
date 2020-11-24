@@ -1,0 +1,23 @@
+##fileformat=VCFv4.3
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=DB,Number=0,Type=Flag,Description="dbSNP membership, build 129">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=MATEID,Number=.,Type=String,Description="ID of mate breakends">
+##INFO=<ID=EVENT,Number=1,Type=String,Description="ID of event associated to breakend">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	NA00001
+2	321681	bnd_W	G	G]17:198982]	6	PASS	SVTYPE=BND;MATEID=bnd_Y;EVENT=tra1	GT	./.
+2	321682	bnd_V	T	]13:123456]T	6	PASS	SVTYPE=BND;MATEID=bnd_U;EVENT=tra2	GT	./.
+2	321682	del0	T	<DEL	6	PASS	SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62	GT:GQ:DP	0/1:12:11
+3	9425916	ins0	C	<INS:ME:L1>	23	PASS	SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22	GT:GQ	1/1:15
+3	12665100	dup0	A	<DUP>	14	PASS	SVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500;DP=5	GT:GQ:CN:CNQ	./.:0:3:16.2
+13	123456	bnd_U	C	C[2:321682[	6	PASS	SVTYPE=BND;MATEID=bnd_V;EVENT=tra2	GT	./.
+13	123457	bnd_X	A	[17:198983[A	6	PASS	SVTYPE=BND;MATEID=bnd_Z;EVENT=tra3	GT	./.
+17	198982	bnd_Y	A	A]2:321681]	6	PASS	SVTYPE=BND;MATEID=bnd_W;EVENT=tra1	GT	./.
+17	198983	bnd_Z	C	[13:123457[C	6	PASS	SVTYPE=BND;MATEID=bnd_X;EVENT=tra3	GT	./.
+20	14370	rs6054257	G	A	29	PASS	DP=14;AF=0.5;DB	GT:GQ:DP	1/1:43:5
+20	1234567	microsat1	GTC	G,GTCT	50	PASS	DP=9	GT:GQ:DP	1/2:35:4

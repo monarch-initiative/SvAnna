@@ -5,24 +5,25 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>svann</artifactId>
-    <groupId>org.jax.svann</groupId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>svanna-core</module>
+        <module>svanna-cli</module>
+    </modules>
+    <groupId>org.jax.svanna</groupId>
     <version>0.2.9</version>
-    <name>svann</name>
+    <name>SvAnna</name>
 
-    <!-- Inherit artifact from SonaType OSS pom.xml Following this article:
-      http://java.dzone.com/articles/deploy-maven-central -->
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.1.RELEASE</version>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
         <junit.version>5.7.0</junit.version>
         <slf4j.version>1.7.30</slf4j.version>
         <phenol.version>1.6.1</phenol.version>
@@ -30,6 +31,27 @@
         <htsjdk.version>2.23.0</htsjdk.version>
     </properties>
 
+    <developers>
+        <developer>
+            <name>Daniel Danis</name>
+            <email>daniel.danis@jax.org</email>
+            <organization>The Jackson Laboratory for Genomic Medicine</organization>
+            <organizationUrl>https://www.jax.org</organizationUrl>
+        </developer>
+        <developer>
+            <name>Peter N Robinson</name>
+            <email>peter.robinson@jax.org</email>
+            <organization>The Jackson Laboratory for Genomic Medicine</organization>
+            <organizationUrl>https://www.jax.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:TheJacksonLaboratory/svann.git</connection>
+        <developerConnection>scm:git:git@github.com:TheJacksonLaboratory/svann.git</developerConnection>
+        <url>scm:git:git@github.com:TheJacksonLaboratory/svann.git</url>
+        <tag>v${project.version}</tag>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -60,8 +82,14 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.samtools</groupId>
+            <artifactId>htsjdk</artifactId>
+            <version>${htsjdk.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>de.charite.compbio</groupId>
-            <artifactId>jannovar-cli</artifactId>
+            <artifactId>jannovar-core</artifactId>
             <version>${jannovar.version}</version>
             <exclusions>
                 <exclusion>
@@ -78,7 +106,7 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
+        <!-- REMOVE -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
@@ -100,6 +128,7 @@
         </dependency>
     </dependencies>
 
+    <!-- remove the code below -->
     <build>
         <finalName>svann</finalName>
 

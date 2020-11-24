@@ -1,12 +1,12 @@
 # Assembly name:  GRCh38.p13
-# Description:	 Genome Reference Consortium Human Build 38 patch release 13 (GRCh38.p13)
+# Description:    Genome Reference Consortium Human Build 38 patch release 13 (GRCh38.p13)
 # Organism name:  Homo sapiens (human)
 # Taxid:			 9606
 # BioProject:	  PRJNA31257
 # Submitter:		Genome Reference Consortium
 # Date:			  2019-02-28
 # Assembly type:  haploid-with-alt-loci
-# Release type:	patch
+# Release type:   patch
 # Assembly level: Chromosome
 # Genome representation: full
 # RefSeq category: Reference Genome

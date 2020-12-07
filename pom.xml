@@ -9,6 +9,8 @@
     <modules>
         <module>svanna-core</module>
         <module>svanna-cli</module>
+        <module>svanna-io</module>
+        <module>svanna-test</module>
     </modules>
     <groupId>org.jax.svanna</groupId>
     <version>0.2.9</version>
@@ -29,6 +31,7 @@
         <phenol.version>1.6.1</phenol.version>
         <jannovar.version>0.35</jannovar.version>
         <htsjdk.version>2.23.0</htsjdk.version>
+        <variant.api.version>1.0-SNAPSHOT</variant.api.version>
     </properties>
 
     <developers>

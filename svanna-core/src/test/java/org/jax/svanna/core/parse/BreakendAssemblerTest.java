@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.variant.api.Breakend;
+import org.monarchinitiative.variant.api.Contig;
 import org.monarchinitiative.variant.api.GenomicAssembly;
 import org.monarchinitiative.variant.api.Strand;
 import org.monarchinitiative.variant.api.impl.BreakendVariant;
@@ -56,19 +57,19 @@ public class BreakendAssemblerTest {
 
         BreakendVariant bv = bndVarOpt.get();
         assertThat(bv.ref(), is("C"));
-        assertThat(bv.alt(), is("C[2:321682["));
+        assertThat(bv.alt(), is(""));
 
         Breakend left = bv.left();
         assertThat(left.id(), is("bnd_U"));
         assertThat(left.contigName(), is("13"));
-        assertThat(left.position().oneBasedPos(), is(123456));
+        assertThat(left.position().pos(), is(123_456));
         assertThat(left.strand(), is(Strand.POSITIVE));
 
 
         Breakend right = bv.right();
         assertThat(right.id(), is("bnd_V"));
         assertThat(right.contigName(), is("2"));
-        assertThat(right.position().oneBasedPos(), is(321_682));
+        assertThat(right.position().pos(), is(321_681));
         assertThat(right.strand(), is(Strand.POSITIVE));
     }
 
@@ -82,19 +83,19 @@ public class BreakendAssemblerTest {
 
         BreakendVariant bv = bndVarOpt.get();
         assertThat(bv.ref(), is("G"));
-        assertThat(bv.alt(), is("G]17:198982]"));
+        assertThat(bv.alt(), is(""));
 
         Breakend left = bv.left();
         assertThat(left.id(), is("bnd_W"));
         assertThat(left.contigName(), is("2"));
-        assertThat(left.position().oneBasedPos(), is(321681));
+        assertThat(left.position().pos(), is(321_681));
         assertThat(left.strand(), is(Strand.POSITIVE));
 
-
+        Contig chr17 = genomicAssembly.contigByName("17");
         Breakend right = bv.right();
         assertThat(right.id(), is("bnd_Y"));
         assertThat(right.contigName(), is("17"));
-        assertThat(right.position().oneBasedPos(), is(83_058_460));
+        assertThat(right.position().pos(), is(chr17.length() - 198_982));
         assertThat(right.strand(), is(Strand.NEGATIVE));
     }
 
@@ -108,19 +109,20 @@ public class BreakendAssemblerTest {
 
         BreakendVariant bv = bndVarOpt.get();
         assertThat(bv.ref(), is("T"));
-        assertThat(bv.alt(), is("[17:198983[A"));
+        assertThat(bv.alt(), is(""));
 
+        Contig chr13 = genomicAssembly.contigByName("13");
         Breakend left = bv.left();
         assertThat(left.id(), is("bnd_X"));
         assertThat(left.contigName(), is("13"));
-        assertThat(left.position().oneBasedPos(), is(114_240_872));
+        assertThat(left.position().pos(), is(chr13.length() - 123_456));
         assertThat(left.strand(), is(Strand.NEGATIVE));
 
 
         Breakend right = bv.right();
         assertThat(right.id(), is("bnd_Z"));
         assertThat(right.contigName(), is("17"));
-        assertThat(right.position().oneBasedPos(), is(198_983));
+        assertThat(right.position().pos(), is(198_982));
         assertThat(right.strand(), is(Strand.POSITIVE));
     }
 
@@ -134,20 +136,75 @@ public class BreakendAssemblerTest {
 
         BreakendVariant bv = bndVarOpt.get();
         assertThat(bv.ref(), is("A"));
-        assertThat(bv.alt(), is("[17:198983[A"));
+        assertThat(bv.alt(), is(""));
 
+        Contig chr2 = genomicAssembly.contigByName("2");
         Breakend left = bv.left();
-        assertThat(left.id(), is("bnd_X"));
-        assertThat(left.contigName(), is("13"));
-        assertThat(left.position().oneBasedPos(), is(114_240_872));
+        assertThat(left.id(), is("bnd_V"));
+        assertThat(left.contigName(), is("2"));
+        assertThat(left.position().pos(), is(chr2.length() - 321_681));
         assertThat(left.strand(), is(Strand.NEGATIVE));
 
 
+        Contig chr13 = genomicAssembly.contigByName("13");
         Breakend right = bv.right();
-        assertThat(right.id(), is("bnd_Z"));
-        assertThat(right.contigName(), is("17"));
-        assertThat(right.position().oneBasedPos(), is(198_983));
-        assertThat(right.strand(), is(Strand.POSITIVE));
+        assertThat(right.id(), is("bnd_U"));
+        assertThat(right.contigName(), is("13"));
+        assertThat(right.position().pos(), is(chr13.length() - 123_456));
+        assertThat(right.strand(), is(Strand.NEGATIVE));
     }
 
+    @Test
+    public void resolveBreakendsWithInsertedSequence_NegToNeg() {
+        String line = "2\t321682\tbnd_V\tT\t]13:123456]AGTNNNNNCAT\t6\tPASS\tSVTYPE=BND;MATEID=bnd_U;EVENT=tra2\tGT\t./.";
+        VariantContext vc = VCF_CODEC.decode(line);
+        Optional<BreakendVariant> bndVarOpt = assembler.resolveBreakends(vc);
+
+        assertThat(bndVarOpt.isPresent(), is(true));
+
+        BreakendVariant bv = bndVarOpt.get();
+        assertThat(bv.ref(), is("A"));
+        assertThat(bv.alt(), is("TGNNNNNACT"));
+
+        Contig chr2 = genomicAssembly.contigByName("2");
+        Breakend left = bv.left();
+        assertThat(left.id(), is("bnd_V"));
+        assertThat(left.contigName(), is("2"));
+        assertThat(left.position().pos(), is(chr2.length() - 321_681));
+        assertThat(left.strand(), is(Strand.NEGATIVE));
+
+
+        Contig chr13 = genomicAssembly.contigByName("13");
+        Breakend right = bv.right();
+        assertThat(right.id(), is("bnd_U"));
+        assertThat(right.contigName(), is("13"));
+        assertThat(right.position().pos(), is(chr13.length() - 123_456));
+        assertThat(right.strand(), is(Strand.NEGATIVE));
+    }
+
+    @Test
+    public void resolveBreakendsWithInsertedSequence_PosToPos() {
+        String line = "13\t123456\tbnd_U\tC\tCAGTNNNNNCA[2:321682[\t6\tPASS\tSVTYPE=BND;MATEID=bnd_V;EVENT=tra2\tGT\t./.";
+        VariantContext vc = VCF_CODEC.decode(line);
+        Optional<BreakendVariant> bndVarOpt = assembler.resolveBreakends(vc);
+
+        assertThat(bndVarOpt.isPresent(), is(true));
+
+        BreakendVariant bv = bndVarOpt.get();
+        assertThat(bv.ref(), is("C"));
+        assertThat(bv.alt(), is("AGTNNNNNCA"));
+
+        Breakend left = bv.left();
+        assertThat(left.id(), is("bnd_U"));
+        assertThat(left.contigName(), is("13"));
+        assertThat(left.position().pos(), is(123_456));
+        assertThat(left.strand(), is(Strand.POSITIVE));
+
+
+        Breakend right = bv.right();
+        assertThat(right.id(), is("bnd_V"));
+        assertThat(right.contigName(), is("2"));
+        assertThat(right.position().pos(), is(321_681));
+        assertThat(right.strand(), is(Strand.POSITIVE));
+    }
 }

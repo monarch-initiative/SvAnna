@@ -3,7 +3,6 @@ package org.jax.svanna.core;
 import org.monarchinitiative.variant.api.Contig;
 import org.monarchinitiative.variant.api.GenomicAssembly;
 import org.monarchinitiative.variant.api.SequenceRole;
-import org.monarchinitiative.variant.api.impl.ContigDefault;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +161,7 @@ class GenomicAssemblyProvider {
                 continue;
             }
 
-            Contig contig = new ContigDefault(contigId, sequenceName, role, length, ctgGenBankAccn, ctgRefSeqAccn, ctgUcscSeqAccn);
+            Contig contig = Contig.of(contigId, sequenceName, role, length, ctgGenBankAccn, ctgRefSeqAccn, ctgUcscSeqAccn);
             contigs.add(contig);
         }
 

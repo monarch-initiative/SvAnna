@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,11 +83,15 @@ class BreakendAssembler {
             return Optional.empty();
         }
 
-        Position pos = Position.of(CoordinateSystem.ONE_BASED, vc.getStart(), ciPos);
+        Position pos = Position.of(vc.getStart(), ciPos);
 
         // this allele is on POSITIVE strand by VCF specification
-        String refOnPositive = vc.getReference().getDisplayString();
-        String alt = vc.getAlternateAllele(0).getDisplayString();
+        String refOnPositive = vc.getReference().getDisplayString().toUpperCase();
+        if (refOnPositive.length() != 1) {
+            LOGGER.warn("Ref allele with {}!=1 for breakend {}", refOnPositive.length(), vRepr);
+            return Optional.empty();
+        }
+        String alt = vc.getAlternateAllele(0).getDisplayString().toUpperCase(Locale.ROOT);
 
         Matcher altMatcher = BND_ALT_PATTERN.matcher(alt);
         if (!altMatcher.matches()) {
@@ -94,7 +99,7 @@ class BreakendAssembler {
             return Optional.empty();
         }
 
-        // pares mate data
+        // parse mate data
         String mateContigName = altMatcher.group("contig");
         Contig mateContig = assembly.contigByName(mateContigName);
         if (mateContig == null) {
@@ -105,22 +110,26 @@ class BreakendAssembler {
         Position matePos;
         try {
             int p = NF.parse(matePosString).intValue();
-            matePos = Position.of(CoordinateSystem.ONE_BASED, p, ciEnd);
+            matePos = Position.of(p, ciEnd);
         } catch (ParseException e) {
             LOGGER.warn("Invalid mate position `{}` for variant `{}`", matePosString, vRepr);
             return Optional.empty();
         }
 
-        // figure out strands
+        // figure out strands and the inserted sequence
         // left strand
         String head = altMatcher.group("head");
         String tail = altMatcher.group("tail");
-        Strand strand = refOnPositive.equals(head)
-                ? Strand.POSITIVE
-                : refOnPositive.equals(tail)
-                ? Strand.NEGATIVE
-                : null;
-        if (strand == null) {
+        if (!head.isEmpty() && !tail.isEmpty()) {
+            LOGGER.warn("Sequence present both at the beginning (`{}`) and the end (`{}`) of alt field for variant `{}`", head, tail, vRepr);
+        }
+        Strand strand;
+        char refBase = refOnPositive.charAt(0);
+        if (!head.isEmpty() && refBase == head.charAt(0)) {
+            strand = Strand.POSITIVE;
+        } else if (!tail.isEmpty() && refBase == tail.charAt(tail.length() - 1)) {
+            strand = Strand.NEGATIVE;
+        } else {
             LOGGER.warn("Invalid breakend alt `{}`, no match for ref allele `{}` neither at the beginning, nor at the end for variant `{}`", alt, refOnPositive, vRepr);
             return Optional.empty();
         }
@@ -136,10 +145,21 @@ class BreakendAssembler {
                 ? Strand.POSITIVE
                 : Strand.NEGATIVE;
 
-        Breakend left = PartialBreakend.of(contig, pos, Strand.POSITIVE, vc.getID()).withStrand(strand);
-        Breakend right = PartialBreakend.of(mateContig, matePos, Strand.POSITIVE, mateId).withStrand(mateStrand);
+        Breakend left = strand.isPositive()
+                ? PartialBreakend.zeroBased(contig, vc.getID(), Strand.POSITIVE, pos).withStrand(strand)
+                : PartialBreakend.oneBased(contig, vc.getID(), Strand.POSITIVE, pos).withStrand(strand);
+        Breakend right = mateStrand.isPositive()
+                ? PartialBreakend.oneBased(mateContig, mateId, Strand.POSITIVE, matePos).withStrand(mateStrand)
+                : PartialBreakend.zeroBased(mateContig, mateId, Strand.POSITIVE, matePos).withStrand(mateStrand);
 
-        return Optional.of(new BreakendVariant(eventId, left, right, strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive), alt));
+        // alt allele
+        String altSeq = strand.isPositive()
+                ? head.substring(1)
+                : tail.substring(0, tail.length() - 1);
+
+        return Optional.of(new BreakendVariant(eventId, left, right,
+                strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive),
+                strand.isPositive() ? altSeq : Utils.reverseComplement(altSeq)));
     }
 
 }

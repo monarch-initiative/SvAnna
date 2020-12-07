@@ -71,24 +71,26 @@ public class VcfVariantParser implements VariantParser<Variant> {
             for (int altAlleleIdx = 0; altAlleleIdx < alts.size(); altAlleleIdx++) {
                 Allele altAllele = alts.get(altAlleleIdx);
                 String alt = altAllele.getDisplayString();
+                Optional<? extends Variant> variantOptional;
                 if (VariantType.isBreakend(alt)) {
                     // breakend
                     if (alts.size() > 1) {
                         LOGGER.warn("Parsing breakend variant with {} (>1) alt alleles is not supported: {}", alts.size(), vRepr);
                         return List.of();
                     }
-                    breakendAssembler.resolveBreakends(vc).ifPresent(variants::add);
+                    variantOptional = breakendAssembler.resolveBreakends(vc);
                 } else if (VariantType.isLargeSymbolic(alt)) {
                     // symbolic
                     if (alts.size() > 1) {
                         LOGGER.warn("Parsing symbolic variant with >1 ({}) alt alleles is not supported: {}", alts.size(), vRepr);
                         return List.of();
                     }
-                    parseIntrachromosomalVariantAllele(vc).ifPresent(variants::add);
+                    variantOptional = parseIntrachromosomalVariantAllele(vc);
                 } else {
                     // sequence variant
-                    parseSequenceVariantAllele(vc, altAlleleIdx).ifPresent(variants::add);
+                    variantOptional = parseSequenceVariantAllele(vc, altAlleleIdx);
                 }
+                variantOptional.ifPresent(variants::add);
             }
             return variants;
         };
@@ -128,7 +130,7 @@ public class VcfVariantParser implements VariantParser<Variant> {
             LOGGER.warn("Invalid CIPOS field `{}` in variant `{}`", vc.getAttributeAsString("CIPOS", ""), vr);
             return Optional.empty();
         }
-        Position start = Position.of(CoordinateSystem.ONE_BASED, vc.getStart(), cipos);
+        Position start = Position.of(vc.getStart(), cipos);
 
         // parse end pos and CIEND
         ConfidenceInterval ciend;
@@ -146,14 +148,14 @@ public class VcfVariantParser implements VariantParser<Variant> {
             LOGGER.warn("Invalid CIEND field `{}` in variant `{}`", vc.getAttributeAsString("CIEND", ""), vr);
             return Optional.empty();
         }
-        Position end = Position.of(CoordinateSystem.ONE_BASED, endPos, ciend);
+        Position end = Position.of(endPos, ciend);
 
         // assemble the results
         String ref = vc.getReference().getDisplayString();
         String alt = vc.getAlternateAllele(0).getDisplayString();
         int svlen = vc.getAttributeAsInt("SVLEN", 0);
 
-        return Optional.of(SymbolicVariant.of(contig, vc.getID(), start, end, ref, alt, svlen));
+        return Optional.of(SymbolicVariant.oneBased(contig, vc.getID(), start, end, ref, alt, svlen));
     }
 
 }

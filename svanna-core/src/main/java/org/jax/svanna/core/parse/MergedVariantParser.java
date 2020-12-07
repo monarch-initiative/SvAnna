@@ -93,24 +93,24 @@ public class MergedVariantParser implements VariantParser<Variant> {
             String[] tokens = line.split(DELIMITER);
 
             return makeCoreCoords(tokens).map(cco -> {
-                int svlen;
+                int changeLength;
                 VariantType vt = cco.variantType;
                 switch (vt.baseType()) {
                     case DEL:
-                        svlen = cco.begin.oneBasedPos() - cco.end.oneBasedPos();
+                        changeLength = cco.begin.pos() - cco.end.pos() + 1;
                         break;
                     case DUP:
-                        svlen = cco.end.oneBasedPos() - cco.begin.oneBasedPos();
+                        changeLength = cco.end.pos() - cco.begin.pos();
                         break;
                     case INV:
-                        svlen = 0;
+                        changeLength = 0;
                         break;
                     default:
                         // shouldn't happen since we check in `makeCoreCoords()`
                         LOGGER.warn("Unsupported variant type {}", vt);
                         throw new RuntimeException();
                 }
-                return SymbolicVariant.of(cco.contig, cco.id, cco.begin, cco.end, "N", '<' + vt.baseType().name() + '>', svlen);
+                return SymbolicVariant.zeroBased(cco.contig, cco.id, cco.begin, cco.end, "N", '<' + vt.baseType().name() + '>', changeLength);
             });
         };
 
@@ -133,9 +133,9 @@ public class MergedVariantParser implements VariantParser<Variant> {
         Position begin, end;
         try {
             int beginPos = NF.parse(tokens[1]).intValue();
-            begin = Position.of(beginPos, CoordinateSystem.ZERO_BASED);
+            begin = Position.of(beginPos);
             int endPos = NF.parse(tokens[2]).intValue();
-            end = Position.of(endPos, CoordinateSystem.ONE_BASED);
+            end = Position.of(endPos);
         } catch (ParseException e) {
             LOGGER.warn("Invalid begin/end coordinate in line {}", String.join(DELIMITER, tokens));
             return Optional.empty();

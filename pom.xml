@@ -8,9 +8,10 @@
     <packaging>pom</packaging>
     <modules>
         <module>svanna-core</module>
-        <module>svanna-cli</module>
-        <module>svanna-io</module>
         <module>svanna-test</module>
+        <module>svanna-io</module>
+        <module>svanna-ingest</module>
+        <module>svanna-cli</module>
     </modules>
     <groupId>org.jax.svanna</groupId>
     <version>0.2.9</version>
@@ -205,8 +206,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
 

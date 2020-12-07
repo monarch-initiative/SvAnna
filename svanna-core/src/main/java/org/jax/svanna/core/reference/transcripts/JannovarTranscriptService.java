@@ -7,6 +7,7 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.core.reference.TranscriptService;
+import org.monarchinitiative.variant.api.CoordinateSystem;
 import org.monarchinitiative.variant.api.GenomicAssembly;
 import org.monarchinitiative.variant.api.Strand;
 
@@ -70,7 +71,7 @@ public class JannovarTranscriptService implements TranscriptService {
         }
 
         // build interval arrays
-        SvAnnTxModelExtractor endExtractor = new SvAnnTxModelExtractor();
+        TranscriptEndExtractor endExtractor = new TranscriptEndExtractor();
         Map<Integer, IntervalArray<Transcript>> intervalArrayMap = new HashMap<>();
         for (int contig : map.keySet()) {
             List<Transcript> transcripts = map.get(contig);
@@ -97,16 +98,16 @@ public class JannovarTranscriptService implements TranscriptService {
         return txBySymbol;
     }
 
-    private static class SvAnnTxModelExtractor implements IntervalEndExtractor<Transcript> {
+    private static class TranscriptEndExtractor implements IntervalEndExtractor<Transcript> {
 
         @Override
-        public int getBegin(Transcript svAnnTxModel) {
-            return svAnnTxModel.withStrand(Strand.POSITIVE).startGenomicPosition().pos();
+        public int getBegin(Transcript transcript) {
+            return transcript.withCoordinateSystem(CoordinateSystem.ZERO_BASED).withStrand(Strand.POSITIVE).start();
         }
 
         @Override
-        public int getEnd(Transcript svAnnTxModel) {
-            return svAnnTxModel.withStrand(Strand.POSITIVE).endGenomicPosition().pos();
+        public int getEnd(Transcript transcript) {
+            return transcript.withCoordinateSystem(CoordinateSystem.ZERO_BASED).withStrand(Strand.POSITIVE).end();
         }
     }
 

@@ -1,0 +1,34 @@
+package org.jax.svanna.core.viz;
+
+import org.jax.svanna.core.hpo.HpoDiseaseSummary;
+import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.reference.AnnotatedVariant;
+import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.Transcript;
+
+import java.util.List;
+
+public interface Visualizable {
+
+    String getImpact();
+
+    String getType();
+
+    boolean hasPhenotypicRelevance();
+
+    AnnotatedVariant variant();
+
+    List<HtmlLocation> locations();
+
+    List<HpoDiseaseSummary> diseaseSummaries();
+
+    List<Overlap> overlaps();
+
+    List<Transcript> transcripts();
+
+    /** @return the total number of genes affected by this structural variant. */
+    int getGeneCount();
+
+    List<Enhancer> enhancers();
+
+}

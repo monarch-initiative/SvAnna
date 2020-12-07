@@ -13,16 +13,16 @@ public class Transcript extends PreciseGenomicRegion {
     private final String hgvsSymbol;
 
     private final boolean isCoding;
-    private final GenomicPosition cdsStart;
-    private final GenomicPosition cdsEnd;
+    private final Position cdsStart;
+    private final Position cdsEnd;
     private final List<GenomicRegion> exons;
 
-    protected Transcript(GenomicRegion txRegion,
+    private Transcript(GenomicRegion txRegion,
                          String accessionId,
                          String hgvsSymbol,
                          boolean isCoding,
-                         GenomicPosition cdsStart,
-                         GenomicPosition cdsEnd,
+                         Position cdsStart,
+                         Position cdsEnd,
                          List<GenomicRegion> exons) {
         super(txRegion);
         this.accessionId = accessionId;
@@ -38,12 +38,13 @@ public class Transcript extends PreciseGenomicRegion {
                                 int end,
                                 Strand strand,
                                 CoordinateSystem coordinateSystem,
-                                GenomicPosition cdsStart, GenomicPosition cdsEnd, String accessionId,
+                                int cdsStart, int cdsEnd,
+                                String accessionId,
                                 String hgvsSymbol,
                                 boolean isCoding,
                                 List<GenomicRegion> exons) {
         GenomicRegion txRegion = PreciseGenomicRegion.of(contig, strand, coordinateSystem, Position.of(start), Position.of(end));
-        return new Transcript(txRegion, accessionId, hgvsSymbol, isCoding, cdsStart, cdsEnd, exons);
+        return new Transcript(txRegion, accessionId, hgvsSymbol, isCoding, Position.of(cdsStart), Position.of(cdsEnd), exons);
     }
 
     public String accessionId() {
@@ -58,12 +59,16 @@ public class Transcript extends PreciseGenomicRegion {
         return isCoding;
     }
 
+    public GenomicRegion cdsRegion() {
+        return GenomicRegion.zeroBased(contig, strand, cdsStart, cdsEnd);
+    }
+
     public GenomicPosition cdsStart() {
-        return cdsStart;
+        return GenomicPosition.zeroBased(contig, strand, cdsStart);
     }
 
     public GenomicPosition cdsEnd() {
-        return cdsEnd;
+        return GenomicPosition.zeroBased(contig, strand, cdsEnd);
     }
 
     public List<GenomicRegion> exons() {
@@ -75,14 +80,34 @@ public class Transcript extends PreciseGenomicRegion {
         if (strand == other) {
             return this;
         } else {
-            GenomicPosition cdsStartOnPositive = cdsEnd.withStrand(other);
-            GenomicPosition cdsEndOnPositive = cdsStart.withStrand(other);
+            Position cdsStartOnPositive = cdsStart.invert(contig, coordinateSystem);
+            Position cdsEndOnPositive = cdsEnd.invert(contig, coordinateSystem);
             List<GenomicRegion> exonsOnPositive = new ArrayList<>(exons.size());
             for (int i = exons.size() - 1; i >= 0; i--) {
                 GenomicRegion exon = exons.get(i);
                 exonsOnPositive.add(exon.withStrand(other));
             }
-            return new Transcript(super.withStrand(other), accessionId, hgvsSymbol, isCoding, cdsStartOnPositive, cdsEndOnPositive, exonsOnPositive);
+            return new Transcript(super.withStrand(other),
+                    accessionId, hgvsSymbol, isCoding,
+                    cdsEndOnPositive, cdsStartOnPositive, exonsOnPositive);
+        }
+    }
+
+    @Override
+    public Transcript withCoordinateSystem(CoordinateSystem other) {
+        if (coordinateSystem == other) {
+            return this;
+        } else {
+            Position start = cdsStart.shift(coordinateSystem.startDelta(other));
+            List<GenomicRegion> exonsWithCoordinateSystem = new ArrayList<>(exons.size());
+            for (GenomicRegion region : exons) {
+                GenomicRegion exon = region.withCoordinateSystem(other);
+                exonsWithCoordinateSystem.add(exon);
+            }
+            GenomicRegion txRegion = super.withCoordinateSystem(other);
+            return new Transcript(txRegion,
+                    accessionId, hgvsSymbol, isCoding,
+                    start, cdsEnd, exonsWithCoordinateSystem);
         }
     }
 

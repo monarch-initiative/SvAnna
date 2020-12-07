@@ -39,12 +39,9 @@ class JannovarTxMapper {
                 : Strand.NEGATIVE;
 
         // these coordinates are already adjusted to the appropriate strand
-        GenomicPosition txStart = GenomicPosition.zeroBased(contig, strand, Position.of(txRegion.getBeginPos()));
-        GenomicPosition txEnd = GenomicPosition.oneBased(contig, strand, Position.of(txRegion.getEndPos()));
-
         GenomeInterval cdsRegion = tm.getCDSRegion();
-        GenomicPosition cdsStart = GenomicPosition.zeroBased(contig, strand, Position.of(cdsRegion.getBeginPos()));
-        GenomicPosition cdsEnd = GenomicPosition.oneBased(contig, strand, Position.of(cdsRegion.getEndPos()));
+        int cdsStart = cdsRegion.getBeginPos();
+        int cdsEnd = cdsRegion.getEndPos();
 
         // process exons
         List<GenomicRegion> exons = new ArrayList<>();

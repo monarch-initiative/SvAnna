@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>svanna-test</artifactId>
+    <description>Module with data (e.g. variants) usable for testing</description>
 
     <properties>
         <maven.compiler.source>${java.version}</maven.compiler.source>

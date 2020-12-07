@@ -98,15 +98,15 @@ public class PreciseGenomicRegion implements GenomicRegion {
 
     @Override
     public CoordinateSystem coordinateSystem() {
-        return CoordinateSystem.ZERO_BASED;
+        return coordinateSystem;
     }
 
     @Override
-    public GenomicRegion withCoordinateSystem(CoordinateSystem coordinateSystem) {
-        if (this.coordinateSystem == coordinateSystem) {
+    public GenomicRegion withCoordinateSystem(CoordinateSystem other) {
+        if (coordinateSystem == other) {
             return this;
         }
-        return new PreciseGenomicRegion(contig, strand, coordinateSystem, normalisedStartPosition(coordinateSystem), end);
+        return new PreciseGenomicRegion(contig, strand, other, normalisedStartPosition(other), end);
     }
 
     @Override
@@ -123,5 +123,16 @@ public class PreciseGenomicRegion implements GenomicRegion {
     @Override
     public int hashCode() {
         return Objects.hash(contig, start, end, strand);
+    }
+
+    @Override
+    public String toString() {
+        return "PreciseGenomicRegion{" +
+                "contig=" + contig +
+                ", strand=" + strand +
+                ", coordinateSystem=" + coordinateSystem +
+                ", start=" + start +
+                ", end=" + end +
+                '}';
     }
 }

@@ -3,8 +3,8 @@ package org.jax.svanna.core.viz;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.reference.AnnotatedVariant;
 import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.core.viz.svg.*;
@@ -119,7 +119,7 @@ public class HtmlVisualizer implements Visualizer {
 
 
     String getSvgString(Visualizable visualizable) {
-        AnnotatedVariant variant = visualizable.variant();
+        SvannaVariant variant = visualizable.variant();
         if (visualizable.getGeneCount() > 10) {
             return EMPTY_STRING;
         }
@@ -174,7 +174,7 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     private String getVariantRepresentation(Visualizable visualizable, List<HtmlLocation> locations) {
-        AnnotatedVariant variant = visualizable.variant();
+        SvannaVariant variant = visualizable.variant();
         VariantType svtype = variant.variantType().baseType();
         HtmlLocation loc;
         switch (svtype) {
@@ -262,7 +262,7 @@ public class HtmlVisualizer implements Visualizer {
 
 
     String getSequencePrioritization(Visualizable visualizable) {
-        AnnotatedVariant variant = visualizable.variant();
+        SvannaVariant variant = visualizable.variant();
         if (visualizable.getGeneCount() > 2 &&
                 (variant.variantType().baseType() == VariantType.DEL ||
                         variant.variantType().baseType() == VariantType.DUP)) {

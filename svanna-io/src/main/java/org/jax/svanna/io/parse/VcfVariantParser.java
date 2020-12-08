@@ -1,11 +1,12 @@
 package org.jax.svanna.io.parse;
 
 import htsjdk.variant.variantcontext.Allele;
+import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
+import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.variant.api.*;
-import org.monarchinitiative.variant.api.impl.SequenceVariant;
-import org.monarchinitiative.variant.api.impl.SymbolicVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +24,7 @@ import static org.jax.svanna.io.parse.Utils.makeVariantRepresentation;
 /**
  * Parse variants stored in a VCF file.
  */
-public class VcfVariantParser implements VariantParser<Variant> {
+public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfVariantParser.class);
 
@@ -44,7 +45,7 @@ public class VcfVariantParser implements VariantParser<Variant> {
     }
 
     @Override
-    public Stream<Variant> createVariantAlleles(Path filePath) throws IOException {
+    public Stream<SvannaVariant> createVariantAlleles(Path filePath) throws IOException {
         try (VCFFileReader reader = new VCFFileReader(filePath, requireVcfIndex)) {
             return reader.iterator().stream()
                     .map(toVariants())
@@ -60,16 +61,16 @@ public class VcfVariantParser implements VariantParser<Variant> {
      *
      * @return function that maps variant context to collection of {@link Variant}s
      */
-    Function<VariantContext, Collection<Variant>> toVariants() {
+    Function<VariantContext, Collection<SvannaVariant>> toVariants() {
         return vc -> {
             String vRepr = makeVariantRepresentation(vc);
 
             List<Allele> alts = vc.getAlternateAlleles();
-            List<Variant> variants = new ArrayList<>(alts.size());
+            List<SvannaVariant> variants = new ArrayList<>(alts.size());
             for (int altAlleleIdx = 0; altAlleleIdx < alts.size(); altAlleleIdx++) {
                 Allele altAllele = alts.get(altAlleleIdx);
                 String alt = altAllele.getDisplayString();
-                Optional<? extends Variant> variantOptional;
+                Optional<? extends SvannaVariant> variantOptional;
                 if (VariantType.isBreakend(alt)) {
                     // breakend
                     if (alts.size() > 1) {
@@ -94,7 +95,7 @@ public class VcfVariantParser implements VariantParser<Variant> {
         };
     }
 
-    private Optional<? extends Variant> parseSequenceVariantAllele(VariantContext vc, int altAlleleIdx) {
+    private Optional<? extends SvannaVariant> parseSequenceVariantAllele(VariantContext vc, int altAlleleIdx) {
         String contigName = vc.getContig();
         Contig contig = assembly.contigByName(contigName);
         if (contig == null) {
@@ -103,10 +104,16 @@ public class VcfVariantParser implements VariantParser<Variant> {
         }
 
         Allele alt = vc.getAlternateAllele(altAlleleIdx);
-        return Optional.of(SequenceVariant.oneBased(contig, vc.getID(), vc.getStart(), vc.getReference().getDisplayString(), alt.getDisplayString()));
+        GenotypesContext gts = vc.getGenotypes();
+        Zygosity zygosity = Utils.parseZygosity(altAlleleIdx, gts);
+        int depthOfCoverage = Utils.parseDepthFromGenotype(altAlleleIdx, gts);
+
+        return Optional.of(SvannaSequenceVariant.oneBased(contig, vc.getID(), vc.getStart(),
+                vc.getReference().getDisplayString(), alt.getDisplayString(),
+                zygosity, depthOfCoverage));
     }
 
-    private Optional<? extends Variant> parseIntrachromosomalVariantAllele(VariantContext vc) {
+    private Optional<? extends SvannaVariant> parseIntrachromosomalVariantAllele(VariantContext vc) {
         String vr = makeVariantRepresentation(vc);
 
         // parse contig
@@ -153,7 +160,21 @@ public class VcfVariantParser implements VariantParser<Variant> {
         String alt = vc.getAlternateAllele(0).getDisplayString();
         int svlen = vc.getAttributeAsInt("SVLEN", 0);
 
-        return Optional.of(SymbolicVariant.oneBased(contig, vc.getID(), start, end, ref, alt, svlen));
+        // parse depth & zygosity
+        GenotypesContext gts = vc.getGenotypes();
+        if (gts.size() > 1) {
+            LOGGER.warn("Parsing symbolic variants with >1 alleles is not supported: {}", vr);
+            return Optional.empty();
+        }
+        Zygosity zygosity = Utils.parseZygosity(0, gts);
+        int depthOfCoverage = Utils.parseDepthFromGenotype(0, gts);
+
+
+
+        return Optional.of(SvannaSymbolicVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
+                start, end, ref, alt,
+                svlen,
+                zygosity, depthOfCoverage));
     }
 
 }

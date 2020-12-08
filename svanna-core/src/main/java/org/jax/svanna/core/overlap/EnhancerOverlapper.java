@@ -3,7 +3,6 @@ package org.jax.svanna.core.overlap;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.reference.Enhancer;
 import org.monarchinitiative.variant.api.*;
-import org.monarchinitiative.variant.api.impl.BreakendVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +56,7 @@ public class EnhancerOverlapper {
         return getEnhancers(region.contig(), region.start(), region.end());
     }
 
-    private List<Enhancer> getEnhancerOverlapsForTranslocation(BreakendVariant variant) {
+    private List<Enhancer> getEnhancerOverlapsForTranslocation(Breakended variant) {
         List<Enhancer> overlappingEnhancers = new ArrayList<>();
 
         Breakend lb = variant.left().withStrand(Strand.POSITIVE);
@@ -69,7 +68,7 @@ public class EnhancerOverlapper {
         overlappingEnhancers.addAll(overlapB);
 
         if (overlappingEnhancers.isEmpty()) {
-            return getLongRangeEnhancerEffects(variant);
+            return getLongRangeEnhancerEffects(lb, rb);
         }
         return overlappingEnhancers;
     }
@@ -91,8 +90,8 @@ public class EnhancerOverlapper {
                 return getSimpleEnhancerOverlap(variant);
             case TRA:
                 // by definition, translocation has coordinates on different contigs
-                if (variant instanceof BreakendVariant) {
-                    return getEnhancerOverlapsForTranslocation((BreakendVariant) variant);
+                if (variant instanceof Breakended) {
+                    return getEnhancerOverlapsForTranslocation((Breakended) variant);
                 }
             default:
                 LOGGER.warn("Unable to get enhancers for variant {}", variant);
@@ -105,7 +104,7 @@ public class EnhancerOverlapper {
         return intervalArray.findOverlappingWithInterval(start, end).getEntries();
     }
 
-    private List<Enhancer> getLongRangeEnhancerEffects(Variant variant) {
+    private List<Enhancer> getLongRangeEnhancerEffects(GenomicPosition left, GenomicPosition right) {
         System.out.println("[WARNING] Long range enhancer prioritization not implemented");
         return List.of();
     }

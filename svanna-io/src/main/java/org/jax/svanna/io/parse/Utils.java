@@ -1,6 +1,10 @@
 package org.jax.svanna.io.parse;
 
+import htsjdk.variant.variantcontext.Genotype;
+import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
+import org.jax.svanna.core.reference.VariantMetadata;
+import org.jax.svanna.core.reference.Zygosity;
 
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
@@ -116,6 +120,34 @@ class Utils {
                 )
         );
         return temporary;
+    }
+
+
+    static Zygosity parseZygosity(int sampleIdx, GenotypesContext gts) {
+        if (gts.isEmpty() || sampleIdx >= gts.size()) {
+            return Zygosity.UNKNOWN;
+        }
+        Genotype gt = gts.get(sampleIdx);
+        switch (gt.getType()) {
+            case HET:
+                return Zygosity.HETEROZYGOUS;
+            case HOM_VAR:
+                return Zygosity.HOMOZYGOUS;
+            case NO_CALL:
+            case UNAVAILABLE:
+            default:
+                return Zygosity.UNKNOWN;
+        }
+    }
+
+    static int parseDepthFromGenotype(int sampleIdx, GenotypesContext genotypes) {
+        if (genotypes.isEmpty() || sampleIdx >= genotypes.size()) {
+            return VariantMetadata.MISSING_DEPTH_PLACEHOLDER;
+        }
+        Genotype gt = genotypes.get(sampleIdx);
+        return gt.hasDP()
+                ? gt.getDP()
+                : VariantMetadata.MISSING_DEPTH_PLACEHOLDER;
     }
 
 }

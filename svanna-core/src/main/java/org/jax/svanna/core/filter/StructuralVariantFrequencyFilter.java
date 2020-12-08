@@ -1,13 +1,13 @@
 package org.jax.svanna.core.filter;
 
-import org.jax.svanna.core.reference.AnnotatedVariant;
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.variant.api.GenomicRegion;
 import org.monarchinitiative.variant.api.Variant;
 
 import java.util.List;
 import java.util.function.Predicate;
 
-public class StructuralVariantFrequencyFilter implements Filter<AnnotatedVariant> {
+public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
 
     private static final FilterType FILTER_TYPE = FilterType.FREQUENCY_FILTER;
 
@@ -27,7 +27,7 @@ public class StructuralVariantFrequencyFilter implements Filter<AnnotatedVariant
     }
 
     @Override
-    public FilterResult runFilter(AnnotatedVariant variant) {
+    public FilterResult runFilter(SvannaVariant variant) {
         switch (variant.variantType().baseType()) {
             // this filter only supports filtering of some SV types
             case DEL:

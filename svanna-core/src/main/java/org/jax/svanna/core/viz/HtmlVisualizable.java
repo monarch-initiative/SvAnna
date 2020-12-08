@@ -3,8 +3,8 @@ package org.jax.svanna.core.viz;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.prioritizer.SvPriority;
-import org.jax.svanna.core.reference.AnnotatedVariant;
 import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.variant.api.*;
 import org.slf4j.Logger;
@@ -20,11 +20,11 @@ public class HtmlVisualizable implements Visualizable {
     /**
      * Representation of the structural variant as it came from the VCF file.
      */
-    private final AnnotatedVariant variant;
+    private final SvannaVariant variant;
 
     private final SvPriority svPriority;
 
-    public HtmlVisualizable(AnnotatedVariant variant, SvPriority svPriority) {
+    public HtmlVisualizable(SvannaVariant variant, SvPriority svPriority) {
         this.variant = variant.withCoordinateSystem(CoordinateSystem.ZERO_BASED);
         this.svPriority = svPriority;
     }
@@ -48,7 +48,7 @@ public class HtmlVisualizable implements Visualizable {
 
 
     @Override
-    public AnnotatedVariant variant() {
+    public SvannaVariant variant() {
         return this.variant;
     }
 

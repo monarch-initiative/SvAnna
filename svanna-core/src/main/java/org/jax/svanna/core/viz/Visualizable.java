@@ -2,8 +2,8 @@ package org.jax.svanna.core.viz;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.overlap.Overlap;
-import org.jax.svanna.core.reference.AnnotatedVariant;
 import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public interface Visualizable {
 
     boolean hasPhenotypicRelevance();
 
-    AnnotatedVariant variant();
+    SvannaVariant variant();
 
     List<HtmlLocation> locations();
 

@@ -108,7 +108,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         Zygosity zygosity = Utils.parseZygosity(altAlleleIdx, gts);
         int depthOfCoverage = Utils.parseDepthFromGenotype(altAlleleIdx, gts);
 
-        return Optional.of(SvannaSequenceVariant.oneBased(contig, vc.getID(), vc.getStart(),
+        return Optional.of(DefaultSvannaVariant.oneBasedSequenceVariant(contig, vc.getID(), vc.getStart(),
                 vc.getReference().getDisplayString(), alt.getDisplayString(),
                 zygosity, depthOfCoverage));
     }
@@ -169,9 +169,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         Zygosity zygosity = Utils.parseZygosity(0, gts);
         int depthOfCoverage = Utils.parseDepthFromGenotype(0, gts);
 
-
-
-        return Optional.of(SvannaSymbolicVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
+        return Optional.of(DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
                 start, end, ref, alt,
                 svlen,
                 zygosity, depthOfCoverage));

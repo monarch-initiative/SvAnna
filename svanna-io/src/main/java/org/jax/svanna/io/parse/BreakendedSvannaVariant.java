@@ -1,17 +1,26 @@
 package org.jax.svanna.io.parse;
 
+import org.jax.svanna.core.filter.FilterResult;
+import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.variant.api.*;
 import org.monarchinitiative.variant.api.impl.Seq;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-class BreakendedSvannaVariant extends AbstractSvannaVariant implements Breakended {
+class BreakendedSvannaVariant implements SvannaVariant, Breakended {
 
     private final String eventId;
     private final Breakend left, right;
     private final String ref, trailingRef, alt;
+
+    protected final Zygosity zygosity;
+    protected final int minDepthOfCoverage;
+    private final Set<FilterType> passedFilterTypes;
+    private final Set<FilterType> failedFilterTypes;
 
     static BreakendedSvannaVariant of(String eventId,
                                              Breakend left,
@@ -41,13 +50,20 @@ class BreakendedSvannaVariant extends AbstractSvannaVariant implements Breakende
                                     String alt,
                                     Zygosity zygosity,
                                     int minDepthOfCoverage) {
-        super(zygosity, minDepthOfCoverage);
         this.eventId = Objects.requireNonNull(eventId);
         this.left = Objects.requireNonNull(left);
         this.right = Objects.requireNonNull(right);
         this.ref = Objects.requireNonNull(ref);
         this.trailingRef = trailingRef;
         this.alt = Objects.requireNonNull(alt);
+
+        this.zygosity = Objects.requireNonNull(zygosity);
+        if (minDepthOfCoverage < -1) {
+            throw new IllegalArgumentException("Minimum depth of coverage must be greater than `-1`: " + minDepthOfCoverage);
+        }
+        this.minDepthOfCoverage = minDepthOfCoverage;
+        passedFilterTypes = new HashSet<>();
+        failedFilterTypes = new HashSet<>();
     }
 
     /*
@@ -114,7 +130,7 @@ class BreakendedSvannaVariant extends AbstractSvannaVariant implements Breakende
     }
 
     @Override
-    public AbstractSvannaVariant toOppositeStrand() {
+    public BreakendedSvannaVariant toOppositeStrand() {
         return new BreakendedSvannaVariant(
                 eventId, right.toOppositeStrand(), left.toOppositeStrand(),
                 Seq.reverseComplement(trailingRef), Seq.reverseComplement(ref), Seq.reverseComplement(alt),
@@ -176,18 +192,50 @@ class BreakendedSvannaVariant extends AbstractSvannaVariant implements Breakende
         return true;
     }
 
+    /*
+     *  **********************  Filterable  **********************
+     */
+    @Override
+    public synchronized boolean passedFilters() {
+        return failedFilterTypes.isEmpty();
+    }
+
+    @Override
+    public synchronized boolean passedFilter(FilterType filterType) {
+        return !failedFilterTypes.contains(filterType) && passedFilterTypes.contains(filterType);
+    }
+
+    @Override
+    public synchronized boolean addFilterResult(FilterResult filterResult) {
+        return filterResult.passed()
+                ? passedFilterTypes.add(filterResult.getFilterType())
+                : failedFilterTypes.add(filterResult.getFilterType());
+    }
+
+    /*
+     * **********************   VariantMetadata   **********************
+     */
+    @Override
+    public int minDepthOfCoverage() {
+        return minDepthOfCoverage;
+    }
+
+    @Override
+    public Zygosity zygosity() {
+        return zygosity;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         BreakendedSvannaVariant that = (BreakendedSvannaVariant) o;
-        return Objects.equals(eventId, that.eventId) && Objects.equals(left, that.left) && Objects.equals(right, that.right) && Objects.equals(ref, that.ref) && Objects.equals(trailingRef, that.trailingRef) && Objects.equals(alt, that.alt);
+        return minDepthOfCoverage == that.minDepthOfCoverage && Objects.equals(eventId, that.eventId) && Objects.equals(left, that.left) && Objects.equals(right, that.right) && Objects.equals(ref, that.ref) && Objects.equals(trailingRef, that.trailingRef) && Objects.equals(alt, that.alt) && zygosity == that.zygosity && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), eventId, left, right, ref, trailingRef, alt);
+        return Objects.hash(eventId, left, right, ref, trailingRef, alt, zygosity, minDepthOfCoverage, passedFilterTypes, failedFilterTypes);
     }
 
     @Override
@@ -199,6 +247,10 @@ class BreakendedSvannaVariant extends AbstractSvannaVariant implements Breakende
                 ", ref='" + ref + '\'' +
                 ", trailingRef='" + trailingRef + '\'' +
                 ", alt='" + alt + '\'' +
-                "} " + super.toString();
+                ", zygosity=" + zygosity +
+                ", minDepthOfCoverage=" + minDepthOfCoverage +
+                ", passedFilterTypes=" + passedFilterTypes +
+                ", failedFilterTypes=" + failedFilterTypes +
+                '}';
     }
 }

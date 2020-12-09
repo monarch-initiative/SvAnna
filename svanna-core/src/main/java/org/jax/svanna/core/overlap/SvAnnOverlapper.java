@@ -270,7 +270,7 @@ public class SvAnnOverlapper implements Overlapper {
             case DUP:
             case INS:
             case INV:
-                GenomicRegion region = variant.withStrand(Strand.POSITIVE).withCoordinateSystem(CoordinateSystem.ZERO_BASED);
+                GenomicRegion region = variant.withStrand(Strand.POSITIVE).toZeroBased();
                 return getIntrachromosomalEventOverlaps(region);
             case TRA:
             case BND:

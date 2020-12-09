@@ -51,8 +51,8 @@ public class EnhancerOverlapper {
             return List.of();
         }
 
-        // let's make sure we only use FWD coordinates for querying the array
-        region = region.withStrand(Strand.POSITIVE);
+        // let's make sure we only use POSITIVE 0-based coordinates for querying the array
+        region = region.withStrand(Strand.POSITIVE).toZeroBased();
         return getEnhancers(region.contig(), region.start(), region.end());
     }
 

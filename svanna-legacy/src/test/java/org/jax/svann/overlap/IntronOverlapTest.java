@@ -2,22 +2,16 @@ package org.jax.svann.overlap;
 
 
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
-import de.charite.compbio.jannovar.reference.GenomePosition;
-import de.charite.compbio.jannovar.reference.Strand;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svann.TestBase;
 import org.jax.svann.reference.SequenceRearrangement;
-import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.jax.svann.parse.TestVariants.Deletions.zbtb48intron1;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Test the ability of Overlapper to calculate the correct intron number.

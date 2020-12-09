@@ -12,7 +12,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class EnhancerTest {
     private static final Path EXAMPLE_TSPEC = Paths.get("src/test/resources/tspec-small.tsv");

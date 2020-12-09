@@ -9,7 +9,6 @@ import org.jax.svann.reference.genome.Contig;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 import org.jax.svann.viz.svg.*;
 
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;

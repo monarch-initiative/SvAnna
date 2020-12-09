@@ -3,7 +3,6 @@ package org.jax.svann.viz;
 import org.jax.svann.genomicreg.Enhancer;
 import org.jax.svann.hpo.HpoDiseaseSummary;
 import org.jax.svann.overlap.Overlap;
-import org.jax.svann.reference.SequenceRearrangement;
 import org.jax.svann.reference.StructuralVariant;
 import org.jax.svann.reference.transcripts.SvAnnTxModel;
 

@@ -12,6 +12,7 @@ target/
 .mtj.tmp/
 
 # Package Files #
+!maven-wrapper.jar
 *.jar
 *.war
 *.nar

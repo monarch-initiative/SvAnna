@@ -7,7 +7,6 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.core.reference.TranscriptService;
-import org.monarchinitiative.variant.api.CoordinateSystem;
 import org.monarchinitiative.variant.api.GenomicAssembly;
 import org.monarchinitiative.variant.api.Strand;
 
@@ -102,12 +101,12 @@ public class JannovarTranscriptService implements TranscriptService {
 
         @Override
         public int getBegin(Transcript transcript) {
-            return transcript.withCoordinateSystem(CoordinateSystem.ZERO_BASED).withStrand(Strand.POSITIVE).start();
+            return transcript.withStrand(Strand.POSITIVE).toZeroBased().start();
         }
 
         @Override
         public int getEnd(Transcript transcript) {
-            return transcript.withCoordinateSystem(CoordinateSystem.ZERO_BASED).withStrand(Strand.POSITIVE).end();
+            return transcript.withStrand(Strand.POSITIVE).toZeroBased().end();
         }
     }
 

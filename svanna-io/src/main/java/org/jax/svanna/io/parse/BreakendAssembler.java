@@ -3,7 +3,6 @@ package org.jax.svanna.io.parse;
 import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.variant.api.*;
 import org.monarchinitiative.variant.api.impl.PartialBreakend;
 import org.slf4j.Logger;
@@ -158,13 +157,12 @@ class BreakendAssembler {
                 : tail.substring(0, tail.length() - 1);
 
         GenotypesContext gts = vc.getGenotypes();
-        int depth = Utils.parseDepthFromGenotype(0, gts);
-        Zygosity zygosity = Utils.parseZygosity(0, gts);
+        Metadata metadata = Metadata.parseGenotypeData(0, gts);
 
         return Optional.of(BreakendedSvannaVariant.of(eventId, left, right,
                 strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive),
                 strand.isPositive() ? altSeq : Utils.reverseComplement(altSeq),
-                zygosity, depth));
+                metadata));
     }
 
 }

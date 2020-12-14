@@ -12,8 +12,7 @@ import java.util.Set;
 
 class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
 
-    protected final Zygosity zygosity;
-    protected final int minDepthOfCoverage;
+    protected final Metadata metadata;
     protected final Set<FilterType> passedFilterTypes;
     protected final Set<FilterType> failedFilterTypes;
 
@@ -26,10 +25,10 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                                    String ref,
                                    String alt,
                                    int changeLength,
-                                   Zygosity zygosity,
-                                   int minDepthOfCoverage) {
+                                   Metadata metadata) {
         // for creating a novel instance via static constructor
-        this(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength, zygosity, minDepthOfCoverage, Set.of(), Set.of());
+        this(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
+                metadata, Set.of(), Set.of());
     }
 
     protected DefaultSvannaVariant(Contig contig,
@@ -41,28 +40,25 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                                    String ref,
                                    String alt,
                                    int changeLength,
-                                   Zygosity zygosity,
-                                   int minDepthOfCoverage,
+                                   Metadata metadata,
                                    Set<FilterType> passedFilterTypes,
                                    Set<FilterType> failedFilterTypes) {
         // for creating a novel instance from an existing instance in `newVariantInstance`
         super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
-        this.zygosity = zygosity;
-        this.minDepthOfCoverage = minDepthOfCoverage;
+        this.metadata = Objects.requireNonNull(metadata);
         this.passedFilterTypes = new HashSet<>(passedFilterTypes);
         this.failedFilterTypes = new HashSet<>(failedFilterTypes);
     }
 
     static DefaultSvannaVariant oneBasedSequenceVariant(Contig contig, String id, int pos, String ref, String alt,
-                                                        Zygosity zygosity,
-                                                        int minDepthOfCoverage) {
+                                                        Metadata metadata) {
         Position start = Position.of(pos);
         if (VariantType.isSymbolic(alt)) {
             throw new IllegalArgumentException("Unable to create non-symbolic variant from symbolic or breakend allele " + alt);
         }
         Position end = calculateEnd(start, ref, alt);
         int changeLength = alt.length() - ref.length();
-        return of(contig, id, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, ref, alt, changeLength, zygosity, minDepthOfCoverage);
+        return of(contig, id, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, ref, alt, changeLength, metadata);
     }
 
     static DefaultSvannaVariant of(Contig contig,
@@ -74,11 +70,10 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                                    String ref,
                                    String alt,
                                    int changeLength,
-                                   Zygosity zygosity,
-                                   int minDepthOfCoverage) {
-        return new DefaultSvannaVariant(contig, id, strand, coordinateSystem, startPosition, endPosition,
-                ref, alt, changeLength,
-                zygosity, minDepthOfCoverage);
+                                   Metadata metadata) {
+        return new DefaultSvannaVariant(
+                contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
+                metadata);
     }
 
     private static Position calculateEnd(Position start, String ref, String alt) {
@@ -109,8 +104,7 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                 ref,
                 alt,
                 changeLength,
-                zygosity,
-                minDepthOfCoverage,
+                metadata,
                 passedFilterTypes,
                 failedFilterTypes);
     }
@@ -134,12 +128,22 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
 
     @Override
     public int minDepthOfCoverage() {
-        return minDepthOfCoverage;
+        return metadata.dp();
+    }
+
+    @Override
+    public int numberOfRefReads() {
+        return metadata.refReads();
+    }
+
+    @Override
+    public int numberOfAltReads() {
+        return metadata.altReads();
     }
 
     @Override
     public Zygosity zygosity() {
-        return zygosity;
+        return metadata.zygosity();
     }
 
     @Override
@@ -148,19 +152,18 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DefaultSvannaVariant that = (DefaultSvannaVariant) o;
-        return minDepthOfCoverage == that.minDepthOfCoverage && zygosity == that.zygosity && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
+        return Objects.equals(metadata, that.metadata) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), zygosity, minDepthOfCoverage, passedFilterTypes, failedFilterTypes);
+        return Objects.hash(super.hashCode(), metadata, passedFilterTypes, failedFilterTypes);
     }
 
     @Override
     public String toString() {
         return "DefaultSvannaVariant{" +
-                "zygosity=" + zygosity +
-                ", minDepthOfCoverage=" + minDepthOfCoverage +
+                "metadata=" + metadata +
                 ", passedFilterTypes=" + passedFilterTypes +
                 ", failedFilterTypes=" + failedFilterTypes +
                 "} " + super.toString();

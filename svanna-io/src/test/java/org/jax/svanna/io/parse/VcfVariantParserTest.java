@@ -81,31 +81,33 @@ public class VcfVariantParserTest {
     }
 
     @Test
-    public void toVariants_symbolicVariant() {
-        String line = "3\t9425916\tins0\tC\t<INS:ME:L1>\t23\tPASS\tSVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22\tGT:GQ:DP\t1/1:15:4";
+    public void toVariants() {
+        String line = "2\t321682\tdel0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62\tGT:GQ:DP:AD\t0/1:12:11:6,5";
         VariantContext vc = VCF_CODEC.decode(line);
         Collection<? extends SvannaVariant> variants = parser.toVariants().apply(vc);
 
         assertThat(variants.size(), equalTo(1));
         SvannaVariant variant = variants.iterator().next();
-        assertThat(variant.contigName(), equalTo("3"));
-        assertThat(variant.startPosition(), equalTo(Position.of(9_425_916, -16, 22)));
-        assertThat(variant.endPosition(), equalTo(Position.of(9_425_916)));
+        assertThat(variant.contigName(), equalTo("2"));
+        assertThat(variant.startPosition(), equalTo(Position.of(321_682, -56, 20)));
+        assertThat(variant.endPosition(), equalTo(Position.of(321_887, -10, 62)));
 
-        assertThat(variant.id(), equalTo("ins0"));
+        assertThat(variant.id(), equalTo("del0"));
         assertThat(variant.strand(), equalTo(Strand.POSITIVE));
         assertThat(variant.coordinateSystem(), equalTo(CoordinateSystem.ONE_BASED));
-        assertThat(variant.variantType(), equalTo(VariantType.INS_ME));
+        assertThat(variant.variantType(), equalTo(VariantType.DEL));
 
-        assertThat(variant.length(), equalTo(1));
-        assertThat(variant.refLength(), equalTo(1));
-        assertThat(variant.changeLength(), equalTo(6027));
+        assertThat(variant.length(), equalTo(206));
+        assertThat(variant.refLength(), equalTo(206));
+        assertThat(variant.changeLength(), equalTo(-205));
 
-        assertThat(variant.ref(), equalTo("C"));
-        assertThat(variant.alt(), equalTo("<INS:ME:L1>"));
+        assertThat(variant.ref(), equalTo("T"));
+        assertThat(variant.alt(), equalTo("<DEL>"));
 
-        assertThat(variant.zygosity(), equalTo(Zygosity.HOMOZYGOUS));
-        assertThat(variant.minDepthOfCoverage(), equalTo(4));
+        assertThat(variant.zygosity(), equalTo(Zygosity.HETEROZYGOUS));
+        assertThat(variant.minDepthOfCoverage(), equalTo(11));
+        assertThat(variant.numberOfRefReads(), equalTo(6));
+        assertThat(variant.numberOfAltReads(), equalTo(5));
     }
 
     @Test

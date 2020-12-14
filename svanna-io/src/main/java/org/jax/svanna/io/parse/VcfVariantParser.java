@@ -5,7 +5,6 @@ import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.variant.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,12 +104,11 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
         Allele alt = vc.getAlternateAllele(altAlleleIdx);
         GenotypesContext gts = vc.getGenotypes();
-        Zygosity zygosity = Utils.parseZygosity(altAlleleIdx, gts);
-        int depthOfCoverage = Utils.parseDepthFromGenotype(altAlleleIdx, gts);
+        Metadata metadata = Metadata.parseGenotypeData(altAlleleIdx, gts);
 
         return Optional.of(DefaultSvannaVariant.oneBasedSequenceVariant(contig, vc.getID(), vc.getStart(),
                 vc.getReference().getDisplayString(), alt.getDisplayString(),
-                zygosity, depthOfCoverage));
+                metadata));
     }
 
     private Optional<? extends SvannaVariant> parseIntrachromosomalVariantAllele(VariantContext vc) {
@@ -166,13 +164,11 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
             LOGGER.warn("Parsing symbolic variants with >1 alleles is not supported: {}", vr);
             return Optional.empty();
         }
-        Zygosity zygosity = Utils.parseZygosity(0, gts);
-        int depthOfCoverage = Utils.parseDepthFromGenotype(0, gts);
+        Metadata metadata = Metadata.parseGenotypeData(0, gts);
 
         return Optional.of(DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
                 start, end, ref, alt,
-                svlen,
-                zygosity, depthOfCoverage));
+                svlen, metadata));
     }
 
 }

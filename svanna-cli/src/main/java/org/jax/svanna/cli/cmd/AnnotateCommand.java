@@ -75,7 +75,7 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
     public Path enhancerFile;
     @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list)")
-    public String hpoTermIdList;
+    public List<String> hpoTermIdList;
     @CommandLine.Option(names = {"--threshold"}, type = SvImpact.class, description = "report variants as severe as this or more")
     public SvImpact threshold = SvImpact.HIGH;
     @CommandLine.Option(names = {"-max_genes"}, description = "maximum gene count to prioritize an SV (default: ${DEFAULT-VALUE} )")
@@ -102,7 +102,7 @@ public class AnnotateCommand implements Callable<Integer> {
         GenomicAssembly assembly = GenomicAssemblyProvider.fromAssemblyReport(ASSEMBLY_REPORT_PATH);
 
         // patient phenotype
-        Set<TermId> patientTerms = Arrays.stream(hpoTermIdList.split(",")).map(String::trim).map(TermId::of).collect(Collectors.toSet());
+        Set<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toSet());
         // check that the HPO terms entered by the user (if any) are valid
         Map<TermId, String> hpoTermsAndLabels;
         if (! patientTerms.isEmpty())

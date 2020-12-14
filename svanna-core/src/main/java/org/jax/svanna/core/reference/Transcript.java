@@ -6,45 +6,49 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Transcript extends PreciseGenomicRegion {
+public class Transcript extends BaseGenomicRegion<Transcript> {
 
     private final String accessionId;
-
     private final String hgvsSymbol;
-
     private final boolean isCoding;
-    private final Position cdsStart;
-    private final Position cdsEnd;
+    private final GenomicRegion cdsRegion;
     private final List<GenomicRegion> exons;
 
-    private Transcript(GenomicRegion txRegion,
-                         String accessionId,
-                         String hgvsSymbol,
-                         boolean isCoding,
-                         Position cdsStart,
-                         Position cdsEnd,
-                         List<GenomicRegion> exons) {
-        super(txRegion);
-        this.accessionId = accessionId;
-        this.hgvsSymbol = hgvsSymbol;
+
+    private Transcript(Contig contig,
+                       Strand strand,
+                       CoordinateSystem coordinateSystem,
+                       Position start,
+                       Position end,
+
+                       String accessionId,
+                       String hgvsSymbol,
+                       boolean isCoding,
+                       GenomicRegion cdsRegion,
+                       List<GenomicRegion> exons) {
+        super(contig, strand, coordinateSystem, start, end);
+
+        this.accessionId = Objects.requireNonNull(accessionId);
+        this.hgvsSymbol = Objects.requireNonNull(hgvsSymbol);
+        this.cdsRegion = cdsRegion;
         this.isCoding = isCoding;
-        this.cdsStart = cdsStart;
-        this.cdsEnd = cdsEnd;
-        this.exons = exons;
+        this.exons = Objects.requireNonNull(exons);
     }
 
-    public static Transcript of(Contig contig,
-                                int start,
-                                int end,
-                                Strand strand,
-                                CoordinateSystem coordinateSystem,
+    public static Transcript of(Contig contig, Strand strand, CoordinateSystem coordinateSystem,
+                                int start, int end,
                                 int cdsStart, int cdsEnd,
                                 String accessionId,
                                 String hgvsSymbol,
                                 boolean isCoding,
                                 List<GenomicRegion> exons) {
-        GenomicRegion txRegion = PreciseGenomicRegion.of(contig, strand, coordinateSystem, Position.of(start), Position.of(end));
-        return new Transcript(txRegion, accessionId, hgvsSymbol, isCoding, Position.of(cdsStart), Position.of(cdsEnd), exons);
+        GenomicRegion cdsRegion = isCoding
+                ? GenomicRegion.of(contig, strand, coordinateSystem, Position.of(cdsStart), Position.of(cdsEnd))
+                : null;
+
+        return new Transcript(contig, strand, coordinateSystem, Position.of(start), Position.of(end),
+                accessionId, hgvsSymbol, isCoding,
+                cdsRegion, exons);
     }
 
     public String accessionId() {
@@ -59,16 +63,39 @@ public class Transcript extends PreciseGenomicRegion {
         return isCoding;
     }
 
+    /**
+     * @return genomic region representing the coding region or <code>null</code> if the transcript is non-coding
+     */
     public GenomicRegion cdsRegion() {
-        return GenomicRegion.zeroBased(contig, strand, cdsStart, cdsEnd);
+        return cdsRegion;
     }
 
-    public GenomicPosition cdsStart() {
-        return GenomicPosition.zeroBased(contig, strand, cdsStart);
+    /**
+     * @return start position of the coding region or <code>null</code> if the transcript is non-coding
+     */
+    public Position cdsStartPosition() {
+        return isCoding ? cdsRegion.startPosition() : null;
     }
 
-    public GenomicPosition cdsEnd() {
-        return GenomicPosition.zeroBased(contig, strand, cdsEnd);
+    /**
+     * @return start {@link GenomicPosition} of the coding region or <code>null</code> if the transcript is non-coding
+     */
+    public GenomicPosition cdsStartGenomicPosition() {
+        return isCoding ? cdsRegion.startGenomicPosition() : null;
+    }
+
+    /**
+     * @return end position of the coding region or <code>null</code> if the transcript is non-coding
+     */
+    public Position cdsEndPosition() {
+        return isCoding ? cdsRegion.endPosition() : null;
+    }
+
+    /**
+     * @return end {@link GenomicPosition} of the coding region or <code>null</code> if the transcript is non-coding
+     */
+    public GenomicPosition cdsEndGenomicPosition() {
+        return isCoding ? cdsRegion.endGenomicPosition() : null;
     }
 
     public List<GenomicRegion> exons() {
@@ -77,37 +104,40 @@ public class Transcript extends PreciseGenomicRegion {
 
     @Override
     public Transcript withStrand(Strand other) {
-        if (strand == other) {
+        if (strand() == other) {
             return this;
         } else {
-            Position cdsStartOnPositive = cdsStart.invert(contig, coordinateSystem);
-            Position cdsEndOnPositive = cdsEnd.invert(contig, coordinateSystem);
-            List<GenomicRegion> exonsOnPositive = new ArrayList<>(exons.size());
+            Position start = startPosition().invert(contig(), coordinateSystem());
+            Position end = endPosition().invert(contig(), coordinateSystem());
+
+            GenomicRegion cdsRegionWithStrand = isCoding ? cdsRegion.withStrand(other) : null;
+
+            List<GenomicRegion> exonsWithStrand = new ArrayList<>(exons.size());
             for (int i = exons.size() - 1; i >= 0; i--) {
                 GenomicRegion exon = exons.get(i);
-                exonsOnPositive.add(exon.withStrand(other));
+                exonsWithStrand.add(exon.withStrand(other));
             }
-            return new Transcript(super.withStrand(other),
-                    accessionId, hgvsSymbol, isCoding,
-                    cdsEndOnPositive, cdsStartOnPositive, exonsOnPositive);
+
+            return new Transcript(contig(), other, coordinateSystem(), end, start, // inverted order!
+                    accessionId, hgvsSymbol, isCoding, cdsRegionWithStrand, exonsWithStrand);
         }
     }
 
     @Override
     public Transcript withCoordinateSystem(CoordinateSystem other) {
-        if (coordinateSystem == other) {
+        if (coordinateSystem() == other) {
             return this;
         } else {
-            Position start = cdsStart.shift(coordinateSystem.startDelta(other));
+            GenomicRegion cdsWithCoordinateSystem = isCoding ? cdsRegion.withCoordinateSystem(other) : null;
             List<GenomicRegion> exonsWithCoordinateSystem = new ArrayList<>(exons.size());
             for (GenomicRegion region : exons) {
                 GenomicRegion exon = region.withCoordinateSystem(other);
                 exonsWithCoordinateSystem.add(exon);
             }
-            GenomicRegion txRegion = super.withCoordinateSystem(other);
-            return new Transcript(txRegion,
-                    accessionId, hgvsSymbol, isCoding,
-                    start, cdsEnd, exonsWithCoordinateSystem);
+
+            return new Transcript(contig(), strand(), other, normalisedStartPosition(other), endPosition(),
+                    accessionId, hgvsSymbol, isCoding, cdsWithCoordinateSystem,
+                    exonsWithCoordinateSystem);
         }
     }
 
@@ -117,22 +147,24 @@ public class Transcript extends PreciseGenomicRegion {
     }
 
     @Override
+    protected Transcript newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position start, Position end) {
+        // no-op Not required as the newVariantInstance returns the same type and this is only required for
+        // the BaseGenomicRegion.withCoordinateSystem and withStrand methods which are overridden in this class
+        return null;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Transcript that = (Transcript) o;
-        return isCoding == that.isCoding &&
-                Objects.equals(accessionId, that.accessionId) &&
-                Objects.equals(hgvsSymbol, that.hgvsSymbol) &&
-                Objects.equals(cdsStart, that.cdsStart) &&
-                Objects.equals(cdsEnd, that.cdsEnd) &&
-                Objects.equals(exons, that.exons);
+        return isCoding == that.isCoding && Objects.equals(accessionId, that.accessionId) && Objects.equals(hgvsSymbol, that.hgvsSymbol) && Objects.equals(cdsRegion, that.cdsRegion) && Objects.equals(exons, that.exons);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), accessionId, hgvsSymbol, isCoding, cdsStart, cdsEnd, exons);
+        return Objects.hash(super.hashCode(), accessionId, hgvsSymbol, isCoding, cdsRegion, exons);
     }
 
     @Override
@@ -141,8 +173,7 @@ public class Transcript extends PreciseGenomicRegion {
                 "accessionId='" + accessionId + '\'' +
                 ", hgvsSymbol='" + hgvsSymbol + '\'' +
                 ", isCoding=" + isCoding +
-                ", cdsStart=" + cdsStart +
-                ", cdsEnd=" + cdsEnd +
+                ", cdsRegion=" + cdsRegion +
                 ", exons=" + exons +
                 "} " + super.toString();
     }

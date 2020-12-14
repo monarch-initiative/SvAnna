@@ -188,7 +188,7 @@ public class SvAnnOverlapper implements Overlapper {
         ExonPair exonPair = getAffectedExons(tx, event);
         boolean affectsCds = false; // note this can only only true if the SV is exonic and the transcript is coding
         if (tx.isCoding()) {
-            GenomicRegion cds = GenomicRegion.of(tx.cdsStart(), tx.cdsEnd());
+            GenomicRegion cds = tx.cdsRegion();
             if (cds.overlapsWith(event) && exonPair.atLeastOneExonOverlap()) {
                 affectsCds = true;
             }

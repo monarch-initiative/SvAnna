@@ -49,8 +49,9 @@ class JannovarTxMapper {
             exons.add(GenomicRegion.zeroBased(contig, strand, Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
         }
 
-        return Optional.of(Transcript.of(contig, txRegion.getBeginPos(), txRegion.getEndPos(), strand, CoordinateSystem.ZERO_BASED,
-                cdsStart, cdsEnd, tm.getAccession(), tm.getGeneSymbol(), tm.isCoding(),
-                exons));
+        return Optional.of(
+                Transcript.of(
+                        contig, strand, CoordinateSystem.ZERO_BASED, txRegion.getBeginPos(), txRegion.getEndPos(),
+                        cdsStart, cdsEnd, tm.getAccession(), tm.getGeneSymbol(), tm.isCoding(), exons));
     }
 }

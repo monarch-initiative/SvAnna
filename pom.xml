@@ -5,72 +5,64 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>svann</artifactId>
-    <groupId>org.jax.svann</groupId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>svanna-core</module>
+        <module>svanna-test</module>
+        <module>svanna-io</module>
+        <module>svanna-ingest</module>
+        <module>svanna-cli</module>
+        <module>svanna-legacy</module>
+    </modules>
+    <groupId>org.jax.svanna</groupId>
     <version>0.2.9</version>
-    <name>svann</name>
+    <name>SvAnna</name>
 
-    <!-- Inherit artifact from SonaType OSS pom.xml Following this article:
-      http://java.dzone.com/articles/deploy-maven-central -->
     <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.2.1.RELEASE</version>
     </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
         <junit.version>5.7.0</junit.version>
         <slf4j.version>1.7.30</slf4j.version>
         <phenol.version>1.6.1</phenol.version>
         <jannovar.version>0.35</jannovar.version>
         <htsjdk.version>2.23.0</htsjdk.version>
+        <variant.api.version>1.0-SNAPSHOT</variant.api.version>
     </properties>
 
+    <developers>
+        <developer>
+            <name>Daniel Danis</name>
+            <email>daniel.danis@jax.org</email>
+            <organization>The Jackson Laboratory for Genomic Medicine</organization>
+            <organizationUrl>https://www.jax.org</organizationUrl>
+        </developer>
+        <developer>
+            <name>Peter N Robinson</name>
+            <email>peter.robinson@jax.org</email>
+            <organization>The Jackson Laboratory for Genomic Medicine</organization>
+            <organizationUrl>https://www.jax.org</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:TheJacksonLaboratory/svann.git</connection>
+        <developerConnection>scm:git:git@github.com:TheJacksonLaboratory/svann.git</developerConnection>
+        <url>scm:git:git@github.com:TheJacksonLaboratory/svann.git</url>
+        <tag>v${project.version}</tag>
+    </scm>
 
     <dependencies>
         <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli-jpms-module</artifactId>
-            <version>4.0.0-alpha-3</version>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.monarchinitiative.phenol</groupId>
-            <artifactId>phenol-annotations</artifactId>
-            <version>${phenol.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.guava</groupId>
-                    <artifactId>guava</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-            <version>2.3.30</version>
-        </dependency>
-
-        <dependency>
-            <groupId>de.charite.compbio</groupId>
-            <artifactId>jannovar-cli</artifactId>
-            <version>${jannovar.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.testing</groupId>
-                    <artifactId>testing</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <!--                       TESTING                                          -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -78,134 +70,25 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <version>3.3.3</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.junit.jupiter</groupId>
-                    <artifactId>junit-jupiter-api</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hamcrest</groupId>
-            <artifactId>hamcrest-all</artifactId>
-            <version>1.3</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
+    <!-- remove the code below -->
     <build>
-        <finalName>svann</finalName>
-
         <plugins>
-            <!-- More JAR building -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>org.jax.svann.Main</mainClass>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-            <!-- Make an executable jar and specify the main class and classpath -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <!-- set useUniqueVersions=false in order that the classpath has the
-                               SNAPSHOT instead of the build number prefixed to the dependency -->
-                            <useUniqueVersions>false</useUniqueVersions>
-                            <mainClass>org.jax.svann.Main</mainClass>
-                        </manifest>
-                    </archive>
-                    <!--   <compilerArgument>-Xlint:all</compilerArgument>
-                       <showWarnings>true</showWarnings>
-                       <showDeprecation>true</showDeprecation> -->
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
                 </configuration>
             </plugin>
-
             <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/distribution-resources</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>log4j2.xml</include>
-                                        <include>*.ftl</include>
-                                        <include>*</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M5</version>
             </plugin>
-
         </plugins>
 
     </build>

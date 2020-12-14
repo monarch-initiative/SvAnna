@@ -20,7 +20,7 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest(classes = {TestDataConfig.class})
 public class MergedVariantParserTest {
 
-    private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/sv_small_merged.bed");
+    private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/org/jax/svanna/io/parse/sv_small_merged.bed");
 
     @Autowired
     public GenomicAssembly genomicAssembly;

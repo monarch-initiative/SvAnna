@@ -19,7 +19,7 @@ public class MetadataTest {
 
     private static final VCFCodec VCF_CODEC = new VCFCodec();
     private static final boolean REQUIRE_INDEX = false;
-    private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/sv_example.vcf");
+    private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/org/jax/svanna/io/parse/sv_example.vcf");
 
     @BeforeAll
     public static void beforeAll() {

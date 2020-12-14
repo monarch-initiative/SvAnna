@@ -1,0 +1,56 @@
+##fileformat=VCFv4.2
+##fileDate=2020-01-01|00:00:00
+##contig=<ID=CM000663.2,length=248956422>
+##contig=<ID=CM000665.2,length=198295559>
+##contig=<ID=CM000667.2,length=181538259>
+##contig=<ID=CM000669.2,length=159345973>
+##contig=<ID=CM000671.2,length=138394717>
+##contig=<ID=CM000673.2,length=135086622>
+##contig=<ID=CM000675.2,length=114364328>
+##contig=<ID=CM000677.2,length=101991189>
+##contig=<ID=CM000679.2,length=83257441>
+##contig=<ID=CM000681.2,length=58617616>
+##contig=<ID=CM000683.2,length=46709983>
+##contig=<ID=CM000685.2,length=156040895>
+##contig=<ID=CM000664.2,length=242193529>
+##contig=<ID=CM000666.2,length=190214555>
+##contig=<ID=CM000668.2,length=170805979>
+##contig=<ID=CM000670.2,length=145138636>
+##contig=<ID=CM000672.2,length=133797422>
+##contig=<ID=CM000674.2,length=133275309>
+##contig=<ID=CM000676.2,length=107043718>
+##contig=<ID=CM000678.2,length=90338345>
+##contig=<ID=CM000680.2,length=80373285>
+##contig=<ID=CM000682.2,length=64444167>
+##contig=<ID=CM000684.2,length=50818468>
+##contig=<ID=CM000686.2,length=57227415>
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=DUP:INT,Description="Interspersed Duplication">
+##ALT=<ID=INS,Description="Insertion">
+##ALT=<ID=BND,Description="Breakend">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=CUTPASTE,Number=0,Type=Flag,Description="Genomic origin of interspersed duplication seems to be deleted">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SUPPORT,Number=1,Type=Integer,Description="Number of reads supporting this variant">
+##INFO=<ID=STD_SPAN,Number=1,Type=Float,Description="Standard deviation in span of merged SV signatures">
+##INFO=<ID=STD_POS,Number=1,Type=Float,Description="Standard deviation in position of merged SV signatures">
+##INFO=<ID=STD_POS1,Number=1,Type=Float,Description="Standard deviation of breakend 1 position">
+##INFO=<ID=STD_POS2,Number=1,Type=Float,Description="Standard deviation of breakend 2 position">
+##INFO=<ID=SEQS,Number=.,Type=String,Description="Insertion sequences from all supporting reads">
+##FILTER=<ID=hom_ref,Description="Genotype is homozygous reference">
+##FILTER=<ID=not_fully_covered,Description="Tandem duplication is not fully covered by a single read">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number of tandem duplication (e.g. 2 for one additional copy)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	dude
+CM000663.2	180188	svim.DEL.1	N	<DEL>	4	hom_ref SVTYPE=DEL;END=180393;SVLEN=-205;SUPPORT=4;STD_SPAN=9.76;STD_POS=8.86	GT:DP:AD	0/0:48:44,4
+CM000663.2	1152627 svim.INS.2	N	<INS>	12	PASS	SVTYPE=INS;END=1152627;SVLEN=86;SUPPORT=10;STD_SPAN=0.57;STD_POS=5.22;SEQS=GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,CCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACACGACCCAGCTCTATCAT GT:DP:AD	0/1:19:9,10
+CM000663.2	1177318 svim.BND.3	N	N[CM000666.2:182304220[ 1	PASS	SVTYPE=BND;SUPPORT=1;STD_POS1=.;STD_POS2=.	GT:DP:AD	./.:.:.,.
+CM000663.2	1382231 svim.DUP_TANDEM.4	N	<DUP:TANDEM>	2	PASS	SVTYPE=DUP:TANDEM;END=1382898;SVLEN=668;SUPPORT=2;STD_SPAN=13.44;STD_POS=6.72	GT:CN:DP:AD	./.:2:.:.,.
+CM000663.2	26641623	svim.INV.5	N	<INV>	3	PASS	SVTYPE=INV;END=26646431;SUPPORT=8;STD_SPAN=.;STD_POS=.	GT:DP:AD	0/1:14:6,8
+CM000663.2	168055351	svim.DUP_INT.6	N	<DUP:INT>	17	PASS	SVTYPE=DUP:INT;CUTPASTE;END=168056494;SVLEN=1144;SUPPORT=16;STD_SPAN=3.08;STD_POS=1.54	GT:DP:AD	1/1:16:0,16

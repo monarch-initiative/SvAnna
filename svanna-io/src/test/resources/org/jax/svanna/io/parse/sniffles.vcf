@@ -1,0 +1,64 @@
+##fileformat=VCFv4.1
+##source=Sniffles
+##fileDate=20200101
+##contig=<ID=CM000663.2,length=248956422>
+##contig=<ID=CM000665.2,length=198295559>
+##contig=<ID=CM000667.2,length=181538259>
+##contig=<ID=CM000669.2,length=159345973>
+##contig=<ID=CM000671.2,length=138394717>
+##contig=<ID=CM000673.2,length=135086622>
+##contig=<ID=CM000675.2,length=114364328>
+##contig=<ID=CM000677.2,length=101991189>
+##contig=<ID=CM000679.2,length=83257441>
+##contig=<ID=CM000681.2,length=58617616>
+##contig=<ID=CM000683.2,length=46709983>
+##contig=<ID=CM000685.2,length=156040895>
+##contig=<ID=CM000664.2,length=242193529>
+##contig=<ID=CM000666.2,length=190214555>
+##contig=<ID=CM000668.2,length=170805979>
+##contig=<ID=CM000670.2,length=145138636>
+##contig=<ID=CM000672.2,length=133797422>
+##contig=<ID=CM000674.2,length=133275309>
+##contig=<ID=CM000676.2,length=107043718>
+##contig=<ID=CM000678.2,length=90338345>
+##contig=<ID=CM000680.2,length=80373285>
+##contig=<ID=CM000682.2,length=64444167>
+##contig=<ID=CM000684.2,length=50818468>
+##contig=<ID=CM000686.2,length=57227415>
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=INVDUP,Description="InvertedDUP with unknown boundaries">
+##ALT=<ID=TRA,Description="Translocation">
+##ALT=<ID=INS,Description="Insertion">
+##FILTER=<ID=UNRESOLVED,Description="An insertion that is longer than the read and thus we cannot predict the full size.">
+##INFO=<ID=CHR2,Number=1,Type=String,Description="Chromosome for END coordinate in case of a translocation">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structural variant">
+##INFO=<ID=MAPQ,Number=1,Type=Integer,Description="Median mapping quality of paired-ends">
+##INFO=<ID=RE,Number=1,Type=Integer,Description="read support">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##INFO=<ID=PRECISE,Number=0,Type=Flag,Description="Precise structural variation">
+##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Length of the SV">
+##INFO=<ID=SVMETHOD,Number=1,Type=String,Description="Type of approach used to detect SV">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=SEQ,Number=1,Type=String,Description="Extracted sequence from the best representative read.">
+##INFO=<ID=STRANDS2,Number=4,Type=Integer,Description="alt reads first + ,alt reads first -,alt reads second + ,alt reads second -.">
+##INFO=<ID=REF_strand,Number=.,Type=Integer,Description="plus strand ref, minus strand ref.">
+##INFO=<ID=Strandbias_pval,Number=A,Type=Float,Description="P-value for fisher exact test for strand bias.">
+##INFO=<ID=STD_quant_start,Number=A,Type=Float,Description="STD of the start breakpoints across the reads.">
+##INFO=<ID=STD_quant_stop,Number=A,Type=Float,Description="STD of the stop breakpoints across the reads.">
+##INFO=<ID=Kurtosis_quant_start,Number=A,Type=Float,Description="Kurtosis value of the start breakpoints across the reads.">
+##INFO=<ID=Kurtosis_quant_stop,Number=A,Type=Float,Description="Kurtosis value of the stop breakpoints across the reads.">
+##INFO=<ID=SUPTYPE,Number=.,Type=String,Description="Type by which the variant is supported.(SR,AL,NR)">
+##INFO=<ID=STRANDS,Number=A,Type=String,Description="Strand orientation of the adjacency in BEDPE format (DEL:+-, DUP:-+, INV:++/--)">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency.">
+##INFO=<ID=ZMW,Number=A,Type=Integer,Description="Number of ZMWs (Pacbio) supporting SV.">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=DR,Number=1,Type=Integer,Description="# high-quality reference reads">
+##FORMAT=<ID=DV,Number=1,Type=Integer,Description="# high-quality variant reads">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	dude
+CM000663.2	1366938	1	N	<DEL>	.	PASS	IMPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=1367108;ZMW=9;STD_quant_start=11.333333;STD_quant_stop=10.000000;Kurtosis_quant_start=6.000000;Kurtosis_quant_stop=6.000000;SVTYPE=DEL;SUPTYPE=AL;SVLEN=-170;STRANDS=+-;STRANDS2=4,5,4,5;RE=9;REF_strand=0,0;Strandbias_pval=1;AF=1	GT:DR:DV	1/1:0:9
+CM000663.2	45825473	2	N	<DUP>	.	PASS	PRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=154318883;ZMW=1;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=DUP;SUPTYPE=SR;SVLEN=108493410;STRANDS=-+;STRANDS2=1,0,1,0;RE=1;REF_strand=0,0;Strandbias_pval=1;AF=1	GT:DR:DV	./.:0:1
+CM000663.2	47681767	3	N	<INV>	.	PASS	PRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=200616263;ZMW=1;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=INV;SUPTYPE=SR;SVLEN=152934496;STRANDS=++;STRANDS2=1,0,0,1;RE=1;REF_strand=0,0;Strandbias_pval=1;AF=1	GT:DR:DV	./.:0:1
+CM000671.2	134183094	5	N	<INS>	.	PASS	IMPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000671.2;END=134183094;ZMW=10;STD_quant_start=0.316228;STD_quant_stop=3986.130668;Kurtosis_quant_start=7.000000;Kurtosis_quant_stop=-1.392315;SVTYPE=INS;SUPTYPE=AL,SR;SVLEN=7365;STRANDS=+-;STRANDS2=5,5,5,5;RE=10;REF_strand=0,0;Strandbias_pval=1;AF=1	GT:DR:DV	1/1:0:10
+CM000684.2	11454286	4	N	<INVDUP>	.	PASS	PRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000684.2;END=11455841;ZMW=2;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=INVDUP;SUPTYPE=SR;SVLEN=1555;STRANDS=--;STRANDS2=0,3,3,0;RE=2;REF_strand=12,15;Strandbias_pval=0.255172;AF=0.0689655	GT:DR:DV	0/0:27:2

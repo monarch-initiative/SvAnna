@@ -1,0 +1,57 @@
+##fileformat=VCFv4.2
+##fileDate=2020-01-01T00:00:00.00Z
+##source=pbsv 2.4.0 (commit v2.4.0)
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structural variant described in this record">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVANN,Number=.,Type=String,Description="Repeat annotation of structural variant">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=MATEID,Number=.,Type=String,Description="ID of mate breakends">
+##INFO=<ID=MATEDIST,Number=1,Type=Integer,Description="Distance to the mate breakend for mates on the same contig">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##INFO=<ID=SHADOWED,Number=0,Type=Flag,Description="CNV overlaps with or is encapsulated by deletion">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##FILTER=<ID=Decoy,Description="Variant involves a decoy sequence">
+##FILTER=<ID=NearReferenceGap,Description="Variant is near (< 1000 bp) from a gap (run of >= 50 Ns) in the reference assembly">
+##FILTER=<ID=NearContigEnd,Description="Variant is near (< 1000 bp) from the end of a contig">
+##FILTER=<ID=InsufficientStrandEvidence,Description="Variant has insufficient number of reads per strand (< 0).">
+##FILTER=<ID=NotFullySpanned,Description="Duplication variant does not have any fully spanning reads.">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth per allele">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth at this position for this sample">
+##FORMAT=<ID=SAC,Number=.,Type=Integer,Description="Number of reads on the forward and reverse strand supporting each allele including reference">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
+##reference=file://GRCh38_primary_assembly_p13.fa
+##contig=<ID=CM000663.2,length=248956422>
+##contig=<ID=CM000664.2,length=242193529>
+##contig=<ID=CM000665.2,length=198295559>
+##contig=<ID=CM000666.2,length=190214555>
+##contig=<ID=CM000667.2,length=181538259>
+##contig=<ID=CM000668.2,length=170805979>
+##contig=<ID=CM000669.2,length=159345973>
+##contig=<ID=CM000670.2,length=145138636>
+##contig=<ID=CM000671.2,length=138394717>
+##contig=<ID=CM000672.2,length=133797422>
+##contig=<ID=CM000673.2,length=135086622>
+##contig=<ID=CM000674.2,length=133275309>
+##contig=<ID=CM000675.2,length=114364328>
+##contig=<ID=CM000676.2,length=107043718>
+##contig=<ID=CM000677.2,length=101991189>
+##contig=<ID=CM000678.2,length=90338345>
+##contig=<ID=CM000679.2,length=83257441>
+##contig=<ID=CM000680.2,length=80373285>
+##contig=<ID=CM000681.2,length=58617616>
+##contig=<ID=CM000682.2,length=64444167>
+##contig=<ID=CM000683.2,length=46709983>
+##contig=<ID=CM000684.2,length=50818468>
+##contig=<ID=CM000685.2,length=156040895>
+##contig=<ID=CM000686.2,length=57227415>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	dude
+CM000663.2	367610	pbsv.DEL.1	TATTCATGCACACATGTTCAC	T	.	PASS	SVTYPE=DEL;END=367630;SVLEN=-20 GT:AD:DP	1/1:0,2:2
+CM000663.2	2514580 pbsv.INS.2	G	GGGGCAGGGTGGGGGCTGGCCGTTGGGGGCTGCCCA	.	PASS	SVTYPE=INS;END=2514580;SVLEN=35 GT:AD:DP	0/1:3,7:10
+CM000663.2	13054707	pbsv.BND.CM000663.2:13054707-CM000663.2:13256071	C	C]CM000663.2:13256071]	.	PASS	SVTYPE=BND;CIPOS=0,0;MATEID=pbsv.BND.CM000663.2:13256071-CM000663.2:13054707;MATEDIST=201364	GT:AD:DP	0/1:1,1:2
+CM000663.2	60776838	pbsv.INV.3	T	<INV>	.	PASS	SVTYPE=INV;END=60778680 GT:AD:DP	0/1:5,1:6
+CM000663.2	61025427	pbsv.INS.DUP.4	A	<DUP>	.	PASS	SVTYPE=DUP;END=61025468;SVLEN=41	GT:AD:DP	0/1:2,4:6
+CM000663.2	144101291	pbsv.CNV.5	G	<CNV>	.	PASS	SVTYPE=cnv;END=144106919;SVLEN=5628;SHADOWED	CN	4

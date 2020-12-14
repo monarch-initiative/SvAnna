@@ -64,7 +64,7 @@ public class AnnotateCommand implements Callable<Integer> {
     private static final Path ASSEMBLY_REPORT_PATH = Path.of(Main.class.getResource("/GCA_000001405.28_GRCh38.p13_assembly_report.txt").getPath());
 
     private final HpoDiseaseGeneMap hpoDiseaseGeneMap;
-    @CommandLine.Option(names = {"-j", "--jannovar"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
+    @CommandLine.Option(names = {"-j", "--jannovar"}, description = "Jannovar transcript definition file (default: ${DEFAULT-VALUE} )")
     public Path jannovarPath = Paths.get("data/data/hg38_refseq_curated.ser");
     @CommandLine.Option(names = {"-g", "--gencode"})
     public Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");

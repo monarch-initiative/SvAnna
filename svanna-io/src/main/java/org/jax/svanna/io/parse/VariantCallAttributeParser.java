@@ -76,6 +76,15 @@ class VariantCallAttributeParser {
             } catch (NumberFormatException e) {
                 LOGGER.warn("`DV` attribute is not an integer: {}", genotype.getExtendedAttribute("DV"));
             }
+        } else if (attributes.containsKey("SUPPORT")) {
+            // SVIM: ##INFO=<ID=SUPPORT,Number=1,Type=Integer,Description="Number of reads supporting this variant">
+            try {
+                builder.altReads(Integer.parseInt((String) attributes.get("SUPPORT")));
+            } catch (ClassCastException e) {
+                LOGGER.warn("Unable to cast `SUPPORT` attribute: {}", attributes.get("SUPPORT"));
+            } catch (NumberFormatException e) {
+                LOGGER.warn("`SUPPORT` attribute is not an integer: {}", attributes.get("SUPPORT"));
+            }
         }
 
         return builder.build();

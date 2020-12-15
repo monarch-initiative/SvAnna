@@ -130,7 +130,27 @@ public class VcfVariantParserTest {
     @Test
     public void createVariantList_Svim() throws Exception {
         List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/svim.vcf"));
-        variants.forEach(System.err::println);
+
+//        assertThat(variants.size(), equalTo(6)); TODO - handle the missing MATEID for SVIM BNDs
+        assertThat(variants.size(), equalTo(5));
+
+        // check general fields for the first variant
+        SvannaVariant del = variants.get(0);
+        assertThat(del.contigName(), equalTo("1"));
+        assertThat(del.start(), equalTo(180_188));
+        assertThat(del.end(), equalTo(180_393));
+        assertThat(del.id(), equalTo("svim.DEL.1"));
+        assertThat(del.ref(), equalTo("N"));
+        assertThat(del.alt(), equalTo("<DEL>"));
+        assertThat(del.length(), equalTo(206));
+        assertThat(del.refLength(), equalTo(206));
+        assertThat(del.changeLength(), equalTo(-205));
+        assertThat(del.variantType(), equalTo(VariantType.DEL));
+        assertThat(del.isSymbolic(), equalTo(true));
+        assertThat(del.zygosity(), equalTo(Zygosity.HOMOZYGOUS));
+        assertThat(del.minDepthOfCoverage(), equalTo(48));
+        assertThat(del.numberOfRefReads(), equalTo(44));
+        assertThat(del.numberOfAltReads(),equalTo(4));
     }
 
     @Test

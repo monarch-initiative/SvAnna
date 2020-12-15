@@ -86,21 +86,22 @@ public class VariantCallAttributeParserTest {
     @ParameterizedTest
     @MethodSource("provideSvimVariants")
     public void parseAttributes_Svim(VariantContext vc, int sampleIdx,
-                                     Zygosity zygosity, int dp, int refDepth, int altDepth) {
+                                     Zygosity zygosity, int dp, int refDepth, int altDepth, int copyNumber) {
         VariantCallAttributes attributes = parser.parseAttributes(vc.getAttributes(), vc.getGenotype(sampleIdx));
 
         assertThat(attributes.zygosity(), equalTo(zygosity));
         assertThat(attributes.dp(), equalTo(dp));
         assertThat(attributes.refReads(), equalTo(refDepth));
         assertThat(attributes.altReads(), equalTo(altDepth));
+        assertThat(attributes.copyNumber(), equalTo(copyNumber));
     }
 
     private static Stream<Arguments> provideSvimVariants() {
         return Stream.of(
                 Arguments.of(decodeLine("CM000663.2\t180188\tsvim.DEL.1\tN\t<DEL>\t4\thom_ref\tSVTYPE=DEL;END=180393;SVLEN=-205;SUPPORT=4;STD_SPAN=9.76;STD_POS=8.86\tGT:DP:AD\t0/0:48:44,4"), 0, Zygosity.HOMOZYGOUS, 48, 44, 4, -1),
                 Arguments.of(decodeLine("CM000663.2\t1152627\tsvim.INS.2\tN\t<INS>\t12\tPASS\tSVTYPE=INS;END=1152627;SVLEN=86;SUPPORT=10;STD_SPAN=0.57;STD_POS=5.22;SEQS=GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,GACTCAGCTCTATCATCCCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACAC,CCATCAGGGATCCAGGCTTTCCACACGACCCAGCTCTATCATCCTCTCAGGGACCCAGGCTCTCCACACGACCCAGCTCTATCAT\tGT:DP:AD\t0/1:19:9,10"), 0, Zygosity.HETEROZYGOUS, 19, 9, 10, -1),
-                Arguments.of(decodeLine("CM000663.2\t1177318\tsvim.BND.3\tN\tN[CM000666.2:182304220[\t1\tPASS\tSVTYPE=BND;SUPPORT=1;STD_POS1=.;STD_POS2=.\tGT:DP:AD\t./.:.:.,."), 0, Zygosity.UNKNOWN, -1, -1, -1, -1),
-                Arguments.of(decodeLine("CM000663.2\t1382231\tsvim.DUP_TANDEM.4\tN\t<DUP:TANDEM>\t2\tPASS\tSVTYPE=DUP:TANDEM;END=1382898;SVLEN=668;SUPPORT=2;STD_SPAN=13.44;STD_POS=6.72\tGT:CN:DP:AD\t./.:2:.:.,."), 0, Zygosity.UNKNOWN, -1, -1, -1, 2),
+                Arguments.of(decodeLine("CM000663.2\t1177318\tsvim.BND.3\tN\tN[CM000666.2:182304220[\t1\tPASS\tSVTYPE=BND;SUPPORT=1;STD_POS1=.;STD_POS2=.\tGT:DP:AD\t./.:.:.,."), 0, Zygosity.UNKNOWN, -1, -1, 1, -1),
+                Arguments.of(decodeLine("CM000663.2\t1382231\tsvim.DUP_TANDEM.4\tN\t<DUP:TANDEM>\t2\tPASS\tSVTYPE=DUP:TANDEM;END=1382898;SVLEN=668;SUPPORT=2;STD_SPAN=13.44;STD_POS=6.72\tGT:CN:DP:AD\t./.:2:.:.,."), 0, Zygosity.UNKNOWN, -1, -1, 2, 2),
                 Arguments.of(decodeLine("CM000663.2\t26641623\tsvim.INV.5\tN\t<INV>\t3\tPASS\tSVTYPE=INV;END=26646431;SUPPORT=8;STD_SPAN=.;STD_POS=.\tGT:DP:AD\t0/1:14:6,8"), 0, Zygosity.HETEROZYGOUS, 14, 6, 8, -1),
                 Arguments.of(decodeLine("CM000663.2\t168055351\tsvim.DUP_INT.6\tN\t<DUP:INT>\t17\tPASS\tSVTYPE=DUP:INT;CUTPASTE;END=168056494;SVLEN=1144;SUPPORT=16;STD_SPAN=3.08;STD_POS=1.54\tGT:DP:AD\t1/1:16:0,16"), 0, Zygosity.HOMOZYGOUS, 16, 0, 16, -1));
     }

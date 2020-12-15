@@ -24,8 +24,6 @@ class BreakendAssembler {
 
     private static final NumberFormat NF = NumberFormat.getInstance();
 
-    private static final VariantCallAttributeParser ATTRIBUTE_PARSER = VariantCallAttributeParser.getInstance();
-
     /**
      * Any BND alt record must match this pattern.
      * E.g.: `G]1:123]`, `]1:123]G`, `G[1:123[`, `[1:123[G`
@@ -160,12 +158,13 @@ class BreakendAssembler {
                 ? head.substring(1)
                 : tail.substring(0, tail.length() - 1);
 
-        VariantCallAttributes variantCallAttributes = ATTRIBUTE_PARSER.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
+        VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        return Optional.of(BreakendedSvannaVariant.of(eventId, left, right,
-                strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive),
-                strand.isPositive() ? altSeq : Utils.reverseComplement(altSeq),
-                variantCallAttributes));
+        return Optional.of(
+                BreakendedSvannaVariant.of(eventId, left, right,
+                        strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive),
+                        strand.isPositive() ? altSeq : Utils.reverseComplement(altSeq),
+                        variantCallAttributes));
     }
 
 }

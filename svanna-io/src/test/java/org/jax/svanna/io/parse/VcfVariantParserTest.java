@@ -9,7 +9,6 @@ import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.io.TestDataConfig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.variant.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
@@ -58,26 +57,26 @@ public class VcfVariantParserTest {
         Set<Breakended> translocations = variants.stream()
                 .filter(v -> v instanceof Breakended)
                 .map(v -> ((Breakended) v))
-                .collect(Collectors.toSet());
+                .collect(toSet());
         assertThat(translocations.stream()
                         .map(bnd -> bnd.left().id())
-                        .collect(Collectors.toSet()),
+                        .collect(toSet()),
                 hasItems("bnd_W", "bnd_V", "bnd_U", "bnd_X", "bnd_Y", "bnd_Z"));
         assertThat(translocations.stream()
                         .map(Breakended::eventId)
-                        .collect(Collectors.toSet()),
+                        .collect(toSet()),
                 hasItems("tra1", "tra2", "tra3"));
 
         assertThat(variants.stream()
                         .filter(variant -> variant.isSymbolic() && !(variant instanceof Breakended))
                         .map(Variant::id)
-                        .collect(Collectors.toSet()),
+                        .collect(toSet()),
                 hasItems("ins0", "del0", "dup0"));
 
         assertThat(variants.stream()
                         .filter(v -> !v.isSymbolic())
                         .map(Variant::id)
-                        .collect(Collectors.toSet()),
+                        .collect(toSet()),
                 hasItems("rs6054257", "microsat1"));
     }
 
@@ -85,7 +84,9 @@ public class VcfVariantParserTest {
     public void createVariantList_Pbsv() throws Exception{
         List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/pbsv.vcf"));
 
-        assertThat(variants.size(), equalTo(6));
+        assertThat(variants, hasSize(6));
+        assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
+                hasItems(VariantType.DEL, VariantType.INS, VariantType.BND, VariantType.INV, VariantType.DUP, VariantType.CNV));
 
         // check general fields for the first variant
         // CM000663.2	367610	pbsv.DEL.1	TATTCATGCACACATGTTCAC	T	.	PASS	SVTYPE=DEL;END=367630;SVLEN=-20	GT:AD:DP	1/1:0,2:2
@@ -134,7 +135,9 @@ public class VcfVariantParserTest {
     public void createVariantList_Svim() throws Exception {
         List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/svim.vcf"));
 
-        assertThat(variants.size(), equalTo(6));
+        assertThat(variants, hasSize(6));
+        assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
+                hasItems(VariantType.DEL, VariantType.INS, VariantType.BND, VariantType.DUP, VariantType.INV, VariantType.DUP_TANDEM));
 
         // check general fields for the first variant
         // CM000663.2	180188	svim.DEL.1	N	<DEL>	4	hom_ref	SVTYPE=DEL;END=180393;SVLEN=-205;SUPPORT=4;STD_SPAN=9.76;STD_POS=8.86	GT:DP:AD	0/0:48:44,4
@@ -175,10 +178,31 @@ public class VcfVariantParserTest {
     }
 
     @Test
-    @Disabled
     public void createVariantList_Sniffles() throws Exception {
         List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/sniffles.vcf"));
-        variants.forEach(System.err::println);
+
+        assertThat(variants, hasSize(5));
+        assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
+                hasItems(VariantType.DEL, VariantType.DUP, VariantType.INV, VariantType.INS, VariantType.SYMBOLIC)); // INVDUP -> SYMBOLIC
+
+        // check general fields for the first variant
+        // CM000663.2	1366938	1	N	<DEL>	.	PASS	IMPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=1367108;ZMW=9;STD_quant_start=11.333333;STD_quant_stop=10.000000;Kurtosis_quant_start=6.000000;Kurtosis_quant_stop=6.000000;SVTYPE=DEL;SUPTYPE=AL;SVLEN=-170;STRANDS=+-;STRANDS2=4,5,4,5;RE=9;REF_strand=0,0;Strandbias_pval=1;AF=1	GT:DR:DV	1/1:0:9
+        SvannaVariant del = variants.get(0);
+        assertThat(del.contigName(), equalTo("1"));
+        assertThat(del.start(), equalTo(1_366_938));
+        assertThat(del.end(), equalTo(1_367_108));
+        assertThat(del.id(), equalTo("1"));
+        assertThat(del.ref(), equalTo("N"));
+        assertThat(del.alt(), equalTo("<DEL>"));
+        assertThat(del.length(), equalTo(171));
+        assertThat(del.refLength(), equalTo(171));
+        assertThat(del.changeLength(), equalTo(-170));
+        assertThat(del.variantType(), equalTo(VariantType.DEL));
+        assertThat(del.isSymbolic(), equalTo(true));
+        assertThat(del.zygosity(), equalTo(Zygosity.HOMOZYGOUS));
+        assertThat(del.minDepthOfCoverage(), equalTo(9));
+        assertThat(del.numberOfRefReads(), equalTo(0));
+        assertThat(del.numberOfAltReads(),equalTo(9));
     }
 
     @Test

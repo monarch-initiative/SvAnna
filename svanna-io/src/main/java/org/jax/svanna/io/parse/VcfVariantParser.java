@@ -99,9 +99,10 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         Allele alt = vc.getAlternateAllele(0);
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        return Optional.of(DefaultSvannaVariant.oneBasedSequenceVariant(contig, vc.getID(), vc.getStart(),
-                vc.getReference().getDisplayString(), alt.getDisplayString(),
-                variantCallAttributes));
+        return Optional.of(
+                DefaultSvannaVariant.oneBasedSequenceVariant(contig, vc.getID(), vc.getStart(),
+                        vc.getReference().getDisplayString(), alt.getDisplayString(),
+                        variantCallAttributes));
     }
 
     private Optional<? extends SvannaVariant> parseIntrachromosomalVariantAllele(VariantContext vc) {
@@ -150,6 +151,10 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         String ref = vc.getReference().getDisplayString();
         String alt = vc.getAlternateAllele(0).getDisplayString();
         int svlen = vc.getAttributeAsInt("SVLEN", 0);
+        if (alt.equals("<INV>") && svlen != 0) {
+            // handle sniffles case
+            svlen = 0;
+        }
 
         // parse depth & zygosity
         GenotypesContext gts = vc.getGenotypes();
@@ -162,9 +167,10 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         }
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        return Optional.of(DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
-                start, end, ref, alt,
-                svlen, variantCallAttributes));
+        return Optional.of(
+                DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
+                        start, end, ref, alt, svlen,
+                        variantCallAttributes));
     }
 
 }

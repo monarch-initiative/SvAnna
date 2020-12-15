@@ -1,6 +1,5 @@
 package org.jax.svanna.core.hpo;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
@@ -37,7 +36,7 @@ public class HpoDiseaseGeneMap {
 
     private HpoDiseaseGeneMap(String hpOboPath, String phenotypeHpoaPath, String mim2geneMedgenPath, String geneInfoPath) {
         this.ontology = OntologyLoader.loadOntology(new File(hpOboPath));
-        List<String> desiredDatabasePrefixes= ImmutableList.of("OMIM");
+        List<String> desiredDatabasePrefixes= List.of("OMIM");
         String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
         HpoAssociationParser hap = new HpoAssociationParser(new File(geneInfoPath), new File(mim2geneMedgenPath), null, new File(phenotypeHpoaPath), ontology);
         this.disease2geneIdMultiMap = hap.getDiseaseToGeneIdMap();
@@ -120,7 +119,7 @@ public class HpoDiseaseGeneMap {
      * return a set of the HPO terms that are equal to or ancestors of our target HPO terms, i.e., that
      * are clinicallly relevant.
      *
-     * @param candidates       List of all HPO terms annotated to Enhancers by {@link org.jax.svann.genomicreg.TSpecParser}
+     * @param candidates       List of all HPO terms annotated to Enhancers
      * @param targetHpoTermIds List of HPO terms annotated the proband (can be subterms of the candidates or equal)
      * @return set of terms from the candidate list that match the target terms, directly or indirectly
      */

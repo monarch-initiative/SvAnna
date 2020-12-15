@@ -1,9 +1,7 @@
 package org.jax.svanna.io.parse;
 
-import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.variant.api.*;
 import org.monarchinitiative.variant.api.impl.PartialBreakend;
 import org.slf4j.Logger;
@@ -36,8 +34,11 @@ class BreakendAssembler {
 
     private final GenomicAssembly assembly;
 
-    BreakendAssembler(GenomicAssembly assembly) {
+    private final VariantCallAttributeParser attributeParser;
+
+    BreakendAssembler(GenomicAssembly assembly, VariantCallAttributeParser attributeParser) {
         this.assembly = assembly;
+        this.attributeParser = attributeParser;
     }
 
     public Optional<SvannaVariant> resolveBreakends(VariantContext vc) {
@@ -56,11 +57,7 @@ class BreakendAssembler {
         }
 
         String eventId = vc.getAttributeAsString("EVENT", "");
-        String mateId = vc.getAttributeAsString("MATEID", null);
-        if (mateId == null) {
-            LOGGER.warn("Missing required `MATEID` field for breakend variant `{}`", vRepr);
-            return Optional.empty();
-        }
+        String mateId = vc.getAttributeAsString("MATEID", "");
 
         // parse pos and confidence intervals, if present
         List<Integer> ci = vc.getAttributeAsIntList("CIPOS", 0);
@@ -157,14 +154,13 @@ class BreakendAssembler {
                 ? head.substring(1)
                 : tail.substring(0, tail.length() - 1);
 
-        GenotypesContext gts = vc.getGenotypes();
-        int depth = Utils.parseDepthFromGenotype(0, gts);
-        Zygosity zygosity = Utils.parseZygosity(0, gts);
+        VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        return Optional.of(BreakendedSvannaVariant.of(eventId, left, right,
-                strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive),
-                strand.isPositive() ? altSeq : Utils.reverseComplement(altSeq),
-                zygosity, depth));
+        return Optional.of(
+                BreakendedSvannaVariant.of(eventId, left, right,
+                        strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive),
+                        strand.isPositive() ? altSeq : Utils.reverseComplement(altSeq),
+                        variantCallAttributes));
     }
 
 }

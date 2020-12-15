@@ -24,7 +24,9 @@ public class BreakendAssemblerTest {
 
     private static final VCFCodec VCF_CODEC = new VCFCodec();
     private static final boolean REQUIRE_INDEX = false;
-    private static final Path VCF_EXAMPLE = Paths.get("src/test/resources/sv_example.vcf");
+    private static final Path VCF_EXAMPLE = Paths.get("src/test/resources/org/jax/svanna/io/parse/sv_example.vcf");
+
+    private static final VariantCallAttributeParser ATTRIBUTE_PARSER = VariantCallAttributeParser.getInstance();
 
     @Autowired
     private GenomicAssembly genomicAssembly;
@@ -40,7 +42,7 @@ public class BreakendAssemblerTest {
 
     @BeforeEach
     public void setUp() {
-        assembler = new BreakendAssembler(genomicAssembly);
+        assembler = new BreakendAssembler(genomicAssembly, ATTRIBUTE_PARSER);
     }
 
     @Test

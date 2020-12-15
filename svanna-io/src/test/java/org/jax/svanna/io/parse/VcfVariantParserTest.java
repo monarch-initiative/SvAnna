@@ -88,6 +88,7 @@ public class VcfVariantParserTest {
         assertThat(variants.size(), equalTo(6));
 
         // check general fields for the first variant
+        // CM000663.2	367610	pbsv.DEL.1	TATTCATGCACACATGTTCAC	T	.	PASS	SVTYPE=DEL;END=367630;SVLEN=-20	GT:AD:DP	1/1:0,2:2
         SvannaVariant del = variants.get(0);
         assertThat(del.contigName(), equalTo("1"));
         assertThat(del.start(), equalTo(367_610));
@@ -106,6 +107,7 @@ public class VcfVariantParserTest {
         assertThat(del.numberOfAltReads(),equalTo(2));
 
         // now check breakended bits
+        // CM000663.2	13054707	pbsv.BND.CM000663.2:13054707-CM000663.2:13256071	C	C]CM000663.2:13256071]	.	PASS	SVTYPE=BND;CIPOS=0,0;MATEID=pbsv.BND.CM000663.2:13256071-CM000663.2:13054707;MATEDIST=201364	GT:AD:DP	0/1:1,1:2
         SvannaVariant breakendVariant = variants.get(2);
         assertThat(breakendVariant.variantType(), equalTo(VariantType.BND));
         assertThat(breakendVariant instanceof Breakended, equalTo(true));
@@ -132,10 +134,10 @@ public class VcfVariantParserTest {
     public void createVariantList_Svim() throws Exception {
         List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/svim.vcf"));
 
-//        assertThat(variants.size(), equalTo(6)); TODO - handle the missing MATEID for SVIM BNDs
-        assertThat(variants.size(), equalTo(5));
+        assertThat(variants.size(), equalTo(6));
 
         // check general fields for the first variant
+        // CM000663.2	180188	svim.DEL.1	N	<DEL>	4	hom_ref	SVTYPE=DEL;END=180393;SVLEN=-205;SUPPORT=4;STD_SPAN=9.76;STD_POS=8.86	GT:DP:AD	0/0:48:44,4
         SvannaVariant del = variants.get(0);
         assertThat(del.contigName(), equalTo("1"));
         assertThat(del.start(), equalTo(180_188));
@@ -152,6 +154,24 @@ public class VcfVariantParserTest {
         assertThat(del.minDepthOfCoverage(), equalTo(48));
         assertThat(del.numberOfRefReads(), equalTo(44));
         assertThat(del.numberOfAltReads(),equalTo(4));
+
+        // now check breakended bits
+        // CM000663.2	1177318	svim.BND.3	N	N[CM000666.2:182304220[	1	PASS	SVTYPE=BND;SUPPORT=1;STD_POS1=.;STD_POS2=.	GT:DP:AD	./.:.:.,.
+        SvannaVariant breakendVariant = variants.get(2);
+        assertThat(breakendVariant.variantType(), equalTo(VariantType.BND));
+        assertThat(breakendVariant instanceof Breakended, equalTo(true));
+        Breakended breakended = (Breakended) breakendVariant;
+        Breakend left = breakended.left();
+        assertThat(left.contigName(), equalTo("1"));
+        assertThat(left.id(), equalTo("svim.BND.3"));
+        assertThat(left.pos(), equalTo(1_177_318));
+        assertThat(left.strand(), equalTo(Strand.POSITIVE));
+
+        Breakend right = breakended.right();
+        assertThat(right.contigName(), equalTo("4"));
+        assertThat(right.id(), equalTo(""));
+        assertThat(right.pos(), equalTo(182_304_220 - 1));
+        assertThat(right.strand(), equalTo(Strand.POSITIVE));
     }
 
     @Test

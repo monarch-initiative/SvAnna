@@ -8,6 +8,11 @@ public interface VariantMetadata {
     int MISSING_DEPTH_PLACEHOLDER = -1;
 
     /**
+     * @return variant zygosity
+     */
+    Zygosity zygosity();
+
+    /**
      * @return minimum number of reads covering the variant site
      * or {@link #MISSING_DEPTH_PLACEHOLDER} if the read depth data is missing
      */
@@ -26,8 +31,8 @@ public interface VariantMetadata {
     int numberOfAltReads();
 
     /**
-     * @return variant zygosity
+     *
+     * @return number of copies for a CNV variant or <code>-1</code> for non-CNV variants.
      */
-    Zygosity zygosity();
-
+    int copyNumber();
 }

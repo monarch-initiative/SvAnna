@@ -142,6 +142,11 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
     }
 
     @Override
+    public int copyNumber() {
+        return variantCallAttributes.copyNumber();
+    }
+
+    @Override
     public Zygosity zygosity() {
         return variantCallAttributes.zygosity();
     }

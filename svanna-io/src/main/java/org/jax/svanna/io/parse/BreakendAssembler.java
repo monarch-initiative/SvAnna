@@ -57,11 +57,7 @@ class BreakendAssembler {
         }
 
         String eventId = vc.getAttributeAsString("EVENT", "");
-        String mateId = vc.getAttributeAsString("MATEID", null);
-        if (mateId == null) {
-            LOGGER.warn("Missing required `MATEID` field for breakend variant `{}`", vRepr);
-            return Optional.empty();
-        }
+        String mateId = vc.getAttributeAsString("MATEID", "");
 
         // parse pos and confidence intervals, if present
         List<Integer> ci = vc.getAttributeAsIntList("CIPOS", 0);

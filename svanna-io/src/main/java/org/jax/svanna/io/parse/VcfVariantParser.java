@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -27,9 +25,12 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfVariantParser.class);
 
+
     private final GenomicAssembly assembly;
 
     private final BreakendAssembler breakendAssembler;
+
+    private final VariantCallAttributeParser attributeParser;
 
     private final boolean requireVcfIndex;
 
@@ -38,8 +39,9 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
     }
 
     public VcfVariantParser(GenomicAssembly assembly, boolean requireVcfIndex) {
+        this.attributeParser = VariantCallAttributeParser.getInstance();
         this.assembly = assembly;
-        this.breakendAssembler = new BreakendAssembler(assembly);
+        this.breakendAssembler = new BreakendAssembler(assembly, attributeParser);
         this.requireVcfIndex = requireVcfIndex;
     }
 
@@ -48,7 +50,8 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         try (VCFFileReader reader = new VCFFileReader(filePath, requireVcfIndex)) {
             return reader.iterator().stream()
                     .map(toVariants())
-                    .flatMap(Collection::stream);
+                    .filter(Optional::isPresent)
+                    .map(Optional::get);
         }
     }
 
@@ -60,41 +63,32 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
      *
      * @return function that maps variant context to collection of {@link Variant}s
      */
-    Function<VariantContext, Collection<SvannaVariant>> toVariants() {
+    Function<VariantContext, Optional<? extends SvannaVariant>> toVariants() {
         return vc -> {
             String vRepr = makeVariantRepresentation(vc);
 
             List<Allele> alts = vc.getAlternateAlleles();
-            List<SvannaVariant> variants = new ArrayList<>(alts.size());
-            for (int altAlleleIdx = 0; altAlleleIdx < alts.size(); altAlleleIdx++) {
-                Allele altAllele = alts.get(altAlleleIdx);
-                String alt = altAllele.getDisplayString();
-                Optional<? extends SvannaVariant> variantOptional;
-                if (VariantType.isBreakend(alt)) {
-                    // breakend
-                    if (alts.size() > 1) {
-                        LOGGER.warn("Parsing breakend variant with {} (>1) alt alleles is not supported: {}", alts.size(), vRepr);
-                        return List.of();
-                    }
-                    variantOptional = breakendAssembler.resolveBreakends(vc);
-                } else if (VariantType.isLargeSymbolic(alt)) {
-                    // symbolic
-                    if (alts.size() > 1) {
-                        LOGGER.warn("Parsing symbolic variant with >1 ({}) alt alleles is not supported: {}", alts.size(), vRepr);
-                        return List.of();
-                    }
-                    variantOptional = parseIntrachromosomalVariantAllele(vc);
-                } else {
-                    // sequence variant
-                    variantOptional = parseSequenceVariantAllele(vc, altAlleleIdx);
-                }
-                variantOptional.ifPresent(variants::add);
+            if (alts.size() != 1) {
+                LOGGER.warn("Parsing variant with {} (!=2) alt alleles is not supported: {}", alts.size(), vRepr);
+                return Optional.empty();
             }
-            return variants;
+
+            Allele altAllele = alts.get(0);
+            String alt = altAllele.getDisplayString();
+            if (VariantType.isBreakend(alt)) {
+                // breakend
+                return breakendAssembler.resolveBreakends(vc);
+            } else if (VariantType.isLargeSymbolic(alt)) {
+                // symbolic
+                return parseIntrachromosomalVariantAllele(vc);
+            } else {
+                // sequence variant
+                return parseSequenceVariantAllele(vc);
+            }
         };
     }
 
-    private Optional<? extends SvannaVariant> parseSequenceVariantAllele(VariantContext vc, int altAlleleIdx) {
+    private Optional<? extends SvannaVariant> parseSequenceVariantAllele(VariantContext vc) {
         String contigName = vc.getContig();
         Contig contig = assembly.contigByName(contigName);
         if (contig == null) {
@@ -102,13 +96,12 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
             return Optional.empty();
         }
 
-        Allele alt = vc.getAlternateAllele(altAlleleIdx);
-        GenotypesContext gts = vc.getGenotypes();
-        Metadata metadata = Metadata.parseGenotypeData(altAlleleIdx, gts);
+        Allele alt = vc.getAlternateAllele(0);
+        VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
         return Optional.of(DefaultSvannaVariant.oneBasedSequenceVariant(contig, vc.getID(), vc.getStart(),
                 vc.getReference().getDisplayString(), alt.getDisplayString(),
-                metadata));
+                variantCallAttributes));
     }
 
     private Optional<? extends SvannaVariant> parseIntrachromosomalVariantAllele(VariantContext vc) {
@@ -160,15 +153,18 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
         // parse depth & zygosity
         GenotypesContext gts = vc.getGenotypes();
-        if (gts.size() > 1) {
-            LOGGER.warn("Parsing symbolic variants with >1 alleles is not supported: {}", vr);
+        if (gts.isEmpty()) {
+            LOGGER.warn("Parsing symbolic variant with no genotype call is not supported: {}", vr);
+            return Optional.empty();
+        } else if (gts.size() > 1) {
+            LOGGER.warn("Parsing symbolic variants with >1 genotype calls is not supported: {}", vr);
             return Optional.empty();
         }
-        Metadata metadata = Metadata.parseGenotypeData(0, gts);
+        VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
         return Optional.of(DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
                 start, end, ref, alt,
-                svlen, metadata));
+                svlen, variantCallAttributes));
     }
 
 }

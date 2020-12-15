@@ -1,0 +1,85 @@
+##fileformat=VCFv4.2
+##fileDate=2020-01-01|00:00:00
+##contig=<ID=CM000663.2,length=248956422>
+##contig=<ID=CM000665.2,length=198295559>
+##contig=<ID=CM000667.2,length=181538259>
+##contig=<ID=CM000669.2,length=159345973>
+##contig=<ID=CM000671.2,length=138394717>
+##contig=<ID=CM000673.2,length=135086622>
+##contig=<ID=CM000675.2,length=114364328>
+##contig=<ID=CM000677.2,length=101991189>
+##contig=<ID=CM000679.2,length=83257441>
+##contig=<ID=CM000681.2,length=58617616>
+##contig=<ID=CM000683.2,length=46709983>
+##contig=<ID=CM000685.2,length=156040895>
+##contig=<ID=CM000664.2,length=242193529>
+##contig=<ID=CM000666.2,length=190214555>
+##contig=<ID=CM000668.2,length=170805979>
+##contig=<ID=CM000670.2,length=145138636>
+##contig=<ID=CM000672.2,length=133797422>
+##contig=<ID=CM000674.2,length=133275309>
+##contig=<ID=CM000676.2,length=107043718>
+##contig=<ID=CM000678.2,length=90338345>
+##contig=<ID=CM000680.2,length=80373285>
+##contig=<ID=CM000682.2,length=64444167>
+##contig=<ID=CM000684.2,length=50818468>
+##contig=<ID=CM000686.2,length=57227415>
+##ALT=<ID=BND,Description="Breakend">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=DUP:INT,Description="Interspersed Duplication">
+##ALT=<ID=INS,Description="Insertion">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=INVDUP,Description="InvertedDUP with unknown boundaries">
+##ALT=<ID=TRA,Description="Translocation">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency.">
+##INFO=<ID=CHR2,Number=1,Type=String,Description="Chromosome for END coordinate in case of a translocation">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=CUTPASTE,Number=0,Type=Flag,Description="Genomic origin of interspersed duplication seems to be deleted">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structural variant">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##INFO=<ID=Kurtosis_quant_start,Number=A,Type=Float,Description="Kurtosis value of the start breakpoints across the reads.">
+##INFO=<ID=Kurtosis_quant_stop,Number=A,Type=Float,Description="Kurtosis value of the stop breakpoints across the reads.">
+##INFO=<ID=MAPQ,Number=1,Type=Integer,Description="Median mapping quality of paired-ends">
+##INFO=<ID=MATEDIST,Number=1,Type=Integer,Description="Distance to the mate breakend for mates on the same contig">
+##INFO=<ID=MATEID,Number=.,Type=String,Description="ID of mate breakends">
+##INFO=<ID=PRECISE,Number=0,Type=Flag,Description="Precise structural variation">
+##INFO=<ID=RE,Number=1,Type=Integer,Description="read support">
+##INFO=<ID=REF_strand,Number=.,Type=Integer,Description="plus strand ref, minus strand ref.">
+##INFO=<ID=SEQS,Number=.,Type=String,Description="Insertion sequences from all supporting reads">
+##INFO=<ID=SEQ,Number=1,Type=String,Description="Extracted sequence from the best representative read.">
+##INFO=<ID=SHADOWED,Number=0,Type=Flag,Description="CNV overlaps with or is encapsulated by deletion">
+##INFO=<ID=STD_SPAN,Number=1,Type=Float,Description="Standard deviation in span of merged SV signatures">
+##INFO=<ID=STD_POS,Number=1,Type=Float,Description="Standard deviation in position of merged SV signatures">
+##INFO=<ID=STD_POS1,Number=1,Type=Float,Description="Standard deviation of breakend 1 position">
+##INFO=<ID=STD_POS2,Number=1,Type=Float,Description="Standard deviation of breakend 2 position">
+##INFO=<ID=STD_quant_start,Number=A,Type=Float,Description="STD of the start breakpoints across the reads.">
+##INFO=<ID=STD_quant_stop,Number=A,Type=Float,Description="STD of the stop breakpoints across the reads.">
+##INFO=<ID=Strandbias_pval,Number=A,Type=Float,Description="P-value for fisher exact test for strand bias.">
+##INFO=<ID=STRANDS,Number=A,Type=String,Description="Strand orientation of the adjacency in BEDPE format (DEL:+-, DUP:-+, INV:++/--)">
+##INFO=<ID=STRANDS2,Number=4,Type=Integer,Description="alt reads first + ,alt reads first -,alt reads second + ,alt reads second -.">
+##INFO=<ID=SUPPORT,Number=1,Type=Integer,Description="Number of reads supporting this variant">
+##INFO=<ID=SUPTYPE,Number=.,Type=String,Description="Type by which the variant is supported.(SR,AL,NR)">
+##INFO=<ID=SVANN,Number=.,Type=String,Description="Repeat annotation of structural variant">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVMETHOD,Number=1,Type=String,Description="Type of approach used to detect SV">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=ZMW,Number=A,Type=Integer,Description="Number of ZMWs (Pacbio) supporting SV.">
+##FILTER=<ID=Decoy,Description="Variant involves a decoy sequence">
+##FILTER=<ID=hom_ref,Description="Genotype is homozygous reference">
+##FILTER=<ID=not_fully_covered,Description="Tandem duplication is not fully covered by a single read">
+##FILTER=<ID=InsufficientStrandEvidence,Description="Variant has insufficient number of reads per strand (< 0).">
+##FILTER=<ID=NearContigEnd,Description="Variant is near (< 1000 bp) from the end of a contig">
+##FILTER=<ID=NearReferenceGap,Description="Variant is near (< 1000 bp) from a gap (run of >= 50 Ns) in the reference assembly">
+##FILTER=<ID=NotFullySpanned,Description="Duplication variant does not have any fully spanning reads.">
+##FILTER=<ID=UNRESOLVED,Description="An insertion that is longer than the read and thus we cannot predict the full size.">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth for each allele">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth at this position for this sample">
+##FORMAT=<ID=DR,Number=1,Type=Integer,Description="# high-quality reference reads">
+##FORMAT=<ID=DV,Number=1,Type=Integer,Description="# high-quality variant reads">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=SAC,Number=.,Type=Integer,Description="Number of reads on the forward and reverse strand supporting each allele including reference">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	dude

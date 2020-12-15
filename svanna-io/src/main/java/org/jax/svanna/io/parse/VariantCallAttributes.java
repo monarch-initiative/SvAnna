@@ -1,7 +1,5 @@
 package org.jax.svanna.io.parse;
 
-import htsjdk.variant.variantcontext.Genotype;
-import htsjdk.variant.variantcontext.GenotypesContext;
 import org.jax.svanna.core.reference.VariantMetadata;
 import org.jax.svanna.core.reference.Zygosity;
 
@@ -10,22 +8,24 @@ import java.util.Objects;
 /**
  * POJO for grouping variant data required for implementing {@link VariantMetadata}.
  */
-class Metadata {
-    private static final int[] MISSING_AD = new int[]{VariantMetadata.MISSING_DEPTH_PLACEHOLDER, VariantMetadata.MISSING_DEPTH_PLACEHOLDER};
-    private static final Metadata MISSING = new Metadata(Zygosity.UNKNOWN,
+class VariantCallAttributes {
+
+    private static final VariantCallAttributes MISSING = new VariantCallAttributes(Zygosity.UNKNOWN,
             VariantMetadata.MISSING_DEPTH_PLACEHOLDER,
             VariantMetadata.MISSING_DEPTH_PLACEHOLDER,
             VariantMetadata.MISSING_DEPTH_PLACEHOLDER);
 
-    static Metadata missing() {
+    static VariantCallAttributes missing() {
         return MISSING;
     }
+
     private final Zygosity zygosity;
     private final int dp, refReads, altReads;
-    Metadata(Zygosity zygosity,
-                     int dp,
-                     int refReads,
-                     int altReads) {
+
+    VariantCallAttributes(Zygosity zygosity,
+                          int dp,
+                          int refReads,
+                          int altReads) {
         this.zygosity = Objects.requireNonNull(zygosity);
 
         if (dp < VariantMetadata.MISSING_DEPTH_PLACEHOLDER) {
@@ -42,39 +42,6 @@ class Metadata {
             throw new IllegalArgumentException("Number of reads supporting alt allele must be greater than `-1`: " + dp);
         }
         this.altReads = altReads;
-    }
-
-    static Metadata parseGenotypeData(int sampleIdx, GenotypesContext genotypes) {
-        if (genotypes.isEmpty() || sampleIdx >= genotypes.size()) {
-            return MISSING;
-        }
-        Genotype gt = genotypes.get(sampleIdx);
-        int dp = gt.hasDP()
-                ? gt.getDP()
-                : VariantMetadata.MISSING_DEPTH_PLACEHOLDER;
-
-        int[] ad = gt.hasAD() ? gt.getAD() : MISSING_AD;
-
-        Zygosity zygosity = parseZygosity(sampleIdx, genotypes);
-
-        return new Metadata(zygosity, dp, ad[0], ad[1]);
-    }
-
-    private static Zygosity parseZygosity(int sampleIdx, GenotypesContext gts) {
-        if (gts.isEmpty() || sampleIdx >= gts.size()) {
-            return Zygosity.UNKNOWN;
-        }
-        Genotype gt = gts.get(sampleIdx);
-        switch (gt.getType()) {
-            case HET:
-                return Zygosity.HETEROZYGOUS;
-            case HOM_VAR:
-                return Zygosity.HOMOZYGOUS;
-            case NO_CALL:
-            case UNAVAILABLE:
-            default:
-                return Zygosity.UNKNOWN;
-        }
     }
 
     public Zygosity zygosity() {
@@ -97,8 +64,8 @@ class Metadata {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Metadata metadata = (Metadata) o;
-        return dp == metadata.dp && refReads == metadata.refReads && altReads == metadata.altReads && zygosity == metadata.zygosity;
+        VariantCallAttributes variantCallAttributes = (VariantCallAttributes) o;
+        return dp == variantCallAttributes.dp && refReads == variantCallAttributes.refReads && altReads == variantCallAttributes.altReads && zygosity == variantCallAttributes.zygosity;
     }
 
     @Override
@@ -108,7 +75,7 @@ class Metadata {
 
     @Override
     public String toString() {
-        return "Metadata{" +
+        return "VariantCallAttributes{" +
                 "zygosity=" + zygosity +
                 ", dp=" + dp +
                 ", refReads=" + refReads +

@@ -17,7 +17,7 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
     private final Breakend left, right;
     private final String ref, trailingRef, alt;
 
-    protected final Metadata metadata;
+    protected final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
     private final Set<FilterType> failedFilterTypes;
 
@@ -26,8 +26,8 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
                                              Breakend right,
                                              String ref,
                                              String alt,
-                                             Metadata metadata) {
-        return new BreakendedSvannaVariant(eventId, left, right, ref, alt, metadata);
+                                             VariantCallAttributes variantCallAttributes) {
+        return new BreakendedSvannaVariant(eventId, left, right, ref, alt, variantCallAttributes);
     }
 
     private BreakendedSvannaVariant(String eventId,
@@ -35,8 +35,8 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
                                     Breakend right,
                                     String ref,
                                     String alt,
-                                    Metadata metadata) {
-        this(eventId, left, right, ref, "", alt, metadata);
+                                    VariantCallAttributes variantCallAttributes) {
+        this(eventId, left, right, ref, "", alt, variantCallAttributes);
     }
 
     private BreakendedSvannaVariant(String eventId,
@@ -45,7 +45,7 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
                                     String ref,
                                     String trailingRef,
                                     String alt,
-                                    Metadata metadata) {
+                                    VariantCallAttributes variantCallAttributes) {
         this.eventId = Objects.requireNonNull(eventId);
         this.left = Objects.requireNonNull(left);
         this.right = Objects.requireNonNull(right);
@@ -53,7 +53,7 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
         this.trailingRef = Objects.requireNonNull(trailingRef);
         this.alt = Objects.requireNonNull(alt);
 
-        this.metadata = Objects.requireNonNull(metadata);
+        this.variantCallAttributes = Objects.requireNonNull(variantCallAttributes);
         passedFilterTypes = new HashSet<>();
         failedFilterTypes = new HashSet<>();
     }
@@ -126,7 +126,7 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
         return new BreakendedSvannaVariant(
                 eventId, right.toOppositeStrand(), left.toOppositeStrand(),
                 Seq.reverseComplement(trailingRef), Seq.reverseComplement(ref), Seq.reverseComplement(alt),
-                metadata);
+                variantCallAttributes);
     }
 
     @Override
@@ -209,22 +209,22 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
      */
     @Override
     public int minDepthOfCoverage() {
-        return metadata.dp();
+        return variantCallAttributes.dp();
     }
 
     @Override
     public int numberOfRefReads() {
-        return metadata.refReads();
+        return variantCallAttributes.refReads();
     }
 
     @Override
     public int numberOfAltReads() {
-        return metadata.altReads();
+        return variantCallAttributes.altReads();
     }
 
     @Override
     public Zygosity zygosity() {
-        return metadata.zygosity();
+        return variantCallAttributes.zygosity();
     }
 
     @Override
@@ -232,12 +232,12 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BreakendedSvannaVariant that = (BreakendedSvannaVariant) o;
-        return Objects.equals(eventId, that.eventId) && Objects.equals(left, that.left) && Objects.equals(right, that.right) && Objects.equals(ref, that.ref) && Objects.equals(trailingRef, that.trailingRef) && Objects.equals(alt, that.alt) && Objects.equals(metadata, that.metadata) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
+        return Objects.equals(eventId, that.eventId) && Objects.equals(left, that.left) && Objects.equals(right, that.right) && Objects.equals(ref, that.ref) && Objects.equals(trailingRef, that.trailingRef) && Objects.equals(alt, that.alt) && Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventId, left, right, ref, trailingRef, alt, metadata, passedFilterTypes, failedFilterTypes);
+        return Objects.hash(eventId, left, right, ref, trailingRef, alt, variantCallAttributes, passedFilterTypes, failedFilterTypes);
     }
 
     @Override
@@ -249,7 +249,7 @@ class BreakendedSvannaVariant implements SvannaVariant, Breakended {
                 ", ref='" + ref + '\'' +
                 ", trailingRef='" + trailingRef + '\'' +
                 ", alt='" + alt + '\'' +
-                ", metadata=" + metadata +
+                ", variantCallAttributes=" + variantCallAttributes +
                 ", passedFilterTypes=" + passedFilterTypes +
                 ", failedFilterTypes=" + failedFilterTypes +
                 '}';

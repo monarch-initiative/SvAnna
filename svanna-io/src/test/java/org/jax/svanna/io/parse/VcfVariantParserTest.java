@@ -16,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -81,13 +81,28 @@ public class VcfVariantParserTest {
     }
 
     @Test
+    public void createVariantList_Pbsv() {
+        // TODO - implement
+    }
+
+    @Test
+    public void createVariantList_Svim() {
+        // TODO - implement
+    }
+
+    @Test
+    public void createVariantList_Sniffles() {
+        // TODO - implement
+    }
+
+    @Test
     public void toVariants() {
         String line = "2\t321682\tdel0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62\tGT:GQ:DP:AD\t0/1:12:11:6,5";
         VariantContext vc = VCF_CODEC.decode(line);
-        Collection<? extends SvannaVariant> variants = parser.toVariants().apply(vc);
+        Optional<? extends SvannaVariant> vo = parser.toVariants().apply(vc);
 
-        assertThat(variants.size(), equalTo(1));
-        SvannaVariant variant = variants.iterator().next();
+        assertThat(vo.isPresent(), equalTo(true));
+        SvannaVariant variant = vo.get();
         assertThat(variant.contigName(), equalTo("2"));
         assertThat(variant.startPosition(), equalTo(Position.of(321_682, -56, 20)));
         assertThat(variant.endPosition(), equalTo(Position.of(321_887, -10, 62)));
@@ -114,16 +129,15 @@ public class VcfVariantParserTest {
     public void toVariants_breakendVariant() {
         String line = "2\t321682\tbnd_V\tT\t]13:123456]T\t6\tPASS\tSVTYPE=BND;MATEID=bnd_U;EVENT=tra2\tGT\t./.";
         VariantContext vc = VCF_CODEC.decode(line);
-        Collection<? extends SvannaVariant> variants = parser.toVariants().apply(vc);
-
-        assertThat(variants.size(), equalTo(1));
+        Optional<? extends SvannaVariant> vo = parser.toVariants().apply(vc);
 
         Contig chr2 = genomicAssembly.contigByName("2");
         Contig chr13 = genomicAssembly.contigByName("13");
         Position expPosition = Position.of(321_682).invert(chr2, CoordinateSystem.ONE_BASED);
 
         // variant bits
-        SvannaVariant variant = variants.iterator().next();
+        assertThat(vo.isPresent(), equalTo(true));
+        SvannaVariant variant = vo.get();
         assertThat(variant.contigName(), equalTo("2"));
         assertThat(variant.startPosition(), equalTo(expPosition));
         assertThat(variant.endPosition(), equalTo(expPosition));
@@ -162,35 +176,35 @@ public class VcfVariantParserTest {
     public void toVariants_multiallelicBreakendVariant() {
         String line = "2\t321681\tbnd_W\tG\tG]17:198982],C\t6\tPASS\tSVTYPE=BND;MATEID=bnd_Y;EVENT=tra1\tGT\t./.";
         VariantContext vc = VCF_CODEC.decode(line);
-        Collection<? extends Variant> variants = parser.toVariants().apply(vc);
+        Optional<? extends Variant> vo = parser.toVariants().apply(vc);
 
-        assertThat(variants, is(empty()));
+        assertThat(vo.isPresent(), is(false));
     }
 
     @Test
     public void toVariants_multiallelicSymbolicVariant() {
         String line = "2\t321682\tdel0\tT\t<DEL>,C\t6\tPASS\tSVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62\tGT:GQ:DP\t0/1:12:11";
         VariantContext vc = VCF_CODEC.decode(line);
-        Collection<? extends Variant> variants = parser.toVariants().apply(vc);
+        Optional<? extends Variant> vo = parser.toVariants().apply(vc);
 
-        assertThat(variants, is(empty()));
+        assertThat(vo.isPresent(), is(false));
     }
 
     @Test
     public void toVariants_symbolic_unknownContig() {
         String line = "bacon\t12665100\tdup0\tA\t<DUP>\t14\tPASS\tSVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500;DP=5\tGT:GQ:CN:CNQ\t./.:0:3:16.2";
         VariantContext vc = VCF_CODEC.decode(line);
-        Collection<? extends Variant> variants = parser.toVariants().apply(vc);
+        Optional<? extends Variant> variants = parser.toVariants().apply(vc);
 
-        assertThat(variants, is(empty()));
+        assertThat(variants.isPresent(), is(false));
     }
 
     @Test
     public void toVariants_sequence_unknownContig() {
         String line = "bacon\t14370\trs6054257\tG\tA\t29\tPASS\tDP=14;AF=0.5;DB\tGT:GQ:DP\t1/1:43:5";
         VariantContext vc = VCF_CODEC.decode(line);
-        Collection<? extends Variant> variants = parser.toVariants().apply(vc);
+        Optional<? extends Variant> vo = parser.toVariants().apply(vc);
 
-        assertThat(variants, is(empty()));
+        assertThat(vo.isPresent(), is(false));
     }
 }

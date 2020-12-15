@@ -1,6 +1,5 @@
 package org.jax.svanna.io.parse;
 
-import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.variant.api.*;
@@ -25,6 +24,8 @@ class BreakendAssembler {
 
     private static final NumberFormat NF = NumberFormat.getInstance();
 
+    private static final VariantCallAttributeParser ATTRIBUTE_PARSER = VariantCallAttributeParser.getInstance();
+
     /**
      * Any BND alt record must match this pattern.
      * E.g.: `G]1:123]`, `]1:123]G`, `G[1:123[`, `[1:123[G`
@@ -35,8 +36,11 @@ class BreakendAssembler {
 
     private final GenomicAssembly assembly;
 
-    BreakendAssembler(GenomicAssembly assembly) {
+    private final VariantCallAttributeParser attributeParser;
+
+    BreakendAssembler(GenomicAssembly assembly, VariantCallAttributeParser attributeParser) {
         this.assembly = assembly;
+        this.attributeParser = attributeParser;
     }
 
     public Optional<SvannaVariant> resolveBreakends(VariantContext vc) {
@@ -156,13 +160,12 @@ class BreakendAssembler {
                 ? head.substring(1)
                 : tail.substring(0, tail.length() - 1);
 
-        GenotypesContext gts = vc.getGenotypes();
-        Metadata metadata = Metadata.parseGenotypeData(0, gts);
+        VariantCallAttributes variantCallAttributes = ATTRIBUTE_PARSER.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
         return Optional.of(BreakendedSvannaVariant.of(eventId, left, right,
                 strand.isPositive() ? refOnPositive : Utils.reverseComplement(refOnPositive),
                 strand.isPositive() ? altSeq : Utils.reverseComplement(altSeq),
-                metadata));
+                variantCallAttributes));
     }
 
 }

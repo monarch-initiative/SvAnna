@@ -12,7 +12,7 @@ import java.util.Set;
 
 class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
 
-    protected final Metadata metadata;
+    protected final VariantCallAttributes variantCallAttributes;
     protected final Set<FilterType> passedFilterTypes;
     protected final Set<FilterType> failedFilterTypes;
 
@@ -25,10 +25,10 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                                    String ref,
                                    String alt,
                                    int changeLength,
-                                   Metadata metadata) {
+                                   VariantCallAttributes variantCallAttributes) {
         // for creating a novel instance via static constructor
         this(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
-                metadata, Set.of(), Set.of());
+                variantCallAttributes, Set.of(), Set.of());
     }
 
     protected DefaultSvannaVariant(Contig contig,
@@ -40,25 +40,25 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                                    String ref,
                                    String alt,
                                    int changeLength,
-                                   Metadata metadata,
+                                   VariantCallAttributes variantCallAttributes,
                                    Set<FilterType> passedFilterTypes,
                                    Set<FilterType> failedFilterTypes) {
         // for creating a novel instance from an existing instance in `newVariantInstance`
         super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
-        this.metadata = Objects.requireNonNull(metadata);
+        this.variantCallAttributes = Objects.requireNonNull(variantCallAttributes);
         this.passedFilterTypes = new HashSet<>(passedFilterTypes);
         this.failedFilterTypes = new HashSet<>(failedFilterTypes);
     }
 
     static DefaultSvannaVariant oneBasedSequenceVariant(Contig contig, String id, int pos, String ref, String alt,
-                                                        Metadata metadata) {
+                                                        VariantCallAttributes variantCallAttributes) {
         Position start = Position.of(pos);
         if (VariantType.isSymbolic(alt)) {
             throw new IllegalArgumentException("Unable to create non-symbolic variant from symbolic or breakend allele " + alt);
         }
         Position end = calculateEnd(start, ref, alt);
         int changeLength = alt.length() - ref.length();
-        return of(contig, id, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, ref, alt, changeLength, metadata);
+        return of(contig, id, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, ref, alt, changeLength, variantCallAttributes);
     }
 
     static DefaultSvannaVariant of(Contig contig,
@@ -70,10 +70,10 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                                    String ref,
                                    String alt,
                                    int changeLength,
-                                   Metadata metadata) {
+                                   VariantCallAttributes variantCallAttributes) {
         return new DefaultSvannaVariant(
                 contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
-                metadata);
+                variantCallAttributes);
     }
 
     private static Position calculateEnd(Position start, String ref, String alt) {
@@ -104,7 +104,7 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                 ref,
                 alt,
                 changeLength,
-                metadata,
+                variantCallAttributes,
                 passedFilterTypes,
                 failedFilterTypes);
     }
@@ -128,22 +128,22 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
 
     @Override
     public int minDepthOfCoverage() {
-        return metadata.dp();
+        return variantCallAttributes.dp();
     }
 
     @Override
     public int numberOfRefReads() {
-        return metadata.refReads();
+        return variantCallAttributes.refReads();
     }
 
     @Override
     public int numberOfAltReads() {
-        return metadata.altReads();
+        return variantCallAttributes.altReads();
     }
 
     @Override
     public Zygosity zygosity() {
-        return metadata.zygosity();
+        return variantCallAttributes.zygosity();
     }
 
     @Override
@@ -152,18 +152,18 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DefaultSvannaVariant that = (DefaultSvannaVariant) o;
-        return Objects.equals(metadata, that.metadata) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
+        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), metadata, passedFilterTypes, failedFilterTypes);
+        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes);
     }
 
     @Override
     public String toString() {
         return "DefaultSvannaVariant{" +
-                "metadata=" + metadata +
+                "variantCallAttributes=" + variantCallAttributes +
                 ", passedFilterTypes=" + passedFilterTypes +
                 ", failedFilterTypes=" + failedFilterTypes +
                 "} " + super.toString();

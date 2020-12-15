@@ -9,6 +9,7 @@ import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.io.TestDataConfig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.variant.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,6 +155,7 @@ public class VcfVariantParserTest {
     }
 
     @Test
+    @Disabled
     public void createVariantList_Sniffles() throws Exception {
         List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/sniffles.vcf"));
         variants.forEach(System.err::println);

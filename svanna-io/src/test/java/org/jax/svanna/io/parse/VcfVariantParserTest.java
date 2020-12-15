@@ -32,7 +32,7 @@ public class VcfVariantParserTest {
     private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/org/jax/svanna/io/parse/sv_example.vcf");
 
     @Autowired
-    public GenomicAssembly genomicAssembly;
+    public GenomicAssembly assembly;
 
     private VcfVariantParser parser;
 
@@ -45,7 +45,7 @@ public class VcfVariantParserTest {
 
     @BeforeEach
     public void setUp() {
-        parser = new VcfVariantParser(genomicAssembly, REQUIRE_INDEX);
+        parser = new VcfVariantParser(assembly, REQUIRE_INDEX);
     }
 
     @Test
@@ -81,18 +81,62 @@ public class VcfVariantParserTest {
     }
 
     @Test
-    public void createVariantList_Pbsv() {
-        // TODO - implement
+    public void createVariantList_Pbsv() throws Exception{
+        List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/pbsv.vcf"));
+
+        assertThat(variants.size(), equalTo(6));
+
+        // check general fields for the first variant
+        SvannaVariant del = variants.get(0);
+        assertThat(del.contigName(), equalTo("1"));
+        assertThat(del.start(), equalTo(367_610));
+        assertThat(del.end(), equalTo(367_630));
+        assertThat(del.id(), equalTo("pbsv.DEL.1"));
+        assertThat(del.ref(), equalTo("TATTCATGCACACATGTTCAC"));
+        assertThat(del.alt(), equalTo("T"));
+        assertThat(del.length(), equalTo(21));
+        assertThat(del.refLength(), equalTo(21));
+        assertThat(del.changeLength(), equalTo(-20));
+        assertThat(del.variantType(), equalTo(VariantType.DEL));
+        assertThat(del.isSymbolic(), equalTo(false));
+        assertThat(del.zygosity(), equalTo(Zygosity.HOMOZYGOUS));
+        assertThat(del.minDepthOfCoverage(), equalTo(2));
+        assertThat(del.numberOfRefReads(), equalTo(0));
+        assertThat(del.numberOfAltReads(),equalTo(2));
+
+        // now check breakended bits
+        SvannaVariant breakendVariant = variants.get(2);
+        assertThat(breakendVariant.variantType(), equalTo(VariantType.BND));
+        assertThat(breakendVariant instanceof Breakended, equalTo(true));
+        Breakended breakended = (Breakended) breakendVariant;
+        Breakend left = breakended.left();
+        assertThat(left.contigName(), equalTo("1"));
+        assertThat(left.id(), equalTo("pbsv.BND.CM000663.2:13054707-CM000663.2:13256071"));
+        assertThat(left.pos(), equalTo(13_054_707));
+        assertThat(left.strand(), equalTo(Strand.POSITIVE));
+
+        Breakend right = breakended.right();
+        assertThat(right.contigName(), equalTo("1"));
+        assertThat(right.id(), equalTo("pbsv.BND.CM000663.2:13256071-CM000663.2:13054707"));
+        assertThat(right.pos(), equalTo(assembly.contigByName("1").length() - 13_256_071));
+        assertThat(right.strand(), equalTo(Strand.NEGATIVE));
+
+        // cnv bits
+        SvannaVariant cnv = variants.get(5);
+        assertThat(cnv.variantType(), equalTo(VariantType.CNV));
+        assertThat(cnv.copyNumber(), equalTo(4));
     }
 
     @Test
-    public void createVariantList_Svim() {
-        // TODO - implement
+    public void createVariantList_Svim() throws Exception {
+        List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/svim.vcf"));
+        variants.forEach(System.err::println);
     }
 
     @Test
-    public void createVariantList_Sniffles() {
-        // TODO - implement
+    public void createVariantList_Sniffles() throws Exception {
+        List<SvannaVariant> variants = parser.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/sniffles.vcf"));
+        variants.forEach(System.err::println);
     }
 
     @Test
@@ -131,8 +175,8 @@ public class VcfVariantParserTest {
         VariantContext vc = VCF_CODEC.decode(line);
         Optional<? extends SvannaVariant> vo = parser.toVariants().apply(vc);
 
-        Contig chr2 = genomicAssembly.contigByName("2");
-        Contig chr13 = genomicAssembly.contigByName("13");
+        Contig chr2 = assembly.contigByName("2");
+        Contig chr13 = assembly.contigByName("13");
         Position expPosition = Position.of(321_682).invert(chr2, CoordinateSystem.ONE_BASED);
 
         // variant bits

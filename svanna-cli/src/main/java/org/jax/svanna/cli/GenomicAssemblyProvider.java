@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
@@ -39,7 +43,7 @@ public class GenomicAssemblyProvider {
         // private no-op
     }
 
-    public static GenomicAssembly fromAssemblyReport(Path assemblyReport) throws IOException {
+    public static GenomicAssembly fromAssemblyReport(InputStream inputStream, Charset charset) throws IOException {
         String assemblyName = null;
         String organismName = null;
         String taxonId = null;
@@ -48,7 +52,7 @@ public class GenomicAssemblyProvider {
         String genBankAccession = null;
         String refSeqAccession = null;
         List<String> contigLines = new ArrayList<>();
-        try (final BufferedReader reader = Files.newBufferedReader(assemblyReport)) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset))) {
             String line;
             boolean nameFound = false;
             boolean organismFound = false;
@@ -126,7 +130,7 @@ public class GenomicAssemblyProvider {
 
         // check that we have assembly ID and taxon id
         if (Stream.of(assemblyName, organismName, taxonId, submitter, date, genBankAccession, refSeqAccession).anyMatch(Objects::isNull)) {
-            String msg = "Did not find at least one required metadata field the assembly report file " + assemblyReport;
+            String msg = "Did not find at least one required metadata field the assembly report";
             throw new IOException(msg);
         }
 
@@ -166,6 +170,12 @@ public class GenomicAssemblyProvider {
         }
 
         return new GenomicAssemblyDefault(assemblyName, organismName, taxonId, submitter, date, genBankAccession, refSeqAccession, contigs);
+    }
+
+    public static GenomicAssembly fromAssemblyReport(Path assemblyReport) throws IOException {
+        try (InputStream is = Files.newInputStream(assemblyReport)) {
+            return fromAssemblyReport(is, StandardCharsets.UTF_8);
+        }
     }
 
     private static SequenceRole parseSequenceRole(String role) {

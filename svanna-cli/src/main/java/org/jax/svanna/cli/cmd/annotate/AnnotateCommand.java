@@ -43,6 +43,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
@@ -62,8 +65,6 @@ public class AnnotateCommand implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
 
     private static final NumberFormat NF = NumberFormat.getNumberInstance();
-
-    private static final Path ASSEMBLY_REPORT_PATH = Path.of(Main.class.getResource("/GCA_000001405.28_GRCh38.p13_assembly_report.txt").getPath());
 
     @CommandLine.Option(names = {"-j", "--jannovar"}, description = "Jannovar transcript definition file (default: ${DEFAULT-VALUE} )")
     public Path jannovarPath = Paths.get("data/data/hg38_refseq_curated.ser");
@@ -97,14 +98,18 @@ public class AnnotateCommand implements Callable<Integer> {
         LOGGER.info("Running `annotate` command...");
         // 0 - set up data
 
+        // assembly
+        Charset charset = StandardCharsets.UTF_8;
+        GenomicAssembly assembly;
+        try (InputStream is = Main.class.getResourceAsStream("/GCA_000001405.28_GRCh38.p13_assembly_report.txt")) {
+            assembly = GenomicAssemblyProvider.fromAssemblyReport(is, charset);
+        }
+
         // TODO: 2. 11. 2020 externalize
         // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids that are provided
         //  by the user into their corresponding labels on the output file.
         //  I will add a method to this class for now, but when we refactor this, we should make it more elegant
         HpoDiseaseGeneMap hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
-
-        // assembly
-        GenomicAssembly assembly = GenomicAssemblyProvider.fromAssemblyReport(ASSEMBLY_REPORT_PATH);
 
         // patient phenotype
         Set<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toSet());

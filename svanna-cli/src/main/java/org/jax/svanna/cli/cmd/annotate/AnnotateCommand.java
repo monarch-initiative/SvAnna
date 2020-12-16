@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd;
+package org.jax.svanna.cli.cmd.annotate;
 
 
 import de.charite.compbio.jannovar.data.JannovarData;

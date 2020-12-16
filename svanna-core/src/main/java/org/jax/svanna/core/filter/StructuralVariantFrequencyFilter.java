@@ -36,6 +36,19 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
         this.frequencyThreshold = frequencyThreshold;
     }
 
+    static float reciprocalOverlap(GenomicRegion first, GenomicRegion second) {
+        if (!first.overlapsWith(second)) {
+            return 0;
+        }
+        first = first.toZeroBased();
+        second = second.toZeroBased().withStrand(first.strand());
+        int maxStart = Math.max(first.start(), second.start());
+        int minEnd = Math.min(first.end(), second.end());
+
+        float intersection = minEnd - maxStart;
+        return Math.min(intersection / first.length(), intersection / second.length());
+    }
+
     @Override
     public FilterType getFilterType() {
         return FILTER_TYPE;
@@ -45,36 +58,25 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
     public FilterResult runFilter(SvannaVariant variant) {
         switch (variant.variantType().baseType()) {
             // this filter only supports filtering of some SV types
-            case DEL:
             case INS:
-            case CNV:
+            case DUP:
+            case DEL:
             case INV:
+            case CNV:
                 return performFiltering(variant);
             default:
                 return NOT_RUN;
         }
     }
 
-    private static double reciprocalOverlap(GenomicRegion first, GenomicRegion second) {
-        if (!first.overlapsWith(second)) {
-            return 0;
-        }
-        first = first.withStrand(second.strand()).toZeroBased();
-        second = second.toZeroBased();
-        int maxStart = Math.max(first.start(), second.start());
-        int minEnd = Math.min(first.end(), second.end());
-        float sharedBases = minEnd - maxStart;
-        return Math.min(sharedBases / first.length(), sharedBases / second.length());
-    }
-
-    private FilterResult performFiltering(final Variant variant) {
+    private FilterResult performFiltering(Variant variant) {
         // get features from benign SV feature origin that share at least 1bp with the query region
         List<SvFeature> features = featureSource.getOverlappingFeatures(variant, SVFeatureOrigin.benign());
 
         return features.stream()
-                .filter(feature -> feature.variantType().baseType() == variant.variantType().baseType())
-                .filter(feature -> feature.frequency() >= frequencyThreshold)
-                .anyMatch(feature -> reciprocalOverlap(feature, variant) > similarityThreshold)
+                .anyMatch(feature -> feature.variantType().baseType() == variant.variantType().baseType()
+                        && feature.frequency() >= frequencyThreshold
+                        && reciprocalOverlap(feature, variant) > similarityThreshold)
                 ? FAIL
                 : PASS;
     }

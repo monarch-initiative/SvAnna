@@ -3,11 +3,22 @@ package org.jax.svanna.core.filter;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.variant.api.GenomicRegion;
 import org.monarchinitiative.variant.api.Variant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.function.Predicate;
 
+/**
+ * This filter flags variant that are present in given {@link SvFeatureSource} and match the query coordinates:
+ * <ul>
+ *     <li>similarity > similarity threshold</li>
+ *     <li>frequency > frequency threshold</li>
+ *     <li>variant type matches query variant type</li>
+ * </ul>
+ */
 public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StructuralVariantFrequencyFilter.class);
 
     private static final FilterType FILTER_TYPE = FilterType.FREQUENCY_FILTER;
 
@@ -16,9 +27,13 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
     private static final FilterResult NOT_RUN = FilterResult.notRun(FILTER_TYPE);
 
     private final SvFeatureSource featureSource;
+    private final float similarityThreshold;
+    private final float frequencyThreshold;
 
-    public StructuralVariantFrequencyFilter(SvFeatureSource featureSource) {
+    public StructuralVariantFrequencyFilter(SvFeatureSource featureSource, float similarityThreshold, float frequencyThreshold) {
         this.featureSource = featureSource;
+        this.similarityThreshold = similarityThreshold;
+        this.frequencyThreshold = frequencyThreshold;
     }
 
     @Override
@@ -40,24 +55,27 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
         }
     }
 
-    private FilterResult performFiltering(Variant variant) {
+    private static double reciprocalOverlap(GenomicRegion first, GenomicRegion second) {
+        if (!first.overlapsWith(second)) {
+            return 0;
+        }
+        first = first.withStrand(second.strand()).toZeroBased();
+        second = second.toZeroBased();
+        int maxStart = Math.max(first.start(), second.start());
+        int minEnd = Math.min(first.end(), second.end());
+        float sharedBases = minEnd - maxStart;
+        return Math.min(sharedBases / first.length(), sharedBases / second.length());
+    }
+
+    private FilterResult performFiltering(final Variant variant) {
         // get features from benign SV feature origin that share at least 1bp with the query region
         List<SvFeature> features = featureSource.getOverlappingFeatures(variant, SVFeatureOrigin.benign());
 
-        return features.stream().anyMatch(isSimilarEnough(variant))
+        return features.stream()
+                .filter(feature -> feature.variantType().baseType() == variant.variantType().baseType())
+                .filter(feature -> feature.frequency() >= frequencyThreshold)
+                .anyMatch(feature -> reciprocalOverlap(feature, variant) > similarityThreshold)
                 ? FAIL
                 : PASS;
-    }
-
-
-    /**
-     * Return predicate for evaluating similarity of the <code>feature</code> to given <code>region</code>.
-     *
-     * @param region
-     * @return
-     */
-    private Predicate<GenomicRegion> isSimilarEnough(GenomicRegion region) {
-        // TODO - implement similarity calculation
-        return feature -> false;
     }
 }

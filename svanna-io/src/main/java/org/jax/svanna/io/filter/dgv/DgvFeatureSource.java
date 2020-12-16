@@ -52,6 +52,9 @@ public class DgvFeatureSource implements SvFeatureSource, Closeable {
         // we must adjust the target region to 0-based coordinate system on positive strand
         GenomicRegion query = region.toZeroBased().withStrand(Strand.POSITIVE);
 
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("Fetching DGV features overlapping the region {}:{}-{}({})", region.contigName(), region.start(), region.end(), region.strand());
+        }
         String line;
         TabixReader.Iterator iterator = tabixReader.query(tabixReader.chr2tid(query.contigName()), query.start(), query.end());
         try {
@@ -135,17 +138,17 @@ public class DgvFeatureSource implements SvFeatureSource, Closeable {
 
         if (arr[5].equals("gain+loss")) {
             return List.of(
-                    DgvFeature.of(contig, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, variantAccession, VariantType.DUP, observedGains / sampleSize),
-                    DgvFeature.of(contig, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, variantAccession, VariantType.DEL, observedLosses / sampleSize));
+                    DgvFeature.of(contig, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, variantAccession, VariantType.DUP, 100 * observedGains / sampleSize),
+                    DgvFeature.of(contig, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, variantAccession, VariantType.DEL, 100 * observedLosses / sampleSize));
         } else {
             float frequency = Float.NaN;
             switch (type.baseType()) {
                 case DEL:
-                    frequency = observedLosses / sampleSize;
+                    frequency = 100 * observedLosses / sampleSize;
                     break;
                 case DUP:
                 case INS:
-                    frequency = observedGains / sampleSize;
+                    frequency = 100 * observedGains / sampleSize;
                     break;
                 default:
                     // fall through

@@ -23,8 +23,8 @@ class DgvFeature extends BaseGenomicRegion<DgvFeature> implements SvFeature {
 
         this.accession = Objects.requireNonNull(accession);
         this.variantType = Objects.requireNonNull(variantType);
-        if (1 < frequency || frequency < 0) {
-            throw new IllegalArgumentException("Frequency must be in range [0,1]: " + frequency);
+        if (100 < frequency || frequency < 0) {
+            throw new IllegalArgumentException("Frequency must be in range [0,100]: " + frequency);
         }
         this.frequency = frequency;
     }

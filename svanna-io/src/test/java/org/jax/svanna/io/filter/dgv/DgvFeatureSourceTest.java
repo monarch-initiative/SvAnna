@@ -57,7 +57,7 @@ public class DgvFeatureSourceTest {
         assertThat(feature.coordinateSystem(), equalTo(CoordinateSystem.ONE_BASED));
         assertThat(feature.strand(), equalTo(Strand.POSITIVE));
         assertThat(feature.variantType(), equalTo(VariantType.DEL));
-        assertThat(feature.frequency(), equalTo(.71428573F));
+        assertThat(feature.frequency(), equalTo(71.428573F));
     }
 
     @Test

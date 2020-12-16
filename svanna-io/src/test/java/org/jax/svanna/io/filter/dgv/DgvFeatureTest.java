@@ -40,7 +40,8 @@ public class DgvFeatureTest {
     public void failsWhenFrequencyOutOfBounds() {
         Contig chr1 = genomicAssembly.contigByName("1");
         IllegalArgumentException e = assertThrows(IllegalArgumentException.class,
-                () -> DgvFeature.of(chr1, Strand.POSITIVE, CoordinateSystem.ONE_BASED, 1, 2, "nsv3324042", VariantType.DUP, 1.01f));
-        assertThat(e.getMessage(), equalTo("Frequency must be in range [0,1]: 1.01"));
+                () -> DgvFeature.of(chr1, Strand.POSITIVE, CoordinateSystem.ONE_BASED, 1, 2,
+                        "nsv3324042", VariantType.DUP, 100.01F));
+        assertThat(e.getMessage(), equalTo("Frequency must be in range [0,100]: 100.01"));
     }
 }

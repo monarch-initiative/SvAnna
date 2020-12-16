@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd;
+package org.jax.svanna.cli.cmd.annotate;
 
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;

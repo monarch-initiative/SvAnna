@@ -1,7 +1,8 @@
 package org.jax.svanna.cli;
 
 
-import org.jax.svanna.cli.cmd.AnnotateCommand;
+import org.jax.svanna.cli.cmd.annotate.AnnotateCommand;
+import org.jax.svanna.cli.cmd.download.DownloadCommand;
 import picocli.CommandLine;
 
 import java.util.Locale;
@@ -34,12 +35,10 @@ public class Main implements Callable<Integer>  {
         Locale.setDefault(Locale.US);
         CommandLine cline = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
-//                .addSubcommand("download", new DownloadCommand())
-//                .addSubcommand("download", null)
+                .addSubcommand("download", new DownloadCommand())
                 .addSubcommand("annotate", new AnnotateCommand());
         cline.setToggleBooleanFlags(false);
-        int exitCode = cline.execute(args);
-        System.exit(exitCode);
+        System.exit(cline.execute(args));
     }
 
     @Override

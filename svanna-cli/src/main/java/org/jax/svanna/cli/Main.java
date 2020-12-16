@@ -31,19 +31,22 @@ public class Main implements Callable<Integer>  {
             .optionParams(italic)
             .build();
 
+    private static CommandLine commandLine;
+
     public static void main(String [] args) {
         Locale.setDefault(Locale.US);
-        CommandLine cline = new CommandLine(new Main())
+        commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
                 .addSubcommand("download", new DownloadCommand())
                 .addSubcommand("annotate", new AnnotateCommand());
-        cline.setToggleBooleanFlags(false);
-        System.exit(cline.execute(args));
+        commandLine.setToggleBooleanFlags(false);
+        System.exit(commandLine.execute(args));
     }
 
     @Override
     public Integer call() {
         // work done in subcommands
+        commandLine.usage(commandLine.getOut());
         return 0;
     }
 }

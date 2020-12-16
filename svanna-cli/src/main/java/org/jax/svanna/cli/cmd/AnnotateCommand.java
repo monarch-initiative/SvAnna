@@ -11,6 +11,7 @@ import org.jax.svanna.cli.html.HtmlTemplate;
 import org.jax.svanna.core.filter.AllPassFilter;
 import org.jax.svanna.core.filter.Filter;
 import org.jax.svanna.core.filter.FilterResult;
+import org.jax.svanna.core.filter.StructuralVariantFrequencyFilter;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseGeneMap;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
@@ -29,6 +30,7 @@ import org.jax.svanna.core.viz.HtmlVisualizable;
 import org.jax.svanna.core.viz.HtmlVisualizer;
 import org.jax.svanna.core.viz.Visualizable;
 import org.jax.svanna.core.viz.Visualizer;
+import org.jax.svanna.io.filter.dgv.DgvFeatureSource;
 import org.jax.svanna.io.hpo.TSpecParser;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
@@ -63,12 +65,11 @@ public class AnnotateCommand implements Callable<Integer> {
 
     private static final Path ASSEMBLY_REPORT_PATH = Path.of(Main.class.getResource("/GCA_000001405.28_GRCh38.p13_assembly_report.txt").getPath());
 
-    private final HpoDiseaseGeneMap hpoDiseaseGeneMap;
     @CommandLine.Option(names = {"-j", "--jannovar"}, description = "Jannovar transcript definition file (default: ${DEFAULT-VALUE} )")
     public Path jannovarPath = Paths.get("data/data/hg38_refseq_curated.ser");
     @CommandLine.Option(names = {"-g", "--gencode"})
     public Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
-    @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE} )")
+    @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outprefix = "SVANNA";
     @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
     public Path vcfFile;
@@ -78,17 +79,14 @@ public class AnnotateCommand implements Callable<Integer> {
     public List<String> hpoTermIdList;
     @CommandLine.Option(names = {"--threshold"}, type = SvImpact.class, description = "report variants as severe as this or more")
     public SvImpact threshold = SvImpact.HIGH;
-    @CommandLine.Option(names = {"-max_genes"}, description = "maximum gene count to prioritize an SV (default: ${DEFAULT-VALUE} )")
+    @CommandLine.Option(names = {"-max_genes"}, description = "maximum gene count to prioritize an SV (default: ${DEFAULT-VALUE})")
     public int maxGenes = 100;
-
-    public AnnotateCommand() {
-        // TODO: 2. 11. 2020 externalize
-        // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids
-        // that are provided by the user into their corresponding labels on the output file.
-        // I will add a method to this class for now, but when we refactor this, we should make it
-        // more elegant
-        hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
-    }
+    @CommandLine.Option(names = {"-d", "--dgv-file"}, description = "DGV variant file")
+    public Path dgvFile = null;
+    @CommandLine.Option(names = {"--similarity-threshold"}, description = "percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
+    public float similarityThreshold = 80.F;
+    @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
+    public float frequencyThreshold = 1.F;
 
     private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
         return new JannovarDataSerializer(jannovarPath.toString()).load();
@@ -96,7 +94,14 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        LOGGER.info("Running `annotate` command...");
         // 0 - set up data
+
+        // TODO: 2. 11. 2020 externalize
+        // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids that are provided
+        //  by the user into their corresponding labels on the output file.
+        //  I will add a method to this class for now, but when we refactor this, we should make it more elegant
+        HpoDiseaseGeneMap hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
 
         // assembly
         GenomicAssembly assembly = GenomicAssemblyProvider.fromAssemblyReport(ASSEMBLY_REPORT_PATH);
@@ -105,7 +110,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Set<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toSet());
         // check that the HPO terms entered by the user (if any) are valid
         Map<TermId, String> hpoTermsAndLabels;
-        if (! patientTerms.isEmpty())
+        if (!patientTerms.isEmpty())
             hpoTermsAndLabels = hpoDiseaseGeneMap.getTermLabelMap(patientTerms);
         else
             hpoTermsAndLabels = Map.of();
@@ -121,15 +126,22 @@ public class AnnotateCommand implements Callable<Integer> {
         TranscriptService transcriptService = JannovarTranscriptService.of(assembly, jannovarData);
         // disease summary map
         Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
+
         // 1 - parse input variants
-//        VariantParser<AnnotatedVariant> parser = new VcfVariantParser(assembly, false);
         VariantParser<SvannaVariant> parser = new VcfVariantParser(assembly, false);
-
-
         List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
 
         // 2 - setup variant filtering
-        Filter<SvannaVariant> variantFilter = new AllPassFilter();
+        Filter<SvannaVariant> variantFilter;
+        if (dgvFile == null) {
+            LOGGER.info("Variants will not be filtered");
+            variantFilter = new AllPassFilter();
+        } else {
+            LOGGER.info("Filtering out variants with reciprocal overlap >{}% occurring in more than {}% probands of the DGV file at `{}`",
+                    similarityThreshold, frequencyThreshold, dgvFile);
+            DgvFeatureSource dgvFeatureSource = new DgvFeatureSource(assembly, dgvFile);
+            variantFilter = new StructuralVariantFrequencyFilter(dgvFeatureSource, similarityThreshold, frequencyThreshold);
+        }
 
         // 3 - prioritize & visualize variants
         // setup prioritization parts
@@ -147,23 +159,23 @@ public class AnnotateCommand implements Callable<Integer> {
         // setup visualization parts
         Visualizer visualizer = new HtmlVisualizer();
 
-        List<PrioritizedSequenceRearrangement> prioritizedSequenceRearrangements = new ArrayList<>();
+        List<PrioritizedVariant> prioritizedVariants = new LinkedList<>();
         int above = 0, below = 0;
         for (SvannaVariant variant : variants) {
-            // run filtering
-            FilterResult filterResult = variantFilter.runFilter(variant);
-            variant.addFilterResult(filterResult);
-
             // run prioritization
             SvPriority priority = prioritizer.prioritize(variant);
             priorities.add(priority);
             if (priority.getImpact().satisfiesThreshold(threshold)) {
-                prioritizedSequenceRearrangements.add(new PrioritizedSequenceRearrangement(variant, priority));
+                above++;
+                // run filtering
+                FilterResult filterResult = variantFilter.runFilter(variant);
+                variant.addFilterResult(filterResult);
+                prioritizedVariants.add(new PrioritizedVariant(variant, priority));
             } else {
                 below++;
             }
         }
-        LOGGER.info(" Above threshold SVs: {}, below threshold SVs: {}", NF.format(above), NF.format(below));
+        LOGGER.info("Above threshold SVs: {}, below threshold SVs: {}", NF.format(above), NF.format(below));
 
         // TODO -- if we have frequency information
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
@@ -185,8 +197,8 @@ public class AnnotateCommand implements Callable<Integer> {
         infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
 
         List<String> visualizations = new ArrayList<>();
-        Collections.sort(prioritizedSequenceRearrangements);
-        for (var pr : prioritizedSequenceRearrangements) {
+        Collections.sort(prioritizedVariants);
+        for (var pr : prioritizedVariants) {
             Visualizable vizbell = pr.getVisualizable();
             visualizations.add(visualizer.getHtml(vizbell));
         }
@@ -207,7 +219,7 @@ public class AnnotateCommand implements Callable<Integer> {
      * An inner class that is designed for ssorting the prioritized structural variants acccording to
      * (1) impact, (2) chromosome, and (3) position. For translocations, we take the "first" chromosome.
      */
-    private static class PrioritizedSequenceRearrangement implements Comparable<PrioritizedSequenceRearrangement> {
+    private static class PrioritizedVariant implements Comparable<PrioritizedVariant> {
         private final SvannaVariant structuralVariant;
         private final SvPriority priority;
         private final SvImpact impact;
@@ -217,7 +229,7 @@ public class AnnotateCommand implements Callable<Integer> {
         private final int position;
 
 
-        private PrioritizedSequenceRearrangement(SvannaVariant sv, SvPriority priority) {
+        private PrioritizedVariant(SvannaVariant sv, SvPriority priority) {
             this.structuralVariant = sv;
             this.priority = priority;
             this.impact = priority.getImpact();
@@ -239,7 +251,7 @@ public class AnnotateCommand implements Callable<Integer> {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            PrioritizedSequenceRearrangement that = (PrioritizedSequenceRearrangement) o;
+            PrioritizedVariant that = (PrioritizedVariant) o;
             return Objects.equals(structuralVariant, that.structuralVariant) &&
                     Objects.equals(priority, that.priority);
         }
@@ -249,7 +261,18 @@ public class AnnotateCommand implements Callable<Integer> {
         }
 
         @Override
-        public int compareTo(PrioritizedSequenceRearrangement that) {
+        public String toString() {
+            return "PrioritizedVariant{" +
+                    "structuralVariant=" + structuralVariant +
+                    ", priority=" + priority +
+                    ", impact=" + impact +
+                    ", contig=" + contig +
+                    ", position=" + position +
+                    '}';
+        }
+
+        @Override
+        public int compareTo(PrioritizedVariant that) {
             int priorityComparison = impact.compareTo(that.impact);
             if (priorityComparison != 0) {
                 return priorityComparison;

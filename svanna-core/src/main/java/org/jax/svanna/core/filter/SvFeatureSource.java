@@ -22,4 +22,6 @@ public interface SvFeatureSource {
     }
 
     List<SvFeature> getOverlappingFeatures(GenomicRegion region, Set<SVFeatureOrigin> originSet);
+
+    boolean equals(Object o);
 }

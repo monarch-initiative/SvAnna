@@ -319,6 +319,22 @@ public abstract class SvSvgGenerator {
     }
 
 
+
+    protected void writeNoncodingTranscript(Transcript tmod, int ypos, Writer writer) throws IOException {
+        Transcript transcript = tmod.withStrand(Strand.POSITIVE);
+        List<GenomicRegion> exons = transcript.exons();
+        double minX = Double.MAX_VALUE;
+        // All exons are untranslated
+        for (GenomicRegion exon : exons) {
+            double exonStart = translateGenomicToSvg(exon.start());
+            double exonEnd = translateGenomicToSvg(exon.end());
+            writeUtrExon(exonStart, exonEnd, ypos, writer);
+        }
+        writeIntrons(exons, ypos, writer);
+        writeTranscriptName(transcript, minX, ypos, writer);
+    }
+
+
     /**
      * This method writes one Jannovar transcript as a cartoon where the UTRs are shown in one color and the
      * the coding exons are shown in another color. TODO -- decide what to do with non-coding genes
@@ -330,8 +346,11 @@ public abstract class SvSvgGenerator {
      */
     protected void writeTranscript(Transcript tmod, int ypos, Writer writer) throws IOException {
         Transcript transcript = tmod.withStrand(Strand.POSITIVE);
+        if (! transcript.isCoding()) {
+            writeNoncodingTranscript(tmod, ypos, writer);
+            return;
+        }
         GenomicRegion cds = transcript.cdsRegion();
-
         double cdsStart = translateGenomicToSvg(cds.start());
         double cdsEnd = translateGenomicToSvg(cds.end());
         List<GenomicRegion> exons = transcript.exons();

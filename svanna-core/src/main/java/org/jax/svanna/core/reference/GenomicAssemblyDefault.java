@@ -1,4 +1,4 @@
-package org.jax.svanna.test;
+package org.jax.svanna.core.reference;
 
 import org.monarchinitiative.variant.api.Contig;
 import org.monarchinitiative.variant.api.GenomicAssembly;

@@ -1,7 +1,7 @@
 package org.jax.svanna.io;
 
 import org.jax.svanna.core.hpo.GeneWithId;
-import org.jax.svanna.test.GenomicAssemblyProvider;
+import org.jax.svanna.core.reference.GenomicAssemblyProvider;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.variant.api.GenomicAssembly;

@@ -1,4 +1,4 @@
-package org.jax.svanna.test;
+package org.jax.svanna.core.reference;
 
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.variant.api.Contig;

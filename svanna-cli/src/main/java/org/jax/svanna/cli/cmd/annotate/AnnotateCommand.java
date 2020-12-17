@@ -66,26 +66,39 @@ public class AnnotateCommand implements Callable<Integer> {
 
     private static final NumberFormat NF = NumberFormat.getNumberInstance();
 
+    @CommandLine.Option(names = {"-d", "--data-dir"}, description = "directory with data, downloaded by `download` subcommand (default: ${DEFAULT-VALUE})")
+    public Path dataDir = Paths.get("data");
+
     @CommandLine.Option(names = {"-j", "--jannovar"}, description = "Jannovar transcript definition file (default: ${DEFAULT-VALUE} )")
     public Path jannovarPath = Paths.get("data/data/hg38_refseq_curated.ser");
+
     @CommandLine.Option(names = {"-g", "--gencode"})
     public Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
+
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outprefix = "SVANNA";
+
     @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
     public Path vcfFile;
+
     @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
     public Path enhancerFile;
+
     @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list)")
     public List<String> hpoTermIdList;
+
     @CommandLine.Option(names = {"--threshold"}, type = SvImpact.class, description = "report variants as severe as this or more")
     public SvImpact threshold = SvImpact.HIGH;
+
     @CommandLine.Option(names = {"-max_genes"}, description = "maximum gene count to prioritize an SV (default: ${DEFAULT-VALUE})")
     public int maxGenes = 100;
-    @CommandLine.Option(names = {"-d", "--dgv-file"}, description = "DGV variant file")
+
+    @CommandLine.Option(names = {"--dgv-file"}, description = "DGV variant file")
     public Path dgvFile = null;
+
     @CommandLine.Option(names = {"--similarity-threshold"}, description = "percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
     public float similarityThreshold = 80.F;
+
     @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
@@ -105,11 +118,10 @@ public class AnnotateCommand implements Callable<Integer> {
             assembly = GenomicAssemblyProvider.fromAssemblyReport(is, charset);
         }
 
-        // TODO: 2. 11. 2020 externalize
         // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids that are provided
         //  by the user into their corresponding labels on the output file.
         //  I will add a method to this class for now, but when we refactor this, we should make it more elegant
-        HpoDiseaseGeneMap hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap();
+        HpoDiseaseGeneMap hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap(dataDir);
 
         // patient phenotype
         Set<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toSet());

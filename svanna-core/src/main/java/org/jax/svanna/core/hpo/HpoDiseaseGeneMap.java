@@ -10,7 +10,7 @@ import org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -18,12 +18,21 @@ import java.util.*;
  * characterized by a list of HPO terms passed by the user. To do so, we first input HPO-information about
  * phenotypes and diseases and gene associations. Then, we extract data about genes and diseases that are relevant
  * for the HPO terms.
+ *
  * @author Peter N Robinson
  */
 public class HpoDiseaseGeneMap {
-    /** Human Phenotype Ontology */
+    // names of the files that we need to find in the data directory
+    private static final String HP_OBO = "hp.obo";
+    private static final String PHENOTYPE_HPOA = "phenotype.hpoa";
+    private static final String MIM_2_GENE_MEDGEN = "mim2gene_medgen";
+    private static final String HOMO_SAPIENS_GENE_INFO_GZ = "Homo_sapiens_gene_info.gz";
+    /**
+     * Human Phenotype Ontology
+     */
     private final Ontology ontology;
-    /** Multimap from a gene id, e.g., NCBIGene:2200 for FBN1, and corresponding disease ids. In the case of
+    /**
+     * Multimap from a gene id, e.g., NCBIGene:2200 for FBN1, and corresponding disease ids. In the case of
      * FBN1, this includes Marfan syndrome (OMIM:154700), Acromicric dysplasia (OMIM:102370), and others.
      */
     private final Multimap<TermId, TermId> disease2geneIdMultiMap;
@@ -34,18 +43,44 @@ public class HpoDiseaseGeneMap {
 
     private final Map<String, GeneWithId> geneSymbolMap;
 
-    private HpoDiseaseGeneMap(String hpOboPath, String phenotypeHpoaPath, String mim2geneMedgenPath, String geneInfoPath) {
-        this.ontology = OntologyLoader.loadOntology(new File(hpOboPath));
-        List<String> desiredDatabasePrefixes= List.of("OMIM");
+    private HpoDiseaseGeneMap(Path hpOboPath, Path phenotypeHpoaPath, Path mim2geneMedgenPath, Path geneInfoPath) {
+        this.ontology = OntologyLoader.loadOntology(hpOboPath.toFile());
+        List<String> desiredDatabasePrefixes = List.of("OMIM");
         String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
-        HpoAssociationParser hap = new HpoAssociationParser(new File(geneInfoPath), new File(mim2geneMedgenPath), null, new File(phenotypeHpoaPath), ontology);
+        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(), mim2geneMedgenPath.toFile(), null, phenotypeHpoaPath.toFile(), ontology);
         this.disease2geneIdMultiMap = hap.getDiseaseToGeneIdMap();
         Map<TermId, String> tid2symbolMap = hap.getGeneIdToSymbolMap();
         this.geneSymbolMap = new HashMap<>();
         for (var e : tid2symbolMap.entrySet()) {
             geneSymbolMap.put(e.getValue(), new GeneWithId(e.getValue(), e.getKey()));
         }
-        this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath,ontology,desiredDatabasePrefixes);
+        this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath.toString(), ontology, desiredDatabasePrefixes);
+    }
+
+    /**
+     * Entry point to using this class.
+     *
+     * @return HpoDiseaseGeneMap initialized with files from data subdirectory
+     */
+    public static HpoDiseaseGeneMap loadGenesAndDiseaseMap(Path dataDirectory) {
+        Path hpoPath = dataDirectory.resolve(HP_OBO);
+        Path phenotypeHpoaPath = dataDirectory.resolve(PHENOTYPE_HPOA);
+        Path mim2geneMedgenPath = dataDirectory.resolve(MIM_2_GENE_MEDGEN);
+        Path geneInfoPath = dataDirectory.resolve(HOMO_SAPIENS_GENE_INFO_GZ);
+
+        if (!hpoPath.toFile().isFile()) {
+            throw new SvAnnRuntimeException("Could not find hp.obo. Did you run the download command?");
+        }
+        if (!phenotypeHpoaPath.toFile().exists()) {
+            throw new SvAnnRuntimeException("Could not find phenotype.hpoa. Did you run the download command?");
+        }
+        if (!mim2geneMedgenPath.toFile().exists()) {
+            throw new SvAnnRuntimeException("Could not find mim2gene_medgen Did you run the download command?");
+        }
+        if (!geneInfoPath.toFile().exists()) {
+            throw new SvAnnRuntimeException("Could not find Homo_sapiens_gene_info.gz. Did you run the download command?");
+        }
+        return new HpoDiseaseGeneMap(hpoPath, phenotypeHpoaPath, mim2geneMedgenPath, geneInfoPath);
     }
 
     /**
@@ -77,39 +112,6 @@ public class HpoDiseaseGeneMap {
         return Map.copyOf(gene2diseaseMap); // immutable
     }
 
-    /**
-     * Entry point to using this class.
-     * @return HpoDiseaseGeneMap initialized with files from data subdirectory
-     */
-    public static HpoDiseaseGeneMap loadGenesAndDiseaseMap() {
-        // TODO: 26. 10. 2020 externalize
-        String hpoPath = String.format("%s%s%s", "data", File.separator, "hp.obo");
-        String phenotypeHpoaPath = String.format("%s%s%s", "data", File.separator, "phenotype.hpoa");
-        String mim2geneMedgenPath = String.format("%s%s%s", "data", File.separator, "mim2gene_medgen");
-        String geneInfoPath = String.format("%s%s%s", "data", File.separator, "Homo_sapiens_gene_info.gz");
-        File hpoFile = new File(hpoPath);
-        File phenotypeFile = new File(phenotypeHpoaPath);
-        File mim2geneFile = new File(mim2geneMedgenPath);
-        File geneInfoFile = new File(geneInfoPath);
-        if (! hpoFile.exists()) {
-            throw new SvAnnRuntimeException("Could not find hp.obo. Did you run the download command?");
-        }
-        if (! phenotypeFile.exists()) {
-            throw new SvAnnRuntimeException("Could not find phenotype.hpoa. Did you run the download command?");
-        }
-        if (! mim2geneFile.exists()) {
-            throw new SvAnnRuntimeException("Could not find mim2gene_medgen Did you run the download command?");
-        }
-        if (! geneInfoFile.exists()) {
-            throw new SvAnnRuntimeException("Could not find Homo_sapiens_gene_info.gz. Did you run the download command?");
-        }
-        HpoDiseaseGeneMap hdgmap = new HpoDiseaseGeneMap(hpoFile.getAbsolutePath(),
-                phenotypeFile.getAbsolutePath(),
-                mim2geneFile.getAbsolutePath(),
-                geneInfoFile.getAbsolutePath());
-        return hdgmap;
-    }
-
     public Map<String, GeneWithId> getGeneSymbolMap() {
         return geneSymbolMap;
     }
@@ -136,6 +138,7 @@ public class HpoDiseaseGeneMap {
     /**
      * This method can be used to get the labels for the terms that the user enters. If the user
      * enters a term that is not in the ontology, we throw a runtime error
+     *
      * @param relevantTerms Should be used for terms entered by the user as HP:1,HP:2, etc
      * @return map with the corresponding term labels
      */

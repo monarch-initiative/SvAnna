@@ -1,10 +1,11 @@
 package org.jax.svanna.core.hpo;
 
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import java.util.Objects;
 
 /**
  * This class offers a simple POJO with information about HpoDiseases that are required for output in the
  * list of prioritized structural variants.
+ *
  * @author Peter N Robinson
  */
 public class HpoDiseaseSummary {
@@ -12,13 +13,9 @@ public class HpoDiseaseSummary {
     private final String diseaseId;
     private final String diseaseName;
 
-    /**
-     * Extract salient information about the disease and the terms used for prioritization
-     * @param disease phenol object representing a disease annotated with HPO terms.
-     */
-    public HpoDiseaseSummary(HpoDisease disease) {
-        this.diseaseId = disease.getDiseaseDatabaseId().getValue();
-        this.diseaseName = disease.getName();
+    public HpoDiseaseSummary(String diseaseId, String diseaseName) {
+        this.diseaseId = Objects.requireNonNull(diseaseId);
+        this.diseaseName = Objects.requireNonNull(diseaseName);
     }
 
     public String getDiseaseId() {
@@ -27,5 +24,26 @@ public class HpoDiseaseSummary {
 
     public String getDiseaseName() {
         return diseaseName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HpoDiseaseSummary that = (HpoDiseaseSummary) o;
+        return Objects.equals(diseaseId, that.diseaseId) && Objects.equals(diseaseName, that.diseaseName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(diseaseId, diseaseName);
+    }
+
+    @Override
+    public String toString() {
+        return "HpoDiseaseSummary{" +
+                "diseaseId='" + diseaseId + '\'' +
+                ", diseaseName='" + diseaseName + '\'' +
+                '}';
     }
 }

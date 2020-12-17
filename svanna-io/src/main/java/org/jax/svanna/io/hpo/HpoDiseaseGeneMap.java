@@ -1,7 +1,9 @@
-package org.jax.svanna.core.hpo;
+package org.jax.svanna.io.hpo;
 
 import com.google.common.collect.Multimap;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.hpo.GeneWithId;
+import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -104,7 +106,7 @@ public class HpoDiseaseGeneMap {
                 if (totalAnnotations.contains(tid)) {
                     for (TermId geneId : associatedGenes) {
                         gene2diseaseMap.putIfAbsent(geneId, new HashSet<>());
-                        gene2diseaseMap.get(geneId).add(new HpoDiseaseSummary(disease));
+                        gene2diseaseMap.get(geneId).add(new HpoDiseaseSummary(disease.getDiseaseDatabaseId().getValue(), disease.getName()));
                     }
                 }
             }

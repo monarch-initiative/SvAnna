@@ -13,9 +13,6 @@ import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAnnotation;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoOnset;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.variant.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,22 +112,22 @@ public class PrototypeSvPrioritizerTest {
     }
 
     private static HpoDiseaseSummary makeDiseaseSummary(String name, TermId diseaseId) {
-        return new HpoDiseaseSummary(
-                new HpoDisease(name,
-                        diseaseId,
-                        List.of(HpoAnnotation.builder(TermId.of("HP:0003074")) // hyperglycemia
-                                        .frequency(1., "Obligate")
-                                        .onset(HpoOnset.INFANTILE_ONSET)
-                                        .build(),
-                                HpoAnnotation.builder(TermId.of("HP:0001508")) // Failure to thrive
-                                        .frequency(.9, "Very frequent")
-                                        .onset(HpoOnset.CONGENITAL_ONSET)
-                                        .build()),
-                        List.of(TermId.of("HP:0000006")), // Autosomal dominant inheritance
-                        List.of(), // not terms
-                        List.of(), // clinical modifiers
-                        List.of() // clinical courses
-                ));
+//        HpoDisease disease = new HpoDisease(name,
+//                diseaseId,
+//                List.of(HpoAnnotation.builder(TermId.of("HP:0003074")) // hyperglycemia
+//                                .frequency(1., "Obligate")
+//                                .onset(HpoOnset.INFANTILE_ONSET)
+//                                .build(),
+//                        HpoAnnotation.builder(TermId.of("HP:0001508")) // Failure to thrive
+//                                .frequency(.9, "Very frequent")
+//                                .onset(HpoOnset.CONGENITAL_ONSET)
+//                                .build()),
+//                List.of(TermId.of("HP:0000006")), // Autosomal dominant inheritance
+//                List.of(), // not terms
+//                List.of(), // clinical modifiers
+//                List.of() // clinical courses
+//        );
+        return new HpoDiseaseSummary(diseaseId.getValue(), name);
     }
 
     private static Map<TermId, Set<HpoDiseaseSummary>> makeDiseaseSummaryMap() {

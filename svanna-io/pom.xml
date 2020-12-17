@@ -28,6 +28,11 @@
             <artifactId>htsjdk</artifactId>
             <version>${htsjdk.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-annotations</artifactId>
+            <version>${phenol.version}</version>
+        </dependency>
 
         <!--    TESTS    -->
         <dependency>

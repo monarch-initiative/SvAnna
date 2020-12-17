@@ -13,7 +13,7 @@ public interface VariantParser<T extends Variant> {
     /**
      * Obtain a stream of variants read from given <code>filePath</code>.
      * <p>
-     * Note that the stream might need to be closed.
+     * Note that the stream should be closed.
      *
      * @param filePath path to variant file
      * @return stream of variants

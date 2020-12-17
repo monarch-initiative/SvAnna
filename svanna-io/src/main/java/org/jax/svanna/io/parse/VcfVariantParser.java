@@ -1,6 +1,5 @@
 package org.jax.svanna.io.parse;
 
-import htsjdk.tribble.TribbleException;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
@@ -58,7 +57,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
             try {
                 // codec returns null for VCF header lines
                 return Optional.ofNullable(codec.decode(line));
-            } catch (TribbleException e) {
+            } catch (Exception e) {
                 LOGGER.warn("Invalid VCF record: `{}`: `{}`", e.getMessage(), line);
                 return Optional.empty();
             }

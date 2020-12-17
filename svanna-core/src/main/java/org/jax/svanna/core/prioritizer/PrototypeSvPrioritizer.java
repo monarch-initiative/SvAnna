@@ -141,6 +141,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
             case INV:
                 return prioritizeInversion(variant);
             case TRA:
+            case BND:
                 return prioritizeTranslocation(variant);
             case DUP:
                 return prioritizeDuplication(variant);

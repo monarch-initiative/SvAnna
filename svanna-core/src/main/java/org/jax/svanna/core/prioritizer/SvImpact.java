@@ -4,7 +4,8 @@ public enum SvImpact {
     UNKNOWN,
     LOW,
     INTERMEDIATE,
-    HIGH;
+    HIGH,
+    VERY_HIGH;
 
     /**
      * Compare the current SvImpact with the threshold.
@@ -14,10 +15,13 @@ public enum SvImpact {
      * @return true if this SvImpact is at least as high impact as threshold
      */
     public boolean satisfiesThreshold(SvImpact threshold) {
-        if (this == HIGH)
+        if (this == VERY_HIGH) {
             return true;
+        }
+        if (this == HIGH)
+            return threshold != VERY_HIGH;
         if (this == INTERMEDIATE)
-            return threshold != HIGH;
+            return threshold != VERY_HIGH && threshold != HIGH;
         if (this == LOW)
             return threshold == LOW;
         else
@@ -25,15 +29,17 @@ public enum SvImpact {
     }
 
     /**
-     * @return {@link SvImpact} that has one step lower severity in comparison with the current {@link SvImpact} category
+     * @return {@link SvImpact} that has one step higher severity in comparison with the current {@link SvImpact} category
      */
-    public SvImpact decrementSeverity() {
+    public SvImpact incrementSeverity() {
         switch (this) {
+            case VERY_HIGH:
             case HIGH:
-                return INTERMEDIATE;
+                return VERY_HIGH;
             case INTERMEDIATE:
+                return HIGH;
             case LOW:
-                return LOW;
+                return INTERMEDIATE;
             case UNKNOWN:
             default:
                 return this;
@@ -41,15 +47,17 @@ public enum SvImpact {
     }
 
     /**
-     * @return {@link SvImpact} that has one step higher severity in comparison with the current {@link SvImpact} category
+     * @return {@link SvImpact} that has one step lower severity in comparison with the current {@link SvImpact} category
      */
-    public SvImpact incrementSeverity() {
+    public SvImpact decrementSeverity() {
         switch (this) {
-            case HIGH:
-            case INTERMEDIATE:
+            case VERY_HIGH:
                 return HIGH;
-            case LOW:
+            case HIGH:
                 return INTERMEDIATE;
+            case INTERMEDIATE:
+            case LOW:
+                return LOW;
             case UNKNOWN:
             default:
                 return this;

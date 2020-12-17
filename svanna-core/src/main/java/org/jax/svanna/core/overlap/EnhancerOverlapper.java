@@ -32,6 +32,7 @@ public class EnhancerOverlapper {
             case DUP:
                 return getSimpleEnhancerOverlap(variant);
             case TRA:
+            case BND:
                 return getEnhancersAffectedByBreakends(variant);
             default:
                 LOGGER.warn("Enhancer overlap not yet implemented for {}", variant.variantType());
@@ -89,6 +90,7 @@ public class EnhancerOverlapper {
                 // we assume that all coordinates of these types are on a single contig
                 return getSimpleEnhancerOverlap(variant);
             case TRA:
+            case BND:
                 // by definition, translocation has coordinates on different contigs
                 if (variant instanceof Breakended) {
                     return getEnhancerOverlapsForTranslocation((Breakended) variant);

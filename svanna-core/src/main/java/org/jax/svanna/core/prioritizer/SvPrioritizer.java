@@ -3,8 +3,8 @@ package org.jax.svanna.core.prioritizer;
 import org.monarchinitiative.variant.api.Variant;
 
 
-public interface SvPrioritizer {
+public interface SvPrioritizer<T extends Variant> {
 
-    SvPriority prioritize(Variant variant);
+    SvPriority prioritize(T variant);
 
 }

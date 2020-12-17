@@ -38,6 +38,7 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.variant.api.Contig;
 import org.monarchinitiative.variant.api.GenomicAssembly;
+import org.monarchinitiative.variant.api.Variant;
 import org.monarchinitiative.variant.api.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -165,7 +166,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
 
-        SvPrioritizer prioritizer = new PrototypeSvPrioritizer(overlapper,
+        SvPrioritizer<Variant> prioritizer = new PrototypeSvPrioritizer(overlapper,
                 enhancerOverlapper,
                 geneSymbolMap,
                 patientTerms,

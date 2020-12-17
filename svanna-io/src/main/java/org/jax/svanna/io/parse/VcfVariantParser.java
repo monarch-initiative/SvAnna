@@ -1,15 +1,20 @@
 package org.jax.svanna.io.parse;
 
+import htsjdk.tribble.TribbleException;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.GenotypesContext;
 import htsjdk.variant.variantcontext.VariantContext;
+import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
+import htsjdk.variant.vcf.VCFHeader;
+import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.variant.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -45,14 +50,54 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         this.requireVcfIndex = requireVcfIndex;
     }
 
+    /**
+     * Function to map a VCF line to {@link VariantContext}.
+     */
+    private static Function<String, Optional<VariantContext>> toVariantContext(VCFCodec codec) {
+        return line -> {
+            try {
+                // codec returns null for VCF header lines
+                return Optional.ofNullable(codec.decode(line));
+            } catch (TribbleException e) {
+                LOGGER.warn("Invalid VCF record: `{}`: `{}`", e.getMessage(), line);
+                return Optional.empty();
+            }
+        };
+    }
+
     @Override
     public Stream<SvannaVariant> createVariantAlleles(Path filePath) throws IOException {
+        /*
+        Sniffles VCF contains corrupted VCF records like
+
+        CM000663.2STRANDBIAS	2324	N	<INV>	.	PASS	IMPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=143208425;ZMW=7;STD_quant_start=181.061947;STD_quant_stop=166.287187;Kurtosis_quant_start=2.721142;Kurtosis_quant_stop=-0.666956;SVTYPE=INV;SUPTYPE=SR;SVLEN=18033775;STRANDS=++;STRANDS2=7,0,0,7;RE=7;REF_strand=49,61;Strandbias_pval=0.00467625;AF=0.0598291	GT:DR:DV	0/0:110:7
+
+        which prevent us to use the code below:
+
         try (VCFFileReader reader = new VCFFileReader(filePath, requireVcfIndex)) {
             return reader.iterator().stream()
                     .map(toVariants())
                     .filter(Optional::isPresent)
                     .map(Optional::get);
         }
+
+        So, this is a workaround that drops the corrupted lines:
+         */
+        VCFHeader header;
+        try (VCFFileReader reader = new VCFFileReader(filePath, requireVcfIndex)) {
+            header = reader.getHeader();
+        }
+
+        VCFCodec codec = new VCFCodec();
+        codec.setVCFHeader(header, header.getVCFHeaderVersion() == null ? VCFHeaderVersion.VCF4_1: header.getVCFHeaderVersion());
+
+        return Files.newBufferedReader(filePath).lines()
+                .map(toVariantContext(codec))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(toVariants())
+                .filter(Optional::isPresent)
+                .map(Optional::get);
     }
 
     /**

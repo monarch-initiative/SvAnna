@@ -391,13 +391,31 @@ public class TestVariants {
          * right mate, upstream from BRCA2 (not disrupted)
          * chr13:32_300_000 (+)
          */
-        public BreakendVariant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+        public Variant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
             Contig chr9 = assembly.contigByName("9");
             Breakend left = PartialBreakend.oneBased(chr9, "tra_l", Strand.POSITIVE, Position.of(133_359_000));
             Contig chr13 = assembly.contigByName("13");
             Breakend right = PartialBreakend.zeroBased(chr13, "tra_r", Strand.POSITIVE, Position.of(32_300_000));
 
-            return new BreakendVariant("transloc1", left, right, "G", "");
+            return new BreakendVariant("translocation_where_one_cds_is_disrupted_and_the_other_is_not",
+                    left, right, "G", "");
+        }
+
+        /**
+         * Translocation where no transcript is disrupted.
+         * <p>
+         * <ul>
+         *   <li><b>left mate:</b> SURF2:NM_017503.5 (~30bp upstream from TSS), <code>chr9:133_356_520 (+)</code></li>
+         *   <li><b>right mate:</b> upstream from BRCA2 (not disrupted), <code>chr13:32_300_000 (+)</code></li>
+         * </ul>
+         */
+        public Variant intergenicTranslocation() {
+            Contig chr9 = assembly.contigByName("9");
+            Breakend left = PartialBreakend.oneBased(chr9, "tra_l", Strand.POSITIVE, Position.of(133_356_520));
+            Contig chr13 = assembly.contigByName("13");
+            Breakend right = PartialBreakend.zeroBased(chr13, "tra_r", Strand.POSITIVE, Position.of(32_300_000));
+
+            return new BreakendVariant("intergenic_translocation", left, right, "C", "");
         }
 
     }

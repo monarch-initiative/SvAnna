@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.jax.svanna.core.overlap.OverlapType.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -354,11 +355,11 @@ public class SvAnnOverlapperTest {
      */
 
     @Test
-    public void testTranslocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+    public void translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
         Variant translocation = testVariants.translocations().translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
         List<Overlap> overlaps = overlapper.getOverlapList(translocation);
 
-        assertThat(overlaps, hasSize(3));
+        assertThat(overlaps, hasSize(2));
 
         Overlap surf2_NM_017503_4 = overlaps.get(0);
         assertThat(surf2_NM_017503_4.getOverlapType(), is(INTRONIC));
@@ -367,9 +368,13 @@ public class SvAnnOverlapperTest {
         Overlap surf2_NM_001278928_1 = overlaps.get(1);
         assertThat(surf2_NM_001278928_1.getOverlapType(), is(INTRONIC));
         assertThat(surf2_NM_001278928_1.getDistance(), is(949));
+    }
 
-        Overlap brca2_NM_000059_3 = overlaps.get(2);
-        assertThat(brca2_NM_000059_3.getOverlapType(), is(UPSTREAM_GENE_VARIANT_500KB));
-        assertThat(brca2_NM_000059_3.getDistance(), is(15479));
+    @Test
+    public void intergenicTranslocationYieldsNoOverlaps() {
+        Variant translocation = testVariants.translocations().intergenicTranslocation();
+        List<Overlap> overlaps = overlapper.getOverlapList(translocation);
+
+        assertThat(overlaps, empty());
     }
 }

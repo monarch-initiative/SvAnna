@@ -1,13 +1,10 @@
-package org.jax.svanna.core.priority;
+package org.jax.svanna.core.prioritizer;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.TestDataConfig;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.overlap.*;
-import org.jax.svanna.core.prioritizer.PrototypeSvPrioritizer;
-import org.jax.svanna.core.prioritizer.SvImpact;
-import org.jax.svanna.core.prioritizer.SvPriority;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.test.TestVariants;
@@ -389,4 +386,12 @@ public class PrototypeSvPrioritizerTest {
                 map(HpoDiseaseSummary::getDiseaseId)
                 .anyMatch(value -> value.equals("OMIM:157000")), equalTo(true));
     }
+
+    /* *****************************************************************************************************************
+     *
+     *                                          BREAKENDS
+     *
+     ******************************************************************************************************************/
+
+    // TODO - add tests
 }

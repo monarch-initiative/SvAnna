@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  *     <li>INTERMEDIATE-IMPACT is changed to LOW IMPACT</li>
  * </ol>
  */
-public class PrototypeSvPrioritizer implements SvPrioritizer {
+public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrototypeSvPrioritizer.class);
 

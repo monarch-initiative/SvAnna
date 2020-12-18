@@ -40,6 +40,15 @@ public class EnhancerOverlapper {
         }
     }
 
+    public List<Enhancer> getEnhancerRegionOverlaps(GenomicRegion region, int padding) {
+        region = region.toPositiveStrand();
+        Contig contig = region.contig();
+        int start = Math.max(region.start() - padding, 0);
+        int end = Math.min(region.end() + padding, region.contig().length());
+
+        return getEnhancers(contig, start, end);
+    }
+
     /**
      * Get enhancers that overlap with the genomic interval associated with DEL, INS and related SVs
      *
@@ -53,20 +62,20 @@ public class EnhancerOverlapper {
         }
 
         // let's make sure we only use POSITIVE 0-based coordinates for querying the array
-        region = region.withStrand(Strand.POSITIVE).toZeroBased();
+        region = region.toPositiveStrand().toZeroBased();
         return getEnhancers(region.contig(), region.start(), region.end());
     }
 
     private List<Enhancer> getEnhancerOverlapsForTranslocation(Breakended variant) {
         List<Enhancer> overlappingEnhancers = new ArrayList<>();
 
-        Breakend lb = variant.left().withStrand(Strand.POSITIVE);
-        List<Enhancer> overlapA = getEnhancers(lb.contig(), lb.pos(), lb.pos());
-        overlappingEnhancers.addAll(overlapA);
+        GenomicPosition lb = variant.left().toPositiveStrand();
+        IntervalArray<Enhancer> leftArray = chromosomeToEnhancerIntervalArrayMap.get(lb.contigId());
+        overlappingEnhancers.addAll(leftArray.findOverlappingWithPoint(lb.pos()).getEntries());
 
-        Breakend rb = variant.right().withStrand(Strand.POSITIVE);
-        List<Enhancer> overlapB = getEnhancers(rb.contig(), rb.pos(), rb.pos());
-        overlappingEnhancers.addAll(overlapB);
+        GenomicPosition rb = variant.right().toPositiveStrand();
+        IntervalArray<Enhancer> rightArray = chromosomeToEnhancerIntervalArrayMap.get(rb.contigId());
+        overlappingEnhancers.addAll(rightArray.findOverlappingWithPoint(rb.pos()).getEntries());
 
         if (overlappingEnhancers.isEmpty()) {
             return getLongRangeEnhancerEffects(lb, rb);
@@ -109,15 +118,6 @@ public class EnhancerOverlapper {
     private List<Enhancer> getLongRangeEnhancerEffects(GenomicPosition left, GenomicPosition right) {
         System.out.println("[WARNING] Long range enhancer prioritization not implemented");
         return List.of();
-    }
-
-    public List<Enhancer> getEnhancerRegionOverlaps(GenomicRegion region, int offset) {
-        region = region.withStrand(Strand.POSITIVE);
-        Contig contig = region.contig();
-        int start = Math.max(region.start() - offset, 0);
-        int end = Math.min(region.end() + offset, region.contig().length());
-
-        return getEnhancers(contig, start, end);
     }
 
 

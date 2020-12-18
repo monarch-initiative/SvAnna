@@ -1,7 +1,6 @@
 package org.jax.svanna.core.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.variant.api.*;
 import org.slf4j.Logger;
@@ -10,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.jax.svanna.core.overlap.OverlapType.*;
 
@@ -233,34 +233,20 @@ public class SvAnnOverlapper implements Overlapper {
      */
     private static List<Overlap> parseIntrachromosomalEventQueryResult(GenomicRegion region,
                                                                        IntervalArray<Transcript>.QueryResult queryResult) {
-        List<Overlap> overlaps = new ArrayList<>();
         if (queryResult.getEntries().isEmpty()) {
             return intergenic(region, queryResult);
         }
+
         // if we get here, then we overlap with one or more genes
-        List<Transcript> overlappingTranscripts = queryResult.getEntries();
-        for (var tx : overlappingTranscripts) {
-            if (region.contains(tx)) {
-                // the transcript is completely contained in the SV
-                String msg = String.format("%s/%s", tx.hgvsSymbol(), tx.accessionId());
-                Overlap overlap = new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tx, OverlapDistance.fromContainedIn(), msg);
-                overlaps.add(overlap);
-                continue;
-            }
-            if (!tx.contains(region.startGenomicPosition()) && !tx.contains(region.endGenomicPosition())) {
-                LOGGER.error("Warning, transcript model ({};{}) retrieved that does not overlap (chr{}:{}-{}({})): ",
-                        tx.hgvsSymbol(), tx.accessionId(), region.contigName(), region.start(), region.end(), region.strand());
-                // TODO I observed this once, it should never happen and may be a Jannovar bug or have some other cause
-            }
-            // TODO if the above bug no longer occurs, make a regular if/else with the above
-            Overlap overlap = genic(tx, region);
-            overlaps.add(overlap);
-        }
-        if (overlaps.isEmpty()) {
-            LOGGER.error("Could not find any overlaps with this query result: {}", queryResult);
-            throw new SvAnnRuntimeException("Empty overlap list");
-        }
-        return overlaps;
+        return parseEventThatOverlapsWithATranscript(region, queryResult.getEntries());
+    }
+
+    private static List<Overlap> parseEventThatOverlapsWithATranscript(GenomicRegion region, List<Transcript> transcripts) {
+        return transcripts.stream()
+                .map(tx -> region.contains(tx)
+                        ? new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tx, OverlapDistance.fromContainedIn(), String.format("%s/%s", tx.hgvsSymbol(), tx.accessionId()))
+                        : genic(tx, region))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -270,7 +256,7 @@ public class SvAnnOverlapper implements Overlapper {
             case DUP:
             case INS:
             case INV:
-                GenomicRegion region = variant.withStrand(Strand.POSITIVE).toZeroBased();
+                GenomicRegion region = variant.toZeroBased().toPositiveStrand();
                 return getIntrachromosomalEventOverlaps(region);
             case TRA:
             case BND:
@@ -292,13 +278,12 @@ public class SvAnnOverlapper implements Overlapper {
         List<Overlap> overlaps = new ArrayList<>();
         // process overlaps
         for (Breakend bnd : List.of(translocation.left(), translocation.right())) {
-            Breakend onFwd = bnd.withStrand(Strand.POSITIVE);
+            GenomicPosition onPos = bnd.toPositiveStrand();
 
-            IntervalArray<Transcript> contigIArray = intervalArrayMap.get(onFwd.contigId());
-            IntervalArray<Transcript>.QueryResult leftQueryResults = contigIArray.findOverlappingWithPoint(onFwd.pos());
-            GenomicRegion leftRegion = onFwd.toRegion(0, 1);
-
-            overlaps.addAll(parseIntrachromosomalEventQueryResult(leftRegion, leftQueryResults));
+            IntervalArray<Transcript> contigIArray = intervalArrayMap.get(onPos.contigId());
+            List<Transcript> overlappingTxs = contigIArray.findOverlappingWithPoint(onPos.pos()).getEntries();
+            GenomicRegion bndRegion = onPos.toRegion(0, 1);
+            overlaps.addAll(parseEventThatOverlapsWithATranscript(bndRegion, overlappingTxs));
         }
 
         return overlaps;

@@ -1,4 +1,4 @@
-package org.jax.svanna.core.priority;
+package org.jax.svanna.core.prioritizer;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import org.jax.svanna.core.reference.Enhancer;

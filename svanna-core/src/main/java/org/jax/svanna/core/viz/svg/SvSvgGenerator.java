@@ -374,7 +374,7 @@ public abstract class SvSvgGenerator {
             }
         }
         writeIntrons(exons, ypos, writer);
-        writeTranscriptName(transcript, minX, ypos, writer);
+        writeTranscriptName(tmod, minX, ypos, writer);
     }
 
     /**

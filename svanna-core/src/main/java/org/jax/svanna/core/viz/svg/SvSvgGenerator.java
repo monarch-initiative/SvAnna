@@ -8,6 +8,7 @@ import org.monarchinitiative.variant.api.*;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,23 +47,24 @@ public abstract class SvSvgGenerator {
     protected final int paddedGenomicMaxPos;
     /** Number of base pairs from left to right boundary of the entire canvas */
     private final double paddedGenomicSpan;
-    /** Minimum position of the scale TODO shouldnt this be {@link #genomicMinPos} ??? */
-    private final double scaleMinPos;
+    /** Minimum genomic position translated to SVG coordinates */
+    private final double svgMinPos;
+    /** Maximum genomic position translated to SVG coordinates */
+    private final double svgMaxPos;
+    private final double svgSpan;
 
-    private final double scaleMaxPos;
-
-    private final int scaleBasePairs;
+    private final int svgScaleBasePairs;
     /** This will be 10% of genomicSpan, extra area on the sides of the graphic to make things look nicer. */
     private int genomicOffset;
-
-//    final String pattern = "###,###.###";
-//    final DecimalFormat decimalFormat = new DecimalFormat(pattern);
+    /** Pattern to format genomic positions with commas. */
+    final String pattern = "###,###.###";
+    final DecimalFormat decimalFormat = new DecimalFormat(pattern);
 
     protected final double INTRON_MIDPOINT_ELEVATION = 10.0;
     /** Height of the symbols that represent the transcripts */
     private final double EXON_HEIGHT = 20;
     /** Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}*/
-    protected final double Y_SKIP_BENEATH_TRANSCRIPTS = 50;
+    protected final double Y_SKIP_BENEATH_TRANSCRIPTS = 30;
     /** Height of the symbol that represents the structural variant. */
     protected final double SV_HEIGHT = 30;
 
@@ -90,7 +92,8 @@ public abstract class SvSvgGenerator {
      *  @param transcripts transcripts affected by the structural variant we are displaying
      * @param enhancers   enhancers  affected by the structural variant we are displaying
      */
-    public SvSvgGenerator(Variant variant, List<Transcript> transcripts,
+    public SvSvgGenerator(Variant variant,
+                          List<Transcript> transcripts,
                           List<Enhancer> enhancers) {
         this.variantType = variant.variantType();
         this.affectedTranscripts = transcripts;
@@ -106,7 +109,6 @@ public abstract class SvSvgGenerator {
             case INS:
             default:
                 // get min/max for SVs with one region
-                // todo  -- do we need to check how many coordinate pairs there are?
                 this.genomicMinPos= getGenomicMinPos(this.variant.start(), transcripts, enhancers);
                 this.genomicMaxPos = getGenomicMaxPos(this.variant.end(), transcripts, enhancers);
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
@@ -114,9 +116,10 @@ public abstract class SvSvgGenerator {
                 this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
                 this.paddedGenomicMaxPos = genomicMaxPos + extraSpaceOnSide;
                 this.paddedGenomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
-                this.scaleBasePairs = 1 + this.genomicMaxPos  -  this.genomicMinPos;
-                this.scaleMinPos = translateGenomicToSvg(genomicMinPos);
-                this.scaleMaxPos = translateGenomicToSvg(genomicMaxPos);
+                this.svgScaleBasePairs = 1 + this.genomicMaxPos  -  this.genomicMinPos;
+                this.svgMinPos = translateGenomicToSvg(genomicMinPos);
+                this.svgMaxPos = translateGenomicToSvg(genomicMaxPos);
+                this.svgSpan = svgMaxPos - svgMinPos;
         }
     }
 
@@ -142,10 +145,11 @@ public abstract class SvSvgGenerator {
         this.paddedGenomicMinPos = minPos - offset;
         this.paddedGenomicMaxPos = maxPos + offset;
         this.paddedGenomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
-        this.genomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
-        this.scaleBasePairs = 1 + maxPos - minPos;
-        this.scaleMinPos = translateGenomicToSvg(this.genomicMinPos);
-        this.scaleMaxPos = translateGenomicToSvg(this.genomicMaxPos);
+        this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
+        this.svgScaleBasePairs = 1 + maxPos - minPos;
+        this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
+        this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
+        this.svgSpan = svgMaxPos - svgMinPos;
     }
 
 
@@ -231,7 +235,7 @@ public abstract class SvSvgGenerator {
     }
 
     private void writeHeader(Writer writer) throws IOException {
-        writeHeader(writer, true);
+        writeHeader(writer, false);
     }
 
     /**
@@ -329,6 +333,7 @@ public abstract class SvSvgGenerator {
             double exonStart = translateGenomicToSvg(exon.start());
             double exonEnd = translateGenomicToSvg(exon.end());
             writeUtrExon(exonStart, exonEnd, ypos, writer);
+            if (minX > exonStart) minX = exonStart;
         }
         writeIntrons(exons, ypos, writer);
         writeTranscriptName(transcript, minX, ypos, writer);
@@ -409,15 +414,36 @@ public abstract class SvSvgGenerator {
         }
     }
 
+    /**
+     * Write a string such as {@code CFAP74 (NM_001304360.1) 1:1921950-2003837 (- strand)} representing the
+     * transcript, its chromosomal location, and its strand.
+     * @param tmod representation of the transcript
+     * @param xpos starting position in SVG space
+     * @param ypos vertical position in SVG space
+     * @param writer file handle
+     * @throws IOException if we cannot write to file
+     */
     private void writeTranscriptName(Transcript tmod, double xpos, int ypos, Writer writer) throws IOException {
         String symbol = tmod.hgvsSymbol();
+        System.out.printf("%s: svgMin %f-%f, xpos=%f\n", symbol, this.svgMinPos, this.svgMaxPos, xpos);
+        double p = (xpos - this.svgMinPos)/ svgSpan;
+        System.out.printf("p=%f: \n", p);
+        if (p > 0.95) {
+            xpos -= 300;
+        } else if (p > 0.9) {
+            xpos -= 200;
+        } else if (p > 0.8) {
+            xpos -= 150;
+        }
         String accession = tmod.accessionId();
         String chrom = tmod.contigName();
         Transcript txOnFwdStrand = tmod.withStrand(Strand.POSITIVE);
         int start = txOnFwdStrand.start();
         int end = txOnFwdStrand.end();
         String strand = tmod.strand().toString();
-        String positionString = String.format("%s:%d-%d (%s strand)", chrom, start, end, strand);
+        String startPos = decimalFormat.format(start);
+        String endPos = decimalFormat.format(end);
+        String positionString = String.format("%s:%s-%s (%s strand)", chrom, startPos, endPos, strand);
         String geneName = String.format("%s (%s)", symbol, accession);
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
         String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
@@ -430,17 +456,17 @@ public abstract class SvSvgGenerator {
         int verticalOffset = 10;
         String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
                 " stroke-width: 1px;" +
-                " stroke-dasharray: 5 2\" />\n", this.scaleMinPos, ypos, this.scaleMaxPos, ypos);
+                " stroke-dasharray: 5 2\" />\n", this.svgMinPos, ypos, this.svgMaxPos, ypos);
         String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos + verticalOffset, this.scaleMinPos, ypos - verticalOffset);
+                " stroke-width: 1px;\" />\n", this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
         String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos + verticalOffset, this.scaleMaxPos, ypos - verticalOffset);
-        String sequenceLength = getSequenceLengthString(scaleBasePairs);
+                " stroke-width: 1px;\" />\n", this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
+        String sequenceLength = getSequenceLengthString(svgScaleBasePairs);
         writer.write(line);
         writer.write(leftVertical);
         writer.write(rightVertical);
         int y = ypos - 15;
-        double xmiddle = 0.45 * (this.scaleMinPos + this.scaleMaxPos);
+        double xmiddle = 0.45 * (this.svgMinPos + this.svgMaxPos);
         String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
                 xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
@@ -450,18 +476,18 @@ public abstract class SvSvgGenerator {
         int verticalOffset = 10;
         String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
                 " stroke-width: 1px;" +
-                " stroke-dasharray: 5 2\" />\n", this.scaleMinPos, ypos, this.scaleMaxPos, ypos);
+                " stroke-dasharray: 5 2\" />\n", this.svgMinPos, ypos, this.svgMaxPos, ypos);
         String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.scaleMinPos, ypos + verticalOffset, this.scaleMinPos, ypos - verticalOffset);
+                " stroke-width: 1px;\" />\n", this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
         String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.scaleMaxPos, ypos + verticalOffset, this.scaleMaxPos, ypos - verticalOffset);
-        String sequenceLength = getSequenceLengthString(scaleBasePairs);
+                " stroke-width: 1px;\" />\n", this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
+        String sequenceLength = getSequenceLengthString(svgScaleBasePairs);
         writer.write(line);
         writer.write(leftVertical);
         writer.write(rightVertical);
         int y = ypos - 15;
-        double xmiddle = 0.45 * (this.scaleMinPos + this.scaleMaxPos);
-        double xcloseToStart = 0.1 * (this.scaleMinPos + this.scaleMaxPos);
+        double xmiddle = 0.45 * (this.svgMinPos + this.svgMaxPos);
+        double xcloseToStart = 0.1 * (this.svgMinPos + this.svgMaxPos);
         String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
                 xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);

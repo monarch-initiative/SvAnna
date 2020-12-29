@@ -14,6 +14,7 @@ import org.monarchinitiative.variant.api.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -31,6 +32,10 @@ public class HtmlVisualizer implements Visualizer {
      * genes, we do not show details.
      */
     private final static int THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS = 100;
+
+    /** Pattern to format genomic positions with commas. */
+    final String pattern = "###,###.###";
+    final DecimalFormat decimalFormat = new DecimalFormat(pattern);
 
     private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF", "F7DC6F", "CFFF98", "A1D6E2",
             "EC96A4", "E6DF44", "F76FDA", "FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6", "FFC300", "F76FF5", "FFFF99",
@@ -60,6 +65,7 @@ public class HtmlVisualizer implements Visualizer {
      * @return an HTML link to the UCSC Genome browser
      */
     String getUcscLink(HtmlLocation hloc) {
+        final String hg38ucsc = "gc5Base=dense&snp150Common=hide&gtexGene=hide&dgvPlus=hide&pubs=hide&knownGene=hide&ncbiRefSeqView=pack&OmimAvSnp=hide";
         String chrom = hloc.getChrom().startsWith("chr") ? hloc.getChrom() : "chr" + hloc.getChrom();
         int sVbegin = hloc.getBegin();
         int sVend = hloc.getEnd();
@@ -81,10 +87,13 @@ public class HtmlVisualizer implements Visualizer {
         int viewBegin = sVbegin - OFFSET;
         int viewEnd = sVend + OFFSET;
         String highlight = getHighlightRegion(chrom, sVbegin, sVend);
-        String url = String.format("https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&virtMode=0&position=%s%%3A%d-%d&%s",
-                chrom, viewBegin, viewEnd, highlight);
-        return String.format("<a href=\"%s\" target=\"__blank\">%s:%d-%d</a>",
-                url, chrom, hloc.getBegin(), hloc.getEnd());
+        String url = String.format("https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&virtMode=0&position=%s%%3A%d-%d&%s&%s",
+                chrom, viewBegin, viewEnd, highlight, hg38ucsc);
+       String startString = decimalFormat.format(hloc.getBegin());
+       String endString = decimalFormat.format(hloc.getEnd());
+        chrom = chrom.startsWith("chr") ? chrom : "chr" + chrom;
+        return String.format("<a href=\"%s\" target=\"_blank\">%s:%s-%s</a>",
+                url, chrom, startString, endString);
     }
 
     /**
@@ -106,13 +115,6 @@ public class HtmlVisualizer implements Visualizer {
         return String.format("highlight=%s", highlight);
     }
 
-
-    /**
-     * These are the things to hide and show to get a nice hg19 image.
-     */
-    private String getURLFragmentHg38() {
-        return "gc5Base=dense&snp150Common=hide&gtexGene=hide&dgvPlus=hide&pubs=hide&knownGene=hide&ncbiRefSeqView=pack&OmimAvSnp=hide";
-    }
 
 
     String getSvgString(Visualizable visualizable) {
@@ -236,12 +238,10 @@ public class HtmlVisualizer implements Visualizer {
                 .append(" &emsp; ").append(zygo).append("</h1>\n");
         sb.append("<div class=\"row\">\n");
         sb.append("<div class=\"column\" style=\"background-color:#F8F8F8;\">\n");
-        sb.append("<h2>Sequence</h2>\n");
         sb.append(getSequencePrioritization(visualizable)).append("\n");
         sb.append("</div>\n");
         sb.append("<div class=\"column\" style=\"background-color:#F0F0F0;\">\n");
-        sb.append("<h2>Phenotypic data</h2>\n");
-        sb.append(getPhenotypePrioritization(visualizable)).append("\n");
+        sb.append(getOverlapSummary(visualizable)).append("\n");
         sb.append("</div>\n");
         sb.append("</div>\n");
         String svg = getSvgString(visualizable);
@@ -258,6 +258,22 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
+    private final static String Variant_TABLE_HEADER = "<table>\n" +
+            "  <thead>\n" +
+            "    <tr>\n" +
+            "      <th>Gene</th>\n" +
+            "      <th>Chrom.</th>\n" +
+            "      <th>Log<sub>2</sub> fold change</th>\n" +
+            "      <th>Probability (PEP)</th>\n" +
+            "    </tr>\n" +
+            "  </thead>\n";
+
+
+
+    private String itemValueRow(String item, String row) {
+        return String.format("<tr><td><b>%s</b></td><td>%s</td></tr>\n", item, row);
+    }
+
     String getSequencePrioritization(Visualizable visualizable) {
         SvannaVariant variant = visualizable.variant();
         if (visualizable.getGeneCount() > 2 &&
@@ -268,42 +284,42 @@ public class HtmlVisualizer implements Visualizer {
         StringBuilder sb = new StringBuilder();
         int minSequenceDepth = variant.minDepthOfCoverage();
         int nRefReads = variant.numberOfRefReads();
-        int nAltRead  = variant.numberOfAltReads();
+        int nAltReads  = variant.numberOfAltReads();
         int copyNumber = variant.copyNumber();
 
         List<HtmlLocation> locations = visualizable.locations();
         String idString = variant.id();
-
-        sb.append("<p>").append(idString).append("</p>\n");
-        sb.append("<p>").append(visualizable.getType()).append("<br/>");
+        sb.append("<table class=\"vartab\">\n");
+        sb.append(itemValueRow("ID", idString));
+        sb.append(itemValueRow("type", visualizable.getType()));
+        sb.append(itemValueRow("impact", visualizable.getImpact()));
+        StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
-            sb.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
+            ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
         } else if (locations.size() == 1) {
-            sb.append(getUcscLink(locations.get(0))).append("</p>");
+            ucscBuilder.append(getUcscLink(locations.get(0))).append("</p>");
         } else {
-            sb.append("<ul>\n");
+            ucscBuilder.append("<ul>\n");
             for (var loc : locations) {
-                sb.append("<li>").append(getUcscLink(loc)).append("</li>\n");
+                ucscBuilder.append("<li>").append(getUcscLink(loc)).append("</li>\n");
             }
-            sb.append("</ul></p>\n");
+            ucscBuilder.append("</ul></p>\n");
         }
-        sb.append("<p>");
-        sb.append("<p>Minimum sequence depth: ").append(minSequenceDepth).append(".</p>\n");
-        sb.append("<p>Ref reads: ").append(nRefReads).append("; Alt reads: ").append(nAltRead).append(".</p>\n");
-        for (var olap : visualizable.overlaps()) {
-            sb.append(olap.toString()).append("<br/>\n");
+        sb.append(itemValueRow("UCSC", ucscBuilder.toString()));
+        int totalReads = nAltReads + nRefReads;
+        if (totalReads != minSequenceDepth) {
+            System.err.printf("[WARNING] Sum of alt (%d)/ref(%d) reads not equal to minDepth (%d).\n", nAltReads, nRefReads, minSequenceDepth);
         }
-        sb.append("</p>\n");
-        List<Enhancer> enhancers = visualizable.enhancers();
-        if (enhancers.isEmpty()) {
-            sb.append("<p>No enhancers found within genomic window.</p>\n");
-        } else {
-            sb.append("<p>Enhancers within genomic window:</p>\n<ul>");
-            for (var e : visualizable.enhancers()) {
-                sb.append("<li>").append(getEnhancerSummary(e)).append("</li>\n");
-            }
-            sb.append("</ul>\n");
+        if (totalReads == 0) {
+            System.err.printf("[WARNING] Total reads zero (should never happen), setting to 1\n");
+            totalReads = 1;
         }
+        String refReads = String.format("%d/%d reads (%.1f%%)", nRefReads, totalReads, 100.0 * (float)nRefReads/totalReads);
+        String altReads = String.format("%d/%d reads (%.1f%%)", nAltReads, totalReads, 100.0 * (float)nAltReads/totalReads);
+        sb.append(itemValueRow("Ref", refReads));
+        sb.append(itemValueRow("Alt", altReads));
+        sb.append(itemValueRow("Disease associations", getDiseaseGenePrioritizationHtml(visualizable)));
+        sb.append("</table>\n");
         return sb.toString();
     }
 
@@ -313,8 +329,8 @@ public class HtmlVisualizer implements Visualizer {
      * transcripts that are affected as we do for single-gene or two-gene deletions. Instead, we just assume that
      * there is a null mutation for all of the genes affected by the SV and we list them.
      *
-     * @param visualizable
-     * @return
+     * @param visualizable object representing the visualizable data for a variant
+     * @return HTML representation
      */
     private String getMultigeneSequencePrioritization(Visualizable visualizable) {
         StringBuilder sb = new StringBuilder();
@@ -395,16 +411,64 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<ul>\n");
         for (var disease : visualizable.diseaseSummaries()) {
             String url = String.format("<a href=\"https://hpo.jax.org/app/browse/disease/%s\" target=\"__blank\">%s (%s)</a>",
-                    disease.getDiseaseId(), disease.getDiseaseName(), disease.getDiseaseId());
+                    disease.getDiseaseId(), prettifyDiseaseName(disease.getDiseaseName()), disease.getDiseaseId());
             sb.append("<li>").append(url).append("</li>\n");
         }
         sb.append("</ul>\n");
         return sb.toString();
     }
 
-    String getPhenotypePrioritization(Visualizable visualizable) {
-        String diseases = getDiseaseGenePrioritizationHtml(visualizable);
-        String enhancers = getEnhancerPrioritizationHtml(visualizable);
-        return String.format("%s<br />%s", diseases, enhancers);
+    private String twoItemRow(String item1, String item2) {
+        return String.format("<tr><td><b>%s</b></td><td>%s</td></tr>\n", item1, item2);
+    }
+
+    String getOverlapSummary(Visualizable visualizable) {
+        //String diseases = getDiseaseGenePrioritizationHtml(visualizable);
+        //String enhancers = getEnhancerPrioritizationHtml(visualizable);
+       // return String.format("%s<br />%s", diseases, enhancers);
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table class=\"overlap\">\n");
+        sb.append("<thead><tr><td>Type</td><td>description</td></tr></thead>\n");
+        sb.append("<tbody>\n");
+        for (var olap : visualizable.overlaps()) {
+            String cat = olap.getOverlapType().getName();
+            String description = olap.getDescription();
+            sb.append(twoItemRow(cat, description));
+        }
+
+        sb.append("</tbody>\n</table>\n");
+        List<Enhancer> enhancers = visualizable.enhancers();
+        if (enhancers.isEmpty()) {
+            sb.append("<p>No enhancers found within genomic window.</p>\n");
+        } else {
+            sb.append("<p>Enhancers within genomic window:</p>\n<ul>");
+            for (var e : visualizable.enhancers()) {
+                sb.append("<li>").append(getEnhancerSummary(e)).append("</li>\n");
+            }
+            sb.append("</ul>\n");
+        }
+        return sb.toString();
+    }
+    /** Some of our name strings contain multiple synonyms. This function removes all but the first and
+     * change all capitalized names to Sentence case.*/
+    String prettifyDiseaseName(String name) {
+        String prettified;
+        int i = name.indexOf(';');
+        if (i>0) {
+            prettified = name.substring(0, i);
+        } else {
+            prettified = name;
+        }
+        // check if name starts with an OMIM id, e.g., #654321
+        String pattern = "^#\\d{6,6}";
+        if (prettified.substring(0,7).matches(pattern)) {
+            prettified = prettified.substring(7);
+        }
+        prettified = prettified.trim();
+        if (prettified.toUpperCase().equals(prettified)) {
+            // String is all caps.
+            prettified = Character.toUpperCase(prettified.charAt(0)) + prettified.substring(1).toLowerCase();
+        }
+        return prettified;
     }
 }

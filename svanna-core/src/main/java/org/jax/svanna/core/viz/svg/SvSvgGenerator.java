@@ -327,13 +327,12 @@ public abstract class SvSvgGenerator {
     protected void writeNoncodingTranscript(Transcript tmod, int ypos, Writer writer) throws IOException {
         Transcript transcript = tmod.withStrand(Strand.POSITIVE);
         List<GenomicRegion> exons = transcript.exons();
-        double minX = Double.MAX_VALUE;
+        double minX = translateGenomicToSvg(transcript.start());
         // All exons are untranslated
         for (GenomicRegion exon : exons) {
             double exonStart = translateGenomicToSvg(exon.start());
             double exonEnd = translateGenomicToSvg(exon.end());
             writeUtrExon(exonStart, exonEnd, ypos, writer);
-            if (minX > exonStart) minX = exonStart;
         }
         writeIntrons(exons, ypos, writer);
         writeTranscriptName(transcript, minX, ypos, writer);

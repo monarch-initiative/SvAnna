@@ -425,9 +425,8 @@ public abstract class SvSvgGenerator {
      */
     private void writeTranscriptName(Transcript tmod, double xpos, int ypos, Writer writer) throws IOException {
         String symbol = tmod.hgvsSymbol();
-        System.out.printf("%s: svgMin %f-%f, xpos=%f\n", symbol, this.svgMinPos, this.svgMaxPos, xpos);
         double p = (xpos - this.svgMinPos)/ svgSpan;
-        System.out.printf("p=%f: \n", p);
+        // adjust start position of label to keep it from going off the right side of the SVG canvas
         if (p > 0.95) {
             xpos -= 300;
         } else if (p > 0.9) {

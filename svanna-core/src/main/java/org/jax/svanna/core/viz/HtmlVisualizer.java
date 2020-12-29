@@ -133,6 +133,9 @@ public class HtmlVisualizer implements Visualizer {
                 case INV:
                     gen = new InversionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
                     break;
+                case DUP:
+                    gen = new DuplicationSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
+                    break;
                 case TRA:
                 case BND:
                     if (variant instanceof Breakended) {
@@ -140,9 +143,6 @@ public class HtmlVisualizer implements Visualizer {
                         break;
                     }
                     // fall through to default
-                case DUP:
-                    gen = new DuplicationSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
-                    break;
                 default:
                     LOGGER.warn("SVG not implemented for type {}", variant.variantType());
                     return "";
@@ -267,6 +267,10 @@ public class HtmlVisualizer implements Visualizer {
         }
         StringBuilder sb = new StringBuilder();
         int minSequenceDepth = variant.minDepthOfCoverage();
+        int nRefReads = variant.numberOfRefReads();
+        int nAltRead  = variant.numberOfAltReads();
+        int copyNumber = variant.copyNumber();
+
         List<HtmlLocation> locations = visualizable.locations();
         String idString = variant.id();
 
@@ -285,6 +289,7 @@ public class HtmlVisualizer implements Visualizer {
         }
         sb.append("<p>");
         sb.append("<p>Minimum sequence depth: ").append(minSequenceDepth).append(".</p>\n");
+        sb.append("<p>Ref reads: ").append(nRefReads).append("; Alt reads: ").append(nAltRead).append(".</p>\n");
         for (var olap : visualizable.overlaps()) {
             sb.append(olap.toString()).append("<br/>\n");
         }

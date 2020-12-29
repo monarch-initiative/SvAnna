@@ -103,6 +103,9 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
+    @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
+    public int minAltReadSupport = 2;
+
     private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
         return new JannovarDataSerializer(jannovarPath.toString()).load();
     }

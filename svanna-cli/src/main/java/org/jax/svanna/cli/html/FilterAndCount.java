@@ -33,13 +33,15 @@ public class FilterAndCount {
 
     private final int unparsableCount;
 
-
+    private final int minAltAlleleCount;
 
 
     public FilterAndCount(List<SvPriority> priorityList,
                           List<? extends SvannaVariant> variants,
-                          SvImpact threshold) {
+                          SvImpact threshold,
+                          int minAltAllele) {
         this.categoryToByVariantTypeCountMap = new HashMap<>();
+        this.minAltAlleleCount = minAltAllele;
         for (var cat : ImpactFilterCategory.values()) {
             this.categoryToByVariantTypeCountMap.put(cat, new HashMap<>());
             // Initialize the count maps to be zero for all SvTypes
@@ -100,8 +102,8 @@ public class FilterAndCount {
         this.nAffectedEnhancers = affectedEnhancers.size();
     }
 
-    public FilterAndCount(List<SvPriority> priorityList, List<SvannaVariant> rearrangements) {
-        this(priorityList, rearrangements, SvImpact.HIGH);
+    public FilterAndCount(List<SvPriority> priorityList, List<SvannaVariant> rearrangements, int minAltAllele) {
+        this(priorityList, rearrangements, SvImpact.HIGH, minAltAllele);
     }
 
 

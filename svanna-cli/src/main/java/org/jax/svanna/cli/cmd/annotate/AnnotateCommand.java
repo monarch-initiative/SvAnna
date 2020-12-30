@@ -203,7 +203,7 @@ public class AnnotateCommand implements Callable<Integer> {
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
         // This filters our SVs with lower impact than our threshold
 
-        FilterAndCount fac = new FilterAndCount(priorities, variants, threshold);
+        FilterAndCount fac = new FilterAndCount(priorities, variants, threshold, this.minAltReadSupport);
         int unparsableCount = fac.getUnparsableCount();
 
         Map<String, String> infoMap = new HashMap<>();
@@ -216,6 +216,11 @@ public class AnnotateCommand implements Callable<Integer> {
         List<String> visualizations = new ArrayList<>();
         Collections.sort(prioritizedVariants);
         for (var pr : prioritizedVariants) {
+            if (pr.variant().numberOfAltReads() < this.minAltReadSupport) {
+                continue;
+            } else if (! pr.variant().passedFilters()) {
+                continue;
+            }
             Visualizable vizbell = pr.getVisualizable();
             visualizations.add(visualizer.getHtml(vizbell));
         }

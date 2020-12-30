@@ -9,17 +9,18 @@ svann is a desktop Java application that requires several external files to run.
 Prerequisites
 ~~~~~~~~~~~~~
 
-svann was written with Java version 11. If you want to
-build svann from source, then the build process described below requires
-`Git <https://git-scm.com/book/en/v2>`_ and `maven <https://maven.apache.org/install.html>`_.
+svanna was written with Java version 11.
+`Git <https://git-scm.com/book/en/v2>`_ and `maven <https://maven.apache.org/install.html>`_ are
+required to build svann from source. Most users should download the prebuilt svanna files from the
+`svanna Releases page <https://github.com/TheJacksonLaboratory/svann/releases>`_.
 
 Installation
 ~~~~~~~~~~~~
 
-Go the GitHub page of `svann <https://github.com/pnrobinson/svann>`_, and clone or download the project.
+Go the GitHub page of `svann <https://github.com/TheJacksonLaboratory/svann>`_, and clone or download the project.
 Build the executable from source with maven, and then test the build. ::
 
-    $ git clone https://github.com/pnrobinson/svann
+    $ git clone https://github.com/TheJacksonLaboratory/svann
     $ cd svann
     $ mvn package
     $ java -jar target/svann.jar
@@ -35,7 +36,7 @@ svann requires `maven <https://maven.apache.org/>`_ version 3.5.3.
 
 
 Prebuilt svann executable
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Alternatively, go to the `Releases section <https://github.com/pnrobinson/svann/releases>`_ on the
 svann GitHub page and download the latest precompiled version of svann.
@@ -61,11 +62,11 @@ using the ``-d`` flag). Download the files automatically as follows. ::
 
     $ java -jar svann.jar download
 
-svann will not download the files if they are already present unless the ``--overwrite`` argument is passed. For
+svann will not download the files if they are already present unless the ``-f`` or ``--force-overwrite`` argument is passed. For
 instance, the following command would download the four files to a directory called datafiles and would
 overwrite any previously downloaded files. ::
 
-    $ java -jar svann.jar download -d datafiles --overwrite
+    $ java -jar svann.jar download -d datafiles --force-overwrite
 
 
 If desired, you can download these files on your own but you need to place them all in the

@@ -182,7 +182,7 @@ public class SvAnnOverlapper implements Overlapper {
      * determined that the SV overlaps with a non-coding transcript
      *
      * @param tx a non-coding transcript (this is checked by calling code)
-     * @return
+     * @return An {@link Overlap} object for an SV that affects a gene
      */
     public static Overlap genic(Transcript tx, GenomicRegion event) {
         ExonPair exonPair = getAffectedExons(tx, event);
@@ -205,7 +205,15 @@ public class SvAnnOverlapper implements Overlapper {
                         txAccession,
                         firstAffectedExon);
                 OverlapDistance overlapDistance = OverlapDistance.fromExonic(geneSymbol, affectsCds);
-                return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tx, overlapDistance, msg);
+                // check if the exon is coding or not
+                if (affectsCds) {
+                    return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tx, overlapDistance, msg);
+                } else if (tx.isCoding()) {
+                    return new Overlap(NON_CDS_REGION_IN_SINGLE_EXON, tx, overlapDistance, msg);
+                } else {
+                    // TODO -- do we need category for ncRNA?
+                    return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tx, overlapDistance, msg);
+                }
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
                         geneSymbol,

@@ -40,7 +40,6 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.variant.api.Contig;
 import org.monarchinitiative.variant.api.GenomicAssembly;
 import org.monarchinitiative.variant.api.Variant;
-import org.monarchinitiative.variant.api.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -292,7 +291,7 @@ public class AnnotateCommand implements Callable<Integer> {
 
         @Override
         public int compareTo(PrioritizedVariant that) {
-            int priorityComparison = impact.compareTo(that.impact);
+            int priorityComparison = that.impact.compareTo(this.impact);
             if (priorityComparison != 0) {
                 return priorityComparison;
             }

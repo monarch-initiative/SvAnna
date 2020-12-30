@@ -405,14 +405,16 @@ a.svg:hover, a.svg:active {
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 <header class="banner">
-    <h1><font color="#FFDA1A">SvAnna</font></h1>
+    <h1><font color="#FFDA1A">SvAnna (Structural Variant Annotation and Analysis</font></h1>
 </header>
 
   <nav>
       <div id="navi">
           <ul>
               <li><a href="#sample">Sample</a></li>
-              <li><a href="#diff">Differential diagnosis</a></li>
+              <li><a href="#variantCounts">Variant counts</a></li>
+              <li><a href="#veryHigh">Very-high impact SVs</a></li>
+               <li><a href="#high">High impact SVs</a></li>
               <li><a href="#about">About</a></li>
           </ul>
       </div>
@@ -434,7 +436,7 @@ a.svg:hover, a.svg:active {
   </section>
 
        <section>
-            <a name="summary"></a>
+            <a name="variantCounts"></a>
               <article>
        ${counts_table?no_esc}
         <p>Total number of genes affected by structural variants: ${n_affectedGenes}</p>
@@ -446,6 +448,7 @@ a.svg:hover, a.svg:active {
         <#list svalist as sva>
         <section>
               <article>
+                <a name="veryHigh"></a>
               ${sva?no_esc}
              </article>
              </section>

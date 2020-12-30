@@ -7,7 +7,6 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +24,6 @@ public class HtmlTemplate {
     /** FreeMarker configuration object. */
     protected final Configuration cfg;
 
-    protected static final String EMPTY_STRING="";
-
     protected static final String NOT_AVAILABLE = "n/a";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlTemplate.class);
@@ -42,11 +39,6 @@ public class HtmlTemplate {
         ClassTemplateLoader templateLoader = new ClassTemplateLoader(HtmlTemplate.class, "");
         cfg.setTemplateLoader(templateLoader);
         cfg.setClassForTemplateLoading(HtmlTemplate.class, "");
-
-        // We simplify and integrate the maps to make it easier to generate a table with Freemarker
-        // We put everything into a list of rows
-        // We want to have one value (can be zero) for each of our SvTypes
-        List<SvTypeCountRow> rows = new ArrayList<>();
         templateData.putIfAbsent("svalist", htmlList);
         templateData.put("counts_table", infoMap.getOrDefault("counts_table", NOT_AVAILABLE));
         templateData.put("n_unparsable", infoMap.getOrDefault("unparsable", NOT_AVAILABLE));

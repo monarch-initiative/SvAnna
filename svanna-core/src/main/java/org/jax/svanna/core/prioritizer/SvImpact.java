@@ -1,17 +1,23 @@
 package org.jax.svanna.core.prioritizer;
 
 public enum SvImpact {
-    UNKNOWN,
-    LOW,
-    INTERMEDIATE,
-    HIGH,
-    VERY_HIGH;
+    UNKNOWN ("Unknown"),
+    LOW("Low"),
+    INTERMEDIATE("Intermediate"),
+    HIGH("High"),
+    VERY_HIGH("Very high");
+
+    private final String name;
+
+    SvImpact(String name) {
+        this.name = name;
+    }
 
     /**
      * Compare the current SvImpact with the threshold.
      * Note that if this is UNKNOWN, then we never satisfy a threshold
      *
-     * @param threshold
+     * @param threshold threshold impact to display a SV in the HTML output
      * @return true if this SvImpact is at least as high impact as threshold
      */
     public boolean satisfiesThreshold(SvImpact threshold) {
@@ -62,6 +68,11 @@ public enum SvImpact {
             default:
                 return this;
         }
+    }
+
+    @Override
+    public String toString() {
+        return this.name;
     }
 
 

@@ -258,18 +258,6 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
-    private final static String Variant_TABLE_HEADER = "<table>\n" +
-            "  <thead>\n" +
-            "    <tr>\n" +
-            "      <th>Gene</th>\n" +
-            "      <th>Chrom.</th>\n" +
-            "      <th>Log<sub>2</sub> fold change</th>\n" +
-            "      <th>Probability (PEP)</th>\n" +
-            "    </tr>\n" +
-            "  </thead>\n";
-
-
-
     private String itemValueRow(String item, String row) {
         return String.format("<tr><td><b>%s</b></td><td>%s</td></tr>\n", item, row);
     }
@@ -290,6 +278,7 @@ public class HtmlVisualizer implements Visualizer {
         List<HtmlLocation> locations = visualizable.locations();
         String idString = variant.id();
         sb.append("<table class=\"vartab\">\n");
+        sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
         sb.append(itemValueRow("type", visualizable.getType()));
         sb.append(itemValueRow("impact", visualizable.getImpact()));
@@ -311,7 +300,7 @@ public class HtmlVisualizer implements Visualizer {
             System.err.printf("[WARNING] Sum of alt (%d)/ref(%d) reads not equal to minDepth (%d).\n", nAltReads, nRefReads, minSequenceDepth);
         }
         if (totalReads == 0) {
-            System.err.printf("[WARNING] Total reads zero (should never happen), setting to 1\n");
+            System.err.println("[WARNING] Total reads zero (should never happen), setting to 1.");
             totalReads = 1;
         }
         String refReads = String.format("%d/%d reads (%.1f%%)", nRefReads, totalReads, 100.0 * (float)nRefReads/totalReads);
@@ -422,13 +411,15 @@ public class HtmlVisualizer implements Visualizer {
         return String.format("<tr><td><b>%s</b></td><td>%s</td></tr>\n", item1, item2);
     }
 
+    private String threeItemRow(String item1, String item2, String item3) {
+        return String.format("<tr><td><b>%s</b></td><td>%s</td><td>%s</td></tr>\n", item1, item2, item3);
+    }
+
     String getOverlapSummary(Visualizable visualizable) {
-        //String diseases = getDiseaseGenePrioritizationHtml(visualizable);
-        //String enhancers = getEnhancerPrioritizationHtml(visualizable);
-       // return String.format("%s<br />%s", diseases, enhancers);
         StringBuilder sb = new StringBuilder();
         sb.append("<table class=\"overlap\">\n");
-        sb.append("<thead><tr><td>Type</td><td>description</td></tr></thead>\n");
+        sb.append("<caption>Overlapping transcripts</caption>\n");
+        //sb.append("<thead><tr><td>Type</td><td>description</td></tr></thead>\n");
         sb.append("<tbody>\n");
         for (var olap : visualizable.overlaps()) {
             String cat = olap.getOverlapType().getName();
@@ -441,11 +432,17 @@ public class HtmlVisualizer implements Visualizer {
         if (enhancers.isEmpty()) {
             sb.append("<p>No enhancers found within genomic window.</p>\n");
         } else {
-            sb.append("<p>Enhancers within genomic window:</p>\n<ul>");
+        sb.append("<table class=\"overlap\">\n");
+        sb.append("<caption>Overlapping enhancers</caption>\n");
+            sb.append("<thead><tr><td>Tissue</td><td>tau</td><td>Position</td></tr></thead>\n");
+            sb.append("<tbody>\n");
             for (var e : visualizable.enhancers()) {
-                sb.append("<li>").append(getEnhancerSummary(e)).append("</li>\n");
+                String tau = String.format("%.1f", e.tau());
+                String chrom = e.contigName().startsWith("chr") ? e.contigName() : "chr" + e.contigName();
+                String position = String.format("%s:%s-%s", chrom, decimalFormat.format(e.start()), decimalFormat.format(e.end()));
+                sb.append(threeItemRow(e.tissueLabel(), tau, position));
             }
-            sb.append("</ul>\n");
+            sb.append("</tbody>\n</table>\n");
         }
         return sb.toString();
     }

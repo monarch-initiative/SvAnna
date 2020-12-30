@@ -207,35 +207,32 @@ table.vartab tr:nth-child(odd){
   background-color: #d9f7f7;
 }
 
+table.vartab caption {
+	background-color: #d5f5e3;
+	font-weight: bold;
+	font-style: italic;
+	letter-spacing: .3em;
+}
+
 table.overlap {
   width:auto;
   min-width:50%;
-  margin-left:auto;
-  margin-right:auto;
-  border: 1px solid black;
 }
 
-table.overlap td {
-  line-height: 40px;
+table.overlap tr:nth-child(odd) {background: #fcf3cf }
+table.overlap tr:nth-child(even) {background:  #d5f5e3 }
+
+table.overlap caption {
+	background-color: #d5f5e3;
+	font-weight: bold;
+	font-style: italic;
+	letter-spacing: .3em;
 }
 
-table.overlap th  {font-size:1.5rem;}
-
-table.overlap tr:nth-child(even) {background: #F5F5F5}
-table.overlap tr:nth-child(odd) {background: #FFF}
-td.overlap {font-size:1.3rem;}
-
-table.minimalistBlack th,
-table.minimalistBlack td {
-	border:2px solid #e0e3ea;
-}
-
-table.minimalistBlack.red td {
-  background: red;
-}
-
-td.red {
-  background-color:#f0f3fa;
+table.overlap thead th {
+	padding: 8px;
+	background-color: #fde9d9;
+	font-size: large;
 }
 
 
@@ -271,19 +268,6 @@ a[name="othergenes"] table.vartab a::first-letter {
 	text-transform: uppercase;
 }
 
-/* Create two equal columns that floats next to each other */
-.column {
-  float: left;
-  width: 50%;
-  padding: 10px;
-}
-
-/* Clear floats after the columns */
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
-}
 
 footer {
 	background-color: #05396b;
@@ -354,8 +338,12 @@ a.svg:hover, a.svg:active {
 .column {
   float: left;
   width: 50%;
-  padding: 60px;
+  padding: 10px;
   min-height: 100px;
+}
+
+.row {
+  display: flex; /* equal height of the children */
 }
 
 /* Clear floats after the columns */

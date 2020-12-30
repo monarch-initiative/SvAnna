@@ -43,8 +43,8 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
      * The constructor calculates the left and right boundaries for display
      * TODO document logic, cleanup
      *
-     * @param transcripts
-     * @param enhancers
+     * @param transcripts List of transcripts affected (disrupted) by the translocation
+     * @param enhancers List of enhancers affected by the translocation
      */
     public TranslocationComponentSvgGenerator(int minPos, int maxPos,
                                               List<Transcript> transcripts,
@@ -90,7 +90,7 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
      * @param genomicCoordinate the position to transform
      * @param genomicMin the minimum genomic position
      * @param genomicMax the maximum genomic position
-     * @return
+     * @return SVG position that corresponds to a given genomic position.
      */
     private double translatePositionToSvg(int genomicCoordinate, int genomicMin, int genomicMax) {
         double pos = genomicCoordinate - genomicMin;
@@ -104,11 +104,11 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
 
     /**
      * Write a zigzag line to indicate the position of the breakpoint
-     * @param y1
+     * @param y1 initial vertical position of the zig-zag line
      * @param n_display_items number of enhancers/transcripts through which the translocation goes
-     * @param x
-     * @param writer
-     * @throws IOException
+     * @param x horizontal position in SVG coordinates
+     * @param writer file handle
+     * @throws IOException if we cannot write
      */
     private void writeZigZagLine(int y1, int n_display_items, int x, String description, Writer writer) throws IOException {
         int increment = 3;
@@ -123,13 +123,15 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
             y += 2 * increment;
         }
         writer.write(" \" style=\"fill: red\" />\n");
-        String text = String.format("<text x=\"%d\" y=\"%d\">%s</text>\n", x+20, y1+10, description);
+        int xpos = (int) getAdjustedXPositionForText(x);
+        String text = String.format("<text x=\"%d\" y=\"%d\">%s</text>\n", xpos+20, y1+10, description);
         writer.write(text);
     }
 
 
     private int writeTranslocation(Writer writer) throws IOException {
-        String description = String.format("Translocation breakpoint at %s:%d", contig.name(), positionOnContig);
+        String chrom = contig.name().startsWith("chr") ? contig.name() : "chr" + contig.name();
+        String description = String.format("Translocation breakpoint at %s:%d", chrom, positionOnContig);
         int ypos = this.ystart;
         int offset = 0;
         int n_display_items = 0;

@@ -246,9 +246,7 @@ public abstract class SvSvgGenerator {
     }
 
     /**
-     * Transform a genomic coordinate to an SVG X coordinate
-     *
-     * @return
+     * @return the SVG x coordinate that corresponds to a given genomic position
      */
     protected double translateGenomicToSvg(int genomicCoordinate) {
         double pos = genomicCoordinate - paddedGenomicMinPos;
@@ -263,11 +261,11 @@ public abstract class SvSvgGenerator {
     /**
      * Write a coding exon
      *
-     * @param start
-     * @param end
-     * @param ypos
-     * @param writer
-     * @throws IOException
+     * @param start exon start position in SVG coordinates
+     * @param end exon end position in SVG coordinates
+     * @param ypos vertical position to write the exon
+     * @param writer file handle
+     * @throws IOException if we cannot write
      */
     protected void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
@@ -281,11 +279,11 @@ public abstract class SvSvgGenerator {
     /**
      * WRite a non-coding (i.e., UTR) exon of a non-coding gene
      *
-     * @param start
-     * @param end
-     * @param ypos
-     * @param writer
-     * @throws IOException
+     * @param start exon start position in SVG coordinates
+     * @param end exon end position in SVG coordinates
+     * @param ypos vertical position to write the exon
+     * @param writer file handle
+     * @throws IOException if we cannot write
      */
     protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
@@ -414,6 +412,27 @@ public abstract class SvSvgGenerator {
     }
 
     /**
+     *  // adjust start position of label to keep it from going off the right side of the SVG canvas
+     * @param xpos original position in SVG coordinates
+     * @return adjusted (if necessary) X position
+     */
+    protected double getAdjustedXPositionForText(double xpos) {
+        double p = (xpos - this.svgMinPos)/ svgSpan;
+        // adjust start position of label to keep it from going off the right side of the SVG canvas
+        if (p > 0.95) {
+            // X position is in the 5% rightmost part of SVG canvas
+            return xpos - 350;
+        } else if (p > 0.9) {
+            return xpos - 250;
+        } else if (p > 0.8) {
+            return xpos - 200;
+        }  else {
+            // no adjustment nedded
+            return xpos;
+        }
+    }
+
+    /**
      * Write a string such as {@code CFAP74 (NM_001304360.1) 1:1921950-2003837 (- strand)} representing the
      * transcript, its chromosomal location, and its strand.
      * @param tmod representation of the transcript
@@ -424,15 +443,7 @@ public abstract class SvSvgGenerator {
      */
     private void writeTranscriptName(Transcript tmod, double xpos, int ypos, Writer writer) throws IOException {
         String symbol = tmod.hgvsSymbol();
-        double p = (xpos - this.svgMinPos)/ svgSpan;
-        // adjust start position of label to keep it from going off the right side of the SVG canvas
-        if (p > 0.95) {
-            xpos -= 300;
-        } else if (p > 0.9) {
-            xpos -= 200;
-        } else if (p > 0.8) {
-            xpos -= 150;
-        }
+        xpos = getAdjustedXPositionForText(xpos);
         String accession = tmod.accessionId();
         String chrom = tmod.contigName();
         Transcript txOnFwdStrand = tmod.withStrand(Strand.POSITIVE);

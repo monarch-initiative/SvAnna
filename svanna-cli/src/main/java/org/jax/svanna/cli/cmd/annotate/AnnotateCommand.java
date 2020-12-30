@@ -6,6 +6,7 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.cli.Main;
+import org.jax.svanna.cli.html.FilterAndCount;
 import org.jax.svanna.cli.html.HtmlTemplate;
 import org.jax.svanna.core.filter.AllPassFilter;
 import org.jax.svanna.core.filter.Filter;
@@ -203,19 +204,14 @@ public class AnnotateCommand implements Callable<Integer> {
         // This filters our SVs with lower impact than our threshold
 
         FilterAndCount fac = new FilterAndCount(priorities, variants, threshold);
-        // Now the list just contains SVs that pass the threshold
-       // List<SvPriority> filteredPriorityList = fac.getFilteredPriorityList();
-
         int unparsableCount = fac.getUnparsableCount();
-        Map<VariantType, Integer> lowImpactCounts = fac.getLowImpactCounts();
-        Map<VariantType, Integer> intermediateImpactCounts = fac.getIntermediateImpactCounts();
-        Map<VariantType, Integer> highImpactCounts = fac.getHighImpactCounts();
 
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("vcf_file", vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
         infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
         infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
+        infoMap.put("counts_table", fac.toHtmlTable());
 
         List<String> visualizations = new ArrayList<>();
         Collections.sort(prioritizedVariants);
@@ -225,9 +221,6 @@ public class AnnotateCommand implements Callable<Integer> {
         }
 
         HtmlTemplate template = new HtmlTemplate(visualizations,
-                lowImpactCounts,
-                intermediateImpactCounts,
-                highImpactCounts,
                 infoMap,
                 hpoTermsAndLabels);
         template.outputFile(outprefix);

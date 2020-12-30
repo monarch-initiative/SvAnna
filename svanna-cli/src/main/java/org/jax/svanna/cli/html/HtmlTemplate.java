@@ -32,9 +32,6 @@ public class HtmlTemplate {
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlTemplate.class);
 
     public HtmlTemplate(List<String> htmlList,
-                        Map<VariantType, Integer> lowImpact,
-                        Map<VariantType, Integer> intermediateImpact,
-                        Map<VariantType, Integer> highImpact,
                         Map<String, String> infoMap,
                         Map<TermId, String> userHpoTerms) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_0)));
@@ -50,18 +47,8 @@ public class HtmlTemplate {
         // We put everything into a list of rows
         // We want to have one value (can be zero) for each of our SvTypes
         List<SvTypeCountRow> rows = new ArrayList<>();
-        // TODO -- use the desired order for the output
-        for (VariantType svtype : VariantType.values()) {
-            SvTypeCountRow row = new SvTypeCountRow(svtype,
-                    lowImpact.getOrDefault(svtype,0),
-                    intermediateImpact.getOrDefault(svtype, 0),
-                    highImpact.getOrDefault(svtype, 0));
-            rows.add(row);
-        }
-        SvTypeCountRow totals = new SvTypeCountRow(lowImpact, intermediateImpact, highImpact);
-        rows.add(totals);
-        templateData.put("svtypecounts", rows);
         templateData.putIfAbsent("svalist", htmlList);
+        templateData.put("counts_table", infoMap.getOrDefault("counts_table", NOT_AVAILABLE));
         templateData.put("n_unparsable", infoMap.getOrDefault("unparsable", NOT_AVAILABLE));
         templateData.put("vcf_file", infoMap.getOrDefault("vcf_file", NOT_AVAILABLE));
         templateData.put("n_affectedGenes", infoMap.getOrDefault("n_affectedGenes", NOT_AVAILABLE));

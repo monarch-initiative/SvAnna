@@ -12,52 +12,28 @@ import java.util.Map;
 public class SvTypeCountRow {
 
     private final String name;
-    private final int low;
-    private final int intermediate;
-    private final int high;
+    Map<ImpactFilterCategory, Integer> countmap;
     private final int total;
 
-    public SvTypeCountRow(VariantType svtype, int lo, int med, int hi) {
+    public SvTypeCountRow(VariantType svtype, Map<ImpactFilterCategory, Integer> map) {
         this.name = svtype.name();
-        this.low = lo;
-        this.intermediate = med;
-        this.high = hi;
-        this.total = lo + med + hi;
+        this.countmap = map;
+        this.total = map.values().stream().mapToInt(Integer::intValue).sum();
     }
 
     public String getName() {
         return name;
     }
 
-    public int getLow() {
-        return low;
-    }
 
-    public int getIntermediate() {
-        return intermediate;
-    }
-
-    public int getHigh() {
-        return high;
-    }
-
-    public int getTotal() {
-        return total;
-    }
 
     /**
      * This constructor is used to make the very last row of the table, with the grand totals
-     * @param lowImpact Counts map for all low impact structural variants
-     * @param intermediateImpact Counts map for all intermediate impact structural variants
-     * @param highImpact Counts map for all high impact structural variants
      */
-    public  SvTypeCountRow(Map<VariantType, Integer> lowImpact,
-                                             Map<VariantType, Integer> intermediateImpact,
-                                             Map<VariantType, Integer> highImpact) {
-        this.low = lowImpact.values().stream().reduce(Integer::sum).orElse(0);
-        this.intermediate = intermediateImpact.values().stream().reduce(Integer::sum).orElse(0);
-        this.high = highImpact.values().stream().reduce(Integer::sum).orElse(0);
-        this.total = this.low + this.intermediate + this.high;
+    public  SvTypeCountRow(Map<ImpactFilterCategory, Integer> map) {
+
+        this.countmap = map;
+        this.total = map.values().stream().mapToInt(Integer::intValue).sum();
         this.name = "Total";
 
     }

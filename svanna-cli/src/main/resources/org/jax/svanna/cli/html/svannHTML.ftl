@@ -235,6 +235,50 @@ table.overlap thead th {
 	font-size: large;
 }
 
+.counts {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.counts thead tr {
+    background-color: #009879;
+    color: black;
+    text-align: left;
+}
+.counts th,
+.counts td {
+    padding: 12px 15px;
+}
+.counts tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.counts tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.counts tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+.counts tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.counts caption {
+  background-color: #d5f5e3;
+  font-weight: bold;
+  font-style: italic;
+  letter-spacing: .2em;
+  font-size: 1.5em;
+}
+
+
+
 
 a[name="othergenes"] table.vartab {
 
@@ -392,20 +436,7 @@ a.svg:hover, a.svg:active {
        <section>
             <a name="summary"></a>
               <article>
-        <table border=1>
-        <thead>
-            <tr>
-              <th>Type</th>
-              <th>Low impact</th>
-              <th>Intermediate impact</th>
-              <th>High impact</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-        <#list svtypecounts as svt>
-        <tr><td>${svt.name}</td><td>${svt.low}</td><td>${svt.intermediate}</td><td>${svt.high}</td><td>${svt.total}</td></tr>
-          </#list>
-        </table>
+       ${counts_table?no_esc}
         <p>Total number of genes affected by structural variants: ${n_affectedGenes}</p>
         <p>Total number of enhancers affected by structural variants: ${n_affectedEnhancers}</p>
         <p>We were unable to parse ${n_unparsable} entries.</p>

@@ -72,3 +72,18 @@ overwrite any previously downloaded files. ::
 If desired, you can download these files on your own but you need to place them all in the
 same directory to run svann.
 
+
+DGV: Database of Genomic Variants
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+svanna is being extended to filter variants for overlap with population variants. For now, svanna uses a downloaded
+file from the DGV (http://dgv.tcag.ca/dgv/app/downloads). Choose the file for the correct genome assembly (probably hg38), and
+download it. We then need to index this file with `tabix <https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3042176/>`_.
+Assuming we have downloaded the file ``GRCh38_hg38_variants_2020-02-25.txt`` from DGV< proceed with the following steps  ::
+
+    $ bgzip GRCh38_hg38_variants_2020-02-25.txt
+    $ tabix --skip-lines 1 -s 2 -b 3 -e 4 GRCh38_hg38_variants_2020-02-25.txt.gz
+
+
+
+

@@ -458,7 +458,7 @@ public class HtmlVisualizer implements Visualizer {
         }
         // check if name starts with an OMIM id, e.g., #654321
         String pattern = "^#\\d{6,6}";
-        if (prettified.substring(0,7).matches(pattern)) {
+        if (prettified.length()>7 && prettified.substring(0,7).matches(pattern)) {
             prettified = prettified.substring(7);
         }
         prettified = prettified.trim();

@@ -155,7 +155,7 @@ public class SvAnnOverlapperTest {
         Set<String> observedAccessionNumbers = overlaps.stream().map(Overlap::getAccession).collect(Collectors.toSet());
         assertEquals(expectedAccessionNumbers, observedAccessionNumbers);
         for (var o : overlaps) {
-            assertEquals(SINGLE_EXON_IN_TRANSCRIPT, o.getOverlapType());
+            assertEquals(NON_CDS_REGION_IN_SINGLE_EXON, o.getOverlapType());
             assertFalse(o.overlapsCds());
         }
     }
@@ -178,7 +178,7 @@ public class SvAnnOverlapperTest {
         Set<String> observedAccessionNumbers = overlaps.stream().map(Overlap::getAccession).collect(Collectors.toSet());
         assertEquals(expectedAccessionNumbers, observedAccessionNumbers);
         for (var o : overlaps) {
-            assertEquals(SINGLE_EXON_IN_TRANSCRIPT, o.getOverlapType());
+            assertEquals(NON_CDS_REGION_IN_SINGLE_EXON, o.getOverlapType());
             assertFalse(o.overlapsCds());
         }
     }
@@ -249,7 +249,7 @@ public class SvAnnOverlapperTest {
         Set<String> observedAccessionNumbers = overlaps.stream().map(Overlap::getAccession).collect(Collectors.toSet());
         assertEquals(expectedAccessionNumbers, observedAccessionNumbers);
         for (var o : overlaps) {
-            assertEquals(SINGLE_EXON_IN_TRANSCRIPT, o.getOverlapType());
+            assertEquals(NON_CDS_REGION_IN_SINGLE_EXON, o.getOverlapType());
             assertFalse(o.overlapsCds());
         }
     }
@@ -270,7 +270,7 @@ public class SvAnnOverlapperTest {
         Set<String> observedAccessionNumbers = overlaps.stream().map(Overlap::getAccession).collect(Collectors.toSet());
         assertEquals(expectedAccessionNumbers, observedAccessionNumbers);
         for (var o : overlaps) {
-            assertEquals(SINGLE_EXON_IN_TRANSCRIPT, o.getOverlapType());
+            assertEquals(NON_CDS_REGION_IN_SINGLE_EXON, o.getOverlapType());
             assertFalse(o.overlapsCds());
         }
     }

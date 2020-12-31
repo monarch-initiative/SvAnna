@@ -127,9 +127,9 @@ public class HpoDiseaseGeneMap {
      * @param targetHpoTermIds List of HPO terms annotated the proband (can be subterms of the candidates or equal)
      * @return set of terms from the candidate list that match the target terms, directly or indirectly
      */
-    public Set<TermId> getRelevantAncestors(Set<TermId> candidates, Set<TermId> targetHpoTermIds) {
+    public Set<TermId> getRelevantAncestors(Set<TermId> candidates, List<TermId> targetHpoTermIds) {
         Set<TermId> relevantSet = new HashSet<>();
-        Set<TermId> ancs = OntologyAlgorithm.getAncestorTerms(ontology, targetHpoTermIds, true);
+        Set<TermId> ancs = OntologyAlgorithm.getAncestorTerms(ontology, new HashSet<>(targetHpoTermIds), true);
         for (TermId tid : candidates) {
             if (ancs.contains(tid))
                 relevantSet.add(tid);

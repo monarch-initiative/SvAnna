@@ -52,7 +52,9 @@ public enum OverlapType {
     DOWNSTREAM_GENE_VARIANT_500B("500b downstream gene variant"),
     UPSTREAM_GENE_VARIANT_500B("500b upstream gene variant"),
     INTRONIC("located completely within intron"),
-    SINGLE_EXON_IN_TRANSCRIPT("single-exon affected in transcript"),
+    SINGLE_EXON_IN_TRANSCRIPT("single-exon in coding transcript"),
+    NON_CDS_REGION_IN_SINGLE_EXON("non-coding region of single exon in coding transcript"),
+    SINGLE_EXON_IN_NC_TRANSCRIPT("single-exon in non-coding transcript"),
     MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript"),
     TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV"),
     TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION("transcript disrupted by translocation"),
@@ -135,8 +137,11 @@ public enum OverlapType {
             case SINGLE_EXON_IN_TRANSCRIPT:
             case MULTIPLE_EXON_IN_TRANSCRIPT:
             case TRANSCRIPT_CONTAINED_IN_SV:
-            case UPSTREAM_GENE_VARIANT_500B:
             case TRANSCRIPT_DISRUPTED_BY_INVERSION:
+                return SvImpact.VERY_HIGH;
+            case UPSTREAM_GENE_VARIANT_500B:
+            case NON_CDS_REGION_IN_SINGLE_EXON:
+            case SINGLE_EXON_IN_NC_TRANSCRIPT:
                 return SvImpact.HIGH;
             case UPSTREAM_GENE_VARIANT_5KB:
             case DOWNSTREAM_GENE_VARIANT_5KB:

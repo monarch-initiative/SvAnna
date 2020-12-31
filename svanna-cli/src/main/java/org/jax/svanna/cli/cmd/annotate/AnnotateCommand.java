@@ -6,6 +6,7 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.cli.Main;
+import org.jax.svanna.cli.html.FilterAndCount;
 import org.jax.svanna.cli.html.HtmlTemplate;
 import org.jax.svanna.core.filter.AllPassFilter;
 import org.jax.svanna.core.filter.Filter;
@@ -39,7 +40,6 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.variant.api.Contig;
 import org.monarchinitiative.variant.api.GenomicAssembly;
 import org.monarchinitiative.variant.api.Variant;
-import org.monarchinitiative.variant.api.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -79,8 +79,8 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outprefix = "SVANNA";
 
-    @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
-    public Path vcfFile;
+    @CommandLine.Option(names = {"-v", "--vcf"})
+    public Path vcfFile = null;
 
     @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
     public Path enhancerFile;
@@ -103,12 +103,22 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
+    @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
+    public int minAltReadSupport = 2;
+
+    @CommandLine.Option(names={"-p","--phenopacket"}, description = "phenopacket with HPO terms and path to VCF file")
+    public Path phenopacketPath = null;
+
     private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
         return new JannovarDataSerializer(jannovarPath.toString()).load();
     }
 
     @Override
     public Integer call() throws Exception {
+        if ((vcfFile == null) == (phenopacketPath == null)) {
+            LOGGER.warn("Provide either path to a VCF file or path to a phenopacket (not both)");
+            return 1;
+        }
         LOGGER.info("Running `annotate` command...");
         // 0 - set up data
 
@@ -123,16 +133,29 @@ public class AnnotateCommand implements Callable<Integer> {
         //  by the user into their corresponding labels on the output file.
         //  I will add a method to this class for now, but when we refactor this, we should make it more elegant
         HpoDiseaseGeneMap hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap(dataDir);
-
-        // patient phenotype
-        Set<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toSet());
+        Ontology hpo = hpoDiseaseGeneMap.getOntology();
+        List<TermId>  patientTerms;
+        if (phenopacketPath != null) {
+            PhenopacketImporter importer = PhenopacketImporter.fromJson(phenopacketPath, hpo);
+            patientTerms = importer.getHpoTerms();
+            vcfFile = importer.getVcfPath();
+        } else {
+            patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toList());
+        }
         // check that the HPO terms entered by the user (if any) are valid
-        Map<TermId, String> hpoTermsAndLabels;
-        if (!patientTerms.isEmpty())
-            hpoTermsAndLabels = hpoDiseaseGeneMap.getTermLabelMap(patientTerms);
-        else
-            hpoTermsAndLabels = Map.of();
-        final Ontology hpo = hpoDiseaseGeneMap.getOntology();
+        Map<TermId, String> topLevelHpoTermsAndLabels;
+        Map<TermId, String> originalHpoTermsAndLabels;
+        if (!patientTerms.isEmpty()) {
+            HpoTopLevel hpoTopLevel = new HpoTopLevel(patientTerms, hpo);
+            topLevelHpoTermsAndLabels = hpoTopLevel.getUpperLevelTerms();
+            originalHpoTermsAndLabels = hpoTopLevel.getOriginalTerms();
+        } else {
+            topLevelHpoTermsAndLabels = Map.of();
+            originalHpoTermsAndLabels = Map.of();
+        }
+
+
+
         // enhancers & relevant enhancer terms
         TSpecParser tparser = new TSpecParser(enhancerFile, assembly);
         Map<Integer, IntervalArray<Enhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
@@ -169,7 +192,7 @@ public class AnnotateCommand implements Callable<Integer> {
         SvPrioritizer<Variant> prioritizer = new PrototypeSvPrioritizer(overlapper,
                 enhancerOverlapper,
                 geneSymbolMap,
-                patientTerms,
+                topLevelHpoTermsAndLabels.keySet(),
                 enhancerRelevantAncestors,
                 relevantGenesAndDiseases,
                 maxGenes);
@@ -199,34 +222,33 @@ public class AnnotateCommand implements Callable<Integer> {
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
         // This filters our SVs with lower impact than our threshold
 
-        FilterAndCount fac = new FilterAndCount(priorities, variants, threshold);
-        // Now the list just contains SVs that pass the threshold
-       // List<SvPriority> filteredPriorityList = fac.getFilteredPriorityList();
-
+        FilterAndCount fac = new FilterAndCount(priorities, variants, threshold, minAltReadSupport);
         int unparsableCount = fac.getUnparsableCount();
-        Map<VariantType, Integer> lowImpactCounts = fac.getLowImpactCounts();
-        Map<VariantType, Integer> intermediateImpactCounts = fac.getIntermediateImpactCounts();
-        Map<VariantType, Integer> highImpactCounts = fac.getHighImpactCounts();
 
         Map<String, String> infoMap = new HashMap<>();
-        infoMap.put("vcf_file", vcfFile.toString());
+        infoMap.put("vcf_file", vcfFile == null ? "" : vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
         infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
         infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
+        infoMap.put("counts_table", fac.toHtmlTable());
+        infoMap.put("phenopacket_file", phenopacketPath == null ? "" : phenopacketPath.toAbsolutePath().toString());
 
         List<String> visualizations = new ArrayList<>();
         Collections.sort(prioritizedVariants);
         for (var pr : prioritizedVariants) {
+            if (pr.variant().numberOfAltReads() < minAltReadSupport) {
+                continue;
+            } else if (! pr.variant().passedFilters()) {
+                continue;
+            }
             Visualizable vizbell = pr.getVisualizable();
             visualizations.add(visualizer.getHtml(vizbell));
         }
 
         HtmlTemplate template = new HtmlTemplate(visualizations,
-                lowImpactCounts,
-                intermediateImpactCounts,
-                highImpactCounts,
                 infoMap,
-                hpoTermsAndLabels);
+                topLevelHpoTermsAndLabels,
+                originalHpoTermsAndLabels);
         template.outputFile(outprefix);
 
         // We're done!
@@ -291,7 +313,7 @@ public class AnnotateCommand implements Callable<Integer> {
 
         @Override
         public int compareTo(PrioritizedVariant that) {
-            int priorityComparison = impact.compareTo(that.impact);
+            int priorityComparison = that.impact.compareTo(impact);
             if (priorityComparison != 0) {
                 return priorityComparison;
             }

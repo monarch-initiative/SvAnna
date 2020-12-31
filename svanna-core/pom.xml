@@ -5,7 +5,7 @@
     <parent>
         <artifactId>svann</artifactId>
         <groupId>org.jax.svanna</groupId>
-        <version>0.2.9</version>
+        <version>0.3.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -34,6 +34,14 @@
             <artifactId>jannovar-core</artifactId>
             <version>${jannovar.version}</version>
             <exclusions>
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.testing</groupId>
                     <artifactId>testing</artifactId>

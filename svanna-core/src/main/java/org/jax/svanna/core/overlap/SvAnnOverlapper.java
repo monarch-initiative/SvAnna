@@ -16,6 +16,7 @@ import static org.jax.svanna.core.overlap.OverlapType.*;
 
 /**
  * This class determines the kind and degree of overlap of a structural variant with transcript features.
+ * The class should be used via the {@link #getOverlapList(Variant)} function.
  */
 public class SvAnnOverlapper implements Overlapper {
 
@@ -33,8 +34,35 @@ public class SvAnnOverlapper implements Overlapper {
      */
     private final Map<Integer, IntervalArray<Transcript>> intervalArrayMap;
 
+    /**
+     * @param intervalArrayMap See {@link #intervalArrayMap}.
+     */
     public SvAnnOverlapper(Map<Integer, IntervalArray<Transcript>> intervalArrayMap) {
         this.intervalArrayMap = intervalArrayMap;
+    }
+
+    /**
+     * public interface to this class. We search for a list of overlaps that overlap the variant
+     * @param variant A structural variant
+     * @return list of {@link Overlap} objects that represent transcripts that overlap with the variant.
+     */
+    @Override
+    public List<Overlap> getOverlapList(Variant variant) {
+        switch (variant.variantType().baseType()) {
+            case DEL:
+            case DUP:
+            case INS:
+            case INV:
+                GenomicRegion region = variant.toZeroBased().toPositiveStrand();
+                return getIntrachromosomalEventOverlaps(region);
+            case TRA:
+            case BND:
+                if (variant instanceof Breakended)
+                    return getTranslocationOverlaps(((Breakended) variant));
+            default:
+                LOGGER.warn("Getting overlaps for `{}` is not yet supported", variant.variantType());
+                return List.of();
+        }
     }
 
     private static Overlap getOverlapForTranscript(GenomicRegion event, Transcript tx) {
@@ -178,13 +206,15 @@ public class SvAnnOverlapper implements Overlapper {
     }
 
     /**
-     * Calculate overlap for a non-coding transcript. By assumption, if we get here then we have already
-     * determined that the SV overlaps with a non-coding transcript
-     *
-     * @param tx a non-coding transcript (this is checked by calling code)
+     * Calculate overlap for a coding or non-coding transcript. By assumption, if we get here then the transcript
+     * is not entirely contained within the SV, instead, the SV overlaps with only a part of the transcript.
+     * This function determines which parts of the transcript overlap. By assumption, the calling code has checked that
+     * the SV does not entirely contain the transcript but instead overlaps with a part of it.
+     * @param tx a coding or non-coding transcript
+     * @param event -- Region corresponding to a SV.
      * @return An {@link Overlap} object for an SV that affects a gene
      */
-    public static Overlap genic(Transcript tx, GenomicRegion event) {
+    private static Overlap genic(Transcript tx, GenomicRegion event) {
         ExonPair exonPair = getAffectedExons(tx, event);
         boolean affectsCds = false; // note this can only only true if the SV is exonic and the transcript is coding
         if (tx.isCoding()) {
@@ -211,8 +241,7 @@ public class SvAnnOverlapper implements Overlapper {
                 } else if (tx.isCoding()) {
                     return new Overlap(NON_CDS_REGION_IN_SINGLE_EXON, tx, overlapDistance, msg);
                 } else {
-                    // TODO -- do we need category for ncRNA?
-                    return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tx, overlapDistance, msg);
+                    return new Overlap(SINGLE_EXON_IN_NC_TRANSCRIPT, tx, overlapDistance, msg);
                 }
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
@@ -233,7 +262,10 @@ public class SvAnnOverlapper implements Overlapper {
     }
 
     /**
-     * If we get here, we know that the SV event is intrachromosomal.
+     * If we get here, we know that the SV event is intrachromosomal (i.e., not a BND/translocation). This function
+     * decides whether the SV overlaps with one or more transcripts and dispatches to
+     * {@link #intergenic(GenomicRegion, IntervalArray.QueryResult)} if there is no overlap and to
+     * {@link #parseEventThatOverlapsWithATranscript(GenomicRegion, List)} if there is.
      *
      * @param region      SV event
      * @param queryResult result with transcript features
@@ -249,31 +281,19 @@ public class SvAnnOverlapper implements Overlapper {
         return parseEventThatOverlapsWithATranscript(region, queryResult.getEntries());
     }
 
+    /**
+     * This function decides whether transcripts are entirely contained within the SV or whether the SV affects on
+     * parts of a transcript.
+     * @param region A genomic region corresponding to a structural variant
+     * @param transcripts List of transcripts that overlap with the region
+     * @return List of {@link Overlap} objects corresponding to the transcripts
+     */
     private static List<Overlap> parseEventThatOverlapsWithATranscript(GenomicRegion region, List<Transcript> transcripts) {
         return transcripts.stream()
                 .map(tx -> region.contains(tx)
                         ? new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tx, OverlapDistance.fromContainedIn(), String.format("%s/%s", tx.hgvsSymbol(), tx.accessionId()))
                         : genic(tx, region))
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<Overlap> getOverlapList(Variant variant) {
-        switch (variant.variantType().baseType()) {
-            case DEL:
-            case DUP:
-            case INS:
-            case INV:
-                GenomicRegion region = variant.toZeroBased().toPositiveStrand();
-                return getIntrachromosomalEventOverlaps(region);
-            case TRA:
-            case BND:
-                if (variant instanceof Breakended)
-                    return getTranslocationOverlaps(((Breakended) variant));
-            default:
-                LOGGER.warn("Getting overlaps for `{}` is not yet supported", variant.variantType());
-                return List.of();
-        }
     }
 
     private List<Overlap> getIntrachromosomalEventOverlaps(GenomicRegion region) {

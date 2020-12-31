@@ -78,8 +78,8 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outprefix = "SVANNA";
-
-    @CommandLine.Option(names = {"-v", "--vcf"}, required = true)
+    @Deprecated /* replaced by phenopacket */
+    @CommandLine.Option(names = {"-v", "--vcf"})
     public Path vcfFile;
 
     @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
@@ -106,6 +106,9 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 2;
 
+    @CommandLine.Option(names={"-p","--phenopacket"}, description = "phenopacket with HPO terms and path to VCF file")
+    public String phenopacketPath = null;
+
     private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
         return new JannovarDataSerializer(jannovarPath.toString()).load();
     }
@@ -126,16 +129,28 @@ public class AnnotateCommand implements Callable<Integer> {
         //  by the user into their corresponding labels on the output file.
         //  I will add a method to this class for now, but when we refactor this, we should make it more elegant
         HpoDiseaseGeneMap hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap(dataDir);
-
-        // patient phenotype
-        Set<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toSet());
-        // check that the HPO terms entered by the user (if any) are valid
-        Map<TermId, String> hpoTermsAndLabels;
-        if (!patientTerms.isEmpty())
-            hpoTermsAndLabels = hpoDiseaseGeneMap.getTermLabelMap(patientTerms);
-        else
-            hpoTermsAndLabels = Map.of();
         final Ontology hpo = hpoDiseaseGeneMap.getOntology();
+        List<TermId>  patientTerms;
+        if (this.phenopacketPath != null) {
+            PhenopacketImporter importer = PhenopacketImporter.fromJson(this.phenopacketPath, hpo);
+            patientTerms = importer.getHpoTerms();
+        } else {
+            patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toList());
+        }
+        // check that the HPO terms entered by the user (if any) are valid
+        Map<TermId, String> topLevelHpoTermsAndLabels;
+        Map<TermId, String> originalHpoTermsAndLabels;
+        if (!patientTerms.isEmpty()) {
+            HpoTopLevel hpoTopLevel = new HpoTopLevel(patientTerms, hpo);
+            topLevelHpoTermsAndLabels = hpoTopLevel.getUpperLevelTerms();
+            originalHpoTermsAndLabels = hpoTopLevel.getOriginalTerms();
+        } else {
+            topLevelHpoTermsAndLabels = Map.of();
+            originalHpoTermsAndLabels = Map.of();
+        }
+
+
+
         // enhancers & relevant enhancer terms
         TSpecParser tparser = new TSpecParser(enhancerFile, assembly);
         Map<Integer, IntervalArray<Enhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
@@ -172,7 +187,7 @@ public class AnnotateCommand implements Callable<Integer> {
         SvPrioritizer<Variant> prioritizer = new PrototypeSvPrioritizer(overlapper,
                 enhancerOverlapper,
                 geneSymbolMap,
-                patientTerms,
+                topLevelHpoTermsAndLabels.keySet(),
                 enhancerRelevantAncestors,
                 relevantGenesAndDiseases,
                 maxGenes);
@@ -226,7 +241,8 @@ public class AnnotateCommand implements Callable<Integer> {
 
         HtmlTemplate template = new HtmlTemplate(visualizations,
                 infoMap,
-                hpoTermsAndLabels);
+                topLevelHpoTermsAndLabels,
+                originalHpoTermsAndLabels);
         template.outputFile(outprefix);
 
         // We're done!

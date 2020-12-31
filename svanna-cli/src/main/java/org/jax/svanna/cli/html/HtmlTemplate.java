@@ -30,7 +30,8 @@ public class HtmlTemplate {
 
     public HtmlTemplate(List<String> htmlList,
                         Map<String, String> infoMap,
-                        Map<TermId, String> userHpoTerms) {
+                        Map<TermId, String> topLevelHpoTerms,
+                        Map<TermId, String> originalHpoTerms) {
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_0)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -45,20 +46,11 @@ public class HtmlTemplate {
         templateData.put("vcf_file", infoMap.getOrDefault("vcf_file", NOT_AVAILABLE));
         templateData.put("n_affectedGenes", infoMap.getOrDefault("n_affectedGenes", NOT_AVAILABLE));
         templateData.put("n_affectedEnhancers", infoMap.getOrDefault("n_affectedEnhancers", NOT_AVAILABLE));
-        List<String> hpos = createHpoLinks(userHpoTerms);
-        templateData.put("hpoterms", hpos);
+        HpoHtmlComponent hpoHtmlComponent = new HpoHtmlComponent(topLevelHpoTerms, originalHpoTerms);
+        templateData.put("hpoterms", hpoHtmlComponent.getHtml());
     }
 
-    private List<String> createHpoLinks(Map<TermId, String> userHpoTerms) {
-      List<String> observedHPOs = new ArrayList<>();
-        for (var e : userHpoTerms.entrySet()) {
-            String termId = e.getKey().getValue();
-            String label = e.getValue();
-            String tstr = String.format("%s (<a href=\"https://hpo.jax.org/app/browse/term/%s\">%s</a>)",label,termId,termId);
-            observedHPOs.add(tstr);
-        }
-       return observedHPOs;
-    }
+
 
 
     public void outputFile(String prefix) {

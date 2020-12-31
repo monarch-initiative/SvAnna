@@ -267,7 +267,7 @@ public class PrototypeSvPrioritizerTest {
         sr = testVariants.insertions().surf1InsertionIn3UTR();
         result = prioritizer.prioritize(sr);
 
-        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
+        assertThat(result.getImpact(), is(SvImpact.HIGH));
     }
 
     /**

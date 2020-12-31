@@ -11,6 +11,7 @@
 
     <properties>
         <phenopacket.version>1.0.0</phenopacket.version>
+        <jackson.version>2.12.0</jackson.version>
     </properties>
 
     <artifactId>svanna-cli</artifactId>
@@ -132,6 +133,18 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
+            <version>2.12.0</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
             <version>2.12.0</version>
         </dependency>
 

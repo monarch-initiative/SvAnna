@@ -18,8 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 /**
@@ -136,17 +137,20 @@ public class PhenopacketImporter {
      * In this case, remove the prefix 'path:', otherwise return the original URI
      * @return URI of VCF file mentioned in the Phenopacket
      */
-    public String getVcfPath() {
-        if (this.vcfFile == null) {
-            return null;
-        }
-        return this.vcfFile.getUri().startsWith("file:") ?
-                this.vcfFile.getUri().substring(5) :
-                this.vcfFile.getUri();
-    }
+
 
     public HtsFile getVcfFile() {
         return this.vcfFile;
+    }
+
+    public Path getVcfPath() {
+        if (this.vcfFile == null) {
+            return null;
+        }
+        String uri = this.vcfFile.getUri().startsWith("file:") ?
+                this.vcfFile.getUri().substring(5) :
+                this.vcfFile.getUri();
+        return Paths.get(uri);
     }
 
     public String getGenomeAssembly() {
@@ -180,7 +184,7 @@ public class PhenopacketImporter {
             return false; // skip to next Phenopacket
         }
         List<PhenotypicFeature> phenolist = phenoPacket.getPhenotypicFeaturesList();
-        int n_observed = phenolist.stream().filter( p -> ! p.getNegated()).collect(Collectors.toList()).size();
+        int n_observed = (int)phenolist.stream().filter( p -> ! p.getNegated()).count();
         if (n_observed==0) {
             System.err.println("[ERROR] phenopackets must have at least one observed HPO term. ");
             return false; // skip to next Phenopacket

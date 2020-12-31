@@ -277,6 +277,47 @@ table.overlap thead th {
   font-size: 1.5em;
 }
 
+.hpotable {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.hpotable thead tr {
+    background-color: #009879;
+    color: black;
+    text-align: left;
+}
+.hpotable th,
+.hpotable td {
+    padding: 12px 15px;
+}
+.hpotable tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.hpotable tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.hpotable tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+.hpotable tbody tr.active-row {
+    font-weight: bold;
+    color: #009879;
+}
+
+.hpotable caption {
+  background-color: #d5f5e3;
+  font-weight: bold;
+  font-style: italic;
+  letter-spacing: .2em;
+  font-size: 1.5em;
+}
 
 
 
@@ -405,7 +446,7 @@ a.svg:hover, a.svg:active {
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 <header class="banner">
-    <h1><font color="#FFDA1A">SvAnna (Structural Variant Annotation and Analysis</font></h1>
+    <h1><font color="#FFDA1A">SvAnna: Structural Variant Annotation and Analysis</font></h1>
 </header>
 
   <nav>
@@ -413,8 +454,7 @@ a.svg:hover, a.svg:active {
           <ul>
               <li><a href="#sample">Sample</a></li>
               <li><a href="#variantCounts">Variant counts</a></li>
-              <li><a href="#veryHigh">Very-high impact SVs</a></li>
-               <li><a href="#high">High impact SVs</a></li>
+              <li><a href="#veryHigh">Prioritized SVs</a></li>
               <li><a href="#about">About</a></li>
           </ul>
       </div>
@@ -423,9 +463,9 @@ a.svg:hover, a.svg:active {
     <section>
       <a name="sample"></a>
         <article>
-        <p>SvAnna (Structural Variant Annotation Amenuensis) analysis of structural variants.</p>
-        <p>structural variants were extracted from ${vcf_file}.</p>
         ${hpoterms?no_esc}
+        <p><b>Phenopackets file</b>: ${phenopacket_file}
+         <p><b>VCF file</b>: ${vcf_file}.</p>
       </article>
   </section>
 
@@ -453,7 +493,7 @@ a.svg:hover, a.svg:active {
         <a name="about"></a>
         <article>
           <h2>About</h2>
-            <p>SvAnna shows candidate SVs that affect genes associated witht the top svann candidates.</p>
+            <p>SvAnna shows candidate SVs that affect genes associated with the top svann candidates.</p>
 
 
         </article>

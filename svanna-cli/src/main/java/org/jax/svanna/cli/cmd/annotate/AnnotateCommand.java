@@ -78,7 +78,7 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outprefix = "SVANNA";
-    @Deprecated /* replaced by phenopacket */
+    /** TODO  -- we should throw an error if the user enters both a VCF and a Phenopacket. */
     @CommandLine.Option(names = {"-v", "--vcf"})
     public Path vcfFile;
 
@@ -134,6 +134,7 @@ public class AnnotateCommand implements Callable<Integer> {
         if (this.phenopacketPath != null) {
             PhenopacketImporter importer = PhenopacketImporter.fromJson(this.phenopacketPath, hpo);
             patientTerms = importer.getHpoTerms();
+            this.vcfFile = importer.getVcfPath();
         } else {
             patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toList());
         }
@@ -226,6 +227,7 @@ public class AnnotateCommand implements Callable<Integer> {
         infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
         infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
         infoMap.put("counts_table", fac.toHtmlTable());
+        infoMap.put("phenopacket_file", this.phenopacketPath);
 
         List<String> visualizations = new ArrayList<>();
         Collections.sort(prioritizedVariants);

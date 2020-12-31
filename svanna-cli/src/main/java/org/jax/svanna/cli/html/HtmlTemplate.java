@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +43,7 @@ public class HtmlTemplate {
         templateData.put("counts_table", infoMap.getOrDefault("counts_table", NOT_AVAILABLE));
         templateData.put("n_unparsable", infoMap.getOrDefault("unparsable", NOT_AVAILABLE));
         templateData.put("vcf_file", infoMap.getOrDefault("vcf_file", NOT_AVAILABLE));
+        templateData.put("phenopacket_file", infoMap.getOrDefault("phenopacket_file", NOT_AVAILABLE));
         templateData.put("n_affectedGenes", infoMap.getOrDefault("n_affectedGenes", NOT_AVAILABLE));
         templateData.put("n_affectedEnhancers", infoMap.getOrDefault("n_affectedEnhancers", NOT_AVAILABLE));
         HpoHtmlComponent hpoHtmlComponent = new HpoHtmlComponent(topLevelHpoTerms, originalHpoTerms);

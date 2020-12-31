@@ -454,14 +454,14 @@ a.svg:hover, a.svg:active {
           <ul>
               <li><a href="#sample">Sample</a></li>
               <li><a href="#variantCounts">Variant counts</a></li>
-              <li><a href="#veryHigh">Prioritized SVs</a></li>
+              <li><a href="#prioritizedVars">Prioritized SVs</a></li>
               <li><a href="#about">About</a></li>
           </ul>
       </div>
   </nav>
   <main>
     <section>
-      <a name="sample"></a>
+      <a id="sample"></a>
         <article>
         ${hpoterms?no_esc}
         <p><b>Phenopackets file</b>: ${phenopacket_file}
@@ -470,7 +470,7 @@ a.svg:hover, a.svg:active {
   </section>
 
        <section>
-            <a name="variantCounts"></a>
+            <a id="variantCounts"></a>
               <article>
        ${counts_table?no_esc}
         <p>Total number of genes affected by structural variants: ${n_affectedGenes}</p>
@@ -482,7 +482,7 @@ a.svg:hover, a.svg:active {
         <#list svalist as sva>
         <section>
               <article>
-                <a name="veryHigh"></a>
+                <a id="prioritizedVars"></a>
               ${sva?no_esc}
              </article>
              </section>

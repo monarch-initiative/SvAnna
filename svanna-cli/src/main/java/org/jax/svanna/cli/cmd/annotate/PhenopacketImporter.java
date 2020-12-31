@@ -7,7 +7,6 @@ import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.phenopackets.schema.v1.Phenopacket;
-import org.phenopackets.schema.v1.core.Gene;
 import org.phenopackets.schema.v1.core.HtsFile;
 import org.phenopackets.schema.v1.core.PhenotypicFeature;
 import org.slf4j.Logger;
@@ -91,11 +90,6 @@ public class PhenopacketImporter {
         return builder.build();
     }
 
-    public String getGene() {
-        if (phenoPacket.getGenesCount()==0) return null;
-        Gene g = phenoPacket.getGenes(0);
-        return g.getId();
-    }
 
     public List<TermId> getNegatedHpoTerms() {
         ImmutableList.Builder<TermId> builder = new ImmutableList.Builder<>();
@@ -137,12 +131,6 @@ public class PhenopacketImporter {
                 this.vcfFile.getUri().substring(5) :
                 this.vcfFile.getUri();
         return Paths.get(uri);
-    }
-
-    public String getGenomeAssembly() {
-        return   this.vcfFile!=null ?
-                this.vcfFile.getGenomeAssembly() :
-                null;
     }
 
     public String getSampleName() {

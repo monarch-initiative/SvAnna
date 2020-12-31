@@ -35,6 +35,14 @@
             <version>${jannovar.version}</version>
             <exclusions>
                 <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+                <exclusion>
                     <groupId>org.testing</groupId>
                     <artifactId>testing</artifactId>
                 </exclusion>

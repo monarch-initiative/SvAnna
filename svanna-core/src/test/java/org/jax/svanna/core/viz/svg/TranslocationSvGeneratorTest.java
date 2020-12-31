@@ -1,20 +1,11 @@
 package org.jax.svanna.core.viz.svg;
 
-/**
- *  /**
- *      * Translocation where one CDS is disrupted and the other is not
- *      * <p>
- *      * left mate, SURF2:NM_017503.5 intron 3 (disrupted CDS)
- *      * chr9:133_359_000 (+)
- *      * right mate, upstream from BRCA2 (not disrupted)
- *      * chr13:32_300_000 (+)
- *      */
-
 import org.jax.svanna.core.TestDataConfig;
 import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.test.TestVariants;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.variant.api.Breakended;
 import org.monarchinitiative.variant.api.Variant;
@@ -39,8 +30,16 @@ public class TranslocationSvGeneratorTest {
     @Autowired
     public org.jax.svanna.core.overlap.Overlapper overlapper;
 
-
+    /**
+     * Translocation where one CDS is disrupted and the other is not
+     * <p>
+     * left mate, SURF2:NM_017503.5 intron 3 (disrupted CDS)
+     * chr9:133_359_000 (+)
+     * right mate, upstream from BRCA2 (not disrupted)
+     * chr13:32_300_000 (+)
+     */
     @Test
+    @Disabled
     public void testWriteSvg() {
         Variant variant = testVariants.translocations().translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
         List<Transcript> transcriptModels = overlapper.getOverlapList(variant).stream()

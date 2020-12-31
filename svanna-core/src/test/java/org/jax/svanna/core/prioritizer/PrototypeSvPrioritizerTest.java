@@ -174,7 +174,7 @@ public class PrototypeSvPrioritizerTest {
         Variant sr = testVariants.deletions().surf1TwoExon_exons_6_and_7();
         SvPriority result = prioritizer.prioritize(sr);
 
-        assertThat(result.getImpact(), is(SvImpact.HIGH));
+        assertThat(result.getImpact(), is(SvImpact.VERY_HIGH));
     }
 
     /**
@@ -261,7 +261,7 @@ public class PrototypeSvPrioritizerTest {
         Variant sr = testVariants.insertions().surf2InsertionIn5UTR();
         SvPriority result = prioritizer.prioritize(sr);
 
-        assertThat(result.getImpact(), is(SvImpact.LOW));
+        assertThat(result.getImpact(), is(SvImpact.INTERMEDIATE));
 
         // 3UTR
         sr = testVariants.insertions().surf1InsertionIn3UTR();

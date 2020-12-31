@@ -34,8 +34,7 @@ public class HtmlVisualizer implements Visualizer {
     private final static int THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS = 100;
 
     /** Pattern to format genomic positions with commas. */
-    final String pattern = "###,###.###";
-    final DecimalFormat decimalFormat = new DecimalFormat(pattern);
+    private final DecimalFormat decimalFormat = new DecimalFormat("###,###.###");
 
     private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF", "F7DC6F", "CFFF98", "A1D6E2",
             "EC96A4", "E6DF44", "F76FDA", "FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6", "FFC300", "F76FF5", "FFFF99",
@@ -297,10 +296,10 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(itemValueRow("UCSC", ucscBuilder.toString()));
         int totalReads = nAltReads + nRefReads;
         if (totalReads != minSequenceDepth) {
-            System.err.printf("[WARNING] Sum of alt (%d)/ref(%d) reads not equal to minDepth (%d).\n", nAltReads, nRefReads, minSequenceDepth);
+            LOGGER.warn("Sum of alt ({})/ref({}) reads not equal to minDepth ({})", nAltReads, nRefReads, minSequenceDepth);
         }
         if (totalReads == 0) {
-            System.err.println("[WARNING] Total reads zero (should never happen), setting to 1.");
+            LOGGER.warn("Total reads zero (should never happen), setting to 1.");
             totalReads = 1;
         }
         String refReads = String.format("%d/%d reads (%.1f%%)", nRefReads, totalReads, 100.0 * (float)nRefReads/totalReads);

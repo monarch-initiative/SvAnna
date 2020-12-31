@@ -45,7 +45,7 @@ public class FilterAndCount {
         for (var cat : ImpactFilterCategory.values()) {
             this.categoryToByVariantTypeCountMap.put(cat, new HashMap<>());
             // Initialize the count maps to be zero for all SvTypes
-            var countmap = this.categoryToByVariantTypeCountMap.get(cat);
+            var countmap = categoryToByVariantTypeCountMap.get(cat);
             Arrays.stream(VariantType.values()).forEach(v -> {
                 countmap.put(v, 0);
             });
@@ -141,7 +141,7 @@ public class FilterAndCount {
     int getRowTotal(VariantType vt) {
         int total = 0;
         for (ImpactFilterCategory ifc: ImpactFilterCategory.values()) {
-            int count = this.categoryToByVariantTypeCountMap.get(ifc).getOrDefault(vt, 0);
+            int count = categoryToByVariantTypeCountMap.get(ifc).getOrDefault(vt, 0);
             total += count;
         }
         return total;
@@ -160,7 +160,7 @@ public class FilterAndCount {
             } else {
                 sb.append("<tr><td>").append(vt.toString()).append("</td>");
                 for (ImpactFilterCategory cat : ImpactFilterCategory.values()) {
-                    int count = this.categoryToByVariantTypeCountMap.get(cat).getOrDefault(vt, 0);
+                    int count = categoryToByVariantTypeCountMap.get(cat).getOrDefault(vt, 0);
                     categoryToCountMap.merge(cat, count, Integer::sum);
                     totalForVariantType += count;
                     sb.append("<td>").append(count).append("</td>");

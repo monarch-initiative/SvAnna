@@ -78,9 +78,9 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outprefix = "SVANNA";
-    /** TODO  -- we should throw an error if the user enters both a VCF and a Phenopacket. */
+
     @CommandLine.Option(names = {"-v", "--vcf"})
-    public Path vcfFile;
+    public Path vcfFile = null;
 
     @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
     public Path enhancerFile;
@@ -107,7 +107,7 @@ public class AnnotateCommand implements Callable<Integer> {
     public int minAltReadSupport = 2;
 
     @CommandLine.Option(names={"-p","--phenopacket"}, description = "phenopacket with HPO terms and path to VCF file")
-    public String phenopacketPath = null;
+    public Path phenopacketPath = null;
 
     private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
         return new JannovarDataSerializer(jannovarPath.toString()).load();
@@ -115,6 +115,10 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        if ((vcfFile == null) == (phenopacketPath == null)) {
+            LOGGER.warn("Provide either path to a VCF file or path to a phenopacket (not both)");
+            return 1;
+        }
         LOGGER.info("Running `annotate` command...");
         // 0 - set up data
 
@@ -129,12 +133,12 @@ public class AnnotateCommand implements Callable<Integer> {
         //  by the user into their corresponding labels on the output file.
         //  I will add a method to this class for now, but when we refactor this, we should make it more elegant
         HpoDiseaseGeneMap hpoDiseaseGeneMap = HpoDiseaseGeneMap.loadGenesAndDiseaseMap(dataDir);
-        final Ontology hpo = hpoDiseaseGeneMap.getOntology();
+        Ontology hpo = hpoDiseaseGeneMap.getOntology();
         List<TermId>  patientTerms;
-        if (this.phenopacketPath != null) {
-            PhenopacketImporter importer = PhenopacketImporter.fromJson(this.phenopacketPath, hpo);
+        if (phenopacketPath != null) {
+            PhenopacketImporter importer = PhenopacketImporter.fromJson(phenopacketPath, hpo);
             patientTerms = importer.getHpoTerms();
-            this.vcfFile = importer.getVcfPath();
+            vcfFile = importer.getVcfPath();
         } else {
             patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toList());
         }
@@ -218,21 +222,21 @@ public class AnnotateCommand implements Callable<Integer> {
         // svList - svann.prioritizeSvsByPopulationFrequency(svList);
         // This filters our SVs with lower impact than our threshold
 
-        FilterAndCount fac = new FilterAndCount(priorities, variants, threshold, this.minAltReadSupport);
+        FilterAndCount fac = new FilterAndCount(priorities, variants, threshold, minAltReadSupport);
         int unparsableCount = fac.getUnparsableCount();
 
         Map<String, String> infoMap = new HashMap<>();
-        infoMap.put("vcf_file", vcfFile.toString());
+        infoMap.put("vcf_file", vcfFile == null ? "" : vcfFile.toString());
         infoMap.put("unparsable", String.valueOf(unparsableCount));
         infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
         infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
         infoMap.put("counts_table", fac.toHtmlTable());
-        infoMap.put("phenopacket_file", this.phenopacketPath);
+        infoMap.put("phenopacket_file", phenopacketPath == null ? "" : phenopacketPath.toAbsolutePath().toString());
 
         List<String> visualizations = new ArrayList<>();
         Collections.sort(prioritizedVariants);
         for (var pr : prioritizedVariants) {
-            if (pr.variant().numberOfAltReads() < this.minAltReadSupport) {
+            if (pr.variant().numberOfAltReads() < minAltReadSupport) {
                 continue;
             } else if (! pr.variant().passedFilters()) {
                 continue;
@@ -309,7 +313,7 @@ public class AnnotateCommand implements Callable<Integer> {
 
         @Override
         public int compareTo(PrioritizedVariant that) {
-            int priorityComparison = that.impact.compareTo(this.impact);
+            int priorityComparison = that.impact.compareTo(impact);
             if (priorityComparison != 0) {
                 return priorityComparison;
             }

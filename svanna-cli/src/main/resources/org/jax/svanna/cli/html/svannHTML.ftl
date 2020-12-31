@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>svann: Structural Variant Annotator</title>
+  <title>SvAnna: Structural Variant Annotator</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -446,7 +446,7 @@ a.svg:hover, a.svg:active {
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
 <header class="banner">
-    <h1><font color="#FFDA1A">SvAnna: Structural Variant Annotation and Analysis</font></h1>
+    <h1><span style="color: #FFDA1A; ">SvAnna: Structural Variant Annotation and Analysis</span></h1>
 </header>
 
   <nav>
@@ -493,7 +493,7 @@ a.svg:hover, a.svg:active {
         <a name="about"></a>
         <article>
           <h2>About</h2>
-            <p>SvAnna shows candidate SVs that affect genes associated with the top svann candidates.</p>
+            <p>SvAnna shows candidate SVs that affect genes associated with the top candidates.</p>
 
 
         </article>
@@ -501,7 +501,7 @@ a.svg:hover, a.svg:active {
       <span id="tooltip" display="none" style="position: absolute; display: none;"></span>
   </main>
   <footer>
-    <p>SvAnn &copy; 2020</p>
+    <p>SvAnna &copy; 2020</p>
   </footer>
 
   <script>

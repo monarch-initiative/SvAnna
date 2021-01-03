@@ -154,12 +154,12 @@ public class HtmlVisualizer implements Visualizer {
                     // fall through to default
                 default:
                     LOGGER.warn("SVG not implemented for type {}", variant.variantType());
-                    return "";
+                    return String.format("SVG generation for variant type %s not implemented.", variant.variantType().toString());
             }
             return gen.getSvg();
         } catch (SvAnnRuntimeException e) {
             LOGGER.warn("Error: {}", e.getMessage());
-            return "";
+            return "<p>" + e.getMessage() +"</p>\n";
         }
     }
 
@@ -190,22 +190,23 @@ public class HtmlVisualizer implements Visualizer {
                     throw new SvAnnRuntimeException("Was expecting one location for insertion but got " + locations.size());
                 }
                 loc = locations.get(0);
-                return String.format("%s:%dins%dbp", loc.getChrom(), loc.getBegin(), len);
+                return String.format("%s:%sins%dbp", loc.getChrom(), decimalFormat.format(loc.getBegin()), len);
             case DEL:
                 if (locations.size() != 1) {
                     throw new SvAnnRuntimeException("Was expecting one location for deletion but got " + locations.size());
                 }
                 loc = locations.get(0);
                 String lend = getLengthDisplayString(loc.getBegin(), loc.getEnd());
-                return String.format("%s:%d-%ddel (%s)", loc.getChrom(), loc.getBegin(), loc.getEnd(), lend);
+                return String.format("%s:%s-%sdel (%s)", loc.getChrom(), decimalFormat.format(loc.getBegin()), decimalFormat.format(loc.getEnd()), lend);
             case TRA:
+            case BND:
                 if (locations.size() != 2) {
                     throw new SvAnnRuntimeException("Was expecting two locations for translocation but got " + locations.size());
                 }
                 HtmlLocation locA = locations.get(0);
                 HtmlLocation locB = locations.get(1);
-                String translocationA = String.format("%s:%d", locA.getChrom(), locA.getBegin());
-                String translocationB = String.format("%s:%d", locB.getChrom(), locB.getBegin());
+                String translocationA = String.format("%s:%s", locA.getChrom(), decimalFormat.format(locA.getBegin()));
+                String translocationB = String.format("%s:%s", locB.getChrom(), decimalFormat.format(locB.getBegin()));
                 return String.format("t(%s, %s)", translocationA, translocationB);
             case DUP:
                 if (locations.size() != 1) {
@@ -227,7 +228,7 @@ public class HtmlVisualizer implements Visualizer {
                 return String.format("inv(%s)(%d; %d) (%s)", invLoc.getChrom(), invBegin, invEnd, lengthInv);
         }
 
-        return "TODO";
+        return "Unimplemented variant type: " + svtype.toString();
     }
 
 

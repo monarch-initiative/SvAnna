@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -95,6 +97,7 @@ public class HtmlVisualizer implements Visualizer {
                 url, chrom, startString, endString);
     }
 
+
     /**
      * Creates a string to show highlights. Nonselected regions are highlighted in very light grey.
      *
@@ -114,6 +117,13 @@ public class HtmlVisualizer implements Visualizer {
         return String.format("highlight=%s", highlight);
     }
 
+    private String getGeneCardsLink(String symbol) {
+        String base = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=";
+        String url = base + symbol;
+        return String.format("<a href=\"%s\" target=\"_blank\">%s</a>",url, symbol);
+    }
+
+
 
 
     String getSvgString(Visualizable visualizable) {
@@ -128,7 +138,6 @@ public class HtmlVisualizer implements Visualizer {
                     gen = new DeletionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
                     break;
                 case INS:
-                    int insertionLength = variant.changeLength();
                     gen = new InsertionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
                     break;
                 case INV:
@@ -261,6 +270,20 @@ public class HtmlVisualizer implements Visualizer {
         return String.format("<tr><td><b>%s</b></td><td>%s</td></tr>\n", item, row);
     }
 
+    String affectedSymbols(Visualizable visualizable) {
+        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(Collectors.toList());
+        if (genes.isEmpty()) { return "n/a"; }
+        Collections.sort(genes);
+        List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(Collectors.toList());
+        StringBuilder sb = new StringBuilder();
+        sb.append("<ul>");
+        for (String a : anchors) {
+            sb.append("<li>").append(a).append("</li>\n");
+        }
+        sb.append("</ul>");
+        return sb.toString();
+    }
+
     String getSequencePrioritization(Visualizable visualizable) {
         SvannaVariant variant = visualizable.variant();
         if (visualizable.getGeneCount() > 2 &&
@@ -307,6 +330,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(itemValueRow("Ref", refReads));
         sb.append(itemValueRow("Alt", altReads));
         sb.append(itemValueRow("Disease associations", getDiseaseGenePrioritizationHtml(visualizable)));
+        sb.append(itemValueRow("Affected genes", affectedSymbols(visualizable)));
         sb.append("</table>\n");
         return sb.toString();
     }

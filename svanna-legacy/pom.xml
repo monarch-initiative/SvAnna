@@ -58,12 +58,6 @@
         </dependency>
 
         <!--                       TESTING                                          -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
         <!-- REMOVE -->
         <dependency>
             <groupId>org.mockito</groupId>

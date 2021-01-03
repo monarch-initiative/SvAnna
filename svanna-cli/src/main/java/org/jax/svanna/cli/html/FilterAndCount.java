@@ -46,9 +46,7 @@ public class FilterAndCount {
             this.categoryToByVariantTypeCountMap.put(cat, new HashMap<>());
             // Initialize the count maps to be zero for all SvTypes
             var countmap = categoryToByVariantTypeCountMap.get(cat);
-            Arrays.stream(VariantType.values()).forEach(v -> {
-                countmap.put(v, 0);
-            });
+            Arrays.stream(VariantType.values()).forEach(v -> countmap.put(v, 0));
         }
         Set<Enhancer> affectedEnhancers = new HashSet<>();
         Set<String> affectedGenes = new HashSet<>();

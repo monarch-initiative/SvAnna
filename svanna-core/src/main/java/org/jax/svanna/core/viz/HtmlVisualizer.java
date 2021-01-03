@@ -374,11 +374,8 @@ public class HtmlVisualizer implements Visualizer {
         if (genes.size() > 10) {
             sb.append("<p>").append(genes.size()).append(" affected genes</p>\n");
         } else {
-            sb.append("<p>Affected genes: <br/><ol>");
-            for (var g : genes) {
-                sb.append("<li>").append(g).append("</li>\n");
-            }
-            sb.append("</ol></p>\n");
+            sb.append("<p>Affected genes: </p>\n");
+            sb.append(affectedSymbols(visualizable));
         }
         return sb.toString();
     }

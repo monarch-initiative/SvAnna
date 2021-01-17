@@ -7,5 +7,5 @@ public enum SequenceRole {
     FIX_PATCH,
     NOVEL_PATCH,
     ALT_SCAFFOLD,
-    UNKNOWN;
+    UNKNOWN
 }

@@ -15,10 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.*;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.IntStream.range;
 
 
 /**
@@ -166,8 +167,7 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
-    private String getLengthDisplayString(int begin, int end) {
-        int len = end - begin;
+    private String getLengthDisplayString(int len) {
         if (len < 1)
             return "n/a";
         else if (len < 1000) {
@@ -192,13 +192,14 @@ public class HtmlVisualizer implements Visualizer {
                     throw new SvAnnRuntimeException("Was expecting one location for insertion but got " + locations.size());
                 }
                 loc = locations.get(0);
+
                 return String.format("%s:%sins%dbp", loc.getChrom(), decimalFormat.format(loc.getBegin()), len);
             case DEL:
                 if (locations.size() != 1) {
                     throw new SvAnnRuntimeException("Was expecting one location for deletion but got " + locations.size());
                 }
                 loc = locations.get(0);
-                String lend = getLengthDisplayString(loc.getBegin(), loc.getEnd());
+                String lend = getLengthDisplayString(visualizable.variant().length());
                 return String.format("%s:%s-%sdel (%s)", loc.getChrom(), decimalFormat.format(loc.getBegin()), decimalFormat.format(loc.getEnd()), lend);
             case TRA:
             case BND:
@@ -217,7 +218,7 @@ public class HtmlVisualizer implements Visualizer {
                 HtmlLocation dupLoc = locations.get(0);
                 int dupBegin = Math.min(dupLoc.getBegin(), dupLoc.getEnd());
                 int dupEnd = Math.max(dupLoc.getBegin(), dupLoc.getEnd());
-                String lengthDup = getLengthDisplayString(dupBegin, dupEnd);
+                String lengthDup = getLengthDisplayString(visualizable.variant().length());
                 return String.format("%s:%d-%d duplication (%s)", dupLoc.getChrom(), dupBegin, dupEnd, lengthDup);
             case INV:
                 if (locations.size() != 1) {
@@ -226,7 +227,7 @@ public class HtmlVisualizer implements Visualizer {
                 HtmlLocation invLoc = locations.get(0);
                 int invBegin = Math.min(invLoc.getBegin(), invLoc.getEnd());
                 int invEnd = Math.max(invLoc.getBegin(), invLoc.getEnd());
-                String lengthInv = getLengthDisplayString(invBegin, invEnd);
+                String lengthInv = getLengthDisplayString(visualizable.variant().length());
                 return String.format("inv(%s)(%d; %d) (%s)", invLoc.getChrom(), invBegin, invEnd, lengthInv);
         }
 
@@ -238,7 +239,7 @@ public class HtmlVisualizer implements Visualizer {
     public String getHtml(Visualizable visualizable) {
         int totalAffectedGeneCount = visualizable.getGeneCount();
         if (totalAffectedGeneCount >= THRESHOLD_COUNT_TO_SHOW_MULTIGENE_DISPLAY &&
-                totalAffectedGeneCount < THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
+                totalAffectedGeneCount > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
             return getMultigeneSequencePrioritization(visualizable);
         }
         List<HtmlLocation> locations = visualizable.locations();
@@ -278,10 +279,10 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     String affectedSymbols(Visualizable visualizable) {
-        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(Collectors.toList());
+        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
         Collections.sort(genes);
-        List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(Collectors.toList());
+        List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
         StringBuilder sb = new StringBuilder();
         sb.append("<ul>");
         for (String a : anchors) {
@@ -290,6 +291,69 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("</ul>");
         return sb.toString();
     }
+
+    String numerousAffectedSymbols(Visualizable visualizable) {
+        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
+        if (genes.isEmpty()) { return "n/a"; }
+        Collections.sort(genes);
+        List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
+        StringBuilder sb = new StringBuilder();
+        int n_genes = genes.size();
+
+        sb.append("<table class=\"numvartab\">\n");
+        sb.append("<caption>Affected genes</caption>\n");
+        //sb.append("<thead><tr><td>Tissue</td><td>position</td><td>tau</td></tr></thead>\n");
+        sb.append("<tbody>\n");
+        final List<List<String>> groups = range(0, anchors.size())
+                .boxed()
+                .collect(groupingBy(index -> index / 4))
+                .values()
+                .stream()
+                .map(indices -> indices
+                        .stream()
+                        .map(anchors::get)
+                        .collect(toList()))
+                .collect(toList());
+        for (List<String> group : groups) {
+            if (group.size() == 4) {
+                sb.append(fourItemRow(group.get(0), group.get(1), group.get(2), group.get(3)));
+            } else if (group.size() == 3) {
+                sb.append(fourItemRow(group.get(0), group.get(1), group.get(2), ""));
+            } else if (group.size() == 2) {
+                sb.append(fourItemRow(group.get(0), group.get(1), "", ""));
+            } else if (group.size() == 1) {
+                sb.append(fourItemRow(group.get(0), "",  "", ""));
+            }
+        }
+        sb.append("</tbody>\n</table>\n");
+        return sb.toString();
+    }
+
+    String numerousEnhancers(Visualizable visualizable) {
+        List<Enhancer> enhancerList = visualizable.enhancers();
+        Map<String, Integer> enhancerMap = new HashMap<>();
+        for (Enhancer e : enhancerList) {
+            String tissue = e.tissueLabel();
+            enhancerMap.putIfAbsent(tissue, 0);
+            enhancerMap.merge(tissue, 1, Integer::sum);
+        }
+        // sort the list (in ascending order)
+        List<Map.Entry<String, Integer>> linkedList =new LinkedList<>(enhancerMap.entrySet());
+        linkedList.sort(Map.Entry.comparingByValue());
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table class=\"vartab\">\n");
+        sb.append("<caption>Enhancers</caption>\n");
+        sb.append("<thead><tr><td>Tissue</td><td>Count</td></tr></thead>\n");
+        // iterate in reverse (descending) order
+        ListIterator<Map.Entry<String, Integer>> listIterator = linkedList.listIterator(linkedList.size());
+        while (listIterator.hasPrevious()) {
+            Map.Entry<String, Integer> entry = listIterator.previous();
+            sb.append(twoItemRow(entry.getKey(), String.valueOf(entry.getValue())));
+        }
+        sb.append("</tbody>\n</table>\n");
+        return sb.toString();
+    }
+
 
     String getSequencePrioritization(Visualizable visualizable) {
         SvannaVariant variant = visualizable.variant();
@@ -390,11 +454,12 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(itemValueRow("Ref", refReads));
         sb.append(itemValueRow("Alt", altReads));
         sb.append(itemValueRow("Disease associations", getDiseaseGenePrioritizationHtml(visualizable)));
-        sb.append(itemValueRow("Affected genes", affectedSymbols(visualizable)));
         sb.append("</table>\n");
+        sb.append(numerousAffectedSymbols(visualizable));
+
         sb.append("</div>\n");
         sb.append("<div class=\"column\" style=\"background-color:#F0F0F0;\">\n");
-        sb.append(getEnhancerTable(visualizable)).append("\n");
+        sb.append(numerousEnhancers(visualizable)).append("\n");
         sb.append("</div>\n");
         sb.append("</div>\n");
 
@@ -464,6 +529,10 @@ public class HtmlVisualizer implements Visualizer {
 
     private String threeItemRow(String item1, String item2, String item3) {
         return String.format("<tr><td><b>%s</b></td><td>%s</td><td>%s</td></tr>\n", item1, item2, item3);
+    }
+
+    private String fourItemRow(String item1, String item2, String item3, String item4) {
+        return String.format("<tr><td><b>%s</b></td><td>%s</td><td>%s</td><td>%s</td></tr>\n", item1, item2, item3, item4);
     }
 
     String getOverlapSummary(Visualizable visualizable) {

@@ -13,8 +13,8 @@ import static org.jax.svanna.core.viz.svg.Constants.SVG_WIDTH;
 
 public class InversionSvgGenerator extends SvSvgGenerator {
 
-    private int inversionGenomicStart;
-    private int inversionGenomicEnd;
+    private final int inversionGenomicStart;
+    private final int inversionGenomicEnd;
     private final double ARROWHEAD_SIZE = 8.0;
 
     public InversionSvgGenerator(Variant variant,

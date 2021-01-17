@@ -60,7 +60,7 @@ public class HtmlVisualizer implements Visualizer {
         int sVbegin = hloc.getBegin();
         int sVend = hloc.getEnd();
         // We want to exand the view -- how much depends on the size of the SV
-        int len = sVend = sVbegin;
+        int len = sVend - sVbegin;
         if (len < 0) {
             // should never happen
             throw new SvAnnRuntimeException("[ERROR] Malformed Htmllocation: " + hloc);

@@ -392,7 +392,7 @@ public class TestVariants extends TestBase {
         public static SequenceRearrangement fbn1UpstreamInversion() {
             Contig chr15 = GENOME_ASSEMBLY.getContigByName("15").orElseThrow();
             int TSS = 48_645_788;
-            int begin = TSS + 25_000; ;
+            int begin = TSS + 25_000;
             int end = begin + 300;
 
             return makeInversion(chr15, begin, end);

@@ -214,6 +214,27 @@ table.vartab caption {
 	letter-spacing: .3em;
 }
 
+
+table.numvartab {
+  width:auto;
+  min-width:50%;
+}
+
+table.numvartab tr:nth-child(even){
+  background-color:#c4f2f2;
+}
+
+table.numvartab tr:nth-child(odd){
+  background-color: #d9f7f7;
+}
+
+table.numvartab caption {
+	background-color: #d5f5e3;
+	font-weight: bold;
+	font-style: italic;
+	letter-spacing: .3em;
+}
+
 table.overlap {
   width:auto;
   min-width:50%;

@@ -29,6 +29,28 @@ public class IntronDistance {
         return intronNumber;
     }
 
+    public String getUpDownStreamDistance(boolean posStrand) {
+        if (posStrand) {
+            int exonUp = intronNumber; // upstream exon in chromosomal coordinates
+            int exonDown = intronNumber + 1; // downstream exon in chromosomal coordinates
+            return String.format("intron %d; %d bp to exon %d; %d bp to exon %d",
+                    intronNumber,
+                    Math.abs(this.distanceToUpstreamExon),
+                    exonUp,
+                    Math.abs(this.distanceToDownstreamExon),
+                    exonDown);
+        } else {
+            int exonUp = intronNumber + 1; // upstream exon in chromosomal coordinates
+            int exonDown = intronNumber; // downstream exon in chromosomal coordinates
+            return String.format("intron %d; %d bp to exon %d; %d bp to exon %d",
+                    intronNumber,
+                    Math.abs(this.distanceToDownstreamExon),
+                    exonUp,
+                    Math.abs(this.distanceToUpstreamExon),
+                    exonDown);
+        }
+    }
+
     public int getDistanceToUpstreamExon() {
         return distanceToUpstreamExon;
     }

@@ -35,7 +35,7 @@ body {
 
 
 body > header, nav, main, body > section, footer {
-  max-width:1200px;
+  max-width:1440px;
   margin-left:auto;
   margin-right:auto;
 }

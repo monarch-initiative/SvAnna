@@ -254,8 +254,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer {
         Map<Enhancer, Boolean> enhancerRelevanceMap = enhancerRelevanceMap(enhancers);
         if (!enhancerRelevanceMap.isEmpty()) {
             SvImpact enhancerImpact = enhancerRelevanceMap.entrySet().stream()
-                    .filter(Map.Entry::getValue)  // getValue is True or False
-                    .findAny().isPresent()
+                    .anyMatch(Map.Entry::getValue)  // getValue is True or False
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
             if (enhancerImpact == SvImpact.HIGH) {

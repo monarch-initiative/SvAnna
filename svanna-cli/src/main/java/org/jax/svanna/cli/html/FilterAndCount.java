@@ -167,8 +167,12 @@ public class FilterAndCount {
                 variantTypeTotals.put(vt, totalForVariantType);
             }
         }
-        List<String> zeroCountTypes = variantTypeTotals.entrySet().stream().filter(e -> e.getValue() == 0).map(e -> e.getKey().name()).collect(Collectors.toList());
-        Collections.sort(zeroCountTypes);
+        List<String> zeroCountTypes = variantTypeTotals.entrySet()
+                .stream()
+                .filter(e -> e.getValue() == 0)
+                .map(e -> e.getKey().name())
+                .sorted()
+                .collect(Collectors.toList());
         sb.append("<tfoot><tr><td>Total</td>");
         for (var cat : ImpactFilterCategory.values()) {
             sb.append("<td>").append(categoryToCountMap.get(cat)).append("</td>");

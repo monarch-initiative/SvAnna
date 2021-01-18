@@ -35,7 +35,7 @@ body {
 
 
 body > header, nav, main, body > section, footer {
-  max-width:1200px;
+  max-width:1440px;
   margin-left:auto;
   margin-right:auto;
 }
@@ -208,6 +208,27 @@ table.vartab tr:nth-child(odd){
 }
 
 table.vartab caption {
+	background-color: #d5f5e3;
+	font-weight: bold;
+	font-style: italic;
+	letter-spacing: .3em;
+}
+
+
+table.numvartab {
+  width:auto;
+  min-width:50%;
+}
+
+table.numvartab tr:nth-child(even){
+  background-color:#c4f2f2;
+}
+
+table.numvartab tr:nth-child(odd){
+  background-color: #d9f7f7;
+}
+
+table.numvartab caption {
 	background-color: #d5f5e3;
 	font-weight: bold;
 	font-style: italic;

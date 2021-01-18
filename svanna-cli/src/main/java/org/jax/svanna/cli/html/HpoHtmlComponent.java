@@ -4,22 +4,24 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Map;
 
+/**
+ * This class provides some convenience functions for creating the HPO tables for the HTML output.
+ */
 public class HpoHtmlComponent {
 
     private final String html;
 
     public HpoHtmlComponent(Map<TermId, String> topLevelHpoTerms, Map<TermId, String> originalHpoTerms) {
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("<div class=\"row\">\n");
-        sb.append("<div class=\"column\">\n");
-        sb.append(originalTermsTable(originalHpoTerms));
-        sb.append("</div>\n");
-        sb.append("<div class=\"column\">\n");
-        sb.append(topLevelTerms(topLevelHpoTerms));
-        sb.append("</div>\n");
-        sb.append("</div>\n");
-        this.html = sb.toString();
+        String sb = "<div class=\"row\">\n" +
+                "<div class=\"column\">\n" +
+                originalTermsTable(originalHpoTerms) +
+                "</div>\n" +
+                "<div class=\"column\">\n" +
+                topLevelTerms(topLevelHpoTerms) +
+                "</div>\n" +
+                "</div>\n";
+        this.html = sb;
     }
 
     private String topLevelTerms(Map<TermId, String> topLevelHpoTerms) {
@@ -37,14 +39,12 @@ public class HpoHtmlComponent {
     }
 
     private String header(String caption) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<table class=\"hpotable\">\n");
-        sb.append("<caption>").append(caption).append("</caption>");
-        sb.append("  <thead><tr>");
-        sb.append("<th>Term</th>");
-        sb.append("<th>Id</th>");
-        sb.append("</tr></thead>\n");
-        return sb.toString();
+        return  "<table class=\"hpotable\">\n" +
+                "<caption>" + caption + "</caption>" +
+                "  <thead><tr>" +
+                "<th>Term</th>" +
+                "<th>Id</th>" +
+                "</tr></thead>\n";
     }
 
     private String hpoLink( TermId tid) {

@@ -255,7 +255,8 @@ public class SvAnnOverlapper implements Overlapper {
         } else {
             // if we get here, then both positions must be in the same intron
             IntronDistance intronDist = getIntronNumber(tx, event);
-            String msg = String.format("%s/%s[intron %d]", geneSymbol, txAccession, intronDist.getIntronNumber());
+
+            String msg = String.format("%s/%s[%s]", geneSymbol, txAccession, intronDist.getUpDownStreamDistance(tx.strand().isPositive()));
             OverlapDistance odist = OverlapDistance.fromIntronic(geneSymbol, intronDist);
             return new Overlap(INTRONIC, tx, odist, msg);
         }

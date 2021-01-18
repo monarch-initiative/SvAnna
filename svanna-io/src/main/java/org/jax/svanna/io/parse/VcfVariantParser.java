@@ -210,11 +210,24 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
             return Optional.empty();
         }
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
-
-        return Optional.of(
-                DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
-                        start, end, ref, alt, svlen,
-                        variantCallAttributes));
+        try {
+            return Optional.of(
+                    DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
+                            start, end, ref, alt, svlen,
+                            variantCallAttributes));
+        } catch (IllegalArgumentException e) {
+            System.out.printf("[ERROR] Caught eception while trying to build DefaultSvannaVariant with:\n");
+            System.out.printf("[ERROR] \tcontig: %s\n", contig);
+            System.out.printf("[ERROR] \tvc.getID(): %s\n", vc.getID());
+            System.out.printf("[ERROR] \tstart: %s\n", start);
+            System.out.printf("[ERROR] \tend: %s\n", end);
+            System.out.printf("[ERROR] \tref: %s\n", ref);
+            System.out.printf("[ERROR] \talt: %s\n", alt);
+            System.out.printf("[ERROR] \tsvlen: %s\n", svlen);
+            System.out.printf("[ERROR] \tvariantCallAttributes: %s\n", variantCallAttributes);
+            System.out.print("[ERROR] " + e.getMessage());
+            return Optional.empty();
+        }
     }
 
 }

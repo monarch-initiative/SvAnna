@@ -13,7 +13,7 @@ import de.charite.compbio.jannovar.reference.*;
  */
 public class TranscriptModelFactory {
 
-    private static ReferenceDictionary rdict;
+    private static final ReferenceDictionary rdict;
 
     static {
         ReferenceDictionaryBuilder rdbuilder = new ReferenceDictionaryBuilder();

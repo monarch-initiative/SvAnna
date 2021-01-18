@@ -1,14 +1,14 @@
 package org.jax.svann.viz.svg;
 
 /**
- *  /**
- *      * Translocation where one CDS is disrupted and the other is not
- *      * <p>
- *      * left mate, SURF2:NM_017503.5 intron 3 (disrupted CDS)
- *      * chr9:133_359_000 (+)
- *      * right mate, upstream from BRCA2 (not disrupted)
- *      * chr13:32_300_000 (+)
- *      */
+ *
+ *  Translocation where one CDS is disrupted and the other is not
+ *  <p>
+ *  left mate, SURF2:NM_017503.5 intron 3 (disrupted CDS)
+ *  chr9:133_359_000 (+)
+ *  right mate, upstream from BRCA2 (not disrupted)
+ *  chr13:32_300_000 (+)
+ */
 
 import de.charite.compbio.jannovar.data.ReferenceDictionary;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;

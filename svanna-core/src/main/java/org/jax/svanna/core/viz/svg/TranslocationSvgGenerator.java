@@ -54,28 +54,24 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
 
 
     /**
-     * The constructor calculates the left and right boundaries for display
-     * TODO document logic, cleanup
-     *
-     * @param transcripts
-     * @param enhancers       // * @param genomeInterval
+     * The constructor calculates the left and right boundaries for display.
+     * @param variant Variant object representing a translocation
+     * @param breakended
+     * @param transcripts transcripts affected by this translocation
+     * @param enhancers Enhancers disrupted by this translocation
      */
     public TranslocationSvgGenerator(Variant variant,
                                      Breakended breakended,
                                      List<Transcript> transcripts,
                                      List<Enhancer> enhancers) {
         super(variant, transcripts, enhancers);
-        // we want to collect the data for the two contigs
-        // we assume that the left and right break ends have two different contigs but not that they may be
-        // TODO can they be the same if we have a translocation in the same chromosome?
         Breakend left = breakended.left();
         Breakend right = breakended.right();
         this.transcriptModelsA = transcripts.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
         this.transcriptModelsB = transcripts.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());
         this.enhancersA = enhancers.stream().filter(e -> e.contigId() == left.contigId()).collect(Collectors.toList());
         this.enhancersB = enhancers.stream().filter(e -> e.contigId() == right.contigId()).collect(Collectors.toList());
-        int displayElementsA = transcriptModelsA.size() + enhancersA.size();
-        int displayElementsB = transcriptModelsB.size() + enhancersB.size();
+        int displayElementsA = transcriptModelsA.size() + enhancersA.size(); // number of display elements for translocation A
         this.separationLineY = displayElementsA*HEIGHT_PER_DISPLAY_ITEM + YSTART + 100;
         this.ystartB = this.separationLineY + 50;
 

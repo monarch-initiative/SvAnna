@@ -15,16 +15,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import java.util.*;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.IntStream.range;
 
 
 /**
- * This class creates the HTML code for each prioritized structural variant that is shown in the output.
+ * This class creates the HTML code for each prioritized structural variant that is shown in the output. The class
+ * works in concert with the freemarker template to create the various HTML display elements.
+ * @author Peter N Robinson
  */
 public class HtmlVisualizer implements Visualizer {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlVisualizer.class);
 
     /** Many SV callers pick up very large deletions/duplications that are almost certainly artifacts. We do not want
@@ -32,10 +35,16 @@ public class HtmlVisualizer implements Visualizer {
      * genes, we do not show details.
      */
     private final static int THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS = 100;
+    /**
+     * For SVs that affect multiple genes, the amount of information shown can grow considerably. Therefore, for
+     * SVs that have this number of genes or more we show an abbreviated view (e.g., we do not list all transcripts
+     * in a table, we just list all gene symbols).
+     */
+    private final static int THRESHOLD_COUNT_TO_SHOW_MULTIGENE_DISPLAY = 3;
 
-    /** Pattern to format genomic positions with commas. */
+    /** Pattern to format genomic positions with commas (e.g., transform 113236378 to 113,236,378). */
     private final DecimalFormat decimalFormat = new DecimalFormat("###,###.###");
-
+    /** Colors that we use to create areas of colored highlight in the UCSC Browser. */
     private final static String[] colors = {"F08080", "CCE5FF", "ABEBC6", "FFA07A", "C39BD3", "FEA6FF", "F7DC6F", "CFFF98", "A1D6E2",
             "EC96A4", "E6DF44", "F76FDA", "FFCCE5", "E4EA8C", "F1F76F", "FDD2D6", "F76F7F", "DAF7A6", "FFC300", "F76FF5", "FFFF99",
             "FF99FF", "99FFFF", "CCFF99", "FFE5CC", "FFD700", "9ACD32", "7FFFD4", "FFB6C1", "FFFACD",
@@ -43,22 +52,12 @@ public class HtmlVisualizer implements Visualizer {
 
     private final static String EMPTY_STRING = "";
 
-    private final static String HTML_TABLE_HEADER = "<table>\n" +
-            "  <thead>\n" +
-            "    <tr>\n" +
-            "      <th>Item</th>\n" +
-            "      <th>Value</th>\n" +
-            "    </tr>\n" +
-            "  </thead>\n";
-
-
-
     public HtmlVisualizer() {
     }
 
 
     /**
-     * Creates a link to the UCSCS browser that shows the posiution of the SV using a color highlight
+     * Creates a link to the UCSCS browser that shows the position of the SV using a color highlight
      *
      * @param hloc Location of (part of) the SV
      * @return an HTML link to the UCSC Genome browser
@@ -78,10 +77,12 @@ public class HtmlVisualizer implements Visualizer {
         if (len<2) {
             // insertion
             OFFSET = 15;
-        } else if (len < 10000) {
-            OFFSET = len * 2;
+        } else if (len < 100) {
+            OFFSET = len + (int)(0.3*len);
+        } else if (len < 500) {
+            OFFSET = len + (int)(0.2*len);
         } else {
-            OFFSET = (int) (len * 1.5);
+            OFFSET = len + (int)(0.1*len);
         }
         int viewBegin = sVbegin - OFFSET;
         int viewEnd = sVend + OFFSET;
@@ -95,11 +96,10 @@ public class HtmlVisualizer implements Visualizer {
                 url, chrom, startString, endString);
     }
 
+
     /**
      * Creates a string to show highlights. Nonselected regions are highlighted in very light grey.
-     *
      * @return something like this {@code highlight=<DB>.<CHROM>:<START>-<END>#<COLOR>}.
-     * .
      */
     private String getHighlightRegion(String chromosome, int start, int end) {
         String genome = "hg38"; // TODO make flexible
@@ -113,6 +113,18 @@ public class HtmlVisualizer implements Visualizer {
                 color);
         return String.format("highlight=%s", highlight);
     }
+
+    /**
+     * Get a linkl to the nice GeneCards database to show information about a gene
+     * @param symbol A gene symbol
+     * @return HTML link to corresponding GeneCards page
+     */
+    private String getGeneCardsLink(String symbol) {
+        String base = "https://www.genecards.org/cgi-bin/carddisp.pl?gene=";
+        String url = base + symbol;
+        return String.format("<a href=\"%s\" target=\"_blank\">%s</a>",url, symbol);
+    }
+
 
 
 
@@ -128,7 +140,6 @@ public class HtmlVisualizer implements Visualizer {
                     gen = new DeletionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
                     break;
                 case INS:
-                    int insertionLength = variant.changeLength();
                     gen = new InsertionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
                     break;
                 case INV:
@@ -146,18 +157,17 @@ public class HtmlVisualizer implements Visualizer {
                     // fall through to default
                 default:
                     LOGGER.warn("SVG not implemented for type {}", variant.variantType());
-                    return "";
+                    return String.format("SVG generation for variant type %s not implemented.", variant.variantType().toString());
             }
             return gen.getSvg();
         } catch (SvAnnRuntimeException e) {
             LOGGER.warn("Error: {}", e.getMessage());
-            return "";
+            return "<p>" + e.getMessage() +"</p>\n";
         }
     }
 
 
-    private String getLengthDisplayString(int begin, int end) {
-        int len = end - begin;
+    private String getLengthDisplayString(int len) {
         if (len < 1)
             return "n/a";
         else if (len < 1000) {
@@ -182,22 +192,24 @@ public class HtmlVisualizer implements Visualizer {
                     throw new SvAnnRuntimeException("Was expecting one location for insertion but got " + locations.size());
                 }
                 loc = locations.get(0);
-                return String.format("%s:%dins%dbp", loc.getChrom(), loc.getBegin(), len);
+
+                return String.format("%s:%sins%dbp", loc.getChrom(), decimalFormat.format(loc.getBegin()), len);
             case DEL:
                 if (locations.size() != 1) {
                     throw new SvAnnRuntimeException("Was expecting one location for deletion but got " + locations.size());
                 }
                 loc = locations.get(0);
-                String lend = getLengthDisplayString(loc.getBegin(), loc.getEnd());
-                return String.format("%s:%d-%ddel (%s)", loc.getChrom(), loc.getBegin(), loc.getEnd(), lend);
+                String lend = getLengthDisplayString(visualizable.variant().length());
+                return String.format("%s:%s-%sdel (%s)", loc.getChrom(), decimalFormat.format(loc.getBegin()), decimalFormat.format(loc.getEnd()), lend);
             case TRA:
+            case BND:
                 if (locations.size() != 2) {
                     throw new SvAnnRuntimeException("Was expecting two locations for translocation but got " + locations.size());
                 }
                 HtmlLocation locA = locations.get(0);
                 HtmlLocation locB = locations.get(1);
-                String translocationA = String.format("%s:%d", locA.getChrom(), locA.getBegin());
-                String translocationB = String.format("%s:%d", locB.getChrom(), locB.getBegin());
+                String translocationA = String.format("%s:%s", locA.getChrom(), decimalFormat.format(locA.getBegin()));
+                String translocationB = String.format("%s:%s", locB.getChrom(), decimalFormat.format(locB.getBegin()));
                 return String.format("t(%s, %s)", translocationA, translocationB);
             case DUP:
                 if (locations.size() != 1) {
@@ -206,7 +218,7 @@ public class HtmlVisualizer implements Visualizer {
                 HtmlLocation dupLoc = locations.get(0);
                 int dupBegin = Math.min(dupLoc.getBegin(), dupLoc.getEnd());
                 int dupEnd = Math.max(dupLoc.getBegin(), dupLoc.getEnd());
-                String lengthDup = getLengthDisplayString(dupBegin, dupEnd);
+                String lengthDup = getLengthDisplayString(visualizable.variant().length());
                 return String.format("%s:%d-%d duplication (%s)", dupLoc.getChrom(), dupBegin, dupEnd, lengthDup);
             case INV:
                 if (locations.size() != 1) {
@@ -215,16 +227,21 @@ public class HtmlVisualizer implements Visualizer {
                 HtmlLocation invLoc = locations.get(0);
                 int invBegin = Math.min(invLoc.getBegin(), invLoc.getEnd());
                 int invEnd = Math.max(invLoc.getBegin(), invLoc.getEnd());
-                String lengthInv = getLengthDisplayString(invBegin, invEnd);
+                String lengthInv = getLengthDisplayString(visualizable.variant().length());
                 return String.format("inv(%s)(%d; %d) (%s)", invLoc.getChrom(), invBegin, invEnd, lengthInv);
         }
 
-        return "TODO";
+        return "Unimplemented variant type: " + svtype.toString();
     }
 
 
     @Override
     public String getHtml(Visualizable visualizable) {
+        int totalAffectedGeneCount = visualizable.getGeneCount();
+        if (totalAffectedGeneCount >= THRESHOLD_COUNT_TO_SHOW_MULTIGENE_DISPLAY &&
+                totalAffectedGeneCount > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
+            return getMultigeneSequencePrioritization(visualizable);
+        }
         List<HtmlLocation> locations = visualizable.locations();
         String variantString = getVariantRepresentation(visualizable, locations);
         String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
@@ -261,13 +278,85 @@ public class HtmlVisualizer implements Visualizer {
         return String.format("<tr><td><b>%s</b></td><td>%s</td></tr>\n", item, row);
     }
 
+    String affectedSymbols(Visualizable visualizable) {
+        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
+        if (genes.isEmpty()) { return "n/a"; }
+        Collections.sort(genes);
+        List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
+        StringBuilder sb = new StringBuilder();
+        sb.append("<ul>");
+        for (String a : anchors) {
+            sb.append("<li>").append(a).append("</li>\n");
+        }
+        sb.append("</ul>");
+        return sb.toString();
+    }
+
+    String numerousAffectedSymbols(Visualizable visualizable) {
+        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
+        if (genes.isEmpty()) { return "n/a"; }
+        Collections.sort(genes);
+        List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
+        StringBuilder sb = new StringBuilder();
+        int n_genes = genes.size();
+
+        sb.append("<table class=\"numvartab\">\n");
+        sb.append("<caption>Affected genes</caption>\n");
+        //sb.append("<thead><tr><td>Tissue</td><td>position</td><td>tau</td></tr></thead>\n");
+        sb.append("<tbody>\n");
+        final List<List<String>> groups = range(0, anchors.size())
+                .boxed()
+                .collect(groupingBy(index -> index / 4))
+                .values()
+                .stream()
+                .map(indices -> indices
+                        .stream()
+                        .map(anchors::get)
+                        .collect(toList()))
+                .collect(toList());
+        for (List<String> group : groups) {
+            if (group.size() == 4) {
+                sb.append(fourItemRow(group.get(0), group.get(1), group.get(2), group.get(3)));
+            } else if (group.size() == 3) {
+                sb.append(fourItemRow(group.get(0), group.get(1), group.get(2), ""));
+            } else if (group.size() == 2) {
+                sb.append(fourItemRow(group.get(0), group.get(1), "", ""));
+            } else if (group.size() == 1) {
+                sb.append(fourItemRow(group.get(0), "",  "", ""));
+            }
+        }
+        sb.append("</tbody>\n</table>\n");
+        return sb.toString();
+    }
+
+    String numerousEnhancers(Visualizable visualizable) {
+        List<Enhancer> enhancerList = visualizable.enhancers();
+        Map<String, Integer> enhancerMap = new HashMap<>();
+        for (Enhancer e : enhancerList) {
+            String tissue = e.tissueLabel();
+            enhancerMap.putIfAbsent(tissue, 0);
+            enhancerMap.merge(tissue, 1, Integer::sum);
+        }
+        // sort the list (in ascending order)
+        List<Map.Entry<String, Integer>> linkedList =new LinkedList<>(enhancerMap.entrySet());
+        linkedList.sort(Map.Entry.comparingByValue());
+        StringBuilder sb = new StringBuilder();
+        sb.append("<table class=\"vartab\">\n");
+        sb.append("<caption>Enhancers</caption>\n");
+        sb.append("<thead><tr><td>Tissue</td><td>Count</td></tr></thead>\n");
+        // iterate in reverse (descending) order
+        ListIterator<Map.Entry<String, Integer>> listIterator = linkedList.listIterator(linkedList.size());
+        while (listIterator.hasPrevious()) {
+            Map.Entry<String, Integer> entry = listIterator.previous();
+            sb.append(twoItemRow(entry.getKey(), String.valueOf(entry.getValue())));
+        }
+        sb.append("</tbody>\n</table>\n");
+        return sb.toString();
+    }
+
+
     String getSequencePrioritization(Visualizable visualizable) {
         SvannaVariant variant = visualizable.variant();
-        if (visualizable.getGeneCount() > 2 &&
-                (variant.variantType().baseType() == VariantType.DEL ||
-                        variant.variantType().baseType() == VariantType.DUP)) {
-            return getMultigeneSequencePrioritization(visualizable);
-        }
         StringBuilder sb = new StringBuilder();
         int minSequenceDepth = variant.minDepthOfCoverage();
         int nRefReads = variant.numberOfRefReads();
@@ -307,6 +396,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(itemValueRow("Ref", refReads));
         sb.append(itemValueRow("Alt", altReads));
         sb.append(itemValueRow("Disease associations", getDiseaseGenePrioritizationHtml(visualizable)));
+        sb.append(itemValueRow("Affected genes", affectedSymbols(visualizable)));
         sb.append("</table>\n");
         return sb.toString();
     }
@@ -323,60 +413,87 @@ public class HtmlVisualizer implements Visualizer {
     private String getMultigeneSequencePrioritization(Visualizable visualizable) {
         StringBuilder sb = new StringBuilder();
         List<HtmlLocation> locations = visualizable.locations();
-        //String variantString = getVariantRepresentation(visualizable,  locations );
+        String variantString = getVariantRepresentation(visualizable,  locations );
+        Zygosity zygosity = visualizable.variant().zygosity();
+        String zygo = zygosity.equals(Zygosity.UNKNOWN) ?
+                "[unknown genotype]" :
+                String.format("[%s]", zygosity.name().toLowerCase());
         String idString = visualizable.variant().id();
-
-        sb.append("<p>").append(idString).append("</p>\n");
-        sb.append("<p>").append(visualizable.getType()).append("<br/>");
+        String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
+        sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact)
+                .append(" &emsp; ").append(zygo).append("</h1>\n");
+        sb.append("<div class=\"row\">\n");
+        sb.append("<div class=\"column\" style=\"background-color:#F8F8F8;\">\n");
+        sb.append("<table class=\"vartab\">\n");
+        sb.append("<caption>Variant information and disease association</caption>\n");
+        sb.append(itemValueRow("ID", idString));
+        sb.append(itemValueRow("type", visualizable.getType()));
+        sb.append(itemValueRow("impact", visualizable.getImpact()));
+        StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
-            sb.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
+            ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
         } else if (locations.size() == 1) {
-            sb.append(getUcscLink(locations.get(0))).append("</p>");
+            ucscBuilder.append(getUcscLink(locations.get(0))).append("</p>");
         } else {
-            sb.append("<ul>\n");
+            ucscBuilder.append("<ul>\n");
             for (var loc : locations) {
-                sb.append("<li>").append(getUcscLink(loc)).append("</li>\n");
+                ucscBuilder.append("<li>").append(getUcscLink(loc)).append("</li>\n");
             }
-            sb.append("</ul></p>\n");
+            ucscBuilder.append("</ul></p>\n");
         }
+        sb.append(itemValueRow("UCSC", ucscBuilder.toString()));
+        int nAltReads = visualizable.variant().numberOfAltReads();
+        int nRefReads = visualizable.variant().numberOfRefReads();
+        int totalReads = nAltReads + nRefReads;
+        if (totalReads == 0) {
+            LOGGER.warn("Total reads zero (should never happen), setting to 1.");
+            totalReads = 1;
+        }
+        String refReads = String.format("%d/%d reads (%.1f%%)", nRefReads, totalReads, 100.0 * (float)nRefReads/totalReads);
+        String altReads = String.format("%d/%d reads (%.1f%%)", nAltReads, totalReads, 100.0 * (float)nAltReads/totalReads);
+        sb.append(itemValueRow("Ref", refReads));
+        sb.append(itemValueRow("Alt", altReads));
+        sb.append(itemValueRow("Disease associations", getDiseaseGenePrioritizationHtml(visualizable)));
+        sb.append("</table>\n");
+        sb.append(numerousAffectedSymbols(visualizable));
 
-        // get list of genes
-        List<String> genes = visualizable.transcripts()
-                .stream()
-                .map(Transcript::hgvsSymbol)
-                .distinct()
-                .collect(Collectors.toList());
-        // show up to ten affected genes -- if there are more just show the count
-        if (genes.size() > 10) {
-            sb.append("<p>").append(genes.size()).append(" affected genes</p>\n");
-        } else {
-            sb.append("<p>Affected genes: <br/><ol>");
-            for (var g : genes) {
-                sb.append("<li>").append(g).append("</li>\n");
-            }
-            sb.append("</ol></p>\n");
-        }
+        sb.append("</div>\n");
+        sb.append("<div class=\"column\" style=\"background-color:#F0F0F0;\">\n");
+        sb.append(numerousEnhancers(visualizable)).append("\n");
+        sb.append("</div>\n");
+        sb.append("</div>\n");
+
+
+
+
         return sb.toString();
     }
 
 
-    private String getEnhancerPrioritizationHtml(Visualizable visualizable) {
+    private String getEnhancerTable(Visualizable visualizable) {
         List<Enhancer> enhancerList = visualizable.enhancers();
         if (enhancerList.isEmpty()) {
             return "";
         } else  if (visualizable.getGeneCount() > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
             return String.format("<p>Total of %d relevant enhancers associated this variant.</p>\n",
                     visualizable.enhancers().size());
-        } else if (enhancerList.size() > 10) {
-            return String.format("<p>Total of %d enhancers associated this variant.</p>\n",
-                    enhancerList.size());
         }
         StringBuilder sb = new StringBuilder();
         sb.append("<ul>\n");
+        sb.append("<table class=\"vartab\">\n");
+        sb.append("<caption>Enhancers</caption>\n");
+        sb.append("<thead><tr><td>Tissue</td><td>position</td><td>tau</td></tr></thead>\n");
+        sb.append("<tbody>\n");
         for (Enhancer e : enhancerList) {
-            sb.append("<li>").append(getEnhancerSummary(e)).append("</li>\n");
+            String tissue = e.tissueLabel();
+            String contig = e.contigName();
+            int start = e.start();
+            int end = e.end();
+            String pos = (contig.startsWith("chr") ? contig : "chr"+ contig) + ":" + start +"-"+end;
+            String tau = String.format("%.2f",e.tau());
+            sb.append(threeItemRow(tissue, pos, tau));
         }
-        sb.append("</ul>\n");
+        sb.append("</tbody>\n</table>\n");
         return sb.toString();
     }
 
@@ -412,6 +529,10 @@ public class HtmlVisualizer implements Visualizer {
 
     private String threeItemRow(String item1, String item2, String item3) {
         return String.format("<tr><td><b>%s</b></td><td>%s</td><td>%s</td></tr>\n", item1, item2, item3);
+    }
+
+    private String fourItemRow(String item1, String item2, String item3, String item4) {
+        return String.format("<tr><td><b>%s</b></td><td>%s</td><td>%s</td><td>%s</td></tr>\n", item1, item2, item3, item4);
     }
 
     String getOverlapSummary(Visualizable visualizable) {

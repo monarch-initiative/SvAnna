@@ -242,7 +242,7 @@ public class SvAnnOverlapperTest {
      */
     @Test
     public void testInsertionIn5UTR() {
-        Variant surf2insertion5utr = testVariants.insertions().surf2InsertionIn5UTR();;
+        Variant surf2insertion5utr = testVariants.insertions().surf2InsertionIn5UTR();
         List<Overlap> overlaps = overlapper.getOverlapList(surf2insertion5utr);
         assertEquals(2, overlaps.size());
         Set<String> expectedAccessionNumbers = Set.of("NM_017503.4", "NM_001278928.1");

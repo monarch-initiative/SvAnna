@@ -67,16 +67,12 @@ public class EnhancerOverlapper {
     }
 
     private List<Enhancer> getEnhancerOverlapsForTranslocation(Breakended variant) {
-        List<Enhancer> overlappingEnhancers = new ArrayList<>();
-
         GenomicPosition lb = variant.left().toPositiveStrand();
         IntervalArray<Enhancer> leftArray = chromosomeToEnhancerIntervalArrayMap.get(lb.contigId());
-        overlappingEnhancers.addAll(leftArray.findOverlappingWithPoint(lb.pos()).getEntries());
-
+        List<Enhancer> overlappingEnhancers = new ArrayList<>(leftArray.findOverlappingWithPoint(lb.pos()).getEntries());
         GenomicPosition rb = variant.right().toPositiveStrand();
         IntervalArray<Enhancer> rightArray = chromosomeToEnhancerIntervalArrayMap.get(rb.contigId());
         overlappingEnhancers.addAll(rightArray.findOverlappingWithPoint(rb.pos()).getEntries());
-
         if (overlappingEnhancers.isEmpty()) {
             return getLongRangeEnhancerEffects(lb, rb);
         }

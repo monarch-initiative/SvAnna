@@ -18,4 +18,5 @@ of germline variants.
    running
    BND<bndannotations>
    structuralvariation
+   vista
 

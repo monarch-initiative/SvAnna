@@ -1,0 +1,139 @@
+Sample name	Sample ID	Sample ontology ID	Facet ontology ID	Facet ontology term
+adipose tissue, adult, pool1	CNhs10615	FF:10010-101C1	UBERON:0001013	adipose tissue
+Whole blood (ribopure), donor090309, donation2	CNhs11671	FF:12180-129A2	UBERON:0000178	blood
+Whole blood (ribopure), donor090309, donation3	CNhs11948	FF:12181-129A3	UBERON:0000178	blood
+Whole blood (ribopure), donor090325, donation1	CNhs11075	FF:12176-128I7	UBERON:0000178	blood
+Whole blood (ribopure), donor090325, donation2	CNhs11076	FF:12177-128I8	UBERON:0000178	blood
+Whole blood (ribopure), donor090612, donation1	CNhs11672	FF:12182-129A4	UBERON:0000178	blood
+Whole blood (ribopure), donor090612, donation2	CNhs11673	FF:12183-129A5	UBERON:0000178	blood
+Whole blood (ribopure), donor090612, donation3	CNhs11949	FF:12184-129A6	UBERON:0000178	blood
+blood, adult, pool1	CNhs11761	FF:10053-101G8	UBERON:0000178	blood
+aorta, adult, pool1	CNhs11760	FF:10052-101G7	UBERON:0001981	blood vessel
+vein, adult	CNhs12844	FF:10191-103E2	UBERON:0001981	blood vessel
+frontal lobe, adult, pool1	CNhs10647	FF:10040-101F4	UBERON:0000955	brain
+globus pallidus - adult, donor10196	CNhs13801	FF:10175-103C4	UBERON:0000955	brain
+amygdala - adult, donor10196	CNhs13793	FF:10167-103B5	UBERON:0000955	brain
+amygdala, adult, donor10252	CNhs12311	FF:10151-102I7	UBERON:0000955	brain
+brain, adult, donor1	CNhs11796	FF:10084-102B3	UBERON:0000955	brain
+brain, adult, pool1	CNhs10617	FF:10012-101C3	UBERON:0000955	brain
+brain, fetal, pool1	CNhs11797	FF:10085-102B4	UBERON:0000955	brain
+caudate nucleus - adult, donor10196	CNhs13802	FF:10177-103C6	UBERON:0000955	brain
+caudate nucleus, adult, donor10252	CNhs12321	FF:10164-103B2	UBERON:0000955	brain
+cerebellum - adult, donor10196	CNhs13799	FF:10173-103C2	UBERON:0000955	brain
+cerebellum, adult, donor10252	CNhs12323	FF:10166-103B4	UBERON:0000955	brain
+cerebellum, adult, pool1	CNhs11795	FF:10083-102B2	UBERON:0000955	brain
+corpus callosum, adult, pool1	CNhs10649	FF:10042-101F6	UBERON:0000955	brain
+diencephalon, adult	CNhs12610	FF:10193-103E4	UBERON:0000955	brain
+duodenum, fetal, donor1, tech_rep1	CNhs11781	FF:10071-101I8	UBERON:0000955	brain
+duodenum, fetal, donor1, tech_rep2	CNhs12996	FF:10071-101I8	UBERON:0000955	brain
+globus pallidus, adult, donor10252	CNhs12319	FF:10161-103A8	UBERON:0000955	brain
+hippocampus - adult, donor10196	CNhs13795	FF:10169-103B7	UBERON:0000955	brain
+hippocampus, adult, donor10252	CNhs12312	FF:10153-102I9	UBERON:0000955	brain
+insula, adult, pool1	CNhs10646	FF:10039-101F3	UBERON:0000955	brain
+locus coeruleus - adult, donor10196	CNhs13808	FF:10182-103D2	UBERON:0000955	brain
+locus coeruleus, adult, donor10252	CNhs12322	FF:10165-103B3	UBERON:0000955	brain
+medial frontal gyrus - adult, donor10196	CNhs13796	FF:10170-103B8	UBERON:0000955	brain
+medial temporal gyrus - adult, donor10196	CNhs13809	FF:10183-103D3	UBERON:0000955	brain
+medial temporal gyrus, adult, donor10252	CNhs12310	FF:10150-102I6	UBERON:0000955	brain
+medulla oblongata - adult, donor10196	CNhs13800	FF:10174-103C3	UBERON:0000955	brain
+medulla oblongata, adult, donor10252	CNhs12315	FF:10155-103A2	UBERON:0000955	brain
+medulla oblongata, adult, pool1	CNhs10645	FF:10038-101F2	UBERON:0000955	brain
+middle temporal gyrus, donor10252	CNhs12316	FF:10156-103A3	UBERON:0000955	brain
+nucleus accumbens, adult, pool1	CNhs10644	FF:10037-101F1	UBERON:0000955	brain
+occipital cortex - adult, donor10196	CNhs13798	FF:10172-103C1	UBERON:0000955	brain
+occipital cortex, adult, donor10252	CNhs12320	FF:10163-103B1	UBERON:0000955	brain
+occipital lobe, adult, donor1	CNhs11787	FF:10076-102A4	UBERON:0000955	brain
+occipital lobe, fetal, donor1	CNhs11784	FF:10073-102A1	UBERON:0000955	brain
+occipital pole, adult, pool1	CNhs10643	FF:10036-101E9	UBERON:0000955	brain
+optic nerve, donor1	CNhs13449	FF:10277-104E7	UBERON:0000955	brain
+paracentral gyrus, adult, pool1	CNhs10642	FF:10035-101E8	UBERON:0000955	brain
+parietal lobe - adult, donor10196	CNhs13797	FF:10171-103B9	UBERON:0000955	brain
+parietal lobe, adult, donor10252	CNhs12317	FF:10157-103A4	UBERON:0000955	brain
+parietal lobe, adult, pool1	CNhs10641	FF:10034-101E7	UBERON:0000955	brain
+parietal lobe, fetal, donor1	CNhs11782	FF:10072-101I9	UBERON:0000955	brain
+pineal gland - adult, donor10196	CNhs13804	FF:10179-103C8	UBERON:0000955	brain
+pineal gland, adult, donor10252	CNhs12228	FF:10160-103A7	UBERON:0000955	brain
+pituitary gland - adult, donor10196	CNhs13805	FF:10180-103C9	UBERON:0000955	brain
+pituitary gland, adult, donor10252	CNhs12229	FF:10162-103A9	UBERON:0000955	brain
+pons, adult, pool1	CNhs10640	FF:10033-101E6	UBERON:0000955	brain
+postcentral gyrus, adult, pool1	CNhs10638	FF:10032-101E5	UBERON:0000955	brain
+putamen, adult, donor10196	CNhs12324	FF:10176-103C5	UBERON:0000955	brain
+substantia nigra, adult, donor10252	CNhs12318	FF:10158-103A5	UBERON:0000955	brain
+temporal lobe, adult, pool1	CNhs10637	FF:10031-101E4	UBERON:0000955	brain
+temporal lobe, fetal, donor1, tech_rep1	CNhs11772	FF:10063-101H9	UBERON:0000955	brain
+temporal lobe, fetal, donor1, tech_rep2	CNhs12997	FF:10063-101H9	UBERON:0000955	brain
+thalamus - adult, donor10196	CNhs13794	FF:10168-103B6	UBERON:0000955	brain
+thalamus, adult, donor10252	CNhs12314	FF:10154-103A1	UBERON:0000955	brain
+esophagus, adult, pool1	CNhs10620	FF:10015-101C6	UBERON:0001043	esophagus
+eye, fetal, donor1	CNhs11762	FF:10054-101G9	UBERON:0000970	eye
+retina, adult, pool1	CNhs10636	FF:10030-101E3	UBERON:0000970	eye
+ovary, adult, pool1	CNhs10626	FF:10020-101D2	UBERON:0000992	female gonad
+gall bladder, adult	CNhs12848	FF:10198-103E9	UBERON:0002110	gallbladder
+heart - mitral valve, adult	CNhs12855	FF:10205-103F7	UBERON:0000948	heart
+heart - pulmonic valve, adult	CNhs12856	FF:10206-103F8	UBERON:0000948	heart
+heart - tricuspid valve, adult	CNhs12857	FF:10207-103F9	UBERON:0000948	heart
+heart, adult, diseased post-infarction, donor1	CNhs11757	FF:10050-101G5	UBERON:0000948	heart
+heart, adult, diseased, donor1	CNhs11758	FF:10051-101G6	UBERON:0000948	heart
+heart, adult, pool1	CNhs10621	FF:10016-101C7	UBERON:0000948	heart
+heart, fetal, pool1	CNhs10653	FF:10046-101G1	UBERON:0000948	heart
+left atrium, adult, donor1	CNhs11790	FF:10079-102A7	UBERON:0000948	heart
+left ventricle, adult, donor1	CNhs11789	FF:10078-102A6	UBERON:0000948	heart
+ductus deferens, adult	CNhs12846	FF:10196-103E7	UBERON:0004054	internal male genitalia
+epididymis, adult	CNhs12847	FF:10197-103E8	UBERON:0004054	internal male genitalia
+seminal vesicle, adult	CNhs12851	FF:10201-103F3	UBERON:0004054	internal male genitalia
+kidney, adult, pool1	CNhs10622	FF:10017-101C8	UBERON:0002113	kidney
+kidney, fetal, pool1	CNhs10652	FF:10045-101F9	UBERON:0002113	kidney
+colon, adult, donor1	CNhs11794	FF:10082-102B1	UBERON:0000059	large intestine
+appendix, adult	CNhs12842	FF:10189-103D9	UBERON:0000059	large intestine
+colon, adult, pool1	CNhs10619	FF:10014-101C5	UBERON:0000059	large intestine
+colon, fetal, donor1	CNhs11780	FF:10070-101I7	UBERON:0000059	large intestine
+rectum, fetal, donor1	CNhs11777	FF:10067-101I4	UBERON:0000059	large intestine
+liver, adult, pool1	CNhs10624	FF:10018-101C9	UBERON:0002107	liver
+liver, fetal, pool1	CNhs11798	FF:10086-102B5	UBERON:0002107	liver
+lung, adult, pool1	CNhs10625	FF:10019-101D1	UBERON:0002048	lung
+lung, fetal, donor1	CNhs11680	FF:10068-101I5	UBERON:0002048	lung
+lung, right lower lobe, adult, donor1	CNhs11786	FF:10075-102A3	UBERON:0002048	lung
+trachea, adult, pool1	CNhs10635	FF:10029-101E2	UBERON:0002048	lung
+trachea, fetal, donor1	CNhs11766	FF:10058-101H4	UBERON:0002048	lung
+lymph node, adult, donor1	CNhs11788	FF:10077-102A5	UBERON:0000029	lymph node
+cerebral meninges, adult	CNhs12840	FF:10188-103D8	UBERON:0002360	meninx
+dura mater, adult, donor1	CNhs10648	FF:10041-101F5	UBERON:0002360	meninx
+olfactory region, adult	CNhs12611	FF:10195-103E6	UBERON:0003112	olfactory region
+pancreas, adult, donor1	CNhs11756	FF:10049-101G4	UBERON:0001264	pancreas
+parotid gland, adult	CNhs12849	FF:10199-103F1	UBERON:0001831	parotid gland
+penis, adult	CNhs12850	FF:10200-103F2	UBERON:0000989	penis
+placenta, adult, pool1	CNhs10627	FF:10021-101D3	UBERON:0001987	placenta
+prostate, adult, pool1	CNhs10628	FF:10022-101D4	UBERON:0002367	prostate gland
+salivary gland, adult, pool1	CNhs11677	FF:10093-102C3	UBERON:0001044	salivary gland
+diaphragm, fetal, donor1	CNhs11779	FF:10069-101I6	UBERON:0001134	skeletal muscle tissue
+skeletal muscle - soleus muscle, donor1	CNhs13454	FF:10282-104F3	UBERON:0001134	skeletal muscle tissue
+skeletal muscle, adult, pool1	CNhs10629	FF:10023-101D5	UBERON:0001134	skeletal muscle tissue
+skeletal muscle, fetal, donor1	CNhs11776	FF:10066-101I3	UBERON:0001134	skeletal muscle tissue
+skin, fetal, donor1	CNhs11774	FF:10065-101I2	UBERON:0002097	skin of body
+small intestine, adult, pool1	CNhs10630	FF:10024-101D6	UBERON:0002108	small intestine
+small intestine, fetal, donor1	CNhs11773	FF:10064-101I1	UBERON:0002108	small intestine
+smooth muscle, adult, pool1	CNhs11755	FF:10048-101G3	UBERON:0001135	smooth muscle tissue
+spinal cord - adult, donor10196	CNhs13807	FF:10181-103D1	UBERON:0002240	spinal cord
+spinal cord, adult, donor10252	CNhs12227	FF:10159-103A6	UBERON:0002240	spinal cord
+spinal cord, fetal, donor1	CNhs11764	FF:10056-101H2	UBERON:0002240	spinal cord
+spleen, adult, pool1	CNhs10631	FF:10025-101D7	UBERON:0002106	spleen
+spleen, fetal, pool1	CNhs10651	FF:10044-101F8	UBERON:0002106	spleen
+stomach, fetal, donor1	CNhs11771	FF:10062-101H8	UBERON:0000945	stomach
+submaxillary gland, adult	CNhs12852	FF:10202-103F4	UBERON:0001736	submandibular gland
+testis, adult, pool1	CNhs10632	FF:10026-101D8	UBERON:0000473	testis
+testis, adult, pool2	CNhs12998	FF:10096-102C6	UBERON:0000473	testis
+throat, adult	CNhs12858	FF:10209-103G2	UBERON:0000341	throat
+throat, fetal, donor1	CNhs11770	FF:10061-101H7	UBERON:0000341	throat
+thymus, adult, pool1	CNhs10633	FF:10027-101D9	UBERON:0002370	thymus
+thymus, fetal, pool1	CNhs10650	FF:10043-101F7	UBERON:0002370	thymus
+thyroid, adult, pool1	CNhs10634	FF:10028-101E1	UBERON:0002046	thyroid gland
+thyroid, fetal, donor1	CNhs11769	FF:10060-101H6	UBERON:0002046	thyroid gland
+tongue, adult	CNhs12853	FF:10203-103F5	UBERON:0001723	tongue
+tongue, fetal, donor1	CNhs11768	FF:10059-101H5	UBERON:0001723	tongue
+tonsil, adult, pool1	CNhs10654	FF:10047-101G2	UBERON:0002372	tonsil
+umbilical cord, fetal, donor1	CNhs11765	FF:10057-101H3	UBERON:0002331	umbilical cord
+bladder, adult, pool1	CNhs10616	FF:10011-101C2	UBERON:0001255	urinary bladder
+uterus, adult, pool1	CNhs11676	FF:10100-102D1	UBERON:0000995	uterus
+cervix, adult, pool1	CNhs10618	FF:10013-101C4	UBERON:0000995	uterus
+uterus, fetal, donor1	CNhs11763	FF:10055-101H1	UBERON:0000995	uterus
+vagina, adult	CNhs12854	FF:10204-103F6	UBERON:0000996	vagina

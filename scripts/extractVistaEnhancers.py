@@ -258,7 +258,6 @@ with open(output_BED4) as f:
         begin = fields[1]
         end = fields[2]
         tissues = fields[3]
-        print(tissues)
         i = tissues.find("(")
         name = tissues[0:i].replace("_", " ")
         if i < 0:
@@ -273,8 +272,8 @@ with open(output_BED4) as f:
                 raise ValueError("Could not find ")
             uberon = uberon_map.get(t)
             uberterm = "%s[%s]" % (uberon.label, uberon.id)
+            print(uberterm)
             uberon_list.append(uberterm)
-        print(name, tissues)
         fields = [name, chrom, begin, end, ";".join(uberon_list)]
         fh.write("\t".join(fields) + "\n")
     fh.close()

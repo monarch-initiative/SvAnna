@@ -1,0 +1,364 @@
+Sample name	Sample ID	Sample ontology ID	Facet ontology ID	Facet ontology term
+salivary acinar cells, donor1	CNhs12810	FF:11771-123I7	CL:0000622	acinar cell
+salivary acinar cells, donor2	CNhs12811	FF:11772-123I8	CL:0000622	acinar cell
+salivary acinar cells, donor3	CNhs12812	FF:11773-123I9	CL:0000622	acinar cell
+Sebocyte, donor1	CNhs10847	FF:11220-116B5	CL:0000622	acinar cell
+Sebocyte, donor2	CNhs11951	FF:11301-117B5	CL:0000622	acinar cell
+Amniotic Epithelial Cells, donor1	CNhs11341	FF:11533-120A3	CL:0002536	amniotic epithelial cell
+Amniotic Epithelial Cells, donor3	CNhs12125	FF:11694-123A2	CL:0002536	amniotic epithelial cell
+Astrocyte - cerebellum, donor1	CNhs11321	FF:11500-119F6	CL:0000127	astrocyte
+Astrocyte - cerebellum, donor2	CNhs12081	FF:11580-120F5	CL:0000127	astrocyte
+Astrocyte - cerebellum, donor3	CNhs12117	FF:11661-122F5	CL:0000127	astrocyte
+Astrocyte - cerebral cortex, donor1	CNhs10864	FF:11235-116D2	CL:0000127	astrocyte
+Astrocyte - cerebral cortex, donor2	CNhs11960	FF:11316-117D2	CL:0000127	astrocyte
+Astrocyte - cerebral cortex, donor3	CNhs12005	FF:11392-118C6	CL:0000127	astrocyte
+Basophils, donor3	CNhs12575	FF:12243-129H2	CL:0000767	basophil
+Endothelial Cells - Aortic, donor0	CNhs10837	FF:11207-116A1	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Aortic, donor1	CNhs12495	FF:11263-116G3	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Aortic, donor2	CNhs11375	FF:11340-117F8	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Aortic, donor3	CNhs12022	FF:11412-118E8	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Artery, donor1	CNhs12496	FF:11264-116G4	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Artery, donor2	CNhs11977	FF:11341-117F9	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Artery, donor3	CNhs12023	FF:11413-118E9	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Microvascular, donor1	CNhs11925	FF:11265-116G5	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Microvascular, donor2	CNhs11376	FF:11342-117G1	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Microvascular, donor3	CNhs12024	FF:11414-118F1	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Thoracic, donor1	CNhs11926	FF:11266-116G6	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Thoracic, donor2	CNhs11978	FF:11343-117G2	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Umbilical vein, donor1	CNhs10872	FF:11243-116E1	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Umbilical vein, donor2	CNhs11967	FF:11324-117E1	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Umbilical vein, donor3	CNhs12010	FF:11400-118D5	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Vein, donor1	CNhs12497	FF:11267-116G7	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Vein, donor2	CNhs11377	FF:11344-117G3	CL:0000071	blood vessel endothelial cell
+Endothelial Cells - Vein, donor3	CNhs12026	FF:11416-118F3	CL:0000071	blood vessel endothelial cell
+Smooth Muscle Cells - Bronchial, donor1	CNhs11328	FF:11512-119G9	CL:0002598	bronchial smooth muscle cell
+Fibroblast - Cardiac, donor2	CNhs11378	FF:11345-117G4	CL:0002548	cardiac fibroblast
+Fibroblast - Cardiac, donor1	CNhs12498	FF:11268-116G8	CL:0002548	cardiac fibroblast
+Fibroblast - Cardiac, donor3	CNhs12027	FF:11417-118F4	CL:0002548	cardiac fibroblast
+Fibroblast - Cardiac, donor4	CNhs11909	FF:11452-119A3	CL:0002548	cardiac fibroblast
+Fibroblast - Cardiac, donor5	CNhs12057	FF:11456-119A7	CL:0002548	cardiac fibroblast
+Fibroblast - Cardiac, donor6	CNhs12061	FF:11460-119B2	CL:0002548	cardiac fibroblast
+Cardiac Myocyte, donor1	CNhs12341	FF:11525-119I4	CL:0000746	cardiac myocyte
+Cardiac Myocyte, donor2	CNhs12350	FF:11605-120I3	CL:0000746	cardiac myocyte
+Cardiac Myocyte, donor3	CNhs12571	FF:11686-122I3	CL:0000746	cardiac myocyte
+Chondrocyte - de diff, donor1	CNhs11923	FF:11261-116G1	CL:0000138	chondrocyte
+Chondrocyte - de diff, donor2	CNhs11372	FF:11338-117F6	CL:0000138	chondrocyte
+Chondrocyte - de diff, donor3	CNhs12020	FF:11410-118E6	CL:0000138	chondrocyte
+Chondrocyte - re diff, donor2	CNhs11373	FF:11339-117F7	CL:0000138	chondrocyte
+Chondrocyte - re diff, donor3	CNhs12021	FF:11411-118E7	CL:0000138	chondrocyte
+Ciliary Epithelial Cells, donor2	CNhs11966	FF:11323-117D9	CL:0000067	ciliated epithelial cell
+Ciliary Epithelial Cells, donor3	CNhs12009	FF:11399-118D4	CL:0000067	ciliated epithelial cell
+Ciliary Epithelial Cells, donor1	CNhs10871	FF:11242-116D9	CL:0000067	ciliated epithelial cell
+Corneal Epithelial Cells, donor1	CNhs11336	FF:11526-119I5	CL:0000575	corneal epithelial cell
+Corneal Epithelial Cells, donor3	CNhs12123	FF:11687-122I4	CL:0000575	corneal epithelial cell
+Dendritic Cells - monocyte immature derived, donor1, tech_rep1	CNhs10855	FF:11227-116C3	CL:0000451	dendritic cell
+Dendritic Cells - monocyte immature derived, donor1, tech_rep2	CNhs11062	FF:11227-116C3	CL:0000451	dendritic cell
+Dendritic Cells - monocyte immature derived, donor3	CNhs12000	FF:11384-118B7	CL:0000451	dendritic cell
+Dendritic Cells - plasmacytoid, donor1	CNhs10857	FF:11228-116C4	CL:0000451	dendritic cell
+immature langerhans cells, donor1	CNhs13537	FF:11904-125F5	CL:0000451	dendritic cell
+immature langerhans cells, donor2	CNhs13480	FF:11905-125F6	CL:0000451	dendritic cell
+migratory langerhans cells, donor1	CNhs13535	FF:11901-125F2	CL:0000451	dendritic cell
+migratory langerhans cells, donor2	CNhs13536	FF:11902-125F3	CL:0000451	dendritic cell
+migratory langerhans cells, donor3	CNhs13547	FF:11903-125F4	CL:0000451	dendritic cell
+Hepatic Sinusoidal Endothelial Cells, donor1	CNhs12075	FF:11521-119H9	CL:1000398	endothelial cell of hepatic sinusoid
+Hepatic Sinusoidal Endothelial Cells, donor2	CNhs12092	FF:11601-120H8	CL:1000398	endothelial cell of hepatic sinusoid
+Endothelial Cells - Lymphatic, donor1	CNhs10865	FF:11236-116D3	CL:0002138	endothelial cell of lymphatic vessel
+Endothelial Cells - Lymphatic, donor2	CNhs11901	FF:11317-117D3	CL:0002138	endothelial cell of lymphatic vessel
+Endothelial Cells - Lymphatic, donor3	CNhs11906	FF:11393-118C7	CL:0002138	endothelial cell of lymphatic vessel
+Smooth Muscle Cells - Colonic, donor1	CNhs10868	FF:11239-116D6	CL:0002504	enteric smooth muscle cell
+Smooth Muscle Cells - Colonic, donor2	CNhs11963	FF:11320-117D6	CL:0002504	enteric smooth muscle cell
+Smooth Muscle Cells - Colonic, donor3	CNhs12007	FF:11396-118D1	CL:0002504	enteric smooth muscle cell
+Esophageal Epithelial Cells, donor1	CNhs11323	FF:11507-119G4	CL:0002252	epithelial cell of esophagus
+Hair Follicle Outer Root Sheath Cells, donor2	CNhs12347	FF:11584-120F9	CL:0002252	epithelial cell of esophagus
+Mallassez-derived cells, donor2	CNhs13550	FF:11929-125I3	CL:0002166	epithelial cell of Malassez
+Mallassez-derived cells, donor3	CNhs13551	FF:11930-125I4	CL:0002166	epithelial cell of Malassez
+Prostate Epithelial Cells (polarized), donor1	CNhs10882	FF:11253-116F2	CL:0002231	epithelial cell of prostate
+Prostate Epithelial Cells, donor2	CNhs11972	FF:11331-117E8	CL:0002231	epithelial cell of prostate
+Prostate Epithelial Cells, donor3	CNhs12014	FF:11404-118D9	CL:0002231	epithelial cell of prostate
+Adipocyte - omental, donor1	CNhs11054	FF:11473-119C6	CL:0000136	fat cell
+Adipocyte - omental, donor2	CNhs12067	FF:11474-119C7	CL:0000136	fat cell
+Adipocyte - omental, donor3	CNhs12068	FF:11475-119C8	CL:0000136	fat cell
+Adipocyte - perirenal, donor1	CNhs12069	FF:11476-119C9	CL:0000136	fat cell
+Adipocyte - subcutaneous, donor1	CNhs12494	FF:11259-116F8	CL:0000136	fat cell
+Adipocyte - subcutaneous, donor2	CNhs11371	FF:11336-117F4	CL:0000136	fat cell
+Adipocyte - subcutaneous, donor3	CNhs12017	FF:11408-118E4	CL:0000136	fat cell
+Adipocyte - breast, donor1	CNhs11051	FF:11376-118A8	CL:0000136	fat cell
+Fibroblast - Choroid Plexus, donor1	CNhs11319	FF:11492-119E7	CL:0002549	fibroblast of choroid plexus
+Fibroblast - Choroid Plexus, donor2	CNhs12344	FF:11572-120E6	CL:0002549	fibroblast of choroid plexus
+Fibroblast - Gingival, donor1	CNhs10866	FF:11237-116D4	CL:0002552	fibroblast of gingiva
+Fibroblast - Gingival, donor2	CNhs11961	FF:11318-117D4	CL:0002552	fibroblast of gingiva
+Fibroblast - Gingival, donor3	CNhs12006	FF:11394-118C8	CL:0002552	fibroblast of gingiva
+Fibroblast - Gingival, donor4 (GFH2)	CNhs10848	FF:11222-116B7	CL:0002552	fibroblast of gingiva
+Fibroblast - Gingival, donor5 (GFH3)	CNhs11952	FF:11303-117B7	CL:0002552	fibroblast of gingiva
+Fibroblast - Lymphatic, donor1	CNhs11322	FF:11506-119G3	CL:0002554	fibroblast of lymphatic vessel
+Fibroblast - Lymphatic, donor3	CNhs12118	FF:11667-122G2	CL:0002554	fibroblast of lymphatic vessel
+Fibroblast - Periodontal Ligament, donor1	CNhs10867	FF:11238-116D5	CL:0002556	fibroblast of periodontium
+Fibroblast - Periodontal Ligament, donor2	CNhs11962	FF:11319-117D5	CL:0002556	fibroblast of periodontium
+Fibroblast - Periodontal Ligament, donor3	CNhs11907	FF:11395-118C9	CL:0002556	fibroblast of periodontium
+Fibroblast - Periodontal Ligament, donor4 (PL29)	CNhs12493	FF:11223-116B8	CL:0002556	fibroblast of periodontium
+Fibroblast - Periodontal Ligament, donor5 (PL30)	CNhs11953	FF:11304-117B8	CL:0002556	fibroblast of periodontium
+Fibroblast - Periodontal Ligament, donor6 (PLH3)	CNhs11996	FF:11380-118B3	CL:0002556	fibroblast of periodontium
+Fibroblast - Pulmonary Artery, donor1	CNhs10878	FF:11250-116E8	CL:0002557	fibroblast of pulmonary artery
+Fibroblast - Conjunctival, donor1	CNhs11339	FF:11531-120A1	CL:0002550	fibroblast of the conjuctiva
+Fibroblast - Aortic Adventitial, donor1	CNhs10874	FF:11245-116E3	CL:1000306	fibroblast of tunica adventitia of artery
+Fibroblast - Aortic Adventitial, donor3	CNhs12011	FF:11401-118D6	CL:1000306	fibroblast of tunica adventitia of artery
+Gingival epithelial cells, donor1 (GEA11)	CNhs11061	FF:11221-116B6	CL:0002621	gingival epithelial cell
+Gingival epithelial cells, donor2 (GEA14)	CNhs11896	FF:11302-117B6	CL:0002621	gingival epithelial cell
+Gingival epithelial cells, donor3 (GEA15)	CNhs11903	FF:11379-118B2	CL:0002621	gingival epithelial cell
+Hair Follicle Dermal Papilla Cells, donor1	CNhs12501	FF:11271-116H2	CL:0002559	hair follicle cell
+Hair Follicle Dermal Papilla Cells, donor2	CNhs11979	FF:11348-117G7	CL:0002559	hair follicle cell
+Hair Follicle Dermal Papilla Cells, donor3	CNhs12030	FF:11420-118F7	CL:0002559	hair follicle cell
+Hair Follicle Outer Root Sheath Cells, donor1	CNhs12339	FF:11504-119G1	CL:0002559	hair follicle cell
+Hepatic Stellate Cells (lipocyte), donor1	CNhs11335	FF:11524-119I3	CL:0000632	hepatic stellate cell
+Hepatic Stellate Cells (lipocyte), donor2	CNhs12093	FF:11604-120I2	CL:0000632	hepatic stellate cell
+Hepatocyte, donor1	CNhs12340	FF:11523-119I2	CL:0000182	hepatocyte
+Hepatocyte, donor2	CNhs12349	FF:11603-120I1	CL:0000182	hepatocyte
+Hepatocyte, donor3	CNhs12626	FF:11684-122I1	CL:0000182	hepatocyte
+Intestinal epithelial cells (polarized), donor1	CNhs10875	FF:11246-116E4	CL:0002563	intestinal epithelial cell
+Iris Pigment Epithelial Cells, donor1	CNhs12596	FF:11530-119I9	CL:0002565	iris pigment epithelial cell
+Keratinocyte - epidermal, donor1	CNhs11064	FF:11272-116H3	CL:0000312	keratinocyte
+Keratinocyte - epidermal, donor2	CNhs11381	FF:11349-117G8	CL:0000312	keratinocyte
+Keratinocyte - epidermal, donor3	CNhs12031	FF:11421-118F8	CL:0000312	keratinocyte
+Keratinocyte - oral, donor1	CNhs10879	FF:11251-116E9	CL:0000312	keratinocyte
+Keratocytes, donor1	CNhs11337	FF:11527-119I6	CL:0002363	keratocyte
+Keratocytes, donor2	CNhs12095	FF:11607-120I5	CL:0002363	keratocyte
+Alveolar Epithelial Cells, donor2	CNhs12084	FF:11590-120G6	CL:0002518	kidney epithelial cell
+Renal Cortical Epithelial Cells, donor1	CNhs11331	FF:11516-119H4	CL:0002518	kidney epithelial cell
+Renal Cortical Epithelial Cells, donor2	CNhs12728	FF:11596-120H3	CL:0002518	kidney epithelial cell
+Renal Epithelial Cells, donor1	CNhs11332	FF:11517-119H5	CL:0002518	kidney epithelial cell
+Renal Epithelial Cells, donor2	CNhs12088	FF:11597-120H4	CL:0002518	kidney epithelial cell
+Renal Epithelial Cells, donor3	CNhs12732	FF:11678-122H4	CL:0002518	kidney epithelial cell
+Renal Glomerular Endothelial Cells, donor1	CNhs12074	FF:11514-119H2	CL:0002518	kidney epithelial cell
+Renal Glomerular Endothelial Cells, donor2	CNhs12086	FF:11594-120H1	CL:0002518	kidney epithelial cell
+Renal Glomerular Endothelial Cells, donor3	CNhs12624	FF:11675-122H1	CL:0002518	kidney epithelial cell
+Renal Glomerular Endothelial Cells, donor4	CNhs13080	FF:11783-124B1	CL:0002518	kidney epithelial cell
+Renal Mesangial Cells, donor1	CNhs11333	FF:11518-119H6	CL:0002518	kidney epithelial cell
+Renal Mesangial Cells, donor3	CNhs12121	FF:11679-122H5	CL:0002518	kidney epithelial cell
+Renal Proximal Tubular Epithelial Cell, donor1	CNhs11330	FF:11515-119H3	CL:0002518	kidney epithelial cell
+Renal Proximal Tubular Epithelial Cell, donor2	CNhs12087	FF:11595-120H2	CL:0002518	kidney epithelial cell
+Renal Proximal Tubular Epithelial Cell, donor3	CNhs12120	FF:11676-122H2	CL:0002518	kidney epithelial cell
+Smooth Muscle Cells - Bronchial, donor2	CNhs12348	FF:11592-120G8	CL:0002518	kidney epithelial cell
+Lens Epithelial Cells, donor1	CNhs12342	FF:11529-119I8	CL:0002224	lens epithelial cell
+Lens Epithelial Cells, donor2	CNhs12568	FF:11609-120I7	CL:0002224	lens epithelial cell
+Lens Epithelial Cells, donor3	CNhs12572	FF:11690-122I7	CL:0002224	lens epithelial cell
+CD19+ B Cells, donor1	CNhs12343	FF:11544-120B5	CL:0000945	lymphocyte of B lineage
+CD19+ B Cells, donor2	CNhs12352	FF:11624-122B4	CL:0000945	lymphocyte of B lineage
+CD19+ B Cells, donor3	CNhs12354	FF:11705-123B4	CL:0000945	lymphocyte of B lineage
+Macrophage - monocyte derived, donor1	CNhs10861	FF:11232-116C8	CL:0000235	macrophage
+Macrophage - monocyte derived, donor2	CNhs11899	FF:11313-117C8	CL:0000235	macrophage
+Macrophage - monocyte derived, donor3	CNhs12003	FF:11389-118C3	CL:0000235	macrophage
+Mammary Epithelial Cell, donor1	CNhs11077	FF:11273-116H4	CL:0002327	mammary epithelial cell
+Mammary Epithelial Cell, donor2	CNhs11382	FF:11350-117G9	CL:0002327	mammary epithelial cell
+Mammary Epithelial Cell, donor3	CNhs12032	FF:11422-118F9	CL:0002327	mammary epithelial cell
+Mast cell - stimulated, donor1	CNhs11073	FF:11487-119E2	CL:0000097	mast cell
+Mast cell, donor1	CNhs12566	FF:11563-120D6	CL:0000097	mast cell
+Mast cell, donor2	CNhs12594	FF:11565-120D8	CL:0000097	mast cell
+Mast cell, donor3	CNhs12593	FF:11566-120D9	CL:0000097	mast cell
+Mast cell, donor4	CNhs12592	FF:11567-120E1	CL:0000097	mast cell
+Melanocyte - dark, donor3	CNhs12570	FF:11663-122F7	CL:0000148	melanocyte
+Melanocyte - light, donor1	CNhs11303	FF:11274-116H5	CL:0000148	melanocyte
+Melanocyte - light, donor2	CNhs11383	FF:11351-117H1	CL:0000148	melanocyte
+Melanocyte - light, donor3	CNhs12033	FF:11423-118G1	CL:0000148	melanocyte
+amniotic membrane cells, donor1	CNhs12502	FF:12235-129G3	CL:0000134	mesenchymal cell
+chorionic membrane cells, donor2	CNhs12506	FF:12239-129G7	CL:0000134	mesenchymal cell
+chorionic membrane cells, donor1	CNhs12504	FF:12238-129G6	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - adipose, donor1	CNhs12363	FF:11747-123G1	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - adipose, donor2	CNhs12364	FF:11748-123G2	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - adipose, donor3	CNhs12365	FF:11749-123G3	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - bone marrow, donor1	CNhs12366	FF:11750-123G4	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - Wharton's Jelly, donor1	CNhs11057	FF:11548-120B9	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - adipose, donor3	CNhs12922	FF:11698-123A6	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - amniotic membrane, donor2	CNhs12104	FF:11627-122B7	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - bone marrow, donor1	CNhs11344	FF:11536-120A6	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - bone marrow, donor2	CNhs12100	FF:11616-122A5	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - bone marrow, donor3	CNhs12126	FF:11697-123A5	CL:0000134	mesenchymal cell
+Mesenchymal stem cells - hepatic, donor0	CNhs10845	FF:11218-116B3	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - hepatic, donor2	CNhs12730	FF:11618-122A7	CL:0000134	mesenchymal cell
+Mesenchymal stem cells - umbilical, donor0	CNhs12492	FF:11214-116A8	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - umbilical, donor3	CNhs12127	FF:11700-123A8	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - adipose, donor1	CNhs11345	FF:11537-120A7	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - umbilical, donor1	CNhs11347	FF:11539-120A9	CL:0000134	mesenchymal cell
+Multipotent Cord Blood Unrestricted Somatic Stem Cells, donor2	CNhs12105	FF:11629-122B9	CL:0000134	mesenchymal cell
+amniotic membrane cells, donor2	CNhs12503	FF:12236-129G4	CL:0000134	mesenchymal cell
+amniotic membrane cells, donor3	CNhs12379	FF:12237-129G5	CL:0000134	mesenchymal cell
+chorionic membrane cells, donor3	CNhs12380	FF:12240-129G8	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - bone marrow, donor2	CNhs12367	FF:11751-123G5	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - bone marrow, donor3	CNhs13098	FF:11840-124H4	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - cardiac, donor1	CNhs12368	FF:11752-123G6	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - cardiac, donor2	CNhs12369	FF:11753-123G7	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - cardiac, donor3	CNhs12370	FF:11754-123G8	CL:0000134	mesenchymal cell
+mesenchymal precursor cell - cardiac, donor4	CNhs12371	FF:11755-123G9	CL:0000134	mesenchymal cell
+Mesenchymal stem cells - adipose, donor0	CNhs10844	FF:11217-116B2	CL:0000134	mesenchymal cell
+Mesenchymal Stem Cells - amniotic membrane, donor1	CNhs11349	FF:11547-120B8	CL:0000134	mesenchymal cell
+Multipotent Cord Blood Unrestricted Somatic Stem Cells, donor1	CNhs11350	FF:11549-120C1	CL:0000134	mesenchymal cell
+Mesothelial Cells, donor1	CNhs10850	FF:11247-116E5	CL:0000077	mesothelial cell
+Mesothelial Cells, donor3	CNhs12012	FF:11402-118D7	CL:0000077	mesothelial cell
+Sertoli Cells, donor1	CNhs10851	FF:11255-116F4	CL:0000077	mesothelial cell
+CD14+ Monocytes, donor2	CNhs11954	FF:11305-117B9	CL:0000576	monocyte
+CD14+ Monocytes, donor3	CNhs11997	FF:11381-118B4	CL:0000576	monocyte
+CD14+CD16- Monocytes, donor1	CNhs13224	FF:11788-124B6	CL:0000576	monocyte
+CD14+ monocyte derived endothelial progenitor cells, donor2	CNhs11897	FF:11310-117C5	CL:0000576	monocyte
+CD14+ monocyte derived endothelial progenitor cells, donor3	CNhs11904	FF:11386-118B9	CL:0000576	monocyte
+CD14+ monocytes - mock treated, donor1	CNhs13468	FF:11863-125A9	CL:0000576	monocyte
+CD14+ monocytes - mock treated, donor2	CNhs13484	FF:11873-125C1	CL:0000576	monocyte
+CD14+ monocytes - mock treated, donor3	CNhs13491	FF:11883-125D2	CL:0000576	monocyte
+CD14+CD16+ Monocytes, donor2	CNhs13208	FF:11801-124D1	CL:0000576	monocyte
+CD14+ Monocytes, donor1	CNhs10852	FF:11224-116B9	CL:0000576	monocyte
+CD14+CD16- Monocytes, donor2	CNhs13216	FF:11799-124C8	CL:0000576	monocyte
+CD14+CD16+ Monocytes, donor3	CNhs13549	FF:11912-125G4	CL:0000576	monocyte
+CD14-CD16+ Monocytes, donor2	CNhs13207	FF:11800-124C9	CL:0000576	monocyte
+CD14+CD16- Monocytes, donor3	CNhs13540	FF:11910-125G2	CL:0000576	monocyte
+CD14+CD16+ Monocytes, donor1	CNhs13541	FF:11789-124B7	CL:0000576	monocyte
+CD14-CD16+ Monocytes, donor3	CNhs13548	FF:11911-125G3	CL:0000576	monocyte
+CD14+ monocyte derived endothelial progenitor cells, donor1	CNhs10858	FF:11229-116C5	CL:0000576	monocyte
+Myoblast, donor2	CNhs11965	FF:11322-117D8	CL:0000056	myoblast
+Myoblast, donor1	CNhs10870	FF:11241-116D8	CL:0000056	myoblast
+Myoblast, donor3	CNhs11908	FF:11398-118D3	CL:0000056	myoblast
+Natural Killer Cells, donor2	CNhs11957	FF:11311-117C6	CL:0000623	natural killer cell
+Natural Killer Cells, donor3	CNhs12001	FF:11387-118C1	CL:0000623	natural killer cell
+Natural Killer Cells, donor1	CNhs10859	FF:11230-116C6	CL:0000623	natural killer cell
+Neurons, donor1	CNhs12338	FF:11494-119E9	CL:0000540	neuron
+Neurons, donor2	CNhs12726	FF:11574-120E8	CL:0000540	neuron
+Neurons, donor3	CNhs13815	FF:11655-122E8	CL:0000540	neuron
+Neural stem cells, donor1	CNhs11063	FF:11275-116H6	CL:0000047	neuronal stem cell
+Neural stem cells, donor2	CNhs11384	FF:11352-117H2	CL:0000047	neuronal stem cell
+Neutrophils, donor1	CNhs10862	FF:11233-116C9	CL:0000775	neutrophil
+Neutrophils, donor2	CNhs11959	FF:11314-117C9	CL:0000775	neutrophil
+Neutrophils, donor3	CNhs11905	FF:11390-118C4	CL:0000775	neutrophil
+Osteoblast - differentiated, donor1	CNhs11311	FF:11276-116H7	CL:0000062	osteoblast
+Osteoblast - differentiated, donor2	CNhs11980	FF:11353-117H3	CL:0000062	osteoblast
+Osteoblast - differentiated, donor3	CNhs12035	FF:11425-118G3	CL:0000062	osteoblast
+Osteoblast, donor2	CNhs11385	FF:11354-117H4	CL:0000062	osteoblast
+Osteoblast, donor3	CNhs12036	FF:11426-118G4	CL:0000062	osteoblast
+Pericytes, donor1	CNhs11317	FF:11491-119E6	CL:0000669	pericyte cell
+Pericytes, donor2	CNhs12079	FF:11571-120E5	CL:0000669	pericyte cell
+Placental Epithelial Cells, donor1	CNhs11079	FF:11278-116H9	CL:0002577	placental epithelial cell
+Placental Epithelial Cells, donor2	CNhs11386	FF:11355-117H5	CL:0002577	placental epithelial cell
+Placental Epithelial Cells, donor3	CNhs12037	FF:11427-118G5	CL:0002577	placental epithelial cell
+Preadipocyte - breast, donor1	CNhs11052	FF:11467-119B9	CL:0002334	preadipocyte
+Preadipocyte - breast, donor2	CNhs11971	FF:11328-117E5	CL:0002334	preadipocyte
+Preadipocyte - omental, donor1	CNhs11065	FF:11468-119C1	CL:0002334	preadipocyte
+Preadipocyte - omental, donor2	CNhs11902	FF:11329-117E6	CL:0002334	preadipocyte
+Preadipocyte - omental, donor3	CNhs12013	FF:11403-118D8	CL:0002334	preadipocyte
+Preadipocyte - perirenal, donor1	CNhs12065	FF:11469-119C2	CL:0002334	preadipocyte
+Preadipocyte - subcutaneous, donor2	CNhs11981	FF:11356-117H6	CL:0002334	preadipocyte
+Preadipocyte - subcutaneous, donor3	CNhs12038	FF:11428-118G6	CL:0002334	preadipocyte
+Preadipocyte - visceral, donor1	CNhs11082	FF:11280-116I2	CL:0002334	preadipocyte
+Preadipocyte - visceral, donor2	CNhs11982	FF:11357-117H7	CL:0002334	preadipocyte
+Preadipocyte - visceral, donor3	CNhs12039	FF:11429-118G7	CL:0002334	preadipocyte
+Alveolar Epithelial Cells, donor1	CNhs11325	FF:11510-119G7	CL:0002368	respiratory epithelial cell
+Bronchial Epithelial Cell, donor4	CNhs12054	FF:11453-119A4	CL:0002368	respiratory epithelial cell
+Bronchial Epithelial Cell, donor5	CNhs12058	FF:11457-119A8	CL:0002368	respiratory epithelial cell
+Bronchial Epithelial Cell, donor6	CNhs12062	FF:11461-119B3	CL:0002368	respiratory epithelial cell
+Small Airway Epithelial Cells, donor1	CNhs10884	FF:11256-116F5	CL:0002368	respiratory epithelial cell
+Small Airway Epithelial Cells, donor2	CNhs11975	FF:11334-117F2	CL:0002368	respiratory epithelial cell
+Small Airway Epithelial Cells, donor3	CNhs12016	FF:11406-118E2	CL:0002368	respiratory epithelial cell
+Tracheal Epithelial Cells, donor1	CNhs11092	FF:11292-117A5	CL:0002368	respiratory epithelial cell
+Tracheal Epithelial Cells, donor2	CNhs11993	FF:11369-118A1	CL:0002368	respiratory epithelial cell
+Tracheal Epithelial Cells, donor3	CNhs12051	FF:11441-118I1	CL:0002368	respiratory epithelial cell
+Reticulocytes, biol_ rep1	CNhs13552	FF:11931-125I5	CL:0000558	reticulocyte
+Reticulocytes, biol_ rep2	CNhs13553	FF:11932-125I6	CL:0000558	reticulocyte
+Retinal Pigment Epithelial Cells, donor0	CNhs10842	FF:11215-116A9	CL:0002586	retinal pigment epithelial cell
+Retinal Pigment Epithelial Cells, donor1	CNhs11338	FF:11528-119I7	CL:0002586	retinal pigment epithelial cell
+Retinal Pigment Epithelial Cells, donor3	CNhs12733	FF:11689-122I6	CL:0002586	retinal pigment epithelial cell
+nasal epithelial cells, donor1, tech_rep1	CNhs12589	FF:12226-129F3	CL:0000098	sensory epithelial cell
+Olfactory epithelial cells, donor1	CNhs13816	FF:11933-125I7	CL:0000098	sensory epithelial cell
+Olfactory epithelial cells, donor2	CNhs13817	FF:11934-125I8	CL:0000098	sensory epithelial cell
+Olfactory epithelial cells, donor3	CNhs13818	FF:11935-125I9	CL:0000098	sensory epithelial cell
+Olfactory epithelial cells, donor4	CNhs13819	FF:11936-126A1	CL:0000098	sensory epithelial cell
+nasal epithelial cells, donor2	CNhs12574	FF:12227-129F4	CL:0000098	sensory epithelial cell
+Skeletal Muscle Cells, donor4	CNhs12053	FF:11451-119A2	CL:0000188	skeletal muscle cell
+Skeletal Muscle Cells, donor5	CNhs12056	FF:11455-119A6	CL:0000188	skeletal muscle cell
+Skeletal Muscle Cells, donor6	CNhs12060	FF:11459-119B1	CL:0000188	skeletal muscle cell
+Skeletal Muscle Satellite Cells, donor1	CNhs10869	FF:11240-116D7	CL:0000188	skeletal muscle cell
+Skeletal Muscle Satellite Cells, donor2	CNhs11964	FF:11321-117D7	CL:0000188	skeletal muscle cell
+Skeletal Muscle Satellite Cells, donor3	CNhs12008	FF:11397-118D2	CL:0000188	skeletal muscle cell
+Skeletal Muscle Cells, donor1	CNhs11083	FF:11281-116I3	CL:0000188	skeletal muscle cell
+Skeletal muscle cells differentiated into Myotubes - multinucleated, donor1	CNhs11084	FF:11282-116I4	CL:0000188	skeletal muscle cell
+Fibroblast - Dermal, donor1	CNhs12499	FF:11269-116G9	CL:0002620	skin fibroblast
+Fibroblast - Dermal, donor2	CNhs11379	FF:11346-117G5	CL:0002620	skin fibroblast
+Fibroblast - Dermal, donor3	CNhs12028	FF:11418-118F5	CL:0002620	skin fibroblast
+Fibroblast - Dermal, donor4	CNhs12052	FF:11450-119A1	CL:0002620	skin fibroblast
+Fibroblast - Dermal, donor5	CNhs12055	FF:11454-119A5	CL:0002620	skin fibroblast
+Fibroblast - Dermal, donor6	CNhs12059	FF:11458-119A9	CL:0002620	skin fibroblast
+Fibroblast - skin dystrophia myotonica, donor1	CNhs11353	FF:11556-120C8	CL:0002620	skin fibroblast
+Fibroblast - skin dystrophia myotonica, donor2	CNhs11354	FF:11557-120C9	CL:0002620	skin fibroblast
+Fibroblast - skin dystrophia myotonica, donor3	CNhs11913	FF:11560-120D3	CL:0002620	skin fibroblast
+Fibroblast - skin normal, donor1	CNhs11351	FF:11553-120C5	CL:0002620	skin fibroblast
+Fibroblast - skin normal, donor2	CNhs11914	FF:11561-120D4	CL:0002620	skin fibroblast
+Fibroblast - skin spinal muscular atrophy, donor1	CNhs11074	FF:11555-120C7	CL:0002620	skin fibroblast
+Fibroblast - skin spinal muscular atrophy, donor2	CNhs11911	FF:11558-120D1	CL:0002620	skin fibroblast
+Fibroblast - skin spinal muscular atrophy, donor3	CNhs11912	FF:11559-120D2	CL:0002620	skin fibroblast
+Fibroblast - skin walker warburg, donor1	CNhs11352	FF:11554-120C6	CL:0002620	skin fibroblast
+Smooth Muscle Cells - Prostate, donor1	CNhs11920	FF:11257-116F6	CL:1000487	smooth muscle cell of prostate
+Smooth Muscle Cells - Prostate, donor2	CNhs11976	FF:11335-117F3	CL:1000487	smooth muscle cell of prostate
+Smooth Muscle Cells - Esophageal, donor1	CNhs11324	FF:11508-119G5	CL:0002599	smooth muscle cell of the esophagus
+Smooth Muscle Cells - Tracheal, donor1	CNhs11329	FF:11513-119H1	CL:0002600	smooth muscle cell of trachea
+Smooth Muscle Cells - Tracheal, donor3	CNhs12894	FF:11674-122G9	CL:0002600	smooth muscle cell of trachea
+Meningeal Cells, donor1	CNhs11320	FF:11493-119E8	CL:0000499	stromal cell
+Meningeal Cells, donor2	CNhs12080	FF:11573-120E7	CL:0000499	stromal cell
+Meningeal Cells, donor3	CNhs12731	FF:11654-122E7	CL:0000499	stromal cell
+Pancreatic stromal cells, donor1	CNhs10877	FF:11249-116E7	CL:0000499	stromal cell
+Prostate Stromal Cells, donor1	CNhs10883	FF:11254-116F3	CL:0000499	stromal cell
+Prostate Stromal Cells, donor2	CNhs11973	FF:11332-117E9	CL:0000499	stromal cell
+Prostate Stromal Cells, donor3	CNhs12015	FF:11405-118E1	CL:0000499	stromal cell
+Synoviocyte, donor2	CNhs11992	FF:11368-117I9	CL:0000499	stromal cell
+Synoviocyte, donor3	CNhs12050	FF:11440-118H9	CL:0000499	stromal cell
+CD4+ T Cells, donor1	CNhs10853	FF:11225-116C1	CL:0000084	T cell
+CD4+ T Cells, donor2	CNhs11955	FF:11306-117C1	CL:0000084	T cell
+CD4+ T Cells, donor3	CNhs11998	FF:11382-118B5	CL:0000084	T cell
+CD4+CD25+CD45RA- memory regulatory T cells expanded, donor1	CNhs13204	FF:11794-124C3	CL:0000084	T cell
+CD4+CD25+CD45RA- memory regulatory T cells expanded, donor2	CNhs13811	FF:11916-125G8	CL:0000084	T cell
+CD4+CD25+CD45RA+ naive regulatory T cells, donor3	CNhs13513	FF:11907-125F8	CL:0000084	T cell
+CD4+CD25-CD45RA- memory conventional T cells expanded, donor1	CNhs13215	FF:11792-124C1	CL:0000084	T cell
+CD4+CD25+CD45RA- memory regulatory T cells expanded, donor3	CNhs13812	FF:11920-125H3	CL:0000084	T cell
+CD4+CD25+CD45RA- memory regulatory T cells, donor1	CNhs13195	FF:11782-124A9	CL:0000084	T cell
+CD4+CD25+CD45RA- memory regulatory T cells, donor2	CNhs13206	FF:11797-124C6	CL:0000084	T cell
+CD4+CD25+CD45RA- memory regulatory T cells, donor3	CNhs13538	FF:11908-125F9	CL:0000084	T cell
+CD4+CD25+CD45RA+ naive regulatory T cells expanded, donor1	CNhs13203	FF:11793-124C2	CL:0000084	T cell
+CD4+CD25-CD45RA- memory conventional T cells, donor3	CNhs13539	FF:11909-125G1	CL:0000084	T cell
+CD4+CD25-CD45RA+ naive conventional T cells expanded, donor2	CNhs13813	FF:11913-125G5	CL:0000084	T cell
+CD4+CD25-CD45RA+ naive conventional T cells expanded, donor3	CNhs13814	FF:11917-125G9	CL:0000084	T cell
+CD4+CD25-CD45RA+ naive conventional T cells, donor1	CNhs13223	FF:11784-124B2	CL:0000084	T cell
+CD4+CD25-CD45RA+ naive conventional T cells, donor2	CNhs13205	FF:11795-124C4	CL:0000084	T cell
+CD4+CD25-CD45RA+ naive conventional T cells, donor3	CNhs13512	FF:11906-125F7	CL:0000084	T cell
+CD8+ T Cells, donor1	CNhs10854	FF:11226-116C2	CL:0000084	T cell
+CD4+CD25-CD45RA+ naive conventional T cells expanded, donor1	CNhs13202	FF:11791-124B9	CL:0000084	T cell
+CD8+ T Cells, donor2	CNhs11956	FF:11307-117C2	CL:0000084	T cell
+CD8+ T Cells, donor3	CNhs11999	FF:11383-118B6	CL:0000084	T cell
+tenocyte, donor1	CNhs12639	FF:11763-123H8	CL:0000388	tendon cell
+tenocyte, donor2	CNhs12640	FF:11765-123I1	CL:0000388	tendon cell
+tenocyte, donor3	CNhs12641	FF:11768-123I4	CL:0000388	tendon cell
+Trabecular Meshwork Cells, donor1	CNhs11340	FF:11532-120A2	CL:0002367	trabecular meshwork cell
+Trabecular Meshwork Cells, donor3	CNhs12124	FF:11693-123A1	CL:0002367	trabecular meshwork cell
+Urothelial cells, donor0	CNhs10843	FF:11216-116B1	CL:0000731	urothelial cell
+Urothelial Cells, donor1	CNhs11334	FF:11520-119H8	CL:0000731	urothelial cell
+Urothelial Cells, donor2	CNhs12091	FF:11600-120H7	CL:0000731	urothelial cell
+Urothelial Cells, donor3	CNhs12122	FF:11681-122H7	CL:0000731	urothelial cell
+Smooth Muscle Cells - Uterine, donor3	CNhs11927	FF:11466-119B8	CL:0002601	uterine smooth muscle cell
+Smooth Muscle Cells - Aortic, donor0	CNhs10838	FF:11210-116A4	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Aortic, donor1	CNhs11085	FF:11283-116I5	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Aortic, donor2	CNhs11305	FF:11360-117I1	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Aortic, donor3	CNhs11309	FF:11432-118H1	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Brachiocephalic, donor1	CNhs11086	FF:11284-116I6	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Brachiocephalic, donor3	CNhs12043	FF:11433-118H2	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Brain Vascular, donor1	CNhs10863	FF:11234-116D1	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Brain Vascular, donor2	CNhs11900	FF:11315-117D1	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Brain Vascular, donor3	CNhs12004	FF:11391-118C5	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Carotid, donor1	CNhs11087	FF:11285-116I7	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Carotid, donor3	CNhs12044	FF:11434-118H3	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Coronary Artery, donor1	CNhs11088	FF:11286-116I8	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Coronary Artery, donor2	CNhs11987	FF:11363-117I4	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Coronary Artery, donor3	CNhs12045	FF:11435-118H4	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Internal Thoracic Artery, donor2	CNhs11988	FF:11364-117I5	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Internal Thoracic Artery, donor3	CNhs12046	FF:11436-118H5	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Pulmonary Artery, donor2	CNhs11989	FF:11365-117I6	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Subclavian Artery, donor1	CNhs11090	FF:11289-117A2	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Subclavian Artery, donor2	CNhs11990	FF:11366-117I7	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Subclavian Artery, donor3	CNhs12048	FF:11438-118H7	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Umbilical artery, donor0	CNhs10839	FF:11212-116A6	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Umbilical Artery, donor1	CNhs11091	FF:11290-117A3	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Umbilical Artery, donor2	CNhs11991	FF:11367-117I8	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Umbilical Artery, donor3	CNhs12049	FF:11439-118H8	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Umbilical Vein, donor1	CNhs12597	FF:11541-120B2	CL:0000359	vascular associated smooth muscle cell
+Smooth Muscle Cells - Umbilical Vein, donor2	CNhs12569	FF:11621-122B1	CL:0000359	vascular associated smooth muscle cell

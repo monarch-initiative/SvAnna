@@ -1,5 +1,6 @@
 package org.jax.svanna;
 
+import org.jax.svanna.cmd.DownloadCommand;
 import org.jax.svanna.cmd.IngestCommand;
 import picocli.CommandLine;
 
@@ -34,6 +35,7 @@ public class Main implements Callable<Integer> {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
+                .addSubcommand("download", new DownloadCommand())
                 .addSubcommand("ingest", new IngestCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));

@@ -18,5 +18,6 @@ of germline variants.
    running
    BND<bndannotations>
    structuralvariation
+   fantom5
    vista
 

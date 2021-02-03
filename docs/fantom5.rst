@@ -35,9 +35,6 @@ Our strategy is to map the libraries to facets (roughly, tissues or groups of ti
 to the FANTOM5 annotations. We then calculate the tissue-specifity score as detailed below. We then
 assign each enhancer to the tissue with the highest tissue specifity (highest number of reads).
 
-TODO -- should we filter out ubiquitous enhancers? Probably yes.
-
-
 
 Tissue specificity score
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,3 +46,11 @@ where 0 means unspecific (ubiquitously expressed across facets) and 1 means spec
 In detail, specificity(X) = 1 – (entropy(X) / log2(N) ), where X is a vector of
 sample-average expression values for an enhancer over all facets (cell types and
 organs/tissues were analyzed separately) and N its cardinality (|X|, the number of facets).
+
+
+Processing
+^^^^^^^^^^
+
+The code currently filters our FANTOM5 enhancers whose overall count per million level is below a given percentile threshold
+(by default: 20th percentile) and who tissue specificity (tau) is a below a percentile threshold (by default: 20th p
+ercentile).

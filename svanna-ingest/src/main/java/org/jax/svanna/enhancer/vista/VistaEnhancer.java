@@ -1,10 +1,13 @@
-package org.jax.svanna.enhancer;
+package org.jax.svanna.enhancer.vista;
 
 
+
+import org.jax.svanna.enhancer.AnnotatedTissue;
+import org.jax.svanna.enhancer.IngestedEnhancer;
 
 import java.util.List;
 
-public class VistaEnhancer implements IngestedEnhancer{
+public class VistaEnhancer implements IngestedEnhancer {
     private final String name;
     private final String chrom;
     private final int begin;

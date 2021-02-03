@@ -1,9 +1,8 @@
-package org.jax.svanna.io;
+package org.jax.svanna.enhancer.vista;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.enhancer.AnnotatedTissue;
 import org.jax.svanna.enhancer.IngestedEnhancer;
-import org.jax.svanna.enhancer.VistaEnhancer;
 import org.jax.svanna.hpomap.HpoMapping;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 

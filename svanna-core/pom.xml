@@ -15,7 +15,6 @@
         <dependency>
             <groupId>org.monarchinitiative.variant</groupId>
             <artifactId>variant-api</artifactId>
-            <version>${variant.api.version}</version>
         </dependency>
         <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>

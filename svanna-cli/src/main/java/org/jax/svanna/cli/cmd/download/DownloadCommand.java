@@ -20,7 +20,7 @@ public class DownloadCommand implements Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadCommand.class);
 
-    @CommandLine.Option(names = {"-d", "--download-dir"}, description = "path do download directory (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"-d", "--download-dir"}, description = "path to download directory (default: ${DEFAULT-VALUE})")
     public Path downloadDir = Path.of("data");
 
     @CommandLine.Option(names = {"-f", "--force-overwrite"}, description = "force overwrite the files (default: ${DEFAULT-VALUE})")

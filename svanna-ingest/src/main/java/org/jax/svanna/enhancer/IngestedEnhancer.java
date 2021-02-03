@@ -2,6 +2,7 @@ package org.jax.svanna.enhancer;
 
 import java.util.List;
 
+// TODO - extends GenomicRegion
 public interface IngestedEnhancer {
 
     String getName();

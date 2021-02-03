@@ -2,6 +2,8 @@ package org.jax.svanna.hpomap;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
+import java.util.Objects;
+
 public class HpoMapping {
 
   private final TermId otherOntologyTermId;
@@ -30,5 +32,28 @@ public class HpoMapping {
 
   public String getHpoLabel() {
     return hpoLabel;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    HpoMapping that = (HpoMapping) o;
+    return Objects.equals(otherOntologyTermId, that.otherOntologyTermId) && Objects.equals(otherOntologyLabel, that.otherOntologyLabel) && Objects.equals(hpoTermId, that.hpoTermId) && Objects.equals(hpoLabel, that.hpoLabel);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(otherOntologyTermId, otherOntologyLabel, hpoTermId, hpoLabel);
+  }
+
+  @Override
+  public String toString() {
+    return "HpoMapping{" +
+            "otherOntologyTermId=" + otherOntologyTermId +
+            ", otherOntologyLabel='" + otherOntologyLabel + '\'' +
+            ", hpoTermId=" + hpoTermId +
+            ", hpoLabel='" + hpoLabel + '\'' +
+            '}';
   }
 }

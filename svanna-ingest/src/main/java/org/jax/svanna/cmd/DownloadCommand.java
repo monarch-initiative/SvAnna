@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 
 @CommandLine.Command(name = "download",
         aliases = "D",
-        header = "intest and transform annotation files",
+        header = "ingest and transform annotation files",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,

@@ -19,6 +19,7 @@ import java.net.URLConnection;
  *
  * @author <a href="mailto:manuel.holtgrewe@charite.de">Manuel Holtgrewe</a>
  */
+// TODO - consider removal, this is utterly overcomplicated
 public class FileDownloader {
     private static final Logger logger = LoggerFactory.getLogger(FileDownloader.class);
     static class ProxyOptions {

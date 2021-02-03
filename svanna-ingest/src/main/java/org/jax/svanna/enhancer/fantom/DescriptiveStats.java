@@ -1,12 +1,7 @@
 package org.jax.svanna.enhancer.fantom;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.DoubleStream;
 
 /**
  * We use this to calculate some statistics about read counts and tau

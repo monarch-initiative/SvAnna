@@ -1,6 +1,5 @@
 package org.jax.svanna.enhancer.fantom;
 
-import org.checkerframework.checker.units.qual.A;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.enhancer.IngestedEnhancer;
 import org.jax.svanna.hpomap.HpoMapping;
@@ -10,7 +9,6 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

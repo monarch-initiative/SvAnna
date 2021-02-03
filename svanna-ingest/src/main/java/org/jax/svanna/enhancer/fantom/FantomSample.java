@@ -51,4 +51,15 @@ public class FantomSample {
     public int hashCode() {
         return Objects.hash(ontologyId, ontologyLabel, hpoId, hpoLabel, id);
     }
+
+    @Override
+    public String toString() {
+        return "FantomSample{" +
+                "hpoId=" + hpoId +
+                ", ontologyId=" + ontologyId +
+                ", ontologyLabel='" + ontologyLabel + '\'' +
+                ", hpoLabel='" + hpoLabel + '\'' +
+                ", id='" + id + '\'' +
+                '}';
+    }
 }

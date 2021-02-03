@@ -6,6 +6,7 @@ import org.jax.svanna.enhancer.AnnotatedTissue;
 import org.jax.svanna.enhancer.IngestedEnhancer;
 
 import java.util.List;
+import java.util.Objects;
 
 public class VistaEnhancer implements IngestedEnhancer {
     private final String name;
@@ -46,5 +47,29 @@ public class VistaEnhancer implements IngestedEnhancer {
     @Override
     public List<AnnotatedTissue> getTissues() {
         return this.tissues;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VistaEnhancer that = (VistaEnhancer) o;
+        return begin == that.begin && end == that.end && Objects.equals(name, that.name) && Objects.equals(chrom, that.chrom) && Objects.equals(tissues, that.tissues);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, chrom, begin, end, tissues);
+    }
+
+    @Override
+    public String toString() {
+        return "VistaEnhancer{" +
+                "name='" + name + '\'' +
+                ", chrom='" + chrom + '\'' +
+                ", begin=" + begin +
+                ", end=" + end +
+                ", tissues=" + tissues +
+                '}';
     }
 }

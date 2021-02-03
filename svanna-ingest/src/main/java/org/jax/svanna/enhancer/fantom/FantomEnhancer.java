@@ -5,6 +5,7 @@ import org.jax.svanna.enhancer.IngestedEnhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.List;
+import java.util.Objects;
 
 public class FantomEnhancer implements IngestedEnhancer {
     private final String chromosome;
@@ -47,6 +48,7 @@ public class FantomEnhancer implements IngestedEnhancer {
 
     @Override
     public List<AnnotatedTissue> getTissues() {
+        // TODO - complete
         return null;
     }
 
@@ -62,4 +64,28 @@ public class FantomEnhancer implements IngestedEnhancer {
         return totalCpm;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FantomEnhancer that = (FantomEnhancer) o;
+        return start == that.start && end == that.end && Double.compare(that.tau, tau) == 0 && Double.compare(that.totalCpm, totalCpm) == 0 && Objects.equals(chromosome, that.chromosome) && Objects.equals(top, that.top);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(chromosome, start, end, tau, top, totalCpm);
+    }
+
+    @Override
+    public String toString() {
+        return "FantomEnhancer{" +
+                "chromosome='" + chromosome + '\'' +
+                ", start=" + start +
+                ", end=" + end +
+                ", tau=" + tau +
+                ", top=" + top +
+                ", totalCpm=" + totalCpm +
+                '}';
+    }
 }

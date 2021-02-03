@@ -42,7 +42,10 @@ public class AnnotatedTissue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AnnotatedTissue that = (AnnotatedTissue) o;
-        return Objects.equals(tissueId, that.tissueId) && Objects.equals(tissueLabel, that.tissueLabel) && Objects.equals(hpoId, that.hpoId) && Objects.equals(hpoLabel, that.hpoLabel);
+        return Objects.equals(tissueId, that.tissueId) &&
+                Objects.equals(tissueLabel, that.tissueLabel) &&
+                Objects.equals(hpoId, that.hpoId) &&
+                Objects.equals(hpoLabel, that.hpoLabel);
     }
 
     @Override
@@ -58,5 +61,9 @@ public class AnnotatedTissue {
                 ", hpoId=" + hpoId +
                 ", hpoLabel='" + hpoLabel + '\'' +
                 '}';
+    }
+
+    public String summary() {
+        return String.format("%s[%s;%s;%s]", getTissueId().getValue() ,getTissueLabel(), getHpoId().getValue(), getHpoLabel());
     }
 }

@@ -2,6 +2,7 @@ package org.jax.svanna.cmd;
 
 import org.jax.svanna.Main;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.enhancer.AnnotatedTissue;
 import org.jax.svanna.enhancer.IngestedEnhancer;
 import org.jax.svanna.enhancer.fantom.Fantom5Parser;
 import org.jax.svanna.hpomap.HpoMapping;
@@ -12,13 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-
+import java.util.stream.Collectors;
 
 
 @CommandLine.Command(name = "ingest",
@@ -47,6 +51,8 @@ public class IngestCommand implements Callable<Integer> {
      */
     @CommandLine.Option(names = {"-t","--threshold"}, description = "default percentile threshold for enhancers")
     public int percentileThreshold = 20;
+    @CommandLine.Option(names = {"-o", "--outfile"}, description = "name of outfile (default: ${DEFAULT-VALUE})")
+    public String outfile = "hg38Enhancers.tsv";
 
     @Override
     public Integer call() {
@@ -60,8 +66,26 @@ public class IngestCommand implements Callable<Integer> {
         double tauAtThreshold = fantom5Parser.getTauThreshold();
         System.out.printf("[INFO] CPM at %d percentile: %f\n", this.percentileThreshold, thresholdCpm);
         System.out.printf("[INFO] Tau at %d percentile: %f\n", this.percentileThreshold, tauAtThreshold);
-        List<IngestedEnhancer> fantom5 = fantom5Parser.getAboveThresholdEnhancers(thresholdCpm, tauAtThreshold);
-        System.out.printf("[INFO] We extracted %d VISTA and %d FANTOM5 enhancers\n", vistaEnhancers.size(), fantom5.size());
+        List<IngestedEnhancer> aboveThresholdEnhancers = fantom5Parser.getAboveThresholdEnhancers(thresholdCpm, tauAtThreshold);
+        System.out.printf("[INFO] We extracted %d VISTA and %d FANTOM5 enhancers\n", vistaEnhancers.size(), aboveThresholdEnhancers.size());
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(this.outfile))) {
+            bw.write("name\tchrom\tbegin\tend\ttissues\n");
+            for (var ie : vistaEnhancers) {
+                String tissues = ie.getTissues().stream().map(AnnotatedTissue::summary).collect(Collectors.joining(";"));
+                bw.write(String.format("%s\t%s\t%d\t%d\t%s\n", ie.getName(), ie.getChromosome(), ie.getBegin(), ie.getEnd(), tissues));
+            }
+            for (var ie : aboveThresholdEnhancers) {
+                if (ie.getTissues() == null) {
+                    System.out.println("What happened?");
+                    int x=42;
+                }
+                String tissues = ie.getTissues().stream().map(AnnotatedTissue::summary).collect(Collectors.joining(";"));
+                bw.write(String.format("%s\t%s\t%d\t%d\t%s\n", ie.getName(), ie.getChromosome(), ie.getBegin(), ie.getEnd(), tissues));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 1;
+        }
         return 0;
     }
 

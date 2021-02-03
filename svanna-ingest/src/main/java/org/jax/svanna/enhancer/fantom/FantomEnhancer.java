@@ -2,7 +2,6 @@ package org.jax.svanna.enhancer.fantom;
 
 import org.jax.svanna.enhancer.AnnotatedTissue;
 import org.jax.svanna.enhancer.IngestedEnhancer;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.List;
 import java.util.Objects;
@@ -13,17 +12,17 @@ public class FantomEnhancer implements IngestedEnhancer {
     private final int end;
     private final double tau;
     /** HPO id corresponding to the tissue or cell line that has the most counts.*/
-    private final TermId top;
+    private final AnnotatedTissue topAnnotatedTissue;
     /** Total CPM of this enhancer in all tissues. */
     private final double totalCpm;
 
 
-    public  FantomEnhancer(String chrom, int s, int e, double tau, TermId stype, double totalCounts){
+    public  FantomEnhancer(String chrom, int s, int e, double tau, AnnotatedTissue tissue, double totalCounts){
         this.chromosome = chrom;
         this.start = s;
         this.end = e;
         this.tau = tau;
-        this.top = stype;
+        this.topAnnotatedTissue = tissue;
         this.totalCpm = totalCounts;
     }
 
@@ -48,16 +47,15 @@ public class FantomEnhancer implements IngestedEnhancer {
 
     @Override
     public List<AnnotatedTissue> getTissues() {
-        // TODO - complete
-        return null;
+        return List.of(this.topAnnotatedTissue);
     }
 
     public double getTau() {
         return tau;
     }
 
-    public TermId getTop() {
-        return top;
+    public AnnotatedTissue getTop() {
+        return this.topAnnotatedTissue;
     }
 
     public double getTotalCpm() {
@@ -69,12 +67,17 @@ public class FantomEnhancer implements IngestedEnhancer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FantomEnhancer that = (FantomEnhancer) o;
-        return start == that.start && end == that.end && Double.compare(that.tau, tau) == 0 && Double.compare(that.totalCpm, totalCpm) == 0 && Objects.equals(chromosome, that.chromosome) && Objects.equals(top, that.top);
+        return start == that.start &&
+                end == that.end &&
+                Double.compare(that.tau, tau) == 0 &&
+                Double.compare(that.totalCpm, totalCpm) == 0 &&
+                Objects.equals(chromosome, that.chromosome) &&
+                Objects.equals(topAnnotatedTissue, that.topAnnotatedTissue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(chromosome, start, end, tau, top, totalCpm);
+        return Objects.hash(chromosome, start, end, tau, topAnnotatedTissue, totalCpm);
     }
 
     @Override
@@ -84,7 +87,7 @@ public class FantomEnhancer implements IngestedEnhancer {
                 ", start=" + start +
                 ", end=" + end +
                 ", tau=" + tau +
-                ", top=" + top +
+                ", top=" + topAnnotatedTissue +
                 ", totalCpm=" + totalCpm +
                 '}';
     }

@@ -1,6 +1,7 @@
 package org.jax.svanna.enhancer.fantom;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.enhancer.AnnotatedTissue;
 import org.jax.svanna.enhancer.IngestedEnhancer;
 import org.jax.svanna.hpomap.HpoMapping;
 import org.jax.svanna.hpomap.HpoTissueMapParser;
@@ -23,7 +24,7 @@ public class Fantom5Parser {
     /** Key -- a FANTOM sample id such as ; value -- {@link FantomSample} object
      * with UBERON/CL and corresponding HPO Term information.
      */
-    private final Map<String, FantomSample> idToFantomSampleMap;
+    private final Map<String, AnnotatedTissue> fantomIdToAnnotatedTissueMap;
     /** Key -- an UBERON/CL id; value - {@link HpoMapping} object with corresponding HPO info. */
     private final Map<TermId, HpoMapping> hpoMap;
 
@@ -39,8 +40,8 @@ public class Fantom5Parser {
         this.hpoMap = HpoTissueMapParser.loadEnhancerMap();
 
         FantomSampleParser sampleParser = new FantomSampleParser(samplesPath, this.hpoMap);
-        this.idToFantomSampleMap = sampleParser.getIdToFantomSampleMap();
-        FantomCountMatrixParser cparser = new FantomCountMatrixParser(countsPath, idToFantomSampleMap);
+        this.fantomIdToAnnotatedTissueMap = sampleParser.getIdToFantomSampleMap();
+        FantomCountMatrixParser cparser = new FantomCountMatrixParser(countsPath, fantomIdToAnnotatedTissueMap);
         this.enhancers = cparser.getEnhancers();
         this.cpmAtThreshold = cparser.getCpmsAtPercentile(percentileThreshold);
         this.tauAtThreshold = cparser.getTauAtPercentile(percentileThreshold);
@@ -56,7 +57,7 @@ public class Fantom5Parser {
             String[] header = {"chrom", "start", "end", "tau", "ontology.id", "ontology.label","HPO.id", "HPO.label"};
             writer.write(String.join("\t", header) + "\n");
             for (FantomEnhancer fe : enhancers) {
-                TermId tid = fe.getTop();
+                TermId tid = fe.getTop().getHpoId();
                 HpoMapping hmap = this.hpoMap.get(tid);
                 if (hmap == null) {
                     throw new SvAnnRuntimeException("Could not find mapping for " + tid.getValue());

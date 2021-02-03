@@ -1,6 +1,7 @@
 package org.jax.svanna.enhancer.fantom;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.enhancer.AnnotatedTissue;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.*;
@@ -18,9 +19,14 @@ import java.util.zip.GZIPInputStream;
 public class FantomCountMatrixParser {
     /** Path to the F5.hg38.enhancers.expression.matrix file. */
     private final String fantomCountsPath;
-    /** List of header fields of the F5.hg38.enhancers.expression.matrix file. */
-    //private final String [] headerFields;
-    private final Map<String, FantomSample> idToFantomSampleMap;
+    /** key - FANTOM5 sample id (String); value -- corresponding {@link AnnotatedTissue} object with labels and HPO.*/
+    private final Map<String, AnnotatedTissue> idToFantomSampleMap;
+    /** key - an UBERON or Cell Ontology id; value -- corresponding {@link AnnotatedTissue} object with labels and HPO.
+     * The difference between this and {@link #idToFantomSampleMap} is that this is a map between an UBERON
+     * term and the corresponding HPO term and the other map is between the raw sample id and the AnnotatedTissue. In
+     * general, multiple FANTOM5 sample ids will be mapped to the same UBERON/Cell Ontology term. We need
+     * uberonToAnnotatedTissueMap after we have created the smaller matrix of counts where samples are combined to UBERON terms. */
+    private final Map<TermId, AnnotatedTissue> uberonToAnnotatedTissueMap;
 
 
     private final static double LOG_2 = Math.log(2);
@@ -37,17 +43,22 @@ public class FantomCountMatrixParser {
     /**
      *
      * @param hg38CountsPath F5.hg38.enhancers.expression.matrix.gz file
-     * @param idToFantomSampleMap path to Human.sample_name2library_id.txt file
+     * @param fantomIdToAnnotatedTissueMap path to Human.sample_name2library_id.txt file
      */
-    public FantomCountMatrixParser(String hg38CountsPath, Map<String, FantomSample> idToFantomSampleMap) {
+    public FantomCountMatrixParser(String hg38CountsPath, Map<String, AnnotatedTissue> fantomIdToAnnotatedTissueMap) {
         this.fantomCountsPath = hg38CountsPath;
         if (! hg38CountsPath.endsWith("gz")) {
             throw new SvAnnRuntimeException("We were expecting a gz file but got " + hg38CountsPath);
         }
         determine_dimensions();
         //enhancers = new ArrayList<>();
-        this.idToFantomSampleMap = idToFantomSampleMap;
-        n_selected_samples = idToFantomSampleMap.size();
+        this.idToFantomSampleMap = fantomIdToAnnotatedTissueMap;
+        // now get a map for the (much smaller set of) unique UBERON and Cell Ontology terms.
+        this.uberonToAnnotatedTissueMap = new HashMap<>();
+        for (AnnotatedTissue annotatedTissue : idToFantomSampleMap.values()) {
+            this.uberonToAnnotatedTissueMap.putIfAbsent(annotatedTissue.getTissueId(), annotatedTissue);
+        }
+        n_selected_samples = fantomIdToAnnotatedTissueMap.size();
         String [] enhancerIds;
         List<TermId> tissueList;
         double [][] cpmCounts;
@@ -77,6 +88,7 @@ public class FantomCountMatrixParser {
         System.out.printf("[INFO] We got %d enhancers\n", this.enhancerList.size());
     }
 
+
     List<TermId> getUniqueTissueTermList(String [] headerFields) {
         // first count the number of tissues represented by the data
         // iterate over the header fields and count the number of distinct tissues
@@ -84,7 +96,7 @@ public class FantomCountMatrixParser {
         for (String tissue : headerFields) {
             if ( this.idToFantomSampleMap.containsKey(tissue)) {
                 // the following gets us an UBERON or CL id
-                TermId tissueId = this.idToFantomSampleMap.get(tissue).getOntologyId();
+                TermId tissueId = this.idToFantomSampleMap.get(tissue).getTissueId();
                 tissueTypeSet.add(tissueId);
             }
         }
@@ -109,7 +121,7 @@ public class FantomCountMatrixParser {
             String id = headerFields[sampleIndex];
                 if (this.idToFantomSampleMap.containsKey(id)) {
                    // this is a column with a mappable tissue.
-                    TermId tissueId = this.idToFantomSampleMap.get(id).getOntologyId();
+                    TermId tissueId = this.idToFantomSampleMap.get(id).getTissueId();
                     if (tissueId == null) {
                         // should never happen
                         throw new SvAnnRuntimeException("Bad sample id " + id);
@@ -133,7 +145,6 @@ public class FantomCountMatrixParser {
         double []column_totals = new double[n_columns];
         for (int j=0;j<n_columns;j++) {
             for (int i = 0; i < n_rows; i++) {
-                //System.out.println("i=" + i +", j="+j);
                 column_totals[j] += unnormalizedMatrix[i][j];
             }
         }
@@ -236,7 +247,12 @@ public class FantomCountMatrixParser {
             }
         }
         TermId topTerm = tissueList.get(maxIndex);
-        return new FantomEnhancer(chrom, start, end, specificity, topTerm, totalCounts);
+        if (! this.uberonToAnnotatedTissueMap.containsKey(topTerm)) {
+            // should never happen
+            throw new SvAnnRuntimeException("Could not find " + topTerm.getValue() +" in uberonToAnnotatedTissueMap");
+        }
+        AnnotatedTissue atissue = this.uberonToAnnotatedTissueMap.get(topTerm);
+        return new FantomEnhancer(chrom, start, end, specificity, atissue, totalCounts);
     }
 
 
@@ -284,30 +300,6 @@ public class FantomCountMatrixParser {
         return Arrays.copyOfRange(fields, 1, fields.length);
     }
 
-
-    /**
-     * This function checks the fields of the header line and sees which columns correspond to tisssues that
-     * are mapped to UBERON/Cell Ontology terms. These columns are called active. The remaining columns will
-     * be skipped. Note that we use
-     * @return boolean array where true means include this column
-     */
-    private boolean [] processHeaderFields(String []fields)  {
-        // We only use columns if the samples can
-        boolean []  activeHeaderColumns = new boolean[n_samples];
-        int found = 0;
-        for (int i=1; i< fields.length; i++) {
-            // note we skip the first column
-            if (this.idToFantomSampleMap.containsKey(fields[i])) {
-                //System.out.println("Found " + [i]);
-                found++;
-                activeHeaderColumns[i-1] = true;
-            } else {
-                activeHeaderColumns[i-1] = false;
-            }
-        }
-        System.out.printf("[INFO] We found %d samples in the counts matrix header\n", found);
-        return activeHeaderColumns;
-    }
 
 
     /**

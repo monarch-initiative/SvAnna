@@ -1,6 +1,7 @@
 package org.jax.svanna.enhancer.fantom;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.enhancer.AnnotatedTissue;
 import org.jax.svanna.hpomap.HpoMapping;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
@@ -23,7 +24,7 @@ public class FantomSampleParser {
     /** Path to Human.sample_name2library_id.txt file. */
     private final String fantomHumanSamplesPath;
     /** Key, a label such as lung adenocarcinoma cell line:PC-14. Value, the sample id., e.g., CNhs10726. */
-     private final Map<String, FantomSample> idToFantomSampleMap;
+     private final Map<String, AnnotatedTissue> idToFantomSampleMap;
     /**
      * parse the FANTOM sample name to library id file.
      * @param path Path to Human.sample_name2library_id.txt file.
@@ -48,12 +49,9 @@ public class FantomSampleParser {
                 String sampleId = fields[1];
                 if (fantomSampleToHpoMap.containsKey(sampleId)) {
                     HpoMapping hmapping = fantomSampleToHpoMap.get(sampleId);
-                    FantomSample fsample = new FantomSample(hmapping.getOtherOntologyTermId(),
-                            hmapping.getOtherOntologyLabel(),
-                            hmapping.getHpoTermId(),
-                            hmapping.getHpoLabel(),
-                            sampleId);
-                    this.idToFantomSampleMap.put(sampleId, fsample);
+                    AnnotatedTissue atissue = new AnnotatedTissue(hmapping.getOtherOntologyTermId(), hmapping.getOtherOntologyLabel(),
+                            hmapping.getHpoTermId(), hmapping.getHpoLabel());
+                    this.idToFantomSampleMap.put(sampleId, atissue);
                     found++;
                 } else {
                     notfound++;
@@ -66,7 +64,7 @@ public class FantomSampleParser {
         System.out.printf("[INFO] We got %d FANTOM samples.\n", this.idToFantomSampleMap.size());
     }
 
-    public Map<String, FantomSample> getIdToFantomSampleMap() {
+    public Map<String, AnnotatedTissue> getIdToFantomSampleMap() {
         return idToFantomSampleMap;
     }
 }

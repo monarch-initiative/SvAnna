@@ -1,0 +1,121 @@
+#HPO-Uberon/CL map,,,
+#version: 2020-11-18,,,
+#id,label,hpo.id,hpo.label
+CL:0000622,acinar cell,HP:0000818,Abnormality of the endocrine system
+CL:0002536,epithelial cell of amnion,HP:0001197,Abnormality of prenatal development or birth
+CL:0000127,astrocyte,HP:0100707,Abnormal astrocyte morphology
+CL:0000767,basophil,HP:0001912,Abnormal basophil morphology
+CL:0000071,blood vessel endothelial cell,HP:0002597,Abnormality of the vasculature
+CL:0002598,bronchial smooth muscle cell,HP:0025426,Abnormal bronchus morphology
+CL:0002548,fibroblast of cardiac tissue,HP:0001627,Abnormal heart morphology
+CL:0000746,cardiac muscle cell,HP:0001627,Abnormal heart morphology
+CL:0000138,chondrocyte,HP:0002763,Abnormal cartilage morphology
+CL:0000575,corneal epithelial cell,HP:0011495,Abnormal corneal epithelium morphology
+CL:0002138,endothelial cell of lymphatic vessel,HP:0100766,Abnormal lymphatic vessel morphology
+CL:0002554,fibroblast of lymphatic vessel,HP:0100766,Abnormal lymphatic vessel morphology
+CL:0002504,enteric smooth muscle cell,HP:0030935,Abnormality of intestinal smooth muscle morphology
+CL:0002252,epithelial cell of esophagus,HP:0002031,Abnormal esophagus morphology
+CL:0002231,epithelial cell of prostate,HP:0008775,Abnormal prostate morphology
+CL:0000136,fat cell,HP:0009124,Abnormal adipose tissue morphology
+CL:0002549,fibroblast of choroid plexus,HP:0007376,Abnormality of the choroid plexus
+CL:0002552,fibroblast of gingiva,HP:0000168,Abnormality of the gingiva
+CL:0002556,fibroblast of periodontium,HP:0410026,Abnormality of the periodontium
+CL:0002557,fibroblast of pulmonary artery,HP:0004414,Abnormality of the pulmonary artery
+CL:0002550,fibroblast of the conjunctiva,HP:0000502,Abnormal conjunctiva morphology
+CL:1000306,fibroblast of tunica adventitia of artery,HP:0011004,Abnormal systemic arterial morphology
+CL:0002621,gingival epithelial cell,HP:0000168,Abnormality of the gingiva
+CL:0002559,hair follicle cell,HP:0001595,Abnormal hair morphology
+CL:0000632,hepatic stellate cell,HP:0410042,Abnormal liver morphology
+CL:0000182,hepatocyte,HP:0410042,Abnormal liver morphology
+CL:0002563,intestinal epithelial cell,HP:0002242,Abnormal intestine morphology
+CL:0002565,iris pigment epithelial cell,HP:0000525,Abnormality iris morphology
+CL:0000312,keratinocyte,HP:0000951,Abnormality of the skin
+CL:0002363,keratocyte,HP:0000481,Abnormal cornea morphology
+CL:0002518,kidney epithelial cell,HP:0000077,Abnormality of the kidney
+CL:0002224,lens epithelial cell,HP:0000517,Abnormality of the lens
+CL:0000945,lymphocyte of B lineage,HP:0002846,Abnormal B cell morphology
+CL:0000235,macrophage,HP:0004311,Abnormal macrophage morphology
+CL:0002327,mammary gland epithelial cell,HP:0000769,Abnormality of the breast
+CL:0000097,mast cell,HP:0100494,Abnormal mast cell morphology
+CL:0000148,melanocyte,HP:0001000,Abnormality of skin pigmentation
+CL:0000576,monocyte,HP:0012144,Abnormal monocyte morphology
+CL:0000056,myoblast,HP:0003011,Abnormality of the musculature
+CL:0000623,natural killer cell,HP:0012176,Abnormal natural killer cell morphology
+CL:0000540,neuron,HP:0012757,Abnormal neuron morphology
+CL:0000047,neuronal stem cell,HP:0012757,Abnormal neuron morphology
+CL:0000775,neutrophil,HP:0001874,Abnormality of neutrophils
+CL:0000062,osteoblast,HP:0000924,Abnormality of the skeletal system
+CL:0000669,pericyte cell,HP:0002597,Abnormality of the vasculature
+CL:0002577,placental epithelial cell,HP:0100767,Abnormal placenta morphology
+CL:0002334,preadipocyte,HP:0009124,Abnormal adipose tissue morphology
+CL:0002368,respiratory epithelial cell,HP:0002086,Abnormality of the respiratory system
+CL:0000558,reticulocyte,HP:0001877,Abnormal erythrocyte morphology
+CL:0002586,retinal pigment epithelial cell,HP:0007703,Abnormality of retinal pigmentation
+CL:0000188,cell of skeletal muscle,HP:0003011,Abnormality of the musculature
+CL:0002620,skin fibroblast,HP:0000951,Abnormality of the skin
+CL:1000487,smooth muscle cell of prostate,HP:0008775,Abnormal prostate morphology
+CL:0002599,smooth muscle cell of the esophagus,HP:0002031,Abnormal esophagus morphology
+CL:0002600,smooth muscle cell of trachea,HP:0002778,Abnormal trachea morphology
+CL:0000084,T cell,HP:0002843,Abnormal T cell morphology
+CL:0000388,tendon cell,HP:0100261,Abnormal tendon morphology
+CL:0002367,trabecular meshwork cell,HP:0012630,Abnormal trabecular meshwork morphology
+CL:0000731,urothelial cell,HP:0012210,Abnormal renal morphology
+CL:0002601,uterine smooth muscle cell,HP:0000130,Abnormality of the uterus
+CL:0000359,vascular associated smooth muscle cell,HP:0002597,Abnormality of the vasculature
+UBERON:0001013,adipose tissue,HP:0009124,Abnormal adipose tissue morphology
+UBERON:0000178,blood,HP:0001871,Abnormality of blood and blood-forming tissues
+UBERON:0001981,blood vessel,HP:0002597,Abnormality of the vasculature
+UBERON:0000955,brain,HP:0012443,Abnormality of brain morphology
+UBERON:0001043,esophagus,HP:0002031,Abnormal esophagus morphology
+UBERON:0000970,eye,HP:0000478,Abnormality of the eye
+UBERON:0000992,ovary,HP:0000137,Abnormality of the ovary
+UBERON:0002110,gall bladder,HP:0005264,Abnormality of the gallbladder
+UBERON:0000948,heart,HP:0001627,Abnormal heart morphology
+UBERON:0004054,internal male genitalia,HP:0000022,Abnormality of male internal genitalia
+UBERON:0002113,kidney,HP:0000077,Abnormality of the kidney
+UBERON:0000059,large intestine,HP:0002250,Abnormal large intestine morphology
+UBERON:0002107,liver,HP:0001392,Abnormality of the liver
+UBERON:0002048,lung,HP:0002088,Abnormal lung morphology
+UBERON:0000029,lymph node,HP:0002733,Abnormality of the lymph nodes
+UBERON:0002360,meninx,HP:0010651,Abnormal meningeal morphology
+UBERON:0003112,olfactory region,HP:0040327,Abnormal morphology of the olfactory bulb
+UBERON:0001264,pancreas,HP:0001732,Abnormality of the pancreas
+UBERON:0001831,parotid gland,HP:0000197,Abnormal parotid gland morphology
+UBERON:0000989,penis,HP:0000036,Abnormality of the penis
+UBERON:0001987,placenta,HP:0100767,Abnormal placenta morphology
+UBERON:0002367,prostate gland,HP:0008775,Abnormal prostate morphology
+UBERON:0001044,saliva-secreting gland,HP:0010286,Abnormal salivary gland morphology
+UBERON:0001134,skeletal muscle tissue,HP:0003011,Abnormality of the musculature
+UBERON:0002097,skin of body,HP:0000951,Abnormality of the skin
+UBERON:0002108,small intestine,HP:0002244,Abnormality of the small intestine
+UBERON:0001135,smooth muscle tissue,HP:0030935,Abnormality of intestinal smooth muscle morphology
+UBERON:0002240,spinal cord,HP:0002143,Abnormality of the spinal cord
+UBERON:0002106,spleen,HP:0001743,Abnormality of the spleen
+UBERON:0000945,stomach,HP:0002577,Abnormal stomach morphology
+UBERON:0001736,submandibular gland,HP:0010287,Abnormality of the submandibular glands
+UBERON:0000473,testis,HP:0000035,Abnormal testis morphology
+UBERON:0000341,throat,HP:0000600,Abnormality of the pharynx
+UBERON:0002370,thymus,HP:0000777,Abnormality of the thymus
+UBERON:0002046,thyroid gland,HP:0000820,Abnormality of the thyroid gland
+UBERON:0001723,tongue,HP:0000157,Abnormality of the tongue
+UBERON:0002372,tonsil,HP:0100765,Abnormality of the tonsils
+UBERON:0002331,umbilical cord,HP:0010881,Abnormality of the umbilical cord
+UBERON:0001255,urinary bladder,HP:0000014,Abnormality of the bladder
+UBERON:0000995,uterus,HP:0000130,Abnormality of the uterus
+UBERON:0000996,vagina,HP:0000142,Abnormal vagina morphology
+UBERON:0001049,neural tube,HP:0002011,Morphological central nervous system abnormality
+UBERON:0007277,presumptive hindbrain,HP:0011282,Abnormality of hindbrain morphology
+UBERON:0002101,limb,HP:0040064,Abnormality of limbs
+UBERON:0001785,cranial nerve,HP:0001291,Abnormal cranial nerve morphology
+UBERON:0009616,presumptive midbrain,HP:0002418,Abnormality of midbrain morphology
+UBERON:0001890,forebrain,HP:0100547,Abnormality of forebrain morphology
+UBERON:0001062,anatomical entity,HP:0000118,Phenotypic abnormality
+UBERON:0000004,nose,HP:0000366,Abnormality of the nose
+UBERON:0002415,tail,HP:0000925,Abnormality of the vertebral column
+UBERON:0000044,dorsal root ganglion,HP:0000759,Abnormal peripheral nervous system morphology
+UBERON:0001675,trigeminal ganglion,HP:0010824,Abnormal fifth cranial nerve morphology
+UBERON:0002539,pharyngeal arch,HP:0000600,Abnormality of the pharynx
+UBERON:0002329,somite,HP:0000925,Abnormality of the vertebral column
+UBERON:0011757,differentiated genital tubercle,HP:0012243,Abnormal reproductive system morphology
+UBERON:0009891,facial mesenchyme,HP:0000271,Abnormality of the face
+UBERON:0001690,ear,HP:0031703,Abnormal ear morphology

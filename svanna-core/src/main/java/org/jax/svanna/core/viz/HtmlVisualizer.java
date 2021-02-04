@@ -238,8 +238,7 @@ public class HtmlVisualizer implements Visualizer {
     @Override
     public String getHtml(Visualizable visualizable) {
         int totalAffectedGeneCount = visualizable.getGeneCount();
-        if (totalAffectedGeneCount >= THRESHOLD_COUNT_TO_SHOW_MULTIGENE_DISPLAY &&
-                totalAffectedGeneCount > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
+        if (totalAffectedGeneCount > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
             return getMultigeneSequencePrioritization(visualizable);
         }
         List<HtmlLocation> locations = visualizable.locations();

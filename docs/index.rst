@@ -15,6 +15,7 @@ of germline variants.
    :caption: Contents:
 
    setup
+   enhancers
    running
    BND<bndannotations>
    structuralvariation

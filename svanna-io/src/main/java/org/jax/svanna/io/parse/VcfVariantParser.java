@@ -8,7 +8,9 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.util.VariantTrimmer;
+import org.monarchinitiative.svart.util.VcfConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,12 +31,11 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfVariantParser.class);
 
-
     private final GenomicAssembly assembly;
 
-    private final BreakendAssembler breakendAssembler;
-
     private final VariantCallAttributeParser attributeParser;
+
+    private final VcfConverter vcfConverter;
 
     private final boolean requireVcfIndex;
 
@@ -45,7 +46,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
     public VcfVariantParser(GenomicAssembly assembly, boolean requireVcfIndex) {
         this.attributeParser = VariantCallAttributeParser.getInstance();
         this.assembly = assembly;
-        this.breakendAssembler = new BreakendAssembler(assembly, attributeParser);
+        this.vcfConverter = new VcfConverter(assembly, VariantTrimmer.leftShiftingTrimmer(VariantTrimmer.removingCommonBase()));
         this.requireVcfIndex = requireVcfIndex;
     }
 
@@ -109,57 +110,42 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
      */
     Function<VariantContext, Optional<? extends SvannaVariant>> toVariants() {
         return vc -> {
-            String vRepr = makeVariantRepresentation(vc);
+            if (assembly.contigByName(vc.getContig()) == Contig.unknown()) {
+                if (LOGGER.isWarnEnabled())
+                    LOGGER.warn("Unknown contig `{}` for variant `{}`", vc.getContig(), makeVariantRepresentation(vc));
+                return Optional.empty();
+            }
 
             List<Allele> alts = vc.getAlternateAlleles();
             if (alts.size() != 1) {
-                LOGGER.warn("Parsing variant with {} (!=2) alt alleles is not supported: {}", alts.size(), vRepr);
+                if (LOGGER.isWarnEnabled())
+                    LOGGER.warn("Parsing variant with {} (!=2) alt alleles is not supported: {}", alts.size(), makeVariantRepresentation(vc));
                 return Optional.empty();
             }
 
             Allele altAllele = alts.get(0);
             String alt = altAllele.getDisplayString();
-            if (VariantType.isBreakend(alt)) {
-                // breakend
-                return breakendAssembler.resolveBreakends(vc);
-            } else if (VariantType.isLargeSymbolic(alt)) {
-                // symbolic
-                return parseIntrachromosomalVariantAllele(vc);
-            } else {
-                // sequence variant
+
+            if (VariantType.isSymbolic(alt)) {
+                return (VariantType.isBreakend(alt))
+                        ? parseBreakendAllele(vc)
+                        : parseSymbolicVariantAllele(vc);
+            } else
                 return parseSequenceVariantAllele(vc);
-            }
         };
     }
 
     private Optional<? extends SvannaVariant> parseSequenceVariantAllele(VariantContext vc) {
-        String contigName = vc.getContig();
-        Contig contig = assembly.contigByName(contigName);
-        if (contig == null) {
-            LOGGER.warn("Unknown contig `{}` in variant `{}-{}:({})`", contigName, vc.getContig(), vc.getStart(), vc.getID());
-            return Optional.empty();
-        }
+        VariantCallAttributes attrs = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        Allele alt = vc.getAlternateAllele(0);
-        VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
+        DefaultSvannaVariant.Builder builder = vcfConverter.convert(DefaultSvannaVariant.builder(),
+                vc.getContig(), vc.getID(), vc.getStart(),
+                vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString());
 
-        return Optional.of(
-                DefaultSvannaVariant.oneBasedSequenceVariant(contig, vc.getID(), vc.getStart(),
-                        vc.getReference().getDisplayString(), alt.getDisplayString(),
-                        variantCallAttributes));
+        return Optional.of(builder.variantCallAttributes(attrs).build());
     }
 
-    private Optional<? extends SvannaVariant> parseIntrachromosomalVariantAllele(VariantContext vc) {
-        String vr = makeVariantRepresentation(vc);
-
-        // parse contig
-        String contigName = vc.getContig();
-        Contig contig = assembly.contigByName(contigName);
-        if (contig == null) {
-            LOGGER.warn("Unknown contig `{}` in variant `{}`", contigName, vr);
-            return Optional.empty();
-        }
-
+    private Optional<? extends SvannaVariant> parseSymbolicVariantAllele(VariantContext vc) {
         // parse start pos and CIPOS
         ConfidenceInterval cipos;
         List<Integer> cp = vc.getAttributeAsIntList("CIPOS", 0);
@@ -168,7 +154,8 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         } else if (cp.size() == 2) {
             cipos = ConfidenceInterval.of(cp.get(0), cp.get(1));
         } else {
-            LOGGER.warn("Invalid CIPOS field `{}` in variant `{}`", vc.getAttributeAsString("CIPOS", ""), vr);
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Invalid CIPOS field `{}` in variant `{}`", vc.getAttributeAsString("CIPOS", ""), makeVariantRepresentation(vc));
             return Optional.empty();
         }
         Position start = Position.of(vc.getStart(), cipos);
@@ -177,7 +164,8 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         ConfidenceInterval ciend;
         int endPos = vc.getAttributeAsInt("END", 0); // 0 is not allowed in 1-based VCF coordinate system
         if (endPos < 1) {
-            LOGGER.warn("Missing END field for variant `{}`", vr);
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Missing END field for variant `{}`", makeVariantRepresentation(vc));
             return Optional.empty();
         }
         List<Integer> ce = vc.getAttributeAsIntList("CIEND", 0);
@@ -186,48 +174,84 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         } else if (ce.size() == 2) {
             ciend = ConfidenceInterval.of(ce.get(0), ce.get(1));
         } else {
-            LOGGER.warn("Invalid CIEND field `{}` in variant `{}`", vc.getAttributeAsString("CIEND", ""), vr);
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Invalid CIEND field `{}` in variant `{}`", vc.getAttributeAsString("CIEND", ""), makeVariantRepresentation(vc));
             return Optional.empty();
         }
         Position end = Position.of(endPos, ciend);
 
-        // assemble the results
+        // we only support calls with 1 genotype
+        GenotypesContext gts = vc.getGenotypes();
+        if (gts.isEmpty()) {
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Parsing symbolic variant with no genotype call is not supported: {}", makeVariantRepresentation(vc));
+            return Optional.empty();
+        } else if (gts.size() > 1) {
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Parsing symbolic variants with >1 genotype calls is not supported: {}", makeVariantRepresentation(vc));
+            return Optional.empty();
+        }
+
+
         String ref = vc.getReference().getDisplayString();
         String alt = vc.getAlternateAllele(0).getDisplayString();
         int svlen = vc.getAttributeAsInt("SVLEN", 0);
-        if (alt.equals("<INV>") && svlen != 0) {
-            // handle sniffles case
+        if (alt.equals("<INV>") && svlen != 0) { // happens in Sniffles input
+            if (LOGGER.isInfoEnabled())
+                LOGGER.info("Correcting SVLEN `{}!=0` for an inversion `{}`", svlen, makeVariantRepresentation(vc));
             svlen = 0;
         }
 
-        // parse depth & zygosity
-        GenotypesContext gts = vc.getGenotypes();
-        if (gts.isEmpty()) {
-            LOGGER.warn("Parsing symbolic variant with no genotype call is not supported: {}", vr);
-            return Optional.empty();
-        } else if (gts.size() > 1) {
-            LOGGER.warn("Parsing symbolic variants with >1 genotype calls is not supported: {}", vr);
-            return Optional.empty();
-        }
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
-        try {
-            return Optional.of(
-                    DefaultSvannaVariant.of(contig, vc.getID(), Strand.POSITIVE, CoordinateSystem.ONE_BASED,
-                            start, end, ref, alt, svlen,
-                            variantCallAttributes));
-        } catch (IllegalArgumentException e) {
-            System.out.printf("[ERROR] Caught eception while trying to build DefaultSvannaVariant with:\n");
-            System.out.printf("[ERROR] \tcontig: %s\n", contig);
-            System.out.printf("[ERROR] \tvc.getID(): %s\n", vc.getID());
-            System.out.printf("[ERROR] \tstart: %s\n", start);
-            System.out.printf("[ERROR] \tend: %s\n", end);
-            System.out.printf("[ERROR] \tref: %s\n", ref);
-            System.out.printf("[ERROR] \talt: %s\n", alt);
-            System.out.printf("[ERROR] \tsvlen: %s\n", svlen);
-            System.out.printf("[ERROR] \tvariantCallAttributes: %s\n", variantCallAttributes);
-            System.out.print("[ERROR] " + e.getMessage());
+        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), vc.getContig(), vc.getID(), start, end, ref, alt, svlen);
+
+        return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
+    }
+
+    private Optional<? extends SvannaVariant> parseBreakendAllele(VariantContext vc) {
+        // sanity checks
+        if (vc.getAlternateAlleles().size() > 1) {
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Multiple alt breakends are not yet supported for variant `{}`", makeVariantRepresentation(vc));
             return Optional.empty();
         }
+
+        // parse pos and confidence intervals, if present
+        List<Integer> ci = vc.getAttributeAsIntList("CIPOS", 0);
+        ConfidenceInterval ciPos, ciEnd;
+        if (ci.isEmpty()) {
+            ciPos = ConfidenceInterval.precise();
+        } else if (ci.size() == 2) {
+            ciPos = ConfidenceInterval.of(ci.get(0), ci.get(1));
+        } else {
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Invalid CIPOS attribute `{}` for variant `{}`", vc.getAttributeAsString("CIPOS", ""), makeVariantRepresentation(vc));
+            return Optional.empty();
+        }
+        ci = vc.getAttributeAsIntList("CIEND", 0);
+        if (ci.isEmpty()) {
+            ciEnd = ConfidenceInterval.precise();
+        } else if (ci.size() == 2) {
+            ciEnd = ConfidenceInterval.of(ci.get(0), ci.get(1));
+        } else {
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Invalid CIEND attribute `{}` for variant `{}`", vc.getAttributeAsString("CIEND", ""), makeVariantRepresentation(vc));
+            return Optional.empty();
+        }
+
+        Position pos = Position.of(vc.getStart(), ciPos);
+
+        String mateId = vc.getAttributeAsString("MATEID", "");
+        String eventId = vc.getAttributeAsString("EVENT", "");
+
+        VariantCallAttributes attrs = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
+
+        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(), vc.getContig(), vc.getID(), pos,
+                vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString(),
+                ciEnd, mateId, eventId);
+
+
+        return Optional.of(builder.variantCallAttributes(attrs).build());
     }
 
 }

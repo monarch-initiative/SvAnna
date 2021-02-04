@@ -4,7 +4,7 @@ import htsjdk.tribble.readers.TabixReader;
 import org.jax.svanna.core.filter.SVFeatureOrigin;
 import org.jax.svanna.core.filter.SvFeature;
 import org.jax.svanna.core.filter.SvFeatureSource;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,14 +49,14 @@ public class DgvFeatureSource implements SvFeatureSource, Closeable {
             return List.of();
         }
 
-        // we must adjust the target region to 0-based coordinate system on positive strand
-        GenomicRegion query = region.toZeroBased().withStrand(Strand.POSITIVE);
-
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Fetching DGV features overlapping the region {}:{}-{}({})", region.contigName(), region.start(), region.end(), region.strand());
         }
         String line;
-        TabixReader.Iterator iterator = tabixReader.query(tabixReader.chr2tid(query.contigName()), query.start(), query.end());
+        TabixReader.Iterator iterator = tabixReader.query(
+                tabixReader.chr2tid(region.contigName()),
+                region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
+                region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
         try {
             List<SvFeature> features = new LinkedList<>();
             while ((line = iterator.next()) != null) {
@@ -89,6 +89,7 @@ public class DgvFeatureSource implements SvFeatureSource, Closeable {
         }
 
         int start, end;
+        CoordinateSystem coordinateSystem = CoordinateSystem.oneBased();
         try {
             // coordinates are 1-based, inclusive
             start = Integer.parseInt(arr[2]);
@@ -138,8 +139,8 @@ public class DgvFeatureSource implements SvFeatureSource, Closeable {
 
         if (arr[5].equals("gain+loss")) {
             return List.of(
-                    DgvFeature.of(contig, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, variantAccession, VariantType.DUP, 100 * observedGains / sampleSize),
-                    DgvFeature.of(contig, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, variantAccession, VariantType.DEL, 100 * observedLosses / sampleSize));
+                    DgvFeature.of(contig, Strand.POSITIVE, coordinateSystem, start, end, variantAccession, VariantType.DUP, 100 * observedGains / sampleSize),
+                    DgvFeature.of(contig, Strand.POSITIVE, coordinateSystem, start, end, variantAccession, VariantType.DEL, 100 * observedLosses / sampleSize));
         } else {
             float frequency = Float.NaN;
             switch (type.baseType()) {
@@ -154,7 +155,7 @@ public class DgvFeatureSource implements SvFeatureSource, Closeable {
                     // fall through
                     break;
             }
-            return List.of(DgvFeature.of(contig, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, variantAccession, type, frequency));
+            return List.of(DgvFeature.of(contig, Strand.POSITIVE, coordinateSystem, start, end, variantAccession, type, frequency));
         }
 
     }

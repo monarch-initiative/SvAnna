@@ -6,7 +6,7 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.reference.Enhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,7 @@ public class TSpecParser {
                 TermId hpoId = TermId.of(fields[6]);
                 String hpoLabel = fields[7];
                 id2labelMap.putIfAbsent(tid, otherOntologyLabel);
-                Enhancer enhancer = Enhancer.of(contig, Strand.POSITIVE, CoordinateSystem.ZERO_BASED,
+                Enhancer enhancer = Enhancer.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(),
                         Position.of(start), Position.of(end),
                         tau, hpoId, otherOntologyLabel);
                 id2enhancerMap.putIfAbsent(tid, new ArrayList<>());
@@ -114,15 +114,15 @@ public class TSpecParser {
      * This class is required to build the Interval Array using Jannovar classes.
      * Note that in our implementation, all {@link Enhancer} objects are on the POSITIVE strand.
      */
-    static class EnhancerIntervalEndExtractor implements IntervalEndExtractor<Enhancer> {
+    private static class EnhancerIntervalEndExtractor implements IntervalEndExtractor<Enhancer> {
         @Override
         public int getBegin(Enhancer x) {
-            return x.start();
+            return x.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         }
 
         @Override
         public int getEnd(Enhancer x) {
-            return x.end();
+            return x.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         }
     }
 

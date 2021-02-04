@@ -6,7 +6,7 @@ import org.jax.svanna.io.TestDataConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -42,7 +42,7 @@ public class DgvFeatureSourceTest {
     @Test
     public void getOverlappingFeatures() {
         int start = 180_900, end = 181_000;
-        GenomicRegion query = GenomicRegion.of(genomicAssembly.contigByName("1"), Strand.POSITIVE, CoordinateSystem.ZERO_BASED,
+        GenomicRegion query = GenomicRegion.of(genomicAssembly.contigByName("1"), Strand.POSITIVE, CoordinateSystem.zeroBased(),
                 Position.of(start), Position.of(end));
         List<SvFeature> features = featureSource.getOverlappingFeatures(query);
 
@@ -54,7 +54,7 @@ public class DgvFeatureSourceTest {
         assertThat(feature.contigName(), equalTo("1"));
         assertThat(feature.start(), equalTo(180_918));
         assertThat(feature.end(), equalTo(180_991));
-        assertThat(feature.coordinateSystem(), equalTo(CoordinateSystem.ONE_BASED));
+        assertThat(feature.coordinateSystem(), equalTo(CoordinateSystem.oneBased()));
         assertThat(feature.strand(), equalTo(Strand.POSITIVE));
         assertThat(feature.variantType(), equalTo(VariantType.DEL));
         assertThat(feature.frequency(), equalTo(71.428573F));
@@ -63,7 +63,7 @@ public class DgvFeatureSourceTest {
     @Test
     public void getOverlappingFeatures_returnsEmptyWhenNotAskingForDgvEntries() {
         int start = 180_900, end = 181_000;
-        GenomicRegion query = GenomicRegion.of(genomicAssembly.contigByName("1"), Strand.POSITIVE, CoordinateSystem.ZERO_BASED,
+        GenomicRegion query = GenomicRegion.of(genomicAssembly.contigByName("1"), Strand.POSITIVE, CoordinateSystem.zeroBased(),
                 Position.of(start), Position.of(end));
         List<SvFeature> features = featureSource.getOverlappingFeatures(query, Set.of(SVFeatureOrigin.GNOMAD_SV));
 
@@ -73,7 +73,7 @@ public class DgvFeatureSourceTest {
     @Test
     public void getOverlappingFeatures_returnsEmptyWhenAskingForEntryOnUnknownChromosome() {
         int start = 180_900, end = 181_000;
-        GenomicRegion query = GenomicRegion.of(genomicAssembly.contigByName("2"), Strand.POSITIVE, CoordinateSystem.ZERO_BASED,
+        GenomicRegion query = GenomicRegion.of(genomicAssembly.contigByName("2"), Strand.POSITIVE, CoordinateSystem.zeroBased(),
                 Position.of(start), Position.of(end));
         List<SvFeature> features = featureSource.getOverlappingFeatures(query);
 

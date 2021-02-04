@@ -2,7 +2,7 @@ package org.jax.svanna.io.filter.dgv;
 
 import org.jax.svanna.core.filter.SVFeatureOrigin;
 import org.jax.svanna.core.filter.SvFeature;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 

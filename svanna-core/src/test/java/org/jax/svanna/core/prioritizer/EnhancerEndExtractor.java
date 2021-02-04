@@ -2,17 +2,18 @@ package org.jax.svanna.core.prioritizer;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import org.jax.svanna.core.reference.Enhancer;
-import org.monarchinitiative.variant.api.Strand;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.Strand;
 
 class EnhancerEndExtractor implements IntervalEndExtractor<Enhancer> {
 
     @Override
     public int getBegin(Enhancer enhancer) {
-        return enhancer.withStrand(Strand.POSITIVE).startGenomicPosition().pos();
+        return enhancer.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
     }
 
     @Override
     public int getEnd(Enhancer enhancer) {
-        return enhancer.withStrand(Strand.POSITIVE).endGenomicPosition().pos();
+        return enhancer.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
     }
 }

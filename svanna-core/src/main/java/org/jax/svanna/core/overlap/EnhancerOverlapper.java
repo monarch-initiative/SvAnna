@@ -2,7 +2,7 @@ package org.jax.svanna.core.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.reference.Enhancer;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +14,7 @@ import java.util.Map;
  * Calculate the overlap of structural variants with enhancers.
  */
 public class EnhancerOverlapper {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerOverlapper.class);
     /**
      * Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers.
@@ -28,29 +29,37 @@ public class EnhancerOverlapper {
         switch (variant.variantType().baseType()) {
             case DEL:
             case INV:
-            case INS:
             case DUP:
                 return getSimpleEnhancerOverlap(variant);
+            case INS:
+                // insertion might be an empty region
+                return variant.length() == 0 ? enhancerOverlapForEmptyRegion(variant) : getSimpleEnhancerOverlap(variant);
             case TRA:
             case BND:
-                return getEnhancersAffectedByBreakends(variant);
+                return getEnhancerOverlapsForTranslocation((BreakendVariant) variant);
             default:
-                LOGGER.warn("Enhancer overlap not yet implemented for {}", variant.variantType());
+                if (LOGGER.isWarnEnabled())
+                    LOGGER.warn("Enhancer overlap not yet implemented for {}", variant.variantType());
                 return List.of();
         }
     }
 
     public List<Enhancer> getEnhancerRegionOverlaps(GenomicRegion region, int padding) {
-        region = region.toPositiveStrand();
-        Contig contig = region.contig();
-        int start = Math.max(region.start() - padding, 0);
-        int end = Math.min(region.end() + padding, region.contig().length());
+        if (!chromosomeToEnhancerIntervalArrayMap.containsKey(region.contigId())) {
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Could not find enhancers for contig {}", region.contigName());
+            return List.of();
+        }
 
-        return getEnhancers(contig, start, end);
+        int start = Math.max(region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()) - padding, 0);
+        int end = Math.min(region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()) + padding, region.contig().length());
+
+        IntervalArray<Enhancer> intervalArray = chromosomeToEnhancerIntervalArrayMap.get(region.contigId());
+        return intervalArray.findOverlappingWithInterval(start, end).getEntries();
     }
 
     /**
-     * Get enhancers that overlap with the genomic interval associated with DEL, INS and related SVs
+     * Get enhancers that overlap with the genomic interval associated with DEL, INV and related SVs
      *
      * @param region a GenomeInterval associated with a structural variant
      * @return a list of overlapping enhancers (can be empty)
@@ -61,61 +70,40 @@ public class EnhancerOverlapper {
             return List.of();
         }
 
-        // let's make sure we only use POSITIVE 0-based coordinates for querying the array
-        region = region.toPositiveStrand().toZeroBased();
-        return getEnhancers(region.contig(), region.start(), region.end());
+        int start = region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+        int end = region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+        IntervalArray<Enhancer> intervalArray = chromosomeToEnhancerIntervalArrayMap.get(region.contigId());
+        return intervalArray.findOverlappingWithInterval(start, end).getEntries();
     }
 
-    private List<Enhancer> getEnhancerOverlapsForTranslocation(Breakended variant) {
-        GenomicPosition lb = variant.left().toPositiveStrand();
-        IntervalArray<Enhancer> leftArray = chromosomeToEnhancerIntervalArrayMap.get(lb.contigId());
-        List<Enhancer> overlappingEnhancers = new ArrayList<>(leftArray.findOverlappingWithPoint(lb.pos()).getEntries());
-        GenomicPosition rb = variant.right().toPositiveStrand();
-        IntervalArray<Enhancer> rightArray = chromosomeToEnhancerIntervalArrayMap.get(rb.contigId());
-        overlappingEnhancers.addAll(rightArray.findOverlappingWithPoint(rb.pos()).getEntries());
+
+    private List<Enhancer> enhancerOverlapForEmptyRegion(GenomicRegion region) {
+        IntervalArray<Enhancer> intervalArray = chromosomeToEnhancerIntervalArrayMap.get(region.contigId());
+        int start = region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()) - 1;
+        int end = region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+        return intervalArray.findOverlappingWithInterval(start, end).getEntries();
+    }
+
+    private List<Enhancer> getEnhancerOverlapsForTranslocation(BreakendVariant variant) {
+        List<Enhancer> overlappingEnhancers = new ArrayList<>();
+
+        Breakend left = variant.left();
+        overlappingEnhancers.addAll(enhancerOverlapForEmptyRegion(left));
+
+        Breakend right = variant.right();
+        overlappingEnhancers.addAll(enhancerOverlapForEmptyRegion(right));
+
         if (overlappingEnhancers.isEmpty()) {
-            return getLongRangeEnhancerEffects(lb, rb);
+            return getLongRangeEnhancerEffects(left, right);
         }
         return overlappingEnhancers;
     }
 
-    /**
-     * This is intended to be used to check if structural rearrangements such as inversions
-     * affect enhancers -- if a breakend occurs WITHIN an enhancer, we regard this as a match.
-     * In contrast, enhancers are defined as being independent of orientation, and so we
-     * do not regard it as a match if an enhancer is completely contained within an inversion.
-     *
-     * @param variant Representation of an inversion, insertion or translocation
-     * @return Prioritization
-     */
-    private List<Enhancer> getEnhancersAffectedByBreakends(Variant variant) {
-        switch (variant.variantType()) {
-            case INS:
-            case INV:
-                // we assume that all coordinates of these types are on a single contig
-                return getSimpleEnhancerOverlap(variant);
-            case TRA:
-            case BND:
-                // by definition, translocation has coordinates on different contigs
-                if (variant instanceof Breakended) {
-                    return getEnhancerOverlapsForTranslocation((Breakended) variant);
-                }
-            default:
-                LOGGER.warn("Unable to get enhancers for variant {}", variant);
-                return List.of();
-        }
-    }
-
-    private List<Enhancer> getEnhancers(Contig contig, int start, int end) {
-        IntervalArray<Enhancer> intervalArray = chromosomeToEnhancerIntervalArrayMap.get(contig.id());
-        return intervalArray.findOverlappingWithInterval(start, end).getEntries();
-    }
-
-    private List<Enhancer> getLongRangeEnhancerEffects(GenomicPosition left, GenomicPosition right) {
-        System.out.println("[WARNING] Long range enhancer prioritization not implemented");
+    private List<Enhancer> getLongRangeEnhancerEffects(GenomicRegion left, GenomicRegion right) {
+        if (LOGGER.isWarnEnabled())
+            LOGGER.warn("Long range enhancer prioritization not implemented");
         return List.of();
     }
-
 
 
 }

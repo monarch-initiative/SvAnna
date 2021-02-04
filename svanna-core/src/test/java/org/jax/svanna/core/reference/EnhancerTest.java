@@ -3,20 +3,20 @@ package org.jax.svanna.core.reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class EnhancerTest {
 
-    private static final Contig ctg1 = Contig.of(1, "1", SequenceRole.ASSEMBLED_MOLECULE, 10, "", "", "");
+    private static final Contig ctg1 = Contig.of(1, "1", SequenceRole.ASSEMBLED_MOLECULE, "1", AssignedMoleculeType.CHROMOSOME, 10, "", "", "");
 
     private Enhancer enhancer;
 
     @BeforeEach
     public void setUp() {
-        enhancer = Enhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.ZERO_BASED, Position.of(3), Position.of(6), .5, TermId.of("HP:0000001"), "brain");
+        enhancer = Enhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(3), Position.of(6), .5, TermId.of("HP:0000001"), "brain");
     }
 
     @Test

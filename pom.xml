@@ -35,7 +35,7 @@
         <protobuf.version>3.8.0</protobuf.version>
         <jannovar.version>0.35</jannovar.version>
         <htsjdk.version>2.23.0</htsjdk.version>
-        <variant.api.version>1.0-SNAPSHOT</variant.api.version>
+        <svart.version>1.0.0-SNAPSHOT</svart.version>
     </properties>
 
     <developers>

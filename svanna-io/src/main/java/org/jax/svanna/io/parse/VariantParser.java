@@ -1,6 +1,6 @@
 package org.jax.svanna.io.parse;
 
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.Variant;
 
 import java.io.IOException;
 import java.nio.file.Path;

@@ -1,6 +1,6 @@
 package org.jax.svanna.core.filter;
 
-import org.monarchinitiative.variant.api.GenomicRegion;
+import org.monarchinitiative.svart.GenomicRegion;
 
 import java.util.EnumSet;
 import java.util.List;

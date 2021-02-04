@@ -3,10 +3,7 @@ package org.jax.svanna.core.viz.svg;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
-import org.monarchinitiative.variant.api.Breakend;
-import org.monarchinitiative.variant.api.Breakended;
-import org.monarchinitiative.variant.api.Strand;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.*;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -61,7 +58,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
      * @param enhancers Enhancers disrupted by this translocation
      */
     public TranslocationSvgGenerator(Variant variant,
-                                     Breakended breakended,
+                                     BreakendVariant breakended,
                                      List<Transcript> transcripts,
                                      List<Enhancer> enhancers) {
         super(variant, transcripts, enhancers);
@@ -75,13 +72,14 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         this.separationLineY = displayElementsA*HEIGHT_PER_DISPLAY_ITEM + YSTART + 100;
         this.ystartB = this.separationLineY + 50;
 
+        CoordinateSystem cs = CoordinateSystem.oneBased();
         this.componentA = new TranslocationComponentSvgGenerator(
-                getMin(transcriptModelsA, enhancersA, left.pos()),
-                getMax(transcriptModelsA, enhancersA, left.pos()),
+                getMin(transcriptModelsA, enhancersA, left.startWithCoordinateSystem(cs)),
+                getMax(transcriptModelsA, enhancersA, left.endWithCoordinateSystem(cs)),
                 transcriptModelsA, enhancersA, variant, left, YSTART);
         this.componentB = new TranslocationComponentSvgGenerator(
-                getMin(transcriptModelsB, enhancersB, right.pos()),
-                getMax(transcriptModelsB, enhancersB, right.pos()),
+                getMin(transcriptModelsB, enhancersB, right.startWithCoordinateSystem(cs)),
+                getMax(transcriptModelsB, enhancersB, right.endWithCoordinateSystem(cs)),
                 transcriptModelsB, enhancersB, variant, right, ystartB);
     }
 

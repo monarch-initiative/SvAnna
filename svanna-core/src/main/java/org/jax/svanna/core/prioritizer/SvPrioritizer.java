@@ -1,6 +1,6 @@
 package org.jax.svanna.core.prioritizer;
 
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.Variant;
 
 
 public interface SvPrioritizer<T extends Variant> {

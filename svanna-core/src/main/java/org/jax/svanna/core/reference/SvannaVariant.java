@@ -1,9 +1,9 @@
 package org.jax.svanna.core.reference;
 
 import org.jax.svanna.core.filter.Filterable;
-import org.monarchinitiative.variant.api.CoordinateSystem;
-import org.monarchinitiative.variant.api.Strand;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.Variant;
 
 public interface SvannaVariant extends Variant, Filterable, VariantMetadata {
 

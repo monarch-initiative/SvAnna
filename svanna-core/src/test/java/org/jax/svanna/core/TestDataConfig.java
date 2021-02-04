@@ -5,12 +5,12 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.overlap.Overlapper;
 import org.jax.svanna.core.overlap.SvAnnOverlapper;
-import org.jax.svanna.core.reference.GenomicAssemblyProvider;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.GenomicAssembly;
+import org.monarchinitiative.svart.GenomicAssemblies;
+import org.monarchinitiative.svart.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,13 +24,11 @@ import java.util.stream.Stream;
 @Configuration
 public class TestDataConfig {
 
-    private static final Path GENOME_ASSEMBLY_REPORT_PATH = Paths.get("src/test/resources/GCA_000001405.28_GRCh38.p13_assembly_report.txt");
-
     private static final Path JANNOVAR_DATA = Paths.get("src/test/resources/hg38_refseq_small.ser");
 
     @Bean
-    public GenomicAssembly genomicAssembly() throws Exception {
-        return GenomicAssemblyProvider.fromAssemblyReport(GENOME_ASSEMBLY_REPORT_PATH);
+    public GenomicAssembly genomicAssembly() {
+        return GenomicAssemblies.GRCh38p13();
     }
 
     /**

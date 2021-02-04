@@ -19,9 +19,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.monarchinitiative.variant</groupId>
-            <artifactId>variant-api</artifactId>
-            <version>${variant.api.version}</version>
+            <groupId>org.monarchinitiative.svart</groupId>
+            <artifactId>svart</artifactId>
+            <version>${svart.version}</version>
         </dependency>
 
         <!--    TESTS    -->

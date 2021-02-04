@@ -1,15 +1,13 @@
 package org.jax.svanna.io;
 
 import org.jax.svanna.core.hpo.GeneWithId;
-import org.jax.svanna.core.reference.GenomicAssemblyProvider;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.GenomicAssembly;
+import org.monarchinitiative.svart.GenomicAssemblies;
+import org.monarchinitiative.svart.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,11 +16,9 @@ import java.util.stream.Stream;
 @Configuration
 public class TestDataConfig {
 
-    private static final Path GENOME_ASSEMBLY_REPORT_PATH = Paths.get("src/test/resources/GCA_000001405.28_GRCh38.p13_assembly_report.txt");
-
     @Bean
     public GenomicAssembly genomicAssembly() throws Exception {
-        return GenomicAssemblyProvider.fromAssemblyReport(GENOME_ASSEMBLY_REPORT_PATH);
+        return GenomicAssemblies.GRCh38p13();
     }
 
     @Bean

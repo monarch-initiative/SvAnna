@@ -4,45 +4,30 @@ import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
+final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
 
-    protected final VariantCallAttributes variantCallAttributes;
-    protected final Set<FilterType> passedFilterTypes;
-    protected final Set<FilterType> failedFilterTypes;
+    private final VariantCallAttributes variantCallAttributes;
+    private final Set<FilterType> passedFilterTypes;
+    private final Set<FilterType> failedFilterTypes;
 
-    protected DefaultSvannaVariant(Contig contig,
-                                   String id,
-                                   Strand strand,
-                                   CoordinateSystem coordinateSystem,
-                                   Position startPosition,
-                                   Position endPosition,
-                                   String ref,
-                                   String alt,
-                                   int changeLength,
-                                   VariantCallAttributes variantCallAttributes) {
-        // for creating a novel instance via static constructor
-        this(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
-                variantCallAttributes, Set.of(), Set.of());
-    }
-
-    protected DefaultSvannaVariant(Contig contig,
-                                   String id,
-                                   Strand strand,
-                                   CoordinateSystem coordinateSystem,
-                                   Position startPosition,
-                                   Position endPosition,
-                                   String ref,
-                                   String alt,
-                                   int changeLength,
-                                   VariantCallAttributes variantCallAttributes,
-                                   Set<FilterType> passedFilterTypes,
-                                   Set<FilterType> failedFilterTypes) {
+    private DefaultSvannaVariant(Contig contig,
+                                 String id,
+                                 Strand strand,
+                                 CoordinateSystem coordinateSystem,
+                                 Position startPosition,
+                                 Position endPosition,
+                                 String ref,
+                                 String alt,
+                                 int changeLength,
+                                 VariantCallAttributes variantCallAttributes,
+                                 Set<FilterType> passedFilterTypes,
+                                 Set<FilterType> failedFilterTypes) {
         // for creating a novel instance from an existing instance in `newVariantInstance`
         super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
         this.variantCallAttributes = Objects.requireNonNull(variantCallAttributes);
@@ -50,15 +35,27 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
         this.failedFilterTypes = new HashSet<>(failedFilterTypes);
     }
 
-    static DefaultSvannaVariant oneBasedSequenceVariant(Contig contig, String id, int pos, String ref, String alt,
-                                                        VariantCallAttributes variantCallAttributes) {
-        Position start = Position.of(pos);
+    private DefaultSvannaVariant(Builder builder) {
+        super(builder);
+        variantCallAttributes = Objects.requireNonNull(builder.variantCallAttributes);
+        passedFilterTypes = builder.passedFilterTypes;
+        failedFilterTypes = builder.failedFilterTypes;
+    }
+
+    static DefaultSvannaVariant sequenceVariant(Contig contig, String id,
+                                                Strand strand, CoordinateSystem coordinateSystem, int pos, String ref, String alt,
+                                                VariantCallAttributes variantCallAttributes) {
         if (VariantType.isSymbolic(alt)) {
             throw new IllegalArgumentException("Unable to create non-symbolic variant from symbolic or breakend allele " + alt);
         }
-        Position end = calculateEnd(start, ref, alt);
-        int changeLength = alt.length() - ref.length();
-        return of(contig, id, Strand.POSITIVE, CoordinateSystem.ONE_BASED, start, end, ref, alt, changeLength, variantCallAttributes);
+        Position start = Position.of(pos);
+        Position end = calculateEnd(start, coordinateSystem, ref, alt);
+        int changeLength = calculateChangeLength(ref, alt);
+        return of(contig, id, strand, coordinateSystem, start, end, ref, alt, changeLength, variantCallAttributes);
+    }
+
+    static Builder builder() {
+        return new Builder();
     }
 
     static DefaultSvannaVariant of(Contig contig,
@@ -73,16 +70,7 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                                    VariantCallAttributes variantCallAttributes) {
         return new DefaultSvannaVariant(
                 contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
-                variantCallAttributes);
-    }
-
-    private static Position calculateEnd(Position start, String ref, String alt) {
-        // we assume CoordinateSystem.ONE_BASED
-        // SNV case
-        if ((ref.length() | alt.length()) == 1) {
-            return start;
-        }
-        return start.withPos(start.pos() + ref.length() - 1);
+                variantCallAttributes, new HashSet<>(), new HashSet<>());
     }
 
     @Override
@@ -173,4 +161,27 @@ class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements 
                 ", failedFilterTypes=" + failedFilterTypes +
                 "} " + super.toString();
     }
+
+    static class Builder extends BaseVariant.Builder<Builder> {
+
+        private VariantCallAttributes variantCallAttributes;
+        private final Set<FilterType> passedFilterTypes = new HashSet<>();
+        private final Set<FilterType> failedFilterTypes = new HashSet<>();
+
+        public Builder variantCallAttributes(VariantCallAttributes variantCallAttributes) {
+            this.variantCallAttributes = variantCallAttributes;
+            return self();
+        }
+
+        @Override
+        public DefaultSvannaVariant build() {
+            return new DefaultSvannaVariant(selfWithEndIfMissing());
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
+
 }

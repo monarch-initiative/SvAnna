@@ -1,8 +1,8 @@
 package org.jax.svanna.core.filter;
 
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.monarchinitiative.variant.api.GenomicRegion;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

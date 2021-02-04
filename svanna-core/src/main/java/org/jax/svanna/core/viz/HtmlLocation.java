@@ -1,7 +1,7 @@
 package org.jax.svanna.core.viz;
 
 
-import org.monarchinitiative.variant.api.Contig;
+import org.monarchinitiative.svart.Contig;
 
 /**
  * A POJO that records the locations of chromosomal breakends or locations in an easily displayable fashion

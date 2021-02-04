@@ -13,8 +13,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.monarchinitiative.variant</groupId>
-            <artifactId>variant-api</artifactId>
+            <groupId>org.monarchinitiative.svart</groupId>
+            <artifactId>svart</artifactId>
         </dependency>
         <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>

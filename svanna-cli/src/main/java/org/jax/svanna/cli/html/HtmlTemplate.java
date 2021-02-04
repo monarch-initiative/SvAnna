@@ -11,8 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,13 +55,14 @@ public class HtmlTemplate {
 
 
     public void outputFile(String prefix) {
-        String outpath = String.format("%s.html", prefix);
-        LOGGER.info("Writing HTML results to `{}`", outpath);
-        try (BufferedWriter out = new BufferedWriter(new FileWriter(outpath))) {
+        Path outPath = Path.of(String.format("%s.html", prefix));
+        LOGGER.info("Writing HTML results to `{}`", outPath.toAbsolutePath());
+        try (BufferedWriter out = Files.newBufferedWriter(outPath)) {
             Template template = cfg.getTemplate("svannHTML.ftl");
             template.process(templateData, out);
         } catch (TemplateException | IOException te) {
-            te.printStackTrace();
+            if (LOGGER.isWarnEnabled())
+                LOGGER.warn("Error writing out HTML results: {}", te.getMessage());
         }
     }
 }

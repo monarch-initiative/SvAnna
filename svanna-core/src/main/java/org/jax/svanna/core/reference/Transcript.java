@@ -1,6 +1,6 @@
 package org.jax.svanna.core.reference;
 
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,24 +78,10 @@ public class Transcript extends BaseGenomicRegion<Transcript> {
     }
 
     /**
-     * @return start {@link GenomicPosition} of the coding region or <code>null</code> if the transcript is non-coding
-     */
-    public GenomicPosition cdsStartGenomicPosition() {
-        return isCoding ? cdsRegion.startGenomicPosition() : null;
-    }
-
-    /**
      * @return end position of the coding region or <code>null</code> if the transcript is non-coding
      */
     public Position cdsEndPosition() {
         return isCoding ? cdsRegion.endPosition() : null;
-    }
-
-    /**
-     * @return end {@link GenomicPosition} of the coding region or <code>null</code> if the transcript is non-coding
-     */
-    public GenomicPosition cdsEndGenomicPosition() {
-        return isCoding ? cdsRegion.endGenomicPosition() : null;
     }
 
     public List<GenomicRegion> exons() {
@@ -107,8 +93,8 @@ public class Transcript extends BaseGenomicRegion<Transcript> {
         if (strand() == other) {
             return this;
         } else {
-            Position start = startPosition().invert(contig(), coordinateSystem());
-            Position end = endPosition().invert(contig(), coordinateSystem());
+            Position start = startPosition().invert(coordinateSystem(), contig());
+            Position end = endPosition().invert(coordinateSystem(), contig());
 
             GenomicRegion cdsRegionWithStrand = isCoding ? cdsRegion.withStrand(other) : null;
 
@@ -135,7 +121,7 @@ public class Transcript extends BaseGenomicRegion<Transcript> {
                 exonsWithCoordinateSystem.add(exon);
             }
 
-            return new Transcript(contig(), strand(), other, normalisedStartPosition(other), endPosition(),
+            return new Transcript(contig(), strand(), other, startPositionWithCoordinateSystem(other), endPositionWithCoordinateSystem(other),
                     accessionId, hgvsSymbol, isCoding, cdsWithCoordinateSystem,
                     exonsWithCoordinateSystem);
         }

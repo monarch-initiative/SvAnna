@@ -3,7 +3,7 @@ package org.jax.svanna.core.filter;
 import org.jax.svanna.core.TestDataConfig;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,10 +35,10 @@ public class StructuralVariantFrequencyFilterTest {
     public void reciprocalOverlap(int leftStart, int leftEnd, Strand leftStrand,
                                   int rightStart, int rightEnd, Strand rightStrand,
                                   float expected) {
-        Contig contig = Contig.of(1, "1", SequenceRole.ASSEMBLED_MOLECULE, 100, "", "", "");
+        Contig contig = Contig.of(1, "1", SequenceRole.ASSEMBLED_MOLECULE,"1", AssignedMoleculeType.CHROMOSOME, 100, "", "", "");
 
-        GenomicRegion left = GenomicRegion.of(contig, leftStrand, CoordinateSystem.ZERO_BASED, Position.of(leftStart), Position.of(leftEnd));
-        GenomicRegion right = GenomicRegion.of(contig, rightStrand, CoordinateSystem.ZERO_BASED, Position.of(rightStart), Position.of(rightEnd));
+        GenomicRegion left = GenomicRegion.of(contig, leftStrand, CoordinateSystem.zeroBased(), Position.of(leftStart), Position.of(leftEnd));
+        GenomicRegion right = GenomicRegion.of(contig, rightStrand, CoordinateSystem.zeroBased(), Position.of(rightStart), Position.of(rightEnd));
 
         assertThat((double) StructuralVariantFrequencyFilter.reciprocalOverlap(left, right), closeTo(expected, TOLERANCE));
         assertThat((double) StructuralVariantFrequencyFilter.reciprocalOverlap(right, left), closeTo(expected, TOLERANCE));

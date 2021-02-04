@@ -1,7 +1,7 @@
 package org.jax.svanna.core.reference;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 

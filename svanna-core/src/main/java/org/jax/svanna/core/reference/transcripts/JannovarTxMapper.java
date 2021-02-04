@@ -3,7 +3,7 @@ package org.jax.svanna.core.reference.transcripts;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svanna.core.reference.Transcript;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,12 +46,12 @@ class JannovarTxMapper {
         // process exons
         List<GenomicRegion> exons = new ArrayList<>();
         for (GenomeInterval exon : tm.getExonRegions()) {
-            exons.add(GenomicRegion.zeroBased(contig, strand, Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
+            exons.add(GenomicRegion.of(contig, strand, CoordinateSystem.zeroBased(), Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
         }
 
         return Optional.of(
                 Transcript.of(
-                        contig, strand, CoordinateSystem.ZERO_BASED, txRegion.getBeginPos(), txRegion.getEndPos(),
+                        contig, strand, CoordinateSystem.zeroBased(), txRegion.getBeginPos(), txRegion.getEndPos(),
                         cdsStart, cdsEnd, tm.getAccession(), tm.getGeneSymbol(), tm.isCoding(), exons));
     }
 }

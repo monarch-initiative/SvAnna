@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.Variant;
 
 import java.util.List;
 

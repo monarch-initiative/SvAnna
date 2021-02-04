@@ -9,7 +9,7 @@ import org.jax.svanna.core.overlap.Overlapper;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -507,9 +507,9 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
     }
 
 
-    private SvPriority prioritizeTranslocation(Variant rearrangement) {
+    private SvPriority prioritizeTranslocation(Variant variant) {
         // the following gets overlaps that disrupt transcripts only
-        List<Overlap> overlaps = overlapper.getOverlapList(rearrangement);
+        List<Overlap> overlaps = overlapper.getOverlapList(variant);
         SvImpact impact = SvImpact.LOW; // default
         OverlapType otype = getHighestOverlapType(overlaps);
         Set<Transcript> affectedTranscripts;
@@ -535,7 +535,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
             affectedTranscripts = Set.of();
             geneWithIdsSet = Set.of();
         }
-        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(rearrangement);
+        List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(variant);
         if (enhancers.size() > 0) {
             impact = SvImpact.HIGH;
             otype = OverlapType.ENHANCER_DISRUPTED_BY_TRANSLOCATION;

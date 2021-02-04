@@ -2,13 +2,14 @@ package org.jax.svanna.core.viz.svg;
 
 import org.jax.svanna.core.TestDataConfig;
 import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.overlap.Overlapper;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.variant.api.Breakended;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -28,7 +29,7 @@ public class TranslocationSvGeneratorTest {
     public TestVariants testVariants;
 
     @Autowired
-    public org.jax.svanna.core.overlap.Overlapper overlapper;
+    public Overlapper overlapper;
 
     /**
      * Translocation where one CDS is disrupted and the other is not
@@ -45,7 +46,7 @@ public class TranslocationSvGeneratorTest {
         List<Transcript> transcriptModels = overlapper.getOverlapList(variant).stream()
                 .map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
-        TranslocationSvgGenerator gen = new TranslocationSvgGenerator(variant, ((Breakended) variant), transcriptModels, enhancerList);
+        TranslocationSvgGenerator gen = new TranslocationSvgGenerator(variant, ((BreakendVariant) variant), transcriptModels, enhancerList);
         String svg = gen.getSvg();
         assertNotNull(svg);
         System.out.println(svg);

@@ -1,10 +1,7 @@
 package org.jax.svanna.test;
 
 
-import org.monarchinitiative.variant.api.*;
-import org.monarchinitiative.variant.api.impl.BreakendVariant;
-import org.monarchinitiative.variant.api.impl.PartialBreakend;
-import org.monarchinitiative.variant.api.impl.SymbolicVariant;
+import org.monarchinitiative.svart.*;
 
 public class TestVariants {
 
@@ -53,7 +50,7 @@ public class TestVariants {
          */
         public Variant gckUpstreamIntergenic_affectingEnhancer() {
             Contig chr7 = assembly.contigByName("7");
-            return SymbolicVariant.oneBased(chr7, "gck_del_upstream_intergenic_enhancer", Position.of(44_189_900), Position.of(44_190_100), "N", "<DEL>", -200);
+            return Variant.of(chr7, "gck_del_upstream_intergenic_enhancer", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(44_189_900), Position.of(44_190_100), "N", "<DEL>", -200);
         }
 
 
@@ -65,7 +62,7 @@ public class TestVariants {
          */
         public Variant gckUpstreamIntergenic_NotAffectingEnhancer() {
             Contig chr7 = assembly.contigByName("7");
-            return SymbolicVariant.oneBased(chr7, "gck_del_upstream_intergenic", Position.of(44_191_000), Position.of(44_192_000), "N", "<DEL>", -1_000);
+            return Variant.of(chr7, "gck_del_upstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(44_191_000), Position.of(44_192_000), "N", "<DEL>", -1_000);
         }
 
         /**
@@ -76,7 +73,7 @@ public class TestVariants {
          */
         public Variant gckUpstreamIntergenic_affectingPhenotypicallyNonrelevantEnhancer() {
             Contig chr7 = assembly.contigByName("7");
-            return SymbolicVariant.oneBased(chr7, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer", Position.of(44_194_500), Position.of(44_195_500), "N", "<DEL>", -1_000);
+            return Variant.of(chr7, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(44_194_500), Position.of(44_195_500), "N", "<DEL>", -1_000);
         }
 
         /**
@@ -87,7 +84,7 @@ public class TestVariants {
          */
         public Variant surf2singleExon_exon3() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "single_exon_del", Position.of(133_357_500), Position.of(133_358_000), "N", "<DEL>", -500);
+            return Variant.of(chr9, "single_exon_del", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_357_500), Position.of(133_358_000), "N", "<DEL>", -500);
         }
 
 
@@ -99,7 +96,7 @@ public class TestVariants {
          */
         public Variant surf1TwoExon_exons_6_and_7() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "two_exon_del", Position.of(133_352_300), Position.of(133_352_900), "N", "<DEL>", -600);
+            return Variant.of(chr9, "two_exon_del", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_352_300), Position.of(133_352_900), "N", "<DEL>", -600);
         }
 
         /**
@@ -110,7 +107,7 @@ public class TestVariants {
          */
         public Variant surf1SingleExon_exon2() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "surf1_exon2_del", Position.of(133_356_250), Position.of(133_356_350), "N", "<DEL>", -100);
+            return Variant.of(chr9, "surf1_exon2_del", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_356_250), Position.of(133_356_350), "N", "<DEL>", -100);
         }
 
         /**
@@ -121,7 +118,7 @@ public class TestVariants {
          */
         public Variant surf1Surf2oneEntireTranscriptAndPartOfAnother() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "entire_tx_del", Position.of(133_350_000), Position.of(133_358_000), "N", "<DEL>", -8_000);
+            return Variant.of(chr9, "entire_tx_del",Strand.POSITIVE, CoordinateSystem.oneBased(),  Position.of(133_350_000), Position.of(133_358_000), "N", "<DEL>", -8_000);
         }
 
 
@@ -133,7 +130,7 @@ public class TestVariants {
          */
         public Variant surf2WithinAnIntron() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "del_within_intron", Position.of(133_359_000), Position.of(133_359_700), "N", "<DEL>", -700);
+            return Variant.of(chr9, "del_within_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_359_000), Position.of(133_359_700), "N", "<DEL>", -700);
         }
 
         /**
@@ -141,7 +138,7 @@ public class TestVariants {
          */
         public Variant zbtb48intron1() {
             Contig chr1 = assembly.contigByName("1");
-            return SymbolicVariant.oneBased(chr1, "del_within_intron", Position.of(6_580_300), Position.of(6_580_400), "N", "<DEL>", -100);
+            return Variant.of(chr1, "del_within_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(6_580_300), Position.of(6_580_400), "N", "<DEL>", -100);
         }
 
         /**
@@ -152,7 +149,7 @@ public class TestVariants {
          */
         public Variant surf2In5UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "del_in_5utr", Position.of(133_356_560), Position.of(133_356_580), "N", "<DEL>", -20);
+            return Variant.of(chr9, "del_in_5utr", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_356_560), Position.of(133_356_580), "N", "<DEL>", -20);
         }
 
         /**
@@ -163,7 +160,7 @@ public class TestVariants {
          */
         public Variant surf1In3UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "del_in_3utr", Position.of(133_351_800), Position.of(133_351_900), "N", "<DEL>", -100);
+            return Variant.of(chr9, "del_in_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_351_800), Position.of(133_351_900), "N", "<DEL>", -100);
         }
 
         /**
@@ -174,7 +171,7 @@ public class TestVariants {
          */
         public Variant surf1DownstreamIntergenic() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "del_downstream_intergenic", Position.of(133_300_000), Position.of(133_310_000), "N", "<DEL>", -10_000);
+            return Variant.of(chr9, "del_downstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_300_000), Position.of(133_310_000), "N", "<DEL>", -10_000);
         }
 
         /**
@@ -186,7 +183,7 @@ public class TestVariants {
          */
         public Variant brca2UpstreamIntergenic() {
             Contig chr15 = assembly.contigByName("15");
-            return SymbolicVariant.oneBased(chr15, "del_upstream_intergenic", Position.of(48_655_000), Position.of(48_665_000), "N", "<DEL>", -10_000);
+            return Variant.of(chr15, "del_upstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(48_655_000), Position.of(48_665_000), "N", "<DEL>", -10_000);
         }
     }
 
@@ -199,7 +196,7 @@ public class TestVariants {
          */
         public Variant surf2InsertionIn5UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "ins_5utr", Position.of(133_356_571), Position.of(133_356_572), "N", "<INS>", 10);
+            return Variant.of(chr9, "ins_5utr",Strand.POSITIVE, CoordinateSystem.oneBased(),  Position.of(133_356_571), Position.of(133_356_572), "N", "<INS>", 10);
         }
 
         /**
@@ -210,7 +207,7 @@ public class TestVariants {
          */
         public Variant surf1InsertionIn3UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "ins_3utr", Position.of(133_351_851), Position.of(133_351_852), "N", "<INS>", 10);
+            return Variant.of(chr9, "ins_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_351_851), Position.of(133_351_852), "N", "<INS>", 10);
         }
 
         /**
@@ -221,7 +218,7 @@ public class TestVariants {
          */
         public Variant surf2Exon4() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "ins_3utr", Position.of(133_360_001), Position.of(133_360_002), "N", "<INS>", 10);
+            return Variant.of(chr9, "ins_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_360_001), Position.of(133_360_002), "N", "<INS>", 10);
         }
 
 
@@ -233,7 +230,7 @@ public class TestVariants {
          */
         public Variant surf2Intron3() {
             Contig chr9 = assembly.contigByName("9");
-            return SymbolicVariant.oneBased(chr9, "ins_intron", Position.of(133_359_001), Position.of(133_359_002), "N", "<INS>", 10);
+            return Variant.of(chr9, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_359_001), Position.of(133_359_002), "N", "<INS>", 10);
         }
 
 
@@ -246,7 +243,7 @@ public class TestVariants {
         public Variant gckRelevantEnhancer() {
             int inserted = 200;
             Contig chr7 = assembly.contigByName("7");
-            return SymbolicVariant.oneBased(chr7, "ins_intron", Position.of(44_190_025), Position.of(44_190_026), "N", "<INS>", inserted);
+            return Variant.of(chr7, "ins_intron",Strand.POSITIVE, CoordinateSystem.oneBased(),  Position.of(44_190_025), Position.of(44_190_026), "N", "<INS>", inserted);
         }
 
         /**
@@ -258,7 +255,7 @@ public class TestVariants {
         public Variant gckNonRelevantEnhancer() {
             int inserted = 200;
             Contig chr7 = assembly.contigByName("7");
-            return SymbolicVariant.oneBased(chr7, "ins_intron", Position.of(44_195_025), Position.of(44_195_026), "N", "<INS>", inserted);
+            return Variant.of(chr7, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(44_195_025), Position.of(44_195_026), "N", "<INS>", inserted);
         }
 
         /**
@@ -270,7 +267,7 @@ public class TestVariants {
         public Variant gckIntergenic() {
             int inserted = 200;
             Contig chr7 = assembly.contigByName("7");
-            return SymbolicVariant.oneBased(chr7, "ins_intron", Position.of(44_196_025), Position.of(44_196_026), "N", "<INS>", inserted);
+            return Variant.of(chr7, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(44_196_025), Position.of(44_196_026), "N", "<INS>", inserted);
         }
 
     }
@@ -376,7 +373,7 @@ public class TestVariants {
         }
 
         private Variant makeInversion(Contig contig, int begin, int end) {
-            return SymbolicVariant.oneBased(contig, "inversion", Position.of(begin), Position.of(end), "N", "<INV>", 0);
+            return Variant.of(contig, "inversion", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(begin), Position.of(end), "N", "<INV>", 0);
         }
 
     }
@@ -393,12 +390,11 @@ public class TestVariants {
          */
         public Variant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
             Contig chr9 = assembly.contigByName("9");
-            Breakend left = PartialBreakend.oneBased(chr9, "tra_l", Strand.POSITIVE, Position.of(133_359_000));
+            Breakend left = Breakend.of(chr9, "tra_l", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_359_001), Position.of(133_359_000));
             Contig chr13 = assembly.contigByName("13");
-            Breakend right = PartialBreakend.zeroBased(chr13, "tra_r", Strand.POSITIVE, Position.of(32_300_000));
+            Breakend right = Breakend.of(chr13, "tra_r", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(32_300_001), Position.of(32_300_000));
 
-            return new BreakendVariant("translocation_where_one_cds_is_disrupted_and_the_other_is_not",
-                    left, right, "G", "");
+            return BreakendVariant.of("translocation_where_one_cds_is_disrupted_and_the_other_is_not", left, right, "G", "");
         }
 
         /**
@@ -411,11 +407,11 @@ public class TestVariants {
          */
         public Variant intergenicTranslocation() {
             Contig chr9 = assembly.contigByName("9");
-            Breakend left = PartialBreakend.oneBased(chr9, "tra_l", Strand.POSITIVE, Position.of(133_356_520));
+            Breakend left = Breakend.of(chr9, "tra_l", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_356_521), Position.of(133_356_520));
             Contig chr13 = assembly.contigByName("13");
-            Breakend right = PartialBreakend.zeroBased(chr13, "tra_r", Strand.POSITIVE, Position.of(32_300_000));
+            Breakend right = Breakend.of(chr13, "tra_r", Strand.POSITIVE,  CoordinateSystem.oneBased(), Position.of(32_300_001), Position.of(32_300_000));
 
-            return new BreakendVariant("intergenic_translocation", left, right, "C", "");
+            return BreakendVariant.of("intergenic_translocation", left, right, "C", "");
         }
 
     }

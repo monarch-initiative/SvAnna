@@ -4,10 +4,7 @@ package org.jax.svanna.core.viz.svg;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
-import org.monarchinitiative.variant.api.Breakend;
-import org.monarchinitiative.variant.api.Contig;
-import org.monarchinitiative.variant.api.Strand;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.*;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -54,7 +51,7 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
                                               int ystart) {
         super(minPos, maxPos, variant, transcripts, enhancers);
         this.contig = breakend.contig();
-        this.positionOnContig = breakend.pos();
+        this.positionOnContig = breakend.startWithCoordinateSystem(CoordinateSystem.oneBased());
         this.ystart = ystart;
         this.minTranscriptPos = transcripts.stream().
                 map(tx -> tx.withStrand(Strand.POSITIVE)).

@@ -8,9 +8,9 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.core.viz.svg.*;
-import org.monarchinitiative.variant.api.Breakended;
-import org.monarchinitiative.variant.api.Contig;
-import org.monarchinitiative.variant.api.VariantType;
+import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,8 +150,8 @@ public class HtmlVisualizer implements Visualizer {
                     break;
                 case TRA:
                 case BND:
-                    if (variant instanceof Breakended) {
-                        gen = new TranslocationSvgGenerator(variant, (Breakended) variant, visualizable.transcripts(), visualizable.enhancers());
+                    if (variant instanceof BreakendVariant) {
+                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, visualizable.transcripts(), visualizable.enhancers());
                         break;
                     }
                     // fall through to default

@@ -6,7 +6,7 @@ import org.jax.svanna.core.prioritizer.SvPriority;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,25 +25,30 @@ public class HtmlVisualizable implements Visualizable {
     private final SvPriority svPriority;
 
     public HtmlVisualizable(SvannaVariant variant, SvPriority svPriority) {
-        this.variant = variant.withCoordinateSystem(CoordinateSystem.ZERO_BASED);
+        this.variant = variant;
         this.svPriority = svPriority;
     }
 
-    private HtmlLocation getSimpleLocation(Variant deletion) {
+    private HtmlLocation getSimpleLocation(Variant variant) {
         // works for INV, DEL, DUP
-        return new HtmlLocation(deletion.contig(), deletion.start(), deletion.end());
+        return new HtmlLocation(variant.contig(),
+                variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
+                variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
     }
 
     private HtmlLocation getInsertionLocation(Variant variant) {
-        GenomicRegion onPositive = variant.withStrand(Strand.POSITIVE);
-        return new HtmlLocation(onPositive.contig(), onPositive.start(), onPositive.end());
+        return new HtmlLocation(variant.contig(),
+                variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
+                variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
     }
 
-    private List<HtmlLocation> getTranslocationLocations(Breakended breakended) {
-        Breakend left = breakended.left().withStrand(Strand.POSITIVE);
-        Breakend right = breakended.right().withStrand(Strand.POSITIVE);
-        return List.of(new HtmlLocation(left.contig(), left.pos()),
-                new HtmlLocation(right.contig(), right.pos()));
+    private List<HtmlLocation> getTranslocationLocations(BreakendVariant breakended) {
+        Breakend left = breakended.left();
+        Breakend right = breakended.right();
+        return List.of(new HtmlLocation(left.contig(),
+                        left.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased())),
+                new HtmlLocation(right.contig(),
+                        right.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased())));
     }
 
 
@@ -117,8 +122,8 @@ public class HtmlVisualizable implements Visualizable {
                 break;
             case TRA:
             case BND:
-                if (variant instanceof Breakended) {
-                    locs.addAll(getTranslocationLocations((Breakended) variant));
+                if (variant instanceof BreakendVariant) {
+                    locs.addAll(getTranslocationLocations((BreakendVariant) variant));
                 }
                 break;
             default:

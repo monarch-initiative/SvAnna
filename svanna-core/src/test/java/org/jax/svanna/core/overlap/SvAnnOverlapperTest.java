@@ -5,8 +5,8 @@ import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.variant.api.GenomicAssembly;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

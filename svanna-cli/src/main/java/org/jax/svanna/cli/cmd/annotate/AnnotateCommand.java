@@ -22,7 +22,6 @@ import org.jax.svanna.core.prioritizer.SvImpact;
 import org.jax.svanna.core.prioritizer.SvPrioritizer;
 import org.jax.svanna.core.prioritizer.SvPriority;
 import org.jax.svanna.core.reference.Enhancer;
-import org.jax.svanna.core.reference.GenomicAssemblyProvider;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
@@ -37,14 +36,16 @@ import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.Contig;
-import org.monarchinitiative.variant.api.GenomicAssembly;
-import org.monarchinitiative.variant.api.Variant;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.parsers.GenomicAssemblyParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -126,7 +127,7 @@ public class AnnotateCommand implements Callable<Integer> {
         Charset charset = StandardCharsets.UTF_8;
         GenomicAssembly assembly;
         try (InputStream is = Main.class.getResourceAsStream("/GCA_000001405.28_GRCh38.p13_assembly_report.txt")) {
-            assembly = GenomicAssemblyProvider.fromAssemblyReport(is, charset);
+            assembly = GenomicAssemblyParser.parseAssembly(new InputStreamReader(is, charset));
         }
 
         // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids that are provided

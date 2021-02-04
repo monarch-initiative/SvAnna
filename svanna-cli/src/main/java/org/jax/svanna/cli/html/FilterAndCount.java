@@ -7,7 +7,7 @@ import org.jax.svanna.core.prioritizer.SvImpact;
 import org.jax.svanna.core.prioritizer.SvPriority;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.monarchinitiative.variant.api.VariantType;
+import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

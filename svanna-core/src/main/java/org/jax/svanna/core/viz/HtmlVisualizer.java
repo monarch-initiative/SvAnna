@@ -3,19 +3,17 @@ package org.jax.svanna.core.viz;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.reference.Enhancer;
-import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Transcript;
-import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.core.reference.*;
 import org.jax.svanna.core.viz.svg.*;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.BreakendVariant;
-import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
@@ -266,10 +264,9 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     String getEnhancerSummary(Enhancer e) {
-       Contig contig = e.contig();
-       String chrom = contig.ucscName();
-       String tissueLabel = String.format("%s; tau %.2f", e.tissueLabel(), e.tau());
-       return String.format("%s:%d-%d [%s]", chrom, e.start(), e.end(), tissueLabel);
+        String tissues = e.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
+        String tissueLabel = String.format("%s; tau %.2f", tissues, e.tau());
+       return String.format("%s:%d-%d [%s]", e.contig().ucscName(), e.start(), e.end(), tissueLabel);
     }
 
 
@@ -332,7 +329,7 @@ public class HtmlVisualizer implements Visualizer {
         List<Enhancer> enhancerList = visualizable.enhancers();
         Map<String, Integer> enhancerMap = new HashMap<>();
         for (Enhancer e : enhancerList) {
-            String tissue = e.tissueLabel();
+            String tissue = e.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
             enhancerMap.putIfAbsent(tissue, 0);
             enhancerMap.merge(tissue, 1, Integer::sum);
         }
@@ -484,7 +481,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<thead><tr><td>Tissue</td><td>position</td><td>tau</td></tr></thead>\n");
         sb.append("<tbody>\n");
         for (Enhancer e : enhancerList) {
-            String tissue = e.tissueLabel();
+            String tissue = e.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
             String contig = e.contigName();
             int start = e.start();
             int end = e.end();
@@ -559,7 +556,8 @@ public class HtmlVisualizer implements Visualizer {
                 String tau = String.format("%.1f", e.tau());
                 String chrom = e.contigName().startsWith("chr") ? e.contigName() : "chr" + e.contigName();
                 String position = String.format("%s:%s-%s", chrom, decimalFormat.format(e.start()), decimalFormat.format(e.end()));
-                sb.append(threeItemRow(e.tissueLabel(), tau, position));
+                String tissues = e.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
+                sb.append(threeItemRow(tissues, tau, position));
             }
             sb.append("</tbody>\n</table>\n");
         }

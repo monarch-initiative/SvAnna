@@ -159,7 +159,9 @@ public class AnnotateCommand implements Callable<Integer> {
 
         // enhancers & relevant enhancer terms
         TSpecParser tparser = new TSpecParser(enhancerFile, assembly);
-        Map<Integer, IntervalArray<Enhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
+        // TODO - fix
+//        Map<Integer, IntervalArray<SomeEnhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
+        Map<Integer, IntervalArray<Enhancer>> enhancerMap = Map.of();
         Set<TermId> enhancerRelevantAncestors = hpoDiseaseGeneMap.getRelevantAncestors(tparser.getId2enhancerMap().keySet(), patientTerms);
         // gene symbols
         Map<String, GeneWithId> geneSymbolMap = hpoDiseaseGeneMap.getGeneSymbolMap();

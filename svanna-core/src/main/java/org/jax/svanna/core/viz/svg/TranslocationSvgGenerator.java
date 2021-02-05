@@ -91,7 +91,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
                 min().orElse(UNINITIALIZED);
         int minEnhancerPos = enhancers.stream()
                 .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Enhancer::start)
+                .mapToInt(Region::start)
                 .min().orElse(UNINITIALIZED);
         if (minTranscriptPos == UNINITIALIZED && minEnhancerPos == UNINITIALIZED) {
             throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
@@ -112,7 +112,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
                 max().orElse(UNINITIALIZED);
         int maxEnhancerPos = enhancers.stream()
                 .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Enhancer::end)
+                .mapToInt(Region::end)
                 .max().orElse(UNINITIALIZED);
         if (maxTranscriptPos == UNINITIALIZED && maxEnhancerPos == UNINITIALIZED) {
             throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");

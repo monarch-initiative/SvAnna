@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.jax.svanna.core.prioritizer.Utils.atLeastOneSharedItem;
+
 /**
  * This class implements both sequence-based and phenotype-based prioritization. The sequence-based prioritizations
  * are different for each SV type, but each results in potentially empty lists of affected transcripts and enhancers.
@@ -184,7 +186,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
             // an enhancer. We will rate the SV high if the enhancer is
             // annotated to a tissue that has phenotypic relevant
             for (Enhancer e : affectedEnhancers) {
-                if (this.relevantHpoIdsForEnhancers.contains(e.hpoId())) {
+                if (atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations())) {
                     // if there is at least one affected enhancer, then the impact is high
                     // no matter what else there is
                     phenotypeImpact = SvImpact.HIGH;
@@ -200,8 +202,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
     Map<Enhancer, Boolean> enhancerRelevanceMap(List<Enhancer> enhancers) {
         Map<Enhancer, Boolean> relevanceMap = new HashMap<>();
         for (var e : enhancers) {
-            TermId hpoId = e.hpoId();
-            if (this.relevantHpoIdsForEnhancers.contains(hpoId)) {
+            if (atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations())) {
                 relevanceMap.put(e, Boolean.TRUE);
             } else {
                 relevanceMap.put(e, Boolean.FALSE);
@@ -285,8 +286,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
 
     private boolean affectedEnhancersRelevant(List<Enhancer> enhancers) {
         return enhancers.stream()
-                .map(Enhancer::hpoId)
-                .anyMatch(relevantHpoIdsForEnhancers::contains);
+                .anyMatch(e -> atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations()));
     }
 
 
@@ -345,7 +345,8 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
 
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(insertion);
         if (!enhancers.isEmpty()) {
-            impact = enhancers.stream().anyMatch(enhancer -> relevantHpoIdsForEnhancers.contains(enhancer.hpoId()))
+            impact = enhancers.stream()
+                    .anyMatch(e -> atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations()))
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
         }
@@ -454,7 +455,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
            List<Enhancer> outsideEnhancers = enhancerOverlapper.getEnhancerRegionOverlaps(inversion, OFFSET);
            boolean relevantEnhancer = false;
            for (var e : outsideEnhancers) {
-               if (this.relevantHpoIdsForEnhancers.contains(e.hpoId())) {
+               if (atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations())) {
                    relevantEnhancer = true;
                    break;
                }

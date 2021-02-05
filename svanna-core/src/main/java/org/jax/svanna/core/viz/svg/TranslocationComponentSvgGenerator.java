@@ -63,11 +63,11 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
                 max().orElse(UNINITIALIZED);
         this.minEnhancerPos = enhancers.stream()
                 .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Enhancer::start)
+                .mapToInt(Region::start)
                 .min().orElse(UNINITIALIZED);
         this.maxEnhancerPos = enhancers.stream()
                 .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Enhancer::end)
+                .mapToInt(Region::end)
                 .max().orElse(UNINITIALIZED);
         this.minPos = minPos;
         this.maxPos = maxPos;

@@ -6,10 +6,12 @@ import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.overlap.*;
 import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.EnhancerTissueSpecificity;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,23 +85,25 @@ public class PrototypeSvPrioritizerTest {
      * Both enhancers have fictional tau=0.8 and TermId `HP:0001939` (Abnormality of metabolism/homeostasis)
      */
     private static Map<Integer, IntervalArray<Enhancer>> makeEnhancerMap(GenomicAssembly assembly) {
-        Contig chr7 = assembly.contigByName("7");
-        Contig chr9 = assembly.contigByName("9");
-        Contig chr15 = assembly.contigByName("15");
-        Contig chr20 = assembly.contigByName("20");
-        String metabolism = "metabolism"; // represents an UBERON/CL term.
-        String cns = "CNS";
-        Enhancer surf1Enhancer = Enhancer.of(chr9, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(133_356_501), Position.of(133_356_530), .8, TermId.of("HP:0001939"),metabolism);
-        Enhancer gckEnhancer = Enhancer.of(chr7, Strand.POSITIVE, CoordinateSystem.zeroBased(),Position.of(44_190_001), Position.of(44_190_050), .8, TermId.of("HP:0001939"),metabolism);
-        Enhancer chr20Enhancer = Enhancer.of(chr20, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(51_642_723),	Position.of(51_642_826),0.42, TermId.of("UBERON:0000955"), "brain");
-        Enhancer closeToGckNotPhenotypicallyRelevant = Enhancer.of(chr7, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(44_195_001), Position.of(44_195_500), .8, TermId.of("HP:0000707"), cns); // abnormality of the nervous system
-        int fbn1TSS = 48_646_788;
-        int fbn1EnhancerStart = fbn1TSS + 90_000;
-        int fbn1EnhancerEnd = fbn1EnhancerStart + 300;
+        EnhancerTissueSpecificity growth = EnhancerTissueSpecificity.of(Term.of("UBERON:0001017", "central nervous system"), Term.of("HP:0001507", "Growth abnormality"), .3);
+        EnhancerTissueSpecificity brain = EnhancerTissueSpecificity.of(Term.of("UBERON:0000955", "brain"), Term.of("HP:0000707", "Abnormality of the nervous system"), .4);
+        EnhancerTissueSpecificity liver = EnhancerTissueSpecificity.of(Term.of("UBERON:0002107", "liver"), Term.of("HP:0001939", "Abnormality of metabolism/homeostasis"), .5);
+        EnhancerTissueSpecificity arteries = EnhancerTissueSpecificity.of(Term.of("UBERON:0000947", "aorta"), Term.of("HP:0011004", "Abnormal systemic arterial morphology"), .6);
+
+
+        Enhancer surf1Enhancer = Enhancer.of(assembly.contigByName("9"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(133_356_501), Position.of(133_356_530),
+                "surf1Enhancer", false, .3, Set.of(growth));
+        Enhancer gckEnhancer = Enhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(),Position.of(44_190_001), Position.of(44_190_050),
+                "gckEnhancer", false, .4, Set.of(liver));
+        Enhancer chr20Enhancer = Enhancer.of(assembly.contigByName("20"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(51_642_723), Position.of(51_642_826),
+                "chr20Enhancer", false, .5, Set.of(brain));
+        Enhancer closeToGckNotPhenotypicallyRelevant = Enhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(44_195_001), Position.of(44_195_500),
+                "closeToGckNotPhenotypicallyRelevant", true, .1, Set.of(brain));
         // the relevant HPO term for aorta is Abnormal systemic arterial morphology
         // Enhancers expect to get an HPO term and an UBERON/CL label
-        Enhancer fbn190kbUpstream =
-                Enhancer.of(chr15, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(fbn1EnhancerStart), Position.of(fbn1EnhancerEnd), 0.42, TermId.of("HP:0011004"), "aorta");
+        int fbn1TSS = 48_646_788;
+        Enhancer fbn190kbUpstream = Enhancer.of(assembly.contigByName("15"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(fbn1TSS + 90_000), Position.of(fbn1TSS + 90_000 + 300),
+                        "fbn190kbUpstream", false, .6, Set.of(arteries));
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());
@@ -373,7 +377,7 @@ public class PrototypeSvPrioritizerTest {
     }
 
     /**
-     * This tests that an inversion of the entire FBN1 which does not diusrupt the
+     * This tests that an inversion of the entire FBN1 which does not disrupt the
      * gene, but is near to an enhancer (90kb away), is pathogenic for Marfan syndrome
      * (according to the logic of this test, anyway).
      */

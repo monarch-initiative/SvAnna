@@ -2,7 +2,9 @@ package org.jax.svanna.core.viz.svg;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.EnhancerTissueSpecificity;
 import org.jax.svanna.core.reference.Transcript;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
 
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.io.Writer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.jax.svanna.core.viz.svg.Constants.*;
 
@@ -171,7 +174,7 @@ public abstract class SvSvgGenerator {
                 .orElse(Integer.MAX_VALUE);
         int enhancerMin = enhancers.stream()
                 .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Enhancer::start)
+                .mapToInt(Region::start)
                 .min()
                 .orElse(Integer.MAX_VALUE);
         return Math.min(transcriptMin, Math.min(enhancerMin, pos));
@@ -196,7 +199,7 @@ public abstract class SvSvgGenerator {
                 .orElse(Integer.MIN_VALUE);
         int enhancerMax = enhancers.stream()
                 .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Enhancer::end)
+                .mapToInt(Region::end)
                 .max()
                 .orElse(Integer.MIN_VALUE);
         return Math.max(transcriptMax, Math.max(enhancerMax, pos));
@@ -313,7 +316,8 @@ public abstract class SvSvgGenerator {
         int start = enhancer.start();
         int end = enhancer.end();
         String positionString = String.format("%s:%d-%d", chrom, start, end);
-        String geneName = String.format("%s (tau %.2f)", enhancer.tissueLabel(), enhancer.tau());
+        String tissues = enhancer.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
+        String geneName = String.format("%s (tau %.2f)", tissues, enhancer.tau());
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
         String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
                 xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));

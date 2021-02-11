@@ -9,13 +9,11 @@ import org.jax.svanna.core.reference.Transcript;
 import java.util.List;
 import java.util.Set;
 
-public interface SvPriority {
+public interface SvPriority extends CorePriority {
 
     static SvPriority unknown() {
         return DefaultSvPriority.unknown();
     }
-
-    SvImpact getImpact();
 
     List<HpoDiseaseSummary> getDiseases();
 

@@ -15,26 +15,37 @@ public class SvImpactTest {
             "VERY_HIGH,     HIGH,         true",
             "VERY_HIGH,     INTERMEDIATE, true",
             "VERY_HIGH,     LOW,          true",
+            "VERY_HIGH,     VERY_LOW,     true",
 
             "HIGH,          VERY_HIGH,    false",
             "HIGH,          HIGH,         true",
             "HIGH,          INTERMEDIATE, true",
             "HIGH,          LOW,          true",
+            "HIGH,          VERY_LOW,     true",
 
             "INTERMEDIATE,  VERY_HIGH,    false",
             "INTERMEDIATE,  HIGH,         false",
             "INTERMEDIATE,  INTERMEDIATE, true",
             "INTERMEDIATE,  LOW,          true",
+            "INTERMEDIATE,  VERY_LOW,     true",
 
             "LOW,           VERY_HIGH,    false",
             "LOW,           HIGH,         false",
             "LOW,           INTERMEDIATE, false",
             "LOW,           LOW,          true",
+            "LOW,           VERY_LOW,     true",
+
+            "VERY_LOW,      VERY_HIGH,    false",
+            "VERY_LOW,      HIGH,         false",
+            "VERY_LOW,      INTERMEDIATE, false",
+            "VERY_LOW,      LOW,          false",
+            "VERY_LOW,      VERY_LOW,     true",
 
             "UNKNOWN,       VERY_HIGH,    false",
             "UNKNOWN,       HIGH,         false",
             "UNKNOWN,       INTERMEDIATE, false",
-            "UNKNOWN,       LOW,          false"
+            "UNKNOWN,       LOW,          false",
+            "UNKNOWN,       VERY_LOW,     false"
     })
     public void satisfiesThreshold(SvImpact instance, SvImpact threshold, boolean expected) {
         assertThat(instance.satisfiesThreshold(threshold), is(expected));
@@ -46,6 +57,7 @@ public class SvImpactTest {
             "HIGH,          VERY_HIGH",
             "INTERMEDIATE,  HIGH",
             "LOW,           INTERMEDIATE",
+            "VERY_LOW,      LOW",
             "UNKNOWN,       UNKNOWN",
 
     })
@@ -58,7 +70,8 @@ public class SvImpactTest {
             "VERY_HIGH,     HIGH",
             "HIGH,          INTERMEDIATE",
             "INTERMEDIATE,  LOW",
-            "LOW,           LOW",
+            "LOW,           VERY_LOW",
+            "VERY_LOW,      VERY_LOW",
             "UNKNOWN,       UNKNOWN",
     })
     public void decrementSeverity(SvImpact instance, SvImpact expected) {

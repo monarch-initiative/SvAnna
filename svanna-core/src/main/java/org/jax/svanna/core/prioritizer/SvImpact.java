@@ -1,7 +1,8 @@
 package org.jax.svanna.core.prioritizer;
 
 public enum SvImpact {
-    UNKNOWN ("Unknown"),
+    UNKNOWN("Unknown"),
+    VERY_LOW("Very low"),
     LOW("Low"),
     INTERMEDIATE("Intermediate"),
     HIGH("High"),
@@ -29,7 +30,9 @@ public enum SvImpact {
         if (this == INTERMEDIATE)
             return threshold != VERY_HIGH && threshold != HIGH;
         if (this == LOW)
-            return threshold == LOW;
+            return threshold != VERY_HIGH && threshold != HIGH && threshold != INTERMEDIATE;
+        if (this == VERY_LOW)
+            return threshold == VERY_LOW;
         else
             return false;
     }
@@ -46,6 +49,8 @@ public enum SvImpact {
                 return HIGH;
             case LOW:
                 return INTERMEDIATE;
+            case VERY_LOW:
+                return LOW;
             case UNKNOWN:
             default:
                 return this;
@@ -62,8 +67,9 @@ public enum SvImpact {
             case HIGH:
                 return INTERMEDIATE;
             case INTERMEDIATE:
-            case LOW:
                 return LOW;
+            case LOW:
+                return VERY_LOW;
             case UNKNOWN:
             default:
                 return this;

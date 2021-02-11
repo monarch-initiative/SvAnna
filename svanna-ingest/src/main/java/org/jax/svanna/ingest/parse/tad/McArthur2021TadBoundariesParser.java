@@ -73,7 +73,7 @@ public class McArthur2021TadBoundariesParser implements IngestRecordParser<TadBo
                 return Optional.empty();
             }
             Contig contig = genomicAssembly.contigByName(lifted.getContig());
-            if (contig == Contig.unknown()) {
+            if (contig.isUnknown()) {
                 if (LOGGER.isWarnEnabled()) LOGGER.warn("Unknown contig `{}` after lifting over record `{}`", lifted.getContig(), line);
                 return Optional.empty();
             }

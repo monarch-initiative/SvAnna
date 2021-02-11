@@ -49,7 +49,7 @@ public class RepetitiveRegionParser implements IngestRecordParser<RepetitiveRegi
             }
 
             Contig contig = genomicAssembly.contigByName(column[4]);
-            if (contig == Contig.unknown()) {
+            if (contig.isUnknown()) {
                 if (LOGGER.isWarnEnabled()) LOGGER.warn("Unknown contig `{}` in line `{}`", column[4], line);
                 return Optional.empty();
             }

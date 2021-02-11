@@ -57,7 +57,7 @@ public class HgSvc2VcfParser implements IngestRecordParser<PopulationVariant> {
     private Function<VariantContext, Optional<? extends PopulationVariant>> toPopulationVariant() {
         return vc -> {
             Contig contig = genomicAssembly.contigByName(vc.getContig());
-            if (contig == Contig.unknown()) {
+            if (contig.isUnknown()) {
                 if (LOGGER.isWarnEnabled())
                     LOGGER.warn("Unknown contig `{}` in record `{}`", vc.getContig(), vc);
                 return Optional.empty();
@@ -91,7 +91,7 @@ public class HgSvc2VcfParser implements IngestRecordParser<PopulationVariant> {
             float alleleFrequency = 100.F * ((float) altCount) / calledAlleleCount;
 
             String id = vc.getAttributeAsString("ID", vc.getID());
-            Variant variant = vcfConverter.convert(vc.getContig(), id, vc.getStart(), vc.getReference().getDisplayString(), alt.getDisplayString());
+            Variant variant = vcfConverter.convert(contig, id, vc.getStart(), vc.getReference().getDisplayString(), alt.getDisplayString());
 
             return Optional.of(BasePopulationVariant.of(variant.contig(), variant.strand(), variant.coordinateSystem(),
                     variant.startPosition(), variant.endPosition(),

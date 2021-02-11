@@ -117,7 +117,7 @@ public class MergedVariantParser implements VariantParser<Variant> {
 
     private Optional<CoreCoords> makeCoreCoords(String[] tokens) {
         Contig contig = assembly.contigByName(tokens[0]);
-        if (contig == null) {
+        if (contig.isUnknown()) {
             LOGGER.warn("Unknown contig {} in line {}", tokens[0], String.join(DELIMITER, tokens));
             return Optional.empty();
         }

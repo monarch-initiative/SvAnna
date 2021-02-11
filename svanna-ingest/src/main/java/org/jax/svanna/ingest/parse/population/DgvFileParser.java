@@ -63,7 +63,7 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
 
             String contigName = "chr" + arr[1];
             Contig contig = genomicAssembly.contigByName(contigName);
-            if (contig == Contig.unknown()) {
+            if (contig.isUnknown()) {
                 LOGGER.debug("Skipping unknown contig '{}' in line '{}'", contigName, line);
                 return List.of();
             }

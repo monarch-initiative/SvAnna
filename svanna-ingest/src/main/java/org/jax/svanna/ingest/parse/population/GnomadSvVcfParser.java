@@ -86,7 +86,7 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
                 return Optional.empty();
             }
             Contig contig = genomicAssembly.contigByName(lifted.getContig());
-            if (contig == Contig.unknown()) {
+            if (contig.isUnknown()) {
                 if (LOGGER.isWarnEnabled())
                     LOGGER.warn("Skipping record {} due to unknown contig '{}' ", vc.getID(), lifted.getContig());
                 return Optional.empty();

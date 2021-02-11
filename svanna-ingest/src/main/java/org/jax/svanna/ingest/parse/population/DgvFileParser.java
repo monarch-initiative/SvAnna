@@ -33,7 +33,7 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
 
 
     @Override
-    public Stream<PopulationVariant> parse() throws IOException {
+    public Stream<? extends PopulationVariant> parse() throws IOException {
         BufferedReader reader = Files.newBufferedReader(dgvFile);
         return reader.lines()
                 .onClose(IOUtils.close(reader))
@@ -43,7 +43,7 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
     }
 
 
-    private Function<String, Collection<PopulationVariant>> toVariants() {
+    private Function<String, Collection<? extends PopulationVariant>> toVariants() {
         return line -> {
             // lines in dgv txt file look like:
             // variantaccession        chr     start   end     varianttype     variantsubtype  reference       pubmedid        method  platform        mergedvariants  supportingvariants      mergedorsample  frequency    samplesize      observedgains   observedlosses  cohortdescription       genes   samples

@@ -18,7 +18,7 @@ public class GnomadSVFileParserTest {
     @Test
     public void parseToList() throws Exception {
         GnomadSVFileParser instance = new GnomadSVFileParser(genomicAssembly, testFile);
-        List<PopulationVariant> variants = instance.parseToList();
+        List<? extends PopulationVariant> variants = instance.parseToList();
 
         // TODO - finish or remove
 //        variants.forEach(System.err::println);

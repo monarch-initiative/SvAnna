@@ -30,7 +30,7 @@ public class RepetitiveRegionParser implements IngestRecordParser<RepetitiveRegi
     }
 
     @Override
-    public Stream<RepetitiveRegion> parse() throws IOException {
+    public Stream<? extends RepetitiveRegion> parse() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(repeatsPath))));
         return reader.lines()
                 .onClose(IOUtils.close(reader))
@@ -40,7 +40,7 @@ public class RepetitiveRegionParser implements IngestRecordParser<RepetitiveRegi
                 .map(Optional::get);
     }
 
-    private Function<String, Optional<RepetitiveRegion>> toRepetitiveRegion() {
+    private Function<String, Optional<? extends RepetitiveRegion>> toRepetitiveRegion() {
         return line -> {
             String[] column = line.trim().split("\\s+");
             if (column.length < 15) {

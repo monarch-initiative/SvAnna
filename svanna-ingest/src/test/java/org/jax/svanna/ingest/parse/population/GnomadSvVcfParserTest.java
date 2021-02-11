@@ -23,7 +23,7 @@ public class GnomadSvVcfParserTest {
     @Test
     public void parseToList() throws Exception {
         GnomadSvVcfParser instance = new GnomadSvVcfParser(genomicAssembly, testFile, chainFile);
-        List<PopulationVariant> variants = instance.parseToList();
+        List<? extends PopulationVariant> variants = instance.parseToList();
 
         assertThat(variants, hasSize(33));
     }

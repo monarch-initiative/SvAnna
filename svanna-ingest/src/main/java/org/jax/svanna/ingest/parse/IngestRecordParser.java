@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 
 public interface IngestRecordParser<T extends GenomicRegion> {
 
-    Stream<T> parse() throws IOException;
+    Stream<? extends T> parse() throws IOException;
 
-    default List<T> parseToList() throws IOException {
-        try (Stream<T> parse = parse()) {
+    default List<? extends T> parseToList() throws IOException {
+        try (Stream<? extends T> parse = parse()) {
             return parse.collect(Collectors.toList());
         }
     }

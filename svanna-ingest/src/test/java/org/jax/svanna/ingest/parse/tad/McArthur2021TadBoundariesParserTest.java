@@ -21,7 +21,7 @@ public class McArthur2021TadBoundariesParserTest {
 
     @Test
     public void parse() throws Exception {
-        List<TadBoundary> records;
+        List<? extends TadBoundary> records;
         try (InputStream is = McArthur2021TadBoundariesParserTest.class.getResourceAsStream("/tads/emcarthur-TAD-stability-heritability.3records.bed")) {
             McArthur2021TadBoundariesParser instance = new McArthur2021TadBoundariesParser(genomicAssembly, is, chainFile);
             records = instance.parseToList();

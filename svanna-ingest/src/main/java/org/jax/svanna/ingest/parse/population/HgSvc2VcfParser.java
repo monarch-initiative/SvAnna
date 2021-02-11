@@ -43,7 +43,7 @@ public class HgSvc2VcfParser implements IngestRecordParser<PopulationVariant> {
 
 
     @Override
-    public Stream<PopulationVariant> parse() throws IOException {
+    public Stream<? extends PopulationVariant> parse() throws IOException {
         VCFFileReader reader = new VCFFileReader(hgsvcVcfPath, false);
         CloseableIterator<VariantContext> variantIterator = reader.iterator();
 
@@ -54,7 +54,7 @@ public class HgSvc2VcfParser implements IngestRecordParser<PopulationVariant> {
                 .map(Optional::get);
     }
 
-    private Function<VariantContext, Optional<PopulationVariant>> toPopulationVariant() {
+    private Function<VariantContext, Optional<? extends PopulationVariant>> toPopulationVariant() {
         return vc -> {
             Contig contig = genomicAssembly.contigByName(vc.getContig());
             if (contig == Contig.unknown()) {

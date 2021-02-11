@@ -30,7 +30,7 @@ public class FantomEnhancerParser implements IngestRecordParser<FEnhancer> {
     }
 
     @Override
-    public Stream<FEnhancer> parse() throws IOException {
+    public Stream<? extends FEnhancer> parse() throws IOException {
         FantomSampleParser sampleParser = new FantomSampleParser(samplesPath, uberonToHpoMap);
         Map<String, AnnotatedTissue> annotatedTissueMap = sampleParser.getIdToFantomSampleMap();
         FantomCountMatrixParser fantomCountMatrixParser = new FantomCountMatrixParser(assembly, countsPath, annotatedTissueMap);

@@ -40,16 +40,16 @@ public class McArthur2021TadBoundariesParser implements IngestRecordParser<TadBo
     }
 
     @Override
-    public Stream<TadBoundary> parse() throws IOException {
+    public Stream<? extends TadBoundary> parse() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(boundariesStabilityInputStream));
         return reader.lines()
                 .skip(1) // header
-                .map(liftThePosition())
+                .map(toTadBoundary())
                 .filter(Optional::isPresent)
                 .map(Optional::get);
     }
 
-    private Function<String, Optional<? extends TadBoundary>> liftThePosition() {
+    private Function<String, Optional<? extends TadBoundary>> toTadBoundary() {
         return line -> {
             String[] column = line.trim().split("\\s+");
             if (column.length < 5) {

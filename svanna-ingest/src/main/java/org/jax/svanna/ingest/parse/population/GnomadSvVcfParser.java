@@ -43,7 +43,7 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
     }
 
     @Override
-    public Stream<PopulationVariant> parse() throws IOException {
+    public Stream<? extends PopulationVariant> parse() throws IOException {
         VCFFileReader reader = new VCFFileReader(gnomadSvVcfPath, false);
         CloseableIterator<VariantContext> variantIterator = reader.iterator();
         return variantIterator.stream()
@@ -60,7 +60,7 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
      * @return Function for mapping {@link VariantContext} to {@link Optional} of {@link PopulationVariant}.
      * The <code>vc</code> must not represent multi-allelic SV
      */
-    private Function<VariantContext, Optional<PopulationVariant>> toPopulationVariant() {
+    private Function<VariantContext, Optional<? extends PopulationVariant>> toPopulationVariant() {
         return vc -> {
             if (vc.getAlternateAlleles().size() > 1) {
                 if (LOGGER.isWarnEnabled())

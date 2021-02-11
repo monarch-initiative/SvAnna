@@ -20,7 +20,7 @@ public class HgSvc2VcfParserTest {
     @Test
     public void parseToList() throws Exception {
         HgSvc2VcfParser instance = new HgSvc2VcfParser(genomicAssembly, testFile);
-        List<PopulationVariant> variants = instance.parseToList();
+        List<? extends PopulationVariant> variants = instance.parseToList();
 
         assertThat(variants, hasSize(43));
     }

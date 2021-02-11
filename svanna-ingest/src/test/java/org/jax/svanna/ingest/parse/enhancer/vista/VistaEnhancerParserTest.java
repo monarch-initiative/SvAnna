@@ -22,7 +22,7 @@ public class VistaEnhancerParserTest extends AbstractEnhancerParserTest {
     public void parse() throws Exception {
         Path vistaPath = Path.of(VistaEnhancerParserTest.class.getResource("/enhancers/vista.tsv").getPath());
         VistaEnhancerParser parser = new VistaEnhancerParser(GRCh38p13, vistaPath, UBERON_TO_HPO);
-        List<Enhancer> enhancers = parser.parseToList();
+        List<? extends Enhancer> enhancers = parser.parseToList();
 
         assertThat(enhancers, hasSize(2));
 

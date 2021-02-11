@@ -49,7 +49,7 @@ public class VistaEnhancerParser implements IngestRecordParser<Enhancer> {
     }
 
     @Override
-    public Stream<Enhancer> parse() throws IOException {
+    public Stream<? extends Enhancer> parse() throws IOException {
         return Files.newBufferedReader(vistaPath).lines()
                 .skip(1) // header
                 .map(toEnhancer())
@@ -57,7 +57,7 @@ public class VistaEnhancerParser implements IngestRecordParser<Enhancer> {
                 .map(Optional::get);
     }
 
-    private Function<String, Optional<Enhancer>> toEnhancer() {
+    private Function<String, Optional<? extends Enhancer>> toEnhancer() {
         return line -> {
             String[] fields = line.split("\t");
             if (fields.length < 5) {

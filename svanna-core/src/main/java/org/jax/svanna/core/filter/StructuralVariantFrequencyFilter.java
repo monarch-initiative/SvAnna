@@ -1,15 +1,18 @@
 package org.jax.svanna.core.filter;
 
+import org.jax.svanna.core.annotation.PopulationVariantDao;
+import org.jax.svanna.core.reference.PopulationVariant;
+import org.jax.svanna.core.reference.PopulationVariantOrigin;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
- * This filter flags variant that are present in given {@link SvFeatureSource} and match the query coordinates:
+ * This filter flags variant that are present in given {@link PopulationVariantDao} and match the query coordinates:
  * <ul>
  *     <li>similarity > similarity threshold</li>
  *     <li>frequency > frequency threshold</li>
@@ -26,12 +29,12 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
     private static final FilterResult PASS = FilterResult.pass(FILTER_TYPE);
     private static final FilterResult NOT_RUN = FilterResult.notRun(FILTER_TYPE);
 
-    private final SvFeatureSource featureSource;
+    private final PopulationVariantDao populationVariantDao;
     private final float similarityThreshold;
     private final float frequencyThreshold;
 
-    public StructuralVariantFrequencyFilter(SvFeatureSource featureSource, float similarityThreshold, float frequencyThreshold) {
-        this.featureSource = featureSource;
+    public StructuralVariantFrequencyFilter(PopulationVariantDao populationVariantDao, float similarityThreshold, float frequencyThreshold) {
+        this.populationVariantDao = populationVariantDao;
         this.similarityThreshold = similarityThreshold;
         this.frequencyThreshold = frequencyThreshold;
     }
@@ -70,13 +73,13 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
     }
 
     private FilterResult performFiltering(Variant variant) {
-        // get features from benign SV feature origin that share at least 1bp with the query region
-        List<SvFeature> features = featureSource.getOverlappingFeatures(variant, SVFeatureOrigin.benign());
+        // get features from benign origins that share at least 1bp with the query region
+        Collection<PopulationVariant> features = populationVariantDao.getOverlapping(variant, PopulationVariantOrigin.benign());
 
         return features.stream()
                 .anyMatch(feature -> feature.variantType().baseType() == variant.variantType().baseType()
-                        && feature.frequency() >= frequencyThreshold
-                        && reciprocalOverlap(feature, variant) > similarityThreshold)
+                        && feature.alleleFrequency() >= frequencyThreshold
+                        && reciprocalOverlap(feature, variant) * 100.F > similarityThreshold)
                 ? FAIL
                 : PASS;
     }

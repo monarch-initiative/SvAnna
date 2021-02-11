@@ -1,6 +1,8 @@
 package org.jax.svanna.ingest;
 
+import org.jax.svanna.ingest.cmd.BuildDb;
 import org.jax.svanna.ingest.cmd.DownloadCommand;
+import org.jax.svanna.ingest.cmd.GenerateConfigCommand;
 import org.jax.svanna.ingest.cmd.IngestCommand;
 import picocli.CommandLine;
 
@@ -36,7 +38,10 @@ public class Main implements Callable<Integer> {
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
                 .addSubcommand("download", new DownloadCommand())
-                .addSubcommand("ingest", new IngestCommand());
+                .addSubcommand("ingest", new IngestCommand())
+                .addSubcommand("build-db", new BuildDb())
+                .addSubcommand("generate-config", new GenerateConfigCommand());
+
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));
     }

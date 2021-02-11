@@ -5,7 +5,7 @@
     <parent>
         <artifactId>svann</artifactId>
         <groupId>org.jax.svanna</groupId>
-        <version>0.3.0</version>
+        <version>0.3.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>svanna-cli</artifactId>
@@ -14,6 +14,11 @@
         <dependency>
             <groupId>org.jax.svanna</groupId>
             <artifactId>svanna-io</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jax.svanna</groupId>
+            <artifactId>svanna-spring-boot-starter</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

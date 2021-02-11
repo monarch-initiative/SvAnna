@@ -1,7 +1,7 @@
 package org.jax.svanna.ingest.cmd;
 
 import org.jax.svanna.ingest.Main;
-import org.jax.svanna.io.SvAnnaIngestDownloader;
+import org.jax.svanna.ingest.io.SvAnnaIngestDownloader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;

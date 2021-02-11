@@ -1,14 +1,14 @@
 package org.jax.svanna.cli.cmd.annotate;
 
 
-import de.charite.compbio.jannovar.data.JannovarData;
-import de.charite.compbio.jannovar.data.JannovarDataSerializer;
-import de.charite.compbio.jannovar.data.SerializationException;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
+import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import org.jax.svanna.cli.Main;
+import org.jax.svanna.cli.cmd.SvAnnaCommand;
 import org.jax.svanna.cli.html.FilterAndCount;
 import org.jax.svanna.cli.html.HtmlTemplate;
-import org.jax.svanna.core.filter.AllPassFilter;
+import org.jax.svanna.core.annotation.AnnotationDataService;
+import org.jax.svanna.core.annotation.PopulationVariantDao;
 import org.jax.svanna.core.filter.Filter;
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.StructuralVariantFrequencyFilter;
@@ -24,35 +24,25 @@ import org.jax.svanna.core.prioritizer.SvPriority;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.TranscriptService;
-import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.core.viz.HtmlVisualizable;
 import org.jax.svanna.core.viz.HtmlVisualizer;
 import org.jax.svanna.core.viz.Visualizable;
 import org.jax.svanna.core.viz.Visualizer;
-import org.jax.svanna.io.filter.dgv.DgvFeatureSource;
 import org.jax.svanna.io.hpo.HpoDiseaseGeneMap;
-import org.jax.svanna.io.hpo.TSpecParser;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.GenomicAssembly;
-import org.monarchinitiative.svart.Variant;
-import org.monarchinitiative.svart.parsers.GenomicAssemblyParser;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ConfigurableApplicationContext;
 import picocli.CommandLine;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "annotate",
@@ -62,7 +52,7 @@ import java.util.stream.Collectors;
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
-public class AnnotateCommand implements Callable<Integer> {
+public class AnnotateCommand extends SvAnnaCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
 
@@ -71,20 +61,14 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names = {"-d", "--data-dir"}, description = "directory with data, downloaded by `download` subcommand (default: ${DEFAULT-VALUE})")
     public Path dataDir = Paths.get("data");
 
-    @CommandLine.Option(names = {"-j", "--jannovar"}, description = "Jannovar transcript definition file (default: ${DEFAULT-VALUE} )")
-    public Path jannovarPath = Paths.get("data/data/hg38_refseq_curated.ser");
-
-    @CommandLine.Option(names = {"-g", "--gencode"})
-    public Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
+//    @CommandLine.Option(names = {"-g", "--gencode"})
+//    public Path geneCodePath = Paths.get("data/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz");
 
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outprefix = "SVANNA";
 
     @CommandLine.Option(names = {"-v", "--vcf"})
     public Path vcfFile = null;
-
-    @CommandLine.Option(names = {"-e", "--enhancer"}, description = "tspec enhancer file")
-    public Path enhancerFile;
 
     @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term IDs (comma-separated list)")
     public List<String> hpoTermIdList;
@@ -94,9 +78,6 @@ public class AnnotateCommand implements Callable<Integer> {
 
     @CommandLine.Option(names = {"-max_genes"}, description = "maximum gene count to prioritize an SV (default: ${DEFAULT-VALUE})")
     public int maxGenes = 100;
-
-    @CommandLine.Option(names = {"--dgv-file"}, description = "DGV variant file")
-    public Path dgvFile = null;
 
     @CommandLine.Option(names = {"--similarity-threshold"}, description = "percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
     public float similarityThreshold = 80.F;
@@ -110,8 +91,18 @@ public class AnnotateCommand implements Callable<Integer> {
     @CommandLine.Option(names={"-p","--phenopacket"}, description = "phenopacket with HPO terms and path to VCF file")
     public Path phenopacketPath = null;
 
-    private static JannovarData readJannovarData(Path jannovarPath) throws SerializationException {
-        return new JannovarDataSerializer(jannovarPath.toString()).load();
+    private static IntervalEndExtractor<Enhancer> intervalEndExtractor() {
+        return new IntervalEndExtractor<>() {
+            @Override
+            public int getBegin(Enhancer x) {
+                return x.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+            }
+
+            @Override
+            public int getEnd(Enhancer x) {
+                return x.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+            }
+        };
     }
 
     @Override
@@ -122,13 +113,6 @@ public class AnnotateCommand implements Callable<Integer> {
         }
         LOGGER.info("Running `annotate` command...");
         // 0 - set up data
-
-        // assembly
-        Charset charset = StandardCharsets.UTF_8;
-        GenomicAssembly assembly;
-        try (InputStream is = Main.class.getResourceAsStream("/GCA_000001405.28_GRCh38.p13_assembly_report.txt")) {
-            assembly = GenomicAssemblyParser.parseAssembly(new InputStreamReader(is, charset));
-        }
 
         // TODO 8.11.2020, note we need to get the HPO Ontology object to translate the HP term ids that are provided
         //  by the user into their corresponding labels on the output file.
@@ -155,107 +139,112 @@ public class AnnotateCommand implements Callable<Integer> {
             originalHpoTermsAndLabels = Map.of();
         }
 
+        Map<Integer, IntervalArray<Enhancer>> enhancerMap = new HashMap<>();
+        Set<TermId> enhancerTerms;
+        try (ConfigurableApplicationContext context = getContext()) {
+            GenomicAssembly genomicAssembly = context.getBean(GenomicAssembly.class);
 
+            AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
 
-        // enhancers & relevant enhancer terms
-        TSpecParser tparser = new TSpecParser(enhancerFile, assembly);
-        // TODO - fix
+            List<Enhancer> enhancers = annotationDataService.allEnhancers();
+            enhancerTerms = enhancers.stream()
+                    .map(Enhancer::hpoTermAssociations)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+            Map<Integer, List<Enhancer>> enhancersByContig = enhancers.stream()
+                    .collect(Collectors.groupingBy(Enhancer::contigId));
+            for (Map.Entry<Integer, List<Enhancer>> entry : enhancersByContig.entrySet()) {
+                enhancerMap.put(entry.getKey(), new IntervalArray<>(entry.getValue(), intervalEndExtractor()));
+            }
+
+//            TSpecParser tparser = new TSpecParser(enhancerFile, genomicAssembly);
 //        Map<Integer, IntervalArray<SomeEnhancer>> enhancerMap = tparser.getChromosomeToEnhancerIntervalArrayMap();
-        Map<Integer, IntervalArray<Enhancer>> enhancerMap = Map.of();
-        Set<TermId> enhancerRelevantAncestors = hpoDiseaseGeneMap.getRelevantAncestors(tparser.getId2enhancerMap().keySet(), patientTerms);
-        // gene symbols
-        Map<String, GeneWithId> geneSymbolMap = hpoDiseaseGeneMap.getGeneSymbolMap();
-        // jannovar data
-        JannovarData jannovarData = readJannovarData(jannovarPath);
-        TranscriptService transcriptService = JannovarTranscriptService.of(assembly, jannovarData);
-        // disease summary map
-        Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
+//        Set<TermId> enhancerRelevantAncestors = hpoDiseaseGeneMap.getRelevantAncestors(tparser.getId2enhancerMap().keySet(), patientTerms);
+            Set<TermId> enhancerRelevantAncestors = hpoDiseaseGeneMap.getRelevantAncestors(enhancerTerms, patientTerms);
 
-        // 1 - parse input variants
-        VariantParser<SvannaVariant> parser = new VcfVariantParser(assembly, false);
-        List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
+            // gene symbols
+            Map<String, GeneWithId> geneSymbolMap = hpoDiseaseGeneMap.getGeneSymbolMap();
+            TranscriptService transcriptService = context.getBean(TranscriptService.class);
+            // disease summary map
+            Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = hpoDiseaseGeneMap.getRelevantGenesAndDiseases(patientTerms);
 
-        // 2 - setup variant filtering
-        Filter<SvannaVariant> variantFilter;
-        if (dgvFile == null) {
-            LOGGER.info("Variants will not be filtered");
-            variantFilter = new AllPassFilter();
-        } else {
-            LOGGER.info("Filtering out variants with reciprocal overlap >{}% occurring in more than {}% probands of the DGV file at `{}`",
-                    similarityThreshold, frequencyThreshold, dgvFile);
-            DgvFeatureSource dgvFeatureSource = new DgvFeatureSource(assembly, dgvFile);
-            variantFilter = new StructuralVariantFrequencyFilter(dgvFeatureSource, similarityThreshold, frequencyThreshold);
-        }
 
-        // 3 - prioritize & visualize variants
-        // setup prioritization parts
-        Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
-        EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
+            LOGGER.info("Filtering out variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
+            PopulationVariantDao populationVariantDao = context.getBean(PopulationVariantDao.class);
+            Filter<SvannaVariant> variantFilter = new StructuralVariantFrequencyFilter(populationVariantDao, similarityThreshold, frequencyThreshold);
 
-        SvPrioritizer<Variant> prioritizer = new PrototypeSvPrioritizer(overlapper,
-                enhancerOverlapper,
-                geneSymbolMap,
-                topLevelHpoTermsAndLabels.keySet(),
-                enhancerRelevantAncestors,
-                relevantGenesAndDiseases,
-                maxGenes);
-        List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
-        // setup visualization parts
-        Visualizer visualizer = new HtmlVisualizer();
+            // setup prioritization parts
+            Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
+            EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
 
-        List<PrioritizedVariant> prioritizedVariants = new LinkedList<>();
-        int above = 0, below = 0;
-        for (SvannaVariant variant : variants) {
-            // run prioritization
-            SvPriority priority = prioritizer.prioritize(variant);
-            priorities.add(priority);
-            if (priority.getImpact().satisfiesThreshold(threshold)) {
-                above++;
-                // run filtering
-                FilterResult filterResult = variantFilter.runFilter(variant);
-                variant.addFilterResult(filterResult);
-                prioritizedVariants.add(new PrioritizedVariant(variant, priority));
-            } else {
-                below++;
+            SvPrioritizer<Variant> prioritizer = new PrototypeSvPrioritizer(overlapper,
+                    enhancerOverlapper,
+                    geneSymbolMap,
+                    topLevelHpoTermsAndLabels.keySet(),
+                    enhancerRelevantAncestors,
+                    relevantGenesAndDiseases,
+                    maxGenes);
+            List<SvPriority> priorities = new ArrayList<>(); // where to store the prioritization results
+            // setup visualization parts
+            Visualizer visualizer = new HtmlVisualizer();
+
+            // read variants
+            VariantParser<SvannaVariant> parser = new VcfVariantParser(genomicAssembly, false);
+            List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
+            List<PrioritizedVariant> prioritizedVariants = new LinkedList<>();
+            int above = 0, below = 0;
+            for (SvannaVariant variant : variants) {
+                // run prioritization
+                SvPriority priority = prioritizer.prioritize(variant);
+                priorities.add(priority);
+                if (priority.getImpact().satisfiesThreshold(threshold)) {
+                    above++;
+                    // run filtering
+                    FilterResult filterResult = variantFilter.runFilter(variant);
+                    variant.addFilterResult(filterResult);
+                    prioritizedVariants.add(new PrioritizedVariant(variant, priority));
+                } else {
+                    below++;
+                }
             }
-        }
-        LOGGER.info("Above threshold SVs: {}, below threshold SVs: {}", NF.format(above), NF.format(below));
+            LOGGER.info("Above threshold SVs: {}, below threshold SVs: {}", NF.format(above), NF.format(below));
 
-        // TODO -- if we have frequency information
-        // svList - svann.prioritizeSvsByPopulationFrequency(svList);
-        // This filters our SVs with lower impact than our threshold
+            // TODO -- if we have frequency information
+            // svList - svann.prioritizeSvsByPopulationFrequency(svList);
+            // This filters our SVs with lower impact than our threshold
 
-        FilterAndCount fac = new FilterAndCount(priorities, variants, threshold, minAltReadSupport);
-        int unparsableCount = fac.getUnparsableCount();
+            FilterAndCount fac = new FilterAndCount(priorities, variants, threshold, minAltReadSupport);
+            int unparsableCount = fac.getUnparsableCount();
 
-        Map<String, String> infoMap = new HashMap<>();
-        infoMap.put("vcf_file", vcfFile == null ? "" : vcfFile.toString());
-        infoMap.put("unparsable", String.valueOf(unparsableCount));
-        infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
-        infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
-        infoMap.put("counts_table", fac.toHtmlTable());
-        infoMap.put("phenopacket_file", phenopacketPath == null ? "" : phenopacketPath.toAbsolutePath().toString());
+            Map<String, String> infoMap = new HashMap<>();
+            infoMap.put("vcf_file", vcfFile == null ? "" : vcfFile.toString());
+            infoMap.put("unparsable", String.valueOf(unparsableCount));
+            infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
+            infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));
+            infoMap.put("counts_table", fac.toHtmlTable());
+            infoMap.put("phenopacket_file", phenopacketPath == null ? "" : phenopacketPath.toAbsolutePath().toString());
 
-        List<String> visualizations = new ArrayList<>();
-        Collections.sort(prioritizedVariants);
-        for (var pr : prioritizedVariants) {
-            if (pr.variant().numberOfAltReads() < minAltReadSupport) {
-                continue;
-            } else if (! pr.variant().passedFilters()) {
-                continue;
+            List<String> visualizations = new ArrayList<>();
+            Collections.sort(prioritizedVariants);
+            for (var pr : prioritizedVariants) {
+                if (pr.variant().numberOfAltReads() < minAltReadSupport) {
+                    continue;
+                } else if (! pr.variant().passedFilters()) {
+                    continue;
+                }
+                Visualizable vizbell = pr.getVisualizable();
+                visualizations.add(visualizer.getHtml(vizbell));
             }
-            Visualizable vizbell = pr.getVisualizable();
-            visualizations.add(visualizer.getHtml(vizbell));
+
+            HtmlTemplate template = new HtmlTemplate(visualizations,
+                    infoMap,
+                    topLevelHpoTermsAndLabels,
+                    originalHpoTermsAndLabels);
+            template.outputFile(outprefix);
+
+            // We're done!
+            return 0;
         }
-
-        HtmlTemplate template = new HtmlTemplate(visualizations,
-                infoMap,
-                topLevelHpoTermsAndLabels,
-                originalHpoTermsAndLabels);
-        template.outputFile(outprefix);
-
-        // We're done!
-        return 0;
     }
 
     /**

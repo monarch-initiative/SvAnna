@@ -5,9 +5,7 @@ import org.jax.svanna.core.TestDataConfig;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.overlap.*;
-import org.jax.svanna.core.reference.Enhancer;
-import org.jax.svanna.core.reference.EnhancerTissueSpecificity;
-import org.jax.svanna.core.reference.TranscriptService;
+import org.jax.svanna.core.reference.*;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -91,19 +89,19 @@ public class PrototypeSvPrioritizerTest {
         EnhancerTissueSpecificity arteries = EnhancerTissueSpecificity.of(Term.of("UBERON:0000947", "aorta"), Term.of("HP:0011004", "Abnormal systemic arterial morphology"), .6);
 
 
-        Enhancer surf1Enhancer = Enhancer.of(assembly.contigByName("9"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(133_356_501), Position.of(133_356_530),
-                "surf1Enhancer", false, .3, Set.of(growth));
-        Enhancer gckEnhancer = Enhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(),Position.of(44_190_001), Position.of(44_190_050),
-                "gckEnhancer", false, .4, Set.of(liver));
-        Enhancer chr20Enhancer = Enhancer.of(assembly.contigByName("20"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(51_642_723), Position.of(51_642_826),
-                "chr20Enhancer", false, .5, Set.of(brain));
-        Enhancer closeToGckNotPhenotypicallyRelevant = Enhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(44_195_001), Position.of(44_195_500),
-                "closeToGckNotPhenotypicallyRelevant", true, .1, Set.of(brain));
+        Enhancer surf1Enhancer = BaseEnhancer.of(assembly.contigByName("9"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(133_356_501), Position.of(133_356_530),
+                "surf1Enhancer", EnhancerSource.UNKNOWN, false, .3, Set.of(growth));
+        Enhancer gckEnhancer = BaseEnhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(),Position.of(44_190_001), Position.of(44_190_050),
+                "gckEnhancer", EnhancerSource.UNKNOWN, false, .4, Set.of(liver));
+        Enhancer chr20Enhancer = BaseEnhancer.of(assembly.contigByName("20"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(51_642_723), Position.of(51_642_826),
+                "chr20Enhancer", EnhancerSource.UNKNOWN, false, .5, Set.of(brain));
+        Enhancer closeToGckNotPhenotypicallyRelevant = BaseEnhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(44_195_001), Position.of(44_195_500),
+                "closeToGckNotPhenotypicallyRelevant", EnhancerSource.UNKNOWN, true, .1, Set.of(brain));
         // the relevant HPO term for aorta is Abnormal systemic arterial morphology
         // Enhancers expect to get an HPO term and an UBERON/CL label
         int fbn1TSS = 48_646_788;
-        Enhancer fbn190kbUpstream = Enhancer.of(assembly.contigByName("15"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(fbn1TSS + 90_000), Position.of(fbn1TSS + 90_000 + 300),
-                        "fbn190kbUpstream", false, .6, Set.of(arteries));
+        Enhancer fbn190kbUpstream = BaseEnhancer.of(assembly.contigByName("15"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(fbn1TSS + 90_000), Position.of(fbn1TSS + 90_000 + 300),
+                        "fbn190kbUpstream", EnhancerSource.UNKNOWN, false, .6, Set.of(arteries));
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());
@@ -150,6 +148,7 @@ public class PrototypeSvPrioritizerTest {
     public void setUp() {
         enhancerMap = makeEnhancerMap(genomicAssembly);
         Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
+
         EnhancerOverlapper enhancerOverlapper = new EnhancerOverlapper(enhancerMap);
         prioritizer = new PrototypeSvPrioritizer(overlapper, enhancerOverlapper, geneSymbolMap, patientTerms, relevantEnhancerTopLevelTerms, diseaseMap);
     }

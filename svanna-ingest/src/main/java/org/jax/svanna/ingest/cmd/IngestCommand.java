@@ -4,11 +4,11 @@ import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.Main;
-import org.jax.svanna.ingest.enhancer.EnhancerParser;
-import org.jax.svanna.ingest.enhancer.fantom.FantomEnhancerParser;
-import org.jax.svanna.ingest.enhancer.vista.VistaEnhancerParser;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
+import org.jax.svanna.ingest.parse.IngestRecordParser;
+import org.jax.svanna.ingest.parse.enhancer.fantom.FantomEnhancerParser;
+import org.jax.svanna.ingest.parse.enhancer.vista.VistaEnhancerParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssemblies;
@@ -19,7 +19,6 @@ import picocli.CommandLine;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -63,39 +62,42 @@ public class IngestCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        GenomicAssembly assembly = GenomicAssemblies.GRCh38p13();
-        File tissueMap = getResource("hpo_enhancer_map.csv");
-        HpoTissueMapParser hpoTissueMapParser = new HpoTissueMapParser(tissueMap);
-        Map<TermId, HpoMapping> uberonToHpoMap = hpoTissueMapParser.getOtherToHpoMap();
+        try {
+            GenomicAssembly assembly = GenomicAssemblies.GRCh38p13();
+            File tissueMap = getResource("hpo_enhancer_map.csv");
+            HpoTissueMapParser hpoTissueMapParser = new HpoTissueMapParser(tissueMap);
+            Map<TermId, HpoMapping> uberonToHpoMap = hpoTissueMapParser.getOtherToHpoMap();
 //        VistaParser vistaParser = new VistaParser(this.vistaPath, uberonToHpoMap);
 //        List<IngestedEnhancer> vistaEnhancers = vistaParser.getEnhancers();
-        EnhancerParser<? extends Enhancer> vistaParser = new VistaEnhancerParser(assembly, vistaPath, uberonToHpoMap);
-        List<? extends Enhancer> vistaEnhancers = vistaParser.parse();
+            IngestRecordParser<? extends Enhancer> vistaParser = new VistaEnhancerParser(assembly, vistaPath, uberonToHpoMap);
+            List<? extends Enhancer> vistaEnhancers = vistaParser.parseToList();
 //        Fantom5Parser fantom5Parser = new Fantom5Parser(this.f5Hg38EnhancerPath, this.samplePath, this.percentileThreshold);
-        EnhancerParser<? extends Enhancer> fantomParser = new FantomEnhancerParser(assembly, f5Hg38EnhancerPath, samplePath, uberonToHpoMap);
-        List<? extends Enhancer> fantomEnhancers = fantomParser.parse();
+            IngestRecordParser<? extends Enhancer> fantomParser = new FantomEnhancerParser(assembly, f5Hg38EnhancerPath, samplePath, uberonToHpoMap);
+            List<? extends Enhancer> fantomEnhancers = fantomParser.parseToList();
 //        double thresholdCpm = fantom5Parser.getCpmThreshold();
 //        double tauAtThreshold = fantom5Parser.getTauThreshold();
 //        System.out.printf("[INFO] CPM at %d percentile: %f\n", this.percentileThreshold, thresholdCpm);
 //        System.out.printf("[INFO] Tau at %d percentile: %f\n", this.percentileThreshold, tauAtThreshold);
 //        List<IngestedEnhancer> aboveThresholdEnhancers = fantom5Parser.getAboveThresholdEnhancers(thresholdCpm, tauAtThreshold);
 //        System.out.printf("[INFO] We extracted %d VISTA and %d FANTOM5 enhancers\n", vistaEnhancers.size(), aboveThresholdEnhancers.size());
-        if (LOGGER.isInfoEnabled())
+            if (LOGGER.isInfoEnabled())
                 LOGGER.info("Storing the enhancers to `{}`", outfile.toAbsolutePath());
-        try (BufferedWriter bw = Files.newBufferedWriter(outfile)) {
-            bw.write("name\tchrom\tbegin\tend\ttissues\n");
-            for (var enhancer : vistaEnhancers) {
-                String tissues = enhancer.tissueSpecificity().stream().map(toTissueSpecificitySummary()).collect(Collectors.joining(";"));
-                String line = String.format("%s\t%s\t%d\t%d\t%s\n", enhancer.id(), enhancer.contigName(), enhancer.startWithCoordinateSystem(CoordinateSystem.zeroBased()), enhancer.endWithCoordinateSystem(CoordinateSystem.zeroBased()), tissues);
-                bw.write(line);
+            try (BufferedWriter bw = Files.newBufferedWriter(outfile)) {
+                bw.write("name\tchrom\tbegin\tend\ttissues\n");
+                for (var enhancer : vistaEnhancers) {
+                    String tissues = enhancer.tissueSpecificity().stream().map(toTissueSpecificitySummary()).collect(Collectors.joining(";"));
+                    String line = String.format("%s\t%s\t%d\t%d\t%s\n", enhancer.id(), enhancer.contigName(), enhancer.startWithCoordinateSystem(CoordinateSystem.zeroBased()), enhancer.endWithCoordinateSystem(CoordinateSystem.zeroBased()), tissues);
+                    bw.write(line);
+                }
+                for (var ie : fantomEnhancers) {
+                    String tissues = ie.tissueSpecificity().stream().map(toTissueSpecificitySummary()).collect(Collectors.joining(";"));
+                    String line = String.format("%s\t%s\t%d\t%d\t%s\n", ie.id(), ie.contigName(), ie.startWithCoordinateSystem(CoordinateSystem.zeroBased()), ie.endWithCoordinateSystem(CoordinateSystem.zeroBased()), tissues);
+                    bw.write(line);
+                }
             }
-            for (var ie : fantomEnhancers) {
-                String tissues = ie.tissueSpecificity().stream().map(toTissueSpecificitySummary()).collect(Collectors.joining(";"));
-                String line = String.format("%s\t%s\t%d\t%d\t%s\n", ie.id(), ie.contigName(), ie.startWithCoordinateSystem(CoordinateSystem.zeroBased()), ie.endWithCoordinateSystem(CoordinateSystem.zeroBased()), tissues);
-                bw.write(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        } catch (Exception e) {
+            LOGGER.error("Error: {}", e.getMessage());
             return 1;
         }
         return 0;

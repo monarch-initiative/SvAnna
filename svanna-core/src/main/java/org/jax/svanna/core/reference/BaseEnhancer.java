@@ -2,6 +2,7 @@ package org.jax.svanna.core.reference;
 
 import org.monarchinitiative.svart.*;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -9,29 +10,50 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
 
     private final String id;
 
+    private final EnhancerSource enhancerSource;
+
     private final boolean isDevelopmental;
 
     private final double tau;
 
     private final Set<EnhancerTissueSpecificity> specificities;
 
-    static BaseEnhancer of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
-                           String id, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, isDevelopmental, tau, Set.copyOf(specificities));
+    public static BaseEnhancer of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+                           String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
+        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     protected BaseEnhancer(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
-                           String id, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
+                           String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
         super(contig, strand, coordinateSystem, startPosition, endPosition);
         this.id = Objects.requireNonNull(id);
+        this.enhancerSource = enhancerSource;
         this.isDevelopmental = isDevelopmental;
         this.tau = tau;
         this.specificities = Objects.requireNonNull(specificities);
     }
 
+    protected BaseEnhancer(Builder builder) {
+        super(builder);
+        this.id = Objects.requireNonNull(builder.id);
+        this.enhancerSource = builder.enhancerSource;
+        this.isDevelopmental = builder.isDevelopmental;
+        this.tau = builder.tau;
+        this.specificities = Set.copyOf(builder.specificities);
+    }
+
     @Override
     public String id() {
         return id;
+    }
+
+    @Override
+    public EnhancerSource enhancerSource() {
+        return enhancerSource;
     }
 
     @Override
@@ -51,7 +73,7 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
 
     @Override
     protected BaseEnhancer newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, isDevelopmental, tau, specificities);
+        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, enhancerSource, isDevelopmental, tau, specificities);
     }
 
     @Override
@@ -77,4 +99,53 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
                 ", tau=" + tau +
                 "} " + super.toString();
     }
+
+    public static class Builder extends BaseGenomicRegion.Builder<Builder> {
+
+        private String id;
+
+        private EnhancerSource enhancerSource = EnhancerSource.UNKNOWN;
+
+        private boolean isDevelopmental = false;
+
+        private double tau = Double.NaN;
+
+        private final Set<EnhancerTissueSpecificity> specificities = new HashSet<>();
+
+
+        public Builder id(String id) {
+            this.id = id;
+            return self();
+        }
+        public Builder enhancerSource(EnhancerSource enhancerSource) {
+            this.enhancerSource = enhancerSource;
+            return self();
+        }
+
+        public Builder isDevelopmental(boolean isDevelopmental) {
+            this.isDevelopmental = isDevelopmental;
+            return self();
+        }
+
+        public Builder tau(double tau) {
+            this.tau = tau;
+            return self();
+        }
+
+        public Builder addSpecificity(EnhancerTissueSpecificity specificity) {
+            this.specificities.add(specificity);
+            return self();
+        }
+
+        @Override
+        public BaseEnhancer build() {
+            return new BaseEnhancer(self());
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
+
 }

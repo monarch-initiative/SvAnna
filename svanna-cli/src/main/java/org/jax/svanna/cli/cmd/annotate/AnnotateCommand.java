@@ -88,7 +88,7 @@ public class AnnotateCommand extends SvAnnaCommand {
     @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 2;
 
-    @CommandLine.Option(names = {"--n-threads"}, paramLabel = "4", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
     public int nThreads = 2;
 
     @CommandLine.Option(names = {"-n", "--report-top-variants"}, paramLabel = "50", description = "Report top n variants (default: ${DEFAULT-VALUE})")

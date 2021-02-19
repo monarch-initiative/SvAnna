@@ -15,6 +15,11 @@ public class LogUtils {
                 variant.startOnStrand(Strand.POSITIVE), variant.endOnStrand(Strand.POSITIVE), variant.ref(), variant.alt());
     }
 
+    public static void logError(Logger logger, String template, Object... objects) {
+        if (logger.isErrorEnabled())
+            logger.error(template, objects);
+    }
+
     public static void logWarn(Logger logger, String template, Object... objects) {
         if (logger.isWarnEnabled())
             logger.warn(template, objects);
@@ -28,6 +33,11 @@ public class LogUtils {
     public static void logDebug(Logger logger, String template, Object... objects) {
         if (logger.isDebugEnabled())
             logger.debug(template, objects);
+    }
+
+    public static void logTrace(Logger logger, String template, Object... objects) {
+        if (logger.isTraceEnabled())
+            logger.trace(template, objects);
     }
 
 }

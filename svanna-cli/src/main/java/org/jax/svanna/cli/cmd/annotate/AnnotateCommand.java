@@ -2,6 +2,7 @@ package org.jax.svanna.cli.cmd.annotate;
 
 
 import org.jax.svanna.cli.Main;
+import org.jax.svanna.cli.cmd.PoolUtils;
 import org.jax.svanna.cli.cmd.ProgressReporter;
 import org.jax.svanna.cli.cmd.SvAnnaCommand;
 import org.jax.svanna.cli.html.FilterAndCount;
@@ -40,7 +41,11 @@ import picocli.CommandLine;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CommandLine.Command(name = "annotate",
         aliases = {"A"},
@@ -83,12 +88,18 @@ public class AnnotateCommand extends SvAnnaCommand {
     @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 2;
 
+    @CommandLine.Option(names = {"--n-threads"}, paramLabel = "4", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
+    public int nThreads = 2;
+
+    @CommandLine.Option(names = {"-n", "--report-top-variants"}, paramLabel = "50", description = "Report top n variants (default: ${DEFAULT-VALUE})")
+    public int reportNVariants = 100;
+
     @CommandLine.Option(names={"-p","--phenopacket"}, description = "phenopacket with HPO terms and path to VCF file")
     public Path phenopacketPath = null;
 
     private static Comparator<? super SvannaVariant> prioritizedVariantComparator() {
         return (l, r) -> {
-            int priority = l.svPriority().compareTo(r.svPriority());
+            int priority = r.svPriority().compareTo(l.svPriority()); // the order is intentional
             if (priority != 0)
                 return priority;
             return Variant.compare(l, r);
@@ -101,7 +112,17 @@ public class AnnotateCommand extends SvAnnaCommand {
             LogUtils.logWarn(LOGGER,"Provide either path to a VCF file or path to a phenopacket (not both)");
             return 1;
         }
-        LOGGER.info("Running `annotate` command...");
+
+        if (nThreads < 1) {
+            LogUtils.logError(LOGGER, "Thread number must be positive: {}", nThreads);
+            return 1;
+        }
+        int processorsAvailable = Runtime.getRuntime().availableProcessors();
+        if (nThreads > processorsAvailable) {
+            LogUtils.logWarn(LOGGER, "You asked for more threads ({}) than processors ({}) available on the system", nThreads, processorsAvailable);
+        }
+
+        LogUtils.logInfo(LOGGER, "Running `annotate` command...");
 
         try (ConfigurableApplicationContext context = getContext()) {
             GenomicAssembly genomicAssembly = context.getBean(GenomicAssembly.class);
@@ -158,12 +179,23 @@ public class AnnotateCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
             LogUtils.logInfo(LOGGER, "Filtering and prioritizing variants");
-            ProgressReporter progressReporter = new ProgressReporter(1_000);
-            List<SvannaVariant> filteredPrioritizedVariants = variants.parallelStream()
-                    .peek(progressReporter::logItem).onClose(progressReporter.summarize())
-                    .peek(v -> v.addFilterResult(variantFilter.runFilter(v)))
-                    .peek(v -> v.setSvPriority(prioritizer.prioritize(v)))
-                    .collect(Collectors.toList());
+            ProgressReporter progressReporter = new ProgressReporter(5_000);
+            List<SvannaVariant> filteredPrioritizedVariants;
+            try (Stream<SvannaVariant> stream = variants.stream()) {
+                Stream<SvannaVariant> variantStream = stream.parallel()
+                        .peek(progressReporter::logItem).onClose(progressReporter.summarize())
+                        .peek(v -> v.addFilterResult(variantFilter.runFilter(v)))
+                        .peek(v -> v.setSvPriority(prioritizer.prioritize(v)));
+
+
+                ForkJoinPool workerPool = PoolUtils.makePool(nThreads);
+                ForkJoinTask<List<SvannaVariant>> task = workerPool.submit(() -> variantStream.collect(Collectors.toList()));
+                filteredPrioritizedVariants = task.get();
+                workerPool.shutdown();
+            } catch (InterruptedException | ExecutionException e) {
+                LogUtils.logError(LOGGER, "Error: {}", e.getMessage());
+                throw e;
+            }
 
             int above = 0, below = 0;
             double thresholdValue = threshold.priority();
@@ -181,7 +213,7 @@ public class AnnotateCommand extends SvAnnaCommand {
             // This filters our SVs with lower impact than our threshold
 
             List<DiscreteSvPriority> priorities = filteredPrioritizedVariants.stream().map(SvannaVariant::svPriority).collect(Collectors.toList());
-            FilterAndCount fac = new FilterAndCount(priorities, variants, threshold, minAltReadSupport);
+            FilterAndCount fac = new FilterAndCount(priorities, filteredPrioritizedVariants, threshold, minAltReadSupport);
             int unparsableCount = fac.getUnparsableCount();
 
             Map<String, String> infoMap = new HashMap<>();
@@ -195,11 +227,13 @@ public class AnnotateCommand extends SvAnnaCommand {
             // setup visualization parts
             VisualizableGenerator graphicsGenerator = new VisualizableGeneratorSimple(overlapper, annotationDataService, phenotypeDataService);
             Visualizer visualizer = new HtmlVisualizer();
+            LogUtils.logInfo(LOGGER, "Reporting {} variants sorted by priority", reportNVariants);
             List<String> visualizations = filteredPrioritizedVariants.stream()
                     .filter(vp -> vp.numberOfAltReads() >= minAltReadSupport && vp.passedFilters())
                     .sorted(prioritizedVariantComparator())
                     .map(graphicsGenerator::makeVisualizable)
                     .map(visualizer::getHtml)
+                    .limit(reportNVariants)
                     .collect(Collectors.toList());
 
             HtmlTemplate template = new HtmlTemplate(visualizations, infoMap, topLevelHpoTerms, validatedPatientTerms);

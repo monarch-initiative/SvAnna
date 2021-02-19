@@ -97,8 +97,12 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
 
     @Override
     public Set<HpoDiseaseSummary> getDiseasesForGene(TermId gene) {
-        return geneToDiseaseIdMap.getOrDefault(gene, Set.of()).stream()
+        if (!geneToDiseaseIdMap.containsKey(gene))
+            return Set.of();
+        return geneToDiseaseIdMap.get(gene).stream()
                 .map(diseaseIdToDisease::get)
+                .filter(Objects::nonNull)
+                .filter(hpoDisease -> hpoDisease.getDiseaseDatabaseId() != null)
                 .map(disease -> HpoDiseaseSummary.of(disease.getDiseaseDatabaseId().getValue(), disease.getName()))
                 .collect(Collectors.toSet());
     }

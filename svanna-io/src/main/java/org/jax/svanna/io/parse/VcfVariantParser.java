@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 import static org.jax.svanna.io.parse.Utils.makeVariantRepresentation;
 
 /**
- * Parse variants stored in a VCF file.
+ * Parse variants stored in a VCF file. The parser is <em>NOT</em> thread safe!
  */
 public class VcfVariantParser implements VariantParser<SvannaVariant> {
 

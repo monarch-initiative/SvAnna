@@ -21,6 +21,7 @@ import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
 
 // class to show that we can replace the enhancer interval arrays with annotationDataService
+@SuppressWarnings("Duplicates") // TODO - remove Prototype prioritizer if this works
 public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, DiscreteSvPriority> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbPrototypeSvPrioritizer.class);
@@ -516,7 +517,8 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
-            LogUtils.logWarn(LOGGER, "Could not identify highest impact overlap for no overlaps.");
+            // TODO - but it happens
+//            LogUtils.logDebug(LOGGER, "Could not identify highest impact overlap for no overlaps.");
             return OverlapType.UNKNOWN;
         }
         Overlap highestImpactOverlap = highestImpactOverlapOpt.get();

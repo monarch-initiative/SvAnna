@@ -64,12 +64,12 @@ public class TranscriptTest {
         assertThat(cds.end(), equalTo(390));
 
         List<GenomicRegion> exons = tx.exons();
-//        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
-//        assertThat(exons.get(1), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
-//        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
-        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
         assertThat(exons.get(1), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
-        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
+        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+//        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+//        assertThat(exons.get(1), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
+//        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
     }
 
     @Test
@@ -94,12 +94,12 @@ public class TranscriptTest {
         assertThat(tx.isCoding(), equalTo(false));
 
         List<GenomicRegion> exons = tx.exons();
-//        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
-//        assertThat(exons.get(1), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
-//        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
-        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
         assertThat(exons.get(1), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
-        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
+        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+//        assertThat(exons.get(0), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+//        assertThat(exons.get(1), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
+//        assertThat(exons.get(2), equalTo(GenomicRegion.of(CONTIG, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
     }
 
     @Test

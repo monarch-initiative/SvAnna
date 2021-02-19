@@ -85,61 +85,24 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
         return exons;
     }
 
-//    @Override
-//    public TranscriptDefault withStrand(Strand other) {
-//        if (strand() == other) {
-//            return this;
-//        } else {
-//            Position start = startPosition().invert(coordinateSystem(), contig());
-//            Position end = endPosition().invert(coordinateSystem(), contig());
-//
-//            GenomicRegion cdsRegionWithStrand = isCoding ? cdsRegion.withStrand(other) : null;
-//
-//            List<GenomicRegion> exonsWithStrand = new ArrayList<>(exons.size());
-//            for (int i = exons.size() - 1; i >= 0; i--) {
-//                GenomicRegion exon = exons.get(i);
-//                exonsWithStrand.add(exon.withStrand(other));
-//            }
-//
-//            return new TranscriptDefault(contig(), other, coordinateSystem(), end, start, // inverted order!
-//                    accessionId, hgvsSymbol, cdsRegionWithStrand, exonsWithStrand);
-//        }
-//    }
-
-//    @Override
-//    public TranscriptDefault withCoordinateSystem(CoordinateSystem other) {
-//        if (coordinateSystem() == other) {
-//            return this;
-//        } else {
-//            GenomicRegion cdsWithCoordinateSystem = isCoding ? cdsRegion.withCoordinateSystem(other) : null;
-//            List<GenomicRegion> exonsWithCoordinateSystem = new ArrayList<>(exons.size());
-//            for (GenomicRegion region : exons) {
-//                GenomicRegion exon = region.withCoordinateSystem(other);
-//                exonsWithCoordinateSystem.add(exon);
-//            }
-//
-//            return new TranscriptDefault(contig(), strand(), other, startPositionWithCoordinateSystem(other), endPositionWithCoordinateSystem(other),
-//                    accessionId, hgvsSymbol, cdsWithCoordinateSystem,
-//                    exonsWithCoordinateSystem);
-//        }
-//    }
-//
-//    @Override
-//    public TranscriptDefault toOppositeStrand() {
-//        return withStrand(strand().opposite());
-//    }
-
     @Override
     protected TranscriptDefault newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position start, Position end) {
-        // no-op Not required as the newVariantInstance returns the same type and this is only required for
-        // the BaseGenomicRegion.withCoordinateSystem and withStrand methods which are overridden in this class
-
         GenomicRegion cds = cdsRegion;
-        if (cds!=null)
+        if (cds != null)
             cds = cds.withStrand(strand).withCoordinateSystem(coordinateSystem);
-        List<GenomicRegion> exons = new ArrayList<>(exons().size());
-        for (GenomicRegion exon : exons()) {
-            exons.add(exon.withStrand(strand).withCoordinateSystem(coordinateSystem));
+        List<GenomicRegion> exons;
+        if (strand() != strand) {
+            exons = new ArrayList<>(exons().size());
+            for (int i = exons().size() - 1; i >= 0; i--) {
+                exons.add(exons().get(i).withStrand(strand).withCoordinateSystem(coordinateSystem));
+            }
+        } else if (coordinateSystem() != coordinateSystem) {
+            exons = new ArrayList<>(exons().size());
+            for (GenomicRegion exon : exons()) {
+                exons.add(exon.withCoordinateSystem(coordinateSystem));
+            }
+        } else {
+            exons = exons();
         }
 
         return new TranscriptDefault(contig, strand, coordinateSystem, start, end, accessionId, hgvsSymbol, cds, exons);

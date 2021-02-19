@@ -1,8 +1,8 @@
 package org.jax.svanna.core.viz;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
+import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.Overlap;
-import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 

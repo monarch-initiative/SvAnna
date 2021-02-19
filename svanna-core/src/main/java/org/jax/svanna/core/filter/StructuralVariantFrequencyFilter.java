@@ -1,8 +1,8 @@
 package org.jax.svanna.core.filter;
 
-import org.jax.svanna.core.annotation.PopulationVariantDao;
-import org.jax.svanna.core.reference.PopulationVariant;
-import org.jax.svanna.core.reference.PopulationVariantOrigin;
+import org.jax.svanna.core.landscape.PopulationVariant;
+import org.jax.svanna.core.landscape.PopulationVariantDao;
+import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Variant;

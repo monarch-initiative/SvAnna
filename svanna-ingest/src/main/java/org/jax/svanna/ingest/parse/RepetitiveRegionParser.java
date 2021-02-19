@@ -1,7 +1,7 @@
 package org.jax.svanna.ingest.parse;
 
-import org.jax.svanna.core.reference.RepeatFamily;
-import org.jax.svanna.core.reference.RepetitiveRegion;
+import org.jax.svanna.core.landscape.RepeatFamily;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
 package org.jax.svanna.ingest.parse.enhancer.vista;
 
-import org.jax.svanna.core.reference.Enhancer;
-import org.jax.svanna.core.reference.EnhancerTissueSpecificity;
+import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.parse.enhancer.AbstractEnhancerParserTest;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.Term;

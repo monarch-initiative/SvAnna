@@ -2,11 +2,11 @@ package org.jax.svanna.core.prioritizer;
 
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
+import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.EnhancerOverlapper;
 import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.overlap.OverlapType;
 import org.jax.svanna.core.overlap.Overlapper;
-import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Variant;
@@ -30,7 +30,7 @@ import static org.jax.svanna.core.prioritizer.Utils.atLeastOneSharedItem;
  *     <li>INTERMEDIATE-IMPACT is changed to LOW IMPACT</li>
  * </ol>
  */
-public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
+public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedSvPriority> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrototypeSvPrioritizer.class);
 
@@ -115,7 +115,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
     }
 
     @Override
-    public SvPriority prioritize(Variant variant) {
+    public AnnotatedSvPriority prioritize(Variant variant) {
         /*
         For each case we need to figure out the affected transcripts/genes.
         Then, we figure out the impact on the sequence (high/medium/low) and phenotype relevance.
@@ -149,7 +149,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
                 return prioritizeDuplication(variant);
             default:
                 LOGGER.warn("Prioritization of {} is not yet supported", variant.variantType());
-                return SvPriority.unknown();
+                return AnnotatedSvPriority.unknown();
         }
     }
 
@@ -160,13 +160,13 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
      * as deletions where overlapping with the CDS of a gene can be high priority.
      * We also prioritize enhancers at this step
 
-     * @return a phenotypically prioritized {@link SvPriority} object
+     * @return a phenotypically prioritized {@link AnnotatedSvPriority} object
      */
-    SvPriority prioritizeSimpleOverlapByPhenotype(SvImpact svImpact,
-                                                  Set<Transcript> affectedTranscripts,
-                                                  Set<GeneWithId> affectedGeneIds,
-                                                  List<Enhancer> affectedEnhancers,
-                                                  List<Overlap> olaps) {
+    AnnotatedSvPriority prioritizeSimpleOverlapByPhenotype(SvImpact svImpact,
+                                                           Set<Transcript> affectedTranscripts,
+                                                           Set<GeneWithId> affectedGeneIds,
+                                                           List<Enhancer> affectedEnhancers,
+                                                           List<Overlap> olaps) {
 
         List<HpoDiseaseSummary> diseaseList = new ArrayList<>();
         SvImpact phenotypeImpact;
@@ -195,7 +195,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
             }
         }
 
-        return new DefaultSvPriority(phenotypeImpact, affectedTranscripts,
+        return new DefaultAnnotatedSvPriority(phenotypeImpact, affectedTranscripts,
                 affectedGeneIds, affectedEnhancers, olaps, diseaseList);
     }
 
@@ -226,7 +226,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
      * @param deletion deletion to evaluate
      * @return priority
      */
-    private SvPriority prioritizeDeletion(Variant deletion) {
+    private AnnotatedSvPriority prioritizeDeletion(Variant deletion) {
         // find the gene/transcript with the most deleterious OverlapType
         List<Overlap> overlaps = overlapper.getOverlapList(deletion);
         OverlapType highestOT = getHighestOverlapType(overlaps);
@@ -298,14 +298,14 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
      * @param insertion an insertion
      * @return Corresponding prioritization according to sequence
      */
-    private SvPriority prioritizeInsertion(Variant insertion) {
+    private AnnotatedSvPriority prioritizeInsertion(Variant insertion) {
         List<Overlap> overlaps = overlapper.getOverlapList(insertion);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for insertion: {}.", insertion);
-            return DefaultSvPriority.unknown();
+            return DefaultAnnotatedSvPriority.unknown();
         }
         Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
@@ -369,7 +369,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
      * @param inversion inversion to prioritize
      * @return prioritization result
      */
-    private SvPriority prioritizeInversion(Variant inversion) {
+    private AnnotatedSvPriority prioritizeInversion(Variant inversion) {
         // Gather information
         List<Overlap> overlaps = overlapper.getOverlapList(inversion);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
@@ -377,7 +377,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for inversion: {}.", inversion);
-            return DefaultSvPriority.unknown();
+            return DefaultAnnotatedSvPriority.unknown();
         }
         Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
@@ -432,7 +432,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
         }
         // if the inversion already has high priority, then return it
         // otherwise look for longer range position effects
-        SvPriority prio = prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        AnnotatedSvPriority prio = prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
         if (prio.getImpact() == SvImpact.HIGH) {
             return prio;
         }
@@ -469,7 +469,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
                        diseases.addAll(diseaseSummaryMap.get(geneid));
                    }
                }
-               return new DefaultSvPriority(SvImpact.HIGH, affectedTranscripts, geneWithIdsSet, outsideEnhancers, overlaps, diseases);
+               return new DefaultAnnotatedSvPriority(SvImpact.HIGH, affectedTranscripts, geneWithIdsSet, outsideEnhancers, overlaps, diseases);
            }
        }
            return prio; // stick to the local interpretation
@@ -508,7 +508,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
     }
 
 
-    private SvPriority prioritizeTranslocation(Variant variant) {
+    private AnnotatedSvPriority prioritizeTranslocation(Variant variant) {
         // the following gets overlaps that disrupt transcripts only
         List<Overlap> overlaps = overlapper.getOverlapList(variant);
         SvImpact impact = SvImpact.LOW; // default
@@ -550,17 +550,17 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant> {
 
         // TODO -- we need a bespoke prioritizer for translocations
         // FOR NOW there are no diseases
-        return new DefaultSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
+        return new DefaultAnnotatedSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
     }
 
-    private SvPriority prioritizeDuplication(Variant duplication) {
+    private AnnotatedSvPriority prioritizeDuplication(Variant duplication) {
         List<Overlap> overlaps = overlapper.getOverlapList(duplication);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for duplication: {}.", duplication);
-            return DefaultSvPriority.unknown();
+            return DefaultAnnotatedSvPriority.unknown();
         }
         Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
         OverlapType highestOT = highestImpactOverlap.getOverlapType();

@@ -7,41 +7,66 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import org.jax.svanna.autoconfigure.exception.MissingResourceException;
 import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
-import org.jax.svanna.core.annotation.AnnotationDataService;
-import org.jax.svanna.core.annotation.PopulationVariantDao;
+import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.hpo.GeneWithId;
+import org.jax.svanna.core.hpo.PhenotypeDataService;
+import org.jax.svanna.core.landscape.AnnotationDataService;
+import org.jax.svanna.core.landscape.PopulationVariantDao;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
-import org.jax.svanna.db.annotation.DbAnnotationDataService;
-import org.jax.svanna.db.annotation.DbPopulationVariantDao;
-import org.jax.svanna.db.annotation.EnhancerAnnotationDao;
-import org.jax.svanna.db.annotation.RepetitiveRegionDao;
+import org.jax.svanna.db.landscape.DbAnnotationDataService;
+import org.jax.svanna.db.landscape.DbPopulationVariantDao;
+import org.jax.svanna.db.landscape.EnhancerAnnotationDao;
+import org.jax.svanna.db.landscape.RepetitiveRegionDao;
+import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
+import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
+import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableConfigurationProperties(SvannaProperties.class)
 public class SvannaAutoConfiguration {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SvannaAutoConfiguration.class);
+
+    private static final Properties properties = readProperties();
+
+    private static final String SVANNA_VERSION = properties.getProperty("svanna.version", "unknown version");
 
     @Bean
     @ConditionalOnMissingBean(name = "svannaDataDirectory")
     public Path svannaDataDirectory(SvannaProperties properties) throws UndefinedResourceException {
         String dataDir = properties.dataDirectory();
         if (dataDir == null || dataDir.isEmpty()) {
-            throw new UndefinedResourceException("Path to Svanna data directory (`--svanna.data-directory`) is not specified");
+            throw new UndefinedResourceException("Path to SvAnna data directory (`--svanna.data-directory`) is not specified");
         }
         Path dataDirPath = Paths.get(dataDir);
         if (!Files.isDirectory(dataDirPath)) {
-            throw new UndefinedResourceException(String.format("Path to Svanna data directory '%s' does not point to real directory", dataDirPath));
+            throw new UndefinedResourceException(String.format("Path to SvAnna data directory '%s' does not point to real directory", dataDirPath));
         }
+        LogUtils.logInfo(LOGGER, "Spooling up SvAnna v{} using resources in `{}`", SVANNA_VERSION, dataDirPath.toAbsolutePath());
         return dataDirPath;
     }
 
@@ -57,6 +82,26 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
+    public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver) {
+        LogUtils.logInfo(LOGGER, "Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
+        Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
+        Path hpoaPath = svannaDataResolver.phenotypeHpoaPath().toAbsolutePath();
+        LogUtils.logInfo(LOGGER, "Parsing HPO disease associations at `{}`", hpoaPath);
+        Path geneInfoPath = svannaDataResolver.geneInfoPath();
+        LogUtils.logInfo(LOGGER, "Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
+        Path mim2geneMedgenPath = svannaDataResolver.mim2geneMedgenPath();
+        LogUtils.logInfo(LOGGER, "Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
+
+        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(),
+                mim2geneMedgenPath.toFile(), null,
+                svannaDataResolver.phenotypeHpoaPath().toFile(), ontology);
+        Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoaPath.toString(), ontology);
+        Set<GeneWithId> geneWithIds = hap.getGeneIdToSymbolMap().entrySet().stream().map(e -> GeneWithId.of(e.getValue(), e.getKey())).collect(Collectors.toSet());
+
+        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneWithIds);
+    }
+
+    @Bean
     public PopulationVariantDao populationVariantDao(DataSource dataSource, GenomicAssembly genomicAssembly) {
         return new DbPopulationVariantDao(dataSource, genomicAssembly);
     }
@@ -64,7 +109,7 @@ public class SvannaAutoConfiguration {
 
     @Bean
     public TranscriptService transcriptService(SvannaProperties svannaProperties, GenomicAssembly genomicAssembly) throws SerializationException {
-        // TODO - replace by our internal transcript source
+        LogUtils.logInfo(LOGGER, "Reading transcript definitions from `{}`", svannaProperties.jannovarCachePath());
         JannovarData jannovarData = new JannovarDataSerializer(svannaProperties.jannovarCachePath()).load();
         return JannovarTranscriptService.of(genomicAssembly, jannovarData);
 
@@ -88,5 +133,17 @@ public class SvannaAutoConfiguration {
         config.setPoolName("svanna-pool");
 
         return new HikariDataSource(config);
+    }
+
+
+    private static Properties readProperties() {
+        Properties properties = new Properties();
+
+        try (InputStream is = SvannaAutoConfiguration.class.getResourceAsStream("/svanna.properties")) {
+            properties.load(is);
+        } catch (IOException e) {
+            LogUtils.logWarn(LOGGER, "Error loading properties: {}", e.getMessage());
+        }
+        return properties;
     }
 }

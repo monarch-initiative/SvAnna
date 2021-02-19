@@ -28,16 +28,16 @@ public class TestDataConfig {
 
     @Bean
     public Map<String, GeneWithId> geneWithIdMap() {
-        GeneWithId surf1 = new GeneWithId("SURF1", TermId.of("NCBIGene:6834"));
-        GeneWithId surf2 = new GeneWithId("SURF2", TermId.of("NCBIGene:6835"));
-        GeneWithId fbn1 = new GeneWithId("FBN1", TermId.of("NCBIGene:2200"));
-        GeneWithId znf436 = new GeneWithId("ZNF436", TermId.of("NCBIGene:80818"));
-        GeneWithId zbtb48 = new GeneWithId("ZBTB48", TermId.of("NCBIGene:3104"));
-        GeneWithId hnf4a = new GeneWithId("HNF4A", TermId.of("NCBIGene:3172"));
-        GeneWithId gck = new GeneWithId("GCK", TermId.of("NCBIGene:2645"));
-        GeneWithId brca2 = new GeneWithId("BRCA2", TermId.of("NCBIGene:675"));
-        GeneWithId col4a5 = new GeneWithId("COL4A5", TermId.of("NCBIGene:1287"));
-        GeneWithId sry = new GeneWithId("SRY", TermId.of("NCBIGene:6736"));
+        GeneWithId surf1 = GeneWithId.of("SURF1", TermId.of("NCBIGene:6834"));
+        GeneWithId surf2 =  GeneWithId.of("SURF2", TermId.of("NCBIGene:6835"));
+        GeneWithId fbn1 =  GeneWithId.of("FBN1", TermId.of("NCBIGene:2200"));
+        GeneWithId znf436 =  GeneWithId.of("ZNF436", TermId.of("NCBIGene:80818"));
+        GeneWithId zbtb48 =  GeneWithId.of("ZBTB48", TermId.of("NCBIGene:3104"));
+        GeneWithId hnf4a =  GeneWithId.of("HNF4A", TermId.of("NCBIGene:3172"));
+        GeneWithId gck =  GeneWithId.of("GCK", TermId.of("NCBIGene:2645"));
+        GeneWithId brca2 =  GeneWithId.of("BRCA2", TermId.of("NCBIGene:675"));
+        GeneWithId col4a5 = GeneWithId.of("COL4A5", TermId.of("NCBIGene:1287"));
+        GeneWithId sry = GeneWithId.of("SRY", TermId.of("NCBIGene:6736"));
 
         return Stream.of(
                 new AbstractMap.SimpleImmutableEntry<>("SURF1", surf1),

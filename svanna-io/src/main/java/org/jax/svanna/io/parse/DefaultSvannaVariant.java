@@ -2,6 +2,7 @@ package org.jax.svanna.io.parse;
 
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
+import org.jax.svanna.core.prioritizer.DiscreteSvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svart.*;
@@ -9,12 +10,14 @@ import org.monarchinitiative.svart.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
     private final Set<FilterType> failedFilterTypes;
+    private final AtomicReference<DiscreteSvPriority> priority = new AtomicReference<>();
 
     private DefaultSvannaVariant(Contig contig,
                                  String id,
@@ -37,7 +40,7 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
 
     private DefaultSvannaVariant(Builder builder) {
         super(builder);
-        variantCallAttributes = Objects.requireNonNull(builder.variantCallAttributes);
+        variantCallAttributes = Objects.requireNonNull(builder.variantCallAttributes, "Variant call attributes cannot be null");
         passedFilterTypes = builder.passedFilterTypes;
         failedFilterTypes = builder.failedFilterTypes;
     }
@@ -140,17 +143,27 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
     }
 
     @Override
+    public synchronized void setSvPriority(DiscreteSvPriority priority) {
+        this.priority.set(priority);
+    }
+
+    @Override
+    public DiscreteSvPriority svPriority() {
+        return priority.get();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DefaultSvannaVariant that = (DefaultSvannaVariant) o;
-        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
+        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes) && Objects.equals(priority, that.priority);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes);
+        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes, priority);
     }
 
     @Override
@@ -159,6 +172,7 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
                 "variantCallAttributes=" + variantCallAttributes +
                 ", passedFilterTypes=" + passedFilterTypes +
                 ", failedFilterTypes=" + failedFilterTypes +
+                ", priority=" + priority.get() +
                 "} " + super.toString();
     }
 

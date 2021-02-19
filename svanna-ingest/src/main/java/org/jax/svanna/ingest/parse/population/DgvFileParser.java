@@ -1,8 +1,8 @@
 package org.jax.svanna.ingest.parse.population;
 
-import org.jax.svanna.core.reference.BasePopulationVariant;
-import org.jax.svanna.core.reference.PopulationVariant;
-import org.jax.svanna.core.reference.PopulationVariantOrigin;
+import org.jax.svanna.core.landscape.BasePopulationVariant;
+import org.jax.svanna.core.landscape.PopulationVariant;
+import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.monarchinitiative.svart.*;

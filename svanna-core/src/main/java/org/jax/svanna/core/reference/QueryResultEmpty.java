@@ -3,7 +3,6 @@ package org.jax.svanna.core.reference;
 import org.monarchinitiative.svart.GenomicRegion;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 class QueryResultEmpty<T extends GenomicRegion> implements QueryResult<T> {
@@ -24,13 +23,13 @@ class QueryResultEmpty<T extends GenomicRegion> implements QueryResult<T> {
     }
 
     @Override
-    public Optional<T> upstream() {
-        return Optional.empty();
+    public T upstream() {
+        return null;
     }
 
     @Override
-    public Optional<T> downstream() {
-        return Optional.empty();
+    public T downstream() {
+        return null;
     }
 
 

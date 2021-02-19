@@ -3,6 +3,7 @@ package org.jax.svanna.core.reference.transcripts;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.TranscriptDefault;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,20 +39,28 @@ class JannovarTxMapper {
                 ? Strand.POSITIVE
                 : Strand.NEGATIVE;
 
-        // these coordinates are already adjusted to the appropriate strand
-        GenomeInterval cdsRegion = tm.getCDSRegion();
-        int cdsStart = cdsRegion.getBeginPos();
-        int cdsEnd = cdsRegion.getEndPos();
-
         // process exons
         List<GenomicRegion> exons = new ArrayList<>();
         for (GenomeInterval exon : tm.getExonRegions()) {
             exons.add(GenomicRegion.of(contig, strand, CoordinateSystem.zeroBased(), Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
         }
 
-        return Optional.of(
-                Transcript.of(
-                        contig, strand, CoordinateSystem.zeroBased(), txRegion.getBeginPos(), txRegion.getEndPos(),
-                        cdsStart, cdsEnd, tm.getAccession(), tm.getGeneSymbol(), tm.isCoding(), exons));
+        // these coordinates are already adjusted to the appropriate strand
+        Transcript tx;
+        if (tm.isCoding()) {
+            GenomeInterval cdsRegion = tm.getCDSRegion();
+            int cdsStart = cdsRegion.getBeginPos();
+            int cdsEnd = cdsRegion.getEndPos();
+            tx = TranscriptDefault.coding(contig, strand, CoordinateSystem.zeroBased(),
+                    txRegion.getBeginPos(), txRegion.getEndPos(),
+                    cdsStart, cdsEnd,
+                    tm.getAccession(), tm.getGeneSymbol(), exons);
+        } else {
+            tx = TranscriptDefault.nonCoding(contig, strand, CoordinateSystem.zeroBased(),
+                    txRegion.getBeginPos(), txRegion.getEndPos(),
+                    tm.getAccession(), tm.getGeneSymbol(), exons);
+        }
+
+        return Optional.of(tx);
     }
 }

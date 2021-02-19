@@ -1,8 +1,8 @@
 package org.jax.svanna.ingest.cmd;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
-import org.jax.svanna.core.reference.Enhancer;
-import org.jax.svanna.core.reference.EnhancerTissueSpecificity;
+import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.Main;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;

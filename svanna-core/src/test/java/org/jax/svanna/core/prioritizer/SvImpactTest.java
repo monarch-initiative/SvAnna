@@ -4,8 +4,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public class SvImpactTest {
 
@@ -76,6 +75,20 @@ public class SvImpactTest {
     })
     public void decrementSeverity(SvImpact instance, SvImpact expected) {
         assertThat(instance.decrementSeverity(), equalTo(expected));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "VERY_HIGH,     1.0",
+            "HIGH,           .8",
+            "INTERMEDIATE,   .6",
+            "LOW,            .4",
+            "VERY_LOW,       .2",
+            "UNKNOWN,        .0",
+
+    })
+    public void priority(SvImpact instance, double expected) {
+        assertThat(instance.priority(), closeTo(expected, 1E-12));
     }
 
 }

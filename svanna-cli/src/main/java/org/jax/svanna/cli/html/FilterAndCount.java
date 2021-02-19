@@ -2,10 +2,9 @@ package org.jax.svanna.cli.html;
 
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
-import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.prioritizer.DiscreteSvPriority;
 import org.jax.svanna.core.prioritizer.SvImpact;
-import org.jax.svanna.core.prioritizer.SvPriority;
-import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
@@ -25,18 +24,18 @@ public class FilterAndCount {
 
     private final Map<ImpactFilterCategory, Map<VariantType, Integer>> categoryToByVariantTypeCountMap;
 
-    private final List<SvPriority> filteredPriorityList;
+    // TODO - figure out how to provide these numbers without having to keeep AnnotatedSvPriority in memory
     /** Number of distinct gene symbols annotated as affected in any way by a structural variant. */
-    private final int nAffectedGenes;
+    private final int nAffectedGenes = -1;
     /** Number of distinct enhancers annotated as affected in any way by a structural variant. */
-    private final int nAffectedEnhancers;
+    private final int nAffectedEnhancers = -1;
 
-    private final int unparsableCount;
+    private final int unparsableCount = -1;
 
     private final int minAltAlleleCount;
 
 
-    public FilterAndCount(List<SvPriority> priorityList,
+    public FilterAndCount(List<? extends DiscreteSvPriority> priorityList,
                           List<? extends SvannaVariant> variants,
                           SvImpact threshold,
                           int minAltAllele) {
@@ -59,11 +58,11 @@ public class FilterAndCount {
 
         // iterate through priorities and rearrangements
         for (int i = 0; i < priorityList.size(); i++) {
-            SvPriority svPriority = priorityList.get(i);
+            DiscreteSvPriority svPriority = priorityList.get(i);
             SvannaVariant variant = variants.get(i);
             if (variant.numberOfAltReads() < 2) {
                 this.categoryToByVariantTypeCountMap.get(ALT_ALLELE_COUNT).merge(variant.variantType(), 1, Integer::sum);
-            } else if (! variant.passedFilters()) {
+            } else if (!variant.passedFilters()) {
                 this.categoryToByVariantTypeCountMap.get(FILTERED).merge(variant.variantType(), 1, Integer::sum);
             } else {
                 switch (svPriority.getImpact()) {
@@ -83,31 +82,13 @@ public class FilterAndCount {
                         unknown++;
                 }
             }
-            Set<String> symbols = svPriority.getOverlaps()
-                    .stream()
-                    .map(Overlap::getGeneSymbol)
-                    .collect(Collectors.toSet());
-            affectedGenes.addAll(symbols);
-            affectedEnhancers.addAll(svPriority.getAffectedEnhancers());
         }
-
-        this.unparsableCount = unknown;
-        filteredPriorityList = priorityList
-                .stream()
-                .filter(svp -> svp.getImpact().satisfiesThreshold(threshold))
-                .collect(Collectors.toList());
-        this.nAffectedGenes = affectedGenes.size();
-        this.nAffectedEnhancers = affectedEnhancers.size();
     }
 
-    public FilterAndCount(List<SvPriority> priorityList, List<SvannaVariant> rearrangements, int minAltAllele) {
-        this(priorityList, rearrangements, SvImpact.HIGH, minAltAllele);
+    public FilterAndCount(List<? extends DiscreteSvPriority> priorityList, List<? extends SvannaVariant> variants, int minAltAllele) {
+        this(priorityList, variants, SvImpact.HIGH, minAltAllele);
     }
 
-
-    public List<SvPriority> getFilteredPriorityList() {
-        return filteredPriorityList;
-    }
 
     public int getUnparsableCount() {
         return unparsableCount;

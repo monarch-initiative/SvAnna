@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.parse.tad;
 
-import org.jax.svanna.core.reference.TadBoundary;
+import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.ingest.parse.population.GnomadSVFileParser;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;

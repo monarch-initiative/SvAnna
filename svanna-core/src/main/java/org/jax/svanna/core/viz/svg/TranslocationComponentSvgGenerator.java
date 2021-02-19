@@ -2,7 +2,7 @@ package org.jax.svanna.core.viz.svg;
 
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
-import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
 

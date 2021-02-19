@@ -1,9 +1,9 @@
 package org.jax.svanna.core.viz;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
+import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.Overlap;
-import org.jax.svanna.core.prioritizer.SvPriority;
-import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.prioritizer.AnnotatedSvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
@@ -22,9 +22,9 @@ public class HtmlVisualizable implements Visualizable {
      */
     private final SvannaVariant variant;
 
-    private final SvPriority svPriority;
+    private final AnnotatedSvPriority svPriority;
 
-    public HtmlVisualizable(SvannaVariant variant, SvPriority svPriority) {
+    public HtmlVisualizable(SvannaVariant variant, AnnotatedSvPriority svPriority) {
         this.variant = variant;
         this.svPriority = svPriority;
     }

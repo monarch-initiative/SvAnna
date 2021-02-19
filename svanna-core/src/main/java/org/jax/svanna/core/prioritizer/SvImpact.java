@@ -76,6 +76,12 @@ public enum SvImpact {
         }
     }
 
+    public double priority() {
+        double top = this.ordinal();
+        int bottom = (SvImpact.values().length - 1);
+        return top / bottom;
+    }
+
     @Override
     public String toString() {
         return this.name;

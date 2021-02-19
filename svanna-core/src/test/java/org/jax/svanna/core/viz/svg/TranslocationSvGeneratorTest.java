@@ -1,9 +1,9 @@
 package org.jax.svanna.core.viz.svg;
 
 import org.jax.svanna.core.TestDataConfig;
+import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.overlap.Overlapper;
-import org.jax.svanna.core.reference.Enhancer;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Disabled;

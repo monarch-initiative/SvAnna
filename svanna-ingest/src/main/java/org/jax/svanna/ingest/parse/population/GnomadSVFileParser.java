@@ -3,7 +3,7 @@ package org.jax.svanna.ingest.parse.population;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.jax.svanna.core.reference.PopulationVariant;
+import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.monarchinitiative.svart.GenomicAssembly;

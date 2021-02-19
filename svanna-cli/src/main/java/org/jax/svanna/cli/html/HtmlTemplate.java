@@ -6,6 +6,8 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
+import org.jax.svanna.core.exception.LogUtils;
+import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +16,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HtmlTemplate {
     /** Map of data that will be used for the FreeMark template. */
@@ -30,8 +34,14 @@ public class HtmlTemplate {
 
     public HtmlTemplate(List<String> htmlList,
                         Map<String, String> infoMap,
-                        Map<TermId, String> topLevelHpoTerms,
-                        Map<TermId, String> originalHpoTerms) {
+                        Collection<Term> topLevelHpoTerms,
+                        Collection<Term> originalHpoTerms) {
+
+        Map<TermId, String> toplevelHpoTermMap = topLevelHpoTerms.stream()
+                .collect(Collectors.toMap(Term::getId, Term::getName));
+        Map<TermId, String> originalTermMap = originalHpoTerms.stream()
+                .collect(Collectors.toMap(Term::getId, Term::getName));
+
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_0)));
         cfg.setDefaultEncoding("UTF-8");
         cfg.setLocalizedLookup(false);
@@ -47,7 +57,7 @@ public class HtmlTemplate {
         templateData.put("phenopacket_file", infoMap.getOrDefault("phenopacket_file", NOT_AVAILABLE));
         templateData.put("n_affectedGenes", infoMap.getOrDefault("n_affectedGenes", NOT_AVAILABLE));
         templateData.put("n_affectedEnhancers", infoMap.getOrDefault("n_affectedEnhancers", NOT_AVAILABLE));
-        HpoHtmlComponent hpoHtmlComponent = new HpoHtmlComponent(topLevelHpoTerms, originalHpoTerms);
+        HpoHtmlComponent hpoHtmlComponent = new HpoHtmlComponent(toplevelHpoTermMap, originalTermMap);
         templateData.put("hpoterms", hpoHtmlComponent.getHtml());
     }
 
@@ -56,13 +66,12 @@ public class HtmlTemplate {
 
     public void outputFile(String prefix) {
         Path outPath = Path.of(String.format("%s.html", prefix));
-        LOGGER.info("Writing HTML results to `{}`", outPath.toAbsolutePath());
+        LogUtils.logInfo(LOGGER, "Writing HTML results to `{}`", outPath.toAbsolutePath());
         try (BufferedWriter out = Files.newBufferedWriter(outPath)) {
             Template template = cfg.getTemplate("svannHTML.ftl");
             template.process(templateData, out);
         } catch (TemplateException | IOException te) {
-            if (LOGGER.isWarnEnabled())
-                LOGGER.warn("Error writing out HTML results: {}", te.getMessage());
+            LogUtils.logWarn(LOGGER, "Error writing out HTML results: {}", te.getMessage());
         }
     }
 }

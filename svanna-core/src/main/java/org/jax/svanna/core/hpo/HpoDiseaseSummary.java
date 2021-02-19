@@ -13,7 +13,11 @@ public class HpoDiseaseSummary {
     private final String diseaseId;
     private final String diseaseName;
 
-    public HpoDiseaseSummary(String diseaseId, String diseaseName) {
+    public static HpoDiseaseSummary of(String diseaseId, String diseaseName) {
+        return new HpoDiseaseSummary(diseaseId, diseaseName);
+    }
+
+    private HpoDiseaseSummary(String diseaseId, String diseaseName) {
         this.diseaseId = Objects.requireNonNull(diseaseId);
         this.diseaseName = Objects.requireNonNull(diseaseName);
     }

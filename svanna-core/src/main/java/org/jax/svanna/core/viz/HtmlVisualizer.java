@@ -3,7 +3,11 @@ package org.jax.svanna.core.viz;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.reference.*;
+import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
+import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.core.viz.svg.*;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.BreakendVariant;

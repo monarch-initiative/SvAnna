@@ -1,8 +1,8 @@
 package org.jax.svanna.core.viz.svg;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
-import org.jax.svanna.core.reference.Enhancer;
-import org.jax.svanna.core.reference.EnhancerTissueSpecificity;
+import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
@@ -356,7 +356,7 @@ public abstract class SvSvgGenerator {
             writeNoncodingTranscript(tmod, ypos, writer);
             return;
         }
-        GenomicRegion cds = transcript.cdsRegion();
+        GenomicRegion cds = transcript.cdsRegion().get();
         double cdsStart = translateGenomicToSvg(cds.start());
         double cdsEnd = translateGenomicToSvg(cds.end());
         List<GenomicRegion> exons = transcript.exons();

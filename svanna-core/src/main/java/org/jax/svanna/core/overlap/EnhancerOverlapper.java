@@ -1,7 +1,7 @@
 package org.jax.svanna.core.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.landscape.Enhancer;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

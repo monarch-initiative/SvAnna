@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.parse.enhancer;
 
-import org.jax.svanna.core.reference.RepetitiveRegion;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.ingest.parse.RepetitiveRegionParser;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.GenomicAssemblies;

@@ -2,9 +2,13 @@ package org.jax.svanna.core.prioritizer;
 
 import org.monarchinitiative.svart.Variant;
 
+/**
+ * The most general definition of the variant prioritizer which calculates priority {@link P} for a variant {@link V}.
+ * <p>
+ * Priority is used to rank variants.
+ */
+public interface SvPrioritizer<V extends Variant, P extends SvPriority> {
 
-public interface SvPrioritizer<T extends Variant> {
-
-    SvPriority prioritize(T variant);
+    P prioritize(V variant);
 
 }

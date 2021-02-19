@@ -2,8 +2,8 @@ package org.jax.svanna.ingest.parse.tad;
 
 import htsjdk.samtools.liftover.LiftOver;
 import htsjdk.samtools.util.Interval;
-import org.jax.svanna.core.reference.TadBoundary;
-import org.jax.svanna.core.reference.TadBoundaryDefault;
+import org.jax.svanna.core.landscape.TadBoundary;
+import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;

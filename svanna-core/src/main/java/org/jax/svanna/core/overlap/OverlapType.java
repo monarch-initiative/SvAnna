@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.prioritizer.SvImpact;
+import org.jax.svanna.core.priority.SvImpact;
 
 import java.util.Set;
 

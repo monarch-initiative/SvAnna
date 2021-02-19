@@ -1,4 +1,4 @@
-package org.jax.svanna.core.prioritizer;
+package org.jax.svanna.core.priority;
 
 public interface SvPriority extends Comparable<SvPriority> {
 

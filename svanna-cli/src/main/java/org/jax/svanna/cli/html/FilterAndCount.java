@@ -3,8 +3,8 @@ package org.jax.svanna.cli.html;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.prioritizer.DiscreteSvPriority;
-import org.jax.svanna.core.prioritizer.SvImpact;
+import org.jax.svanna.core.priority.DiscreteSvPriority;
+import org.jax.svanna.core.priority.SvImpact;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;

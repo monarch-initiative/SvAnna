@@ -2,7 +2,7 @@ package org.jax.svanna.io.parse;
 
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
-import org.jax.svanna.core.prioritizer.DiscreteSvPriority;
+import org.jax.svanna.core.priority.DiscreteSvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svart.BaseBreakendVariant;

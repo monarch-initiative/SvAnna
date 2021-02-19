@@ -1,4 +1,4 @@
-package org.jax.svanna.core.prioritizer;
+package org.jax.svanna.core.priority;
 
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.jax.svanna.core.prioritizer.Utils.atLeastOneSharedItem;
+import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
 /**
  * This class implements both sequence-based and phenotype-based prioritization. The sequence-based prioritizations

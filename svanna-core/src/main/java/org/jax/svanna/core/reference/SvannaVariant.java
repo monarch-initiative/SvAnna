@@ -1,7 +1,7 @@
 package org.jax.svanna.core.reference;
 
 import org.jax.svanna.core.filter.Filterable;
-import org.jax.svanna.core.prioritizer.DiscreteSvPriority;
+import org.jax.svanna.core.priority.DiscreteSvPriority;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
 import org.monarchinitiative.svart.Variant;

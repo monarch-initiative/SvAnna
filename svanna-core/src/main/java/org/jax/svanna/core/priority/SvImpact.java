@@ -1,4 +1,4 @@
-package org.jax.svanna.core.prioritizer;
+package org.jax.svanna.core.priority;
 
 public enum SvImpact {
     UNKNOWN("Unknown"),

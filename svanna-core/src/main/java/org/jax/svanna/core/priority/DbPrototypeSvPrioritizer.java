@@ -1,4 +1,4 @@
-package org.jax.svanna.core.prioritizer;
+package org.jax.svanna.core.priority;
 
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.GeneWithId;
@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.jax.svanna.core.prioritizer.Utils.atLeastOneSharedItem;
+import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
 
 // class to show that we can replace the enhancer interval arrays with annotationDataService

@@ -1,4 +1,4 @@
-package org.jax.svanna.core.prioritizer;
+package org.jax.svanna.core.priority;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.TestDataConfig;

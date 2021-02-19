@@ -190,8 +190,8 @@ public class AnnotateCommand extends SvAnnaCommand {
 
                 ForkJoinPool workerPool = PoolUtils.makePool(nThreads);
                 ForkJoinTask<List<SvannaVariant>> task = workerPool.submit(() -> variantStream.collect(Collectors.toList()));
-                filteredPrioritizedVariants = task.get();
                 workerPool.shutdown();
+                filteredPrioritizedVariants = task.get();
             } catch (InterruptedException | ExecutionException e) {
                 LogUtils.logError(LOGGER, "Error: {}", e.getMessage());
                 throw e;

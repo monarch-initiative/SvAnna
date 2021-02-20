@@ -17,10 +17,10 @@ import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.PopulationVariantDao;
 import org.jax.svanna.core.overlap.Overlapper;
 import org.jax.svanna.core.overlap.SvAnnOverlapper;
-import org.jax.svanna.core.priority.DbPrototypeSvPrioritizer;
-import org.jax.svanna.core.priority.DiscreteSvPriority;
+import org.jax.svanna.core.priority.StrippedSvPrioritizer;
 import org.jax.svanna.core.priority.SvImpact;
 import org.jax.svanna.core.priority.SvPrioritizer;
+import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.viz.HtmlVisualizer;
@@ -164,7 +164,7 @@ public class AnnotateCommand extends SvAnnaCommand {
             // setup prioritization parts
             Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
 
-            SvPrioritizer<Variant, DiscreteSvPriority> prioritizer = new DbPrototypeSvPrioritizer(annotationDataService,
+            SvPrioritizer<Variant, ? extends SvPriority> prioritizer = new StrippedSvPrioritizer(annotationDataService,
                     overlapper,
                     geneSymbolMap,
 //                    topLevelHpoTermsAndLabels.keySet(),
@@ -212,7 +212,7 @@ public class AnnotateCommand extends SvAnnaCommand {
             // svList - svann.prioritizeSvsByPopulationFrequency(svList);
             // This filters our SVs with lower impact than our threshold
 
-            List<DiscreteSvPriority> priorities = filteredPrioritizedVariants.stream().map(SvannaVariant::svPriority).collect(Collectors.toList());
+            List<SvPriority> priorities = filteredPrioritizedVariants.stream().map(SvannaVariant::svPriority).collect(Collectors.toList());
             FilterAndCount fac = new FilterAndCount(priorities, filteredPrioritizedVariants, threshold, minAltReadSupport);
             int unparsableCount = fac.getUnparsableCount();
 

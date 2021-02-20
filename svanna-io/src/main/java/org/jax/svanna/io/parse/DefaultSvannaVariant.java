@@ -2,7 +2,7 @@ package org.jax.svanna.io.parse;
 
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
-import org.jax.svanna.core.priority.DiscreteSvPriority;
+import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svart.*;
@@ -17,7 +17,7 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
     private final Set<FilterType> failedFilterTypes;
-    private final AtomicReference<DiscreteSvPriority> priority = new AtomicReference<>();
+    private final AtomicReference<SvPriority> priority = new AtomicReference<>();
 
     private DefaultSvannaVariant(Contig contig,
                                  String id,
@@ -143,12 +143,12 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
     }
 
     @Override
-    public synchronized void setSvPriority(DiscreteSvPriority priority) {
+    public synchronized void setSvPriority(SvPriority priority) {
         this.priority.set(priority);
     }
 
     @Override
-    public DiscreteSvPriority svPriority() {
+    public SvPriority svPriority() {
         return priority.get();
     }
 

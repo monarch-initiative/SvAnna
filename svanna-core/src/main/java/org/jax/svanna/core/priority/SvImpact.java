@@ -76,7 +76,16 @@ public enum SvImpact {
         }
     }
 
+    public static SvImpact max(SvImpact left, SvImpact right) {
+        return left.priority() > right.priority() ? left : right;
+    }
+
+    public static SvImpact min(SvImpact left, SvImpact right) {
+        return left.priority() < right.priority() ? left : right;
+    }
+
     public double priority() {
+        if (this == UNKNOWN) return 0.;
         double top = this.ordinal();
         int bottom = (SvImpact.values().length - 1);
         return top / bottom;

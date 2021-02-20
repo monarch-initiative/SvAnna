@@ -5,6 +5,7 @@ import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.priority.DiscreteSvPriority;
 import org.jax.svanna.core.priority.SvImpact;
+import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class FilterAndCount {
     private final int minAltAlleleCount;
 
 
-    public FilterAndCount(List<? extends DiscreteSvPriority> priorityList,
+    public FilterAndCount(List<? extends SvPriority> priorityList,
                           List<? extends SvannaVariant> variants,
                           SvImpact threshold,
                           int minAltAllele) {
@@ -58,28 +59,24 @@ public class FilterAndCount {
 
         // iterate through priorities and rearrangements
         for (int i = 0; i < priorityList.size(); i++) {
-            DiscreteSvPriority svPriority = priorityList.get(i);
+            SvPriority svPriority = priorityList.get(i);
             SvannaVariant variant = variants.get(i);
             if (variant.numberOfAltReads() < 2) {
                 this.categoryToByVariantTypeCountMap.get(ALT_ALLELE_COUNT).merge(variant.variantType(), 1, Integer::sum);
             } else if (!variant.passedFilters()) {
                 this.categoryToByVariantTypeCountMap.get(FILTERED).merge(variant.variantType(), 1, Integer::sum);
             } else {
-                switch (svPriority.getImpact()) {
-                    case VERY_HIGH:
-                        this.categoryToByVariantTypeCountMap.get(VERY_HIGH_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                        break;
-                    case HIGH:
-                        this.categoryToByVariantTypeCountMap.get(HIGH_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                        break;
-                    case INTERMEDIATE:
-                        this.categoryToByVariantTypeCountMap.get(INTERMEDIATE_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                        break;
-                    case LOW:
-                        this.categoryToByVariantTypeCountMap.get(LOW_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                        break;
-                    default:
-                        unknown++;
+                double priority = svPriority.getPriority();
+                if (priority >= .8) {
+                    this.categoryToByVariantTypeCountMap.get(VERY_HIGH_IMPACT).merge(variant.variantType(), 1, Integer::sum);
+                } else if (priority >= .6) {
+                    this.categoryToByVariantTypeCountMap.get(HIGH_IMPACT).merge(variant.variantType(), 1, Integer::sum);
+                } else if (priority >= .4) {
+                    this.categoryToByVariantTypeCountMap.get(INTERMEDIATE_IMPACT).merge(variant.variantType(), 1, Integer::sum);
+                } else if (priority >= .2) {
+                    this.categoryToByVariantTypeCountMap.get(LOW_IMPACT).merge(variant.variantType(), 1, Integer::sum);
+                } else {
+                    unknown++;
                 }
             }
         }

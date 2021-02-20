@@ -22,9 +22,9 @@ import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
 // class to show that we can replace the enhancer interval arrays with annotationDataService
 @SuppressWarnings("Duplicates") // TODO - remove Prototype prioritizer if this works
-public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, DiscreteSvPriority> {
+public class StrippedSvPrioritizer implements SvPrioritizer<Variant, DiscreteSvPriority> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DbPrototypeSvPrioritizer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StrippedSvPrioritizer.class);
 
     private final AnnotationDataService annotationDataService;
 
@@ -47,17 +47,17 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
      */
     private final Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap;
     /**
-     * If an SV affects more genes than this, we assume it is likely to be an artifact, and downweight its
+     * If an SV affects more genes than this, we assume it is likely to be an artifact, and we down-weight its
      * impact.
      */
     private final int maxGenes;
 
-    public DbPrototypeSvPrioritizer(AnnotationDataService annotationDataService,
-                                    Overlapper overlapper,
-                                    Map<String, GeneWithId> geneSymbolMap,
-                                    Set<TermId> relevantHpoIdsForEnhancers,
-                                    Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap,
-                                    int maxGenes) {
+    public StrippedSvPrioritizer(AnnotationDataService annotationDataService,
+                                 Overlapper overlapper,
+                                 Map<String, GeneWithId> geneSymbolMap,
+                                 Set<TermId> relevantHpoIdsForEnhancers,
+                                 Map<TermId, Set<HpoDiseaseSummary>> diseaseSummaryMap,
+                                 int maxGenes) {
         this.annotationDataService = annotationDataService;
         this.overlapper = overlapper;
         this.geneSymbolMap = geneSymbolMap;
@@ -65,8 +65,6 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
         this.diseaseSummaryMap = diseaseSummaryMap;
         this.maxGenes = maxGenes;
     }
-
-
 
 
     @Override
@@ -95,13 +93,14 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
                 return prioritizeDeletion(variant);
             case INS:
                 return prioritizeInsertion(variant);
+            case DUP:
+                return prioritizeDuplication(variant);
             case INV:
                 return prioritizeInversion(variant);
             case TRA:
             case BND:
                 return prioritizeTranslocation(variant);
-            case DUP:
-                return prioritizeDuplication(variant);
+
             default:
                 LogUtils.logWarn(LOGGER, "Prioritization of {} is not yet supported", variant.variantType());
                 return DiscreteSvPriority.unknown();
@@ -124,52 +123,44 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
     private DiscreteSvPriority prioritizeDeletion(Variant deletion) {
         // find the gene/transcript with the most deleterious OverlapType
         List<Overlap> overlaps = overlapper.getOverlapList(deletion);
-        OverlapType highestOT = getHighestOverlapType(overlaps);
 
-        // select the relevant genes and transcripts
-        Set<String> affectedGeneSymbols = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toSet());
-        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
-        for (String symbol : affectedGeneSymbols) {
-            if (geneSymbolMap.containsKey(symbol)) {
-                geneWithIdsSet.add(geneSymbolMap.get(symbol));
-            }
+        // set default impact
+        Optional<Overlap> highestOverlapType = findOverlapWithMaxPriority(overlaps);
+        if (highestOverlapType.isEmpty()) {
+            LogUtils.logWarn(LOGGER, "Did not find overlap for {}", LogUtils.variantSummary(deletion));
+            return DiscreteSvPriority.unknown();
         }
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
-
-        // start figuring out the impact
-        SvImpact impact = highestOT.defaultSvImpact();
+        SvImpact impact = highestOverlapType.get().getOverlapType().defaultSvImpact();
 
 
         // now the impact might still be HIGH if the deletion overlaps with a phenotypically relevant enhancer
         // impact is INTERMEDIATE if the deletion overlaps with some enhancer
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(deletion);
-        Map<Enhancer, Boolean> enhancerRelevanceMap = enhancerRelevanceMap(enhancers);
-        if (!enhancerRelevanceMap.isEmpty()) {
-            SvImpact enhancerImpact = enhancerRelevanceMap.entrySet().stream().anyMatch(Map.Entry::getValue)
-                    ? SvImpact.HIGH
-                    : SvImpact.INTERMEDIATE;
-            if (enhancerImpact == SvImpact.HIGH) {
-                impact = SvImpact.HIGH;
-            } else if (impact != SvImpact.HIGH && enhancerImpact == SvImpact.INTERMEDIATE) {
-                impact = SvImpact.INTERMEDIATE;
-            }
+        SvImpact enhancerImpact = enhancerPhenotypicImpact(enhancers);
+
+        if (enhancerImpact == SvImpact.HIGH) {
+            impact = SvImpact.HIGH;
+        } else if (!impact.satisfiesThreshold(SvImpact.HIGH)) {
+            impact = SvImpact.INTERMEDIATE;
         }
+
         // counts of gene regardless of relevance
-        int genecount =  (int)affectedTranscripts
-                .stream()
+        Set<Transcript> affectedTranscripts = overlaps.stream()
+                .map(Overlap::getTranscriptModel)
+                .collect(Collectors.toSet());
+        long geneCount = affectedTranscripts.stream()
                 .map(Transcript::hgvsSymbol)
                 .distinct()
                 .count();
 
-        if (genecount > maxGenes) {
+        // select the relevant genes and transcripts
+        if (geneCount > maxGenes) {
+            // deletions this big should have been discovered elsewhere, they are likely artifacts
             impact = impact.decrementSeverity();
-            System.out.println(geneWithIdsSet.size());
+            LogUtils.logWarn(LOGGER, "Deletion {} involves {} genes", LogUtils.variantSummary(deletion), geneCount);
         }
-        return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        Set<GeneWithId> geneWithIdsSet = selectOverlappingGeneIds(overlaps);
+        return prioritizeSimpleOverlapByPhenotype(impact, !affectedTranscripts.isEmpty(), geneWithIdsSet, enhancers);
 
     }
 
@@ -187,53 +178,104 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
-            LOGGER.error("Could not identify highest impact overlap for insertion: {}.", insertion);
+            LogUtils.logWarn(LOGGER, "Could not identify highest impact overlap for insertion: {}.", insertion);
             return DiscreteSvPriority.unknown();
         }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
-        OverlapType highestOT = highestImpactOverlap.getOverlapType();
-        Set<String> affectedGeneIds = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toSet());
-        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
-        for (String symbol : affectedGeneIds) {
-            if (geneSymbolMap.containsKey(symbol)) {
-                geneWithIdsSet.add(geneSymbolMap.get(symbol));
-            }
-        }
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+        // sequence impact
+        Overlap overlap = highestImpactOverlapOpt.get();
+        Set<GeneWithId> geneWithIdsSet = selectOverlappingGeneIds(overlaps);
+        SvImpact sequenceImpact = insertionSequenceImpact(overlap, geneWithIdsSet);
 
-        // start figuring out the impact
-        SvImpact impact = highestOT.defaultSvImpact();
-        if (affectedGeneIds.size() > 1 && highestOT.isExonic()) {
+        // enhancer impact
+        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(insertion);
+        SvImpact enhancerImpact = enhancerPhenotypicImpact(enhancers);
+
+        // final impact
+        SvImpact impact = SvImpact.max(sequenceImpact, enhancerImpact);
+        return prioritizeSimpleOverlapByPhenotype(impact, !overlaps.isEmpty(), geneWithIdsSet, enhancers);
+    }
+
+    private SvImpact insertionSequenceImpact(Overlap overlap, Set<GeneWithId> geneWithIdsSet) {
+        OverlapType overlapType = overlap.getOverlapType();
+        SvImpact impact = overlapType.defaultSvImpact();
+        if (geneWithIdsSet.size() > 1 && overlapType.isExonic()) {
             // Insertion affects >1 genes, although I'm not sure if this can actually happen
-            impact = SvImpact.HIGH;
-        } else if (highestOT.isExonic()) {
+            impact = SvImpact.max(impact, SvImpact.HIGH);
+        } else if (overlapType.isExonic()) {
             // insertion into CDS is HIGH, UTR is intermediate
-            impact = highestImpactOverlap.overlapsCds()
+            impact = overlap.overlapsCds()
                     ? SvImpact.HIGH
                     : SvImpact.INTERMEDIATE;
-        } else if (highestOT.isIntronic()) {
+        } else if (overlapType.isIntronic()) {
             // intronic insertion close to CDS has HIGH impact,
             // an insertion further away is INTERMEDIATE impact
-            int distance = Math.abs(highestImpactOverlap.getDistance());
+            int distance = Math.abs(overlap.getDistance());
             impact = distance <= 25
                     ? SvImpact.HIGH
                     : distance <= 100
                     ? SvImpact.INTERMEDIATE
                     : SvImpact.LOW;
         }
+        return impact;
+    }
 
-        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(insertion);
-        if (!enhancers.isEmpty()) {
-            impact = enhancers.stream()
-                    .anyMatch(e -> atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations()))
-                    ? SvImpact.HIGH
-                    : SvImpact.INTERMEDIATE;
+
+    private DiscreteSvPriority prioritizeDuplication(Variant duplication) {
+        List<Overlap> overlaps = overlapper.getOverlapList(duplication);
+        Optional<Overlap> maxPriorityOverlap = findOverlapWithMaxPriority(overlaps);
+        if (maxPriorityOverlap.isEmpty()) {
+            // should never happen
+            LOGGER.error("Could not identify highest impact overlap for duplication: {}.", duplication);
+            return DefaultAnnotatedSvPriority.unknown();
         }
-        return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+
+        // Start figuring out the impact
+        Overlap overlap = maxPriorityOverlap.get();
+        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(duplication);
+        SvImpact sequenceImpact = duplicationSequenceImpact(overlap, enhancers);
+
+        Set<GeneWithId> geneWithIdsSet = selectOverlappingGeneIds(overlaps);
+        // counts of gene regardless of relevance
+        Set<Transcript> affectedTranscripts = overlaps.stream()
+                .map(Overlap::getTranscriptModel)
+                .collect(Collectors.toSet());
+        long geneCount = affectedTranscripts.stream()
+                .map(Transcript::hgvsSymbol)
+                .distinct()
+                .count();
+
+        if (geneCount > maxGenes) {
+            sequenceImpact = sequenceImpact.decrementSeverity();
+            LogUtils.logWarn(LOGGER, "Duplication {} involves {} genes", LogUtils.variantSummary(duplication), geneCount);
+        }
+        return prioritizeSimpleOverlapByPhenotype(sequenceImpact, !affectedTranscripts.isEmpty(), geneWithIdsSet, enhancers);
+    }
+
+    private SvImpact duplicationSequenceImpact(Overlap overlap, List<Enhancer> enhancers) {
+        OverlapType overlapType = overlap.getOverlapType();
+        SvImpact impact = overlapType.defaultSvImpact();
+
+        if (overlapType.isIntronic()) {
+            // intronic duplication close to CDS has HIGH impact,
+            // an inversion further away is INTERMEDIATE impact
+            int distance = Math.abs(overlap.getDistance());
+            impact = distance <= 25
+                    ? SvImpact.HIGH
+                    : distance <= 100
+                    ? SvImpact.INTERMEDIATE
+                    : SvImpact.LOW;
+        } else if (overlapType.isIntergenic()) {
+            //  intergenic duplication, let's consider promoter and enhancers
+            if (overlapType.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
+                // promoter region
+                impact = SvImpact.HIGH;
+            } else {
+                impact = enhancers.isEmpty()
+                        ? SvImpact.LOW
+                        : SvImpact.HIGH;
+            }
+        }
+        return impact;
     }
 
     /**
@@ -253,69 +295,26 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
      * @return prioritization result
      */
     private DiscreteSvPriority prioritizeInversion(Variant inversion) {
-        // Gather information
         List<Overlap> overlaps = overlapper.getOverlapList(inversion);
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
-        if (highestImpactOverlapOpt.isEmpty()) {
-            // should never happen
-            LOGGER.error("Could not identify highest impact overlap for inversion: {}", inversion);
-            return DiscreteSvPriorityDefault.unknown();
-        }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
-        OverlapType highestOT = highestImpactOverlap.getOverlapType();
 
-        Set<String> affectedGeneIds = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toSet());
-        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
-        for (String symbol : affectedGeneIds) {
-            if (geneSymbolMap.containsKey(symbol)) {
-                geneWithIdsSet.add(geneSymbolMap.get(symbol));
-            }
+        Optional<Overlap> highestOTOpt = findOverlapWithMaxPriority(overlaps);
+        if (highestOTOpt.isEmpty()) {
+            LogUtils.logWarn(LOGGER, "Did not find overlap for variant {}", LogUtils.variantSummary(inversion));
+            return DiscreteSvPriority.unknown();
         }
+        Overlap overlap = highestOTOpt.get();
+        OverlapType overlapType = overlap.getOverlapType();
+
+        // set default impact
+        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(inversion);
+        SvImpact impact = considerEnhancersForInversion(overlapType.defaultSvImpact(), overlap, enhancers);
+        // if the inversion already has high priority, then return it
+        // otherwise look for longer range position effects
         Set<Transcript> affectedTranscripts = overlaps.stream()
                 .map(Overlap::getTranscriptModel)
                 .collect(Collectors.toSet());
-
-        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(inversion);
-
-        // Start figuring out the impact
-        SvImpact impact = highestOT.defaultSvImpact(); // default
-
-        if (highestOT.isExonic() && highestOT != OverlapType.TRANSCRIPT_CONTAINED_IN_SV) {
-            // (1) the inversion affects an exon
-            // If an inversion completely contains a gene, we do not rank it as high impact
-            // but we will look at regulatory effects
-            impact = SvImpact.HIGH;
-        } else if (highestOT == OverlapType.TRANSCRIPT_CONTAINED_IN_SV) {
-            impact = SvImpact.INTERMEDIATE;
-        } else if (highestOT.isIntronic()) {
-            // (2) intronic inversion close to CDS has HIGH impact,
-            // an inversion further away is INTERMEDIATE impact
-            int distance = highestImpactOverlap.getDistance();
-            impact = distance <= 25
-                    ? SvImpact.HIGH
-                    : distance <= 100
-                    ? SvImpact.INTERMEDIATE
-                    : SvImpact.LOW;
-        } else if (highestOT.isIntergenic()) {
-            // (3) intergenic inversion, let's consider promoter and enhancers
-            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
-                // promoter region
-                impact = SvImpact.HIGH;
-            } else if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_2KB)) {
-                // promoter region
-                impact = SvImpact.INTERMEDIATE;
-            } else {
-                impact = enhancers.isEmpty()
-                        ? SvImpact.LOW
-                        : SvImpact.HIGH;
-            }
-        }
-        // if the inversion already has high priority, then return it
-        // otherwise look for longer range position effects
-        DiscreteSvPriority prio = prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+        Set<GeneWithId> geneWithIdsSet = selectOverlappingGeneIds(overlaps);
+        DiscreteSvPriority prio = prioritizeSimpleOverlapByPhenotype(impact, !affectedTranscripts.isEmpty(), geneWithIdsSet, enhancers);
         if (prio.getImpact() == SvImpact.HIGH) {
             return prio;
         }
@@ -323,7 +322,7 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
         // are only due to the intron. Similarly, if the inversion is upstream or downstream of the
         // it will not affect the distance to enhancers on the "other side" -- by definition,
         // enhancers are not sensitive to orientation
-        if (highestOT.isIntronic() || highestOT.isDownstream() || highestOT.isUpstream()) {
+        if (overlapType.isIntronic() || overlapType.isDownstream() || overlapType.isUpstream()) {
             return prio;
         }
         //if we get here, we look and see if there are both relevant genes within the inversion
@@ -358,12 +357,17 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
         return prio; // stick to the local interpretation
     }
 
-
     private DiscreteSvPriority prioritizeTranslocation(Variant variant) {
         // the following gets overlaps that disrupt transcripts only
         List<Overlap> overlaps = overlapper.getOverlapList(variant);
         SvImpact impact = SvImpact.LOW; // default
-        OverlapType otype = getHighestOverlapType(overlaps);
+        Optional<Overlap> overlapOptional = findOverlapWithMaxPriority(overlaps);
+        if (overlapOptional.isEmpty()) {
+            LogUtils.logWarn(LOGGER, "Did not find overlap for variant {}", LogUtils.variantSummary(variant));
+            return DiscreteSvPriority.unknown();
+        }
+        Overlap overlap = overlapOptional.get();
+        OverlapType overlapType = overlap.getOverlapType();
         Set<Transcript> affectedTranscripts;
         Set<GeneWithId> geneWithIdsSet;
         if (!overlaps.isEmpty()) {
@@ -374,14 +378,15 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
                     geneWithIdsSet.add(geneSymbolMap.get(symbol));
                 }
             }
-            affectedTranscripts =
-                    overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
-            if (otype.translocationDisruptable()) {
+            affectedTranscripts = overlaps.stream()
+                    .map(Overlap::getTranscriptModel)
+                    .collect(Collectors.toSet());
+            if (overlapType.translocationDisruptable()) {
                 impact = SvImpact.HIGH;
-                otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
+                overlapType = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
             } else {
                 impact = SvImpact.INTERMEDIATE;
-                otype = OverlapType.TRANSLOCATION_WITHOUT_TRANSCRIPT_DISRUPTION;
+                overlapType = OverlapType.TRANSLOCATION_WITHOUT_TRANSCRIPT_DISRUPTION;
             }
         } else {
             affectedTranscripts = Set.of();
@@ -390,82 +395,26 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
         if (enhancers.size() > 0) {
             impact = SvImpact.HIGH;
-            otype = OverlapType.ENHANCER_DISRUPTED_BY_TRANSLOCATION;
+            overlapType = OverlapType.ENHANCER_DISRUPTED_BY_TRANSLOCATION;
         }
         if (impact == SvImpact.HIGH) {
             // this means that the translocation disrupts a gene, so we will
             // take gene disruption, rather than regulatory effects, to be
             // the primary mode of action of this translocation
-            return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
+            return prioritizeSimpleOverlapByPhenotype(impact, !affectedTranscripts.isEmpty(), geneWithIdsSet, enhancers);
         }
 
         // TODO -- we need a bespoke prioritizer for translocations
         // FOR NOW there are no diseases
-        return new DefaultAnnotatedSvPriority(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps, List.of());
+        return DiscreteSvPriorityDefault.of(impact, false);
     }
 
-    private DiscreteSvPriority prioritizeDuplication(Variant duplication) {
-        List<Overlap> overlaps = overlapper.getOverlapList(duplication);
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
-        if (highestImpactOverlapOpt.isEmpty()) {
-            // should never happen
-            LOGGER.error("Could not identify highest impact overlap for duplication: {}.", duplication);
-            return DefaultAnnotatedSvPriority.unknown();
-        }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
-        OverlapType highestOT = highestImpactOverlap.getOverlapType();
-
-        Set<String> affectedGeneIds = overlaps.stream()
+    private Set<GeneWithId> selectOverlappingGeneIds(List<Overlap> overlaps) {
+        return overlaps.stream()
                 .map(Overlap::getGeneSymbol)
+                .filter(geneSymbolMap::containsKey)
+                .map(geneSymbolMap::get)
                 .collect(Collectors.toSet());
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
-
-        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(duplication);
-
-        // Start figuring out the impact
-        SvImpact impact = highestOT.defaultSvImpact(); // default
-
-        if (highestOT.isIntronic()) {
-            // intronic duplication close to CDS has HIGH impact,
-            // an inversion further away is INTERMEDIATE impact
-            int distance = Math.abs(highestImpactOverlap.getDistance());
-            impact = distance <= 25
-                    ? SvImpact.HIGH
-                    : distance <= 100
-                    ? SvImpact.INTERMEDIATE
-                    : SvImpact.LOW;
-        } else if (highestOT.isIntergenic()) {
-            //  intergenic duplication, let's consider promoter and enhancers
-            if (highestOT.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
-                // promoter region
-                impact = SvImpact.HIGH;
-            } else {
-                impact = enhancers.isEmpty()
-                        ? SvImpact.LOW
-                        : SvImpact.HIGH;
-            }
-        }
-        Set<GeneWithId> geneWithIdsSet = new HashSet<>();
-        for (String symbol : affectedGeneIds) {
-            if (geneSymbolMap.containsKey(symbol)) {
-                geneWithIdsSet.add(geneSymbolMap.get(symbol));
-            }
-        }
-        // counts of gene regardless of relevance
-        int genecount =  (int)affectedTranscripts
-                .stream()
-                .map(Transcript::hgvsSymbol)
-                .distinct()
-                .count();
-
-        if (genecount > maxGenes) {
-            impact = impact.decrementSeverity();
-            System.out.println(geneWithIdsSet.size());
-        }
-        return prioritizeSimpleOverlapByPhenotype(impact, affectedTranscripts, geneWithIdsSet, enhancers, overlaps);
     }
 
     /**
@@ -473,14 +422,13 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
      * part of a gene that is phenotypically relevant. It should be used for SVs such
      * as deletions where overlapping with the CDS of a gene can be high priority.
      * We also prioritize enhancers at this step
-
+     *
      * @return a phenotypically prioritized {@link AnnotatedSvPriority} object
      */
-    DiscreteSvPriority prioritizeSimpleOverlapByPhenotype(SvImpact svImpact,
-                                                           Set<Transcript> affectedTranscripts,
-                                                           Set<GeneWithId> affectedGeneIds,
-                                                           List<Enhancer> affectedEnhancers,
-                                                           List<Overlap> olaps) {
+    private DiscreteSvPriority prioritizeSimpleOverlapByPhenotype(SvImpact impact,
+                                                                  boolean affectsTranscript,
+                                                                  Set<GeneWithId> affectedGeneIds,
+                                                                  List<Enhancer> affectedEnhancers) {
         List<HpoDiseaseSummary> diseaseList = new ArrayList<>();
         SvImpact phenotypeImpact;
         for (var gene : affectedGeneIds) {
@@ -492,15 +440,15 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
 
         // decrement severity of the SV if it is not relevant to the disease
         phenotypeImpact = diseaseList.isEmpty()
-                ? svImpact.decrementSeverity()
-                : svImpact;
+                ? impact.decrementSeverity()
+                : impact;
 
-        if (affectedTranscripts.isEmpty() && affectedEnhancers.size() > 0) {
+        if (affectsTranscript && affectedEnhancers.size() > 0) {
             // in this case, we have prioritize the SV based on overlap with
             // an enhancer. We will rate the SV high if the enhancer is
             // annotated to a tissue that has phenotypic relevant
-            for (Enhancer e : affectedEnhancers) {
-                if (atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations())) {
+            for (Enhancer enhancer : affectedEnhancers) {
+                if (atLeastOneSharedItem(relevantHpoIdsForEnhancers, enhancer.hpoTermAssociations())) {
                     // if there is at least one affected enhancer, then the impact is high
                     // no matter what else there is
                     phenotypeImpact = SvImpact.HIGH;
@@ -512,28 +460,48 @@ public class DbPrototypeSvPrioritizer implements SvPrioritizer<Variant, Discrete
         return DiscreteSvPriority.of(phenotypeImpact, !diseaseList.isEmpty());
     }
 
-    private OverlapType getHighestOverlapType(List<Overlap> overlaps) {
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
-        if (highestImpactOverlapOpt.isEmpty()) {
-            // should never happen
-            // TODO - but it happens
-//            LogUtils.logDebug(LOGGER, "Could not identify highest impact overlap for no overlaps.");
-            return OverlapType.UNKNOWN;
-        }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
-        return highestImpactOverlap.getOverlapType();
+    private SvImpact enhancerPhenotypicImpact(Collection<Enhancer> enhancers) {
+        return enhancers.stream().anyMatch(e -> atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations()))
+                ? SvImpact.HIGH
+                : SvImpact.INTERMEDIATE;
     }
 
-    Map<Enhancer, Boolean> enhancerRelevanceMap(List<Enhancer> enhancers) {
-        Map<Enhancer, Boolean> relevanceMap = new HashMap<>();
-        for (var e : enhancers) {
-            if (atLeastOneSharedItem(relevantHpoIdsForEnhancers, e.hpoTermAssociations())) {
-                relevanceMap.put(e, Boolean.TRUE);
+    private static SvImpact considerEnhancersForInversion(SvImpact impact, Overlap overlap, List<Enhancer> enhancers) {
+        OverlapType overlapType = overlap.getOverlapType();
+        if (overlapType.isExonic() && overlapType != OverlapType.TRANSCRIPT_CONTAINED_IN_SV) {
+            // (1) the inversion affects an exon
+            // If an inversion completely contains a gene, we do not rank it as high impact
+            // but we will look at regulatory effects
+            impact = SvImpact.HIGH;
+        } else if (overlapType == OverlapType.TRANSCRIPT_CONTAINED_IN_SV) {
+            impact = SvImpact.INTERMEDIATE;
+        } else if (overlapType.isIntronic()) {
+            // (2) intronic inversion close to CDS has HIGH impact,
+            // an inversion further away is INTERMEDIATE impact
+            int distance = overlap.getDistance();
+            impact = distance <= 25
+                    ? SvImpact.HIGH
+                    : distance <= 100
+                    ? SvImpact.INTERMEDIATE
+                    : SvImpact.LOW;
+        } else if (overlapType.isIntergenic()) {
+            // (3) intergenic inversion, let's consider promoter and enhancers
+            if (overlapType.equals(OverlapType.UPSTREAM_GENE_VARIANT_500B)) {
+                // promoter region
+                impact = SvImpact.HIGH;
+            } else if (overlapType.equals(OverlapType.UPSTREAM_GENE_VARIANT_2KB)) {
+                // promoter region
+                impact = SvImpact.INTERMEDIATE;
             } else {
-                relevanceMap.put(e, Boolean.FALSE);
+                impact = enhancers.isEmpty()
+                        ? SvImpact.LOW
+                        : SvImpact.HIGH;
             }
         }
-        return Map.copyOf(relevanceMap); // immutable
+        return impact;
+    }
+
+    private static Optional<Overlap> findOverlapWithMaxPriority(List<Overlap> overlaps) {
+        return overlaps.stream().max(Comparator.comparing(Overlap::getOverlapType));
     }
 }

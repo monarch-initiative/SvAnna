@@ -63,12 +63,13 @@ public class TabularResultWriter implements ResultWriter {
     private Consumer<? super SvannaVariant> printVariant(CSVPrinter printer) {
         return variant -> {
             try {
-                printer.printRecord(variant.contigName(),
-                        variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
-                        variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
-                        variant.id(),
-                        variant.variantType(),
-                        variant.svPriority().getPriority());
+                printer.print(variant.contigName());
+                printer.print(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                printer.print(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                printer.print(variant.id());
+                printer.print(variant.variantType());
+                printer.print(variant.svPriority().getPriority());
+                printer.println();
             } catch (IOException e) {
                 LogUtils.logWarn(LOGGER, "Error writing out record `{}`", LogUtils.variantSummary(variant));
             }

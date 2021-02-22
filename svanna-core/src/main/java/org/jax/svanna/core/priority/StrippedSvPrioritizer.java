@@ -8,6 +8,7 @@ import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.overlap.OverlapType;
 import org.jax.svanna.core.overlap.Overlapper;
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Variant;
@@ -22,7 +23,7 @@ import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
 // class to show that we can replace the enhancer interval arrays with annotationDataService
 @SuppressWarnings("Duplicates") // TODO - remove Prototype prioritizer if this works
-public class StrippedSvPrioritizer implements SvPrioritizer<Variant, DiscreteSvPriority> {
+public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, DiscreteSvPriority> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrippedSvPrioritizer.class);
 
@@ -68,7 +69,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<Variant, DiscreteSvP
 
 
     @Override
-    public DiscreteSvPriority prioritize(Variant variant) {
+    public DiscreteSvPriority prioritize(SvannaVariant variant) {
         /*
         For each case we need to figure out the affected transcripts/genes.
         Then, we figure out the impact on the sequence (high/medium/low) and phenotype relevance.

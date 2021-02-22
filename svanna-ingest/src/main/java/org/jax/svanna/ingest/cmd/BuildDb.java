@@ -7,6 +7,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
+import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.TadBoundary;
@@ -40,8 +41,10 @@ import picocli.CommandLine;
 
 import javax.sql.DataSource;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -226,6 +229,12 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
+    private static <T extends GenomicRegion> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {
+        return ingestRecordParser.parse()
+                .mapToInt(ingestDao::insertItem)
+                .sum();
+    }
+
     private static Path downloadUrl(URL url, Path downloadDir) throws IOException {
         String file = url.getFile();
         String urlFileName = file.substring(file.lastIndexOf('/') + 1);
@@ -240,16 +249,33 @@ public class BuildDb implements Callable<Integer> {
         File parent = target.getParentFile();
         if (!parent.isDirectory() && !parent.mkdirs())
             throw new IOException("Unable to create parent directory `" + parent.getAbsolutePath() + "` for downloading `" + target.getAbsolutePath() + '`');
-        try (BufferedInputStream is = new BufferedInputStream(source.openStream())) {
+
+        URLConnection connection;
+        if ("http".equals(source.getProtocol()))
+            connection = openHttpConnectionHandlingRedirects(source);
+        else
+            connection = source.openConnection();
+
+        try (BufferedInputStream is = new BufferedInputStream(connection.getInputStream())) {
             FileOutputStream os = new FileOutputStream(target);
             IOUtils.copyLarge(is, os);
         }
     }
 
-    private static <T extends GenomicRegion> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {
-        return ingestRecordParser.parse()
-                .mapToInt(ingestDao::insertItem)
-                .sum();
+    private static URLConnection openHttpConnectionHandlingRedirects(URL source) throws IOException {
+        LogUtils.logDebug(LOGGER, "Opening HTTP connection to `{}`", source);
+        HttpURLConnection connection = (HttpURLConnection) source.openConnection();
+        int status = connection.getResponseCode();
+
+        if (status != HttpURLConnection.HTTP_OK) {
+            LogUtils.logDebug(LOGGER, "Received response `{}`", status);
+            if (status == HttpURLConnection.HTTP_MOVED_PERM || status == HttpURLConnection.HTTP_MOVED_TEMP || status == HttpURLConnection.HTTP_SEE_OTHER) {
+                String location = connection.getHeaderField("Location");
+                LogUtils.logDebug(LOGGER, "Redirecting to `{}`", location);
+                return new URL(location).openConnection();
+            }
+        }
+        return connection;
     }
 
     private static void downloadPhenotypeFiles(Path buildDir, IngestDbProperties properties) throws IOException {

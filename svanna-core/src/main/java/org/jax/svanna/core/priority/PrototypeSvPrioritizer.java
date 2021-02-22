@@ -228,7 +228,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
      */
     private AnnotatedSvPriority prioritizeDeletion(Variant deletion) {
         // find the gene/transcript with the most deleterious OverlapType
-        List<Overlap> overlaps = overlapper.getOverlapList(deletion);
+        List<Overlap> overlaps = overlapper.getOverlaps(deletion);
         OverlapType highestOT = getHighestOverlapType(overlaps);
 
         // select the relevant genes and transcripts
@@ -299,7 +299,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
      * @return Corresponding prioritization according to sequence
      */
     private AnnotatedSvPriority prioritizeInsertion(Variant insertion) {
-        List<Overlap> overlaps = overlapper.getOverlapList(insertion);
+        List<Overlap> overlaps = overlapper.getOverlaps(insertion);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
@@ -371,7 +371,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
      */
     private AnnotatedSvPriority prioritizeInversion(Variant inversion) {
         // Gather information
-        List<Overlap> overlaps = overlapper.getOverlapList(inversion);
+        List<Overlap> overlaps = overlapper.getOverlaps(inversion);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
@@ -510,7 +510,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
 
     private AnnotatedSvPriority prioritizeTranslocation(Variant variant) {
         // the following gets overlaps that disrupt transcripts only
-        List<Overlap> overlaps = overlapper.getOverlapList(variant);
+        List<Overlap> overlaps = overlapper.getOverlaps(variant);
         SvImpact impact = SvImpact.LOW; // default
         OverlapType otype = getHighestOverlapType(overlaps);
         Set<Transcript> affectedTranscripts;
@@ -554,7 +554,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
     }
 
     private AnnotatedSvPriority prioritizeDuplication(Variant duplication) {
-        List<Overlap> overlaps = overlapper.getOverlapList(duplication);
+        List<Overlap> overlaps = overlapper.getOverlaps(duplication);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {

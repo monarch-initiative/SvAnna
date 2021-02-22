@@ -10,7 +10,7 @@ package org.jax.svanna.core.overlap;
  */
 public class OverlapDistance {
 
-    private static final int UNITIALIZED = -42;
+    private static final int UNITIALIZED = Integer.MIN_VALUE;
     private final OverlapDistanceType overlapDistanceType;
     private final int distanceA;
     private final int distanceB;

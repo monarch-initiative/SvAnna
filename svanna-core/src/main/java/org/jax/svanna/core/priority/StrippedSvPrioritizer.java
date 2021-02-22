@@ -123,7 +123,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
      */
     private DiscreteSvPriority prioritizeDeletion(Variant deletion) {
         // find the gene/transcript with the most deleterious OverlapType
-        List<Overlap> overlaps = overlapper.getOverlapList(deletion);
+        List<Overlap> overlaps = overlapper.getOverlaps(deletion);
 
         // set default impact
         Optional<Overlap> highestOverlapType = findOverlapWithMaxPriority(overlaps);
@@ -174,7 +174,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
      * @return Corresponding prioritization according to sequence
      */
     private DiscreteSvPriority prioritizeInsertion(Variant insertion) {
-        List<Overlap> overlaps = overlapper.getOverlapList(insertion);
+        List<Overlap> overlaps = overlapper.getOverlaps(insertion);
         Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
                 .max(Comparator.comparing(Overlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
@@ -222,7 +222,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
 
 
     private DiscreteSvPriority prioritizeDuplication(Variant duplication) {
-        List<Overlap> overlaps = overlapper.getOverlapList(duplication);
+        List<Overlap> overlaps = overlapper.getOverlaps(duplication);
         Optional<Overlap> maxPriorityOverlap = findOverlapWithMaxPriority(overlaps);
         if (maxPriorityOverlap.isEmpty()) {
             // should never happen
@@ -296,7 +296,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
      * @return prioritization result
      */
     private DiscreteSvPriority prioritizeInversion(Variant inversion) {
-        List<Overlap> overlaps = overlapper.getOverlapList(inversion);
+        List<Overlap> overlaps = overlapper.getOverlaps(inversion);
 
         Optional<Overlap> highestOTOpt = findOverlapWithMaxPriority(overlaps);
         if (highestOTOpt.isEmpty()) {
@@ -360,7 +360,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
 
     private DiscreteSvPriority prioritizeTranslocation(Variant variant) {
         // the following gets overlaps that disrupt transcripts only
-        List<Overlap> overlaps = overlapper.getOverlapList(variant);
+        List<Overlap> overlaps = overlapper.getOverlaps(variant);
         SvImpact impact = SvImpact.LOW; // default
         Optional<Overlap> overlapOptional = findOverlapWithMaxPriority(overlaps);
         if (overlapOptional.isEmpty()) {

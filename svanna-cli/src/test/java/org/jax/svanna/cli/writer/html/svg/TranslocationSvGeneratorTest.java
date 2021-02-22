@@ -43,7 +43,7 @@ public class TranslocationSvGeneratorTest {
     @Disabled
     public void testWriteSvg() {
         Variant variant = testVariants.translocations().translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
-        List<Transcript> transcriptModels = overlapper.getOverlapList(variant).stream()
+        List<Transcript> transcriptModels = overlapper.getOverlaps(variant).stream()
                 .map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
         TranslocationSvgGenerator gen = new TranslocationSvgGenerator(variant, ((BreakendVariant) variant), transcriptModels, enhancerList);

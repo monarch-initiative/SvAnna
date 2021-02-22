@@ -38,7 +38,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     @Override
     public Visualizable makeVisualizable(SvannaVariant variant) {
-        List<Overlap> overlaps = overlapper.getOverlapList(variant);
+        List<Overlap> overlaps = overlapper.getOverlaps(variant);
         List<Transcript> transcripts = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
 

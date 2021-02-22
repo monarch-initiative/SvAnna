@@ -31,7 +31,7 @@ public class InversionSvgGeneratorTest {
     @Test
     public void testWriteSvg() {
         Variant variant = testVariants.inversions().gckExonic();
-        List<Transcript> transcripts = overlapper.getOverlapList(variant).stream()
+        List<Transcript> transcripts = overlapper.getOverlaps(variant).stream()
                 .map(Overlap::getTranscriptModel)
                 .collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();

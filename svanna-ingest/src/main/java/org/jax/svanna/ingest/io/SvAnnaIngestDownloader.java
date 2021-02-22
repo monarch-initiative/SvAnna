@@ -24,11 +24,6 @@ public class SvAnnaIngestDownloader {
 
     private final static String SAMPLENAME_URL = "https://fantom.gsc.riken.jp/5/datafiles/latest/extra/Enhancers/Human.sample_name2library_id.txt";
 
-    private final static String HPO_OBO = "hp.obo";
-
-    private final static String HPO_URL = "https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo";
-
-
     public SvAnnaIngestDownloader(String path){
         this(path,false);
     }
@@ -44,7 +39,6 @@ public class SvAnnaIngestDownloader {
     public void download() {
         downloadFileIfNeeded(ENHANCER_FILE,ENHANCERS_URL);
         downloadFileIfNeeded(SAMPLENAME_FILE, SAMPLENAME_URL);
-        downloadFileIfNeeded(HPO_OBO, HPO_URL);
     }
 
 

@@ -28,7 +28,7 @@ public class GenerateConfigCommand implements Callable<Integer> {
 
     @CommandLine.Parameters(arity = "1",
             description = "Configuration file path",
-            defaultValue = "svanna-config.yml")
+            defaultValue = "svanna-ingest-config.yml")
     public Path outputPath;
 
     @Override

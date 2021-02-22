@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
+@Deprecated
 public class IngestCommand implements Callable<Integer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestCommand.class);
     @CommandLine.Option(names = {"-f", "--fantom"},

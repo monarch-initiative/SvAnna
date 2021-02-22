@@ -54,6 +54,7 @@ public class SvAnnOverlapper implements Overlapper {
             case DEL:
             case DUP:
             case INV:
+            case CNV:
                 return intrachromosomalEventOverlaps(variant);
             case INS:
                 return variant.length() == 0 ? emptyRegionOverlap(variant) : intrachromosomalEventOverlaps(variant);

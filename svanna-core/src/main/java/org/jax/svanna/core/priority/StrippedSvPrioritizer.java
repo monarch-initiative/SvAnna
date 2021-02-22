@@ -96,6 +96,8 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
                 return prioritizeInsertion(variant);
             case DUP:
                 return prioritizeDuplication(variant);
+            case CNV:
+                return prioritizeCnv(variant);
             case INV:
                 return prioritizeInversion(variant);
             case TRA:
@@ -277,6 +279,17 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
             }
         }
         return impact;
+    }
+
+    private DiscreteSvPriority prioritizeCnv(SvannaVariant variant) {
+        if (variant.copyNumber() > 2)
+            return prioritizeDuplication(variant);
+        else if (variant.copyNumber() < 2 && variant.copyNumber() >= 0)
+            return prioritizeDeletion(variant);
+        else {
+            LogUtils.logWarn(LOGGER, "Variant `{}` has copy number `{}`", LogUtils.variantSummary(variant), variant.copyNumber());
+            return DiscreteSvPriority.unknown();
+        }
     }
 
     /**

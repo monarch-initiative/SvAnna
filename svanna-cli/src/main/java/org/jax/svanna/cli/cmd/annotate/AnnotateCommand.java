@@ -179,19 +179,6 @@ public class AnnotateCommand extends SvAnnaCommand {
                 return 1;
             }
 
-            // TODO - belongs to the HTML visualization
-//            int above = 0, below = 0;
-//            double thresholdValue = threshold.priority();
-//            for (SvannaVariant variant : filteredPrioritizedVariants) {
-//                if (variant.svPriority().getPriority() >= thresholdValue) {
-//                    above += 1;
-//                } else {
-//                    below += 1;
-//                }
-//            }
-//            LogUtils.logInfo(LOGGER, "Above threshold SVs: {}, below threshold SVs: {}", NF.format(above), NF.format(below));
-
-
             ResultWriterFactory resultWriterFactory = context.getBean(ResultWriterFactory.class);
             for (OutputFormat outputFormat : outputFormats) {
                 ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat);

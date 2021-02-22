@@ -5,16 +5,22 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAnnotation;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoSubOntologyRootTermIds;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategoryMap;
+import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.ontology.algo.InformationContentComputation;
 import org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.ontology.similarity.ResnikSimilarity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -41,6 +47,8 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
 
     private final Set<GeneWithId> geneWithIds;
 
+    private final ResnikSimilarity resnikSimilarity;
+
     public PhenotypeDataServiceDefault(Ontology ontology,
                                        Multimap<TermId, TermId> diseaseToGeneMultiMap,
                                        Map<TermId, HpoDisease> diseaseIdToDisease,
@@ -50,6 +58,20 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
         this.diseaseIdToDisease = diseaseIdToDisease;
         this.geneToDiseaseIdMap = prepareGeneToDiseaseMap(diseaseToGeneMultiMap);
         this.geneWithIds = geneWithIds;
+        //TODO CHECK ME
+        final Ontology phenotypicAbnormalitySubOntology = ontology.subOntology(HpoSubOntologyRootTermIds.PHENOTYPIC_ABNORMALITY);
+        final InformationContentComputation icPrecomputation =
+                new InformationContentComputation(phenotypicAbnormalitySubOntology);
+        /** The TermId to object ID mapping. */
+        final HashMap<TermId, Collection<TermId>> termIdToObjectId = new HashMap<>();
+        final Map<TermId, Double> termToIc =
+                icPrecomputation.computeInformationContent(termIdToObjectId);
+        LOGGER.info("Done with precomputing information content.");
+
+        LOGGER.info("Performing pairwise Resnik similarity precomputation...");
+        this.resnikSimilarity =
+                new ResnikSimilarity(
+                        phenotypicAbnormalitySubOntology, termToIc, /* symmetric= */ false);
     }
 
     private Map<TermId, Set<TermId>> prepareGeneToDiseaseMap(Multimap<TermId, TermId> diseaseToGeneMultiMap) {
@@ -73,6 +95,31 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     public Set<GeneWithId> geneWithIds() {
         return geneWithIds;
     }
+
+
+    public double resnikSimilarity(Set<TermId> hpoTerms, TermId geneId) {
+
+        if (! this.geneToDiseaseIdMap.containsKey(geneId)) {
+            return 0.0;
+        }
+        Set<TermId> diseaseIdSet = this.geneToDiseaseIdMap.get(geneId);
+        double maxResnik = 0;
+        TermId maxDisease = null;
+        for (TermId diseaseId : diseaseIdSet) {
+            HpoDisease disease = this.diseaseIdToDisease.get(diseaseId);
+           // TODO -- make sure we only use positive annotations
+            List<TermId> diseaseAnnotations = disease.getPhenotypicAbnormalityTermIdList();
+            double sim =  resnikSimilarity.computeScore(diseaseAnnotations, hpoTerms);
+            if (sim>maxResnik) {
+                maxResnik = sim;
+                maxDisease = diseaseId;
+            }
+        }
+
+        return maxResnik;
+    }
+
+
 
     @Override
     public Map<TermId, Set<HpoDiseaseSummary>> getRelevantGenesAndDiseases(Collection<TermId> hpoTermIds) {

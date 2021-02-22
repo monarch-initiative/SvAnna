@@ -26,8 +26,8 @@ svanna.ingest:
 
 
   phenotype:
-    hpoOboUrl: https://raw.githubusercontent.com/obophenotype/human-phenotype-ontology/master/hp.obo
-    hpoAnnotationsUrl: http://compbio.charite.de/jenkins/job/hpo.annotations.current/lastSuccessfulBuild/artifact/current/phenotype.hpoa
+    hpoOboUrl: http://purl.obolibrary.org/obo/hp.obo
+    hpoAnnotationsUrl: http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa
     mim2geneMedgenUrl: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/mim2gene_medgen
     geneInfoUrl: ftp://ftp.ncbi.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
     gencodeUrl: ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_35/gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz

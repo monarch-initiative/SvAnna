@@ -1,7 +1,7 @@
 # Required properties template, the file follows YAML syntax.
 svanna:
   # path to folder with SvAnna database and the other required files
-  dataDirectory: /home/ielis/data/clinical-long-read-genome/svanna
+  dataDirectory:
   # path to Jannovar transcript database
-  jannovarCachePath: /home/ielis/soft/jannovar/v0.35/hg38_refseq.ser
+  jannovarCachePath:
 

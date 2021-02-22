@@ -1,7 +1,7 @@
 package org.jax.svanna.core.filter;
 
+import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.PopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariantDao;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.GenomicRegion;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collection;
 
 /**
- * This filter flags variant that are present in given {@link PopulationVariantDao} and match the query coordinates:
+ * This filter flags variant that are present in given {@link AnnotationDataService} and match the query coordinates:
  * <ul>
  *     <li>similarity > similarity threshold</li>
  *     <li>frequency > frequency threshold</li>
@@ -29,12 +29,12 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
     private static final FilterResult PASS = FilterResult.pass(FILTER_TYPE);
     private static final FilterResult NOT_RUN = FilterResult.notRun(FILTER_TYPE);
 
-    private final PopulationVariantDao populationVariantDao;
+    private final AnnotationDataService annotationDataService;
     private final float similarityThreshold;
     private final float frequencyThreshold;
 
-    public StructuralVariantFrequencyFilter(PopulationVariantDao populationVariantDao, float similarityThreshold, float frequencyThreshold) {
-        this.populationVariantDao = populationVariantDao;
+    public StructuralVariantFrequencyFilter(AnnotationDataService annotationDataService, float similarityThreshold, float frequencyThreshold) {
+        this.annotationDataService = annotationDataService;
         this.similarityThreshold = similarityThreshold;
         this.frequencyThreshold = frequencyThreshold;
     }
@@ -74,7 +74,7 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
 
     private FilterResult performFiltering(Variant variant) {
         // get features from benign origins that share at least 1bp with the query region
-        Collection<PopulationVariant> features = populationVariantDao.getOverlapping(variant, PopulationVariantOrigin.benign());
+        Collection<PopulationVariant> features = annotationDataService.getOverlapping(variant, PopulationVariantOrigin.benign());
 
         return features.stream()
                 .anyMatch(feature -> feature.variantType().baseType() == variant.variantType().baseType()

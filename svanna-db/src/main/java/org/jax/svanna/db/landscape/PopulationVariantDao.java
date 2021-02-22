@@ -1,5 +1,7 @@
-package org.jax.svanna.core.landscape;
+package org.jax.svanna.db.landscape;
 
+import org.jax.svanna.core.landscape.PopulationVariant;
+import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.monarchinitiative.svart.GenomicRegion;
 
 import java.util.List;

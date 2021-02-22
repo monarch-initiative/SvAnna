@@ -19,7 +19,6 @@ import org.jax.svanna.core.filter.StructuralVariantFrequencyFilter;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.landscape.PopulationVariantDao;
 import org.jax.svanna.core.overlap.SvAnnOverlapper;
 import org.jax.svanna.core.priority.StrippedSvPrioritizer;
 import org.jax.svanna.core.priority.SvImpact;
@@ -160,9 +159,8 @@ public class AnnotateCommand extends SvAnnaCommand {
 
             LogUtils.logInfo(LOGGER, "Setting up filtering and prioritization");
             TranscriptService transcriptService = context.getBean(TranscriptService.class);
-            PopulationVariantDao populationVariantDao = context.getBean(PopulationVariantDao.class);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            VariantAnalysis<SvannaVariant> variantAnalysis = setupVariantAnalysis(patientTerms, transcriptService, annotationDataService, phenotypeDataService, populationVariantDao);
+            VariantAnalysis<SvannaVariant> variantAnalysis = setupVariantAnalysis(patientTerms, transcriptService, annotationDataService, phenotypeDataService);
 
 
             LogUtils.logInfo(LOGGER, "Filtering and prioritizing variants");
@@ -215,11 +213,10 @@ public class AnnotateCommand extends SvAnnaCommand {
     private VariantAnalysis<SvannaVariant> setupVariantAnalysis(Collection<TermId> patientTerms,
                                                                 TranscriptService transcriptService,
                                                                 AnnotationDataService annotationDataService,
-                                                                PhenotypeDataService phenotypeDataService,
-                                                                PopulationVariantDao populationVariantDao) {
+                                                                PhenotypeDataService phenotypeDataService) {
         // setup filtering
         LogUtils.logInfo(LOGGER, "Filtering out variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
-        Filter<SvannaVariant> variantFilter = new StructuralVariantFrequencyFilter(populationVariantDao, similarityThreshold, frequencyThreshold);
+        Filter<SvannaVariant> variantFilter = new StructuralVariantFrequencyFilter(annotationDataService, similarityThreshold, frequencyThreshold);
 
         LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
         Set<TermId> enhancerTerms = annotationDataService.enhancerPhenotypeAssociations();

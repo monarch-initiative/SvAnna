@@ -2,7 +2,6 @@ package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.core.landscape.BasePopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariantDao;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.db.IngestDao;
 import org.monarchinitiative.svart.*;

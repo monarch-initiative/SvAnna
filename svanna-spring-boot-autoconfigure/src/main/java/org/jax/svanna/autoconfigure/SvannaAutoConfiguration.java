@@ -11,7 +11,6 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.landscape.PopulationVariantDao;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.db.landscape.DbAnnotationDataService;
@@ -78,7 +77,7 @@ public class SvannaAutoConfiguration {
     @Bean
     public AnnotationDataService annotationDataService(DataSource dataSource, GenomicAssembly genomicAssembly) {
         return new DbAnnotationDataService(new EnhancerAnnotationDao(dataSource, genomicAssembly),
-                new RepetitiveRegionDao(dataSource, genomicAssembly));
+                new RepetitiveRegionDao(dataSource, genomicAssembly), new DbPopulationVariantDao(dataSource, genomicAssembly));
     }
 
     @Bean
@@ -100,12 +99,6 @@ public class SvannaAutoConfiguration {
 
         return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneWithIds);
     }
-
-    @Bean
-    public PopulationVariantDao populationVariantDao(DataSource dataSource, GenomicAssembly genomicAssembly) {
-        return new DbPopulationVariantDao(dataSource, genomicAssembly);
-    }
-
 
     @Bean
     public TranscriptService transcriptService(SvannaProperties svannaProperties, GenomicAssembly genomicAssembly) throws SerializationException {

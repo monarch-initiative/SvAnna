@@ -1,6 +1,5 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.AnnotationDao;
 import org.jax.svanna.core.landscape.RepeatFamily;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.db.IngestDao;

@@ -1,4 +1,4 @@
-package org.jax.svanna.core.landscape;
+package org.jax.svanna.db.landscape;
 
 import org.monarchinitiative.svart.GenomicRegion;
 

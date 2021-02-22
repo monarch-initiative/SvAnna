@@ -26,4 +26,12 @@ public interface AnnotationDataService
 
     List<RepetitiveRegion> overlappingRepetitiveRegions(GenomicRegion query);
 
+    Set<PopulationVariantOrigin> availableOrigins();
+
+    List<PopulationVariant> getOverlapping(GenomicRegion query, Set<PopulationVariantOrigin> origins);
+
+    default List<PopulationVariant> getOverlapping(GenomicRegion query) {
+        return getOverlapping(query, availableOrigins());
+    }
+
 }

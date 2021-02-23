@@ -1,7 +1,9 @@
 package org.jax.svanna.core.landscape;
 
+import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Position;
+import org.monarchinitiative.svart.Strand;
 
 public interface TadBoundary extends GenomicRegion {
 
@@ -15,8 +17,16 @@ public interface TadBoundary extends GenomicRegion {
      */
     float stability();
 
-    default Position median() {
-        return startPosition().shift(length() / 2);
+    @Override
+    TadBoundary withStrand(Strand other);
+
+    @Override
+    TadBoundary withCoordinateSystem(CoordinateSystem coordinateSystem);
+
+    default Position asPosition() {
+        int halfLength = length() / 2;
+        int median = start() + halfLength;
+        return Position.of(median, -halfLength, halfLength);
     }
 
 }

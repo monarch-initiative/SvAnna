@@ -30,7 +30,7 @@ public class McArthur2021TadBoundariesParserTest {
 
         TadBoundary first = records.get(0);
         assertThat(first.id(), equalTo("chr1:600000-700000"));
-        assertThat(first.median(), equalTo(Position.of(714620)));
+        assertThat(first.asPosition(), equalTo(Position.of(714620, -50_000, 50_000)));
         assertThat((double) first.stability(), closeTo(0.65444404, 1E-8));
 
         assertThat(first.contig(), equalTo(genomicAssembly.contigByName("chr1")));

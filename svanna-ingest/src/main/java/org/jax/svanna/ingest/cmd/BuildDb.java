@@ -223,7 +223,7 @@ public class BuildDb implements Callable<Integer> {
             ZipArchiveEntry entry = zipFile.getEntry(entryName);
             InputStream is = zipFile.getInputStream(entry);
             IngestRecordParser<TadBoundary> parser = new McArthur2021TadBoundariesParser(assembly, is, chain);
-            IngestDao<TadBoundary> dao = new TadBoundaryDao(dataSource);
+            IngestDao<TadBoundary> dao = new TadBoundaryDao(dataSource, assembly);
             int updated = ingestTrack(parser, dao);
             LOGGER.info("Ingest of TAD boundaries affected {} rows", updated);
         }

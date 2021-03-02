@@ -13,7 +13,7 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
     private final String accessionId;
     private final String hgvsSymbol;
     private final GenomicRegion cdsRegion;
-    private final List<GenomicRegion> exons;
+    private final List<Exon> exons;
 
 
     private TranscriptDefault(Contig contig,
@@ -25,7 +25,7 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
                               String accessionId,
                               String hgvsSymbol,
                               GenomicRegion cdsRegion,
-                              List<GenomicRegion> exons) {
+                              List<Exon> exons) {
         super(contig, strand, coordinateSystem, start, end);
 
         this.accessionId = Objects.requireNonNull(accessionId);
@@ -40,7 +40,7 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
                                        String hgvsSymbol,
                                        boolean isCoding,
                                        int cdsStart, int cdsEnd,
-                                       List<GenomicRegion> exons) {
+                                       List<Exon> exons) {
         GenomicRegion cdsRegion = isCoding
                 ? GenomicRegion.of(contig, strand, coordinateSystem, Position.of(cdsStart), Position.of(cdsEnd))
                 : null;
@@ -53,7 +53,7 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
     public static TranscriptDefault nonCoding(Contig contig, Strand strand, CoordinateSystem coordinateSystem,
                                        int start, int end,
                                        String accessionId, String hgvsSymbol,
-                                       List<GenomicRegion> exons) {
+                                       List<Exon> exons) {
         return new TranscriptDefault(contig, strand, coordinateSystem, Position.of(start), Position.of(end), accessionId, hgvsSymbol, null, exons);
     }
 
@@ -61,7 +61,7 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
                                     int start, int end,
                                     int cdsStart, int cdsEnd,
                                     String accessionId, String hgvsSymbol,
-                                    List<GenomicRegion> exons) {
+                                    List<Exon> exons) {
         GenomicRegion cdsRegion = GenomicRegion.of(contig, strand, coordinateSystem, Position.of(cdsStart), Position.of(cdsEnd));
         return new TranscriptDefault(contig, strand, coordinateSystem, Position.of(start), Position.of(end), accessionId, hgvsSymbol, cdsRegion, exons);
     }
@@ -81,7 +81,7 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
     }
 
     @Override
-    public List<GenomicRegion> exons() {
+    public List<Exon> exons() {
         return exons;
     }
 
@@ -90,15 +90,18 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
         GenomicRegion cds = cdsRegion;
         if (cds != null)
             cds = cds.withStrand(strand).withCoordinateSystem(coordinateSystem);
-        List<GenomicRegion> exons;
+        List<Exon> exons;
         if (strand() != strand) {
             exons = new ArrayList<>(exons().size());
             for (int i = exons().size() - 1; i >= 0; i--) {
-                exons.add(exons().get(i).withStrand(strand).withCoordinateSystem(coordinateSystem));
+                Exon current = exons().get(i);
+                Position eStart = current.startPosition().invert(coordinateSystem, contig());
+                Position eEnd = current.endPosition().invert(coordinateSystem, contig());
+                exons.add(Exon.of(coordinateSystem, eEnd, eStart)); // intentional
             }
         } else if (coordinateSystem() != coordinateSystem) {
             exons = new ArrayList<>(exons().size());
-            for (GenomicRegion exon : exons()) {
+            for (Exon exon : exons()) {
                 exons.add(exon.withCoordinateSystem(coordinateSystem));
             }
         } else {

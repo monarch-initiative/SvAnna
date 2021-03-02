@@ -12,12 +12,16 @@ public class DbAnnotationDataService implements AnnotationDataService {
     private final EnhancerAnnotationDao enhancerAnnotationDao;
     private final AnnotationDao<RepetitiveRegion> repetitiveRegionDao;
     private final PopulationVariantDao populationVariantDao;
+    private final AnnotationDao<TadBoundary> tadBoundaryDao;
 
     public DbAnnotationDataService(EnhancerAnnotationDao enhancerAnnotationDao,
-                                   AnnotationDao<RepetitiveRegion> repetitiveRegionDao, PopulationVariantDao populationVariantDao) {
+                                   AnnotationDao<RepetitiveRegion> repetitiveRegionDao,
+                                   PopulationVariantDao populationVariantDao,
+                                   AnnotationDao<TadBoundary> tadBoundaryDao) {
         this.enhancerAnnotationDao = enhancerAnnotationDao;
         this.repetitiveRegionDao = repetitiveRegionDao;
         this.populationVariantDao = populationVariantDao;
+        this.tadBoundaryDao = tadBoundaryDao;
     }
 
     @Override
@@ -46,8 +50,12 @@ public class DbAnnotationDataService implements AnnotationDataService {
     }
 
     @Override
-    public List<PopulationVariant> getOverlapping(GenomicRegion query, Set<PopulationVariantOrigin> origins) {
+    public List<PopulationVariant> overlappingPopulationVariants(GenomicRegion query, Set<PopulationVariantOrigin> origins) {
         return populationVariantDao.getOverlapping(query, origins);
     }
 
+    @Override
+    public List<TadBoundary> overlappingTadBoundaries(GenomicRegion query) {
+        return tadBoundaryDao.getOverlapping(query);
+    }
 }

@@ -28,10 +28,11 @@ public interface AnnotationDataService
 
     Set<PopulationVariantOrigin> availableOrigins();
 
-    List<PopulationVariant> getOverlapping(GenomicRegion query, Set<PopulationVariantOrigin> origins);
+    List<PopulationVariant> overlappingPopulationVariants(GenomicRegion query, Set<PopulationVariantOrigin> origins);
 
-    default List<PopulationVariant> getOverlapping(GenomicRegion query) {
-        return getOverlapping(query, availableOrigins());
+    default List<PopulationVariant> overlappingPopulationVariants(GenomicRegion query) {
+        return overlappingPopulationVariants(query, availableOrigins());
     }
 
+    List<TadBoundary> overlappingTadBoundaries(GenomicRegion query);
 }

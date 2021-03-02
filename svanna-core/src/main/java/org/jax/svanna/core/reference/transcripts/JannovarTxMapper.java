@@ -2,8 +2,8 @@ package org.jax.svanna.core.reference.transcripts;
 
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
-import org.jax.svanna.core.reference.TranscriptDefault;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +40,9 @@ class JannovarTxMapper {
                 : Strand.NEGATIVE;
 
         // process exons
-        List<GenomicRegion> exons = new ArrayList<>();
+        List<Exon> exons = new ArrayList<>();
         for (GenomeInterval exon : tm.getExonRegions()) {
-            exons.add(GenomicRegion.of(contig, strand, CoordinateSystem.zeroBased(), Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
+            exons.add(Exon.of(CoordinateSystem.zeroBased(), Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
         }
 
         // these coordinates are already adjusted to the appropriate strand
@@ -51,12 +51,12 @@ class JannovarTxMapper {
             GenomeInterval cdsRegion = tm.getCDSRegion();
             int cdsStart = cdsRegion.getBeginPos();
             int cdsEnd = cdsRegion.getEndPos();
-            tx = TranscriptDefault.coding(contig, strand, CoordinateSystem.zeroBased(),
+            tx = Transcript.coding(contig, strand, CoordinateSystem.zeroBased(),
                     txRegion.getBeginPos(), txRegion.getEndPos(),
                     cdsStart, cdsEnd,
                     tm.getAccession(), tm.getGeneSymbol(), exons);
         } else {
-            tx = TranscriptDefault.nonCoding(contig, strand, CoordinateSystem.zeroBased(),
+            tx = Transcript.nonCoding(contig, strand, CoordinateSystem.zeroBased(),
                     txRegion.getBeginPos(), txRegion.getEndPos(),
                     tm.getAccession(), tm.getGeneSymbol(), exons);
         }

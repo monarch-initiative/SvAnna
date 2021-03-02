@@ -1,5 +1,6 @@
 package org.jax.svanna.core.exception;
 
+import org.monarchinitiative.svart.Breakend;
 import org.monarchinitiative.svart.Strand;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
@@ -13,6 +14,12 @@ public class LogUtils {
     public static String variantSummary(Variant variant) {
         return String.format("%s %s:%d-%d %s>%s", variant.id(), variant.contigName(),
                 variant.startOnStrand(Strand.POSITIVE), variant.endOnStrand(Strand.POSITIVE), variant.ref(), variant.alt());
+    }
+
+
+    public static String breakendSummary(Breakend variant) {
+        return String.format("%s %s:%d-%d",
+                variant.id(), variant.contigName(), variant.startOnStrand(Strand.POSITIVE), variant.endOnStrand(Strand.POSITIVE));
     }
 
     public static void logError(Logger logger, String template, Object... objects) {

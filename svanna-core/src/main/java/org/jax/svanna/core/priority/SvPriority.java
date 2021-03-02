@@ -2,6 +2,14 @@ package org.jax.svanna.core.priority;
 
 public interface SvPriority extends Comparable<SvPriority> {
 
+    static SvPriority unknown() {
+        return UnknownSvPriority.instance();
+    }
+
+    static SvPriority of(double priority, boolean hasPhenotypicRelevance) {
+        return SvPriorityDefault.of(priority, hasPhenotypicRelevance);
+    }
+
     /**
      * @return priority as double, higher value means higher priority
      */

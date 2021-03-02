@@ -1,25 +1,43 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.core.landscape.TadBoundary;
+import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.db.IngestDao;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
 
-public class TadBoundaryDao implements IngestDao<TadBoundary> {
+public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<TadBoundary> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TadBoundaryDao.class);
 
     private final DataSource dataSource;
 
-    public TadBoundaryDao(DataSource dataSource) {
+    private final GenomicAssembly genomicAssembly;
+
+    private final NamedParameterJdbcTemplate template;
+
+    private final double stabilityThreshold;
+
+    public TadBoundaryDao(DataSource dataSource, GenomicAssembly genomicAssembly, double stabilityThreshold) {
         this.dataSource = dataSource;
+        this.template = new NamedParameterJdbcTemplate(dataSource);
+        this.genomicAssembly = genomicAssembly;
+        this.stabilityThreshold = stabilityThreshold;
+    }
+
+    public TadBoundaryDao(DataSource dataSource, GenomicAssembly genomicAssembly) {
+        this(dataSource, genomicAssembly, 0.);
     }
 
     @Override
@@ -53,4 +71,35 @@ public class TadBoundaryDao implements IngestDao<TadBoundary> {
         return updated;
     }
 
+    @Override
+    public List<TadBoundary> getAllItems() {
+        throw new RuntimeException("The deprecated method is not implemented");
+    }
+
+    @Override
+    public List<TadBoundary> getOverlapping(GenomicRegion query) {
+        String sql = "select CONTIG, START, END, ID, STABILITY " +
+                " from SVANNA.TAD_BOUNDARY " +
+                " where CONTIG = :contig " +
+                "   and :start < END " +
+                "   and START < :end " +
+                "   and STABILITY > :stability" +
+                " order by START";
+        SqlParameterSource paramsSource = new MapSqlParameterSource()
+                .addValue("contig", query.contigId())
+                .addValue("start", query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .addValue("end", query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .addValue("stability", stabilityThreshold);
+        return template.query(sql, paramsSource, processResults());
+    }
+
+    private RowMapper<TadBoundary> processResults() {
+        return (rs, i) -> TadBoundaryDefault.of(
+                genomicAssembly.contigById(rs.getInt("CONTIG")),
+                Strand.POSITIVE, CoordinateSystem.zeroBased(),
+                Position.of(rs.getInt("START")),
+                Position.of(rs.getInt("END")),
+                rs.getString("ID"),
+                rs.getFloat("STABILITY"));
+    }
 }

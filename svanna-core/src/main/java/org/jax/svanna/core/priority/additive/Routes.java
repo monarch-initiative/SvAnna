@@ -8,6 +8,7 @@ public class Routes {
     private final Route alternate;
 
     public static Routes of(GenomicRegion reference, Route alternate) {
+        // TODO - normalize coordinate system of reference
         return new Routes(reference, alternate);
     }
 
@@ -22,5 +23,9 @@ public class Routes {
 
     public Route alternate() {
         return alternate;
+    }
+
+    public boolean isIntraChromosomal() {
+        return alternate.segmentContigs().size() == 1;
     }
 }

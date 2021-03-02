@@ -3,6 +3,7 @@ package org.jax.svanna.core.overlap;
 import com.google.common.collect.ImmutableList;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
@@ -273,10 +274,11 @@ public class SvAnnOverlapper implements Overlapper {
      * @return object representing the number of the first and last affected exon
      */
     private static ExonPair getAffectedExons(Transcript tx, GenomicRegion event) {
-        List<GenomicRegion> exons = tx.exons();
+        event = event.withStrand(tx.strand());
+        List<Exon> exons = tx.exons();
         boolean[] affected = new boolean[exons.size()]; // initializes to false
         for (int i = 0; i < exons.size(); i++) {
-            GenomicRegion exon = exons.get(i);
+            Exon exon = exons.get(i);
             if (exon.overlapsWith(event)) {
                 affected[i] = true;
             }
@@ -311,7 +313,7 @@ public class SvAnnOverlapper implements Overlapper {
         // we use zero based coordinates for calculations
         int variantStart = variant.startOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
         int variantEnd = variant.endOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
-        List<GenomicRegion> exons = tx.exons();
+        List<Exon> exons = tx.exons();
 
         for (int i = 0; i < exons.size() - 1; i++) {
             // current exon end

@@ -13,10 +13,7 @@ import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
-import org.jax.svanna.db.landscape.DbAnnotationDataService;
-import org.jax.svanna.db.landscape.DbPopulationVariantDao;
-import org.jax.svanna.db.landscape.EnhancerAnnotationDao;
-import org.jax.svanna.db.landscape.RepetitiveRegionDao;
+import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
@@ -75,21 +72,26 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public AnnotationDataService annotationDataService(DataSource dataSource, GenomicAssembly genomicAssembly) {
-        return new DbAnnotationDataService(new EnhancerAnnotationDao(dataSource, genomicAssembly),
-                new RepetitiveRegionDao(dataSource, genomicAssembly), new DbPopulationVariantDao(dataSource, genomicAssembly));
+    public AnnotationDataService annotationDataService(DataSource dataSource, GenomicAssembly genomicAssembly, SvannaProperties svannaProperties) {
+        double stabilityThreshold = svannaProperties.dataParameters().tadStabilityThreshold();
+        LogUtils.logDebug(LOGGER, "Including TAD boundaries with stability >{}", stabilityThreshold);
+        return new DbAnnotationDataService(
+                new EnhancerAnnotationDao(dataSource, genomicAssembly),
+                new RepetitiveRegionDao(dataSource, genomicAssembly),
+                new DbPopulationVariantDao(dataSource, genomicAssembly),
+                new TadBoundaryDao(dataSource, genomicAssembly, stabilityThreshold));
     }
 
     @Bean
     public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver) {
-        LogUtils.logInfo(LOGGER, "Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
+        LogUtils.logDebug(LOGGER, "Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
         Path hpoaPath = svannaDataResolver.phenotypeHpoaPath().toAbsolutePath();
-        LogUtils.logInfo(LOGGER, "Parsing HPO disease associations at `{}`", hpoaPath);
+        LogUtils.logDebug(LOGGER, "Parsing HPO disease associations at `{}`", hpoaPath);
         Path geneInfoPath = svannaDataResolver.geneInfoPath();
-        LogUtils.logInfo(LOGGER, "Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
+        LogUtils.logDebug(LOGGER, "Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
         Path mim2geneMedgenPath = svannaDataResolver.mim2geneMedgenPath();
-        LogUtils.logInfo(LOGGER, "Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
+        LogUtils.logDebug(LOGGER, "Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
 
         HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(),
                 mim2geneMedgenPath.toFile(), null,

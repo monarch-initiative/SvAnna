@@ -1,4 +1,4 @@
-package org.jax.svanna.db.metadata;
+package org.jax.svanna.db.additive.dispatch;
 
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.landscape.TadBoundary;
@@ -70,41 +70,48 @@ class PaddingTadBoundaryDao {
         };
     }
 
-    TadBoundaryPair getBoundaryPair(Contig leftContig, int leftPosition, Contig rightContig, int rightPosition) {
+    /**
+     ** @param contig contig
+     * @param left 0-based start coordinate on positive strand
+     * @param right 0-based end coordinate on positive strand
+     * @return TAD pair where left TAD is upstream of {@code left} on positive strand
+     * and right TAD is downstream of {@code right} on positive strand
+     */
+    TadBoundaryPair getBoundaryPair(Contig contig, int left, int right) {
         SqlParameterSource paramSource = new MapSqlParameterSource()
-                .addValue("leftContig", leftContig.id())
-                .addValue("leftPosition", leftPosition)
-                .addValue("rightContig", rightContig.id())
-                .addValue("rightPosition", rightPosition)
+                .addValue("contig", contig.id())
+                .addValue("left", left)
+                .addValue("right", right)
                 .addValue("stability", stabilityThreshold);
-        String sql = "(select top 1 ID, START, END, STABILITY " + // upstream
+
+        String sql = "(select top 1 CONTIG, ID, START, END, STABILITY " + // upstream
                 "  from SVANNA.TAD_BOUNDARY " +
-                "  where CONTIG = :leftContig and END < :leftPosition and STABILITY > :stability " +
+                "  where CONTIG = :contig and END < :left and STABILITY > :stability " +
                 "  order by END DESC) " +
                 "union " +
-                "(select top 1 ID, START, END, STABILITY " + // downstream
+                "(select top 1 CONTIG, ID, START, END, STABILITY " + // downstream
                 "  from SVANNA.TAD_BOUNDARY " +
-                "  where CONTIG = :rightContig and START > :rightPosition and STABILITY > :stability " +
+                "  where CONTIG = :contig and START > :right and STABILITY > :stability " +
                 "  order by START) " +
                 "order by START";
 
-        return template.query(sql, paramSource, boundaryPairExtractor(leftContig, leftPosition, rightContig, rightPosition));
+        return template.query(sql, paramSource, boundaryPairExtractor(left, right));
     }
 
-    private ResultSetExtractor<TadBoundaryPair> boundaryPairExtractor(Contig leftContig, int leftPosition, Contig rightContig, int rightPosition) {
+    private ResultSetExtractor<TadBoundaryPair> boundaryPairExtractor(int left, int right) {
         return rs -> {
             TadBoundary upstream = null, downstream = null;
             while (rs.next()) {
                 TadBoundary boundary = processRow(rs);
                 int boundaryStart = boundary.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
                 int boundaryEnd = boundary.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-                if (boundary.contig().equals(leftContig) && boundaryStart <= leftPosition) {
+                if (boundaryStart <= left) {
                     if (upstream != null) {
                         LogUtils.logWarn(LOGGER, "Found the 2nd upstream boundary!");
                         throw new IllegalArgumentException("Found the 2nd upstream boundary!");
                     }
                     upstream = boundary;
-                } else if (boundary.contig().equals(rightContig) && rightPosition <= boundaryEnd) {
+                } else if (right <= boundaryEnd) {
                     if (downstream != null) {
                         LogUtils.logWarn(LOGGER, "Found 2nd downstream TAD boundary!");
                         throw new IllegalArgumentException("Found 2nd downstream TAD boundary!");
@@ -120,9 +127,10 @@ class PaddingTadBoundaryDao {
     }
 
     private TadBoundary processRow(ResultSet rs) throws SQLException {
-        return TadBoundaryDefault.of(genomicAssembly.contigById(rs.getInt("ID")),
+        return TadBoundaryDefault.of(genomicAssembly.contigById(rs.getInt("CONTIG")),
                 Strand.POSITIVE, CoordinateSystem.zeroBased(),
                 Position.of(rs.getInt("START")), Position.of(rs.getInt("END")),
-                rs.getString("ID"), rs.getFloat("STABILITY"));
+                rs.getString("ID"),
+                rs.getFloat("STABILITY"));
     }
 }

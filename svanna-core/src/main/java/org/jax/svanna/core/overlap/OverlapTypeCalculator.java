@@ -17,8 +17,9 @@ public class OverlapTypeCalculator {
         if (variant.contains(transcript)) {
             return TRANSCRIPT_CONTAINED_IN_SV;
         }
+        GenomicRegion variantRegion = variant.withStrand(transcript.strand());
         long nAffectedExons = transcript.exons().stream()
-                .filter(e -> e.overlapsWith(variant))
+                .filter(e -> e.overlapsWith(variantRegion))
                 .count();
         return (nAffectedExons == 0)
                 ? INTRONIC

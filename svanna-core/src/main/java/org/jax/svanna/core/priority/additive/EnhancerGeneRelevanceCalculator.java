@@ -1,4 +1,4 @@
-package org.jax.svanna.core.priority.additive.simple;
+package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.reference.Gene;

@@ -5,3 +5,6 @@ svanna:
   # path to Jannovar transcript database
   jannovarCachePath:
 
+  dataParameters:
+    # TAD must be present in at least 25% of the tissues to be included in the analysis
+    #tadStabilityThreshold: 0.25

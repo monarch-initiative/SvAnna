@@ -74,7 +74,7 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
 
     private FilterResult performFiltering(Variant variant) {
         // get features from benign origins that share at least 1bp with the query region
-        Collection<PopulationVariant> features = annotationDataService.getOverlapping(variant, PopulationVariantOrigin.benign());
+        Collection<PopulationVariant> features = annotationDataService.overlappingPopulationVariants(variant, PopulationVariantOrigin.benign());
 
         return features.stream()
                 .anyMatch(feature -> feature.variantType().baseType() == variant.variantType().baseType()

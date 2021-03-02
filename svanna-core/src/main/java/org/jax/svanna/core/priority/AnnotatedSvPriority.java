@@ -13,7 +13,7 @@ import java.util.Set;
  * This interface currently represents more data that should be provided by {@link SvPrioritizer}, and therefore violates
  * the single responsibility principle.
  * The interface is kept here in order not to break the existing code, mainly {@link PrototypeSvPrioritizer} and the
- * code in the {@link org.jax.svanna.core.viz} package.
+ * code in the {@link org.jax.svanna.cli.writer.html} package.
  * <p>
  * IMPORTANT - do not implement a new {@link SvPrioritizer} that returns an instance of this interface.
  */

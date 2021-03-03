@@ -8,9 +8,8 @@ import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Gene> {
 
@@ -64,17 +63,15 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     }
 
     private double processInterSegmentProjection(Projection<Gene> projection) {
-        List<Segment> segments = projection.spannedLocations().stream()
-                .map(location -> projection.route().segments().get(location.segmentIdx()))
-                .collect(Collectors.toList());
+        Set<Segment> spannedSegments = projection.spannedSegments();
 
         return projection.source().transcripts().stream()
-                .mapToDouble(tx -> evaluateSegmentsWrtTranscript(segments, tx))
+                .mapToDouble(tx -> evaluateSegmentsWrtTranscript(spannedSegments, tx))
                 .min()
                 .orElse(noImpact());
     }
 
-    private double evaluateSegmentsWrtTranscript(List<Segment> segments, Transcript tx) {
+    private double evaluateSegmentsWrtTranscript(Set<Segment> segments, Transcript tx) {
         double score = noImpact();
         for (Segment segment : segments) {
             int segmentStart = segment.startOnStrand(tx.strand());

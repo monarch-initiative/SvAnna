@@ -73,6 +73,12 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
         return startLocation.segmentIdx == endLocation.segmentIdx;
     }
 
+    public Set<Segment> spannedSegments() {
+        return spannedLocations.stream()
+                .map(location -> route.segments().get(location.segmentIdx()))
+                .collect(Collectors.toSet());
+    }
+
     public boolean isDeleted() {
         return isIntraSegment() && startEvent() == Event.DELETION && endEvent() == Event.DELETION;
     }

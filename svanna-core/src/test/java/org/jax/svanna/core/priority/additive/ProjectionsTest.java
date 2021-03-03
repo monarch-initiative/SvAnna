@@ -1,7 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.TestContig;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +10,10 @@ import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Position;
 import org.monarchinitiative.svart.Strand;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -43,19 +45,19 @@ public class ProjectionsTest {
 
         GenomicRegion query = GenomicRegion.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
 
-        Optional<Projection<GenomicRegion>> projectOpt = Projections.project(query, delBnd);
+        List<Projection<GenomicRegion>> projectOpt = Projections.projectAll(query, delBnd);
 
-        assertThat(projectOpt.isPresent(), equalTo(expected));
-        if (projectOpt.isPresent()) {
-            Projection<GenomicRegion> projection = projectOpt.get();
+        assertThat(!projectOpt.isEmpty(), equalTo(expected));
+        if (!projectOpt.isEmpty()) {
+            Projection<GenomicRegion> projection = projectOpt.get(0);
             assertThat(projection.start(), equalTo(expectedStart));
             assertThat(projection.end(), equalTo(expectedEnd));
         }
     }
 
     private static void printOutProjection(Projection<GenomicRegion> projection) {
-        System.err.println(projection.startEvent());
-        System.err.println(projection.endEvent());
+        System.err.println(projection.startLocation());
+        System.err.println(projection.endLocation());
         System.err.println(projection.spannedLocations());
         System.err.println(projection.source());
     }
@@ -92,9 +94,9 @@ public class ProjectionsTest {
             if (!projections.isEmpty()) {
                 Projection<GenomicRegion> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.startLocation(), equalTo(startEvent));
+                assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
-                assertThat(projection.endLocation(), equalTo(endEvent));
+                assertThat(projection.endEvent(), equalTo(endEvent));
                 if (!spannedEvents.isEmpty()) {
                     Arrays.stream(spannedEvents.split("\\|"))
                             .map(Event::valueOf)
@@ -129,9 +131,9 @@ public class ProjectionsTest {
             if (!projections.isEmpty()) {
                 Projection<GenomicRegion> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.startLocation(), equalTo(startEvent));
+                assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
-                assertThat(projection.endLocation(), equalTo(endEvent));
+                assertThat(projection.endEvent(), equalTo(endEvent));
                 if (!spannedEvents.isEmpty())
                     Arrays.stream(spannedEvents.split("\\|"))
                             .map(Event::valueOf)
@@ -162,7 +164,7 @@ public class ProjectionsTest {
             assertThat(projections, hasSize(expectedNumberOfItems));
             if (!projections.isEmpty()) {
                 int deletionSegmentIdx = 1; // the deletion segment is the 1th element of `deletion` list
-                Projection<GenomicRegion> projection = Projection.builder(deletion.neoContig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), query)
+                Projection<GenomicRegion> projection = Projection.builder(deletion, query, deletion.neoContig(), Strand.POSITIVE, CoordinateSystem.zeroBased())
                         .start(Position.of(expectedStart)).setStartEvent(Projection.Location.of(deletionSegmentIdx, startEvent))
                         .end(Position.of(expectedEnd)).setEndEvent(Projection.Location.of(deletionSegmentIdx, endEvent))
                         .build();
@@ -195,9 +197,9 @@ public class ProjectionsTest {
             if (!projections.isEmpty()) {
                 Projection<GenomicRegion> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.startLocation(), equalTo(startEvent));
+                assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
-                assertThat(projection.endLocation(), equalTo(endEvent));
+                assertThat(projection.endEvent(), equalTo(endEvent));
                 if (!spannedEvents.isEmpty())
                     Arrays.stream(spannedEvents.split("\\|"))
                             .map(Event::valueOf)
@@ -231,9 +233,9 @@ public class ProjectionsTest {
             if (!projections.isEmpty()) {
                 Projection<GenomicRegion> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.startLocation(), equalTo(startEvent));
+                assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
-                assertThat(projection.endLocation(), equalTo(endEvent));
+                assertThat(projection.endEvent(), equalTo(endEvent));
                 assertThat(projection.strand(), equalTo(strand));
                 if (!spannedEvents.isEmpty())
                     Arrays.stream(spannedEvents.split("\\|"))
@@ -290,9 +292,9 @@ public class ProjectionsTest {
             if (!projections.isEmpty()) {
                 Projection<GenomicRegion> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.startLocation(), equalTo(startEvent));
+                assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
-                assertThat(projection.endLocation(), equalTo(endEvent));
+                assertThat(projection.endEvent(), equalTo(endEvent));
                 if (!spannedEvents.isEmpty())
                     Arrays.stream(spannedEvents.split("\\|"))
                             .map(Event::valueOf)
@@ -341,149 +343,5 @@ public class ProjectionsTest {
         }
 
     }
-
-    @Nested
-    @Disabled
-    @Deprecated
-    public class Simple {
-
-        @ParameterizedTest
-        @CsvSource({
-                "20, 45,     true, 10, 30",
-                "20, 55,     true, 10, 35", // spanning through
-                "45, 55,     true, 30, 35",
-        })
-        public void projectOnDeletion(int start, int end, boolean expected, int expectedStart, int expectedEnd) {
-            TestContig ctg1 = TestContig.of(0, 100);
-            Route deletion = Route.of(List.of(
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(10), Position.of(40), "upstream", Event.GAP, 1),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "deletion", Event.DELETION, 0),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(70), "downstream", Event.GAP, 1)
-            ));
-
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-
-            Optional<Projection<GenomicRegion>> projectOpt = Projections.project(query, deletion);
-
-            assertThat(projectOpt.isPresent(), equalTo(expected));
-            if (projectOpt.isPresent()) {
-                Projection<GenomicRegion> projection = projectOpt.get();
-                assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.end(), equalTo(expectedEnd));
-            }
-        }
-
-        @ParameterizedTest
-        @CsvSource({
-                "10, 35,     true, 10, 35",
-                "10, 45,     true, 10, 55", // spanning through
-                "35, 45,     true, 35, 55",
-        })
-        public void projectOnDuplication(int start, int end, boolean expected, int expectedStart, int expectedEnd) {
-            TestContig ctg1 = TestContig.of(0, 100);
-            Route deletion = Route.of(List.of(
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(30), "upstream", Event.GAP, 1),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(40), "duplication", Event.DUPLICATION, 2),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(60), "downstream", Event.GAP, 1)
-            ));
-
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-
-            Optional<Projection<GenomicRegion>> projectOpt = Projections.project(query, deletion);
-
-            assertThat(projectOpt.isPresent(), equalTo(expected));
-            if (projectOpt.isPresent()) {
-                Projection<GenomicRegion> projection = projectOpt.get();
-                assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.end(), equalTo(expectedEnd));
-            }
-        }
-
-        @ParameterizedTest
-        @CsvSource({
-                "30, 45,     true, 10, 45",
-                "30, 40,     true, 10, 20",
-                "30, 41,     true, 10, 41",
-        })
-        public void projectOnInsertion(int start, int end, boolean expected, int expectedStart, int expectedEnd) {
-            TestContig ctg1 = TestContig.of(0, 100);
-            Route insertion = Route.of(List.of(
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "upstream", Event.GAP, 1),
-                    Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(40), "insertion", 20),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "downstream", Event.GAP, 1)
-            ));
-
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-
-            Optional<Projection<GenomicRegion>> projectOpt = Projections.project(query, insertion);
-
-            assertThat(projectOpt.isPresent(), equalTo(expected));
-            if (projectOpt.isPresent()) {
-                Projection<GenomicRegion> projection = projectOpt.get();
-                assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.end(), equalTo(expectedEnd));
-            }
-        }
-
-        @ParameterizedTest
-        @CsvSource({
-                "25, 35,     true,  5, 15",
-                "35, 45,     true, 15, 25", // fully within the inverted region
-                "45, 55,     true, 25, 35",
-        })
-        public void projectOnInversion(int start, int end, boolean expected, int expectedStart, int expectedEnd) {
-            TestContig ctg1 = TestContig.of(0, 100);
-            Route inversion = Route.of(List.of(
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(30), "upstream", Event.GAP, 1),
-                    Segment.of(ctg1, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(70), "inversion", Event.INVERSION, 1),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(60), "downstream", Event.GAP, 1)
-            ));
-
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-
-            Optional<Projection<GenomicRegion>> projectOpt = Projections.project(query, inversion);
-
-            assertThat(projectOpt.isPresent(), equalTo(expected));
-            if (projectOpt.isPresent()) {
-                Projection<GenomicRegion> projection = projectOpt.get();
-                assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.end(), equalTo(expectedEnd));
-//            printOutProjection(projection);
-            }
-        }
-
-        @ParameterizedTest
-        @CsvSource({
-                "one,   30,   50,     true, 10, 20",
-                "one,   30,   40,     true, 10, 20",
-                "one,   41,   60,    false,  0,  0",
-
-                "two,  120,  130,     true, 20, 30",
-                "two,  100,  130,     true, 20, 30",
-                "two,  100,  120,    false,  0,  0",
-        })
-        public void projectOnBreakend(String ctg, int start, int end, boolean expected, int expectedStart, int expectedEnd) {
-            TestContig ctg1 = TestContig.of(0, 100);
-            TestContig ctg2 = TestContig.of(1, 200);
-            Route breakend = Route.of(
-                    List.of(
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "upstream", Event.GAP, 1),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(40), "bndA", Event.BREAKEND, 1),
-                            Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(120), Position.of(120), "bndB", Event.BREAKEND, 1),
-                            Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(120), Position.of(150), "downstream", Event.GAP, 1)
-                    ));
-
-            GenomicRegion query = GenomicRegion.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-            Optional<Projection<GenomicRegion>> projectOpt = Projections.project(query, breakend);
-
-            assertThat(projectOpt.isPresent(), equalTo(expected));
-            if (projectOpt.isPresent()) {
-                Projection<GenomicRegion> projection = projectOpt.get();
-                assertThat(projection.start(), equalTo(expectedStart));
-                assertThat(projection.end(), equalTo(expectedEnd));
-            }
-        }
-    }
-
 
 }

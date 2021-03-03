@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class Projections {
 
@@ -72,11 +71,11 @@ public class Projections {
             int firstStart = query.startOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start() + nBasesInPreviousSegments;
             int firstEnd = query.endOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start() + nBasesInPreviousSegments;
 
-            Projection<T> first = Projection.builder(route.neoContig(), STRAND, CS, query)
+            Projection<T> first = Projection.builder(route, query, route.neoContig(), STRAND, CS)
                     .start(Position.of(firstStart)).setStartEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
                     .end(Position.of(firstEnd)).setEndEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
                     .build();
-            Projection<T> second = Projection.builder(route.neoContig(), STRAND, CS, query)
+            Projection<T> second = Projection.builder(route, query, route.neoContig(), STRAND, CS)
                     .start(Position.of(firstStart + segment.length())).setStartEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
                     .end(Position.of(firstEnd + segment.length())).setEndEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
                     .build();
@@ -89,7 +88,7 @@ public class Projections {
             int invertedEnd = Coordinates.invertPosition(CS, route.neoContig(), nBasesInPreviousSegments + start);
             int invertedStart = Coordinates.invertPosition(CS, route.neoContig(), nBasesInPreviousSegments + end);
 
-            return List.of(Projection.builder(route.neoContig(), STRAND.opposite(), CS, query)
+            return List.of(Projection.builder(route, query, route.neoContig(), STRAND.opposite(), CS)
                     .start(Position.of(invertedStart)).setStartEvent(Projection.Location.of(segmentIdx, Event.INVERSION))
                     .end(Position.of(invertedEnd)).setEndEvent(Projection.Location.of(segmentIdx, Event.INVERSION))
                     .build());
@@ -98,7 +97,7 @@ public class Projections {
             int nBasesInPreviousSegments = countBasesInPreviousSegments(segments, segmentIdx);
             int start = query.startOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start() + nBasesInPreviousSegments;
             int end = query.endOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start() + nBasesInPreviousSegments;
-            return List.of(Projection.builder(route.neoContig(), STRAND, CS, query)
+            return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
                     .start(Position.of(start)).setStartEvent(Projection.Location.of(segmentIdx, Event.GAP))
                     .end(Position.of(end)).setEndEvent(Projection.Location.of(segmentIdx, Event.GAP))
                     .build());
@@ -129,7 +128,7 @@ public class Projections {
             int start = query.startOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - startSegment.start() + startPrevious;
             int endPrevious = countBasesInPreviousSegments(segments, endSegmentIdx);
             int end = query.endOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - endSegment.start() + endPrevious;
-            return List.of(Projection.builder(route.neoContig(), STRAND, CS, query)
+            return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
                     .start(Position.of(start)).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
                     .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                     .addAllSpannedEvents(spannedLocations)
@@ -145,7 +144,7 @@ public class Projections {
                     int start = query.startOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - startSegment.start() + startPrevious;
                     int endPrevious = countBasesInPreviousSegments(segments, endSegmentIdx);
                     int end = query.endOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - endSegment.start() + endPrevious;
-                    return List.of(Projection.builder(route.neoContig(), STRAND, CS, query)
+                    return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
                             .start(Position.of(start)).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
                             .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                             .addAllSpannedEvents(spannedLocations)
@@ -166,7 +165,7 @@ public class Projections {
                     int start = query.startOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - startSegment.start() + startPrevious + penultimateBases;
                     int endPrevious = countBasesInPreviousSegments(segments, endSegmentIdx);
                     int end = query.endOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - endSegment.start() + endPrevious;
-                    return List.of(Projection.builder(route.neoContig(), STRAND, CS, query)
+                    return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
                             .start(Position.of(start)).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
                             .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                             .addAllSpannedEvents(spannedLocations)
@@ -187,148 +186,6 @@ public class Projections {
             count += segments.get(i).contributingBases();
         }
         return count;
-    }
-
-
-    @Deprecated
-    public static <T extends GenomicRegion> Optional<Projection<T>> project(T query, Route route) {
-        if (!route.segmentContigs().contains(query.contig()))
-            return Optional.empty();
-
-        Projection.Builder<T> builder = Projection.builder(route.neoContig(), STRAND, CS, query);
-
-        int basesInPassedSegments = 0;
-        int segmentIdx = 0;
-        Strand strand = null;
-        Segment previousSegment = null;
-        boolean startFoundInTheCurrentSegment = false;
-        for (Segment segment : route.segments()) {
-            if (previousSegment == null) {
-                previousSegment = segment;
-                strand = segment.strand();
-            } else if (!previousSegment.contig().equals(segment.contig())) {
-                strand = segment.strand();
-            }
-
-            if (segment.contig().equals(query.contig())) {
-                if (!builder.startFound()) {
-                    int start = query.strand().equals(segment.strand())
-                            ? query.startWithCoordinateSystem(segment.coordinateSystem())
-                            : Coordinates.invertPosition(segment.coordinateSystem(), query.contig(), query.start());
-                    if (segment.contains(start)) {
-                        Position startPosition;
-                        Event startEvent;
-                        if (segmentIsDeletion(segment)) {
-                            startPosition = Position.of(basesInPassedSegments);
-                            startEvent = Event.DELETION;
-                        } else if (segmentIsDuplication(segment)) {
-                            int intraSegmentBases = start - segment.start();
-                            startPosition = Position.of(basesInPassedSegments + intraSegmentBases);
-                            startEvent = Event.DUPLICATION;
-                        } else if (segmentIsInversion(segment, strand)) {
-                            int intraSegmentBases = segment.length() - (start - segment.start());
-                            startPosition = Position.of(basesInPassedSegments + intraSegmentBases);
-                            startEvent = Event.INVERSION;
-                        } else {
-                            int intraSegmentBases = start - segment.start();
-                            startPosition = Position.of(basesInPassedSegments + intraSegmentBases);
-                            startEvent = Event.GAP;
-                        }
-                        builder.start(startPosition)
-                                .setStartEvent(Projection.Location.of(segmentIdx, startEvent));
-                        startFoundInTheCurrentSegment = true;
-                    }
-                }
-
-                if (!builder.endFound()) {
-                    int end = query.strand().equals(segment.strand())
-                            ? query.endWithCoordinateSystem(segment.coordinateSystem())
-                            : Coordinates.invertPosition(segment.coordinateSystem(), query.contig(), query.end());
-                    if (segment.contains(end)) {
-                        Position endPosition;
-                        Event endEvent;
-                        if (segmentIsDeletion(segment)) {
-                            endPosition = Position.of(basesInPassedSegments);
-                            endEvent = Event.DELETION;
-                        } else if (segmentIsDuplication(segment)) {
-                            int intraSegmentBases = end - segment.start();
-                            endPosition = Position.of(basesInPassedSegments + intraSegmentBases);
-                            endEvent = Event.DUPLICATION;
-                        } else if (segmentIsInversion(segment, strand)) {
-                            int intraSegmentBases = segment.length() - (end - segment.start());
-                            endPosition = Position.of(basesInPassedSegments + intraSegmentBases);
-                            endEvent = Event.INVERSION;
-                        } else {
-                            int intraSegmentBases = end - segment.start();
-                            endPosition = Position.of(basesInPassedSegments + intraSegmentBases);
-                            endEvent = Event.GAP;
-                        }
-                        builder.end(endPosition)
-                                .setEndEvent(Projection.Location.of(segmentIdx, endEvent));
-                    }
-                }
-
-                if (builder.startFound() && !builder.endFound() && !startFoundInTheCurrentSegment) {
-                    if (segmentIsDeletion(segment))
-                        builder.spannedEvent(Projection.Location.of(segmentIdx, Event.DELETION));
-                    else if (segmentIsInversion(segment, strand))
-                        builder.spannedEvent(Projection.Location.of(segmentIdx, Event.INVERSION));
-                    else if (segmentIsDuplication(segment))
-                        builder.spannedEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION));
-                    else if (segmentIsInsertion(segment))
-                        builder.spannedEvent(Projection.Location.of(segmentIdx, Event.INSERTION));
-                }
-                startFoundInTheCurrentSegment = false;
-
-                if (builder.isComplete()) {
-                    return Optional.of(builder.build());
-                }
-            }
-
-            basesInPassedSegments += segment.length() * segment.copies();
-            segmentIdx++;
-        }
-
-
-        if (builder.startFound() && !builder.endFound()) {
-            // salvage the end that was likely truncated
-            Projection.Location startLocation = builder.startEvent();
-            int bases = route.segments().subList(0, startLocation.segmentIdx() + 1).stream()
-                    .mapToInt(s -> s.length() * s.copies())
-                    .sum();
-
-            builder.end(Position.of(bases))
-                    .setEndEvent(Projection.Location.of(startLocation.segmentIdx(), Event.BREAKEND));
-        } else if (!builder.startFound() && builder.endFound()) {
-            // salvage the start that was likely truncated
-            Projection.Location endLocation = builder.endEvent();
-            int bases = route.segments().subList(0, endLocation.segmentIdx()).stream()
-                    .mapToInt(segment -> segment.length() * segment.copies())
-                    .sum();
-
-            builder.start(Position.of(bases))
-                    .setStartEvent(Projection.Location.of(endLocation.segmentIdx(), Event.BREAKEND));
-        } else {
-            return Optional.empty();
-        }
-        return Optional.of(builder.build());
-    }
-
-
-    private static boolean segmentIsInsertion(Segment segment) {
-        return segment.endWithCoordinateSystem(CS) - segment.startWithCoordinateSystem(CS) == 0 && segment.length() > 0;
-    }
-
-    private static boolean segmentIsDuplication(Segment segment) {
-        return segment.copies() == 2;
-    }
-
-    private static boolean segmentIsDeletion(Segment segment) {
-        return segment.copies() == 0;
-    }
-
-    private static boolean segmentIsInversion(Segment segment, Strand strand) {
-        return strand != segment.strand();
     }
 
 }

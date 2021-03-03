@@ -15,8 +15,8 @@ public class SimpleSequenceImpactCalculator<T extends GenomicRegion> implements 
     @Override
     public double projectImpact(Projection<T> projection) {
         Set<Event> spannedEvents = projection.spannedEvents();
-        Event startEvent = projection.startLocation();
-        Event endEvent = projection.endLocation();
+        Event startEvent = projection.startEvent();
+        Event endEvent = projection.endEvent();
 
         if (spannedEvents.contains(Event.DELETION))
             // A part of the gene is deleted

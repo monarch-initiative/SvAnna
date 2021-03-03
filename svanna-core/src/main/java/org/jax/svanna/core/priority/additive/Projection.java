@@ -12,22 +12,26 @@ import java.util.stream.Collectors;
 public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Projection<T>> {
 
     private final T source;
-    private final Location startLocation;
-    private final Location endLocation;
-    private final Set<Location> spannedLocations;
+
+    private final Route route;
 
     private Projection(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
-                       T source, Location startLocation, Location endLocation, Set<Location> spannedLocations) {
+                       T source, Route route, Location startLocation, Location endLocation, Set<Location> spannedLocations) {
         super(contig, strand, coordinateSystem, startPosition, endPosition);
         this.source = source;
+        this.route = route;
         this.startLocation = startLocation;
         this.endLocation = endLocation;
         this.spannedLocations = spannedLocations;
     }
+    private final Location startLocation;
+    private final Location endLocation;
+    private final Set<Location> spannedLocations;
 
     private Projection(Builder<T> builder) {
         this(builder.contig, builder.strand, builder.coordinateSystem, builder.start, builder.end,
                 Objects.requireNonNull(builder.source),
+                Objects.requireNonNull(builder.route),
                 Objects.requireNonNull(builder.startLocation),
                 Objects.requireNonNull(builder.endLocation),
                 Set.copyOf(Objects.requireNonNull(builder.spannedLocations)));
@@ -37,19 +41,23 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
         return source;
     }
 
-    public Location startEvent() {
+    public Route route() {
+        return route;
+    }
+
+    public Location startLocation() {
         return startLocation;
     }
 
-    public Event startLocation() {
+    public Event startEvent() {
         return startLocation.event();
     }
 
-    public Location endEvent() {
+    public Location endLocation() {
         return endLocation;
     }
 
-    public Event endLocation() {
+    public Event endEvent() {
         return endLocation.event();
     }
 
@@ -66,16 +74,16 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
     }
 
     public boolean isDeleted() {
-        return isIntraSegment() && startLocation() == Event.DELETION && endLocation() == Event.DELETION;
+        return isIntraSegment() && startEvent() == Event.DELETION && endEvent() == Event.DELETION;
     }
 
     // TODO - evaluate the usefulness
     public boolean isTruncated() {
         if (isIntraSegment()) {
-            return startLocation() == Event.DELETION && endLocation() == Event.DELETION;
+            return startEvent() == Event.DELETION && endEvent() == Event.DELETION;
         }
-        return startLocation() == Event.DELETION || startLocation() == Event.INVERSION || startLocation() == Event.BREAKEND
-                        || endLocation() == Event.DELETION || endLocation() == Event.INVERSION || endLocation() == Event.BREAKEND;
+        return startEvent() == Event.DELETION || startEvent() == Event.INVERSION || startEvent() == Event.BREAKEND
+                || endEvent() == Event.DELETION || endEvent() == Event.INVERSION || endEvent() == Event.BREAKEND;
     }
 
     @Override
@@ -84,18 +92,19 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         Projection<?> that = (Projection<?>) o;
-        return Objects.equals(source, that.source) && Objects.equals(startLocation, that.startLocation) && Objects.equals(endLocation, that.endLocation) && Objects.equals(spannedLocations, that.spannedLocations);
+        return Objects.equals(source, that.source) && Objects.equals(route, that.route) && Objects.equals(startLocation, that.startLocation) && Objects.equals(endLocation, that.endLocation) && Objects.equals(spannedLocations, that.spannedLocations);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), source, startLocation, endLocation, spannedLocations);
+        return Objects.hash(super.hashCode(), source, route, startLocation, endLocation, spannedLocations);
     }
 
     @Override
     public String toString() {
         return "Projection{" +
                 "source=" + source +
+                ", route=" + route +
                 ", startLocation=" + startLocation +
                 ", endLocation=" + endLocation +
                 ", spannedLocations=" + spannedLocations +
@@ -104,16 +113,18 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
 
     @Override
     protected Projection<T> newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new Projection<>(contig, strand, coordinateSystem, startPosition, endPosition, source, startLocation, endLocation, spannedLocations);
+        return new Projection<>(contig, strand, coordinateSystem, startPosition, endPosition, source, route, startLocation, endLocation, spannedLocations);
     }
 
-    static <T extends GenomicRegion> Builder<T> builder(Contig contig, Strand strand, CoordinateSystem coordinateSystem, T source) {
-        return new Builder<>(source, contig, strand, coordinateSystem);
+    static <T extends GenomicRegion> Builder<T> builder(Route route, T source, Contig contig, Strand strand, CoordinateSystem coordinateSystem) {
+        return new Builder<>(source, route, contig, strand, coordinateSystem);
     }
 
     static class Builder<T extends GenomicRegion> {
 
         private final T source;
+
+        private final Route route;
 
         private final Contig contig;
 
@@ -128,8 +139,9 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
         private Location startLocation;
         private Location endLocation;
 
-        private Builder(T source, Contig contig, Strand strand, CoordinateSystem coordinateSystem) {
+        private Builder(T source, Route route, Contig contig, Strand strand, CoordinateSystem coordinateSystem) {
             this.source = source;
+            this.route = route;
             this.contig = contig;
             this.strand = strand;
             this.coordinateSystem = coordinateSystem;

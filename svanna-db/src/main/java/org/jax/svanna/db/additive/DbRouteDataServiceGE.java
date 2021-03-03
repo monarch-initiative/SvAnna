@@ -3,7 +3,7 @@ package org.jax.svanna.db.additive;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.priority.additive.RouteDataService;
 import org.jax.svanna.core.priority.additive.Routes;
-import org.jax.svanna.core.priority.additive.simple.RouteDataGE;
+import org.jax.svanna.core.priority.additive.ge.RouteDataGE;
 import org.jax.svanna.core.reference.GeneService;
 import org.monarchinitiative.svart.GenomicRegion;
 

@@ -1,4 +1,4 @@
-package org.jax.svanna.core.priority.additive.simple;
+package org.jax.svanna.core.priority.additive.ge;
 
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.landscape.Enhancer;

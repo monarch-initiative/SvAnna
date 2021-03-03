@@ -12,15 +12,14 @@ import java.util.stream.Collectors;
 public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
 
     private final TermId accessionId;
-    private final TermId hgvsSymbol;
+    private final String geneName;
     private final Set<Transcript> transcripts;
 
     protected GeneDefault(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
-                          TermId accessionId, TermId hgvsSymbol, Set<Transcript> transcripts) {
+                          TermId accessionId, String geneName, Set<Transcript> transcripts) {
         super(contig, strand, coordinateSystem, startPosition, endPosition);
-//        this.accessionId = Objects.requireNonNull(accessionId);
-        this.accessionId = accessionId;
-        this.hgvsSymbol = Objects.requireNonNull(hgvsSymbol);
+        this.accessionId = Objects.requireNonNull(accessionId);
+        this.geneName = Objects.requireNonNull(geneName);
         this.transcripts = transcripts;
     }
 
@@ -34,8 +33,8 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
     }
 
     @Override
-    public TermId hgvsName() {
-        return hgvsSymbol;
+    public String geneName() {
+        return geneName;
     }
 
     @Override
@@ -54,7 +53,7 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
         else
             throw new IllegalArgumentException("We're changing neither strand nor coordinate system. This should not have happened!");
 
-        return new GeneDefault(contig, strand, coordinateSystem, startPosition, endPosition, accessionId, hgvsSymbol, transcripts);
+        return new GeneDefault(contig, strand, coordinateSystem, startPosition, endPosition, accessionId, geneName, transcripts);
     }
 
     @Override
@@ -63,19 +62,19 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         GeneDefault that = (GeneDefault) o;
-        return Objects.equals(accessionId, that.accessionId) && Objects.equals(hgvsSymbol, that.hgvsSymbol) && Objects.equals(transcripts, that.transcripts);
+        return Objects.equals(accessionId, that.accessionId) && Objects.equals(geneName, that.geneName) && Objects.equals(transcripts, that.transcripts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), accessionId, hgvsSymbol, transcripts);
+        return Objects.hash(super.hashCode(), accessionId, geneName, transcripts);
     }
 
     @Override
     public String toString() {
         return "GeneDefault{" +
                 "accessionId=" + accessionId +
-                ", hgvsSymbol=" + hgvsSymbol +
+                ", geneName=" + geneName +
                 ", transcripts=" + transcripts +
                 '}';
     }
@@ -86,7 +85,7 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
         private final Set<Transcript> transcripts = new HashSet<>();
 
         private TermId accessionId;
-        private TermId hgvsSymbol;
+        private String geneName;
 
         private Contig contig = null;
 
@@ -111,8 +110,8 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
             return this;
         }
 
-        public Builder hgvsSymbol(TermId hgvsSymbol) {
-            this.hgvsSymbol = hgvsSymbol;
+        public Builder geneName(String geneName) {
+            this.geneName = geneName;
             return this;
         }
 
@@ -146,7 +145,7 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
                 if (txEnd > end)
                     end = txEnd;
             }
-            return new GeneDefault(contig, strand, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end), accessionId, hgvsSymbol, Set.copyOf(txs));
+            return new GeneDefault(contig, strand, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end), accessionId, geneName, Set.copyOf(txs));
         }
 
     }

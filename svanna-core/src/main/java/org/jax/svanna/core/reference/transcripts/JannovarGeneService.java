@@ -1,6 +1,7 @@
 package org.jax.svanna.core.reference.transcripts;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
@@ -57,12 +58,25 @@ public class JannovarGeneService implements GeneService {
                 TranscriptModel tm = tmByAccession.get(accessionId);
                 Optional<Transcript> txOpt = remapper.remap(tm);
                 txOpt.ifPresent(tx -> {
-                    if (!geneBuilder.containsKey(tm.getGeneSymbol())) {
-                        geneBuilder.put(tm.getGeneSymbol(), GeneDefault.builder()
-                                .accessionId(TermId.of("HGNC", tm.getGeneID()))
-                                .hgvsSymbol(TermId.of("HGVS", tm.getGeneSymbol())));
+                    geneBuilder.putIfAbsent(tm.getGeneSymbol(), GeneDefault.builder());
+
+                    GeneDefault.Builder builder = geneBuilder.get(tm.getGeneSymbol());
+
+                    ImmutableSortedMap<String, String> altIds = tm.getAltGeneIDs();
+                    if (!altIds.containsKey("ENTREZ_ID")) {
+                        LogUtils.logWarn(LOGGER, "Missing entrez id for gene {}", tm.getGeneSymbol());
+                        return;
                     }
-                    geneBuilder.get(tm.getGeneSymbol()).addTranscript(tx);
+                    TermId geneAccessionId = TermId.of("NCBIGene", altIds.get("ENTREZ_ID"));
+                    builder.accessionId(geneAccessionId);
+
+                    if (altIds.containsKey("HGNC_SYMBOL")) {
+                        builder.geneName(altIds.get("HGNC_SYMBOL"));
+                    } else {
+                        builder.geneName(tm.getGeneSymbol());
+                    }
+
+                    builder.addTranscript(tx);
                 });
             }
         }
@@ -71,7 +85,7 @@ public class JannovarGeneService implements GeneService {
                 .map(buildGeneIfPossible())
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toMap(gene -> gene.hgvsName().getValue(), Function.identity()));
+                .collect(Collectors.toMap(Gene::geneName, Function.identity()));
 
         Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()
                 .collect(Collectors.groupingBy(Gene::contigId, Collectors.toSet()));

@@ -35,7 +35,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <junit.version>5.7.0</junit.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <phenol.version>1.6.1</phenol.version>
+        <phenol.version>1.6.2</phenol.version>
         <phenopacket.version>1.0.0</phenopacket.version>
         <protobuf.version>3.8.0</protobuf.version>
         <jannovar.version>0.35</jannovar.version>
@@ -117,19 +117,24 @@
             </dependency>
             <dependency>
                 <groupId>org.monarchinitiative.phenol</groupId>
+                <artifactId>phenol-io</artifactId>
+                <version>${phenol.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.monarchinitiative.phenol</groupId>
                 <artifactId>phenol-annotations</artifactId>
                 <version>${phenol.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.samtools</groupId>
+                <artifactId>htsjdk</artifactId>
+                <version>${htsjdk.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.tukaani</groupId>
                         <artifactId>xz</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.github.samtools</groupId>
-                <artifactId>htsjdk</artifactId>
-                <version>${htsjdk.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.phenopackets</groupId>

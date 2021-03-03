@@ -1,4 +1,4 @@
-package org.jax.svanna.core;
+package org.jax.svanna.io;
 
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;

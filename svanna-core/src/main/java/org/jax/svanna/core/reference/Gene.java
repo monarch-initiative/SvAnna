@@ -10,9 +10,10 @@ import java.util.Set;
 public interface Gene extends GenomicRegion {
 
     // TODO - evaluate usefulness of the `TermId`s
+    // Should be e.g. `NCBIGene:5163` for PDK1
     TermId accessionId();
 
-    TermId hgvsName();
+    String geneName();
 
     Set<Transcript> transcripts();
 

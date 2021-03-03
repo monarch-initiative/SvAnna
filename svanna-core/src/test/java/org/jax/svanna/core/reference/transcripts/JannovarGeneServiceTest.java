@@ -5,7 +5,6 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.reference.Gene;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 
 import java.nio.file.Path;
@@ -33,6 +32,6 @@ public class JannovarGeneServiceTest {
         List<Gene> genes = service.overlappingGenes(region);
 
         assertThat(genes, hasSize(3));
-        assertThat(genes.stream().map(Gene::hgvsName).map(TermId::getValue).collect(Collectors.toSet()), hasItems("HGVS:SURF1", "HGVS:SURF2", "HGVS:SURF4"));
+        assertThat(genes.stream().map(Gene::geneName).collect(Collectors.toSet()), hasItems("SURF1", "SURF2", "SURF4"));
     }
 }

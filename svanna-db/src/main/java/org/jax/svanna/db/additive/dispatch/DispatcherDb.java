@@ -58,7 +58,12 @@ public class DispatcherDb implements Dispatcher {
         Breakend left = bv.left();
         Breakend right = bv.right();
 
-        Position upstreamBound = dao.upstreamOf(variants.getFirst())
+        V first = variants.getFirst();
+        GenomicRegion leftmost = (first instanceof BreakendVariant)
+                ? ((BreakendVariant) first).left()
+                : first;
+
+        Position upstreamBound = dao.upstreamOf(leftmost)
                 .map(TadBoundary::asPosition)
                 .orElse(Position.of(0));
         GenomicRegion upstream = GenomicRegion.of(left.contig(), left.strand(), CoordinateSystem.zeroBased(), upstreamBound, upstreamBound);
@@ -68,7 +73,11 @@ public class DispatcherDb implements Dispatcher {
                 .orElse(Position.of(left.contig().length()));
         GenomicRegion downstreamRef = GenomicRegion.of(left.contig(), left.strand(), CoordinateSystem.zeroBased(), downstreamRefBound, downstreamRefBound);
 
-        Position downstreamAltBound = dao.downstreamOf(variants.getLast())
+        V last = variants.getLast();
+        GenomicRegion rightmost= (last instanceof BreakendVariant)
+                ? ((BreakendVariant) last).right()
+                : last;
+        Position downstreamAltBound = dao.downstreamOf(rightmost)
                 .map(TadBoundary::asPosition)
                 .orElse(Position.of(right.contig().length()));
         GenomicRegion downstreamAlt = GenomicRegion.of(right.contig(), right.strand(), right.coordinateSystem(), downstreamAltBound, downstreamAltBound);

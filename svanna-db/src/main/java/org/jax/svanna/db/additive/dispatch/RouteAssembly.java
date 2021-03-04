@@ -13,8 +13,6 @@ class RouteAssembly {
     static <V extends Variant> VariantArrangement<V> assemble(List<V> variants) throws RouteAssemblyException {
         if (variants.isEmpty()) throw new RouteAssemblyException("Variant list must not be empty");
 
-        if (variants.size() == 1) return VariantArrangement.intrachromosomal(variants);
-
         List<V> breakends = variants.stream()
                 .filter(v -> v instanceof BreakendVariant)
                 .collect(Collectors.toList());

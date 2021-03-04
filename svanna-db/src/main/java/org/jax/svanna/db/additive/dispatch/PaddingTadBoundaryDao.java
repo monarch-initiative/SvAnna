@@ -36,11 +36,14 @@ class PaddingTadBoundaryDao {
                 .addValue("position", region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .addValue("stability", stabilityThreshold);
         String sql = region.strand().isPositive()
-                ? "select top 1 ID, START, END, STABILITY from SVANNA.TAD_BOUNDARY " +
-                "  where CONTIG = :contig and END < :position and STABILITY > :stability " +
+                ? "select top 1 CONTIG, START, END, ID, STABILITY " +
+                "  from SVANNA.TAD_BOUNDARY " +
+                "    where CONTIG = :contig and END < :position and STABILITY > :stability " +
                 "  order by END DESC"
-                : "select top 1 ID, START, END, STABILITY from SVANNA.TAD_BOUNDARY " +
-                "  where CONTIG = :contig and START > :position and STABILITY > :stability " +
+
+                : "select top 1 CONTIG, START, END, ID, STABILITY " +
+                "  from SVANNA.TAD_BOUNDARY " +
+                "    where CONTIG = :contig and START > :position and STABILITY > :stability " +
                 "  order by START";
         return template.query(sql, paramSource, mapToTadBoundary(region.strand()));
     }
@@ -48,14 +51,16 @@ class PaddingTadBoundaryDao {
     Optional<TadBoundary> downstreamOf(GenomicRegion region) {
         SqlParameterSource paramSource = new MapSqlParameterSource()
                 .addValue("contig", region.contigId())
-                .addValue("position", region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .addValue("position", region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .addValue("stability", stabilityThreshold);
         String sql = region.strand().isPositive()
-                ? "select top 1 ID, START, END, STABILITY from SVANNA.TAD_BOUNDARY " +
-                "  where CONTIG = :contig and START > :position and STABILITY > :stability " +
+                ? "select top 1 CONTIG, START, END, ID, STABILITY " +
+                "  from SVANNA.TAD_BOUNDARY " +
+                "    where CONTIG = :contig and START > :position and STABILITY > :stability " +
                 "  order by START"
-                : "select top 1 ID, START, END, STABILITY from SVANNA.TAD_BOUNDARY " +
-                "  where CONTIG = :contig and END < :position and STABILITY > :stability " +
+                : "select top 1 CONTIG, START, END, ID, STABILITY " +
+                "  from SVANNA.TAD_BOUNDARY " +
+                "    where CONTIG = :contig and END < :position and STABILITY > :stability " +
                 "  order by END DESC";
         return template.query(sql, paramSource, mapToTadBoundary(region.strand()));
     }
@@ -63,7 +68,7 @@ class PaddingTadBoundaryDao {
     private ResultSetExtractor<Optional<TadBoundary>> mapToTadBoundary(Strand strand) {
         return rs -> {
             if (rs.first()) {
-                TadBoundary boundary = processRow(rs);
+                TadBoundary boundary = mapRowToTadBoundary(rs);
                 return Optional.of(boundary.withStrand(strand));
             }
             return Optional.empty();
@@ -102,7 +107,7 @@ class PaddingTadBoundaryDao {
         return rs -> {
             TadBoundary upstream = null, downstream = null;
             while (rs.next()) {
-                TadBoundary boundary = processRow(rs);
+                TadBoundary boundary = mapRowToTadBoundary(rs);
                 int boundaryStart = boundary.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
                 int boundaryEnd = boundary.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
                 if (boundaryStart <= left) {
@@ -126,7 +131,7 @@ class PaddingTadBoundaryDao {
         };
     }
 
-    private TadBoundary processRow(ResultSet rs) throws SQLException {
+    private TadBoundary mapRowToTadBoundary(ResultSet rs) throws SQLException {
         return TadBoundaryDefault.of(genomicAssembly.contigById(rs.getInt("CONTIG")),
                 Strand.POSITIVE, CoordinateSystem.zeroBased(),
                 Position.of(rs.getInt("START")), Position.of(rs.getInt("END")),

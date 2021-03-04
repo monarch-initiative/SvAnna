@@ -11,7 +11,7 @@ import org.jax.svanna.core.reference.Gene;
 @FunctionalInterface
 public interface EnhancerGeneRelevanceCalculator {
 
-    double DEFAULT_ENHANCER_RELEVANCE = 1.f;
+    double DEFAULT_ENHANCER_RELEVANCE = .1f;
 
     static EnhancerGeneRelevanceCalculator defaultCalculator() {
         return (g, e) -> DEFAULT_ENHANCER_RELEVANCE;

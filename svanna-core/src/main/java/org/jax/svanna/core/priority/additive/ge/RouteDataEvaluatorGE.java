@@ -35,8 +35,8 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
     public double evaluate(RouteDataGE routeData) {
         Routes routes = routeData.route();
 
-        double reference = evaluateReference(routes.reference(), routeData.tadBoundaries(), routeData.genes(), routeData.enhancers());
-        double alternate = evaluateAlternate(routes.alternate(), routeData.tadBoundaries(), routeData.genes(), routeData.enhancers());
+        double reference = evaluateReference(routes.reference(), routeData.refTadBoundaries(), routeData.refGenes(), routeData.refEnhancers());
+        double alternate = evaluateAlternate(routes.alternate(), routeData.altTadBoundaries(), routeData.altGenes(), routeData.altEnhancers());
 
         return Math.abs(reference - alternate);
     }
@@ -138,7 +138,7 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
         if (tadBoundaries.isEmpty())
             return List.of(reference);
         else if (tadBoundaries.size() == 1) {
-            Position tadPosition = tadBoundaries.get(0).asPosition();
+            Position tadPosition = tadBoundaries.get(0).withStrand(reference.strand()).asPosition();
             return List.of(
                     GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.startPosition(), tadPosition),
                     GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), tadPosition, reference.endPosition())

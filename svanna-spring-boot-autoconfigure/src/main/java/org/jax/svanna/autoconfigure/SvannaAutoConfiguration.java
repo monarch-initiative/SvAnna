@@ -10,7 +10,10 @@ import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.landscape.AnnotationDataService;
+import org.jax.svanna.core.priority.SvPriorityFactory;
+import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.core.reference.TranscriptService;
+import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
@@ -72,6 +75,18 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
+    public SvPriorityFactory svPriorityFactory(GenomicAssembly genomicAssembly,
+                                               DataSource dataSource,
+                                               SvannaProperties svannaProperties,
+                                               SvannaDataResolver svannaDataResolver,
+                                               AnnotationDataService annotationDataService,
+                                               TranscriptService transcriptService,
+                                               GeneService geneService,
+                                               PhenotypeDataService phenotypeDataService) {
+        return new SvPriorityFactoryImpl(genomicAssembly, dataSource, svannaProperties, svannaDataResolver, annotationDataService, transcriptService, geneService, phenotypeDataService);
+    }
+
+    @Bean
     public AnnotationDataService annotationDataService(DataSource dataSource, GenomicAssembly genomicAssembly, SvannaProperties svannaProperties) {
         double stabilityThreshold = svannaProperties.dataParameters().tadStabilityThreshold();
         LogUtils.logDebug(LOGGER, "Including TAD boundaries with stability >{}", stabilityThreshold);
@@ -121,13 +136,22 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public TranscriptService transcriptService(SvannaProperties svannaProperties, GenomicAssembly genomicAssembly) throws SerializationException {
-        LogUtils.logInfo(LOGGER, "Reading transcript definitions from `{}`", svannaProperties.jannovarCachePath());
-        JannovarData jannovarData = new JannovarDataSerializer(svannaProperties.jannovarCachePath()).load();
-        return JannovarTranscriptService.of(genomicAssembly, jannovarData);
-
+    public GeneService geneService(GenomicAssembly genomicAssembly, JannovarData jannovarData) {
+        return JannovarGeneService.of(genomicAssembly, jannovarData);
     }
 
+
+    @Bean
+    public TranscriptService transcriptService(GenomicAssembly genomicAssembly, JannovarData jannovarData) {
+        return JannovarTranscriptService.of(genomicAssembly, jannovarData);
+    }
+
+
+    @Bean
+    public JannovarData jannovarData(SvannaProperties svannaProperties) throws SerializationException {
+        LogUtils.logInfo(LOGGER, "Reading transcript definitions from `{}`", svannaProperties.jannovarCachePath());
+        return new JannovarDataSerializer(svannaProperties.jannovarCachePath()).load();
+    }
 
     @Bean
     public SvannaDataResolver svannaDataResolver(Path svannaDataDirectory) throws MissingResourceException {

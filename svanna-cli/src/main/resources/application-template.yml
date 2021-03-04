@@ -11,3 +11,5 @@ svanna:
   phenotypeParameters:
     # term similarity measure, choose from {RESNIK_SYMMETRIC, RESNIK_ASYMMETRIC}
     #termSimilarityMeasure: RESNIK_SYMMETRIC
+    # An event involving max N genes to be considered by the prototype prioritizer
+    #maxGenes: 100

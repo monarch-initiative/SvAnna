@@ -49,8 +49,11 @@ class RouteAssembly {
     private static <V extends Variant> VariantArrangement<V> assembleInterchromosomal(List<V> variants, V breakendVariant) {
         BreakendVariant breakend = (BreakendVariant) breakendVariant;
 
-
         Breakend left = breakend.left();
+        Breakend right = breakend.right();
+        if (left.contig().equals(right.contig()))
+            throw new RouteAssemblyException("Intrachromosomal breakends are not currently supported: " + LogUtils.variantSummary(breakend));
+
         List<V> leftSorted = variants.stream()
                 .filter(v -> v.contig().equals(left.contig()) && !v.equals(breakend))
                 .sorted(Comparator.comparingInt(left::distanceTo))
@@ -62,7 +65,6 @@ class RouteAssembly {
         }
 
 
-        Breakend right = breakend.right();
         List<V> rightSorted = variants.stream()
                 .filter(v -> v.contig().equals(right.contig()) && !v.equals(breakend))
                 .sorted(Comparator.comparing(v -> right.distanceTo((Region<?>) v)).reversed())

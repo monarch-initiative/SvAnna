@@ -13,7 +13,17 @@ public class SvannaProperties {
     private String jannovarCachePath;
 
     @NestedConfigurationProperty
-    private DataParameters dataParameters;
+    private DataParameters dataParameters = new DataParameters();
+    @NestedConfigurationProperty
+    private PrioritizationParameters prioritizationParameters = new PrioritizationParameters();
+
+    public PrioritizationParameters phenotypeParameters() {
+        return prioritizationParameters;
+    }
+
+    public void setPhenotypeParameters(PrioritizationParameters prioritizationParameters) {
+        this.prioritizationParameters = prioritizationParameters;
+    }
 
     public DataParameters dataParameters() {
         return dataParameters;
@@ -59,9 +69,19 @@ public class SvannaProperties {
         RESNIK_ASYMMETRIC
     }
 
-    public static class PhenotypeParameters {
+    public static class PrioritizationParameters {
 
         private TermSimilarityMeasure termSimilarityMeasure = TermSimilarityMeasure.RESNIK_SYMMETRIC;
+
+        private int maxGenes = 100;
+
+        public int maxGenes() {
+            return maxGenes;
+        }
+
+        public void setMaxGenes(int maxGenes) {
+            this.maxGenes = maxGenes;
+        }
 
         public TermSimilarityMeasure termSimilarityMeasure() {
             return termSimilarityMeasure;

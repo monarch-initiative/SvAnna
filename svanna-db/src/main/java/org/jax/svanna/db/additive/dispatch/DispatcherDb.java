@@ -8,6 +8,7 @@ import org.monarchinitiative.svart.*;
 import javax.sql.DataSource;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 public class DispatcherDb implements Dispatcher {
 
@@ -36,19 +37,20 @@ public class DispatcherDb implements Dispatcher {
         V last = variants.getLast();
         if (first.strand() != last.strand())
             throw new DispatchException("First and last variants must be on the same strand");
-        int left, right;
-        // TODO - this needs to be tested, right now I expect variants to be always on POSITIVE strand
-        if (first.strand().isPositive()) {
-            left = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
-            right = last.endWithCoordinateSystem(CoordinateSystem.zeroBased());
-            TadBoundaryPair tadPair = dao.getBoundaryPair(first.contig(), left, right);
-            return Neighborhood.of(tadPair.upstream(), tadPair.downstream(), tadPair.downstream());
-        } else {
-            left = last.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-            right = first.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-            TadBoundaryPair tadPair = dao.getBoundaryPair(first.contig(), left, right);
-            return Neighborhood.of(tadPair.downstream(), tadPair.upstream(), tadPair.upstream());
-        }
+
+        Optional<TadBoundary> upstreamTad = dao.upstreamOf(first);
+        // empty when there is no TAD upstream, just the end of the chromosome
+        GenomicRegion upstream = upstreamTad.isPresent()
+                ? upstreamTad.get()
+                : GenomicRegion.of(first.contig(), first.strand(), CoordinateSystem.zeroBased(), Position.of(0), Position.of(1));
+
+        Optional<TadBoundary> downstreamTad = dao.downstreamOf(last);
+        // empty when there is no TAD downstream, just the end of the chromosome
+        GenomicRegion downstream = downstreamTad.isPresent()
+                ? downstreamTad.get()
+                : GenomicRegion.of(last.contig(), last.strand(), CoordinateSystem.zeroBased(), last.contig().length() - 1, last.contig().length());
+
+        return Neighborhood.of(upstream, downstream, downstream);
     }
 
     private <V extends Variant> Neighborhood interchromosomalNeighborhood(VariantArrangement<V> arrangement) {

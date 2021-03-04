@@ -38,7 +38,7 @@ public class Projections {
                 if (segment.contains(queryEnd)) {
                     endSegmentIdx = i;
                 }
-                if (startSegmentIdx > 0 && endSegmentIdx > 0)
+                if (startSegmentIdx >= 0 && endSegmentIdx >= 0)
                     break; // stop the search
             }
         }

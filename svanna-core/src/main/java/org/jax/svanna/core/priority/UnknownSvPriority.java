@@ -20,4 +20,8 @@ class UnknownSvPriority implements SvPriority {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return "UNKNOWN PRIORITY";
+    }
 }

@@ -1,5 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
+import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.priority.SvPrioritizer;
 import org.jax.svanna.core.priority.SvPriority;
 import org.monarchinitiative.svart.Variant;
@@ -27,19 +28,24 @@ public class AdditiveSvPrioritizer<V extends Variant, D extends RouteData> imple
 
     @Override
     public SvPriority prioritize(V variant) {
-        Routes routes;
         try {
-            routes = dispatcher.assembleRoutes(List.of(variant));
-        } catch (DispatchException e) {
-            if (LOGGER.isWarnEnabled())
-                LOGGER.warn("Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
-            return SvPriority.unknown();
+            Routes routes;
+            try {
+                routes = dispatcher.assembleRoutes(List.of(variant));
+            } catch (DispatchException e) {
+                LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
+                return SvPriority.unknown();
+            }
+
+            D data = routeDataService.getData(routes);
+            double score = routeDataEvaluator.evaluate(data);
+
+            return SvPriority.of(score, true);
+        } catch (Exception e) {
+            // TODO - remove once stable
+            LogUtils.logError(LOGGER, "Error: ", e);
+            throw e;
         }
-
-        D data = routeDataService.getData(routes);
-        double score = routeDataEvaluator.evaluate(data);
-
-        return SvPriority.of(score, true);
     }
 
     public static <V extends Variant, D extends RouteData> Builder<V,D> builder() {

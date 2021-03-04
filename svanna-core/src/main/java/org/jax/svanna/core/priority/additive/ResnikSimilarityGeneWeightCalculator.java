@@ -1,11 +1,9 @@
-package org.jax.svanna.io.hpo;
+package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.priority.additive.GeneWeightCalculator;
 import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.ontology.similarity.HpoResnikSimilarity;
 
 import java.util.Collection;
 import java.util.List;
@@ -17,18 +15,14 @@ public class ResnikSimilarityGeneWeightCalculator implements GeneWeightCalculato
 
     private final PhenotypeDataService phenotypeDataService;
 
-    private final HpoResnikSimilarity hpoResnikSimilarity;
-
     private final List<TermId> patientFeatures;
 
     private final Map<TermId, Collection<TermId>> diseaseIdToTermIds;
 
     public ResnikSimilarityGeneWeightCalculator(PhenotypeDataService phenotypeDataService,
-                                                HpoResnikSimilarity hpoResnikSimilarity,
                                                 List<TermId> patientTerms,
                                                 Map<TermId, Collection<TermId>> diseaseIdToTermIds) {
         this.phenotypeDataService = phenotypeDataService;
-        this.hpoResnikSimilarity = hpoResnikSimilarity;
         this.patientFeatures = patientTerms;
         this.diseaseIdToTermIds = diseaseIdToTermIds;
     }
@@ -47,7 +41,7 @@ public class ResnikSimilarityGeneWeightCalculator implements GeneWeightCalculato
         double maxSimilarity = 0.;
         for (TermId diseaseId : diseaseIds) {
             Collection<TermId> diseaseHpoIds = diseaseIdToTermIds.get(diseaseId);
-            double resnikSimilarity = hpoResnikSimilarity.computeScoreSymmetric(patientFeatures, diseaseHpoIds);
+            double resnikSimilarity = phenotypeDataService.computeSimilarityScore(diseaseHpoIds, patientFeatures);
             maxSimilarity = Math.max(maxSimilarity, resnikSimilarity);
         }
 

@@ -43,4 +43,6 @@ public interface PhenotypeDataService {
     Set<Term> validateTerms(Collection<TermId> hpoTermIds);
 
     Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> hpoTermIds);
+
+    double computeSimilarityScore(Collection<TermId> query, Collection<TermId> target);
 }

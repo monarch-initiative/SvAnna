@@ -53,4 +53,22 @@ public class SvannaProperties {
         }
 
     }
+
+    public enum TermSimilarityMeasure {
+        RESNIK_SYMMETRIC,
+        RESNIK_ASYMMETRIC
+    }
+
+    public static class PhenotypeParameters {
+
+        private TermSimilarityMeasure termSimilarityMeasure = TermSimilarityMeasure.RESNIK_SYMMETRIC;
+
+        public TermSimilarityMeasure termSimilarityMeasure() {
+            return termSimilarityMeasure;
+        }
+
+        public void setTermSimilarityMeasure(TermSimilarityMeasure termSimilarityMeasure) {
+            this.termSimilarityMeasure = termSimilarityMeasure;
+        }
+    }
 }

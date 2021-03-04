@@ -8,13 +8,13 @@ import de.charite.compbio.jannovar.data.SerializationException;
 import org.jax.svanna.autoconfigure.exception.MissingResourceException;
 import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.hpo.GeneWithId;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
+import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
+import org.jax.svanna.io.hpo.PrecomputedResnikSimilaritiesParser;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -83,7 +83,7 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver) {
+    public PhenotypeDataService phenotypeDataService(DataSource dataSource, SvannaDataResolver svannaDataResolver, SvannaProperties properties) throws UndefinedResourceException, IOException {
         LogUtils.logDebug(LOGGER, "Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
         Path hpoaPath = svannaDataResolver.phenotypeHpoaPath().toAbsolutePath();
@@ -99,7 +99,25 @@ public class SvannaAutoConfiguration {
         Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoaPath.toString(), ontology);
         Set<GeneWithId> geneWithIds = hap.getGeneIdToSymbolMap().entrySet().stream().map(e -> GeneWithId.of(e.getValue(), e.getKey())).collect(Collectors.toSet());
 
-        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneWithIds);
+        SimilarityScoreCalculator similarityScoreCalculator;
+        SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.phenotypeParameters().termSimilarityMeasure();
+        LogUtils.logDebug(LOGGER, "Initializing phenotype term similarity calculator `{}`", similarityMeasure);
+
+        if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {
+            LogUtils.logDebug(LOGGER, "Reading precomputed Resnik term similarities from `{}`", svannaDataResolver.precomputedResnikSimilaritiesPath());
+            Map<TermPair, Double> resnikSimilarities = PrecomputedResnikSimilaritiesParser.readSimilarities(svannaDataResolver.precomputedResnikSimilaritiesPath());
+            similarityScoreCalculator = new ResnikSimilarityScoreCalculator(resnikSimilarities, true);
+        } else if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_ASYMMETRIC) {
+            LogUtils.logDebug(LOGGER, "Reading precomputed Resnik term similarities from `{}`", svannaDataResolver.precomputedResnikSimilaritiesPath());
+            Map<TermPair, Double> resnikSimilarities = PrecomputedResnikSimilaritiesParser.readSimilarities(svannaDataResolver.precomputedResnikSimilaritiesPath());
+            similarityScoreCalculator = new ResnikSimilarityScoreCalculator(resnikSimilarities, false);
+        } else {
+            throw new UndefinedResourceException("Unknown term similarity measure " + similarityMeasure);
+        }
+
+        LogUtils.logDebug(LOGGER, "Done");
+
+        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneWithIds, similarityScoreCalculator);
     }
 
     @Bean

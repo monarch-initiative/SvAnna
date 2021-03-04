@@ -5,6 +5,7 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
+import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategoryMap;
@@ -41,15 +42,19 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
 
     private final Set<GeneWithId> geneWithIds;
 
+    private final SimilarityScoreCalculator similarityScoreCalculator;
+
     public PhenotypeDataServiceDefault(Ontology ontology,
                                        Multimap<TermId, TermId> diseaseToGeneMultiMap,
                                        Map<TermId, HpoDisease> diseaseIdToDisease,
-                                       Set<GeneWithId> geneWithIds) {
+                                       Set<GeneWithId> geneWithIds,
+                                       SimilarityScoreCalculator similarityScoreCalculator) {
         this.ontology = ontology;
         this.diseaseToGeneMultiMap = diseaseToGeneMultiMap;
         this.diseaseIdToDisease = diseaseIdToDisease;
         this.geneToDiseaseIdMap = prepareGeneToDiseaseMap(diseaseToGeneMultiMap);
         this.geneWithIds = geneWithIds;
+        this.similarityScoreCalculator = similarityScoreCalculator;
     }
 
     private Map<TermId, Set<TermId>> prepareGeneToDiseaseMap(Multimap<TermId, TermId> diseaseToGeneMultiMap) {
@@ -144,4 +149,10 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
                 .filter(ancs::contains)
                 .collect(Collectors.toSet());
     }
+
+    @Override
+    public double computeSimilarityScore(Collection<TermId> query, Collection<TermId> target) {
+        return similarityScoreCalculator.computeSimilarityScore(query, target);
+    }
+
 }

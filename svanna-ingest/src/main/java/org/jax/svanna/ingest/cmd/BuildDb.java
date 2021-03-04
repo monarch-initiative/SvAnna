@@ -8,10 +8,12 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.db.TermSimilarityDao;
 import org.jax.svanna.db.landscape.DbPopulationVariantDao;
 import org.jax.svanna.db.landscape.EnhancerAnnotationDao;
 import org.jax.svanna.db.landscape.RepetitiveRegionDao;
@@ -27,6 +29,7 @@ import org.jax.svanna.ingest.parse.population.DgvFileParser;
 import org.jax.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.jax.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.jax.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
+import org.jax.svanna.ingest.similarity.ResnikSimilarity;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -126,6 +129,7 @@ public class BuildDb implements Callable<Integer> {
             ingestPopulationVariants(tmpDir, properties, assembly, dataSource, hg19ToHg38Chain);
             ingestRepeats(tmpDir, properties, assembly, dataSource);
             ingestTads(tmpDir, properties, assembly, dataSource, hg19ToHg38Chain);
+            precomputeResnikSimilarity(buildDir, dataSource);
 
             return 0;
         }
@@ -203,6 +207,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("HGSVC2 ingest updated {} rows", hgsvc2Updated);
 
     }
+
     private static void ingestRepeats(Path tmpDir, IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource) throws IOException {
         URL repeatsUrl = new URL(properties.getRepetitiveRegionsUrl());
         Path repeatsLocalPath = downloadUrl(repeatsUrl, tmpDir);
@@ -212,7 +217,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("Repeats ingest updated {} rows", repetitiveUpdated);
     }
 
-    private void ingestTads(Path tmpDir, IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource, Path chain) throws IOException {
+    private static void ingestTads(Path tmpDir, IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource, Path chain) throws IOException {
         // McArthur2021 supplement
         URL mcArthurSupplement = new URL(properties.tad().mcArthur2021Supplement());
         Path localPath = downloadUrl(mcArthurSupplement, tmpDir);
@@ -227,6 +232,20 @@ public class BuildDb implements Callable<Integer> {
             int updated = ingestTrack(parser, dao);
             LOGGER.info("Ingest of TAD boundaries affected {} rows", updated);
         }
+    }
+
+    private static void precomputeResnikSimilarity(Path buildDir, DataSource dataSource) {
+        Path ontologyPath = buildDir.resolve("hp.obo");
+        Path hpoaPath = buildDir.resolve("phenotype.hpoa");
+        String similarityMeasure = "RESNIK";
+        Map<TermPair, Double> similarityMap = ResnikSimilarity.precomputeResnikSimilarity(ontologyPath, hpoaPath);
+
+        LOGGER.info("Inserting the similarities into the database");
+        TermSimilarityDao termSimilarityDao = new TermSimilarityDao(dataSource);
+        int updated = similarityMap.entrySet().stream()
+                .mapToInt(e -> termSimilarityDao.insertItem(similarityMeasure, e.getKey().left(), e.getKey().right(), e.getValue()))
+                .sum();
+        LOGGER.info("Ingest of precomputed Resnik similarities affected {} rows", updated);
     }
 
     private static <T extends GenomicRegion> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {

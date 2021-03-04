@@ -72,3 +72,13 @@ create table SVANNA.TAD_BOUNDARY
 create
 index SVANNA.TAD_BOUNDARY__CONTIG_START_END_IDX
     on SVANNA.TAD_BOUNDARY (CONTIG, "START", "END");
+
+
+drop table if exists SVANNA.TERM_SIMILARITY;
+create table SVANNA.TERM_SIMILARITY
+(
+    SIMILARITY_MEASURE VARCHAR(50) not null,
+    LEFT_TERM_ID       VARCHAR(15) not null,
+    RIGHT_TERM_ID      VARCHAR(15) not null,
+    SIMILARITY         DOUBLE      not null
+);

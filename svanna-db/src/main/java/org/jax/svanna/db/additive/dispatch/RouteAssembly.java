@@ -28,6 +28,8 @@ class RouteAssembly {
         long contigCount = variants.stream().map(Variant::contig).distinct().count();
         if (contigCount > 1)
             throw new RouteAssemblyException("Unable to assemble variants on " + contigCount + "(>1) contigs without knowing the breakend");
+        if (variants.size() == 1)
+            return VariantArrangement.intrachromosomal(variants);
 
         List<V> startSorted = variants.stream()
                 .map(v -> (V) v.withStrand(Strand.POSITIVE))

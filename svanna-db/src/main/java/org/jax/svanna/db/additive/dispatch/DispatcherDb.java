@@ -99,7 +99,7 @@ public class DispatcherDb implements Dispatcher {
 
         return GenomicRegion.of(upstream.contig(), upstream.strand(), upstream.coordinateSystem(),
                 upstream.start(),
-                downstream.endOnStrandWithCoordinateSystem(downstream.strand(), downstream.coordinateSystem()));
+                downstream.endOnStrandWithCoordinateSystem(upstream.strand(), upstream.coordinateSystem()));
     }
 
     private static <T extends Variant> void validateReferenceInput(GenomicRegion upstream, GenomicRegion downstream, List<T> variants) {

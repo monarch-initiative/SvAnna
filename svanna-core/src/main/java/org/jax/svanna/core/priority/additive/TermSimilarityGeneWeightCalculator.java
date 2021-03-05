@@ -6,22 +6,21 @@ import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ResnikSimilarityGeneWeightCalculator implements GeneWeightCalculator {
+public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator {
 
     private final PhenotypeDataService phenotypeDataService;
 
-    private final List<TermId> patientFeatures;
+    private final Collection<TermId> patientFeatures;
 
     private final Map<TermId, Collection<TermId>> diseaseIdToTermIds;
 
-    public ResnikSimilarityGeneWeightCalculator(PhenotypeDataService phenotypeDataService,
-                                                List<TermId> patientTerms,
-                                                Map<TermId, Collection<TermId>> diseaseIdToTermIds) {
+    public TermSimilarityGeneWeightCalculator(PhenotypeDataService phenotypeDataService,
+                                              Collection<TermId> patientTerms,
+                                              Map<TermId, Collection<TermId>> diseaseIdToTermIds) {
         this.phenotypeDataService = phenotypeDataService;
         this.patientFeatures = patientTerms;
         this.diseaseIdToTermIds = diseaseIdToTermIds;
@@ -30,7 +29,7 @@ public class ResnikSimilarityGeneWeightCalculator implements GeneWeightCalculato
 
     @Override
     public double calculateRelevance(Gene gene) {
-        // gene -> associated diseases -> disease IDs -> max Resnik similarity
+        // gene -> associated diseases -> disease IDs -> max similarity
         Set<HpoDiseaseSummary> associatedDiseases = phenotypeDataService.getDiseasesForGene(gene.accessionId());
 
         Set<TermId> diseaseIds = associatedDiseases.stream()

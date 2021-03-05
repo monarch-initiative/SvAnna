@@ -134,7 +134,7 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
             }
         }
 
-        return new ResnikSimilarityGeneWeightCalculator(phenotypeDataService, patientFeatures, diseaseIdToTermIds);
+        return new TermSimilarityGeneWeightCalculator(phenotypeDataService, patientFeatures, diseaseIdToTermIds);
     }
 
 }

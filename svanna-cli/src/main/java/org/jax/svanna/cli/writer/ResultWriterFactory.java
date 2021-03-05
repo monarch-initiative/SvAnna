@@ -24,9 +24,9 @@ public class ResultWriterFactory {
             case HTML:
                 return new HtmlResultWriter(overlapper, annotationDataService, phenotypeDataService);
             case TSV:
-                return new TabularResultWriter(OutputFormat.TSV.fileSuffix(), '\t', false);
+                return new TabularResultWriter(OutputFormat.TSV.fileSuffix(), '\t', true);
             case CSV:
-                return new TabularResultWriter(OutputFormat.CSV.fileSuffix(), ',', false);
+                return new TabularResultWriter(OutputFormat.CSV.fileSuffix(), ',', true);
             case VCF:
             default:
                 throw new RuntimeException("Unsupported right now");

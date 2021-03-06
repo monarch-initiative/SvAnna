@@ -22,6 +22,7 @@ public class DispatcherDb implements Dispatcher {
 
     @Override
     public <V extends Variant> Routes assembleRoutes(List<V> variants) throws DispatchException {
+        // variants are sorted and put to the same strand - either POSITIVE or NEGATIVE
         VariantArrangement<V> sortedVariants = RouteAssembly.assemble(variants);
 
         Neighborhood neighborhood = sortedVariants.hasBreakend()
@@ -89,102 +90,77 @@ public class DispatcherDb implements Dispatcher {
 
 
     static <T extends Variant> Routes buildRoutes(Neighborhood neighborhood, List<T> variants) {
-        GenomicRegion reference = buildReferencePath(neighborhood.upstream(), neighborhood.downstreamRef(), variants);
+        GenomicRegion reference = buildReferencePath(neighborhood.upstream(), neighborhood.downstreamRef());
         Route alternate = buildAltRoute(neighborhood.upstream(), neighborhood.downstreamAlt(), variants);
         return Routes.of(reference, alternate);
     }
 
-    private static <T extends Variant> GenomicRegion buildReferencePath(GenomicRegion upstream, GenomicRegion downstream, List<T> variants) {
-        validateReferenceInput(upstream, downstream, variants);
+    private static <T extends Variant> GenomicRegion buildReferencePath(GenomicRegion upstream, GenomicRegion downstream) {
+        validateReferenceInput(upstream, downstream);
 
         return GenomicRegion.of(upstream.contig(), upstream.strand(), upstream.coordinateSystem(),
                 upstream.start(),
                 downstream.endOnStrandWithCoordinateSystem(upstream.strand(), upstream.coordinateSystem()));
     }
 
-    private static <T extends Variant> void validateReferenceInput(GenomicRegion upstream, GenomicRegion downstream, List<T> variants) {
+    private static <T extends Variant> void validateReferenceInput(GenomicRegion upstream, GenomicRegion downstream) {
         if (upstream == null)
             throw new IllegalArgumentException("Upstream region cannot be null");
 
         if (downstream == null)
             throw new IllegalArgumentException("Downstream region cannot be null");
 
-        if (variants.isEmpty())
-            throw new IllegalArgumentException("Variants must not be empty");
-
         if (!upstream.contig().equals(downstream.contig()))
             throw new IllegalArgumentException("Upstream and downstream segments must be on the same contig for the reference path");
-
-        if (variants.stream().anyMatch(v -> !v.contig().equals(upstream.contig())))
-            throw new IllegalArgumentException("Variant contigs must be the same as the upstream/downstream segment for the reference path");
     }
 
     private static <T extends Variant> Route buildAltRoute(GenomicRegion upstream, GenomicRegion downstream, List<T> variants) {
-        if (variants.isEmpty())
-            throw new DispatchException("Variants must not be empty");
-
         T first = variants.get(0);
         if (!upstream.contig().equals(first.contig()))
             throw new DispatchException("Upstream must be on the same contig as the first variant");
-        int upstreamBound = Math.max(upstream.startOnStrandWithCoordinateSystem(first.strand(), CS), upstream.endOnStrandWithCoordinateSystem(first.strand(), CS));
         int firstStart = first.startWithCoordinateSystem(CS);
-        if (upstreamBound > firstStart)
-            throw new DispatchException("Upstream region must be upstream of the first variant");
 
         List<Segment> segments = new LinkedList<>();
 
         int upstreamStart = Math.min(upstream.startOnStrandWithCoordinateSystem(first.strand(), CS), upstream.endOnStrandWithCoordinateSystem(first.strand(), CS));
-        segments.add(Segment.of(upstream.contig(), first.strand(), CS, Position.of(upstreamStart), Position.of(firstStart),
-                "upstream", Event.GAP, 1));
+        Segment firstSegment = Segment.of(upstream.contig(), first.strand(), CS,
+                Position.of(upstreamStart), Position.of(firstStart),
+                "upstream", Event.GAP, 1);
+        segments.add(firstSegment);
         segments.addAll(makeVariantSegment(first, first.strand()));
 
 
         for (int i = 1; i < variants.size(); i++) {
-            T previous = variants.get(i-1);
-//            Segment previousSegment = segments.getLast();
-            T variant = variants.get(i);
-            if (!previous.contig().equals(variant.contig()))
-                throw new DispatchException("Different contigs (" + previous.contigName() + " vs. " + variant.contigName() + " )" +
-                        " in variants " + LogUtils.variantSummary(previous) + " and " + LogUtils.variantSummary(variant));
+            T previous = variants.get(i - 1);
+            T current = variants.get(i);
+            if (!previous.contig().equals(current.contig()))
+                throw new DispatchException("Different contigs (" + previous.contigName() + " vs. " + current.contigName() + " )" +
+                        " in variants " + LogUtils.variantSummary(previous) + " and " + LogUtils.variantSummary(current));
 
-            Strand strand = previous.variantType().baseType() != VariantType.INV
-                    ? previous.strand()
-//                    : previous.strand().opposite();
-                    : previous.strand();
-
-            int gapStart = previous.endOnStrandWithCoordinateSystem(strand, CS);
-//            int gapStart = previousSegment.endOnStrandWithCoordinateSystem(strand, CS);
-            int gapEnd = variant.startOnStrandWithCoordinateSystem(strand, CS);
-            Segment gap = Segment.of(previous.contig(), strand, CS, Position.of(gapStart), Position.of(gapEnd), "gap-" + i, Event.GAP, 1);
+            int gapStart = previous.endOnStrandWithCoordinateSystem(previous.strand(), CS);
+            int gapEnd = current.startOnStrandWithCoordinateSystem(previous.strand(), CS);
+            Segment gap = Segment.of(previous.contig(), previous.strand(), CS, Position.of(gapStart), Position.of(gapEnd), "gap-" + i, Event.GAP, 1);
             segments.add(gap);
 
-            segments.addAll(makeVariantSegment(variant, strand));
+            segments.addAll(makeVariantSegment(current, previous.strand()));
         }
 
 
         T last = variants.get(variants.size() - 1);
-        Contig lastContig;
         Strand lastStrand;
         int lastEnd;
         if (last instanceof BreakendVariant) {
             Breakend right = ((BreakendVariant) last).right();
-            lastContig = right.contig();
             lastStrand = right.strand();
             lastEnd = right.endWithCoordinateSystem(CS);
         } else{
-            lastContig = last.contig();
             lastStrand = last.strand();
             lastEnd = last.endWithCoordinateSystem(CS);
         }
-        if (!downstream.contig().equals(lastContig))
-            throw new DispatchException("Downstream segment must be on the same contig as the last variant");
-        int downstreamBound = Math.min(downstream.startOnStrandWithCoordinateSystem(lastStrand, CS), downstream.startOnStrandWithCoordinateSystem(lastStrand, CS));
 
-        if (downstreamBound < lastEnd)
-            throw new DispatchException("Downstream region must be downstream of the last variant");
-
-        int downstreamEnd = Math.max(downstream.startOnStrandWithCoordinateSystem(lastStrand, CS), downstream.endOnStrandWithCoordinateSystem(lastStrand, CS));
-        segments.add(Segment.of(downstream.contig(), lastStrand, CS, Position.of(lastEnd), Position.of(downstreamEnd),
+        int downstreamEnd = downstream.endOnStrandWithCoordinateSystem(lastStrand, CS);
+        segments.add(Segment.of(downstream.contig(), lastStrand, CS,
+                Position.of(lastEnd), Position.of(downstreamEnd),
                 "downstream", Event.GAP, 1));
 
 
@@ -202,12 +178,9 @@ public class DispatcherDb implements Dispatcher {
                         variant.id(), Event.SNV, 1));
                 break;
             case INV:
-                int startInv = variant.startOnStrandWithCoordinateSystem(previous, CS);
-                int endInv = variant.endOnStrandWithCoordinateSystem(previous, CS);
                 segments = List.of(Segment.of(variant.contig(), previous, CS,
-                        Position.of(startInv), Position.of(endInv),
+                        Position.of(start), Position.of(end),
                         variant.id(), Event.INVERSION, 1));
-                // TODO - check as this might have been fixed in a wrong way
                 break;
             case DEL:
                 segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),

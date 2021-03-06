@@ -10,6 +10,14 @@ import java.util.stream.Collectors;
 
 class RouteAssembly {
 
+    /**
+     * Sort variants located in a single contig and adjust variant strands to the same strand. If there is a breakend
+     * among the variants, variant strands of the other variants are adjusted to align with the breakend.
+     * <p>
+     * The method supports max 1 breakend to be present.
+     *
+     * @throws RouteAssemblyException if not possible to arrange the variants in a meaningful way
+     */
     static <V extends Variant> VariantArrangement<V> assemble(List<V> variants) throws RouteAssemblyException {
         if (variants.isEmpty()) throw new RouteAssemblyException("Variant list must not be empty");
 
@@ -24,6 +32,7 @@ class RouteAssembly {
             throw new RouteAssemblyException("Unable to assemble a list of " + breakends.size() + "(>1) breakend variants");
     }
 
+    @SuppressWarnings("unchecked")
     private static <V extends Variant> VariantArrangement<V> assembleIntrachromosomal(List<V> variants) {
         long contigCount = variants.stream().map(Variant::contig).distinct().count();
         if (contigCount > 1)
@@ -32,7 +41,7 @@ class RouteAssembly {
             return VariantArrangement.intrachromosomal(variants);
 
         List<V> startSorted = variants.stream()
-                .map(v -> (V) v.withStrand(Strand.POSITIVE))
+                .map(v -> (V) v.withStrand(Strand.POSITIVE)) // this might fail if V does not override `withStrand`
                 .sorted(Comparator.comparingInt(v -> v.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())))
                 .collect(Collectors.toList());
 
@@ -48,18 +57,20 @@ class RouteAssembly {
         return VariantArrangement.intrachromosomal(startSorted);
     }
 
+    @SuppressWarnings("unchecked")
     private static <V extends Variant> VariantArrangement<V> assembleInterchromosomal(List<V> variants, V breakendVariant) {
         BreakendVariant breakend = (BreakendVariant) breakendVariant;
 
         Breakend left = breakend.left();
         Breakend right = breakend.right();
         if (left.contig().equals(right.contig()))
+            // TODO - evaluate
             throw new RouteAssemblyException("Intrachromosomal breakends are not currently supported: " + LogUtils.variantSummary(breakend));
 
         List<V> leftSorted = variants.stream()
                 .filter(v -> v.contig().equals(left.contig()) && !v.equals(breakend))
                 .sorted(Comparator.comparingInt(left::distanceTo))
-                .map(v -> (V) v.withStrand(left.strand()))
+                .map(v -> (V) v.withStrand(left.strand())) // this might fail if V does not override `withStrand`
                 .collect(Collectors.toList());
         for (V variant : leftSorted) {
             if (left.distanceTo(variant) > 0)

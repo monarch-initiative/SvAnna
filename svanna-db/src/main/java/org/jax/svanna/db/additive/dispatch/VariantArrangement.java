@@ -6,6 +6,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A list of variants arranged in an order that allows creating the annotation route. The variant list contains max 1
+ * breakend variant, location of the breakend variant is indicated by the {@link #breakendIndex}.
+ *
+ * @param <T>
+ */
 class VariantArrangement<T extends Variant> {
 
     private final LinkedList<T> variants;

@@ -26,6 +26,10 @@ class VariantArrangement<T extends Variant> {
         return variants;
     }
 
+    public int size() {
+        return variants.size();
+    }
+
     public int breakendIndex() {
         return breakendIndex;
     }

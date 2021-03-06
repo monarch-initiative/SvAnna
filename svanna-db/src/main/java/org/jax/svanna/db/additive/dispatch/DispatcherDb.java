@@ -1,23 +1,20 @@
 package org.jax.svanna.db.additive.dispatch;
 
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.priority.additive.*;
-import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.monarchinitiative.svart.*;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 public class DispatcherDb implements Dispatcher {
 
     private static final CoordinateSystem CS = CoordinateSystem.zeroBased();
 
-    private final TadBoundaryDao tadBoundaryDao;
+    private final NeighborhoodBuilder neighborhoodBuilder;
 
-    public DispatcherDb(TadBoundaryDao tadBoundaryDao) {
-        this.tadBoundaryDao = tadBoundaryDao;
+    public DispatcherDb(NeighborhoodBuilder neighborhoodBuilder) {
+        this.neighborhoodBuilder = neighborhoodBuilder;
     }
 
     @Override
@@ -26,68 +23,11 @@ public class DispatcherDb implements Dispatcher {
         VariantArrangement<V> sortedVariants = RouteAssembly.assemble(variants);
 
         Neighborhood neighborhood = sortedVariants.hasBreakend()
-                ? interchromosomalNeighborhood(sortedVariants)
-                : intrachromosomalNeighborhood(sortedVariants);
+                ? neighborhoodBuilder.interchromosomalNeighborhood(sortedVariants)
+                : neighborhoodBuilder.intrachromosomalNeighborhood(sortedVariants);
 
         return buildRoutes(neighborhood, variants);
     }
-
-    private <V extends Variant> Neighborhood intrachromosomalNeighborhood(VariantArrangement<V> arrangement) {
-        LinkedList<V> variants = arrangement.variants();
-        V first = variants.getFirst();
-        V last = variants.getLast();
-        if (first.strand() != last.strand())
-            throw new DispatchException("First and last variants must be on the same strand");
-
-        Optional<TadBoundary> upstreamTad = tadBoundaryDao.upstreamOf(first);
-        // empty when there is no TAD upstream, just the end of the chromosome
-        GenomicRegion upstream = upstreamTad.isPresent()
-                ? upstreamTad.get()
-                : GenomicRegion.of(first.contig(), first.strand(), CoordinateSystem.zeroBased(), Position.of(0), Position.of(1));
-
-        Optional<TadBoundary> downstreamTad = tadBoundaryDao.downstreamOf(last);
-        // empty when there is no TAD downstream, just the end of the chromosome
-        GenomicRegion downstream = downstreamTad.isPresent()
-                ? downstreamTad.get()
-                : GenomicRegion.of(last.contig(), last.strand(), CoordinateSystem.zeroBased(), last.contig().length() - 1, last.contig().length());
-
-        return Neighborhood.of(upstream, downstream, downstream);
-    }
-
-    private <V extends Variant> Neighborhood interchromosomalNeighborhood(VariantArrangement<V> arrangement) {
-        LinkedList<V> variants = arrangement.variants();
-
-        BreakendVariant bv = (BreakendVariant) variants.get(arrangement.breakendIndex());
-        Breakend left = bv.left();
-        Breakend right = bv.right();
-
-        V first = variants.getFirst();
-        GenomicRegion leftmost = (first instanceof BreakendVariant)
-                ? ((BreakendVariant) first).left()
-                : first;
-
-        Position upstreamBound = tadBoundaryDao.upstreamOf(leftmost)
-                .map(TadBoundary::asPosition)
-                .orElse(Position.of(0));
-        GenomicRegion upstream = GenomicRegion.of(left.contig(), left.strand(), CoordinateSystem.zeroBased(), upstreamBound, upstreamBound);
-
-        Position downstreamRefBound = tadBoundaryDao.downstreamOf(left)
-                .map(TadBoundary::asPosition)
-                .orElse(Position.of(left.contig().length()));
-        GenomicRegion downstreamRef = GenomicRegion.of(left.contig(), left.strand(), CoordinateSystem.zeroBased(), downstreamRefBound, downstreamRefBound);
-
-        V last = variants.getLast();
-        GenomicRegion rightmost= (last instanceof BreakendVariant)
-                ? ((BreakendVariant) last).right()
-                : last;
-        Position downstreamAltBound = tadBoundaryDao.downstreamOf(rightmost)
-                .map(TadBoundary::asPosition)
-                .orElse(Position.of(right.contig().length()));
-        GenomicRegion downstreamAlt = GenomicRegion.of(right.contig(), right.strand(), right.coordinateSystem(), downstreamAltBound, downstreamAltBound);
-
-        return Neighborhood.of(upstream, downstreamRef, downstreamAlt);
-    }
-
 
     static <T extends Variant> Routes buildRoutes(Neighborhood neighborhood, List<T> variants) {
         GenomicRegion reference = buildReferencePath(neighborhood.upstream(), neighborhood.downstreamRef());

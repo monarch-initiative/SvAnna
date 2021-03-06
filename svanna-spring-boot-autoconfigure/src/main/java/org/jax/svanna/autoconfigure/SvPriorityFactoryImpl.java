@@ -19,6 +19,7 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.db.additive.DbRouteDataServiceGE;
 import org.jax.svanna.db.additive.dispatch.DispatcherDb;
+import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
@@ -80,7 +81,8 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
                 return null;
 
             case ADDITIVE:
-                Dispatcher dispatcher = new DispatcherDb(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThreshold());
+                TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThreshold());
+                Dispatcher dispatcher = new DispatcherDb(tadBoundaryDao);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
                 RouteDataEvaluator<RouteDataGE> routeDataEvaluator = configureRouteDataEvaluator(patientTerms, svannaDataResolver);
 

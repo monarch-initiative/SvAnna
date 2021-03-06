@@ -8,6 +8,7 @@ import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.reference.Gene;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -20,7 +21,7 @@ import static org.hamcrest.Matchers.closeTo;
 
 public class RouteDataEvaluatorGETest {
 
-    private static final double ERROR = 1e-5;
+    private static final double ERROR = 1E-6;
 
     private final SequenceImpactCalculator<Gene> geneImpact = new SimpleSequenceImpactCalculator<>(10.);
     private final GeneWeightCalculator geneWeightCalculator  = GeneWeightCalculator.defaultGeneRelevanceCalculator();
@@ -37,11 +38,11 @@ public class RouteDataEvaluatorGETest {
 
     @ParameterizedTest
     @CsvSource({
-            "0,   10,  15,   80,              0.", //  nothing is knocked out
-            "0,    4,  10,   80,              2.", //  enhancer knocked out
-            "0,   30,  40,   80,             12.", //  gene knocked out
-            "0,   30,  55,   80,             13.", // `gene and enhancer knocked out
-            "0,   30,  70,   80,             24.", //  2 genes and enhancer knocked out
+            "0,   10,  15,   80,               .0",      //  nothing is knocked out
+            "0,    4,  10,   80,               .2",      //  enhancer knocked out
+            "0,   30,  40,   80,             27.382818", //  gene knocked out
+            "0,   30,  55,   80,             27.482818", // `gene and enhancer knocked out
+            "0,   30,  70,   80,             54.765636", //  2 genes and enhancer knocked out
     })
     public void evaluateDeletion(int start, int delStart, int delEnd, int end, double expected) {
         Contig ctg1 = TestContig.of(0, 100);
@@ -68,11 +69,11 @@ public class RouteDataEvaluatorGETest {
 
     @ParameterizedTest
     @CsvSource({
-            "0,   10,  15,   80,              0.", //  nothing is knocked out
-            "0,    4,  10,   80,              1.", //  enhancer is knocked out
-            "0,   45,  50,   80,              2.", //  TAD is knocked out
-            "0,   30,  40,   80,             11.", // `A` knocked out
-            "0,   30,  70,   80,             22.", // `AbB` knocked out
+            "0,   10,  15,   80,               .0",      //  nothing is knocked out
+            "0,    4,  10,   80,               .1",      //  enhancer is knocked out
+            "0,   45,  50,   80,               .2",      //  TAD is knocked out
+            "0,   30,  40,   80,             27.282818", // `A` knocked out
+            "0,   30,  70,   80,             54.565636", // `AbB` knocked out
     })
     public void evaluateDeletionWithTad(int start, int delStart, int delEnd, int end, double expected) {
         Contig ctg1 = TestContig.of(0, 100);
@@ -101,14 +102,14 @@ public class RouteDataEvaluatorGETest {
 
     @ParameterizedTest
     @CsvSource({
-            "0,   10,  15,   80,              0.",  //  nothing is duplicated
-            "0,    5,  10,   80,              1.",  //  enhancer is duplicated
-            "0,    7,  13,   80,              0.",  //  enhancer is spanned by a tandem duplication
-            "0,   15,  55,   80,              11.", //  gene duplication and enhancer adoption `HGNC:A` <-> `b`
-            "0,   15,  45,   80,              11.", //  `HGNC:A` duplication
-            "0,   15,  50,   80,              10.", //  `HGNC:A` duplication within a neo-TAD
-            "0,   40,  55,   80,              0.",  //  enhancer duplication
-            "0,   20,  70,   80,             22.",  //  `AXbB` duplicated
+            "0,   10,  15,   80,                .0",        //  nothing is duplicated
+            "0,    5,  10,   80,                .1",        //  enhancer is duplicated
+            "0,    7,  13,   80,                .0",        //  enhancer is spanned by a tandem duplication
+            "0,   15,  55,   80,              27.282818",  //  gene duplication and enhancer adoption `HGNC:A` <-> `b`
+            "0,   15,  45,   80,              27.282818",  //  `HGNC:A` duplication
+            "0,   15,  50,   80,              27.182818",  //  `HGNC:A` duplication within a neo-TAD
+            "0,   40,  55,   80,               0.",        //  enhancer duplication
+            "0,   20,  70,   80,              54.565636",  //  `AXbB` duplicated
     })
     public void evaluateDuplicationWithTad(int start, int dupStart, int dupEnd, int end, double expected) {
         Contig ctg1 = TestContig.of(0, 100);
@@ -137,16 +138,16 @@ public class RouteDataEvaluatorGETest {
 
     @ParameterizedTest
     @CsvSource({
-            "0,   10,  15,   80,               0.",  //  nothing relevant is inverted
-            "0,    5,  10,   80,               0.",  //  enhancer is inverted
-            "0,    7,  15,   80,               1.",  //  enhancer is disrupted by an inversion
-            "0,   15,  42,   80,               0.",  //  gene is inverted
-            "0,   25,  45,   80,              11.",  //  gene is disrupted by an inversion
+            "0,   10,  15,   80,               0.",        //  nothing relevant is inverted
+            "0,    5,  10,   80,               0.",        //  enhancer is inverted
+            "0,    7,  15,   80,               0.1",        //  enhancer is disrupted by an inversion
+            "0,   15,  42,   80,               0.",        //  gene is inverted
+            "0,   25,  45,   80,              27.282818",  //  gene is disrupted by an inversion
 
             //  enhancer adoption (0 is correct since we work with constant enhancer-gene relevance. No net loss/gain of gene/enhancer interaction)
             "0,    40,  55,   80,              0.",
 
-            "0,   20,  50,   80,              0.", // separate `a` from the rest, again no net loss/gain here
+            "0,   20,  50,   80,               0.",         // separate `a` from the rest, again no net loss/gain here
     })
     public void evaluateInversionWithTad(int start, int invStart, int invEnd, int end, double expected) {
         Contig ctg1 = TestContig.of(0, 100);
@@ -179,6 +180,7 @@ public class RouteDataEvaluatorGETest {
             "10,   100,     10.",
             "70,   100,     13.",
     })
+    @Disabled("Fix the route setup")
     public void evaluateBreakendWithTads(int left, int right, double expected) {
         TestContig ctg1 = TestContig.of(0, 100);
         TestContig ctg2 = TestContig.of(1, 200);

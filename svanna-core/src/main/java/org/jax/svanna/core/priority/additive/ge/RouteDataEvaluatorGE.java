@@ -51,16 +51,20 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
         Map<GenomicRegion, List<Gene>> genesByTad = partitionItemsByRegion(genes, tadRegions);
         Map<GenomicRegion, List<Enhancer>> enhancersByTad = partitionItemsByRegion(enhancers, tadRegions);
 
-        return tadRegions.stream()
-                .mapToDouble(tadRegion -> evaluateReferenceTad(genesByTad.get(tadRegion), enhancersByTad.get(tadRegion)))
-                .sum();
+        double score = 0.;
+        for (GenomicRegion tadRegion : tadRegions) {
+            double tadScore = evaluateReferenceTad(genesByTad.get(tadRegion), enhancersByTad.get(tadRegion));
+            score += tadScore;
+        }
+
+        return score;
     }
 
     private double evaluateReferenceTad(List<Gene> genes, List<Enhancer> enhancers) {
         double score = 0.;
         for (Gene gene : genes) {
             double geneImpact = geneImpactCalculator.noImpact();
-            double geneRelevance = geneWeightCalculator.calculateRelevance(gene);
+            double geneRelevance = Math.exp(geneWeightCalculator.calculateRelevance(gene));
             double enhancerContribution = 0.;
             for (Enhancer enhancer : enhancers) {
                 enhancerContribution += enhancerImpactCalculator.noImpact() * enhancerGeneRelevanceCalculator.calculateRelevance(gene, enhancer);
@@ -121,7 +125,7 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
             if (geneImpact < 1E-12)
                 // LoF
                 continue;
-            double geneRelevance = geneWeightCalculator.calculateRelevance(gene.source());
+            double geneRelevance = Math.exp(geneWeightCalculator.calculateRelevance(gene.source()));
 
             double enhancerRelevance = 0.;
             for (Projection<Enhancer> enhancer : enhancers) {

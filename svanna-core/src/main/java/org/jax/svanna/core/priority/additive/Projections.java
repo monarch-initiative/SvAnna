@@ -30,11 +30,11 @@ public class Projections {
 
             if (segment.contig().equals(query.contig())) {
                 // we need to work on 1-based if we investigate start and end as integers separately
-                int queryStart = query.startWithCoordinateSystem(CoordinateSystem.oneBased());
+                int queryStart = query.startOnStrandWithCoordinateSystem(segment.strand(), CoordinateSystem.oneBased());
                 if (segment.contains(queryStart)) {
                     startSegmentIdx = i;
                 }
-                int queryEnd = query.endWithCoordinateSystem(CoordinateSystem.oneBased());
+                int queryEnd = query.endOnStrandWithCoordinateSystem(segment.strand(), CoordinateSystem.oneBased());
                 if (segment.contains(queryEnd)) {
                     endSegmentIdx = i;
                 }

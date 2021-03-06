@@ -1,8 +1,10 @@
 package org.jax.svanna.cli;
 
 
+import org.jax.svanna.cli.cmd.AnnotateTurboCommand;
 import org.jax.svanna.cli.cmd.GenerateConfigCommand;
 import org.jax.svanna.cli.cmd.annotate.AnnotateCommand;
+import org.jax.svanna.cli.cmd.annotate_cases.AnnotateCasesCommand;
 import org.jax.svanna.cli.cmd.download.DownloadCommand;
 import picocli.CommandLine;
 

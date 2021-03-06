@@ -61,7 +61,7 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
 
 
     @Override
-    public <V extends Variant, P extends SvPriority> SvPrioritizer<V, P> getPrioritizer(SvPrioritizerType type, List<TermId> patientTerms) {
+    public <V extends Variant, P extends SvPriority> SvPrioritizer<V, P> getPrioritizer(SvPrioritizerType type, Collection<TermId> patientTerms) {
         switch (type) {
             case PROTOTYPE:
                 LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
@@ -80,11 +80,8 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
                 return null;
 
             case ADDITIVE:
-                LogUtils.logDebug(LOGGER, "Preparing dispatcher");
                 Dispatcher dispatcher = new DispatcherDb(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThreshold());
-                LogUtils.logDebug(LOGGER, "Preparing route data service");
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
-                LogUtils.logDebug(LOGGER, "Preparing route data evaluator");
                 RouteDataEvaluator<RouteDataGE> routeDataEvaluator = configureRouteDataEvaluator(patientTerms, svannaDataResolver);
 
                 return (SvPrioritizer<V, P>) AdditiveSvPrioritizer.<SvannaVariant, RouteDataGE>builder()
@@ -97,7 +94,7 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
         }
     }
 
-    private RouteDataEvaluatorGE configureRouteDataEvaluator(List<TermId> patientFeatures, SvannaDataResolver svannaDataResolver) {
+    private RouteDataEvaluatorGE configureRouteDataEvaluator(Collection<TermId> patientFeatures, SvannaDataResolver svannaDataResolver) {
         SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator();
 
         GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeDataService, svannaDataResolver, patientFeatures);
@@ -111,7 +108,7 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
     }
 
 
-    private static GeneWeightCalculator configureGeneWeightCalculator(PhenotypeDataService phenotypeDataService, SvannaDataResolver svannaDataResolver, List<TermId> patientFeatures) {
+    private static GeneWeightCalculator configureGeneWeightCalculator(PhenotypeDataService phenotypeDataService, SvannaDataResolver svannaDataResolver, Collection<TermId> patientFeatures) {
         Ontology ontology = phenotypeDataService.ontology();
 
 

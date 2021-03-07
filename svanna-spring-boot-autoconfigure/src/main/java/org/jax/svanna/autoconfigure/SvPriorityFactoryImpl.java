@@ -106,8 +106,9 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
 
         SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator();
 
-        // TODO - provide real implementation
-        EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = EnhancerGeneRelevanceCalculator.defaultCalculator();
+        Set<TermId> availableTopLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
+        Set<TermId> relevantAncestorsForEnhancerFiltering = phenotypeDataService.getRelevantAncestors(availableTopLevelEnhancerTerms, patientFeatures);
+        EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = PhenotypeEnhancerGeneRelevanceCalculator.of(relevantAncestorsForEnhancerFiltering);
 
         return new RouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
     }

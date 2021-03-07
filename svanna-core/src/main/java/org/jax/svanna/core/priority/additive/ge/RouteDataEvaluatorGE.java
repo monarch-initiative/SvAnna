@@ -65,11 +65,11 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
         for (Gene gene : genes) {
             double geneImpact = geneImpactCalculator.noImpact();
             double geneRelevance = Math.exp(geneWeightCalculator.calculateRelevance(gene));
-            double enhancerContribution = 0.;
+            double enhancerRelevance = 0.;
             for (Enhancer enhancer : enhancers) {
-                enhancerContribution += enhancerImpactCalculator.noImpact() * enhancerGeneRelevanceCalculator.calculateRelevance(gene, enhancer);
+                enhancerRelevance += enhancerImpactCalculator.noImpact() * enhancerGeneRelevanceCalculator.calculateRelevance(enhancer);
             }
-            score += geneImpact * geneRelevance + enhancerContribution;
+            score += geneImpact * geneRelevance + enhancerRelevance;
         }
         return score;
     }
@@ -129,9 +129,7 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
 
             double enhancerRelevance = 0.;
             for (Projection<Enhancer> enhancer : enhancers) {
-                double enhancerImpact = enhancerImpactCalculator.projectImpact(enhancer);
-                double enhancerGeneRelevance = enhancerGeneRelevanceCalculator.calculateRelevance(gene.source(), enhancer.source());
-                enhancerRelevance += enhancerImpact * enhancerGeneRelevance;
+                enhancerRelevance += enhancerImpactCalculator.projectImpact(enhancer) * enhancerGeneRelevanceCalculator.calculateRelevance(enhancer.source());
             }
             score += geneImpact * geneRelevance + enhancerRelevance;
         }

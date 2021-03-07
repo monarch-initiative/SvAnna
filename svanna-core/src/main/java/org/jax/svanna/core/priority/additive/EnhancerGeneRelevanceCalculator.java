@@ -1,7 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.reference.Gene;
 
 /**
  * Assess the relevance of a potential change to the enhancer - gene interaction for an individual with given phenotype.
@@ -14,8 +13,8 @@ public interface EnhancerGeneRelevanceCalculator {
     double DEFAULT_ENHANCER_RELEVANCE = .1f;
 
     static EnhancerGeneRelevanceCalculator defaultCalculator() {
-        return (g, e) -> DEFAULT_ENHANCER_RELEVANCE;
+        return e -> DEFAULT_ENHANCER_RELEVANCE;
     }
 
-    double calculateRelevance(Gene gene, Enhancer enhancer);
+    double calculateRelevance(Enhancer enhancer);
 }

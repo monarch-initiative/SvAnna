@@ -3,7 +3,6 @@ package org.jax.svanna.cli.cmd.annotate_cases;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.Main;
-import org.jax.svanna.cli.cmd.AnnotateTurboCommand;
 import org.jax.svanna.cli.cmd.SvAnnaCommand;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
         footer = Main.FOOTER)
 public class AnnotateCasesCommand extends SvAnnaCommand {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateTurboCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCasesCommand.class);
 
     private static final NumberFormat NF = NumberFormat.getNumberInstance();
 

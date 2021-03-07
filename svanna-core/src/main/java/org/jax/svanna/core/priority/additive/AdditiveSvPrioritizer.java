@@ -29,18 +29,14 @@ public class AdditiveSvPrioritizer<V extends Variant, D extends RouteData> imple
     @Override
     public SvPriority prioritize(V variant) {
         try {
-            Routes routes;
-            try {
-                routes = dispatcher.assembleRoutes(List.of(variant));
-            } catch (DispatchException e) {
-                LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
-                return SvPriority.unknown();
-            }
-
+            Routes routes = dispatcher.assembleRoutes(List.of(variant));
             D data = routeDataService.getData(routes);
             double score = routeDataEvaluator.evaluate(data);
 
             return SvPriority.of(score, true);
+        } catch (DispatchException e) {
+            LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
+            return SvPriority.unknown();
         } catch (Exception e) {
             // TODO - remove once stable
             LogUtils.logError(LOGGER, "Error: ", e);

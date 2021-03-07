@@ -90,8 +90,12 @@ public class SvannaAutoConfiguration {
     public AnnotationDataService annotationDataService(DataSource dataSource, GenomicAssembly genomicAssembly, SvannaProperties svannaProperties) {
         double stabilityThreshold = svannaProperties.dataParameters().tadStabilityThreshold();
         LogUtils.logDebug(LOGGER, "Including TAD boundaries with stability >{}", stabilityThreshold);
+
+        double enhancerSpecificityThreshold = svannaProperties.dataParameters().enhancerSpecificityThreshold();
+        LogUtils.logDebug(LOGGER, "Including enhancers with tissue specificity >{}", enhancerSpecificityThreshold);
+
         return new DbAnnotationDataService(
-                new EnhancerAnnotationDao(dataSource, genomicAssembly),
+                new EnhancerAnnotationDao(dataSource, genomicAssembly, enhancerSpecificityThreshold),
                 new RepetitiveRegionDao(dataSource, genomicAssembly),
                 new DbPopulationVariantDao(dataSource, genomicAssembly),
                 new TadBoundaryDao(dataSource, genomicAssembly, stabilityThreshold));

@@ -1,7 +1,10 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.landscape.*;
+import org.jax.svanna.core.landscape.BaseEnhancer;
+import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.EnhancerSource;
+import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.db.IngestDao;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -21,6 +24,9 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerAnnotationDao.class);
 
+    // will get you all enhancers, tissue specific or non-specific
+    public static final double DEFAULT_ENHANCER_SPECIFICITY_THRESHOLD = .0;
+
     private final DataSource dataSource;
 
     private final GenomicAssembly genomicAssembly;
@@ -29,9 +35,16 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
 
     private final int unknownContigId;
 
+    private final double enhancerSpecificity;
+
     public EnhancerAnnotationDao(DataSource dataSource, GenomicAssembly genomicAssembly) {
+        this(dataSource, genomicAssembly, DEFAULT_ENHANCER_SPECIFICITY_THRESHOLD);
+    }
+
+    public EnhancerAnnotationDao(DataSource dataSource, GenomicAssembly genomicAssembly, double enhancerSpecificity) {
         this.dataSource = dataSource;
         this.genomicAssembly = genomicAssembly;
+        this.enhancerSpecificity = enhancerSpecificity;
 
         contigIdMap = new HashMap<>();
         for (Contig contig : genomicAssembly.contigs()) {
@@ -172,6 +185,10 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Get all developmental enhancers as well as non-developmental enhancers with tissue specificity above
+     * a preset threshold.
+     */
     @Override
     public List<Enhancer> getOverlapping(GenomicRegion query) {
         String enhancerSql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
@@ -179,12 +196,14 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
                 "   from SVANNA.ENHANCERS E join SVANNA.ENHANCER_TISSUE_SPECIFICITY ETS on E.ENHANCER_ID = ETS.ENHANCER_ID" +
                 " where E.CONTIG = ? " +
                 "   and ? < E.END " +
-                "   and E.START < ?";
+                "   and E.START < ? " +
+                "   and (E.IS_DEVELOPMENTAL = true or (E.IS_DEVELOPMENTAL = false and ETS.SPECIFICITY > ?))";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(enhancerSql)) {
             preparedStatement.setInt(1, query.contigId());
             preparedStatement.setInt(2, query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
             preparedStatement.setInt(3, query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+            preparedStatement.setDouble(4, enhancerSpecificity);
             return processEnhancers(preparedStatement);
         } catch (SQLException e) {
             if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());

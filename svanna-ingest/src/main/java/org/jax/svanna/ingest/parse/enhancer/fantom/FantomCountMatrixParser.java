@@ -301,7 +301,7 @@ public class FantomCountMatrixParser {
         double totalCpmCount = countsPerMillion.stream()
                 .mapToDouble(Double::doubleValue)
                 .sum();
-        if (totalCpmCount - 0. < DOUBLE_EQUALITY_COMPARISON_TOLERANCE) {
+        if (totalCpmCount < DOUBLE_EQUALITY_COMPARISON_TOLERANCE) {
             // No read counts per million for this enhancer.
             // No reason to process the enhancer
             return Optional.empty();

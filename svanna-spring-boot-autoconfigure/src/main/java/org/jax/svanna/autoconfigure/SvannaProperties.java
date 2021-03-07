@@ -54,6 +54,16 @@ public class SvannaProperties {
 
         private double tadStabilityThreshold = .25;
 
+        private double enhancerSpecificityThreshold = .5;
+
+        public double enhancerSpecificityThreshold() {
+            return enhancerSpecificityThreshold;
+        }
+
+        public void setEnhancerSpecificityThreshold(double enhancerSpecificityThreshold) {
+            this.enhancerSpecificityThreshold = enhancerSpecificityThreshold;
+        }
+
         public double tadStabilityThreshold() {
             return tadStabilityThreshold;
         }

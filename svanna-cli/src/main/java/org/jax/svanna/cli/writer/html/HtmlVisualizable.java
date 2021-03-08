@@ -62,17 +62,6 @@ public class HtmlVisualizable implements Visualizable {
         return variant.variantType().toString();
     }
 
-
-    @Override
-    public String getImpact() {
-        return svPriority.getImpact().toString();
-    }
-
-    @Override
-    public boolean hasPhenotypicRelevance() {
-        return this.svPriority.hasPhenotypicRelevance();
-    }
-
     @Override
     public List<HpoDiseaseSummary> diseaseSummaries() {
         return this.svPriority.getDiseases();

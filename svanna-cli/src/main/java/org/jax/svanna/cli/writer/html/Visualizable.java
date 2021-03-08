@@ -10,11 +10,7 @@ import java.util.List;
 
 public interface Visualizable {
 
-    String getImpact();
-
     String getType();
-
-    boolean hasPhenotypicRelevance();
 
     SvannaVariant variant();
 

@@ -228,21 +228,4 @@ public class AnnotateCommand extends SvAnnaCommand {
         return new FilterAndPrioritize<>(variantFilter, prioritizer);
     }
 
-    /**
-     * Parse input argument that specifies the desired output formats into a collection of {@link OutputFormat}s.
-     *
-     * @return a collection of output formats
-     */
-    private static Collection<OutputFormat> parseOutputFormats(String outputFormats) {
-        Set<OutputFormat> formats = new HashSet<>(2);
-        for (String format : outputFormats.split(",")) {
-            try {
-                formats.add(OutputFormat.valueOf(format.toUpperCase()));
-            } catch (IllegalArgumentException e) {
-                LogUtils.logWarn(LOGGER, "Ignoring invalid output format `{}`", format);
-            }
-        }
-        return formats;
-    }
-
 }

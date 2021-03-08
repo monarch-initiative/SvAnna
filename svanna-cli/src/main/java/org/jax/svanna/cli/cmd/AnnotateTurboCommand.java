@@ -192,7 +192,7 @@ public class AnnotateTurboCommand extends SvAnnaCommand {
 
             return 0;
         } catch (Exception e) {
-            LogUtils.logError(LOGGER, "Error occurred: {}", e.getMessage());
+            LogUtils.logError(LOGGER, "Error occurred: {}", e.getMessage(), e);
             return 1;
         }
     }

@@ -7,7 +7,6 @@ import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -17,12 +16,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<TadBoundary> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TadBoundaryDao.class);
+
+    private static final CoordinateSystem CS = CoordinateSystem.zeroBased();
 
     private final DataSource dataSource;
 
@@ -49,14 +51,17 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
 
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            String sql = "insert into SVANNA.TAD_BOUNDARY(CONTIG, START, END, ID, STABILITY) " +
-                    "VALUES ( ?, ?, ?, ?, ?)";
+            String sql = "insert into SVANNA.TAD_BOUNDARY(CONTIG, START, END, MIDPOINT, ID, STABILITY) " +
+                    "VALUES ( ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, item.contigId());
-                preparedStatement.setInt(2, item.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-                preparedStatement.setInt(3, item.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-                preparedStatement.setString(4, item.id());
-                preparedStatement.setFloat(5, item.stability());
+                int start = item.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CS);
+                int midpoint = start + item.length() / 2;
+                preparedStatement.setInt(2, start);
+                preparedStatement.setInt(3, item.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CS));
+                preparedStatement.setInt(4, midpoint);
+                preparedStatement.setString(5, item.id());
+                preparedStatement.setFloat(6, item.stability());
 
                 updated += preparedStatement.executeUpdate();
                 connection.commit();
@@ -81,64 +86,64 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
 
     @Override
     public List<TadBoundary> getOverlapping(GenomicRegion query) {
-        String sql = "select CONTIG, START, END, ID, STABILITY " +
+        String sql = "select CONTIG, MIDPOINT, ID, STABILITY " +
                 " from SVANNA.TAD_BOUNDARY " +
                 " where CONTIG = :contig " +
-                "   and :start < END " +
-                "   and START < :end " +
+                "   and :start < MIDPOINT " +
+                "   and MIDPOINT < :end " +
                 "   and STABILITY > :stability" +
-                " order by START";
+                " order by MIDPOINT";
         SqlParameterSource paramsSource = new MapSqlParameterSource()
                 .addValue("contig", query.contigId())
-                .addValue("start", query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
-                .addValue("end", query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .addValue("start", query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CS))
+                .addValue("end", query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CS))
                 .addValue("stability", stabilityThreshold);
         return template.query(sql, paramsSource, processResults());
-    }
-
-    private RowMapper<TadBoundary> processResults() {
-        return (rs, i) -> TadBoundaryDefault.of(
-                genomicAssembly.contigById(rs.getInt("CONTIG")),
-                Strand.POSITIVE, CoordinateSystem.zeroBased(),
-                Position.of(rs.getInt("START")),
-                Position.of(rs.getInt("END")),
-                rs.getString("ID"),
-                rs.getFloat("STABILITY"));
     }
 
     public Optional<TadBoundary> upstreamOf(GenomicRegion region) {
         SqlParameterSource paramSource = new MapSqlParameterSource()
                 .addValue("contig", region.contigId())
-                .addValue("position", region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .addValue("position", region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CS))
                 .addValue("stability", stabilityThreshold);
         String sql = region.strand().isPositive()
-                ? "select top 1 CONTIG, START, END, ID, STABILITY " +
+                ? "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and END < :position and STABILITY > :stability " +
-                "  order by END DESC"
+                "    where CONTIG = :contig and MIDPOINT < :position and STABILITY > :stability " +
+                "  order by MIDPOINT DESC"
 
-                : "select top 1 CONTIG, START, END, ID, STABILITY " +
+                : "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and START > :position and STABILITY > :stability " +
-                "  order by START";
+                "    where CONTIG = :contig and MIDPOINT > :position and STABILITY > :stability " +
+                "  order by MIDPOINT";
         return template.query(sql, paramSource, mapToTadBoundary(region.strand()));
     }
 
     public Optional<TadBoundary> downstreamOf(GenomicRegion region) {
         SqlParameterSource paramSource = new MapSqlParameterSource()
                 .addValue("contig", region.contigId())
-                .addValue("position", region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .addValue("position", region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CS))
                 .addValue("stability", stabilityThreshold);
         String sql = region.strand().isPositive()
-                ? "select top 1 CONTIG, START, END, ID, STABILITY " +
+                ? "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and START > :position and STABILITY > :stability " +
-                "  order by START"
-                : "select top 1 CONTIG, START, END, ID, STABILITY " +
+                "    where CONTIG = :contig and MIDPOINT > :position and STABILITY > :stability " +
+                "  order by MIDPOINT"
+                : "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and END < :position and STABILITY > :stability " +
-                "  order by END DESC";
+                "    where CONTIG = :contig and MIDPOINT < :position and STABILITY > :stability " +
+                "  order by MIDPOINT DESC";
         return template.query(sql, paramSource, mapToTadBoundary(region.strand()));
+    }
+
+    private ResultSetExtractor<List<TadBoundary>> processResults() {
+        return (rs) -> {
+            List<TadBoundary> boundaries = new LinkedList<>();
+            while (rs.next()) {
+                boundaries.add(mapRowToTadBoundary(rs));
+            }
+            return boundaries;
+        };
     }
 
     private ResultSetExtractor<Optional<TadBoundary>> mapToTadBoundary(Strand strand) {
@@ -151,11 +156,11 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         };
     }
 
-
     private TadBoundary mapRowToTadBoundary(ResultSet rs) throws SQLException {
+        Position pos = Position.of(rs.getInt("MIDPOINT"));
         return TadBoundaryDefault.of(genomicAssembly.contigById(rs.getInt("CONTIG")),
-                Strand.POSITIVE, CoordinateSystem.zeroBased(),
-                Position.of(rs.getInt("START")), Position.of(rs.getInt("END")),
+                Strand.POSITIVE, CS,
+                pos, pos,
                 rs.getString("ID"),
                 rs.getFloat("STABILITY"));
     }

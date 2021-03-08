@@ -46,6 +46,7 @@ public class TabularResultWriter implements ResultWriter {
                     .withHeader("CONTIG", "START", "END", "ID", "VTYPE", "PRIORITY")
                     .print(writer);
             analysisResults.variants().stream()
+                    .filter(sv -> !Double.isNaN(sv.svPriority().getPriority()))
                     .sorted(Comparator.comparing(Prioritized::svPriority).reversed())
                     .forEachOrdered(printVariant(printer));
         }

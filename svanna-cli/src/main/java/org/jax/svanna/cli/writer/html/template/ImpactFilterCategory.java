@@ -7,13 +7,10 @@ package org.jax.svanna.cli.writer.html.template;
  */
 public enum ImpactFilterCategory {
 
-    LOW_IMPACT("Low"),
-    INTERMEDIATE_IMPACT("Intermediate"),
-    HIGH_IMPACT("High"),
-    VERY_HIGH_IMPACT("Very high"),
-
+    PASS("Pass"),
     FILTERED("Filters"),
-    ALT_ALLELE_COUNT("Low alt allele count");
+    ALT_ALLELE_COUNT("Low alt allele count"),
+    UNABLE_TO_PRIORITIZE("Unable to prioritize");
 
     private final String name;
     ImpactFilterCategory(String name) {

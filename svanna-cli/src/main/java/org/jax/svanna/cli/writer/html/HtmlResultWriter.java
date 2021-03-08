@@ -9,7 +9,6 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.Overlapper;
-import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
@@ -53,27 +52,29 @@ public class HtmlResultWriter implements ResultWriter {
         LogUtils.logInfo(LOGGER, "Writing HTML results to `{}`", outPath.toAbsolutePath());
 
         LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", parameters.reportNVariants());
-        List<String> visualizations = results.variants().stream()
+        List<Visualizable> visualizables = results.variants().stream()
                 .filter(vp -> vp.numberOfAltReads() >= parameters.minAltReadSupport() && vp.passedFilters())
                 .sorted(prioritizedVariantComparator())
                 .map(visualizableGenerator::makeVisualizable)
+                .collect(Collectors.toList());
+
+        Map<String, String> variantCountSummary = summarizeVariantCounts(visualizables, parameters);
+        variantCountSummary.put("vcf_file", results.variantSource());
+
+        List<String> visualizations = visualizables.stream()
                 .map(visualizer::getHtml)
                 .limit(parameters.reportNVariants())
                 .collect(Collectors.toList());
 
-        Map<String, String> variantCountSummary = summarizeVariantCounts(results, parameters);
 
         HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.topLevelPhenotypeTerms(), results.probandPhenotypeTerms());
         template.outputFile(outPath);
     }
 
-    private Map<String, String> summarizeVariantCounts(AnalysisResults results, HtmlResultFormatParameters parameters) {
-        List<? extends SvannaVariant> variants = results.variants();
-        List<SvPriority> priorities = variants.stream().map(SvannaVariant::svPriority).collect(Collectors.toList());
-        FilterAndCount fac = new FilterAndCount(priorities, variants, parameters.threshold(), parameters.minAltReadSupport());
+    private Map<String, String> summarizeVariantCounts(List<Visualizable> visualizables, HtmlResultFormatParameters parameters) {
+        FilterAndCount fac = new FilterAndCount(visualizables, parameters.minAltReadSupport());
 
         Map<String, String> infoMap = new HashMap<>();
-        infoMap.put("vcf_file", results.variantSource());
         infoMap.put("unparsable", String.valueOf(fac.getUnparsableCount()));
         infoMap.put("n_affectedGenes", String.valueOf(fac.getnAffectedGenes()));
         infoMap.put("n_affectedEnhancers", String.valueOf(fac.getnAffectedEnhancers()));

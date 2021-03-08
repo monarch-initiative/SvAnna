@@ -1,15 +1,11 @@
 package org.jax.svanna.cli.writer.html.template;
 
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.cli.writer.html.Visualizable;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.priority.DiscreteSvPriority;
-import org.jax.svanna.core.priority.SvImpact;
-import org.jax.svanna.core.priority.SvPriority;
+import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.VariantType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,74 +17,59 @@ import static org.jax.svanna.cli.writer.html.template.ImpactFilterCategory.*;
  */
 public class FilterAndCount {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FilterAndCount.class);
-
     private final Map<ImpactFilterCategory, Map<VariantType, Integer>> categoryToByVariantTypeCountMap;
 
-    // TODO - figure out how to provide these numbers without having to keeep AnnotatedSvPriority in memory
-    /** Number of distinct gene symbols annotated as affected in any way by a structural variant. */
-    private final int nAffectedGenes = -1;
-    /** Number of distinct enhancers annotated as affected in any way by a structural variant. */
-    private final int nAffectedEnhancers = -1;
+    /**
+     * Number of distinct gene symbols annotated as affected in any way by a structural variant.
+     */
+    private final int nAffectedGenes;
+    /**
+     * Number of distinct enhancers annotated as affected in any way by a structural variant.
+     */
+    private final int nAffectedEnhancers;
 
-    private final int unparsableCount = -1;
-
-    private final int minAltAlleleCount;
+    private final int unableToBePrioritized;
 
 
-    public FilterAndCount(List<? extends SvPriority> priorityList,
-                          List<? extends SvannaVariant> variants,
-                          SvImpact threshold,
-                          int minAltAllele) {
+    public FilterAndCount(List<Visualizable> visualizables, int minAltAllele) {
         this.categoryToByVariantTypeCountMap = new HashMap<>();
-        this.minAltAlleleCount = minAltAllele;
         for (var cat : ImpactFilterCategory.values()) {
             this.categoryToByVariantTypeCountMap.put(cat, new HashMap<>());
             // Initialize the count maps to be zero for all SvTypes
-            var countmap = categoryToByVariantTypeCountMap.get(cat);
-            Arrays.stream(VariantType.values()).forEach(v -> countmap.put(v, 0));
+            var countMap = categoryToByVariantTypeCountMap.get(cat);
+            Arrays.stream(VariantType.values()).forEach(v -> countMap.put(v, 0));
         }
         Set<Enhancer> affectedEnhancers = new HashSet<>();
         Set<String> affectedGenes = new HashSet<>();
         int unknown = 0;
 
-        if (priorityList.size() != variants.size()) {
-            LOGGER.warn("Number of priorities and variants does not match: {}!={}", priorityList.size(), variants.size());
-            throw new SvAnnRuntimeException("Number of priorities and variants does not match");
-        }
-
         // iterate through priorities and rearrangements
-        for (int i = 0; i < priorityList.size(); i++) {
-            SvPriority svPriority = priorityList.get(i);
-            SvannaVariant variant = variants.get(i);
-            if (variant.numberOfAltReads() < 2) {
+        for (Visualizable visualizable : visualizables) {
+            SvannaVariant variant = visualizable.variant();
+            if (variant.numberOfAltReads() < minAltAllele) {
                 this.categoryToByVariantTypeCountMap.get(ALT_ALLELE_COUNT).merge(variant.variantType(), 1, Integer::sum);
             } else if (!variant.passedFilters()) {
                 this.categoryToByVariantTypeCountMap.get(FILTERED).merge(variant.variantType(), 1, Integer::sum);
             } else {
-                double priority = svPriority.getPriority();
-                if (priority >= .8) {
-                    this.categoryToByVariantTypeCountMap.get(VERY_HIGH_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                } else if (priority >= .6) {
-                    this.categoryToByVariantTypeCountMap.get(HIGH_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                } else if (priority >= .4) {
-                    this.categoryToByVariantTypeCountMap.get(INTERMEDIATE_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                } else if (priority >= .2) {
-                    this.categoryToByVariantTypeCountMap.get(LOW_IMPACT).merge(variant.variantType(), 1, Integer::sum);
-                } else {
+                this.categoryToByVariantTypeCountMap.get(PASS).merge(variant.variantType(), 1, Integer::sum);
+                double priority = variant.svPriority().getPriority();
+                if (Double.isNaN(priority))
                     unknown++;
-                }
             }
+            Set<String> symbols = visualizable.overlaps().stream()
+                    .map(Overlap::getGeneSymbol)
+                    .collect(Collectors.toSet());
+            affectedGenes.addAll(symbols);
+            affectedEnhancers.addAll(visualizable.enhancers());
         }
-    }
-
-    public FilterAndCount(List<? extends DiscreteSvPriority> priorityList, List<? extends SvannaVariant> variants, int minAltAllele) {
-        this(priorityList, variants, SvImpact.HIGH, minAltAllele);
+        unableToBePrioritized = unknown;
+        nAffectedGenes = affectedGenes.size();
+        nAffectedEnhancers = affectedEnhancers.size();
     }
 
 
     public int getUnparsableCount() {
-        return unparsableCount;
+        return unableToBePrioritized;
     }
 
     public int getnAffectedGenes() {
@@ -99,7 +80,61 @@ public class FilterAndCount {
         return nAffectedEnhancers;
     }
 
-    private String header() {
+    public String toHtmlTable() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(filterAndCountHeader());
+        Map<ImpactFilterCategory, Integer> categoryToCountMap = new HashMap<>();
+        for (var ifc : ImpactFilterCategory.values()) {
+            categoryToCountMap.put(ifc, 0);
+        }
+
+        Map<VariantType, Integer> variantTypeTotals = new HashMap<>();
+        for (VariantType vt : VariantType.values()) {
+            int rowTotal = getRowTotal(vt);
+            if (rowTotal == 0) {
+                variantTypeTotals.put(vt, 0);
+            } else {
+                sb.append("<tr><td>").append(vt.toString()).append("</td>");
+                int totalForVariantType = 0;
+                for (ImpactFilterCategory cat : ImpactFilterCategory.values()) {
+                    int count = categoryToByVariantTypeCountMap.get(cat).getOrDefault(vt, 0);
+                    categoryToCountMap.merge(cat, count, Integer::sum);
+                    totalForVariantType += count;
+                    sb.append("<td>").append(count).append("</td>");
+                }
+                sb.append("<td>").append(totalForVariantType).append("</td>\n");
+                variantTypeTotals.put(vt, totalForVariantType);
+            }
+        }
+        sb.append("<tfoot><tr><td>Total</td>");
+        for (var cat : ImpactFilterCategory.values()) {
+            sb.append("<td>").append(categoryToCountMap.get(cat)).append("</td>");
+        }
+        int total = categoryToCountMap.values().stream().mapToInt(Integer::intValue).sum();
+        sb.append("<td>").append(total).append("</td>");
+        sb.append("</tr></tfoot>");
+        sb.append("</table>\n");
+
+        List<String> zeroCountTypes = variantTypeTotals.entrySet()
+                .stream()
+                .filter(e -> e.getValue() == 0)
+                .map(e -> e.getKey().name())
+                .sorted()
+                .collect(Collectors.toList());
+        sb.append("<p>The following variant types had no counts: ").append(String.join(", ", zeroCountTypes)).append("</p>\n");
+        return sb.toString();
+    }
+
+    private int getRowTotal(VariantType vt) {
+        int total = 0;
+        for (ImpactFilterCategory ifc: ImpactFilterCategory.values()) {
+            int count = categoryToByVariantTypeCountMap.get(ifc).getOrDefault(vt, 0);
+            total += count;
+        }
+        return total;
+    }
+
+    private String filterAndCountHeader() {
         StringBuilder sb = new StringBuilder();
         sb.append("<table class=\"counts\">\n");
         sb.append("<caption>Variant counts</caption>");
@@ -112,54 +147,5 @@ public class FilterAndCount {
         sb.append("<th>Total</th>");
         sb.append("</tr></thead>\n");
         return sb.toString();
-    }
-
-    int getRowTotal(VariantType vt) {
-        int total = 0;
-        for (ImpactFilterCategory ifc: ImpactFilterCategory.values()) {
-            int count = categoryToByVariantTypeCountMap.get(ifc).getOrDefault(vt, 0);
-            total += count;
-        }
-        return total;
-    }
-
-    public String toHtmlTable() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(header());
-        Map<VariantType, Integer> variantTypeTotals = new HashMap<>();
-        Map<ImpactFilterCategory, Integer> categoryToCountMap = new HashMap<>();
-        for (var ifc : ImpactFilterCategory.values()) { categoryToCountMap.put(ifc, 0); }
-        for (VariantType vt : VariantType.values()) {
-            int totalForVariantType = getRowTotal(vt);
-            if (totalForVariantType == 0) {
-                variantTypeTotals.put(vt, 0);
-            } else {
-                sb.append("<tr><td>").append(vt.toString()).append("</td>");
-                for (ImpactFilterCategory cat : ImpactFilterCategory.values()) {
-                    int count = categoryToByVariantTypeCountMap.get(cat).getOrDefault(vt, 0);
-                    categoryToCountMap.merge(cat, count, Integer::sum);
-                    totalForVariantType += count;
-                    sb.append("<td>").append(count).append("</td>");
-                }
-                sb.append("<td>").append(totalForVariantType).append("</td>\n");
-                variantTypeTotals.put(vt, totalForVariantType);
-            }
-        }
-        List<String> zeroCountTypes = variantTypeTotals.entrySet()
-                .stream()
-                .filter(e -> e.getValue() == 0)
-                .map(e -> e.getKey().name())
-                .sorted()
-                .collect(Collectors.toList());
-        sb.append("<tfoot><tr><td>Total</td>");
-        for (var cat : ImpactFilterCategory.values()) {
-            sb.append("<td>").append(categoryToCountMap.get(cat)).append("</td>");
-        }
-        int total = categoryToCountMap.values().stream().mapToInt(Integer::intValue).sum();
-        sb.append("<td>").append(total).append("</td>");
-        sb.append("</tr></tfoot>");
-        sb.append("</table>\n");
-        sb.append("<p>The following variant types had no counts: ").append(String.join(", ", zeroCountTypes)).append("</p>\n");
-       return sb.toString();
     }
 }

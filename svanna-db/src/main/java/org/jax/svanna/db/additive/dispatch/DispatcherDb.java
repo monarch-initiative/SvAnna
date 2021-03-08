@@ -35,7 +35,7 @@ public class DispatcherDb implements Dispatcher {
         return Routes.of(reference, alternate);
     }
 
-    private static <T extends Variant> GenomicRegion buildReferencePath(GenomicRegion upstream, GenomicRegion downstream) {
+    private static GenomicRegion buildReferencePath(GenomicRegion upstream, GenomicRegion downstream) {
         validateReferenceInput(upstream, downstream);
 
         return GenomicRegion.of(upstream.contig(), upstream.strand(), upstream.coordinateSystem(),
@@ -43,7 +43,7 @@ public class DispatcherDb implements Dispatcher {
                 downstream.endOnStrandWithCoordinateSystem(upstream.strand(), upstream.coordinateSystem()));
     }
 
-    private static <T extends Variant> void validateReferenceInput(GenomicRegion upstream, GenomicRegion downstream) {
+    private static void validateReferenceInput(GenomicRegion upstream, GenomicRegion downstream) {
         if (upstream == null)
             throw new IllegalArgumentException("Upstream region cannot be null");
 

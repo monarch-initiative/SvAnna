@@ -146,12 +146,32 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
                     GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), tadPosition, reference.endPosition())
             );
         } else {
-            List<GenomicRegion> regions = new ArrayList<>(tadBoundaries.size() - 1);
-            for (int i = 1; i < tadBoundaries.size(); i++) {
-                TadBoundary previous = tadBoundaries.get(i - 1);
-                TadBoundary current = tadBoundaries.get(i);
-                regions.add(GenomicRegion.of(current.contig(), current.strand(), current.coordinateSystem(), previous.asPosition(), current.asPosition()));
+            List<TadBoundary> sortedTads = tadBoundaries.stream()
+                    .sorted(Comparator.comparingInt(tb -> tb.withStrand(reference.strand()).asPosition().pos()))
+                    .collect(Collectors.toList());
+
+            LinkedList<GenomicRegion> regions = new LinkedList<>();
+            Position previous = sortedTads.get(0).withStrand(reference.strand()).asPosition();
+            for (int i = 1; i < sortedTads.size(); i++) {
+                Position current = sortedTads.get(i).withStrand(reference.strand()).asPosition();
+                regions.add(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), previous, current));
+                previous = current;
             }
+
+            GenomicRegion first = regions.removeFirst();
+            int firstStart = first.startOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem());
+            if (firstStart > reference.start())
+                regions.addFirst(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.startPosition(), first.endPosition()));
+            else
+                regions.addFirst(first);
+
+            GenomicRegion last = regions.removeLast();
+            int lastEnd = last.endOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem());
+            if (lastEnd < reference.end())
+                regions.addLast(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), last.startPosition(), reference.endPosition()));
+            else
+                regions.addLast(last);
+
             return regions;
         }
     }

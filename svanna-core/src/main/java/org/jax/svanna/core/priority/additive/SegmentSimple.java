@@ -58,6 +58,7 @@ class SegmentSimple extends BaseGenomicRegion<SegmentSimple> implements Segment 
     @Override
     public String toString() {
         return "SegmentSimple{" +
+                contigId() + ':' + start() + '-' + end() + ' ' + strand() + ' ' +
                 "id='" + id + '\'' +
                 ", copies=" + copies +
                 '}';

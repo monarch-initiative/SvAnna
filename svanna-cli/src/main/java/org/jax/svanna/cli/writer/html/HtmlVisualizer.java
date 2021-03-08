@@ -58,13 +58,47 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
+    @Override
+    public String getHtml(Visualizable visualizable) {
+        int totalAffectedGeneCount = visualizable.getGeneCount();
+        if (totalAffectedGeneCount > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
+            return getMultigeneSequencePrioritization(visualizable);
+        }
+        StringBuilder sb = new StringBuilder();
+
+        List<HtmlLocation> locations = visualizable.locations();
+        String variantString = getVariantRepresentation(visualizable, locations);
+        sb.append("<h1>").append(variantString);
+
+        String predImpact = String.format("Priority: %.2f", visualizable.variant().svPriority().getPriority());
+        sb.append(" &emsp; ").append(predImpact);
+
+        Zygosity zygosity = visualizable.variant().zygosity();
+        String zygo = zygosity.equals(Zygosity.UNKNOWN)
+                ? "[unknown genotype]"
+                : String.format("[%s]", zygosity.name().toLowerCase());
+        sb.append(" &emsp; ").append(zygo).append("</h1>\n");
+        sb.append("<div class=\"row\">\n");
+        sb.append("<div class=\"column\" style=\"background-color:#F8F8F8;\">\n");
+        sb.append(getSequencePrioritization(visualizable)).append("\n");
+        sb.append("</div>\n");
+        sb.append("<div class=\"column\" style=\"background-color:#F0F0F0;\">\n");
+        sb.append(getOverlapSummary(visualizable)).append("\n");
+        sb.append("</div>\n");
+        sb.append("</div>\n");
+        String svg = getSvgString(visualizable);
+        sb.append(svg);
+
+        return sb.toString();
+    }
+
     /**
      * Creates a link to the UCSCS browser that shows the position of the SV using a color highlight
      *
      * @param hloc Location of (part of) the SV
      * @return an HTML link to the UCSC Genome browser
      */
-    String getUcscLink(HtmlLocation hloc) {
+    private String getUcscLink(HtmlLocation hloc) {
         final String hg38ucsc = "gc5Base=dense&snp150Common=hide&gtexGene=hide&dgvPlus=hide&pubs=hide&knownGene=hide&ncbiRefSeqView=pack&OmimAvSnp=hide";
         String chrom = hloc.getChrom().startsWith("chr") ? hloc.getChrom() : "chr" + hloc.getChrom();
         int sVbegin = hloc.getBegin();
@@ -130,7 +164,7 @@ public class HtmlVisualizer implements Visualizer {
 
 
 
-    String getSvgString(Visualizable visualizable) {
+    private String getSvgString(Visualizable visualizable) {
         SvannaVariant variant = visualizable.variant();
         if (visualizable.getGeneCount() > 10) {
             return EMPTY_STRING;
@@ -237,37 +271,7 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
-    @Override
-    public String getHtml(Visualizable visualizable) {
-        int totalAffectedGeneCount = visualizable.getGeneCount();
-        if (totalAffectedGeneCount > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
-            return getMultigeneSequencePrioritization(visualizable);
-        }
-        List<HtmlLocation> locations = visualizable.locations();
-        String variantString = getVariantRepresentation(visualizable, locations);
-        String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
-        Zygosity zygosity = visualizable.variant().zygosity();
-        String zygo = zygosity.equals(Zygosity.UNKNOWN) ?
-                "[unknown genotype]" :
-                String.format("[%s]", zygosity.name().toLowerCase());
-        StringBuilder sb = new StringBuilder();
-        sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact)
-                .append(" &emsp; ").append(zygo).append("</h1>\n");
-        sb.append("<div class=\"row\">\n");
-        sb.append("<div class=\"column\" style=\"background-color:#F8F8F8;\">\n");
-        sb.append(getSequencePrioritization(visualizable)).append("\n");
-        sb.append("</div>\n");
-        sb.append("<div class=\"column\" style=\"background-color:#F0F0F0;\">\n");
-        sb.append(getOverlapSummary(visualizable)).append("\n");
-        sb.append("</div>\n");
-        sb.append("</div>\n");
-        String svg = getSvgString(visualizable);
-        sb.append(svg);
-
-        return sb.toString();
-    }
-
-    String getEnhancerSummary(Enhancer e) {
+    private String getEnhancerSummary(Enhancer e) {
         String tissues = e.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
         String tissueLabel = String.format("%s; tau %.2f", tissues, e.tau());
        return String.format("%s:%d-%d [%s]", e.contig().ucscName(), e.start(), e.end(), tissueLabel);
@@ -278,7 +282,7 @@ public class HtmlVisualizer implements Visualizer {
         return String.format("<tr><td><b>%s</b></td><td>%s</td></tr>\n", item, row);
     }
 
-    String affectedSymbols(Visualizable visualizable) {
+    private String affectedSymbols(Visualizable visualizable) {
         List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
         Collections.sort(genes);
@@ -292,7 +296,7 @@ public class HtmlVisualizer implements Visualizer {
         return sb.toString();
     }
 
-    String numerousAffectedSymbols(Visualizable visualizable) {
+    private String numerousAffectedSymbols(Visualizable visualizable) {
         List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
         Collections.sort(genes);
@@ -329,7 +333,7 @@ public class HtmlVisualizer implements Visualizer {
         return sb.toString();
     }
 
-    String numerousEnhancers(Visualizable visualizable) {
+    private String numerousEnhancers(Visualizable visualizable) {
         List<Enhancer> enhancerList = visualizable.enhancers();
         Map<String, Integer> enhancerMap = new HashMap<>();
         for (Enhancer e : enhancerList) {
@@ -355,7 +359,7 @@ public class HtmlVisualizer implements Visualizer {
     }
 
 
-    String getSequencePrioritization(Visualizable visualizable) {
+    private String getSequencePrioritization(Visualizable visualizable) {
         SvannaVariant variant = visualizable.variant();
         StringBuilder sb = new StringBuilder();
         int minSequenceDepth = variant.minDepthOfCoverage();
@@ -369,7 +373,6 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
         sb.append(itemValueRow("type", visualizable.getType()));
-        sb.append(itemValueRow("impact", visualizable.getImpact()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
@@ -419,7 +422,7 @@ public class HtmlVisualizer implements Visualizer {
                 "[unknown genotype]" :
                 String.format("[%s]", zygosity.name().toLowerCase());
         String idString = visualizable.variant().id();
-        String predImpact = String.format("Predicted impact: %s", visualizable.getImpact());
+        String predImpact = String.format("Priority: %.2f", visualizable.variant().svPriority().getPriority());
         sb.append("<h1>").append(variantString).append(" &emsp; ").append(predImpact)
                 .append(" &emsp; ").append(zygo).append("</h1>\n");
         sb.append("<div class=\"row\">\n");
@@ -428,7 +431,6 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
         sb.append(itemValueRow("type", visualizable.getType()));
-        sb.append(itemValueRow("impact", visualizable.getImpact()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");

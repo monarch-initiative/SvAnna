@@ -42,7 +42,9 @@ public class Main implements Callable<Integer>  {
                 .setColorScheme(COLOR_SCHEME)
                 .addSubcommand("download", new DownloadCommand())
                 .addSubcommand("generate-config", new GenerateConfigCommand())
-                .addSubcommand("annotate", new AnnotateCommand());
+                .addSubcommand("annotate", new AnnotateCommand())
+                .addSubcommand("annotate-turbo", new AnnotateTurboCommand())
+                .addSubcommand("annotate-cases", new AnnotateCasesCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));
     }

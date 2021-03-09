@@ -26,7 +26,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
             Event.GAP, 1.,
             Event.SNV, .85,
             Event.DUPLICATION, .3,
-            Event.INSERTION, .2,
+            Event.INSERTION, .1,
             Event.DELETION, .1,
             Event.INVERSION, .0,
             Event.BREAKEND, .0

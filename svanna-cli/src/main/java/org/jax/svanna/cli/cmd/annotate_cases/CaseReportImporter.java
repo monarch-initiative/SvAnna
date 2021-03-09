@@ -77,7 +77,7 @@ class CaseReportImporter {
 
 
     private static Optional<CaseReport> importPhenopacket(Path casePath) {
-        LogUtils.logDebug(LOGGER, "Parsing `{}`", casePath);
+        LogUtils.logTrace(LOGGER, "Parsing `{}`", casePath);
         String payload;
         try (BufferedReader reader = Files.newBufferedReader(casePath)) {
             payload = reader.lines().collect(Collectors.joining());

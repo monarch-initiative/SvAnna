@@ -5,12 +5,12 @@ svanna:
   # path to Jannovar transcript database
   jannovarCachePath:
 
-  dataParameters:
+  #dataParameters:
     # TAD must be present in at least 25% of the tissues to be included in the analysis
     #tadStabilityThreshold: 0.25
     # Enhancer must have at least 50% specificity to a tissue
     #enhancerSpecificityThreshold: 0.5
-  prioritizationParameters:
+  #prioritizationParameters:
     # term similarity measure, choose from {RESNIK_SYMMETRIC, RESNIK_ASYMMETRIC}
     #termSimilarityMeasure: RESNIK_SYMMETRIC
     # An event involving max N genes to be considered by the prototype prioritizer

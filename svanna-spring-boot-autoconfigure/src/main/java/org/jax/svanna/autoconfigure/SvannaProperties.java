@@ -14,15 +14,25 @@ public class SvannaProperties {
 
     @NestedConfigurationProperty
     private DataParameters dataParameters = new DataParameters();
+
     @NestedConfigurationProperty
     private PrioritizationParameters prioritizationParameters = new PrioritizationParameters();
 
-    public PrioritizationParameters phenotypeParameters() {
-        return prioritizationParameters;
+
+    public String dataDirectory() {
+        return dataDirectory;
     }
 
-    public void setPhenotypeParameters(PrioritizationParameters prioritizationParameters) {
-        this.prioritizationParameters = prioritizationParameters;
+    public void setDataDirectory(String dataDirectory) {
+        this.dataDirectory = dataDirectory;
+    }
+
+    public String jannovarCachePath() {
+        return jannovarCachePath;
+    }
+
+    public void setJannovarCachePath(String jannovarCachePath) {
+        this.jannovarCachePath = jannovarCachePath;
     }
 
     public DataParameters dataParameters() {
@@ -34,20 +44,12 @@ public class SvannaProperties {
     }
 
 
-    public String jannovarCachePath() {
-        return jannovarCachePath;
+    public PrioritizationParameters prioritizationParameters() {
+        return prioritizationParameters;
     }
 
-    public void setJannovarCachePath(String jannovarCachePath) {
-        this.jannovarCachePath = jannovarCachePath;
-    }
-
-    public String dataDirectory() {
-        return dataDirectory;
-    }
-
-    public void setDataDirectory(String dataDirectory) {
-        this.dataDirectory = dataDirectory;
+    public void setPrioritizationParameters(PrioritizationParameters prioritizationParameters) {
+        this.prioritizationParameters = prioritizationParameters;
     }
 
     public static class DataParameters {

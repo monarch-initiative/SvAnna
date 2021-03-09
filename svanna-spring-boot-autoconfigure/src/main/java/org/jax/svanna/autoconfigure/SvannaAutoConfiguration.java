@@ -119,7 +119,7 @@ public class SvannaAutoConfiguration {
         Set<GeneWithId> geneWithIds = hap.getGeneIdToSymbolMap().entrySet().stream().map(e -> GeneWithId.of(e.getValue(), e.getKey())).collect(Collectors.toSet());
 
         SimilarityScoreCalculator similarityScoreCalculator;
-        SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.phenotypeParameters().termSimilarityMeasure();
+        SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.prioritizationParameters().termSimilarityMeasure();
         LogUtils.logDebug(LOGGER, "Initializing phenotype term similarity calculator `{}`", similarityMeasure);
 
         if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {

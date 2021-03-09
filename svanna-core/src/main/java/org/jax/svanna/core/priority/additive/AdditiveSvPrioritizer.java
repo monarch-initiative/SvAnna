@@ -34,6 +34,9 @@ public class AdditiveSvPrioritizer<V extends Variant, D extends RouteData> imple
             double score = routeDataEvaluator.evaluate(data);
 
             return SvPriority.of(score, true);
+        } catch (IntrachromosomalBreakendException e) {
+            LogUtils.logTrace(LOGGER, "Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
+            return SvPriority.unknown();
         } catch (DispatchException e) {
             LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
             return SvPriority.unknown();

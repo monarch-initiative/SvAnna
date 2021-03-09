@@ -53,8 +53,6 @@ public class HtmlResultWriter implements ResultWriter {
 
         LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", parameters.reportNVariants());
         List<Visualizable> visualizables = results.variants().stream()
-                .filter(vp -> vp.numberOfAltReads() >= parameters.minAltReadSupport() && vp.passedFilters())
-                .sorted(prioritizedVariantComparator())
                 .map(visualizableGenerator::makeVisualizable)
                 .collect(Collectors.toList());
 
@@ -62,6 +60,10 @@ public class HtmlResultWriter implements ResultWriter {
         variantCountSummary.put("vcf_file", results.variantSource());
 
         List<String> visualizations = visualizables.stream()
+                .filter(vp -> vp.variant().numberOfAltReads() >= parameters.minAltReadSupport()
+                        && vp.variant().passedFilters()
+                        && !Double.isNaN(vp.variant().svPriority().getPriority()))
+                .sorted(prioritizedVariantComparator())
                 .map(visualizer::getHtml)
                 .limit(parameters.reportNVariants())
                 .collect(Collectors.toList());
@@ -82,12 +84,15 @@ public class HtmlResultWriter implements ResultWriter {
         return infoMap;
     }
 
-    private static Comparator<? super SvannaVariant> prioritizedVariantComparator() {
+    private static Comparator<? super Visualizable> prioritizedVariantComparator() {
         return (l, r) -> {
-            int priority = r.svPriority().compareTo(l.svPriority()); // the order is intentional
+            SvannaVariant rv = r.variant();
+            SvannaVariant lv = l.variant();
+
+            int priority = rv.svPriority().compareTo(lv.svPriority()); // the order is intentional
             if (priority != 0)
                 return priority;
-            return Variant.compare(l, r);
+            return Variant.compare(lv, rv);
         };
     }
 

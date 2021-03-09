@@ -1,6 +1,7 @@
 package org.jax.svanna.db.additive.dispatch;
 
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.priority.additive.IntrachromosomalBreakendException;
 import org.monarchinitiative.svart.*;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ class RouteAssembly {
         Breakend right = breakend.right();
         if (left.contig().equals(right.contig()))
             // TODO - evaluate
-            throw new RouteAssemblyException("Intrachromosomal breakends are not currently supported: " + LogUtils.variantSummary(breakend));
+            throw new IntrachromosomalBreakendException("Intrachromosomal breakends are not currently supported: " + LogUtils.variantSummary(breakend));
 
         List<V> leftSorted = variants.stream()
                 .filter(v -> v.contig().equals(left.contig()) && !v.equals(breakend))

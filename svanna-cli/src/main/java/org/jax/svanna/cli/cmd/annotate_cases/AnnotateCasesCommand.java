@@ -19,7 +19,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import picocli.CommandLine;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,7 +61,7 @@ public class AnnotateCasesCommand extends SvAnnaCommand {
 
     @Override
     public Integer call() {
-        List<CaseReport> cases = readCaseReports();
+        List<CaseReport> cases = CaseReportImporter.readCaseReports(caseReports, caseReportPath);
 
         Map<String, Map<Variant, SvPriority>> results = new HashMap<>();
         try (ConfigurableApplicationContext context = getContext()) {
@@ -103,48 +102,6 @@ public class AnnotateCasesCommand extends SvAnnaCommand {
         }
 
         return 0;
-    }
-
-    private List<CaseReport> readCaseReports() {
-        List<CaseReport> cases = new ArrayList<>();
-
-        cases.addAll(readCasesProvidedAsPositionalArguments());
-        cases.addAll(readCasesProvidedViaCaseFolderOption());
-
-        cases.sort(Comparator.comparing(CaseReport::caseName));
-        return cases;
-    }
-
-    private List<CaseReport> readCasesProvidedAsPositionalArguments() {
-        if (caseReports != null) {
-            return caseReports.stream()
-                    .map(CaseReportImporter::importCase)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toList());
-        }
-        return List.of();
-    }
-
-    private List<CaseReport> readCasesProvidedViaCaseFolderOption() {
-        if (caseReportPath != null) {
-            File caseReportFile = caseReportPath.toFile();
-            if (caseReportFile.isDirectory()) {
-                File[] jsons = caseReportFile.listFiles(f -> f.getName().endsWith(".json"));
-                if (jsons != null) {
-                    LogUtils.logDebug(LOGGER, "Found {} JSON files in `{}`", jsons.length, caseReportPath.toAbsolutePath());
-                    return Arrays.stream(jsons)
-                            .map(File::toPath)
-                            .map(CaseReportImporter::importCase)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .collect(Collectors.toList());
-                }
-            } else {
-                LogUtils.logWarn(LOGGER, "Skipping not-a-folder `{}`", caseReportPath);
-            }
-        }
-        return List.of();
     }
 
     private void writeOutTheResults(Map<String, Map<Variant, SvPriority>> results) throws IOException {

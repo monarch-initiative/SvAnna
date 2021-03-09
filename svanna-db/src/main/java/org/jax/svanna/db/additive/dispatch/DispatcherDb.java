@@ -2,6 +2,7 @@ package org.jax.svanna.db.additive.dispatch;
 
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.priority.additive.*;
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.*;
 
 import java.util.LinkedList;
@@ -145,10 +146,21 @@ public class DispatcherDb implements Dispatcher {
                                     left.id(), Event.BREAKEND, 1),
                             Segment.of(right.contig(), right.strand(), CS,
                                     right.startPositionWithCoordinateSystem(CS), right.endPositionWithCoordinateSystem(CS),
-                                    right.id(), Event.BREAKEND,  1));
+                                    right.id(), Event.BREAKEND, 1));
                     break;
                 } catch (ClassCastException e) {
                     throw new DispatchException("Should have been breakend but was " + variant.getClass().getSimpleName());
+                }
+            case CNV:
+                if (variant instanceof SvannaVariant) {
+                    SvannaVariant sv = (SvannaVariant) variant;
+                    int copyNumber = sv.copyNumber();
+                    if (copyNumber < 1 || copyNumber == 2)
+                        throw new DispatchException("Copy number was `" + copyNumber + "` for variant `" + LogUtils.variantSummary(variant) + "`");
+
+                    segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
+                            variant.id(), Event.DELETION, copyNumber - 1));
+                    break;
                 }
             default:
                 throw new DispatchException("Unsupported variant type " + variant.variantType());

@@ -51,6 +51,13 @@ public class Projections {
             return List.of();
         }
 
+        if (query.length() == 0) {
+            if (startSegmentIdx == endSegmentIdx - 1)
+                startSegmentIdx++; // TODO - is this dirty hack working?
+            else if (startSegmentIdx - 1 == endSegmentIdx)
+                endSegmentIdx++;
+        }
+
         if (startSegmentIdx == endSegmentIdx) {
             return processIntraSegmentEvent(query, startSegmentIdx, route);
         } else {
@@ -149,6 +156,8 @@ public class Projections {
                             .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                             .addAllSpannedEvents(spannedLocations)
                             .build());
+                case INSERTION:
+                    // TODO - fix
                 default:
                     LogUtils.logWarn(LOGGER, "Unexpected end event `{}`", endEvent);
                     return List.of();
@@ -170,6 +179,8 @@ public class Projections {
                             .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                             .addAllSpannedEvents(spannedLocations)
                             .build());
+                case INSERTION:
+                    // TODO - fix
                 default:
                     LogUtils.logWarn(LOGGER, "Unexpected start event `{}`", startEvent);
                     return List.of();

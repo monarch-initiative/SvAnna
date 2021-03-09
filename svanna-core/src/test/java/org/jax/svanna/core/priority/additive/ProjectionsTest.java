@@ -20,49 +20,6 @@ import static org.hamcrest.Matchers.*;
 
 public class ProjectionsTest {
 
-//    @ParameterizedTest
-//    @CsvSource({
-//            "one,  30,  55,   true, 10, 25",
-//            "two, 130, 160,   true, 30, 65",
-//
-//            // trimmed
-//            "one,  30,  45,   true, 10, 20",
-//    })
-//    @Disabled
-//    public void projectOnDelBndDup(String ctg, int start, int end, boolean expected, int expectedStart, int expectedEnd) {
-//        TestContig ctg1 = TestContig.of(0, 100);
-//        TestContig ctg2 = TestContig.of(1, 200);
-//        Route delBnd = Route.of(
-//                List.of(
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "upstream", Event.GAP, 1),      // 20 (20)
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "deletion", Event.DELETION, 0),      // 0  (20)
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(55), "gap-1", Event.GAP, 1),         // 5  (25)
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(55), Position.of(55), "bndA", Event.BREAKEND, 1),          // 0  (25)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(125), Position.of(125), "bndB", Event.BREAKEND, 1),        // 0  (25)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(125), Position.of(145), "gap-2", Event.GAP, 1),       // 20 (45)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(145), Position.of(150), "duplication", Event.DUPLICATION, 2), // 10 (55)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(150), Position.of(180), "downstream", Event.GAP, 1)   // 30 (85)
-//                ));
-//
-//        GenomicRegion query = GenomicRegion.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-//
-//        List<Projection<GenomicRegion>> projectOpt = Projections.projectAll(query, delBnd);
-//
-//        assertThat(!projectOpt.isEmpty(), equalTo(expected));
-//        if (!projectOpt.isEmpty()) {
-//            Projection<GenomicRegion> projection = projectOpt.get(0);
-//            assertThat(projection.start(), equalTo(expectedStart));
-//            assertThat(projection.end(), equalTo(expectedEnd));
-//        }
-//    }
-
-    private static void printOutProjection(Projection<GenomicRegion> projection) {
-        System.err.println(projection.startLocation());
-        System.err.println(projection.endLocation());
-        System.err.println(projection.spannedLocations());
-        System.err.println(projection.source());
-    }
-
     @Nested
     public class SimpleAll {
 
@@ -345,4 +302,47 @@ public class ProjectionsTest {
 
     }
 
+
+//    @ParameterizedTest
+//    @CsvSource({
+//            "one,  30,  55,   true, 10, 25",
+//            "two, 130, 160,   true, 30, 65",
+//
+//            // trimmed
+//            "one,  30,  45,   true, 10, 20",
+//    })
+//    @Disabled
+//    public void projectOnDelBndDup(String ctg, int start, int end, boolean expected, int expectedStart, int expectedEnd) {
+//        TestContig ctg1 = TestContig.of(0, 100);
+//        TestContig ctg2 = TestContig.of(1, 200);
+//        Route delBnd = Route.of(
+//                List.of(
+//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "upstream", Event.GAP, 1),      // 20 (20)
+//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "deletion", Event.DELETION, 0),      // 0  (20)
+//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(55), "gap-1", Event.GAP, 1),         // 5  (25)
+//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(55), Position.of(55), "bndA", Event.BREAKEND, 1),          // 0  (25)
+//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(125), Position.of(125), "bndB", Event.BREAKEND, 1),        // 0  (25)
+//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(125), Position.of(145), "gap-2", Event.GAP, 1),       // 20 (45)
+//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(145), Position.of(150), "duplication", Event.DUPLICATION, 2), // 10 (55)
+//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(150), Position.of(180), "downstream", Event.GAP, 1)   // 30 (85)
+//                ));
+//
+//        GenomicRegion query = GenomicRegion.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
+//
+//        List<Projection<GenomicRegion>> projectOpt = Projections.projectAll(query, delBnd);
+//
+//        assertThat(!projectOpt.isEmpty(), equalTo(expected));
+//        if (!projectOpt.isEmpty()) {
+//            Projection<GenomicRegion> projection = projectOpt.get(0);
+//            assertThat(projection.start(), equalTo(expectedStart));
+//            assertThat(projection.end(), equalTo(expectedEnd));
+//        }
+//    }
+
+    private static void printOutProjection(Projection<GenomicRegion> projection) {
+        System.err.println(projection.startLocation());
+        System.err.println(projection.endLocation());
+        System.err.println(projection.spannedLocations());
+        System.err.println(projection.source());
+    }
 }

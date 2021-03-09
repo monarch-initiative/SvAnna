@@ -2,14 +2,10 @@ package org.jax.svanna.ingest.hpomap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.monarchinitiative.phenol.base.PhenolRuntimeException;
+import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.net.URL;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -30,33 +26,37 @@ public class HpoTissueMapParser {
 
   private final List<HpoMapping> hpoMappingList;
 
-  public HpoTissueMapParser(String path){
-    this(new File(path));
+  public HpoTissueMapParser(InputStream is) throws IOException {
+    hpoMappingList = readMappings(is);
   }
 
-  public HpoTissueMapParser(File path) {
-    ImmutableList.Builder<HpoMapping> builder = new ImmutableList.Builder<>();
-    try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-      String line;
-      while ((line = br.readLine()) != null) {
-        if (line.startsWith("#") || line.isEmpty())
-          continue;
-        //System.out.println(line);
-        String [] fields = line.split(",");
-        if (fields.length != 4) {
-          throw new PhenolRuntimeException("Malformed mapping file line: " + line);
-        }
-        TermId tid = TermId.of(fields[0]);
-        String label = fields[1];
-        TermId hpoId = TermId.of(fields[2]);
-        String hpoLabel = fields[3];
-        HpoMapping hmapping = new HpoMapping(tid, label, hpoId, hpoLabel);
-        builder.add(hmapping);
-      }
-    } catch (IOException e) {
-      throw new PhenolRuntimeException("Could not parse map file: " + e.getMessage());
+  public HpoTissueMapParser(File path) throws IOException {
+    try (InputStream is = new FileInputStream(path)) {
+      hpoMappingList = readMappings(is);
     }
-    hpoMappingList = builder.build();
+  }
+
+  private static List<HpoMapping> readMappings(InputStream is) throws IOException {
+    ImmutableList.Builder<HpoMapping> builder = new ImmutableList.Builder<>();
+    BufferedReader br = new BufferedReader(new InputStreamReader(is));
+    String line;
+    while ((line = br.readLine()) != null) {
+      if (line.startsWith("#") || line.isEmpty())
+        continue;
+
+      String[] fields = line.split(",");
+      if (fields.length != 4) {
+        throw new SvAnnRuntimeException("Malformed mapping file line: " + line);
+      }
+      TermId tid = TermId.of(fields[0]);
+      String label = fields[1];
+      TermId hpoId = TermId.of(fields[2]);
+      String hpoLabel = fields[3];
+      HpoMapping hmapping = new HpoMapping(tid, label, hpoId, hpoLabel);
+      builder.add(hmapping);
+    }
+
+    return builder.build();
   }
 
   public Map<TermId, HpoMapping> getOtherToHpoMap() {
@@ -69,13 +69,6 @@ public class HpoTissueMapParser {
 
   public List<HpoMapping> getHpoMappingList() {
     return hpoMappingList;
-  }
-
-  public static Map<TermId, HpoMapping> loadEnhancerMap() {
-    ClassLoader classLoader = HpoTissueMapParser.class.getClassLoader();
-    URL url = classLoader.getResource("hpo_enhancer_map.csv");
-    HpoTissueMapParser parser = new HpoTissueMapParser(url.getFile());
-    return parser.getOtherToHpoMap();
   }
 
 

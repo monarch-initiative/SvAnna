@@ -4,10 +4,8 @@ import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,11 +27,8 @@ public class SupplementParser {
 
 
     public SupplementParser(Map<TermId, HpoMapping> hpoMappingMap) {
-        File fileS10 = getFileFromResources("andersson-2014-table_s10.csv");
-        File fileS11 = getFileFromResources("andersson-2014-table_s11.csv");
-        //fantomSampleToTermIdMap = new HashMap<>();
         fantomSampleToHpoMappingMap = new HashMap<>();
-        try (BufferedReader br = new BufferedReader(new FileReader(fileS10))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s10.csv")))) {
             String line;
             br.readLine(); // discard header
             while ((line=br.readLine()) != null) {
@@ -41,7 +36,7 @@ public class SupplementParser {
                 String sampleId = fields[1];
                 String clId = fields[3];
                 TermId cellOntologyId = TermId.of(clId);
-               // fantomSampleToTermIdMap.put(sampleId, cellOntologyId);
+                // fantomSampleToTermIdMap.put(sampleId, cellOntologyId);
                 if (hpoMappingMap.containsKey(cellOntologyId)) {
                     //fantomSampleToHpoIdMap.put(sampleId, cl2hpo.get(cellOntologyId));
                     fantomSampleToHpoMappingMap.put(sampleId, hpoMappingMap.get(cellOntologyId));
@@ -50,7 +45,8 @@ public class SupplementParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try (BufferedReader br = new BufferedReader(new FileReader(fileS11))) {
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s11.csv")))) {
             String line;
             br.readLine(); // discard header
             while ((line=br.readLine()) != null) {
@@ -68,16 +64,6 @@ public class SupplementParser {
         System.out.printf("[INFO] Imported %d samples with CL/UBERON ids.\n",
                 fantomSampleToHpoMappingMap.size());
 
-    }
-
-    private File getFileFromResources(String fileName) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource(fileName);
-        if (resource == null) {
-            throw new IllegalArgumentException(fileName + " is not found!");
-        } else {
-            return new File(resource.getFile());
-        }
     }
 
     public Map<String, HpoMapping> getFantomSampleToHpoMappingMap() { return this.fantomSampleToHpoMappingMap; }

@@ -7,6 +7,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -18,7 +19,12 @@ public abstract class AbstractEnhancerParserTest {
 
     protected static Map<TermId, HpoMapping> UBERON_TO_HPO;
     static {
-        HpoTissueMapParser hpoTissueMapParser = new HpoTissueMapParser(ENHANCER_MAP_PATH.toFile());
-        UBERON_TO_HPO = hpoTissueMapParser.getOtherToHpoMap();
+        HpoTissueMapParser hpoTissueMapParser;
+        try {
+            hpoTissueMapParser = new HpoTissueMapParser(ENHANCER_MAP_PATH.toFile());
+            UBERON_TO_HPO = hpoTissueMapParser.getOtherToHpoMap();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -47,7 +47,6 @@ import picocli.CommandLine;
 import javax.sql.DataSource;
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -168,10 +167,12 @@ public class BuildDb implements Callable<Integer> {
         return flyway.migrate();
     }
 
-    private static void ingestEnhancers(IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource) throws URISyntaxException, IOException {
-        File tissueMap = new File(BuildDb.class.getResource("/hpo_enhancer_map.csv").toURI());
-        HpoTissueMapParser hpoTissueMapParser = new HpoTissueMapParser(tissueMap);
-        Map<TermId, HpoMapping> uberonToHpoMap = hpoTissueMapParser.getOtherToHpoMap();
+    private static void ingestEnhancers(IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource) throws IOException {
+        Map<TermId, HpoMapping> uberonToHpoMap;
+        try (InputStream is = BuildDb.class.getResourceAsStream("/hpo_enhancer_map.csv")) {
+            HpoTissueMapParser hpoTissueMapParser = new HpoTissueMapParser(is);
+            uberonToHpoMap = hpoTissueMapParser.getOtherToHpoMap();
+        }
 
         IngestRecordParser<? extends Enhancer> vistaParser = new VistaEnhancerParser(assembly, Path.of(properties.enhancers().vista()), uberonToHpoMap);
         IngestDao<Enhancer> ingestDao = new EnhancerAnnotationDao(dataSource, assembly);

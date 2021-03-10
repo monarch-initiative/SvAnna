@@ -32,17 +32,20 @@ public class GeneAwareNeighborhoodBuilder extends TadNeighborhoodBuilder {
         if (arrangement.size() == 1) {
             V variant = arrangement.variants().get(0);
             List<Gene> genes = geneService.overlappingGenes(variant);
-            if (genes.size() == 1) {
-                Gene gene = genes.get(0);
-                if (gene.contains(variant)) {
-                    int startPos = gene.startOnStrandWithCoordinateSystem(variant.strand(), CS) - GENE_PADDING;
-                    GenomicRegion upstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, startPos, startPos);
+            if (!genes.isEmpty()) {
+                // let's make this simple if the variant overlaps with one or more genes
+                int startPos = variant.start(), endPos = variant.end();
+                for (Gene gene : genes) {
+                    int geneStart = gene.startOnStrandWithCoordinateSystem(variant.strand(), CS);
+                    startPos = Math.min(geneStart, startPos);
 
-                    int endPos = gene.endOnStrandWithCoordinateSystem(variant.strand(), CS) + GENE_PADDING;
-                    GenomicRegion downstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, endPos, endPos);
-
-                    return Neighborhood.of(upstream, downstream, downstream);
+                    int geneEnd = gene.endOnStrandWithCoordinateSystem(variant.strand(), CS);
+                    endPos = Math.max(geneEnd, endPos);
                 }
+                GenomicRegion upstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, startPos - GENE_PADDING, startPos);
+                GenomicRegion downstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, endPos, endPos + GENE_PADDING);
+
+                return Neighborhood.of(upstream, downstream, downstream);
             }
         }
         return super.intrachromosomalNeighborhood(arrangement);

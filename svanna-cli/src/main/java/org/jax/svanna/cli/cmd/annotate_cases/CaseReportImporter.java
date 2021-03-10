@@ -107,6 +107,11 @@ class CaseReportImporter {
         for (org.phenopackets.schema.v1.core.Variant v : phenopacket.getVariantsList()) {
             if (v.getAlleleCase() == org.phenopackets.schema.v1.core.Variant.AlleleCase.VCF_ALLELE) {
                 VcfAllele vcfAllele = v.getVcfAllele();
+                if (!vcfAllele.getGenomeAssembly().equals("GRCh38")) {
+                    LogUtils.logWarn(LOGGER, "Unexpected genomic assembly `{}` in case `{}`", vcfAllele.getGenomeAssembly(), caseName);
+                    continue;
+                }
+
                 Contig contig = VCF_CONVERTER.parseContig(vcfAllele.getChr());
                 if (contig.isUnknown()) {
                     LogUtils.logWarn(LOGGER, "Unable to find contig `{}` in GRCh38.p13", vcfAllele.getChr());

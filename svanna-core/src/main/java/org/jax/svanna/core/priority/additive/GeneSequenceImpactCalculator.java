@@ -15,7 +15,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneSequenceImpactCalculator.class);
 
-    private static final int UPSTREAM_PROMOTOR_PADDING = 500;
+    private static final int UPSTREAM_PROMOTER_PADDING = 2000;
     private static final int DOWNSTREAM_TX_PADDING = 0;
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;
@@ -89,9 +89,14 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
 
             Exon first = tx.exons().get(0);
-            int promoterAndExonStart = first.start() - UPSTREAM_PROMOTOR_PADDING;
+            int promoterStart = first.start() - UPSTREAM_PROMOTER_PADDING;
+            int promoterEnd = first.start();
+            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, first.coordinateSystem(), promoterStart, promoterEnd))
+                score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
+
+            int firstExonStart = first.start();
             int firstExonEnd = first.end() + INTRONIC_DONOR_PADDING;
-            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, first.coordinateSystem(), promoterAndExonStart, firstExonEnd))
+            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, first.coordinateSystem(), firstExonStart, firstExonEnd))
                 score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
 
 

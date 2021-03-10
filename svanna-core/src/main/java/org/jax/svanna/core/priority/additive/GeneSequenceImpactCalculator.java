@@ -109,8 +109,8 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
             Exon last = tx.exons().get(tx.exons().size() - 1);
             int lastExonStart = last.start() - INTRONIC_ACCEPTOR_PADDING;
-            int lastExon = first.end() + DOWNSTREAM_TX_PADDING;
-            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, last.coordinateSystem(), lastExonStart, lastExon))
+            int lastExonEnd = last.end() + DOWNSTREAM_TX_PADDING;
+            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, last.coordinateSystem(), lastExonStart, lastExonEnd))
                 score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
         }
 

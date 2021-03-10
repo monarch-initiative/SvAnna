@@ -60,23 +60,35 @@ public class GeneAwareNeighborhoodBuilder extends TadNeighborhoodBuilder {
                 throw new DispatchException(e);
             }
 
-            GenomicRegion upstream = null, downstreamRef = null, downstreamAlt = null;
+            GenomicRegion upstream, downstreamRef, downstreamAlt;
 
             Breakend left = bv.left();
             List<Gene> genes = geneService.overlappingGenes(left);
-            if (genes.size() == 1) {
-                Gene gene = genes.get(0);
-                int startPos = gene.startOnStrandWithCoordinateSystem(left.strand(), CS) - GENE_PADDING;
-                upstream = GenomicRegion.of(left.contig(), left.strand(), CS, startPos, startPos);
+            if (!genes.isEmpty()) {
+                int startPos = -1, endPos = -1;
+                for (Gene gene : genes) {
+                    int geneStart = gene.startOnStrandWithCoordinateSystem(left.strand(), CS);
+                    if (startPos == -1)
+                        startPos = geneStart;
+                    else
+                        startPos = Math.min(startPos, geneStart);
 
-                int endPos = gene.endOnStrandWithCoordinateSystem(left.strand(), CS) + GENE_PADDING;
-                downstreamRef = GenomicRegion.of(left.contig(), left.strand(), CS, endPos, endPos);
-                downstreamAlt = bv.right();
-            }
+                    int geneEnd = gene.endOnStrandWithCoordinateSystem(left.strand(), CS);
+                    if (endPos == -1)
+                        endPos = geneEnd;
+                    else
+                        endPos = Math.max(endPos, geneEnd);
+                }
 
-            if (upstream != null && downstreamRef != null && downstreamAlt != null) {
-                return Neighborhood.of(upstream, downstreamRef, downstreamAlt);
+                upstream = GenomicRegion.of(left.contig(), left.strand(), CS, startPos - GENE_PADDING, startPos);
+                downstreamRef = GenomicRegion.of(left.contig(), left.strand(), CS, endPos, endPos + GENE_PADDING);
+            } else {
+                upstream = left.withCoordinateSystem(CS).withPadding(1, 0);
+                downstreamRef = left.withCoordinateSystem(CS);
             }
+            downstreamAlt = bv.right();
+
+            return Neighborhood.of(upstream, downstreamRef, downstreamAlt);
         }
         return super.interchromosomalNeighborhood(arrangement);
     }

@@ -15,3 +15,7 @@ svanna:
     #termSimilarityMeasure: RESNIK_SYMMETRIC
     # An event involving max N genes to be considered by the prototype prioritizer
     #maxGenes: 100
+    # Scaling factor to use for calculating fitness of a gene with or without a variant
+    #geneFactor: 1.
+    # Scaling factor to use for calculating fitness of an enhancer with or without a variant
+    #enhancerFactor: .25

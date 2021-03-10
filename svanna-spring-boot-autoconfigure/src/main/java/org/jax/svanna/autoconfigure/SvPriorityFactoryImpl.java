@@ -100,11 +100,11 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
     }
 
     private RouteDataEvaluatorGE configureRouteDataEvaluator(Collection<TermId> patientFeatures, SvannaDataResolver svannaDataResolver) {
-        SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator();
+        SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(svannaProperties.prioritizationParameters().geneFactor());
 
         GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeDataService, svannaDataResolver, patientFeatures);
 
-        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator();
+        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(svannaProperties.prioritizationParameters().enhancerFactor());
 
         Set<TermId> availableTopLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
         Set<TermId> relevantAncestorsForEnhancerFiltering = phenotypeDataService.getRelevantAncestors(availableTopLevelEnhancerTerms, patientFeatures);

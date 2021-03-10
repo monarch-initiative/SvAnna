@@ -87,6 +87,10 @@ public class SvannaProperties {
 
         private int maxGenes = 100;
 
+        private double geneFactor = 1.;
+
+        private double enhancerFactor = .25;
+
         public int maxGenes() {
             return maxGenes;
         }
@@ -101,6 +105,22 @@ public class SvannaProperties {
 
         public void setTermSimilarityMeasure(TermSimilarityMeasure termSimilarityMeasure) {
             this.termSimilarityMeasure = termSimilarityMeasure;
+        }
+
+        public double geneFactor() {
+            return geneFactor;
+        }
+
+        public void setGeneFactor(double geneFactor) {
+            this.geneFactor = geneFactor;
+        }
+
+        public double enhancerFactor() {
+            return enhancerFactor;
+        }
+
+        public void setEnhancerFactor(double enhancerFactor) {
+            this.enhancerFactor = enhancerFactor;
         }
     }
 }

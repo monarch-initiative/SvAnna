@@ -12,15 +12,22 @@ public class EnhancerSequenceImpactCalculator implements SequenceImpactCalculato
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerSequenceImpactCalculator.class);
 
-    private static final Map<Event, Double> FITNESS_WITH_EVENT = Map.of(
-            Event.GAP, 1.,
-            Event.SNV, .85,
-            Event.DUPLICATION, .2,
-            Event.INSERTION, .2,
-            Event.DELETION, .1,
-            Event.INVERSION, .0,
-            Event.BREAKEND, .0
-    );
+    private final Map<Event, Double> fitnessWithEvent;
+
+    private final double enhancerFactor;
+
+    public EnhancerSequenceImpactCalculator(double enhancerFactor) {
+        this.enhancerFactor = enhancerFactor;
+        this.fitnessWithEvent = Map.of(
+                Event.GAP, enhancerFactor,
+                Event.SNV, .85 * enhancerFactor,
+                Event.DUPLICATION, .2 * enhancerFactor,
+                Event.INSERTION, .2 * enhancerFactor,
+                Event.DELETION, .1 * enhancerFactor,
+                Event.INVERSION, .0,
+                Event.BREAKEND, .0
+        );
+    }
 
     @Override
     public double projectImpact(Projection<Enhancer> projection) {
@@ -29,14 +36,19 @@ public class EnhancerSequenceImpactCalculator implements SequenceImpactCalculato
                 : processInterSegmentProjection(projection);
     }
 
+    @Override
+    public double noImpact() {
+        return enhancerFactor;
+    }
+
     private double processIntraSegmentProjection(Projection<Enhancer> projection) {
         switch (projection.startEvent()) {
             case DELETION:
                 // the entire enhancer region is deleted
                 return 0.;
             case DUPLICATION:
-                // the entire gene is duplicated
-                return 2.;
+                // the entire enhancer is duplicated
+                return 2. * noImpact();
             case BREAKEND:
             case SNV:
             case INSERTION:
@@ -59,7 +71,7 @@ public class EnhancerSequenceImpactCalculator implements SequenceImpactCalculato
         for (Segment segment : projection.spannedSegments()) {
             if (Coordinates.overlap(segment.coordinateSystem(), segment.startOnStrand(enhancer.strand()), segment.endOnStrand(enhancer.strand()),
                     enhancer.coordinateSystem(), enhancer.start(), enhancer.end()))
-                score = Math.min(FITNESS_WITH_EVENT.getOrDefault(segment.event(), noImpact()), score);
+                score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
         }
 
         return score;

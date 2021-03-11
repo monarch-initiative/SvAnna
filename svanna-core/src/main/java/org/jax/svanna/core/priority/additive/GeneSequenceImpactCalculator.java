@@ -10,21 +10,24 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Gene> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneSequenceImpactCalculator.class);
 
-    private static final int UPSTREAM_PROMOTER_PADDING = 2000;
     private static final int DOWNSTREAM_TX_PADDING = 0;
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;
+
+    private final int promoterLength;
 
     private final double geneFactor;
 
     private final Map<Event, Double> fitnessWithEvent;
 
-    public GeneSequenceImpactCalculator(double geneFactor) {
+    public GeneSequenceImpactCalculator(double geneFactor, int promoterLength) {
+        this.promoterLength = promoterLength;
         this.geneFactor = geneFactor;
         this.fitnessWithEvent = Map.of(
                 Event.GAP, geneFactor,
@@ -39,6 +42,31 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     @Override
     public double projectImpact(Projection<Gene> projection) {
+        Set<Segment> nonGapSegments = projection.route().segments().stream()
+                .filter(s -> s.event() != Event.GAP)
+                .collect(Collectors.toSet());
+
+        Double score = Double.NaN;
+        for (Transcript tx : projection.source().transcripts()) {
+            int txStart = tx.start();
+            int promoterStart = txStart - promoterLength;
+            int promoterEnd = txStart + Coordinates.endDelta(tx.coordinateSystem());
+
+            for (Segment nonGapSegment : nonGapSegments) {
+                int segmentStart = nonGapSegment.startOnStrand(tx.strand());
+                int segmentEnd = nonGapSegment.endOnStrand(tx.strand());
+                if (Coordinates.overlap(tx.coordinateSystem(), promoterStart, promoterEnd,
+                        nonGapSegment.coordinateSystem(), segmentStart, segmentEnd)) {
+                    Double fitness = fitnessWithEvent.get(nonGapSegment.event());
+                    if (score.isNaN() || fitness < score)
+                        score = fitness;
+                }
+            }
+        }
+
+        if (!score.isNaN())
+            return score;
+
         return projection.isIntraSegment()
                 ? processIntraSegmentProjection(projection)
                 : processInterSegmentProjection(projection);
@@ -89,11 +117,6 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
 
             Exon first = tx.exons().get(0);
-            int promoterStart = first.start() - UPSTREAM_PROMOTER_PADDING;
-            int promoterEnd = first.start();
-            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, first.coordinateSystem(), promoterStart, promoterEnd))
-                score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
-
             int firstExonStart = first.start();
             int firstExonEnd = first.end() + INTRONIC_DONOR_PADDING;
             if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, first.coordinateSystem(), firstExonStart, firstExonEnd))

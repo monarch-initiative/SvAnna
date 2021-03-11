@@ -100,11 +100,15 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
     }
 
     private RouteDataEvaluatorGE configureRouteDataEvaluator(Collection<TermId> patientFeatures, SvannaDataResolver svannaDataResolver) {
-        SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(svannaProperties.prioritizationParameters().geneFactor());
+        SvannaProperties.PrioritizationParameters prioritizationParameters = svannaProperties.prioritizationParameters();
+        LogUtils.logDebug(LOGGER, "Gene factor: {}", prioritizationParameters.geneFactor());
+        LogUtils.logDebug(LOGGER, "Promoter length: {}", prioritizationParameters.promoterLength());
+        SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(prioritizationParameters.geneFactor(), prioritizationParameters.promoterLength());
 
         GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeDataService, svannaDataResolver, patientFeatures);
 
-        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(svannaProperties.prioritizationParameters().enhancerFactor());
+        LogUtils.logDebug(LOGGER, "Enhancer factor: {}", prioritizationParameters.enhancerFactor());
+        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationParameters.enhancerFactor());
 
         Set<TermId> availableTopLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
         Set<TermId> relevantAncestorsForEnhancerFiltering = phenotypeDataService.getRelevantAncestors(availableTopLevelEnhancerTerms, patientFeatures);

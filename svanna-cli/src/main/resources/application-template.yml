@@ -19,3 +19,5 @@ svanna:
     #geneFactor: 1.
     # Scaling factor to use for calculating fitness of an enhancer with or without a variant
     #enhancerFactor: .25
+    # Number of bases prepended to a transcript and evaluated as a promoter region
+    #promoterLength: 2000

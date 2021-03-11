@@ -91,6 +91,8 @@ public class SvannaProperties {
 
         private double enhancerFactor = .25;
 
+        private int promoterLength = 2000;
+
         public int maxGenes() {
             return maxGenes;
         }
@@ -122,5 +124,14 @@ public class SvannaProperties {
         public void setEnhancerFactor(double enhancerFactor) {
             this.enhancerFactor = enhancerFactor;
         }
+
+        public int promoterLength() {
+            return promoterLength;
+        }
+
+        public void setPromoterLength(int promoterLength) {
+            this.promoterLength = promoterLength;
+        }
+
     }
 }

@@ -29,9 +29,9 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         this.fitnessWithEvent = Map.of(
                 Event.GAP, geneFactor,
                 Event.SNV, .85 * geneFactor,
-                Event.DUPLICATION, .3 * geneFactor,
+                Event.DUPLICATION, .0,
                 Event.INSERTION, .1 * geneFactor,
-                Event.DELETION, .1 * geneFactor,
+                Event.DELETION, .0 * geneFactor,
                 Event.INVERSION, .0,
                 Event.BREAKEND, .0
         );

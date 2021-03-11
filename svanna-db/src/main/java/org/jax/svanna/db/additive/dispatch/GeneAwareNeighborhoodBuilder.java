@@ -42,8 +42,10 @@ public class GeneAwareNeighborhoodBuilder extends TadNeighborhoodBuilder {
                     int geneEnd = gene.endOnStrandWithCoordinateSystem(variant.strand(), CS);
                     endPos = Math.max(geneEnd, endPos);
                 }
-                GenomicRegion upstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, startPos - GENE_PADDING, startPos);
-                GenomicRegion downstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, endPos, endPos + GENE_PADDING);
+                int start = Math.max(0, startPos - GENE_PADDING);
+                GenomicRegion upstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, start, startPos);
+                int end = Math.min(variant.contig().length(), endPos + GENE_PADDING);
+                GenomicRegion downstream = GenomicRegion.of(variant.contig(), variant.strand(), CS, endPos, end);
 
                 return Neighborhood.of(upstream, downstream, downstream);
             }
@@ -83,8 +85,10 @@ public class GeneAwareNeighborhoodBuilder extends TadNeighborhoodBuilder {
                         endPos = Math.max(endPos, geneEnd);
                 }
 
-                upstream = GenomicRegion.of(left.contig(), left.strand(), CS, startPos - GENE_PADDING, startPos);
-                downstreamRef = GenomicRegion.of(left.contig(), left.strand(), CS, endPos, endPos + GENE_PADDING);
+                int start = Math.max(0, startPos - GENE_PADDING);
+                upstream = GenomicRegion.of(left.contig(), left.strand(), CS, start, startPos);
+                int end = Math.min(left.contig().length(), endPos + GENE_PADDING);
+                downstreamRef = GenomicRegion.of(left.contig(), left.strand(), CS, endPos, end);
             } else {
                 upstream = left.withCoordinateSystem(CS).withPadding(1, 0);
                 downstreamRef = left.withCoordinateSystem(CS);

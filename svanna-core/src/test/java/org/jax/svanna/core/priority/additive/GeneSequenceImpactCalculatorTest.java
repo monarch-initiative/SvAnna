@@ -55,7 +55,7 @@ public class GeneSequenceImpactCalculatorTest {
                 .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
                 .build();
 
-        List<Projection<Gene>> projections = Projections.projectAll(gene, route);
+        List<Projection<Gene>> projections = Projections.project(gene, route);
         if (projections.isEmpty()) fail();
 
 
@@ -86,7 +86,7 @@ public class GeneSequenceImpactCalculatorTest {
                 .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
                 .build();
 
-        List<Projection<Gene>> projections = Projections.projectAll(gene, route);
+        List<Projection<Gene>> projections = Projections.project(gene, route);
         if (projections.isEmpty()) fail();
 
 

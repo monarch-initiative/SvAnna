@@ -82,15 +82,15 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
         SortedSet<Projection<? extends GenomicRegion>> projections = new TreeSet<>(GenomicRegion::compare);
 
         for (TadBoundary boundary : tadBoundaries) {
-            projections.addAll(Projections.projectAll(boundary, alternate));
+            projections.addAll(Projections.project(boundary, alternate));
         }
 
         for (Gene gene : genes) {
-            projections.addAll(Projections.projectAll(gene, alternate));
+            projections.addAll(Projections.project(gene, alternate));
         }
 
         for (Enhancer enhancer : enhancers) {
-            projections.addAll(Projections.projectAll(enhancer, alternate));
+            projections.addAll(Projections.project(enhancer, alternate));
         }
 
         double score = 0.0;

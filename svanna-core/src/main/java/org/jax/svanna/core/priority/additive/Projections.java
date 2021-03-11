@@ -18,7 +18,7 @@ public class Projections {
     private Projections() {
     }
 
-    public static <T extends GenomicRegion> List<Projection<T>> projectAll(T query, Route route) {
+    public static <T extends GenomicRegion> List<Projection<T>> project(T query, Route route) {
         if (!route.segmentContigs().contains(query.contig()))
             return List.of();
 

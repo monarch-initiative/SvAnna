@@ -46,7 +46,7 @@ public class ProjectionsTest {
 
             GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
 
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, deletion);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
@@ -83,7 +83,7 @@ public class ProjectionsTest {
 
             GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
 
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, deletion);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
 
             assertThat(projections, hasSize(expectedSize));
             if (!projections.isEmpty()) {
@@ -117,7 +117,7 @@ public class ProjectionsTest {
 
             GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
 
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, deletion);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
 
             assertThat(projections, hasSize(expectedNumberOfItems));
             if (!projections.isEmpty()) {
@@ -149,7 +149,7 @@ public class ProjectionsTest {
 
             GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
 
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, insertion);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, insertion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
@@ -185,7 +185,7 @@ public class ProjectionsTest {
 
             GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
 
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, inversion);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, inversion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
@@ -214,9 +214,9 @@ public class ProjectionsTest {
             SortedSet<Projection<? extends GenomicRegion>> projections = new TreeSet<>(GenomicRegion::compare);
 
             GenomicRegion first = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(25), Position.of(30));
-            projections.addAll(Projections.projectAll(first, inversion));
+            projections.addAll(Projections.project(first, inversion));
             GenomicRegion second = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(35), Position.of(40));
-            projections.addAll(Projections.projectAll(second, inversion));
+            projections.addAll(Projections.project(second, inversion));
 
             projections.forEach(System.err::println);
         }
@@ -244,7 +244,7 @@ public class ProjectionsTest {
                     ));
 
             GenomicRegion query = GenomicRegion.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, breakend);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, breakend);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
@@ -278,7 +278,7 @@ public class ProjectionsTest {
 
             GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
 
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, deletion);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
         }
@@ -295,7 +295,7 @@ public class ProjectionsTest {
                     ));
 
             GenomicRegion query = GenomicRegion.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(25), Position.of(35));
-            List<Projection<GenomicRegion>> projections = Projections.projectAll(query, deletion);
+            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
 
             assertThat(projections.isEmpty(), equalTo(true));
         }

@@ -8,6 +8,7 @@ import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,12 +43,28 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     @Override
     public double projectImpact(Projection<Gene> projection) {
-        Set<Segment> nonGapSegments = projection.route().segments().stream()
+        Double score = checkPromoter(projection.route().segments(), projection.source().transcripts());
+
+        if (!score.isNaN())
+            return score;
+
+        return projection.isIntraSegment()
+                ? processIntraSegmentProjection(projection)
+                : processInterSegmentProjection(projection);
+    }
+
+    @Override
+    public double noImpact() {
+        return geneFactor;
+    }
+
+    private Double checkPromoter(List<Segment> segments, Set<Transcript> transcripts) {
+        Set<Segment> nonGapSegments = segments.stream()
                 .filter(s -> s.event() != Event.GAP)
                 .collect(Collectors.toSet());
 
         Double score = Double.NaN;
-        for (Transcript tx : projection.source().transcripts()) {
+        for (Transcript tx : transcripts) {
             int txStart = tx.start();
             int promoterStart = txStart - promoterLength;
             int promoterEnd = txStart + Coordinates.endDelta(tx.coordinateSystem());
@@ -63,35 +80,17 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                 }
             }
         }
-
-        if (!score.isNaN())
-            return score;
-
-        return projection.isIntraSegment()
-                ? processIntraSegmentProjection(projection)
-                : processInterSegmentProjection(projection);
-    }
-
-    @Override
-    public double noImpact() {
-        return geneFactor;
-    }
-
-    private double processInterSegmentProjection(Projection<Gene> projection) {
-        Set<Segment> spannedSegments = projection.spannedSegments();
-
-        return projection.source().transcripts().stream()
-                .mapToDouble(tx -> evaluateSegmentsWrtTranscript(spannedSegments, tx))
-                .min()
-                .orElse(noImpact());
+        return score;
     }
 
     private double processIntraSegmentProjection(Projection<Gene> projection) {
         switch (projection.startEvent()) {
+            // TODO - plug in haploinsufficiency
             case DELETION:
-                // the entire gene region is deleted
+                // the entire gene is deleted
                 return 0.;
             case DUPLICATION:
+                // TODO - plug in triplosensitivity
                 // the entire gene is duplicated
                 return 2 * noImpact();
             case BREAKEND:
@@ -107,6 +106,15 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
             case INVERSION: // the entire gene is inverted, this should not be an issue
                 return noImpact();
         }
+    }
+
+    private double processInterSegmentProjection(Projection<Gene> projection) {
+        Set<Segment> spannedSegments = projection.spannedSegments();
+
+        return projection.source().transcripts().stream()
+                .mapToDouble(tx -> evaluateSegmentsWrtTranscript(spannedSegments, tx))
+                .min()
+                .orElse(noImpact());
     }
 
     private double evaluateSegmentsWrtTranscript(Set<Segment> segments, Transcript tx) {

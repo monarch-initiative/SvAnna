@@ -88,6 +88,10 @@ public class AnnotatePhenotypedCasesCommand extends SvAnnaCommand {
             List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
+            List<SvannaVariant> filteredVariants = variants.stream()
+                    .filter(SvannaVariant::passedFilters)
+                    .collect(Collectors.toList());
+            LogUtils.logInfo(LOGGER, "Removed {} variants that failed previous filters", variants.size() - filteredVariants.size());
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
             SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);

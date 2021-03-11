@@ -134,10 +134,11 @@ public class VcfVariantParserTest {
             assertThat(right.startOnStrand(Strand.POSITIVE), equalTo(13_256_071));
             assertThat(right.endOnStrand(Strand.POSITIVE), equalTo(13_256_070));
 
-            // cnv bits
+            // cnv bits & the fact that this CNV fails the filters
             SvannaVariant cnv = variants.get(5);
             assertThat(cnv.variantType(), equalTo(VariantType.CNV));
             assertThat(cnv.copyNumber(), equalTo(4));
+            assertThat(cnv.passedFilters(), equalTo(false));
         }
 
         @Test

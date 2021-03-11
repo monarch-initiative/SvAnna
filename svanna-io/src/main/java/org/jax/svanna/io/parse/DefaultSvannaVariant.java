@@ -34,8 +34,8 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
         // for creating a novel instance from an existing instance in `newVariantInstance`
         super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
         this.variantCallAttributes = Objects.requireNonNull(variantCallAttributes);
-        this.passedFilterTypes = new HashSet<>(passedFilterTypes);
-        this.failedFilterTypes = new HashSet<>(failedFilterTypes);
+        this.passedFilterTypes = passedFilterTypes;
+        this.failedFilterTypes = failedFilterTypes;
     }
 
     private DefaultSvannaVariant(Builder builder) {
@@ -43,18 +43,6 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
         variantCallAttributes = Objects.requireNonNull(builder.variantCallAttributes, "Variant call attributes cannot be null");
         passedFilterTypes = builder.passedFilterTypes;
         failedFilterTypes = builder.failedFilterTypes;
-    }
-
-    static DefaultSvannaVariant sequenceVariant(Contig contig, String id,
-                                                Strand strand, CoordinateSystem coordinateSystem, int pos, String ref, String alt,
-                                                VariantCallAttributes variantCallAttributes) {
-        if (VariantType.isSymbolic(alt)) {
-            throw new IllegalArgumentException("Unable to create non-symbolic variant from symbolic or breakend allele " + alt);
-        }
-        Position start = Position.of(pos);
-        Position end = calculateEnd(start, coordinateSystem, ref, alt);
-        int changeLength = calculateChangeLength(ref, alt);
-        return of(contig, id, strand, coordinateSystem, start, end, ref, alt, changeLength, variantCallAttributes);
     }
 
     static Builder builder() {
@@ -184,6 +172,15 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
 
         public Builder variantCallAttributes(VariantCallAttributes variantCallAttributes) {
             this.variantCallAttributes = variantCallAttributes;
+            return self();
+        }
+
+        public Builder addFilterResult(FilterResult filterResult) {
+            if (filterResult.passed())
+                passedFilterTypes.add(filterResult.getFilterType());
+            else
+                failedFilterTypes.add(filterResult.getFilterType());
+
             return self();
         }
 

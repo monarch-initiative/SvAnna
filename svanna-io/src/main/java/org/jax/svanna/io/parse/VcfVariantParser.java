@@ -7,6 +7,8 @@ import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
+import org.jax.svanna.core.filter.FilterResult;
+import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.util.VariantTrimmer;
@@ -140,6 +142,11 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
                 contig, vc.getID(), vc.getStart(),
                 vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString());
 
+        // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
+        // variants with low quality
+        if (!vc.getFilters().isEmpty())
+            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
+
         return Optional.of(builder.variantCallAttributes(attrs).build());
     }
 
@@ -203,6 +210,11 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
         DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), contig, vc.getID(), start, end, ref, alt, svlen);
 
+        // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
+        // variants with low quality
+        if (!vc.getFilters().isEmpty())
+            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
+
         return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
     }
 
@@ -248,6 +260,10 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
                 vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString(),
                 ciEnd, mateId, eventId);
 
+        // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
+        // variants with low quality
+        if (!vc.getFilters().isEmpty())
+            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
 
         return Optional.of(builder.variantCallAttributes(attrs).build());
     }

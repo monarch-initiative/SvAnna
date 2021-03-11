@@ -154,6 +154,15 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
             return self();
         }
 
+        public Builder addFilterResult(FilterResult filterResult) {
+            if (filterResult.passed())
+                passedFilterTypes.add(filterResult.getFilterType());
+            else
+                failedFilterTypes.add(filterResult.getFilterType());
+
+            return self();
+        }
+
         @Override
         protected BreakendedSvannaVariant build() {
             return new BreakendedSvannaVariant(self());

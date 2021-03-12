@@ -16,9 +16,10 @@ public interface GeneService {
 
     default List<Gene> overlappingGenes(GenomicRegion query) {
         IntervalArray<Gene> array = getChromosomeMap().get(query.contigId());
-        IntervalArray<Gene>.QueryResult result = array.findOverlappingWithInterval(
-                query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
-                query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+        IntervalArray<Gene>.QueryResult result =
+                query.length() == 0
+                        ? array.findOverlappingWithPoint(query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                        : array.findOverlappingWithInterval(query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
         return result.getEntries();
     }
 }

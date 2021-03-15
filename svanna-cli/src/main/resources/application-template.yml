@@ -6,10 +6,15 @@ svanna:
   jannovarCachePath:
 
   #dataParameters:
-    # TAD must be present in at least 25% of the tissues to be included in the analysis
-    #tadStabilityThreshold: 0.25
-    # Enhancer must have at least 50% specificity to a tissue
-    #enhancerSpecificityThreshold: 0.5
+    # TAD must be present in at least 80% of the tissues to be included in the analysis
+    #tadStabilityThreshold: 0.8
+    #enhancers:
+      # Include VISTA developmental enhancers in the analysis
+      #useVista: True
+      # Include FANTOM5 enhancers in the analysis
+      #useFantom5: False
+      # FANTOM5 enhancer must have at least 50% specificity to a tissue
+      #fantom5TissueSpecificity: 0.5
   #prioritizationParameters:
     # term similarity measure, choose from {RESNIK_SYMMETRIC, RESNIK_ASYMMETRIC}
     #termSimilarityMeasure: RESNIK_SYMMETRIC

@@ -91,18 +91,23 @@ public class SvannaAutoConfiguration {
         double stabilityThreshold = svannaProperties.dataParameters().tadStabilityThreshold();
         LogUtils.logDebug(LOGGER, "Including TAD boundaries with stability >{}", stabilityThreshold);
 
-        double enhancerSpecificityThreshold = svannaProperties.dataParameters().enhancerSpecificityThreshold();
-        LogUtils.logDebug(LOGGER, "Including enhancers with tissue specificity >{}", enhancerSpecificityThreshold);
+        SvannaProperties.EnhancerParameters enhancers = svannaProperties.dataParameters().enhancers();
+        if (enhancers.useVista())
+            LogUtils.logDebug(LOGGER, "Including VISTA enhancers");
+        if (enhancers.useFantom5())
+            LogUtils.logDebug(LOGGER, "Including FANTOM5 enhancers with tissue specificity >{}", enhancers.fantom5TissueSpecificity());
+
+        EnhancerAnnotationDao.EnhancerParameters enhancerParameters = EnhancerAnnotationDao.EnhancerParameters.of(enhancers.useVista(), enhancers.useFantom5(), enhancers.fantom5TissueSpecificity());
 
         return new DbAnnotationDataService(
-                new EnhancerAnnotationDao(dataSource, genomicAssembly, enhancerSpecificityThreshold),
+                new EnhancerAnnotationDao(dataSource, genomicAssembly, enhancerParameters),
                 new RepetitiveRegionDao(dataSource, genomicAssembly),
                 new DbPopulationVariantDao(dataSource, genomicAssembly),
                 new TadBoundaryDao(dataSource, genomicAssembly, stabilityThreshold));
     }
 
     @Bean
-    public PhenotypeDataService phenotypeDataService(DataSource dataSource, SvannaDataResolver svannaDataResolver, SvannaProperties properties) throws UndefinedResourceException, IOException {
+    public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver, SvannaProperties properties) throws UndefinedResourceException, IOException {
         LogUtils.logDebug(LOGGER, "Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
         Path hpoaPath = svannaDataResolver.phenotypeHpoaPath().toAbsolutePath();

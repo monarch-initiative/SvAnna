@@ -24,9 +24,6 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancerAnnotationDao.class);
 
-    // will get you all enhancers, tissue specific or non-specific
-    public static final double DEFAULT_ENHANCER_SPECIFICITY_THRESHOLD = .0;
-
     private final DataSource dataSource;
 
     private final GenomicAssembly genomicAssembly;
@@ -35,16 +32,16 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
 
     private final int unknownContigId;
 
-    private final double enhancerSpecificity;
+    private final EnhancerParameters enhancerParameters;
 
     public EnhancerAnnotationDao(DataSource dataSource, GenomicAssembly genomicAssembly) {
-        this(dataSource, genomicAssembly, DEFAULT_ENHANCER_SPECIFICITY_THRESHOLD);
+        this(dataSource, genomicAssembly, EnhancerParameters.defaultParameters());
     }
 
-    public EnhancerAnnotationDao(DataSource dataSource, GenomicAssembly genomicAssembly, double enhancerSpecificity) {
+    public EnhancerAnnotationDao(DataSource dataSource, GenomicAssembly genomicAssembly, EnhancerParameters enhancerParameters) {
         this.dataSource = dataSource;
         this.genomicAssembly = genomicAssembly;
-        this.enhancerSpecificity = enhancerSpecificity;
+        this.enhancerParameters = enhancerParameters;
 
         contigIdMap = new HashMap<>();
         for (Contig contig : genomicAssembly.contigs()) {
@@ -148,6 +145,56 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
         };
     }
 
+    /**
+     * Get enhancers that meet the selection criteria set by {@link EnhancerParameters} and overlap with given
+     * {@code query}.
+     */
+    @Override
+    public List<Enhancer> getOverlapping(GenomicRegion query) {
+        if (!enhancerParameters.useEnhancers()) {
+            return List.of();
+        }
+
+        try (Connection connection = dataSource.getConnection()) {
+            if (!enhancerParameters.useFantom5()) {
+                // just VISTA
+                String enhancerSql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
+                        " TERM_ID, TERM_LABEL, HPO_ID, HPO_LABEL, SPECIFICITY " +
+                        "   from SVANNA.ENHANCERS E join SVANNA.ENHANCER_TISSUE_SPECIFICITY ETS on E.ENHANCER_ID = ETS.ENHANCER_ID " +
+                        " where E.CONTIG = ? " +
+                        "   and ? < E.END " +
+                        "   and E.START < ? " +
+                        "   and E.IS_DEVELOPMENTAL = true";
+                try (PreparedStatement ps = connection.prepareStatement(enhancerSql)) {
+                    ps.setInt(1, query.contigId());
+                    ps.setInt(2, query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                    ps.setInt(3, query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                    return processEnhancers(ps);
+                }
+            } else {
+                // FANTOM5 and maybe VISTA
+                String enhancerSql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
+                        " TERM_ID, TERM_LABEL, HPO_ID, HPO_LABEL, SPECIFICITY " +
+                        "   from SVANNA.ENHANCERS E join SVANNA.ENHANCER_TISSUE_SPECIFICITY ETS on E.ENHANCER_ID = ETS.ENHANCER_ID" +
+                        " where E.CONTIG = ? " +
+                        "   and ? < E.END " +
+                        "   and E.START < ? " +
+                        "   and (E.IS_DEVELOPMENTAL = ? or (E.IS_DEVELOPMENTAL = false and ETS.SPECIFICITY > ?))";
+                try (PreparedStatement ps = connection.prepareStatement(enhancerSql)) {
+                    ps.setInt(1, query.contigId());
+                    ps.setInt(2, query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                    ps.setInt(3, query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                    ps.setBoolean(4, enhancerParameters.useVista());
+                    ps.setDouble(5, enhancerParameters.fantom5TissueSpecificity());
+                    return processEnhancers(ps);
+                }
+            }
+        } catch (SQLException e) {
+            if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());
+            return List.of();
+        }
+    }
+
     private List<Enhancer> processEnhancers(PreparedStatement statement) throws SQLException {
         Map<Integer, BaseEnhancer.Builder> builders = new HashMap<>();
         try (ResultSet rs = statement.executeQuery()) {
@@ -185,29 +232,63 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Get all developmental enhancers as well as non-developmental enhancers with tissue specificity above
-     * a preset threshold.
-     */
-    @Override
-    public List<Enhancer> getOverlapping(GenomicRegion query) {
-        String enhancerSql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
-                " TERM_ID, TERM_LABEL, HPO_ID, HPO_LABEL, SPECIFICITY " +
-                "   from SVANNA.ENHANCERS E join SVANNA.ENHANCER_TISSUE_SPECIFICITY ETS on E.ENHANCER_ID = ETS.ENHANCER_ID" +
-                " where E.CONTIG = ? " +
-                "   and ? < E.END " +
-                "   and E.START < ? " +
-                "   and (E.IS_DEVELOPMENTAL = true or (E.IS_DEVELOPMENTAL = false and ETS.SPECIFICITY > ?))";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(enhancerSql)) {
-            preparedStatement.setInt(1, query.contigId());
-            preparedStatement.setInt(2, query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-            preparedStatement.setInt(3, query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-            preparedStatement.setDouble(4, enhancerSpecificity);
-            return processEnhancers(preparedStatement);
-        } catch (SQLException e) {
-            if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());
-            return List.of();
+    public static class EnhancerParameters {
+
+        private static final EnhancerParameters DEFAULT_PARAMETERS = new EnhancerParameters(true, false, Double.NaN);
+        private final boolean useVista;
+        private final boolean useFantom5;
+        private final double fantom5TissueSpecificity;
+
+        public static EnhancerParameters of(boolean useVista, boolean useFantom5, double fantom5Specificity) {
+            return new EnhancerParameters(useVista, useFantom5, fantom5Specificity);
+        }
+
+        private EnhancerParameters(boolean useVista, boolean useFantom5, double fantom5TissueSpecificity) {
+            this.useVista = useVista;
+            this.useFantom5 = useFantom5;
+            this.fantom5TissueSpecificity = fantom5TissueSpecificity;
+        }
+
+        public boolean useEnhancers() {
+            return useVista && useFantom5;
+        }
+
+        public boolean useVista() {
+            return useVista;
+        }
+
+        public boolean useFantom5() {
+            return useFantom5;
+        }
+
+        public double fantom5TissueSpecificity() {
+            return fantom5TissueSpecificity;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            EnhancerParameters that = (EnhancerParameters) o;
+            return useVista == that.useVista && useFantom5 == that.useFantom5 && Double.compare(that.fantom5TissueSpecificity, fantom5TissueSpecificity) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(useVista, useFantom5, fantom5TissueSpecificity);
+        }
+
+        @Override
+        public String toString() {
+            return "EnhancerParameters{" +
+                    "useVista=" + useVista +
+                    ", useFantom5=" + useFantom5 +
+                    ", fantom5Specificity=" + fantom5TissueSpecificity +
+                    '}';
+        }
+
+        public static EnhancerParameters defaultParameters() {
+            return DEFAULT_PARAMETERS;
         }
     }
 }

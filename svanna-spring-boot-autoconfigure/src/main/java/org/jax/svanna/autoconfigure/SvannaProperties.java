@@ -54,16 +54,17 @@ public class SvannaProperties {
 
     public static class DataParameters {
 
-        private double tadStabilityThreshold = .25;
+        private double tadStabilityThreshold = .8;
 
-        private double enhancerSpecificityThreshold = .5;
+        @NestedConfigurationProperty
+        private EnhancerParameters enhancers = new EnhancerParameters();
 
-        public double enhancerSpecificityThreshold() {
-            return enhancerSpecificityThreshold;
+        public void setEnhancers(EnhancerParameters enhancers) {
+            this.enhancers = enhancers;
         }
 
-        public void setEnhancerSpecificityThreshold(double enhancerSpecificityThreshold) {
-            this.enhancerSpecificityThreshold = enhancerSpecificityThreshold;
+        public EnhancerParameters enhancers() {
+            return enhancers;
         }
 
         public double tadStabilityThreshold() {
@@ -134,4 +135,37 @@ public class SvannaProperties {
         }
 
     }
+
+    public static class EnhancerParameters {
+
+        private boolean useVista = true;
+        private boolean useFantom5 = false;
+        private double fantom5TissueSpecificity = .5;
+
+        public boolean useVista() {
+            return useVista;
+        }
+
+        public void setUseVista(boolean useVista) {
+            this.useVista = useVista;
+        }
+
+        public boolean useFantom5() {
+            return useFantom5;
+        }
+
+        public void setUseFantom5(boolean useFantom5) {
+            this.useFantom5 = useFantom5;
+        }
+
+        public double fantom5TissueSpecificity() {
+            return fantom5TissueSpecificity;
+        }
+
+        public void setFantom5TissueSpecificity(double fantom5TissueSpecificity) {
+            this.fantom5TissueSpecificity = fantom5TissueSpecificity;
+        }
+
+    }
+
 }

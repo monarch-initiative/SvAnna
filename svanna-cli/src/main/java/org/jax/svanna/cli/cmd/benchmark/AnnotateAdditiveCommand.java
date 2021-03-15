@@ -1,8 +1,11 @@
-package org.jax.svanna.cli.cmd;
+package org.jax.svanna.cli.cmd.benchmark;
 
 
 import org.jax.svanna.cli.Main;
-import org.jax.svanna.cli.cmd.annotate.PhenopacketImporter;
+import org.jax.svanna.cli.cmd.ProgressReporter;
+import org.jax.svanna.cli.cmd.SvAnnaCommand;
+import org.jax.svanna.cli.cmd.TaskUtils;
+import org.jax.svanna.cli.cmd.Utils;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
@@ -36,17 +39,17 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@CommandLine.Command(name = "annotate-turbo",
-        aliases = {"T"},
-        header = "Annotate a VCF file with turbo features",
+@CommandLine.Command(name = "annotate-additive",
+        aliases = {"AA"},
+        header = "Prioritize the variants with additive prioritizer",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
-public class AnnotateTurboCommand extends SvAnnaCommand {
+public class AnnotateAdditiveCommand extends SvAnnaCommand {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateTurboCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateAdditiveCommand.class);
 
     private static final NumberFormat NF = NumberFormat.getNumberInstance();
 
@@ -60,14 +63,8 @@ public class AnnotateTurboCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"-v", "--vcf"})
     public Path vcfFile = null;
 
-    @CommandLine.Option(names = {"-p", "--phenopacket"}, description = "phenopacket with HPO terms and path to VCF file")
-    public Path phenopacketPath = null;
-
     @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
     public int nThreads = 2;
-
-//    @CommandLine.Option(names = {"-max_genes"}, description = "maximum gene count to prioritize an SV (default: ${DEFAULT-VALUE})")
-//    public int maxGenes = 100;
 
     /*
      * ------------ FILTERING OPTIONS ------------
@@ -104,9 +101,9 @@ public class AnnotateTurboCommand extends SvAnnaCommand {
 
 
     @Override
-    public Integer call() throws Exception {
-        if ((vcfFile == null) == (phenopacketPath == null)) {
-            LogUtils.logWarn(LOGGER,"Provide either path to a VCF file or path to a phenopacket (not both)");
+    public Integer call() {
+        if ((vcfFile == null)) {
+            LogUtils.logWarn(LOGGER,"Path to a VCF file must be supplied");
             return 1;
         }
 
@@ -130,14 +127,7 @@ public class AnnotateTurboCommand extends SvAnnaCommand {
 
             // check that the HPO terms entered by the user (if any) are valid
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
-            List<TermId> patientTerms;
-            if (phenopacketPath != null) {
-                PhenopacketImporter importer = PhenopacketImporter.fromJson(phenopacketPath, phenotypeDataService.ontology());
-                patientTerms = importer.getHpoTerms();
-                vcfFile = importer.getVcfPath();
-            } else {
-                patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toList());
-            }
+            List<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toList());
 
             LogUtils.logDebug(LOGGER, "Validating provided phenotype terms");
             Set<Term> validatedPatientTerms = phenotypeDataService.validateTerms(patientTerms);

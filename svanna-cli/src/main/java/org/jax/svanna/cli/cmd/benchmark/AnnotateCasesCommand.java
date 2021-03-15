@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.annotate_cases;
+package org.jax.svanna.cli.cmd.benchmark;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -27,8 +27,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "annotate-cases",
-        aliases = {"C"},
-        header = "Annotate cases with additive prioritizer features",
+        aliases = {"AC"},
+        header = "Annotate cases curated using Hpo Case Annotator and store the priorities in tabular file",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
@@ -43,19 +43,19 @@ public class AnnotateCasesCommand extends SvAnnaCommand {
         NF.setMaximumFractionDigits(2);
     }
 
-    @CommandLine.Option(names = {"-f", "--case-folder"}, description = "path to a folder with JSON case report files")
+    @CommandLine.Option(names = {"-f", "--case-folder"}, description = "path to a folder with case report JSON files")
     public Path caseReportPath;
 
     /*
      * ------------   I/O OPTIONS    ------------
      */
-    @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for the output CSV file (default: ${DEFAULT-VALUE})")
     public String outPrefix = "SVANNA_PP";
 
     /*
      * ------------ ANALYSIS OPTIONS ------------
      */
-    @CommandLine.Parameters(description = "path(s) to JSON files with case reports curated by Hpo Case Annotator")
+    @CommandLine.Parameters(description = "path(s) to case report JSON files")
     public List<Path> caseReports;
 
 

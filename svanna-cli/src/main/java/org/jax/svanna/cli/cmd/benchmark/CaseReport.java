@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.annotate_cases;
+package org.jax.svanna.cli.cmd.benchmark;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Variant;

@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.annotate_cases;
+package org.jax.svanna.cli.cmd.benchmark;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.csv.CSVFormat;
@@ -35,8 +35,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@CommandLine.Command(name = "annotate-phenotyped-cases",
-        aliases = {"P"},
+@CommandLine.Command(name = "benchmark-curated-cases",
+        aliases = {"BCC"},
         header = "Annotate cases with additive prioritizer features",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
@@ -59,7 +59,7 @@ public class AnnotatePhenotypedCasesCommand extends SvAnnaCommand {
     public Path vcfFile = null;
 
 
-    @CommandLine.Option(names = {"-f", "--case-folder"}, description = "path to a folder with JSON case report files")
+    @CommandLine.Option(names = {"-f", "--case-folder"}, description = "path to a folder with case report JSON files")
     public Path caseReportPath;
 
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")

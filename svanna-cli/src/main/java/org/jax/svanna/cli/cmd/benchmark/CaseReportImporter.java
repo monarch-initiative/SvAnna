@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.annotate_cases;
+package org.jax.svanna.cli.cmd.benchmark;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;

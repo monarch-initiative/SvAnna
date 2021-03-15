@@ -3,6 +3,9 @@ package org.jax.svanna.test;
 
 import org.monarchinitiative.svart.*;
 
+// Let's keep the variant declarations within the test class even at the cost of code duplication.
+// The in situ variant declarations improve tests' independence
+@Deprecated
 public class TestVariants {
 
     private final GenomicAssembly assembly;
@@ -395,23 +398,6 @@ public class TestVariants {
             Breakend right = Breakend.of(chr13, "tra_r", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(32_300_001), Position.of(32_300_000));
 
             return BreakendVariant.of("translocation_where_one_cds_is_disrupted_and_the_other_is_not", left, right, "G", "");
-        }
-
-        /**
-         * Translocation where no transcript is disrupted.
-         * <p>
-         * <ul>
-         *   <li><b>left mate:</b> SURF2:NM_017503.5 (~30bp upstream from TSS), <code>chr9:133_356_520 (+)</code></li>
-         *   <li><b>right mate:</b> upstream from BRCA2 (not disrupted), <code>chr13:32_300_000 (+)</code></li>
-         * </ul>
-         */
-        public Variant intergenicTranslocation() {
-            Contig chr9 = assembly.contigByName("9");
-            Breakend left = Breakend.of(chr9, "tra_l", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(133_356_521), Position.of(133_356_520));
-            Contig chr13 = assembly.contigByName("13");
-            Breakend right = Breakend.of(chr13, "tra_r", Strand.POSITIVE,  CoordinateSystem.oneBased(), Position.of(32_300_001), Position.of(32_300_000));
-
-            return BreakendVariant.of("intergenic_translocation", left, right, "C", "");
         }
 
     }

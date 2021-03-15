@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface Overlapper {
 
-    List<Overlap> getOverlapList(Variant variant);
+    List<Overlap> getOverlaps(Variant variant);
 
 }

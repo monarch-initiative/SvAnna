@@ -7,6 +7,8 @@ import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
+import org.jax.svanna.core.filter.FilterResult;
+import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.util.VariantTrimmer;
@@ -25,13 +27,11 @@ import java.util.stream.Stream;
 import static org.jax.svanna.io.parse.Utils.makeVariantRepresentation;
 
 /**
- * Parse variants stored in a VCF file.
+ * Parse variants stored in a VCF file. The parser is <em>NOT</em> thread safe!
  */
 public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfVariantParser.class);
-
-    private final GenomicAssembly assembly;
 
     private final VariantCallAttributeParser attributeParser;
 
@@ -45,7 +45,6 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
     public VcfVariantParser(GenomicAssembly assembly, boolean requireVcfIndex) {
         this.attributeParser = VariantCallAttributeParser.getInstance();
-        this.assembly = assembly;
         this.vcfConverter = new VcfConverter(assembly, VariantTrimmer.leftShiftingTrimmer(VariantTrimmer.removingCommonBase()));
         this.requireVcfIndex = requireVcfIndex;
     }
@@ -110,7 +109,8 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
      */
     Function<VariantContext, Optional<? extends SvannaVariant>> toVariants() {
         return vc -> {
-            if (assembly.contigByName(vc.getContig()) == Contig.unknown()) {
+            Contig contig = vcfConverter.parseContig(vc.getContig());
+            if (contig.isUnknown()) {
                 if (LOGGER.isWarnEnabled())
                     LOGGER.warn("Unknown contig `{}` for variant `{}`", vc.getContig(), makeVariantRepresentation(vc));
                 return Optional.empty();
@@ -128,24 +128,29 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
             if (VariantType.isSymbolic(alt)) {
                 return (VariantType.isBreakend(alt))
-                        ? parseBreakendAllele(vc)
-                        : parseSymbolicVariantAllele(vc);
+                        ? parseBreakendAllele(vc, contig)
+                        : parseSymbolicVariantAllele(vc, contig);
             } else
-                return parseSequenceVariantAllele(vc);
+                return parseSequenceVariantAllele(vc, contig);
         };
     }
 
-    private Optional<? extends SvannaVariant> parseSequenceVariantAllele(VariantContext vc) {
+    private Optional<? extends SvannaVariant> parseSequenceVariantAllele(VariantContext vc, Contig contig) {
         VariantCallAttributes attrs = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
         DefaultSvannaVariant.Builder builder = vcfConverter.convert(DefaultSvannaVariant.builder(),
-                vc.getContig(), vc.getID(), vc.getStart(),
+                contig, vc.getID(), vc.getStart(),
                 vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString());
+
+        // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
+        // variants with low quality
+        if (!vc.getFilters().isEmpty())
+            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
 
         return Optional.of(builder.variantCallAttributes(attrs).build());
     }
 
-    private Optional<? extends SvannaVariant> parseSymbolicVariantAllele(VariantContext vc) {
+    private Optional<? extends SvannaVariant> parseSymbolicVariantAllele(VariantContext vc, Contig contig) {
         // parse start pos and CIPOS
         ConfidenceInterval cipos;
         List<Integer> cp = vc.getAttributeAsIntList("CIPOS", 0);
@@ -203,12 +208,17 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         }
 
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
-        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), vc.getContig(), vc.getID(), start, end, ref, alt, svlen);
+        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), contig, vc.getID(), start, end, ref, alt, svlen);
+
+        // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
+        // variants with low quality
+        if (!vc.getFilters().isEmpty())
+            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
 
         return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
     }
 
-    private Optional<? extends SvannaVariant> parseBreakendAllele(VariantContext vc) {
+    private Optional<? extends SvannaVariant> parseBreakendAllele(VariantContext vc, Contig contig) {
         // sanity checks
         if (vc.getAlternateAlleles().size() > 1) {
             if (LOGGER.isWarnEnabled())
@@ -246,10 +256,14 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
         VariantCallAttributes attrs = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(), vc.getContig(), vc.getID(), pos,
+        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(), contig, vc.getID(), pos,
                 vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString(),
                 ciEnd, mateId, eventId);
 
+        // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
+        // variants with low quality
+        if (!vc.getFilters().isEmpty())
+            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
 
         return Optional.of(builder.variantCallAttributes(attrs).build());
     }

@@ -1,6 +1,9 @@
 package org.jax.svanna.core.overlap;
 
+import com.google.common.collect.ImmutableList;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
+import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
@@ -16,7 +19,7 @@ import static org.jax.svanna.core.overlap.OverlapType.*;
 
 /**
  * This class determines the kind and degree of overlap of a structural variant with transcript features.
- * The class should be used via the {@link #getOverlapList(Variant)} function.
+ * The class should be used via the {@link #getOverlaps(Variant)} function.
  */
 public class SvAnnOverlapper implements Overlapper {
 
@@ -47,20 +50,25 @@ public class SvAnnOverlapper implements Overlapper {
      * @return list of {@link Overlap} objects that represent transcripts that overlap with the variant.
      */
     @Override
-    public List<Overlap> getOverlapList(Variant variant) {
+    public List<Overlap> getOverlaps(Variant variant) {
         switch (variant.variantType().baseType()) {
             case DEL:
             case DUP:
             case INV:
+            case CNV:
                 return intrachromosomalEventOverlaps(variant);
             case INS:
                 return variant.length() == 0 ? emptyRegionOverlap(variant) : intrachromosomalEventOverlaps(variant);
             case TRA:
             case BND:
-                if (variant instanceof BreakendVariant)
+                if (variant instanceof BreakendVariant) {
                     return translocationOverlaps(((BreakendVariant) variant));
+                } else {
+                    LogUtils.logWarn(LOGGER, "Variant `{}` has type `{}` but it is not instance of BreakendVariant", LogUtils.variantSummary(variant), variant.variantType());
+                    return List.of();
+                }
             default:
-                LOGGER.warn("Getting overlaps for `{}` is not yet supported", variant.variantType());
+                LogUtils.logWarn(LOGGER, "Getting overlaps for `{}` is not yet supported", variant.variantType());
                 return List.of();
         }
     }
@@ -78,9 +86,17 @@ public class SvAnnOverlapper implements Overlapper {
 
     private List<Overlap> translocationOverlaps(BreakendVariant translocation) {
         List<Overlap> overlaps = new ArrayList<>();
-        // process overlaps
-        for (Breakend bnd : List.of(translocation.left(), translocation.right())) {
-            overlaps.addAll(parseEventThatOverlapsWithATranscript(bnd, emptyRegionResults(bnd).getEntries()));
+        for (Breakend breakend : List.of(translocation.left(), translocation.right())) {
+            // breakends are empty regions, as defined in Svart
+            IntervalArray<Transcript>.QueryResult breakendQuery = emptyRegionResults(breakend);
+            ImmutableList<Transcript> overlapping = breakendQuery.getEntries();
+            if (overlapping.isEmpty()) {
+                overlaps.addAll(intergenic(breakend, breakendQuery.getLeft(), breakendQuery.getRight()));
+            } else {
+                overlapping.stream()
+                        .map(tx -> genic(tx, breakend))
+                        .forEach(overlaps::add);
+            }
         }
 
         return overlaps;
@@ -96,7 +112,7 @@ public class SvAnnOverlapper implements Overlapper {
     /**
      * If we get here, we know that the SV event is intrachromosomal (i.e., not a BND/translocation). This function
      * decides whether the SV overlaps with one or more transcripts and dispatches to
-     * {@link #intergenic(GenomicRegion, IntervalArray.QueryResult)} if there is no overlap and to
+     * {@link #intergenic} if there is no overlap and to
      * {@link #parseEventThatOverlapsWithATranscript(GenomicRegion, List)} if there is.
      *
      * @param region      SV event
@@ -106,7 +122,7 @@ public class SvAnnOverlapper implements Overlapper {
     private static List<Overlap> parseIntrachromosomalEventQueryResult(GenomicRegion region,
                                                                        IntervalArray<Transcript>.QueryResult queryResult) {
         if (queryResult.getEntries().isEmpty()) {
-            return intergenic(region, queryResult);
+            return intergenic(region, queryResult.getLeft(), queryResult.getRight());
         }
 
         // if we get here, then we overlap with one or more genes
@@ -119,24 +135,18 @@ public class SvAnnOverlapper implements Overlapper {
      * transcript, it is called downstream
      *
      * @param event       region representing the SV event, always on FWD strand
-     * @param queryResult Jannovar object with left and right neighbors of the SV
+     * @param left left transcript or null if we are at the chromosome edge
+     * @param right right transcript or null if we are at the chromosome edge
      * @return list of overlaps -- usually both the upstream and the downstream neighbors (unless the SV is at the very end/beginning of a chromosome)
      */
-    private static List<Overlap> intergenic(GenomicRegion event, IntervalArray<Transcript>.QueryResult queryResult) {
+    private static List<Overlap> intergenic(GenomicRegion event, Transcript left, Transcript right) {
         List<Overlap> overlaps = new ArrayList<>(2);
 
-        // This means that the SV does not overlap with any annotated transcript
-        Transcript txLeft = queryResult.getLeft();
-        Transcript txRight = queryResult.getRight();
-        // if we are 5' or 3' to the first or last gene on the chromosome, then
-        // there is not left or right gene anymore
-
-        if (txLeft != null) {
-            // process the transcript if not null
-            overlaps.add(getOverlapForTranscript(event, txLeft));
+        if (left != null) {
+            overlaps.add(getOverlapForTranscript(event, left));
         }
-        if (txRight != null) {
-            overlaps.add(getOverlapForTranscript(event, txRight));
+        if (right != null) {
+            overlaps.add(getOverlapForTranscript(event, right));
         }
         return overlaps;
     }
@@ -210,7 +220,7 @@ public class SvAnnOverlapper implements Overlapper {
         ExonPair exonPair = getAffectedExons(tx, event);
         boolean affectsCds = false; // note this can only only true if the SV is exonic and the transcript is coding
         if (tx.isCoding()) {
-            GenomicRegion cds = tx.cdsRegion();
+            GenomicRegion cds = tx.cdsRegion().get();
             if (cds.overlapsWith(event) && exonPair.atLeastOneExonOverlap()) {
                 affectsCds = true;
             }
@@ -264,10 +274,11 @@ public class SvAnnOverlapper implements Overlapper {
      * @return object representing the number of the first and last affected exon
      */
     private static ExonPair getAffectedExons(Transcript tx, GenomicRegion event) {
-        List<GenomicRegion> exons = tx.exons();
+        event = event.withStrand(tx.strand());
+        List<Exon> exons = tx.exons();
         boolean[] affected = new boolean[exons.size()]; // initializes to false
         for (int i = 0; i < exons.size(); i++) {
-            GenomicRegion exon = exons.get(i);
+            Exon exon = exons.get(i);
             if (exon.overlapsWith(event)) {
                 affected[i] = true;
             }
@@ -302,7 +313,7 @@ public class SvAnnOverlapper implements Overlapper {
         // we use zero based coordinates for calculations
         int variantStart = variant.startOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
         int variantEnd = variant.endOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
-        List<GenomicRegion> exons = tx.exons();
+        List<Exon> exons = tx.exons();
 
         for (int i = 0; i < exons.size() - 1; i++) {
             // current exon end
@@ -319,8 +330,7 @@ public class SvAnnOverlapper implements Overlapper {
             }
 
         }
-        if (LOGGER.isWarnEnabled())
-            LOGGER.warn("Could not find intron number");
+        LogUtils.logWarn(LOGGER, "Could not find intron number");
         return IntronDistance.empty();
     }
 }

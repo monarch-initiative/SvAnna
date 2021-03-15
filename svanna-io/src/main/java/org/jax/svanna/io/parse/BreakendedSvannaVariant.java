@@ -2,6 +2,7 @@ package org.jax.svanna.io.parse;
 
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
+import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svart.BaseBreakendVariant;
@@ -10,12 +11,14 @@ import org.monarchinitiative.svart.Breakend;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvannaVariant> implements SvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
     private final Set<FilterType> failedFilterTypes;
+    private final AtomicReference<SvPriority> priority = new AtomicReference<>();
 
     private BreakendedSvannaVariant(String eventId,
                                     Breakend left,
@@ -106,17 +109,27 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
     }
 
     @Override
+    public void setSvPriority(SvPriority priority) {
+        this.priority.set(priority);
+    }
+
+    @Override
+    public SvPriority svPriority() {
+        return priority.get();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         BreakendedSvannaVariant that = (BreakendedSvannaVariant) o;
-        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
+        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes) && Objects.equals(priority.get(), that.priority.get());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes);
+        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes, priority);
     }
 
     @Override
@@ -125,6 +138,7 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
                 "variantCallAttributes=" + variantCallAttributes +
                 ", passedFilterTypes=" + passedFilterTypes +
                 ", failedFilterTypes=" + failedFilterTypes +
+                ", priority=" + priority.get() +
                 "} " + super.toString();
     }
 
@@ -137,6 +151,15 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
 
         public Builder variantCallAttributes(VariantCallAttributes variantCallAttributes) {
             this.variantCallAttributes = variantCallAttributes;
+            return self();
+        }
+
+        public Builder addFilterResult(FilterResult filterResult) {
+            if (filterResult.passed())
+                passedFilterTypes.add(filterResult.getFilterType());
+            else
+                failedFilterTypes.add(filterResult.getFilterType());
+
             return self();
         }
 

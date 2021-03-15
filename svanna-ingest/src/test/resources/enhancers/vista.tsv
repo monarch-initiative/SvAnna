@@ -1,0 +1,3 @@
+name	chr	begin	end	tissues
+element 1	chr16	86396481	86397120	neural tube[UBERON:0001049];presumptive hindbrain[UBERON:0007277];
+element 4	chr16	80338696	80339858	limb[UBERON:0002101]

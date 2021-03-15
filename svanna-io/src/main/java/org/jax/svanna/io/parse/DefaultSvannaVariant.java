@@ -2,6 +2,7 @@ package org.jax.svanna.io.parse;
 
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
+import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svart.*;
@@ -9,12 +10,14 @@ import org.monarchinitiative.svart.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
     private final Set<FilterType> failedFilterTypes;
+    private final AtomicReference<SvPriority> priority = new AtomicReference<>();
 
     private DefaultSvannaVariant(Contig contig,
                                  String id,
@@ -31,27 +34,15 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
         // for creating a novel instance from an existing instance in `newVariantInstance`
         super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
         this.variantCallAttributes = Objects.requireNonNull(variantCallAttributes);
-        this.passedFilterTypes = new HashSet<>(passedFilterTypes);
-        this.failedFilterTypes = new HashSet<>(failedFilterTypes);
+        this.passedFilterTypes = passedFilterTypes;
+        this.failedFilterTypes = failedFilterTypes;
     }
 
     private DefaultSvannaVariant(Builder builder) {
         super(builder);
-        variantCallAttributes = Objects.requireNonNull(builder.variantCallAttributes);
+        variantCallAttributes = Objects.requireNonNull(builder.variantCallAttributes, "Variant call attributes cannot be null");
         passedFilterTypes = builder.passedFilterTypes;
         failedFilterTypes = builder.failedFilterTypes;
-    }
-
-    static DefaultSvannaVariant sequenceVariant(Contig contig, String id,
-                                                Strand strand, CoordinateSystem coordinateSystem, int pos, String ref, String alt,
-                                                VariantCallAttributes variantCallAttributes) {
-        if (VariantType.isSymbolic(alt)) {
-            throw new IllegalArgumentException("Unable to create non-symbolic variant from symbolic or breakend allele " + alt);
-        }
-        Position start = Position.of(pos);
-        Position end = calculateEnd(start, coordinateSystem, ref, alt);
-        int changeLength = calculateChangeLength(ref, alt);
-        return of(contig, id, strand, coordinateSystem, start, end, ref, alt, changeLength, variantCallAttributes);
     }
 
     static Builder builder() {
@@ -140,17 +131,27 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
     }
 
     @Override
+    public synchronized void setSvPriority(SvPriority priority) {
+        this.priority.set(priority);
+    }
+
+    @Override
+    public SvPriority svPriority() {
+        return priority.get();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DefaultSvannaVariant that = (DefaultSvannaVariant) o;
-        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes);
+        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes) && Objects.equals(priority, that.priority);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes);
+        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes, priority);
     }
 
     @Override
@@ -159,6 +160,7 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
                 "variantCallAttributes=" + variantCallAttributes +
                 ", passedFilterTypes=" + passedFilterTypes +
                 ", failedFilterTypes=" + failedFilterTypes +
+                ", priority=" + priority.get() +
                 "} " + super.toString();
     }
 
@@ -170,6 +172,15 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
 
         public Builder variantCallAttributes(VariantCallAttributes variantCallAttributes) {
             this.variantCallAttributes = variantCallAttributes;
+            return self();
+        }
+
+        public Builder addFilterResult(FilterResult filterResult) {
+            if (filterResult.passed())
+                passedFilterTypes.add(filterResult.getFilterType());
+            else
+                failedFilterTypes.add(filterResult.getFilterType());
+
             return self();
         }
 

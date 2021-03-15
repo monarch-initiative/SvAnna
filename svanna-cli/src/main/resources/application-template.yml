@@ -1,0 +1,28 @@
+# Required properties template, the file follows YAML syntax.
+svanna:
+  # path to folder with SvAnna database and the other required files
+  dataDirectory:
+  # path to Jannovar transcript database
+  jannovarCachePath:
+
+  #dataParameters:
+    # TAD must be present in at least 80% of the tissues to be included in the analysis
+    #tadStabilityThreshold: 0.8
+    #enhancers:
+      # Include VISTA developmental enhancers in the analysis
+      #useVista: True
+      # Include FANTOM5 enhancers in the analysis
+      #useFantom5: False
+      # FANTOM5 enhancer must have at least 50% specificity to a tissue
+      #fantom5TissueSpecificity: 0.5
+  #prioritizationParameters:
+    # term similarity measure, choose from {RESNIK_SYMMETRIC, RESNIK_ASYMMETRIC}
+    #termSimilarityMeasure: RESNIK_SYMMETRIC
+    # An event involving max N genes to be considered by the prototype prioritizer
+    #maxGenes: 100
+    # Scaling factor to use for calculating fitness of a gene with or without a variant
+    #geneFactor: 1.
+    # Scaling factor to use for calculating fitness of an enhancer with or without a variant
+    #enhancerFactor: .25
+    # Number of bases prepended to a transcript and evaluated as a promoter region
+    #promoterLength: 2000

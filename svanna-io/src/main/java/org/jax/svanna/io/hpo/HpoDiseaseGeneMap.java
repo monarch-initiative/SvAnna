@@ -23,21 +23,23 @@ import java.util.*;
  *
  * @author Peter N Robinson
  */
+@Deprecated(forRemoval = true) // in favor of PhenotypeDataService
 public class HpoDiseaseGeneMap {
     // names of the files that we need to find in the data directory
     private static final String HP_OBO = "hp.obo";
     private static final String PHENOTYPE_HPOA = "phenotype.hpoa";
     private static final String MIM_2_GENE_MEDGEN = "mim2gene_medgen";
-    private static final String HOMO_SAPIENS_GENE_INFO_GZ = "Homo_sapiens_gene_info.gz";
-    /**
-     * Human Phenotype Ontology
-     */
+    private static final String HOMO_SAPIENS_GENE_INFO_GZ = "Homo_sapiens.gene_info.gz";
+
+    // HPO
     private final Ontology ontology;
+
     /**
      * Multimap from a gene id, e.g., NCBIGene:2200 for FBN1, and corresponding disease ids. In the case of
      * FBN1, this includes Marfan syndrome (OMIM:154700), Acromicric dysplasia (OMIM:102370), and others.
      */
     private final Multimap<TermId, TermId> disease2geneIdMultiMap;
+
     /**
      * Map from disease IDs, e.g., OMIM:154700, to the corresponding HpoDisease object.
      */
@@ -45,18 +47,14 @@ public class HpoDiseaseGeneMap {
 
     private final Map<String, GeneWithId> geneSymbolMap;
 
-    private HpoDiseaseGeneMap(Path hpOboPath, Path phenotypeHpoaPath, Path mim2geneMedgenPath, Path geneInfoPath) {
-        this.ontology = OntologyLoader.loadOntology(hpOboPath.toFile());
-        List<String> desiredDatabasePrefixes = List.of("OMIM");
-        String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
-        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(), mim2geneMedgenPath.toFile(), null, phenotypeHpoaPath.toFile(), ontology);
-        this.disease2geneIdMultiMap = hap.getDiseaseToGeneIdMap();
-        Map<TermId, String> tid2symbolMap = hap.getGeneIdToSymbolMap();
-        this.geneSymbolMap = new HashMap<>();
-        for (var e : tid2symbolMap.entrySet()) {
-            geneSymbolMap.put(e.getValue(), new GeneWithId(e.getValue(), e.getKey()));
-        }
-        this.diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath.toString(), ontology, desiredDatabasePrefixes);
+    private HpoDiseaseGeneMap(Ontology ontology,
+                              Map<TermId, HpoDisease> diseaseMap,
+                              Multimap<TermId, TermId> disease2geneIdMultiMap,
+                              Map<String, GeneWithId> geneSymbolMap) {
+        this.ontology = ontology;
+        this.diseaseMap = diseaseMap;
+        this.disease2geneIdMultiMap = disease2geneIdMultiMap;
+        this.geneSymbolMap = geneSymbolMap;
     }
 
     /**
@@ -66,23 +64,37 @@ public class HpoDiseaseGeneMap {
      */
     public static HpoDiseaseGeneMap loadGenesAndDiseaseMap(Path dataDirectory) {
         Path hpoPath = dataDirectory.resolve(HP_OBO);
-        Path phenotypeHpoaPath = dataDirectory.resolve(PHENOTYPE_HPOA);
-        Path mim2geneMedgenPath = dataDirectory.resolve(MIM_2_GENE_MEDGEN);
-        Path geneInfoPath = dataDirectory.resolve(HOMO_SAPIENS_GENE_INFO_GZ);
-
         if (!hpoPath.toFile().isFile()) {
             throw new SvAnnRuntimeException("Could not find hp.obo. Did you run the download command?");
         }
-        if (!phenotypeHpoaPath.toFile().exists()) {
+        Ontology ontology = OntologyLoader.loadOntology(hpoPath.toFile());
+
+        Path phenotypeHpoaPath = dataDirectory.resolve(PHENOTYPE_HPOA);
+        if (!phenotypeHpoaPath.toFile().isFile()) {
             throw new SvAnnRuntimeException("Could not find phenotype.hpoa. Did you run the download command?");
         }
-        if (!mim2geneMedgenPath.toFile().exists()) {
+
+        Path mim2geneMedgenPath = dataDirectory.resolve(MIM_2_GENE_MEDGEN);
+        if (!mim2geneMedgenPath.toFile().isFile()) {
             throw new SvAnnRuntimeException("Could not find mim2gene_medgen Did you run the download command?");
         }
-        if (!geneInfoPath.toFile().exists()) {
+
+        Path geneInfoPath = dataDirectory.resolve(HOMO_SAPIENS_GENE_INFO_GZ);
+        if (!geneInfoPath.toFile().isFile()) {
             throw new SvAnnRuntimeException("Could not find Homo_sapiens_gene_info.gz. Did you run the download command?");
         }
-        return new HpoDiseaseGeneMap(hpoPath, phenotypeHpoaPath, mim2geneMedgenPath, geneInfoPath);
+        List<String> desiredDatabasePrefixes = List.of("OMIM");
+        String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
+        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(), mim2geneMedgenPath.toFile(), null, phenotypeHpoaPath.toFile(), ontology);
+        Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(phenotypeHpoaPath.toString(), ontology, desiredDatabasePrefixes);
+
+        Multimap<TermId, TermId> diseaseToGeneIdMap = hap.getDiseaseToGeneIdMap();
+        Map<TermId, String> tid2symbolMap = hap.getGeneIdToSymbolMap();
+        Map<String, GeneWithId> geneSymbolMap = new HashMap<>();
+        for (var e : tid2symbolMap.entrySet()) {
+            geneSymbolMap.put(e.getValue(), GeneWithId.of(e.getValue(), e.getKey()));
+        }
+        return new HpoDiseaseGeneMap(ontology, diseaseMap, diseaseToGeneIdMap, geneSymbolMap);
     }
 
     /**
@@ -99,14 +111,12 @@ public class HpoDiseaseGeneMap {
             if (associatedGenes.isEmpty()) {
                 continue; // we are not interested in diseases with no associated genes for this prioritization
             }
-            List<TermId> directAnnotations = disease.getPhenotypicAbnormalityTermIdList();
-            Set<TermId> totalAnnotations =
-                    OntologyAlgorithm.getAncestorTerms(ontology, new HashSet<>(directAnnotations), true);
+            Set<TermId> totalAnnotations = OntologyAlgorithm.getAncestorTerms(ontology, Set.copyOf(disease.getPhenotypicAbnormalityTermIdList()), true);
             for (TermId tid : targetHpoTermIds) {
                 if (totalAnnotations.contains(tid)) {
                     for (TermId geneId : associatedGenes) {
                         gene2diseaseMap.putIfAbsent(geneId, new HashSet<>());
-                        gene2diseaseMap.get(geneId).add(new HpoDiseaseSummary(disease.getDiseaseDatabaseId().getValue(), disease.getName()));
+                        gene2diseaseMap.get(geneId).add(HpoDiseaseSummary.of(disease.getDiseaseDatabaseId().getValue(), disease.getName()));
                     }
                 }
             }
@@ -121,7 +131,7 @@ public class HpoDiseaseGeneMap {
     /**
      * The Enhancers are linked to HPO terms representing their tissue specificity. Here, we
      * return a set of the HPO terms that are equal to or ancestors of our target HPO terms, i.e., that
-     * are clinicallly relevant.
+     * are clinically relevant.
      *
      * @param candidates       List of all HPO terms annotated to Enhancers
      * @param targetHpoTermIds List of HPO terms annotated the proband (can be subterms of the candidates or equal)

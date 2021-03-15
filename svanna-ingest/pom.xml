@@ -5,7 +5,7 @@
     <parent>
         <artifactId>svann</artifactId>
         <groupId>org.jax.svanna</groupId>
-        <version>0.3.0</version>
+        <version>0.3.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>svanna-ingest</artifactId>
@@ -14,17 +14,12 @@
     <dependencies>
         <dependency>
             <groupId>org.jax.svanna</groupId>
-            <artifactId>svanna-core</artifactId>
+            <artifactId>svanna-db</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jax.svanna</groupId>
-            <artifactId>svanna-io</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.monarchinitiative.variant</groupId>
-            <artifactId>variant-api</artifactId>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -33,6 +28,34 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.samtools</groupId>
+            <artifactId>htsjdk</artifactId>
         </dependency>
     </dependencies>
 

@@ -1,14 +1,12 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.prioritizer.SvImpact;
+import org.jax.svanna.core.priority.SvImpact;
 
 import java.util.Set;
 
 /**
  * Categories to represent how an SV overlaps with a gene.
  * The categories are meant to be used with any type of gene, coding or non-coding, disease-related or not.
- * <p>
- * In general, the higher ordinal means the higher deleteriousness.
  *
  * @author Peter N Robinson
  */
@@ -25,42 +23,43 @@ public enum OverlapType {
     /**
      * 500KB_downstream_variant (no SO term)
      */
-    DOWNSTREAM_GENE_VARIANT_500KB("500kb downstream gene variant"),
+    DOWNSTREAM_GENE_VARIANT_500KB("500kb downstream gene variant", DOWNSTREAM_GENE_VARIANT),
     /**
      * 500KB_downstream_variant (no SO term)
      */
-    UPSTREAM_GENE_VARIANT_500KB("500kb upstream gene variant"),
+    UPSTREAM_GENE_VARIANT_500KB("500kb upstream gene variant", UPSTREAM_GENE_VARIANT),
     /**
      * 5KB_downstream_variant (SO:0001633)
      */
-    DOWNSTREAM_GENE_VARIANT_5KB("5kb downstream gene variant"),
+    DOWNSTREAM_GENE_VARIANT_5KB("5kb downstream gene variant", DOWNSTREAM_GENE_VARIANT),
     /**
      * 5KB_upstream_variant (SO:0001635)
      */
-    UPSTREAM_GENE_VARIANT_5KB("5kb upstream gene variant"),
+    UPSTREAM_GENE_VARIANT_5KB("5kb upstream gene variant", UPSTREAM_GENE_VARIANT),
     /**
      * 2KB_downstream_variant (SO:0002083)
      */
-    DOWNSTREAM_GENE_VARIANT_2KB("2kb downstream gene variant"),
+    DOWNSTREAM_GENE_VARIANT_2KB("2kb downstream gene variant", DOWNSTREAM_GENE_VARIANT),
     /**
      * 2KB_upstream_variant (SO:0001636)
      */
-    UPSTREAM_GENE_VARIANT_2KB("2kb upstream gene variant"),
+    UPSTREAM_GENE_VARIANT_2KB("2kb upstream gene variant", UPSTREAM_GENE_VARIANT),
     /**
      * 500B_downstream_variant (SO:0001634)
      */
-    DOWNSTREAM_GENE_VARIANT_500B("500b downstream gene variant"),
-    UPSTREAM_GENE_VARIANT_500B("500b upstream gene variant"),
-    INTRONIC("located completely within intron"),
-    SINGLE_EXON_IN_TRANSCRIPT("single-exon in coding transcript"),
-    NON_CDS_REGION_IN_SINGLE_EXON("non-coding region of single exon in coding transcript"),
-    SINGLE_EXON_IN_NC_TRANSCRIPT("single-exon in non-coding transcript"),
-    MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript"),
-    TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV"),
-    TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION("transcript disrupted by translocation"),
-    ENHANCER_DISRUPTED_BY_TRANSLOCATION("enhancers disrupted by translocation"),
-    TRANSLOCATION_WITHOUT_TRANSCRIPT_DISRUPTION("translocation without transcript disruption"),
-    TRANSCRIPT_DISRUPTED_BY_INVERSION("transcript disrupted by inversion");
+    DOWNSTREAM_GENE_VARIANT_500B("500b downstream gene variant", DOWNSTREAM_GENE_VARIANT),
+    UPSTREAM_GENE_VARIANT_500B("500b upstream gene variant", UPSTREAM_GENE_VARIANT),
+    GENIC("affecting a gene"),
+    INTRONIC("located completely within intron", GENIC),
+    SINGLE_EXON_IN_TRANSCRIPT("single-exon in coding transcript", GENIC),
+    NON_CDS_REGION_IN_SINGLE_EXON("non-coding region of single exon in coding transcript", SINGLE_EXON_IN_TRANSCRIPT),
+    SINGLE_EXON_IN_NC_TRANSCRIPT("single-exon in non-coding transcript", SINGLE_EXON_IN_TRANSCRIPT),
+    MULTIPLE_EXON_IN_TRANSCRIPT("multiple exons affected in transcript", GENIC),
+    TRANSCRIPT_CONTAINED_IN_SV("transcript contained in SV", GENIC),
+    TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION("transcript disrupted by translocation", GENIC),
+    ENHANCER_DISRUPTED_BY_TRANSLOCATION("enhancers disrupted by translocation", GENIC),
+    TRANSLOCATION_WITHOUT_TRANSCRIPT_DISRUPTION("translocation without transcript disruption", GENIC),
+    TRANSCRIPT_DISRUPTED_BY_INVERSION("transcript disrupted by inversion", GENIC);
 
     private final static Set<OverlapType> intergenicTypes = Set.of(
             DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_500KB, DOWNSTREAM_GENE_VARIANT_5KB, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_500B,
@@ -72,11 +71,22 @@ public enum OverlapType {
 
     private final String name;
 
+    private final OverlapType baseType;
 
-    OverlapType(String type) {
-        name = type;
+    OverlapType(String name) {
+        this.name = name;
+        baseType = this;
     }
 
+
+    OverlapType(String name, OverlapType baseType) {
+        this.name = name;
+        this.baseType = baseType;
+    }
+
+    public OverlapType baseType() {
+        return baseType;
+    }
 
     public static boolean isIntronic(OverlapType type) {
         return intronicTypes.contains(type);
@@ -142,6 +152,7 @@ public enum OverlapType {
             case UPSTREAM_GENE_VARIANT_500B:
             case NON_CDS_REGION_IN_SINGLE_EXON:
             case SINGLE_EXON_IN_NC_TRANSCRIPT:
+            case GENIC:
                 return SvImpact.HIGH;
             case UPSTREAM_GENE_VARIANT_5KB:
             case DOWNSTREAM_GENE_VARIANT_5KB:
@@ -149,8 +160,9 @@ public enum OverlapType {
             case DOWNSTREAM_GENE_VARIANT_2KB:
                 return SvImpact.INTERMEDIATE;
             case INTRONIC:
-            default:
                 return SvImpact.LOW;
+            default:
+                return SvImpact.VERY_LOW;
         }
     }
 

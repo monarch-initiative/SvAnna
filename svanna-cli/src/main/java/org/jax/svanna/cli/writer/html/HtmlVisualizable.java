@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class HtmlVisualizable implements Visualizable {
 
@@ -63,8 +64,8 @@ public class HtmlVisualizable implements Visualizable {
     }
 
     @Override
-    public List<HpoDiseaseSummary> diseaseSummaries() {
-        return this.svPriority.getDiseases();
+    public Set<HpoDiseaseSummary> diseaseSummaries() {
+        return Set.copyOf(svPriority.getDiseases());
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 
 import java.util.List;
+import java.util.Set;
 
 public interface Visualizable {
 
@@ -16,7 +17,7 @@ public interface Visualizable {
 
     List<HtmlLocation> locations();
 
-    List<HpoDiseaseSummary> diseaseSummaries();
+    Set<HpoDiseaseSummary> diseaseSummaries();
 
     List<Overlap> overlaps();
 

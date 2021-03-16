@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 class SomeVisualizable implements Visualizable {
 
@@ -22,7 +23,7 @@ class SomeVisualizable implements Visualizable {
      */
     private final SvannaVariant variant;
 
-    private final List<HpoDiseaseSummary> diseaseSummaries;
+    private final Set<HpoDiseaseSummary> diseaseSummaries;
 
     private final List<Transcript> transcripts;
 
@@ -31,7 +32,7 @@ class SomeVisualizable implements Visualizable {
     private final List<Overlap> overlaps;
 
     static SomeVisualizable of(SvannaVariant variant,
-                               List<HpoDiseaseSummary> diseaseSummaries,
+                               Set<HpoDiseaseSummary> diseaseSummaries,
                                List<Transcript> transcripts,
                                List<Enhancer> affectedEnhancers,
                                List<Overlap> overlaps) {
@@ -39,7 +40,7 @@ class SomeVisualizable implements Visualizable {
     }
 
     private SomeVisualizable(SvannaVariant variant,
-                            List<HpoDiseaseSummary> diseaseSummaries,
+                            Set<HpoDiseaseSummary> diseaseSummaries,
                             List<Transcript> transcripts,
                             List<Enhancer> affectedEnhancers,
                             List<Overlap> overlaps) {
@@ -84,7 +85,7 @@ class SomeVisualizable implements Visualizable {
     }
 
     @Override
-    public List<HpoDiseaseSummary> diseaseSummaries() {
+    public Set<HpoDiseaseSummary> diseaseSummaries() {
         return diseaseSummaries;
     }
 

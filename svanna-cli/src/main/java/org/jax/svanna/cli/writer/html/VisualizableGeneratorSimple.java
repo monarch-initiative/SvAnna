@@ -13,6 +13,7 @@ import org.jax.svanna.core.reference.Transcript;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,13 +43,13 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         List<Transcript> transcripts = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
 
-        List<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
+        Set<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
                 .map(Overlap::getGeneSymbol)
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
                 .map(id -> phenotypeDataService.getDiseasesForGene(id.getGeneId()))
                 .flatMap(Collection::stream)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         return SomeVisualizable.of(variant, diseaseSummaries, transcripts, enhancers, overlaps);
     }
 }

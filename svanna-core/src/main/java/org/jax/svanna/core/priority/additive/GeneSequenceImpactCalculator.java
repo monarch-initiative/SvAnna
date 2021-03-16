@@ -4,7 +4,9 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
+import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
+import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,6 +121,16 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     private double evaluateSegmentsWrtTranscript(Set<Segment> segments, Transcript tx) {
         double score = noImpact();
+
+        if (!tx.isCoding())
+            // heuristics shortcut
+            return score;
+
+        //noinspection OptionalGetWithoutIsPresent
+        GenomicRegion cds = tx.cdsRegion().get();
+        int cdsStart = cds.start();
+        int cdsEnd = cds.end();
+
         for (Segment segment : segments) {
             int segmentStart = segment.startOnStrand(tx.strand());
             int segmentEnd = segment.endOnStrand(tx.strand());
@@ -127,29 +139,45 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
             Exon first = tx.exons().get(0);
             int firstExonStart = first.start();
             int firstExonEnd = first.end() + INTRONIC_DONOR_PADDING;
-            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, first.coordinateSystem(), firstExonStart, firstExonEnd))
-                score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
-
+            score = Math.min(evaluateExon(segment.coordinateSystem(), segmentStart, segmentEnd, segment.event(), first.coordinateSystem(), firstExonStart, first.start(), first.end(), firstExonEnd, cdsStart, cdsEnd), score);
 
             // internal exons
             for (int i = 1; i < tx.exons().size() - 1; i++) {
                 Exon exon = tx.exons().get(i);
                 int paddedExonStart = exon.start() - INTRONIC_ACCEPTOR_PADDING;
                 int paddedExonEnd = exon.end() + INTRONIC_DONOR_PADDING;
-                if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd,
-                        exon.coordinateSystem(), paddedExonStart, paddedExonEnd)) {
-                    score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
-                }
+                score = Math.min(evaluateExon(segment.coordinateSystem(), segmentStart, segmentEnd, segment.event(), exon.coordinateSystem(), paddedExonStart, exon.start(), exon.end(), paddedExonEnd, cdsStart, cdsEnd), score);
             }
 
 
             Exon last = tx.exons().get(tx.exons().size() - 1);
             int lastExonStart = last.start() - INTRONIC_ACCEPTOR_PADDING;
             int lastExonEnd = last.end() + DOWNSTREAM_TX_PADDING;
-            if (Coordinates.overlap(segment.coordinateSystem(), segmentStart, segmentEnd, last.coordinateSystem(), lastExonStart, lastExonEnd))
-                score = Math.min(fitnessWithEvent.getOrDefault(segment.event(), noImpact()), score);
+            score = Math.min(evaluateExon(segment.coordinateSystem(), segmentStart, segmentEnd, segment.event(), last.coordinateSystem(), lastExonStart, last.start(), last.end(), lastExonEnd, cdsStart, cdsEnd), score);
         }
 
         return score;
+    }
+
+    private double evaluateExon(CoordinateSystem segmentCs, int segmentStart, int segmentEnd, Event event, CoordinateSystem exonCs, int spliceStart, int exonStart, int exonEnd, int spliceEnd,
+                                int cdsStart, int cdsEnd) {
+        if (!Coordinates.overlap(segmentCs, segmentStart, segmentEnd, exonCs, spliceStart, spliceEnd))
+            return noImpact();
+        if (event.equals(Event.GAP))
+            return noImpact();
+
+        boolean affectsCds = Coordinates.overlap(segmentCs, segmentStart, segmentEnd, exonCs, cdsStart, cdsEnd);
+        if (!affectsCds) {
+            // may be 5UTR or 3UTR
+            if (cdsEnd < segmentStart) { // 3UTR
+                // TODO - improve as 3'UTR might be in fact multi-exonic
+                int utr3length = Coordinates.length(exonCs, exonStart, exonEnd);
+                if (utr3length != 0) {
+                    double seqImpact = 2. * Coordinates.length(segmentCs, segmentStart, segmentEnd) / utr3length;
+                    return Math.max(1 - seqImpact, 0.);
+                }
+            }
+        }
+        return fitnessWithEvent.getOrDefault(event, noImpact());
     }
 }

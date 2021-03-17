@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.cmd.benchmark;
 
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.Variant;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -10,9 +10,9 @@ class CaseReport {
 
     private final String caseName;
     private final Collection<TermId> patientTerms;
-    private final Collection<Variant> variants;
+    private final Collection<SvannaVariant> variants;
 
-    CaseReport(String caseName, Collection<TermId> patientTerms, Collection<Variant> variants) {
+    CaseReport(String caseName, Collection<TermId> patientTerms, Collection<SvannaVariant> variants) {
         this.caseName = caseName;
         this.patientTerms = patientTerms;
         this.variants = variants;
@@ -26,7 +26,7 @@ class CaseReport {
         return patientTerms;
     }
 
-    public Collection<Variant> variants() {
+    public Collection<SvannaVariant> variants() {
         return variants;
     }
 

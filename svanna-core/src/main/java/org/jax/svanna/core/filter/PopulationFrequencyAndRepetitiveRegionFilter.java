@@ -43,7 +43,7 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
     }
 
 
-    public <T extends SvannaVariant> List<T> filter(List<T> variants) {
+    public <T extends SvannaVariant> List<T> filter(Collection<T> variants) {
         Map<Integer, List<T>> variantsByContig = variants.stream()
                 .collect(Collectors.groupingBy(Variant::contigId));
         List<T> results = new LinkedList<>();

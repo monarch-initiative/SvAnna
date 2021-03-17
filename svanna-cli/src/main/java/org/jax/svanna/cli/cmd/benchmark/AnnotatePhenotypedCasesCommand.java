@@ -8,7 +8,9 @@ import org.jax.svanna.cli.cmd.ProgressReporter;
 import org.jax.svanna.cli.cmd.SvAnnaCommand;
 import org.jax.svanna.cli.cmd.TaskUtils;
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
+import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.priority.SvPrioritizer;
 import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
@@ -52,6 +54,12 @@ public class AnnotatePhenotypedCasesCommand extends SvAnnaCommand {
         NF.setMaximumFractionDigits(2);
     }
 
+    @CommandLine.Option(names = {"--similarity-threshold"}, description = "percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
+    public float similarityThreshold = 80.F;
+
+    @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
+    public float frequencyThreshold = 1.F;
+
     @CommandLine.Option(
             names = {"-v", "--vcf"},
             required = true,
@@ -88,10 +96,17 @@ public class AnnotatePhenotypedCasesCommand extends SvAnnaCommand {
             List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
-            List<SvannaVariant> filteredVariants = variants.stream()
+            LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
+            LogUtils.logInfo(LOGGER, "Filtering out the variants where at least >{}% of variant's region occurs in a repetitive region", similarityThreshold);
+            AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
+            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold);
+            List<SvannaVariant> allVariants = filter.filter(variants);
+
+            List<SvannaVariant> filteredVariants = allVariants.stream()
                     .filter(SvannaVariant::passedFilters)
                     .collect(Collectors.toList());
-            LogUtils.logInfo(LOGGER, "Removed {} variants that failed the previous filters", variants.size() - filteredVariants.size());
+
+            LogUtils.logInfo(LOGGER, "Removed {} variants that failed the filtering", variants.size() - filteredVariants.size());
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
             SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
@@ -111,8 +126,15 @@ public class AnnotatePhenotypedCasesCommand extends SvAnnaCommand {
                 SvPrioritizer<Variant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
 
                 // prepare the variants
-                List<Variant> caseVariants = new LinkedList<>(variants);
-                caseVariants.addAll(aCase.variants());
+                List<Variant> caseVariants = new LinkedList<>(filteredVariants);
+                Collection<SvannaVariant> targetVariants = aCase.variants();
+                List<SvannaVariant> filteredTargetVariants = filter.filter(targetVariants);
+                for (SvannaVariant filteredTargetVariant : filteredTargetVariants) {
+                    if (filteredTargetVariant.passedFilters())
+                        caseVariants.add(filteredTargetVariant);
+                    else
+                        LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters!", aCase.caseName(), LogUtils.variantSummary(filteredTargetVariant));
+                }
 
                 ProgressReporter progressReporter = new ProgressReporter(5_000);
                 Stream<VariantPriority> annotationStream = caseVariants.parallelStream()
@@ -122,7 +144,7 @@ public class AnnotatePhenotypedCasesCommand extends SvAnnaCommand {
                 List<VariantPriority> priorities = TaskUtils.executeBlocking(() -> annotationStream.collect(Collectors.toList()), nThreads);
 
                 results.put(aCase.caseName(), priorities);
-                Set<String> causalIds = aCase.variants().stream()
+                Set<String> causalIds = targetVariants.stream()
                         .map(Variant::id)
                         .collect(Collectors.toSet());
                 causalVariantIds.put(aCase.caseName(), causalIds);

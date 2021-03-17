@@ -1,10 +1,8 @@
-package org.jax.svanna.io.parse;
+package org.jax.svanna.core.reference;
 
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svart.BaseBreakendVariant;
 import org.monarchinitiative.svart.Breakend;
 
@@ -13,7 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvannaVariant> implements SvannaVariant {
+public final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvannaVariant> implements SvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
@@ -42,7 +40,7 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
         failedFilterTypes = builder.failedFilterTypes;
     }
 
-    static BreakendedSvannaVariant of(String eventId,
+    public static BreakendedSvannaVariant of(String eventId,
                                       Breakend left,
                                       Breakend right,
                                       String ref,
@@ -51,7 +49,7 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
         return new BreakendedSvannaVariant(eventId, left, right, ref, alt, variantCallAttributes, new HashSet<>(), new HashSet<>());
     }
 
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -142,7 +140,7 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
                 "} " + super.toString();
     }
 
-    static class Builder extends BaseBreakendVariant.Builder<Builder> {
+    public static class Builder extends BaseBreakendVariant.Builder<Builder> {
 
         private VariantCallAttributes variantCallAttributes;
         private final Set<FilterType> passedFilterTypes = new HashSet<>();
@@ -164,7 +162,7 @@ final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvanna
         }
 
         @Override
-        protected BreakendedSvannaVariant build() {
+        public BreakendedSvannaVariant build() {
             return new BreakendedSvannaVariant(self());
         }
 

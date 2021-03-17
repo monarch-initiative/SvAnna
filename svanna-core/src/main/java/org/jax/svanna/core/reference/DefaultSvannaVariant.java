@@ -1,10 +1,8 @@
-package org.jax.svanna.io.parse;
+package org.jax.svanna.core.reference;
 
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svart.*;
 
 import java.util.HashSet;
@@ -12,7 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
+public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
@@ -45,11 +43,11 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
         failedFilterTypes = builder.failedFilterTypes;
     }
 
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
-    static DefaultSvannaVariant of(Contig contig,
+    public static DefaultSvannaVariant of(Contig contig,
                                    String id,
                                    Strand strand,
                                    CoordinateSystem coordinateSystem,
@@ -164,7 +162,7 @@ final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> imple
                 "} " + super.toString();
     }
 
-    static class Builder extends BaseVariant.Builder<Builder> {
+    public static class Builder extends BaseVariant.Builder<Builder> {
 
         private VariantCallAttributes variantCallAttributes;
         private final Set<FilterType> passedFilterTypes = new HashSet<>();

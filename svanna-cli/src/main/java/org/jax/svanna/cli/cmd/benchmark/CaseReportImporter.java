@@ -3,6 +3,10 @@ package org.jax.svanna.cli.cmd.benchmark;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.reference.DefaultSvannaVariant;
+import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.VariantCallAttributes;
+import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.util.VariantTrimmer;
@@ -102,7 +106,7 @@ class CaseReportImporter {
                 .map(pf -> TermId.of(pf.getType().getId()))
                 .collect(Collectors.toSet());
 
-        Set<Variant> variants = new HashSet<>();
+        Set<SvannaVariant> variants = new HashSet<>();
         int i = 0;
         for (org.phenopackets.schema.v1.core.Variant v : phenopacket.getVariantsList()) {
             if (v.getAlleleCase() == org.phenopackets.schema.v1.core.Variant.AlleleCase.VCF_ALLELE) {
@@ -127,6 +131,28 @@ class CaseReportImporter {
                     infoFields = Arrays.stream(info.split(";"))
                             .map(p -> p.split("="))
                             .collect(Collectors.toMap(f -> f[0], f -> f.length == 2 ? f[1] : ""));
+                }
+
+                VariantCallAttributes.Builder attrBuilder = VariantCallAttributes.builder();
+                String zygosityId = v.getZygosity().getId();
+                if (zygosityId.equals("GENO:0000135")) {
+                    attrBuilder.zygosity(Zygosity.HETEROZYGOUS)
+                            .dp(20)
+                            .refReads(10)
+                            .altReads(10);
+                } else if (zygosityId.equals("GENO:0000136")) {
+                    attrBuilder.zygosity(Zygosity.HOMOZYGOUS)
+                            .dp(20)
+                            .refReads(0)
+                            .altReads(20);
+                } else if (zygosityId.equals("GENO:0000134")) {
+                    attrBuilder.zygosity(Zygosity.HEMIZYGOUS)
+                            .dp(10)
+                            .refReads(0)
+                            .altReads(10);
+                } else {
+                    LogUtils.logWarn(LOGGER, "Unknown zygosity id={} label={}", zygosityId, v.getZygosity().getLabel());
+                    attrBuilder.zygosity(Zygosity.UNKNOWN);
                 }
 
                 if (infoFields.containsKey("SVTYPE")) {
@@ -160,15 +186,20 @@ class CaseReportImporter {
                     }
 
                     try {
-                        Variant variant = VCF_CONVERTER.convertSymbolic(contig, variantId, start, end, vcfAllele.getRef(), '<' + vcfAllele.getAlt() + '>', changeLength);
-                        variants.add(variant);
+                        // SYMBOLIC
+                        DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convertSymbolic(DefaultSvannaVariant.builder(), contig, variantId, start, end, vcfAllele.getRef(), '<' + vcfAllele.getAlt() + '>', changeLength);
+                        builder.variantCallAttributes(attrBuilder.build());
+                        variants.add(builder.build());
                     } catch (Exception e) {
                         LogUtils.logWarn(LOGGER, "Error: {}", e.getMessage());
                         throw e;
                     }
                 } else {
-                    Variant variant = VCF_CONVERTER.convert(contig, variantId, vcfAllele.getPos(), vcfAllele.getRef(), vcfAllele.getAlt());
-                    variants.add(variant);
+                    // SEQUENCE
+                    DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convert(DefaultSvannaVariant.builder(),
+                            contig, variantId, vcfAllele.getPos(), vcfAllele.getRef(), vcfAllele.getAlt());
+                    builder.variantCallAttributes(attrBuilder.build());
+                    variants.add(builder.build());
                 }
             }
 

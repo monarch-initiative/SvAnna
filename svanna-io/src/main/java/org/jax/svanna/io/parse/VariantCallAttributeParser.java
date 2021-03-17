@@ -1,6 +1,7 @@
 package org.jax.svanna.io.parse;
 
 import htsjdk.variant.variantcontext.Genotype;
+import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.core.reference.Zygosity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

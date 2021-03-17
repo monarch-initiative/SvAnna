@@ -1,14 +1,11 @@
-package org.jax.svanna.io.parse;
-
-import org.jax.svanna.core.reference.VariantMetadata;
-import org.jax.svanna.core.reference.Zygosity;
+package org.jax.svanna.core.reference;
 
 import java.util.Objects;
 
 /**
  * POJO for grouping variant data required for implementing {@link VariantMetadata}.
  */
-class VariantCallAttributes {
+public class VariantCallAttributes {
 
     private final Zygosity zygosity;
     private final int dp;
@@ -39,7 +36,7 @@ class VariantCallAttributes {
         copyNumber = builder.copyNumber;
     }
 
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -87,7 +84,7 @@ class VariantCallAttributes {
                 '}';
     }
 
-    static class Builder {
+    public static class Builder {
 
         private Zygosity zygosity = Zygosity.UNKNOWN;
         private int dp = VariantMetadata.MISSING_DEPTH_PLACEHOLDER;
@@ -99,32 +96,32 @@ class VariantCallAttributes {
 
         }
 
-        Builder zygosity(Zygosity zygosity) {
+        public Builder zygosity(Zygosity zygosity) {
             this.zygosity = zygosity;
             return this;
         }
 
-        Builder dp(int dp) {
+        public Builder dp(int dp) {
             this.dp = dp;
             return this;
         }
 
-        Builder refReads(int refReads) {
+        public Builder refReads(int refReads) {
             this.refReads = refReads;
             return this;
         }
 
-        Builder altReads(int altReads) {
+        public Builder altReads(int altReads) {
             this.altReads = altReads;
             return this;
         }
 
-        Builder copyNumber(int copyNumber) {
+        public Builder copyNumber(int copyNumber) {
             this.copyNumber = copyNumber;
             return this;
         }
 
-        VariantCallAttributes build() {
+        public VariantCallAttributes build() {
             return new VariantCallAttributes(this);
         }
 

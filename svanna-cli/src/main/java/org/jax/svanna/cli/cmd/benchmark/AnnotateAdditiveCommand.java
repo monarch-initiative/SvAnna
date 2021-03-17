@@ -13,10 +13,7 @@ import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.cli.writer.html.HtmlResultFormatParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.filter.Filter;
-import org.jax.svanna.core.filter.FilterResult;
-import org.jax.svanna.core.filter.RepetitiveRegionVariantFilter;
-import org.jax.svanna.core.filter.StructuralVariantFrequencyFilter;
+import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.priority.*;
@@ -140,30 +137,12 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
             List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
-            // filter
+            // Filter
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            Filter<SvannaVariant> variantFilter = new StructuralVariantFrequencyFilter(annotationDataService, similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where at least >{}% of variant's region occurs in a repetitive region", similarityThreshold);
-            Filter<SvannaVariant> repetitiveRegionFilter = new RepetitiveRegionVariantFilter(annotationDataService, similarityThreshold);
-
-            LogUtils.logInfo(LOGGER, "Filtering variants");
-            ProgressReporter filterProgress = new ProgressReporter(5_000);
-            List<SvannaVariant> filteredVariants;
-            try (Stream<SvannaVariant> filteredStream = variants.parallelStream()
-                    .peek(filterProgress::logItem)
-                    .onClose(filterProgress.summarize())) {
-                Stream<SvannaVariant> filtered = filteredStream.peek(v -> {
-                    FilterResult pfFv = variantFilter.runFilter(v);
-                    v.addFilterResult(pfFv);
-                    FilterResult rrFr = repetitiveRegionFilter.runFilter(v);
-                    v.addFilterResult(rrFr);
-                });
-                filteredVariants = TaskUtils.executeBlocking(() -> filtered.collect(Collectors.toList()), nThreads);
-            } catch (InterruptedException | ExecutionException e) {
-                LogUtils.logError(LOGGER, "Error: {}", e.getMessage());
-                return 1;
-            }
+            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold);
+            List<SvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize
             SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);

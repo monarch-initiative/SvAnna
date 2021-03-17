@@ -12,9 +12,10 @@ import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.cli.writer.html.HtmlResultFormatParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
-import org.jax.svanna.core.analysis.FilterAndPrioritize;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.Filter;
+import org.jax.svanna.core.filter.FilterResult;
+import org.jax.svanna.core.filter.RepetitiveRegionVariantFilter;
 import org.jax.svanna.core.filter.StructuralVariantFrequencyFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
@@ -129,37 +130,55 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
             List<TermId> patientTerms = hpoTermIdList.stream().map(TermId::of).collect(Collectors.toList());
 
-            LogUtils.logDebug(LOGGER, "Validating provided phenotype terms");
+            LogUtils.logDebug(LOGGER, "Validating the provided phenotype terms");
             Set<Term> validatedPatientTerms = phenotypeDataService.validateTerms(patientTerms);
-            LogUtils.logDebug(LOGGER, "Preparing top-level phenotype terms for the input terms");
+            LogUtils.logDebug(LOGGER, "Preparing the top-level phenotype terms for the input terms");
             Set<Term> topLevelHpoTerms = phenotypeDataService.getTopLevelTerms(validatedPatientTerms);
-
-
-            LogUtils.logInfo(LOGGER, "Setting up filtering and prioritization");
-            // setup filtering
-            LogUtils.logInfo(LOGGER, "Filtering out variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
-            AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            Filter<SvannaVariant> variantFilter = new StructuralVariantFrequencyFilter(annotationDataService, similarityThreshold, frequencyThreshold);
-
-            // setup prioritization
-            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
-            SvPrioritizer<SvannaVariant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, patientTerms);
-
-            // setup analysis
-            FilterAndPrioritize<SvannaVariant> analysis = new FilterAndPrioritize<>(variantFilter, prioritizer);
 
             LogUtils.logInfo(LOGGER, "Reading variants from `{}`", vcfFile);
             VariantParser<SvannaVariant> parser = new VcfVariantParser(genomicAssembly, false);
             List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
-            LogUtils.logInfo(LOGGER, "Filtering and prioritizing variants");
+            // filter
+            LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
+            AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
+            Filter<SvannaVariant> variantFilter = new StructuralVariantFrequencyFilter(annotationDataService, similarityThreshold, frequencyThreshold);
+            LogUtils.logInfo(LOGGER, "Filtering out the variants where at least >{}% of variant's region occurs in a repetitive region", similarityThreshold);
+            Filter<SvannaVariant> repetitiveRegionFilter = new RepetitiveRegionVariantFilter(annotationDataService, similarityThreshold);
+
+            LogUtils.logInfo(LOGGER, "Filtering variants");
+            ProgressReporter filterProgress = new ProgressReporter(5_000);
+            List<SvannaVariant> filteredVariants;
+            try (Stream<SvannaVariant> filteredStream = variants.parallelStream()
+                    .peek(filterProgress::logItem)
+                    .onClose(filterProgress.summarize())) {
+                Stream<SvannaVariant> filtered = filteredStream.peek(v -> {
+                    FilterResult pfFv = variantFilter.runFilter(v);
+                    v.addFilterResult(pfFv);
+                    FilterResult rrFr = repetitiveRegionFilter.runFilter(v);
+                    v.addFilterResult(rrFr);
+                });
+                filteredVariants = TaskUtils.executeBlocking(() -> filtered.collect(Collectors.toList()), nThreads);
+            } catch (InterruptedException | ExecutionException e) {
+                LogUtils.logError(LOGGER, "Error: {}", e.getMessage());
+                return 1;
+            }
+
+            // Prioritize
+            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
+            SvPrioritizer<SvannaVariant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, patientTerms);
+
+            LogUtils.logInfo(LOGGER, "Prioritizing variants");
             AnalysisResults results;
-            ProgressReporter progressReporter = new ProgressReporter(5_000);
-            try (Stream<SvannaVariant> variantStream = variants.parallelStream()
-                    .peek(progressReporter::logItem)
-                    .onClose(progressReporter.summarize())) {
-                Stream<SvannaVariant> prioritized = analysis.analyze(variantStream);
+            ProgressReporter priorityProgress = new ProgressReporter(5_000);
+            try (Stream<SvannaVariant> variantStream = filteredVariants.parallelStream()
+                    .peek(priorityProgress::logItem)
+                    .onClose(priorityProgress.summarize())) {
+                Stream<SvannaVariant> prioritized = variantStream.peek(v -> {
+                    SvPriority priority = prioritizer.prioritize(v);
+                    v.setSvPriority(priority);
+                });
 
                 List<SvannaVariant> filteredPrioritizedVariants = TaskUtils.executeBlocking(() -> prioritized.collect(Collectors.toList()), nThreads);
 
@@ -179,12 +198,13 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
                 }
                 writer.write(results, outprefix);
             }
-
-            return 0;
         } catch (Exception e) {
             LogUtils.logError(LOGGER, "Error occurred: {}", e.getMessage(), e);
             return 1;
         }
+
+        LogUtils.logInfo(LOGGER, "The analysis is complete. Bye");
+        return 0;
     }
 
 }

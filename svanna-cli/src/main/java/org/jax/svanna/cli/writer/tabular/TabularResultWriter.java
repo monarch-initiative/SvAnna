@@ -6,6 +6,8 @@ import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.filter.FilterType;
+import org.jax.svanna.core.filter.Filterable;
 import org.jax.svanna.core.reference.Prioritized;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
@@ -21,11 +23,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class TabularResultWriter implements ResultWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TabularResultWriter.class);
+
+    // SvAnna works with these filters
+    private static final List<FilterType> FILTER_TYPES = List.of(
+            FilterType.FAILED_VARIANT_FILTER,
+            FilterType.FREQUENCY_FILTER,
+            FilterType.REPETITIVE_REGION_FILTER);
 
     private final String suffix;
 
@@ -43,7 +53,7 @@ public class TabularResultWriter implements ResultWriter {
     public void write(AnalysisResults analysisResults, String prefix) throws IOException {
         try (BufferedWriter writer = openWriter(prefix)) {
             CSVPrinter printer = CSVFormat.DEFAULT.withDelimiter(columnSeparator)
-                    .withHeader("CONTIG", "START", "END", "ID", "VTYPE", "PRIORITY")
+                    .withHeader("CONTIG", "START", "END", "ID", "VTYPE", "FAILED_FILTERS", "PRIORITY")
                     .print(writer);
             analysisResults.variants().stream()
                     .filter(sv -> !Double.isNaN(sv.svPriority().getPriority()))
@@ -61,7 +71,7 @@ public class TabularResultWriter implements ResultWriter {
                 : Files.newBufferedWriter(outPath);
     }
 
-    private Consumer<? super SvannaVariant> printVariant(CSVPrinter printer) {
+    private static Consumer<? super SvannaVariant> printVariant(CSVPrinter printer) {
         return variant -> {
             try {
                 printer.print(variant.contigName());
@@ -69,6 +79,7 @@ public class TabularResultWriter implements ResultWriter {
                 printer.print(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
                 printer.print(variant.id());
                 printer.print(variant.variantType());
+                printer.print(failedFilters(variant));
                 printer.print(variant.svPriority().getPriority());
                 printer.println();
             } catch (IOException e) {
@@ -77,4 +88,12 @@ public class TabularResultWriter implements ResultWriter {
         };
     }
 
+    private static String failedFilters(Filterable filterable) {
+        List<String> failedFilters = new LinkedList<>();
+        for (FilterType filterType : FILTER_TYPES) {
+            if (!filterable.passedFilter(filterType))
+                failedFilters.add(filterType.vcfValue());
+        }
+        return String.join(";", failedFilters);
+    }
 }

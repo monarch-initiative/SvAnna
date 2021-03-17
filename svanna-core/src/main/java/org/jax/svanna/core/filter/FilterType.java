@@ -41,7 +41,8 @@ public enum FilterType {
     VARIANT_EFFECT_FILTER("var-effect", "Variant effect"),
     INHERITANCE_FILTER("inheritance", "Inheritance"),
     BED_FILTER("bed", "Gene panel target region (Bed)"),
-    PRIORITY_SCORE_FILTER("gene-priority", "Gene priority score");
+    PRIORITY_SCORE_FILTER("gene-priority", "Gene priority score"),
+    REPETITIVE_REGION_FILTER("repeats", "Repetitive region");
 
     private final String vcfValue;
     private final String stringValue;

@@ -4,10 +4,7 @@ import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Variant;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -20,8 +17,6 @@ import java.util.Collection;
  * </ul>
  */
 public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StructuralVariantFrequencyFilter.class);
 
     private static final FilterType FILTER_TYPE = FilterType.FREQUENCY_FILTER;
 
@@ -37,19 +32,6 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
         this.annotationDataService = annotationDataService;
         this.similarityThreshold = similarityThreshold;
         this.frequencyThreshold = frequencyThreshold;
-    }
-
-    static float reciprocalOverlap(GenomicRegion first, GenomicRegion second) {
-        if (!first.overlapsWith(second)) {
-            return 0;
-        }
-        first = first.toZeroBased();
-        second = second.toZeroBased().withStrand(first.strand());
-        int maxStart = Math.max(first.start(), second.start());
-        int minEnd = Math.min(first.end(), second.end());
-
-        float intersection = minEnd - maxStart;
-        return Math.min(intersection / first.length(), intersection / second.length());
     }
 
     @Override
@@ -79,7 +61,7 @@ public class StructuralVariantFrequencyFilter implements Filter<SvannaVariant> {
         return features.stream()
                 .anyMatch(feature -> feature.variantType().baseType() == variant.variantType().baseType()
                         && feature.alleleFrequency() >= frequencyThreshold
-                        && reciprocalOverlap(feature, variant) * 100.F > similarityThreshold)
+                        && FilterUtils.reciprocalOverlap(feature, variant) * 100.F > similarityThreshold)
                 ? FAIL
                 : PASS;
     }

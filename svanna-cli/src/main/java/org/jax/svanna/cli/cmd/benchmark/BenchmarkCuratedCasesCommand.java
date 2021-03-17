@@ -44,7 +44,7 @@ import java.util.stream.Stream;
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
-public class AnnotatePhenotypedCasesCommand extends SvAnnaCommand {
+public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCasesCommand.class);
 

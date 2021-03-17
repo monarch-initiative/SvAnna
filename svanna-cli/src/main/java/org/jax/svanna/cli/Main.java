@@ -5,7 +5,7 @@ import org.jax.svanna.cli.cmd.GenerateConfigCommand;
 import org.jax.svanna.cli.cmd.annotate.AnnotateCommand;
 import org.jax.svanna.cli.cmd.benchmark.AnnotateAdditiveCommand;
 import org.jax.svanna.cli.cmd.benchmark.AnnotateCasesCommand;
-import org.jax.svanna.cli.cmd.benchmark.AnnotatePhenotypedCasesCommand;
+import org.jax.svanna.cli.cmd.benchmark.BenchmarkCuratedCasesCommand;
 import org.jax.svanna.cli.cmd.download.DownloadCommand;
 import picocli.CommandLine;
 
@@ -46,7 +46,7 @@ public class Main implements Callable<Integer>  {
                 .addSubcommand("annotate", new AnnotateCommand())
                 .addSubcommand("annotate-cases", new AnnotateCasesCommand())
                 .addSubcommand("annotate-additive", new AnnotateAdditiveCommand())
-                .addSubcommand("benchmark-curated-cases", new AnnotatePhenotypedCasesCommand());
+                .addSubcommand("benchmark-curated-cases", new BenchmarkCuratedCasesCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));
     }

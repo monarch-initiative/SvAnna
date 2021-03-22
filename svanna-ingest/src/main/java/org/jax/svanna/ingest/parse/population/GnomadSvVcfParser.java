@@ -5,6 +5,7 @@ import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.samtools.util.Interval;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
+import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.landscape.BasePopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
@@ -48,7 +49,7 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
         CloseableIterator<VariantContext> variantIterator = reader.iterator();
         return variantIterator.stream()
                 .onClose(IOUtils.close(reader, variantIterator))
-                    .filter(multiallelicPcrPlusPredictedGenotypingArtifacts())
+                    .filter(insufficientQualityRecord())
                     .filter(unresolvedBreakends())
                     .map(toPopulationVariant())
                     .filter(Optional::isPresent)
@@ -63,14 +64,12 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
     private Function<VariantContext, Optional<? extends PopulationVariant>> toPopulationVariant() {
         return vc -> {
             if (vc.getAlternateAlleles().size() > 1) {
-                if (LOGGER.isWarnEnabled())
-                    LOGGER.warn("Skipping multiallelic record `{}`", vc.getID());
+                LogUtils.logDebug(LOGGER, "Skipping multiallelic record `{}`", vc.getID());
                 return Optional.empty();
             }
 
             if (!vc.hasAttribute("END")) {
-                if (LOGGER.isWarnEnabled())
-                    LOGGER.warn("Skipping record `{}` with missing `END`", vc.getID());
+                LogUtils.logWarn(LOGGER, "Skipping record `{}` with missing `END`", vc.getID());
                 return Optional.empty();
             }
 
@@ -80,25 +79,25 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
 
             Interval lifted = liftOver.liftOver(new Interval(ucscName, s, e, false, vc.getID()));
             if (lifted == null) {
-                if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("Liftover of `{}` failed", vc.getID());
+                LogUtils.logDebug(LOGGER, "Liftover of `{}` failed", vc.getID());
                 liftoverFailedCounter.incrementAndGet();
                 return Optional.empty();
             }
             Contig contig = genomicAssembly.contigByName(lifted.getContig());
             if (contig.isUnknown()) {
-                if (LOGGER.isWarnEnabled())
-                    LOGGER.warn("Skipping record {} due to unknown contig '{}' ", vc.getID(), lifted.getContig());
+                LogUtils.logWarn(LOGGER, "Skipping record {} due to unknown contig '{}' ", vc.getID(), lifted.getContig());
                 return Optional.empty();
             }
 
-            Position start = Position.of(lifted.getStart());
-            Position end = Position.of(lifted.getEnd());
             VariantType variantType = VariantType.parseType(vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString());
 
             float popmaxAf = 100.F * (float) vc.getAttributeAsDouble("POPMAX_AF", DEFAULT_AF); // !!frequencies are percentages!!
 
-            return Optional.of(BasePopulationVariant.of(contig, Strand.POSITIVE, CoordinateSystem.oneBased(), start, end,
+            // right trimming symbolic variant and removing the common base
+            int start = lifted.getStart() + 1;
+
+            return Optional.of(BasePopulationVariant.of(contig, Strand.POSITIVE, CoordinateSystem.oneBased(),
+                    Position.of(start), Position.of(lifted.getEnd()),
                     vc.getID(), variantType, popmaxAf, PopulationVariantOrigin.GNOMAD_SV));
         };
     }
@@ -112,9 +111,14 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
      * </ul>
      * fields.
      */
-    private static Predicate<? super VariantContext> multiallelicPcrPlusPredictedGenotypingArtifacts() {
-        return vc -> !(vc.getFilters().contains("MULTIALLELIC")
+    private static Predicate<? super VariantContext> insufficientQualityRecord() {
+        // GnomadSV VCF should have these fields:
+        // PASS, LOW_CALL_RATE, PCRPLUS_ENRICHED, UNSTABLE_AF_PCRMINUS, MULTIALLELIC, UNRESOLVED
+        return vc -> !(
+                vc.getFilters().contains("LOW_CALL_RATE")
                 || vc.getFilters().contains("PCRPLUS_ENRICHED")
+                || vc.getFilters().contains("UNSTABLE_AF_PCRMINUS")
+                || vc.getFilters().contains("MULTIALLELIC")
                 || vc.getFilters().contains("PREDICTED_GENOTYPING_ARTIFACT"));
     }
 

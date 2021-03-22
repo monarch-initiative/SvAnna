@@ -65,7 +65,7 @@ public class BasePopulationVariant extends BaseGenomicRegion<BasePopulationVaria
 
     @Override
     public String toString() {
-        return "Popvar{" +
+        return "BasePopulationVariant{" +
                 "region=" + super.toString() +
                 ", id=" + id +
                 ", variantType=" + variantType +

@@ -132,6 +132,7 @@ public class BuildDb implements Callable<Integer> {
             ingestTads(tmpDir, properties, assembly, dataSource, hg19ToHg38Chain);
             precomputeResnikSimilarity(buildDir);
 
+            LOGGER.info("The ingest is complete");
             return 0;
         }
     }

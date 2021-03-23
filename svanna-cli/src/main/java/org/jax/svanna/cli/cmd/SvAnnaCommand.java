@@ -4,9 +4,9 @@ import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
+import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.overlap.Overlapper;
-import org.jax.svanna.core.overlap.SvAnnOverlapper;
-import org.jax.svanna.core.reference.TranscriptService;
+import org.jax.svanna.core.reference.GeneService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -41,8 +41,8 @@ public abstract class SvAnnaCommand implements Callable<Integer> {
     }
 
     @Bean
-    public ResultWriterFactory resultWriterFactory(TranscriptService transcriptService, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
-        Overlapper overlapper = new SvAnnOverlapper(transcriptService.getChromosomeMap());
+    public ResultWriterFactory resultWriterFactory(GeneService geneService, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
+        Overlapper overlapper = new GeneOverlapper(geneService.getChromosomeMap());
         return new ResultWriterFactory(overlapper, annotationDataService, phenotypeDataService);
     }
 }

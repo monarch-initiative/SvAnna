@@ -111,4 +111,27 @@ public class TranscriptDefault extends BaseGenomicRegion<TranscriptDefault> impl
         return new TranscriptDefault(contig, strand, coordinateSystem, start, end, accessionId, hgvsSymbol, cds, exons);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        TranscriptDefault that = (TranscriptDefault) o;
+        return Objects.equals(accessionId, that.accessionId) && Objects.equals(hgvsSymbol, that.hgvsSymbol) && Objects.equals(cdsRegion, that.cdsRegion) && Objects.equals(exons, that.exons);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), accessionId, hgvsSymbol, cdsRegion, exons);
+    }
+
+    @Override
+    public String toString() {
+        return "TranscriptDefault{" +
+                "accessionId='" + accessionId + '\'' +
+                ", hgvsSymbol='" + hgvsSymbol + '\'' +
+                ", cdsRegion=" + cdsRegion +
+                ", exons=" + exons +
+                '}';
+    }
 }

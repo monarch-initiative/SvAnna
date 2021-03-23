@@ -3,10 +3,7 @@ package org.jax.svanna.core.reference;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
@@ -96,7 +93,7 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
         }
 
         public Builder addTranscript(Transcript transcript) {
-            this.transcripts.add(transcript.withCoordinateSystem(CoordinateSystem.zeroBased()));
+            transcripts.add(transcript.withCoordinateSystem(CoordinateSystem.zeroBased()));
             if (contig == null)
                 contig = transcript.contig();
             if (strand == null)
@@ -127,11 +124,26 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
             if (transcripts.stream().anyMatch(tx -> tx.strand() != strand))
                 // All transcripts of Gencode genes are always on a single strand
                 throw new IllegalArgumentException("Cannot create gene with transcripts on different strands");
-            Set<Transcript> txs = transcripts;
-            if (transcripts.stream().anyMatch(tx -> !tx.contig().equals(contig))) {
-                Set<String> contigs = transcripts.stream().map(Transcript::contigName).collect(Collectors.toSet());
-                if (contigs.contains("X") && contigs.contains("Y")) {
-                    txs = transcripts.stream().filter(tx -> tx.contigName().equals("X")).collect(Collectors.toSet());
+            Collection<Transcript> txs;
+            if (transcripts.stream().allMatch(tx -> tx.contig().equals(contig))) {
+                txs = transcripts;
+            } else {
+                // Transcripts are on multiple contigs. This may happen for transcripts on chrX and chrY.
+                // However, such state is illegal otherwise, hence the IllegalArgumentException.
+                Set<String> contigNames = transcripts.stream()
+                        .map(Transcript::contigName)
+                        .collect(Collectors.toSet());
+                if (contigNames.contains("X") && contigNames.contains("Y")) {
+                    contig = transcripts.stream()
+                            .filter(tx -> tx.contigName().equals("X"))
+                            .findFirst()
+                            .map(Transcript::contig)
+                            .orElseThrow(() -> new IllegalArgumentException("Could not find contig for chrX even though it should have been here"));
+                    txs = new LinkedList<>();
+                    for (Transcript tx : transcripts) {
+                        if (tx.contigName().equals("X"))
+                            txs.add(tx);
+                    }
                 } else
                     throw new IllegalArgumentException("Cannot create gene with transcripts on different contigs");
             }

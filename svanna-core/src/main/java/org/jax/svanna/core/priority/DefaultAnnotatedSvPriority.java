@@ -3,7 +3,7 @@ package org.jax.svanna.core.priority;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.overlap.TranscriptOverlap;
 import org.jax.svanna.core.reference.Transcript;
 
 import java.util.List;
@@ -20,13 +20,13 @@ class DefaultAnnotatedSvPriority implements AnnotatedSvPriority {
     private final Set<GeneWithId> affectedGeneIds;
     private final List<Enhancer> affectedEnhancers;
     private final List<HpoDiseaseSummary> diseases;
-    private final List<Overlap> overlaps;
+    private final List<TranscriptOverlap> overlaps;
 
     DefaultAnnotatedSvPriority(SvImpact svImpact,
                                Set<Transcript> affectedTranscripts,
                                Set<GeneWithId> affectedGeneIds,
                                List<Enhancer> affectedEnhancers,
-                               List<Overlap> olaps,
+                               List<TranscriptOverlap> olaps,
                                List<HpoDiseaseSummary> diseaseList) {
         this.svImpact = svImpact;
         this.affectedTranscripts = affectedTranscripts;
@@ -66,7 +66,7 @@ class DefaultAnnotatedSvPriority implements AnnotatedSvPriority {
     }
 
     @Override
-    public List<Overlap> getOverlaps() {
+    public List<TranscriptOverlap> getOverlaps() {
         return overlaps;
     }
 

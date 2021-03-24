@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.Variant;
 
 import java.io.IOException;
@@ -11,9 +11,9 @@ import java.util.List;
 public class DeletionSvgGenerator extends SvSvgGenerator {
 
     public DeletionSvgGenerator(Variant variant,
-                                List<Transcript> transcripts,
+                                List<Gene> genes,
                                 List<Enhancer> enhancers) {
-        super(variant, transcripts, enhancers);
+        super(variant, genes, enhancers);
     }
 
 
@@ -30,12 +30,12 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s deletion", deletionLength);
         writeDeletion(starty, deletionDescription, writer);
         y += 100;
-        for (var e : this.affectedEnhancers) {
+        for (var e : affectedEnhancers) {
             writeEnhancer(e, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
-        for (var tmod : this.affectedTranscripts) {
-            writeTranscript(tmod, y, writer);
+        for (var gene : affectedGenes) {
+            writeGene(gene, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);

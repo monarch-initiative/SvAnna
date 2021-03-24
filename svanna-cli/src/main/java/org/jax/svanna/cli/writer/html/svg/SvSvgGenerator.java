@@ -3,7 +3,9 @@ package org.jax.svanna.cli.writer.html.svg;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
+import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Exon;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
@@ -27,7 +29,7 @@ public abstract class SvSvgGenerator {
     /** Canvas height of the SVG.*/
     protected int SVG_HEIGHT;
     /** List of transcripts that are affected by the SV and that are to be shown in the SVG. */
-    protected final List<Transcript> affectedTranscripts;
+    protected final List<Gene> affectedGenes;
     /** List of enhancers that are affected by the SV and that are to be shown in the SVG. */
     protected final List<Enhancer> affectedEnhancers;
     /** Variant on {@link Strand#POSITIVE} */
@@ -91,28 +93,31 @@ public abstract class SvSvgGenerator {
     /**
      * The constructor calculates the left and right boundaries for display
      * TODO document logic, cleanup
-     *  @param transcripts transcripts affected by the structural variant we are displaying
+     *  @param genes genes affected by the structural variant we are displaying
      * @param enhancers   enhancers  affected by the structural variant we are displaying
      */
     public SvSvgGenerator(Variant variant,
-                          List<Transcript> transcripts,
+                          List<Gene> genes,
                           List<Enhancer> enhancers) {
         this.variantType = variant.variantType();
-        this.affectedTranscripts = transcripts;
+        this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
         this.variant = variant.withStrand(Strand.POSITIVE);
+        int nTranscripts = affectedGenes.stream()
+                .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
+                .sum();
         if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
-            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
-            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         switch (variantType.baseType()) {
             case DEL:
             case INS:
             default:
                 // get min/max for SVs with one region
-                this.genomicMinPos= getGenomicMinPos(this.variant.start(), transcripts, enhancers);
-                this.genomicMaxPos = getGenomicMaxPos(this.variant.end(), transcripts, enhancers);
+                this.genomicMinPos= getGenomicMinPos(this.variant.start(), genes, enhancers);
+                this.genomicMaxPos = getGenomicMaxPos(this.variant.end(), genes, enhancers);
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
                 int extraSpaceOnSide = (int)(0.1*(this.genomicSpan));
                 this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
@@ -128,16 +133,19 @@ public abstract class SvSvgGenerator {
     public SvSvgGenerator(int minPos,
                           int maxPos,
                           Variant variant,
-                          List<Transcript> transcripts,
+                          List<Gene> genes,
                           List<Enhancer> enhancers) {
         this.variantType = variant.variantType();
-        this.affectedTranscripts = transcripts;
+        this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
         this.variant = variant.withStrand(Strand.POSITIVE);
+        int nTranscripts = affectedGenes.stream()
+                .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
+                .sum();
         if (variantType.baseType() == VariantType.TRA) {
-            this.SVG_HEIGHT = 500 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = 500 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
-            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + transcripts.size()) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         int delta = maxPos - minPos;
         int offset = (int) (OFFSET_FACTOR * delta);
@@ -161,12 +169,12 @@ public abstract class SvSvgGenerator {
      * (rather than taking say the enahncers from {@link #affectedEnhancers}, because for some types of
      * SVs like translocations, we will only use part of the list to calculate maximum and minimum positions.
      *
-     * @param transcripts Transcripts on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param genes Genes on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @param enhancers   Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMinPos(int pos, List<Transcript> transcripts, List<Enhancer> enhancers) {
-        int transcriptMin = transcripts.stream()
+    int getGenomicMinPos(int pos, List<Gene> genes, List<Enhancer> enhancers) {
+        int geneMin = genes.stream()
                 .map(t -> t.withStrand(Strand.POSITIVE))
                 .mapToInt(GenomicRegion::start)
                 .min()
@@ -176,7 +184,7 @@ public abstract class SvSvgGenerator {
                 .mapToInt(Region::start)
                 .min()
                 .orElse(Integer.MAX_VALUE);
-        return Math.min(transcriptMin, Math.min(enhancerMin, pos));
+        return Math.min(geneMin, Math.min(enhancerMin, pos));
     }
 
 
@@ -186,12 +194,12 @@ public abstract class SvSvgGenerator {
      * SVs like translocations, we will only use part of the list to calculate maximum and minimum positions.
      *
      * @param pos  variant position
-     * @param transcripts Transcripts on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param genes Genes on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @param enhancers   Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMaxPos(int pos, List<Transcript> transcripts, List<Enhancer> enhancers) {
-        int transcriptMax = transcripts.stream()
+    int getGenomicMaxPos(int pos, List<Gene> genes, List<Enhancer> enhancers) {
+        int geneMax = genes.stream()
                 .map(t -> t.withStrand(Strand.POSITIVE))
                 .mapToInt(GenomicRegion::end)
                 .max()
@@ -201,7 +209,7 @@ public abstract class SvSvgGenerator {
                 .mapToInt(Region::end)
                 .max()
                 .orElse(Integer.MIN_VALUE);
-        return Math.max(transcriptMax, Math.max(enhancerMax, pos));
+        return Math.max(geneMax, Math.max(enhancerMax, pos));
     }
 
 
@@ -325,7 +333,7 @@ public abstract class SvSvgGenerator {
 
 
 
-    protected void writeNoncodingTranscript(Transcript tmod, int ypos, Writer writer) throws IOException {
+    protected void writeNoncodingTranscript(String geneSymbol, Transcript tmod, int ypos, Writer writer) throws IOException {
         Transcript transcript = tmod.withStrand(Strand.POSITIVE);
         List<Exon> exons = transcript.exons();
         double minX = translateGenomicToSvg(transcript.start());
@@ -336,28 +344,34 @@ public abstract class SvSvgGenerator {
             writeUtrExon(exonStart, exonEnd, ypos, writer);
         }
         writeIntrons(exons, ypos, writer);
-        writeTranscriptName(transcript, minX, ypos, writer);
+        writeTranscriptName(geneSymbol, transcript, minX, ypos, writer);
     }
 
+    protected void writeGene(Gene gene, int ypos, Writer writer) throws IOException {
+        for (Transcript transcript : gene.transcripts()) {
+            writeTranscript(gene.geneSymbol(), transcript, ypos, writer);
+            ypos += Constants.HEIGHT_PER_DISPLAY_ITEM;
+        }
+    }
 
     /**
      * This method writes one Jannovar transcript as a cartoon where the UTRs are shown in one color and the
      * the coding exons are shown in another color. TODO -- decide what to do with non-coding genes
      *
-     * @param tmod   transcript representation
+     * @param tx   transcript representation
      * @param ypos   The y position where we will write the cartoon
      * @param writer file handle
      * @throws IOException if we cannot write.
      */
-    protected void writeTranscript(Transcript tmod, int ypos, Writer writer) throws IOException {
-        Transcript transcript = tmod.withStrand(Strand.POSITIVE);
-        if (! transcript.isCoding()) {
-            writeNoncodingTranscript(tmod, ypos, writer);
+    protected void writeTranscript(String geneSymbol, Transcript tx, int ypos, Writer writer) throws IOException {
+        Transcript transcript = tx.withStrand(Strand.POSITIVE);
+        if (! (transcript instanceof CodingTranscript)) {
+            writeNoncodingTranscript(geneSymbol, transcript, ypos, writer);
             return;
         }
-        GenomicRegion cds = transcript.cdsRegion().get();
-        double cdsStart = translateGenomicToSvg(cds.start());
-        double cdsEnd = translateGenomicToSvg(cds.end());
+        CodingTranscript ctx = (CodingTranscript) transcript;
+        double cdsStart = translateGenomicToSvg(ctx.codingStart());
+        double cdsEnd = translateGenomicToSvg(ctx.codingEnd());
         List<Exon> exons = transcript.exons();
         double minX = Double.MAX_VALUE;
         // write a line for UTR, otherwise write a box
@@ -379,7 +393,7 @@ public abstract class SvSvgGenerator {
             }
         }
         writeIntrons(exons, ypos, writer);
-        writeTranscriptName(tmod, minX, ypos, writer);
+        writeTranscriptName(geneSymbol, tx, minX, ypos, writer);
     }
 
     /**
@@ -438,25 +452,19 @@ public abstract class SvSvgGenerator {
     /**
      * Write a string such as {@code CFAP74 (NM_001304360.1) 1:1921950-2003837 (- strand)} representing the
      * transcript, its chromosomal location, and its strand.
-     * @param tmod representation of the transcript
+     * @param tx representation of the transcript
      * @param xpos starting position in SVG space
      * @param ypos vertical position in SVG space
      * @param writer file handle
      * @throws IOException if we cannot write to file
      */
-    private void writeTranscriptName(Transcript tmod, double xpos, int ypos, Writer writer) throws IOException {
-        String symbol = tmod.hgvsSymbol();
+    private void writeTranscriptName(String geneSymbol, Transcript tx, double xpos, int ypos, Writer writer) throws IOException {
         xpos = getAdjustedXPositionForText(xpos);
-        String accession = tmod.accessionId();
-        String chrom = tmod.contigName();
-        Transcript txOnFwdStrand = tmod.withStrand(Strand.POSITIVE);
-        int start = txOnFwdStrand.start();
-        int end = txOnFwdStrand.end();
-        String strand = tmod.strand().toString();
-        String startPos = decimalFormat.format(start);
-        String endPos = decimalFormat.format(end);
-        String positionString = String.format("%s:%s-%s (%s strand)", chrom, startPos, endPos, strand);
-        String geneName = String.format("%s (%s)", symbol, accession);
+        String strand = tx.strand().toString();
+        String startPos = decimalFormat.format(tx.startOnStrand(Strand.POSITIVE));
+        String endPos = decimalFormat.format(tx.endOnStrand(Strand.POSITIVE));
+        String positionString = String.format("%s:%s-%s (%s strand)", tx.contigName(), startPos, endPos, strand);
+        String geneName = String.format("%s (%s)", geneSymbol, tx.accessionId());
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
         String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
                 xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));

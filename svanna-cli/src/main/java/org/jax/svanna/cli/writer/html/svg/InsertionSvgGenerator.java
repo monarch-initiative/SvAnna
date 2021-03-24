@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.Variant;
 
 import java.io.IOException;
@@ -12,7 +12,7 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
 
 
     public InsertionSvgGenerator(Variant variant,
-                                 List<Transcript> transcripts,
+                                 List<Gene> transcripts,
                                  List<Enhancer> enhancers) {
         super(variant, transcripts, enhancers);
     }
@@ -27,8 +27,8 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
         String insertionDescription = String.format("%s insertion", insertionLength);
         writeInsertion(xpos, starty, insertionDescription, writer);
         y += 100;
-        for (var tmod : affectedTranscripts) {
-            writeTranscript(tmod, y, writer);
+        for (var gene : affectedGenes) {
+            writeGene(gene, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);

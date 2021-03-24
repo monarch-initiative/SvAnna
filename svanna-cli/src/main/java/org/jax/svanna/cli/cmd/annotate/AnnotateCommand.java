@@ -67,7 +67,7 @@ public class AnnotateCommand extends SvAnnaCommand {
     /*
      * ------------ ANALYSIS OPTIONS ------------
      */
-    @CommandLine.Option(names = {"-v", "--vcf"})
+    @CommandLine.Option(names = {"--vcf"})
     public Path vcfFile = null;
 
     @CommandLine.Option(names = {"-p", "--phenopacket"}, description = "phenopacket with HPO terms and path to VCF file")

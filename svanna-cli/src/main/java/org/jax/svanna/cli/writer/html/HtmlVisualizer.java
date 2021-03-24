@@ -6,8 +6,10 @@ import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
+import org.jax.svanna.core.overlap.GeneOverlap;
+import org.jax.svanna.core.overlap.TranscriptOverlap;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.core.reference.Zygosity;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.BreakendVariant;
@@ -173,21 +175,21 @@ public class HtmlVisualizer implements Visualizer {
             SvSvgGenerator gen;
             switch (variant.variantType().baseType()) {
                 case DEL:
-                    gen = new DeletionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
+                    gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
                     break;
                 case INS:
-                    gen = new InsertionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
+                    gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
                     break;
                 case INV:
-                    gen = new InversionSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
+                    gen = new InversionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
                     break;
                 case DUP:
-                    gen = new DuplicationSvgGenerator(variant, visualizable.transcripts(), visualizable.enhancers());
+                    gen = new DuplicationSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
                     break;
                 case TRA:
                 case BND:
                     if (variant instanceof BreakendVariant) {
-                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, visualizable.transcripts(), visualizable.enhancers());
+                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, visualizable.genes(), visualizable.enhancers());
                         break;
                     }
                     // fall through to default
@@ -283,7 +285,10 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     private String affectedSymbols(Visualizable visualizable) {
-        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
+        List<String> genes = visualizable.genes().stream()
+                .map(Gene::geneSymbol)
+                .distinct()
+                .collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
         Collections.sort(genes);
         List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
@@ -297,7 +302,7 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     private String numerousAffectedSymbols(Visualizable visualizable) {
-        List<String> genes = visualizable.transcripts().stream().map(Transcript::hgvsSymbol).distinct().collect(toList());
+        List<String> genes = visualizable.genes().stream().map(Gene::geneSymbol).distinct().collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
         Collections.sort(genes);
         List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
@@ -543,10 +548,13 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<caption>Overlapping transcripts</caption>\n");
         //sb.append("<thead><tr><td>Type</td><td>description</td></tr></thead>\n");
         sb.append("<tbody>\n");
-        for (var olap : visualizable.overlaps()) {
-            String cat = olap.getOverlapType().getName();
-            String description = olap.getDescription();
-            sb.append(twoItemRow(cat, description));
+        for (GeneOverlap olap : visualizable.overlaps()) {
+            Gene gene = olap.gene();
+            for (TranscriptOverlap txOverlap : olap.transcriptOverlaps()) {
+                String cat = txOverlap.getOverlapType().getName();
+                String description = txOverlap.getDescription();
+                sb.append(threeItemRow(gene.geneSymbol(), cat, description));
+            }
         }
 
         sb.append("</tbody>\n</table>\n");

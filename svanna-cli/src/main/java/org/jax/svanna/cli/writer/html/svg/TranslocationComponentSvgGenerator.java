@@ -3,7 +3,7 @@ package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.*;
 
 import java.io.IOException;
@@ -38,34 +38,30 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
      * The constructor calculates the left and right boundaries for display
      * TODO document logic, cleanup
      *
-     * @param transcripts List of transcripts affected (disrupted) by the translocation
+     * @param genes List of genes affected (disrupted) by the translocation
      * @param enhancers List of enhancers affected by the translocation
      */
     public TranslocationComponentSvgGenerator(int minPos, int maxPos,
-                                              List<Transcript> transcripts,
+                                              List<Gene> genes,
                                               List<Enhancer> enhancers,
                                               Variant variant,
                                               Breakend breakend,
                                               int ystart) {
-        super(minPos, maxPos, variant, transcripts, enhancers);
+        super(minPos, maxPos, variant, genes, enhancers);
         this.contig = breakend.contig();
         this.positionOnContig = breakend.startWithCoordinateSystem(CoordinateSystem.oneBased());
         this.ystart = ystart;
-        this.minTranscriptPos = transcripts.stream().
-                map(tx -> tx.withStrand(Strand.POSITIVE)).
-                mapToInt(Transcript::start).
+        this.minTranscriptPos = genes.stream().
+                mapToInt(tx -> tx.startOnStrand(Strand.POSITIVE)).
                 min().orElse(UNINITIALIZED);
-        this.maxTranscriptPos = transcripts.stream().
-                map(tx -> tx.withStrand(Strand.POSITIVE)).
-                mapToInt(Transcript::end).
+        this.maxTranscriptPos = genes.stream().
+                mapToInt(tx -> tx.endOnStrand(Strand.POSITIVE)).
                 max().orElse(UNINITIALIZED);
         this.minEnhancerPos = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::start)
+                .mapToInt(e -> e.startOnStrand(Strand.POSITIVE))
                 .min().orElse(UNINITIALIZED);
         this.maxEnhancerPos = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::end)
+                .mapToInt(e -> e.endOnStrand(Strand.POSITIVE))
                 .max().orElse(UNINITIALIZED);
         this.minPos = minPos;
         this.maxPos = maxPos;
@@ -136,8 +132,8 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
             offset += Constants.HEIGHT_PER_DISPLAY_ITEM;
             n_display_items++;
         }
-        for (var tmod : this.affectedTranscripts) {
-            writeTranscript(tmod, ypos, writer);
+        for (var gene : affectedGenes) {
+            writeGene(gene, ypos, writer);
             ypos += Constants.HEIGHT_PER_DISPLAY_ITEM;
             offset += Constants.HEIGHT_PER_DISPLAY_ITEM;
             n_display_items++;

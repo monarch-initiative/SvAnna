@@ -58,7 +58,7 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
     /*
      * ------------ ANALYSIS OPTIONS ------------
      */
-    @CommandLine.Option(names = {"-v", "--vcf"})
+    @CommandLine.Option(names = {"--vcf"}, description = "Path to input VCF file")
     public Path vcfFile = null;
 
     @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")

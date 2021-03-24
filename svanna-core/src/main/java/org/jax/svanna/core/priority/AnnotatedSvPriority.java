@@ -3,7 +3,7 @@ package org.jax.svanna.core.priority;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.overlap.TranscriptOverlap;
 import org.jax.svanna.core.reference.Transcript;
 
 import java.util.List;
@@ -31,6 +31,6 @@ public interface AnnotatedSvPriority extends DiscreteSvPriority {
 
     List<Enhancer> getAffectedEnhancers();
 
-    List<Overlap> getOverlaps();
+    List<TranscriptOverlap> getOverlaps();
 
 }

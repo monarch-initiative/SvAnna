@@ -6,7 +6,7 @@ import org.jax.svanna.core.reference.Transcript;
  * An object that represents the type and degree of overlap of a structural variant and
  * a transcript or enhancer feature.
  */
-public class Overlap {
+public class TranscriptOverlap {
 
     private final OverlapType overlapType;
     /**
@@ -14,22 +14,22 @@ public class Overlap {
      */
     private final OverlapDistance overlapDistance;
 
-    private final Transcript transcriptModel;
-
-    private final String hgvsSymbol;
+    private final String accessionId;
 
     private final String description;
 
-
-    public Overlap(OverlapType type, Transcript tx, String hgvsSymbol, OverlapDistance odist) {
-        this(type, tx, hgvsSymbol, odist, odist.getDescription());
+    @Deprecated
+    public static TranscriptOverlap of(OverlapType type, Transcript tx, String hgvsSymbol, OverlapDistance odist, String desc) {
+        return of(type, tx.accessionId(), odist, desc);
     }
 
+    public static TranscriptOverlap of(OverlapType type, String accessionId, OverlapDistance odist, String desc) {
+        return new TranscriptOverlap(type, accessionId, odist, desc);
+    }
 
-    public Overlap(OverlapType type, Transcript tx, String hgvsSymbol, OverlapDistance odist, String desc) {
+    private TranscriptOverlap(OverlapType type, String accessionId, OverlapDistance odist, String desc) {
         this.overlapType = type;
-        this.transcriptModel = tx;
-        this.hgvsSymbol = hgvsSymbol;
+        this.accessionId = accessionId;
         this.overlapDistance = odist;
         this.description = desc;
     }
@@ -54,16 +54,11 @@ public class Overlap {
      * @return true if this overlap involves exonic sequence
      */
     public boolean overlapsCds() {
-        return overlapDistance.isOverlapsCds();
-    }
-
-
-    public String getGeneSymbol() {
-        return hgvsSymbol;
+        return overlapDistance.overlapsCds();
     }
 
     public String getAccession() {
-        return this.transcriptModel.accessionId();
+        return accessionId;
     }
 
     public OverlapType getOverlapType() {
@@ -76,10 +71,6 @@ public class Overlap {
 
     public OverlapDistance getOverlapDistance() {
         return overlapDistance;
-    }
-
-    public Transcript getTranscriptModel() {
-        return transcriptModel;
     }
 
     public String getDescription() {

@@ -2,10 +2,10 @@ package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.priority.AnnotatedSvPriority;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated(forRemoval = true)
 public class HtmlVisualizable implements Visualizable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlVisualizable.class);
@@ -68,11 +69,6 @@ public class HtmlVisualizable implements Visualizable {
         return Set.copyOf(svPriority.getDiseases());
     }
 
-    @Override
-    public List<Transcript> transcripts() {
-        return new ArrayList<>(this.svPriority.getAffectedTranscripts());
-    }
-
     /**
      * Count up the number of unique (distinct) genes affected by this structural variant.
      *
@@ -82,7 +78,7 @@ public class HtmlVisualizable implements Visualizable {
     public int getGeneCount() {
         return (int) this.svPriority.getAffectedTranscripts()
                 .stream()
-                .map(Transcript::hgvsSymbol)
+//                .map(Transcript::hgvsSymbol)
                 .distinct()
                 .count();
     }
@@ -124,7 +120,12 @@ public class HtmlVisualizable implements Visualizable {
     }
 
     @Override
-    public List<Overlap> overlaps() {
-        return svPriority.getOverlaps();
+    public List<GeneOverlap> overlaps() {
+        return List.of();
+    }
+
+    @Override
+    public List<Gene> genes() {
+        return List.of();
     }
 }

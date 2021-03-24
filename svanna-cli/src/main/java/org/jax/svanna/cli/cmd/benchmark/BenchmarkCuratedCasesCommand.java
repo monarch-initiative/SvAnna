@@ -61,7 +61,7 @@ public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
     public float frequencyThreshold = 1.F;
 
     @CommandLine.Option(
-            names = {"-v", "--vcf"},
+            names = {"--vcf"},
             required = true,
             description = "path to VCF file with variants to be used as neutral background")
     public Path vcfFile = null;

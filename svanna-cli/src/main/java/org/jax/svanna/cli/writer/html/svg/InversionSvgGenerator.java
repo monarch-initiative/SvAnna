@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.Variant;
 
 import java.io.IOException;
@@ -15,9 +15,9 @@ public class InversionSvgGenerator extends SvSvgGenerator {
     private final double ARROWHEAD_SIZE = 8.0;
 
     public InversionSvgGenerator(Variant variant,
-                                 List<Transcript> transcripts,
+                                 List<Gene> genes,
                                  List<Enhancer> enhancers) {
-        super(variant, transcripts, enhancers);
+        super(variant, genes, enhancers);
         // TODO - check
         int pos1 = variant.start();
         int pos2 = variant.end();
@@ -37,8 +37,8 @@ public class InversionSvgGenerator extends SvSvgGenerator {
             writeEnhancer(e, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
-        for (var tmod : this.affectedTranscripts) {
-            writeTranscript(tmod, y, writer);
+        for (var gene : this.affectedGenes) {
+            writeGene(gene, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);

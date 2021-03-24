@@ -38,6 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * Thus, the patient might have terms such as HP:0003074 (Hyperglycemia), and HP:0001508 (Failure to thrive).
  */
 @SpringBootTest(classes = TestDataConfig.class)
+@Disabled // TODO - evaluate whether this prioritizer should be removed
 public class PrototypeSvPrioritizerTest {
 
     private Map<Integer, IntervalArray<Enhancer>> enhancerMap;
@@ -363,9 +364,9 @@ public class PrototypeSvPrioritizerTest {
         DiscreteSvPriority result = prioritizer.prioritize(sr);
         assertThat(result.getImpact(), is(SvImpact.HIGH));
 //        assertThat(result.hasPhenotypicRelevance(), equalTo(true));
-//        List<Overlap> overlaps = result.getOverlaps();
+//        List<TranscriptOverlap> overlaps = result.getOverlaps();
 //        assertThat(overlaps.size(), is(1));
-//        Overlap olap = overlaps.get(0);
+//        TranscriptOverlap olap = overlaps.get(0);
 //        assertThat(olap.getOverlapType(), is(OverlapType.UPSTREAM_GENE_VARIANT_500B));
 //        assertThat(olap.getDistance(), is(lessThan(500))); // 500bp class, actually it is 48bp
 //        assertThat(olap.getGeneSymbol(), is("FBN1"));

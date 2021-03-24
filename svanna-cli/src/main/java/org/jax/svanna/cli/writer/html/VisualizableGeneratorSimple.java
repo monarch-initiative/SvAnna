@@ -5,10 +5,10 @@ import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
-import org.jax.svanna.core.overlap.Overlapper;
+import org.jax.svanna.core.overlap.GeneOverlap;
+import org.jax.svanna.core.overlap.GeneOverlapper;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Transcript;
 
 import java.util.Collection;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
-    private final Overlapper overlapper;
+    private final GeneOverlapper overlapper;
 
     private final AnnotationDataService annotationDataService;
 
@@ -27,7 +27,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     private final Map<String, GeneWithId> geneMap;
 
-    public VisualizableGeneratorSimple(Overlapper overlapper,
+    public VisualizableGeneratorSimple(GeneOverlapper overlapper,
                                        AnnotationDataService annotationDataService,
                                        PhenotypeDataService phenotypeDataService) {
         this.overlapper = overlapper;
@@ -39,17 +39,19 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     @Override
     public Visualizable makeVisualizable(SvannaVariant variant) {
-        List<Overlap> overlaps = overlapper.getOverlaps(variant);
-        List<Transcript> transcripts = overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toList());
+        List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
+        List<String> geneSymbols = overlaps.stream()
+                .map(GeneOverlap::gene)
+                .map(Gene::geneSymbol)
+                .collect(Collectors.toList());
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
 
-        Set<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
+        Set<HpoDiseaseSummary> diseaseSummaries = geneSymbols.stream()
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
                 .map(id -> phenotypeDataService.getDiseasesForGene(id.getGeneId()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        return SomeVisualizable.of(variant, diseaseSummaries, transcripts, enhancers, overlaps);
+        return SomeVisualizable.of(variant, diseaseSummaries, overlaps, enhancers);
     }
 }

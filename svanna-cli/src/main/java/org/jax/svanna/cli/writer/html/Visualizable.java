@@ -2,9 +2,9 @@ package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.overlap.GeneOverlap;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Transcript;
 
 import java.util.List;
 import java.util.Set;
@@ -19,9 +19,9 @@ public interface Visualizable {
 
     Set<HpoDiseaseSummary> diseaseSummaries();
 
-    List<Overlap> overlaps();
+    List<GeneOverlap> overlaps();
 
-    List<Transcript> transcripts();
+    List<Gene> genes();
 
     /** @return the total number of genes affected by this structural variant. */
     int getGeneCount();

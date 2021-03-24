@@ -8,7 +8,7 @@ import org.jax.svanna.cli.writer.html.template.HtmlTemplate;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.overlap.Overlapper;
+import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class HtmlResultWriter implements ResultWriter {
     private final Visualizer visualizer;
     private HtmlResultFormatParameters parameters = HtmlResultFormatParameters.defaultParameters();
 
-    public HtmlResultWriter(Overlapper overlapper, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
+    public HtmlResultWriter(GeneOverlapper overlapper, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
         visualizableGenerator = new VisualizableGeneratorSimple(overlapper, annotationDataService, phenotypeDataService);
         visualizer = new HtmlVisualizer();
     }

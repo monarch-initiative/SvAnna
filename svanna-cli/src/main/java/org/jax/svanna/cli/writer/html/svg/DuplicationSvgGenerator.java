@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.Variant;
 
 import java.io.IOException;
@@ -16,9 +16,9 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
 
 
     public DuplicationSvgGenerator(Variant variant,
-                                   List<Transcript> transcripts,
+                                   List<Gene> genes,
                                    List<Enhancer> enhancers) {
-        super(variant, transcripts, enhancers);
+        super(variant, genes, enhancers);
 
         duplicationStart = Math.min(variant.start(), variant.end());
         duplicationEnd = Math.max(variant.start(), variant.end());
@@ -39,8 +39,8 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s duplication", deletionLength);
         writeDuplication(starty, deletionDescription, writer);
         y += 100;
-        for (var tmod : affectedTranscripts) {
-            writeTranscript(tmod, y, writer);
+        for (var gene : affectedGenes) {
+            writeGene(gene, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);

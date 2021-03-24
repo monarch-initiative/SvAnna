@@ -5,9 +5,9 @@ import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.overlap.OverlapType;
 import org.jax.svanna.core.overlap.Overlapper;
+import org.jax.svanna.core.overlap.TranscriptOverlap;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
@@ -125,10 +124,10 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
      */
     private DiscreteSvPriority prioritizeDeletion(Variant deletion) {
         // find the gene/transcript with the most deleterious OverlapType
-        List<Overlap> overlaps = overlapper.getOverlaps(deletion);
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(deletion);
 
         // set default impact
-        Optional<Overlap> highestOverlapType = findOverlapWithMaxPriority(overlaps);
+        Optional<TranscriptOverlap> highestOverlapType = findOverlapWithMaxPriority(overlaps);
         if (highestOverlapType.isEmpty()) {
             LogUtils.logWarn(LOGGER, "Did not find overlap for {}", LogUtils.variantSummary(deletion));
             return DiscreteSvPriority.unknown();
@@ -148,9 +147,10 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         }
 
         // counts of gene regardless of relevance
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+        Set<Transcript> affectedTranscripts = Set.of(); // FIXME
+//        Set<Transcript> affectedTranscripts = overlaps.stream()
+//                .map(TranscriptOverlap::getTranscriptModel)
+//                .collect(Collectors.toSet());
         long geneCount = affectedTranscripts.stream()
 //                .map(Transcript::hgvsSymbol)
                 .distinct()
@@ -176,16 +176,16 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
      * @return Corresponding prioritization according to sequence
      */
     private DiscreteSvPriority prioritizeInsertion(Variant insertion) {
-        List<Overlap> overlaps = overlapper.getOverlaps(insertion);
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(insertion);
+        Optional<TranscriptOverlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(TranscriptOverlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LogUtils.logWarn(LOGGER, "Could not identify highest impact overlap for insertion: {}.", insertion);
             return DiscreteSvPriority.unknown();
         }
         // sequence impact
-        Overlap overlap = highestImpactOverlapOpt.get();
+        TranscriptOverlap overlap = highestImpactOverlapOpt.get();
         Set<GeneWithId> geneWithIdsSet = selectOverlappingGeneIds(overlaps);
         SvImpact sequenceImpact = insertionSequenceImpact(overlap, geneWithIdsSet);
 
@@ -198,7 +198,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         return prioritizeSimpleOverlapByPhenotype(impact, !overlaps.isEmpty(), geneWithIdsSet, enhancers);
     }
 
-    private SvImpact insertionSequenceImpact(Overlap overlap, Set<GeneWithId> geneWithIdsSet) {
+    private SvImpact insertionSequenceImpact(TranscriptOverlap overlap, Set<GeneWithId> geneWithIdsSet) {
         OverlapType overlapType = overlap.getOverlapType();
         SvImpact impact = overlapType.defaultSvImpact();
         if (geneWithIdsSet.size() > 1 && overlapType.isExonic()) {
@@ -224,8 +224,8 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
 
 
     private DiscreteSvPriority prioritizeDuplication(Variant duplication) {
-        List<Overlap> overlaps = overlapper.getOverlaps(duplication);
-        Optional<Overlap> maxPriorityOverlap = findOverlapWithMaxPriority(overlaps);
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(duplication);
+        Optional<TranscriptOverlap> maxPriorityOverlap = findOverlapWithMaxPriority(overlaps);
         if (maxPriorityOverlap.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for duplication: {}.", duplication);
@@ -233,15 +233,16 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         }
 
         // Start figuring out the impact
-        Overlap overlap = maxPriorityOverlap.get();
+        TranscriptOverlap overlap = maxPriorityOverlap.get();
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(duplication);
         SvImpact sequenceImpact = duplicationSequenceImpact(overlap, enhancers);
 
         Set<GeneWithId> geneWithIdsSet = selectOverlappingGeneIds(overlaps);
         // counts of gene regardless of relevance
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+        Set<Transcript> affectedTranscripts = Set.of(); // FIXME
+//        Set<Transcript> affectedTranscripts = overlaps.stream()
+//                .map(TranscriptOverlap::getTranscriptModel)
+//                .collect(Collectors.toSet());
         long geneCount = affectedTranscripts.stream()
 //                .map(Transcript::hgvsSymbol)
                 .distinct()
@@ -254,7 +255,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         return prioritizeSimpleOverlapByPhenotype(sequenceImpact, !affectedTranscripts.isEmpty(), geneWithIdsSet, enhancers);
     }
 
-    private SvImpact duplicationSequenceImpact(Overlap overlap, List<Enhancer> enhancers) {
+    private SvImpact duplicationSequenceImpact(TranscriptOverlap overlap, List<Enhancer> enhancers) {
         OverlapType overlapType = overlap.getOverlapType();
         SvImpact impact = overlapType.defaultSvImpact();
 
@@ -309,14 +310,14 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
      * @return prioritization result
      */
     private DiscreteSvPriority prioritizeInversion(Variant inversion) {
-        List<Overlap> overlaps = overlapper.getOverlaps(inversion);
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(inversion);
 
-        Optional<Overlap> highestOTOpt = findOverlapWithMaxPriority(overlaps);
+        Optional<TranscriptOverlap> highestOTOpt = findOverlapWithMaxPriority(overlaps);
         if (highestOTOpt.isEmpty()) {
             LogUtils.logWarn(LOGGER, "Did not find overlap for variant {}", LogUtils.variantSummary(inversion));
             return DiscreteSvPriority.unknown();
         }
-        Overlap overlap = highestOTOpt.get();
+        TranscriptOverlap overlap = highestOTOpt.get();
         OverlapType overlapType = overlap.getOverlapType();
 
         // set default impact
@@ -324,9 +325,10 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         SvImpact impact = considerEnhancersForInversion(overlapType.defaultSvImpact(), overlap, enhancers);
         // if the inversion already has high priority, then return it
         // otherwise look for longer range position effects
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+        Set<Transcript> affectedTranscripts = Set.of(); // FIXME
+//        Set<Transcript> affectedTranscripts = overlaps.stream()
+//                .map(TranscriptOverlap::getTranscriptModel)
+//                .collect(Collectors.toSet());
         Set<GeneWithId> geneWithIdsSet = selectOverlappingGeneIds(overlaps);
         DiscreteSvPriority prio = prioritizeSimpleOverlapByPhenotype(impact, !affectedTranscripts.isEmpty(), geneWithIdsSet, enhancers);
         if (prio.getImpact() == SvImpact.HIGH) {
@@ -373,28 +375,30 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
 
     private DiscreteSvPriority prioritizeTranslocation(Variant variant) {
         // the following gets overlaps that disrupt transcripts only
-        List<Overlap> overlaps = overlapper.getOverlaps(variant);
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(variant);
         SvImpact impact = SvImpact.LOW; // default
-        Optional<Overlap> overlapOptional = findOverlapWithMaxPriority(overlaps);
+        Optional<TranscriptOverlap> overlapOptional = findOverlapWithMaxPriority(overlaps);
         if (overlapOptional.isEmpty()) {
             LogUtils.logWarn(LOGGER, "Did not find overlap for variant {}", LogUtils.variantSummary(variant));
             return DiscreteSvPriority.unknown();
         }
-        Overlap overlap = overlapOptional.get();
+        TranscriptOverlap overlap = overlapOptional.get();
         OverlapType overlapType = overlap.getOverlapType();
-        Set<Transcript> affectedTranscripts;
+//        Set<Transcript> affectedTranscripts;
+        Set<Transcript> affectedTranscripts = Set.of(); // FIXME
         Set<GeneWithId> geneWithIdsSet;
         if (!overlaps.isEmpty()) {
-            Set<String> affectedGeneIds = overlaps.stream().map(Overlap::getGeneSymbol).collect(Collectors.toSet());
+//            Set<String> affectedGeneIds = overlaps.stream().map(TranscriptOverlap::getGeneSymbol).collect(Collectors.toSet());
+            Set<String> affectedGeneIds = Set.of(); // FIXME
             geneWithIdsSet = new HashSet<>();
             for (String symbol : affectedGeneIds) {
                 if (geneSymbolMap.containsKey(symbol)) {
                     geneWithIdsSet.add(geneSymbolMap.get(symbol));
                 }
             }
-            affectedTranscripts = overlaps.stream()
-                    .map(Overlap::getTranscriptModel)
-                    .collect(Collectors.toSet());
+//            affectedTranscripts = overlaps.stream()
+//                    .map(TranscriptOverlap::getTranscriptModel)
+//                    .collect(Collectors.toSet());
             if (overlapType.translocationDisruptable()) {
                 impact = SvImpact.HIGH;
                 overlapType = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
@@ -423,12 +427,13 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         return DiscreteSvPriorityDefault.of(impact, false);
     }
 
-    private Set<GeneWithId> selectOverlappingGeneIds(List<Overlap> overlaps) {
-        return overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .filter(geneSymbolMap::containsKey)
-                .map(geneSymbolMap::get)
-                .collect(Collectors.toSet());
+    private Set<GeneWithId> selectOverlappingGeneIds(List<TranscriptOverlap> overlaps) {
+//        return overlaps.stream()
+//                .map(TranscriptOverlap::getGeneSymbol)
+//                .filter(geneSymbolMap::containsKey)
+//                .map(geneSymbolMap::get)
+//                .collect(Collectors.toSet());
+        return Set.of(); // FIXME
     }
 
     /**
@@ -480,7 +485,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
                 : SvImpact.INTERMEDIATE;
     }
 
-    private static SvImpact considerEnhancersForInversion(SvImpact impact, Overlap overlap, List<Enhancer> enhancers) {
+    private static SvImpact considerEnhancersForInversion(SvImpact impact, TranscriptOverlap overlap, List<Enhancer> enhancers) {
         OverlapType overlapType = overlap.getOverlapType();
         if (overlapType.isExonic() && overlapType != OverlapType.TRANSCRIPT_CONTAINED_IN_SV) {
             // (1) the inversion affects an exon
@@ -515,7 +520,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         return impact;
     }
 
-    private static Optional<Overlap> findOverlapWithMaxPriority(List<Overlap> overlaps) {
-        return overlaps.stream().max(Comparator.comparing(Overlap::getOverlapType));
+    private static Optional<TranscriptOverlap> findOverlapWithMaxPriority(List<TranscriptOverlap> overlaps) {
+        return overlaps.stream().max(Comparator.comparing(TranscriptOverlap::getOverlapType));
     }
 }

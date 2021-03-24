@@ -4,9 +4,9 @@ import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.EnhancerOverlapper;
-import org.jax.svanna.core.overlap.Overlap;
 import org.jax.svanna.core.overlap.OverlapType;
 import org.jax.svanna.core.overlap.Overlapper;
+import org.jax.svanna.core.overlap.TranscriptOverlap;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Variant;
@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
@@ -166,7 +165,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
                                                            Set<Transcript> affectedTranscripts,
                                                            Set<GeneWithId> affectedGeneIds,
                                                            List<Enhancer> affectedEnhancers,
-                                                           List<Overlap> olaps) {
+                                                           List<TranscriptOverlap> olaps) {
 
         List<HpoDiseaseSummary> diseaseList = new ArrayList<>();
         SvImpact phenotypeImpact;
@@ -228,22 +227,24 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
      */
     private AnnotatedSvPriority prioritizeDeletion(Variant deletion) {
         // find the gene/transcript with the most deleterious OverlapType
-        List<Overlap> overlaps = overlapper.getOverlaps(deletion);
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(deletion);
         OverlapType highestOT = getHighestOverlapType(overlaps);
 
         // select the relevant genes and transcripts
-        Set<String> affectedGeneSymbols = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toSet());
+//        Set<String> affectedGeneSymbols = overlaps.stream()
+//                .map(TranscriptOverlap::getGeneSymbol)
+//                .collect(Collectors.toSet());
+        Set<String> affectedGeneSymbols = Set.of(); // FIXME
         Set<GeneWithId> geneWithIdsSet = new HashSet<>();
         for (String symbol : affectedGeneSymbols) {
             if (geneSymbolMap.containsKey(symbol)) {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
         }
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+//        Set<Transcript> affectedTranscripts = overlaps.stream()
+//                .map(TranscriptOverlap::getTranscriptModel)
+//                .collect(Collectors.toSet());
+        Set<Transcript> affectedTranscripts = Set.of();
 
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
@@ -299,28 +300,30 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
      * @return Corresponding prioritization according to sequence
      */
     private AnnotatedSvPriority prioritizeInsertion(Variant insertion) {
-        List<Overlap> overlaps = overlapper.getOverlaps(insertion);
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(insertion);
+        Optional<TranscriptOverlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(TranscriptOverlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for insertion: {}.", insertion);
             return DefaultAnnotatedSvPriority.unknown();
         }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        TranscriptOverlap highestImpactOverlap = highestImpactOverlapOpt.get();
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
-        Set<String> affectedGeneIds = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toSet());
+//        Set<String> affectedGeneIds = overlaps.stream()
+//                .map(TranscriptOverlap::getGeneSymbol)
+//                .collect(Collectors.toSet());
+        Set<String> affectedGeneIds = Set.of(); // FIXME
         Set<GeneWithId> geneWithIdsSet = new HashSet<>();
         for (String symbol : affectedGeneIds) {
             if (geneSymbolMap.containsKey(symbol)) {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
         }
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+//        Set<Transcript> affectedTranscripts = overlaps.stream()
+//                .map(TranscriptOverlap::getTranscriptModel)
+//                .collect(Collectors.toSet());
+        Set<Transcript> affectedTranscripts = Set.of();
 
         // start figuring out the impact
         SvImpact impact = highestOT.defaultSvImpact();
@@ -371,29 +374,31 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
      */
     private AnnotatedSvPriority prioritizeInversion(Variant inversion) {
         // Gather information
-        List<Overlap> overlaps = overlapper.getOverlaps(inversion);
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(inversion);
+        Optional<TranscriptOverlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(TranscriptOverlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for inversion: {}.", inversion);
             return DefaultAnnotatedSvPriority.unknown();
         }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        TranscriptOverlap highestImpactOverlap = highestImpactOverlapOpt.get();
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
 
-        Set<String> affectedGeneIds = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toSet());
+//        Set<String> affectedGeneIds = overlaps.stream()
+//                .map(TranscriptOverlap::getGeneSymbol)
+//                .collect(Collectors.toSet());
+        Set<String> affectedGeneIds = Set.of(); // FIXME
         Set<GeneWithId> geneWithIdsSet = new HashSet<>();
         for (String symbol : affectedGeneIds) {
             if (geneSymbolMap.containsKey(symbol)) {
                 geneWithIdsSet.add(geneSymbolMap.get(symbol));
             }
         }
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+//        Set<Transcript> affectedTranscripts = overlaps.stream()
+//                .map(TranscriptOverlap::getTranscriptModel)
+//                .collect(Collectors.toSet());
+        Set<Transcript> affectedTranscripts = Set.of();
 
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(inversion);
 
@@ -495,36 +500,37 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
 //    }
 
 
-    private OverlapType getHighestOverlapType(List<Overlap> overlaps) {
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
+    private OverlapType getHighestOverlapType(List<TranscriptOverlap> overlaps) {
+        Optional<TranscriptOverlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(TranscriptOverlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for list of {} overlaps.", overlaps.size());
             return OverlapType.UNKNOWN;
         }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        TranscriptOverlap highestImpactOverlap = highestImpactOverlapOpt.get();
         return highestImpactOverlap.getOverlapType();
     }
 
 
     private AnnotatedSvPriority prioritizeTranslocation(Variant variant) {
         // the following gets overlaps that disrupt transcripts only
-        List<Overlap> overlaps = overlapper.getOverlaps(variant);
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(variant);
         SvImpact impact = SvImpact.LOW; // default
         OverlapType otype = getHighestOverlapType(overlaps);
-        Set<Transcript> affectedTranscripts;
+//        Set<Transcript> affectedTranscripts;
+        Set<Transcript> affectedTranscripts = Set.of();
         Set<GeneWithId> geneWithIdsSet;
         if (!overlaps.isEmpty()) {
-            Set<String> affectedGeneIds = overlaps.stream().map(Overlap::getGeneSymbol).collect(Collectors.toSet());
+//            Set<String> affectedGeneIds = overlaps.stream().map(TranscriptOverlap::getGeneSymbol).collect(Collectors.toSet());
+            Set<String> affectedGeneIds = Set.of(); // FIXME
             geneWithIdsSet = new HashSet<>();
             for (String symbol : affectedGeneIds) {
                 if (geneSymbolMap.containsKey(symbol)) {
                     geneWithIdsSet.add(geneSymbolMap.get(symbol));
                 }
             }
-            affectedTranscripts =
-                    overlaps.stream().map(Overlap::getTranscriptModel).collect(Collectors.toSet());
+//            affectedTranscripts = overlaps.stream().map(TranscriptOverlap::getTranscriptModel).collect(Collectors.toSet());
             if (otype.translocationDisruptable()) {
                 impact = SvImpact.HIGH;
                 otype = OverlapType.TRANSCRIPT_DISRUPTED_BY_TRANSLOCATION;
@@ -554,23 +560,25 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
     }
 
     private AnnotatedSvPriority prioritizeDuplication(Variant duplication) {
-        List<Overlap> overlaps = overlapper.getOverlaps(duplication);
-        Optional<Overlap> highestImpactOverlapOpt = overlaps.stream()
-                .max(Comparator.comparing(Overlap::getOverlapType));
+        List<TranscriptOverlap> overlaps = overlapper.getOverlaps(duplication);
+        Optional<TranscriptOverlap> highestImpactOverlapOpt = overlaps.stream()
+                .max(Comparator.comparing(TranscriptOverlap::getOverlapType));
         if (highestImpactOverlapOpt.isEmpty()) {
             // should never happen
             LOGGER.error("Could not identify highest impact overlap for duplication: {}.", duplication);
             return DefaultAnnotatedSvPriority.unknown();
         }
-        Overlap highestImpactOverlap = highestImpactOverlapOpt.get();
+        TranscriptOverlap highestImpactOverlap = highestImpactOverlapOpt.get();
         OverlapType highestOT = highestImpactOverlap.getOverlapType();
 
-        Set<String> affectedGeneIds = overlaps.stream()
-                .map(Overlap::getGeneSymbol)
-                .collect(Collectors.toSet());
-        Set<Transcript> affectedTranscripts = overlaps.stream()
-                .map(Overlap::getTranscriptModel)
-                .collect(Collectors.toSet());
+//        Set<String> affectedGeneIds = overlaps.stream()
+//                .map(TranscriptOverlap::getGeneSymbol)
+//                .collect(Collectors.toSet());
+        Set<String> affectedGeneIds = Set.of(); // FIXME
+        Set<Transcript> affectedTranscripts = Set.of();
+//        Set<Transcript> affectedTranscripts = overlaps.stream()
+//                .map(TranscriptOverlap::getTranscriptModel)
+//                .collect(Collectors.toSet());
 
         List<Enhancer> enhancers = enhancerOverlapper.getEnhancerOverlaps(duplication);
 

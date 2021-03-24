@@ -2,9 +2,9 @@ package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.overlap.GeneOverlap;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 class SomeVisualizable implements Visualizable {
 
@@ -25,30 +26,25 @@ class SomeVisualizable implements Visualizable {
 
     private final Set<HpoDiseaseSummary> diseaseSummaries;
 
-    private final List<Transcript> transcripts;
-
     private final List<Enhancer> affectedEnhancers;
 
-    private final List<Overlap> overlaps;
+    private final List<GeneOverlap> overlaps;
 
     static SomeVisualizable of(SvannaVariant variant,
                                Set<HpoDiseaseSummary> diseaseSummaries,
-                               List<Transcript> transcripts,
-                               List<Enhancer> affectedEnhancers,
-                               List<Overlap> overlaps) {
-        return new SomeVisualizable(variant, diseaseSummaries, transcripts, affectedEnhancers, overlaps);
+                               List<GeneOverlap> overlaps,
+                               List<Enhancer> affectedEnhancers) {
+        return new SomeVisualizable(variant, diseaseSummaries, overlaps, affectedEnhancers);
     }
 
     private SomeVisualizable(SvannaVariant variant,
-                            Set<HpoDiseaseSummary> diseaseSummaries,
-                            List<Transcript> transcripts,
-                            List<Enhancer> affectedEnhancers,
-                            List<Overlap> overlaps) {
+                             Set<HpoDiseaseSummary> diseaseSummaries,
+                             List<GeneOverlap> overlaps,
+                             List<Enhancer> affectedEnhancers) {
         this.variant = variant;
         this.diseaseSummaries = diseaseSummaries;
-        this.transcripts = transcripts;
-        this.affectedEnhancers = affectedEnhancers;
         this.overlaps = overlaps;
+        this.affectedEnhancers = affectedEnhancers;
     }
 
     private HtmlLocation getSimpleLocation(Variant variant) {
@@ -90,8 +86,8 @@ class SomeVisualizable implements Visualizable {
     }
 
     @Override
-    public List<Transcript> transcripts() {
-        return transcripts;
+    public List<Gene> genes() {
+        return overlaps.stream().map(GeneOverlap::gene).collect(Collectors.toList());
     }
 
     /**
@@ -101,8 +97,9 @@ class SomeVisualizable implements Visualizable {
      */
     @Override
     public int getGeneCount() {
-        return (int) transcripts.stream()
-                .map(Transcript::hgvsSymbol)
+        return (int) overlaps.stream()
+                .map(GeneOverlap::gene)
+                .map(Gene::geneSymbol)
                 .distinct()
                 .count();
     }
@@ -144,7 +141,7 @@ class SomeVisualizable implements Visualizable {
     }
 
     @Override
-    public List<Overlap> overlaps() {
+    public List<GeneOverlap> overlaps() {
         return overlaps;
     }
 
@@ -153,12 +150,12 @@ class SomeVisualizable implements Visualizable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SomeVisualizable that = (SomeVisualizable) o;
-        return Objects.equals(variant, that.variant) && Objects.equals(diseaseSummaries, that.diseaseSummaries) && Objects.equals(transcripts, that.transcripts) && Objects.equals(affectedEnhancers, that.affectedEnhancers) && Objects.equals(overlaps, that.overlaps);
+        return Objects.equals(variant, that.variant) && Objects.equals(diseaseSummaries, that.diseaseSummaries) && Objects.equals(affectedEnhancers, that.affectedEnhancers) && Objects.equals(overlaps, that.overlaps);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(variant, diseaseSummaries, transcripts, affectedEnhancers, overlaps);
+        return Objects.hash(variant, diseaseSummaries, affectedEnhancers, overlaps);
     }
 
     @Override
@@ -166,7 +163,6 @@ class SomeVisualizable implements Visualizable {
         return "SomeVisualizable{" +
                 "variant=" + variant +
                 ", diseaseSummaries=" + diseaseSummaries +
-                ", transcripts=" + transcripts +
                 ", affectedEnhancers=" + affectedEnhancers +
                 ", overlaps=" + overlaps +
                 '}';

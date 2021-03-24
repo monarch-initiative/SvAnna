@@ -11,32 +11,58 @@ package org.jax.svanna.core.overlap;
 public class OverlapDistance {
 
     private static final int UNITIALIZED = Integer.MIN_VALUE;
+
     private final OverlapDistanceType overlapDistanceType;
-    private final int distanceA;
-    private final int distanceB;
+
+    private final int upstreamDistance;
+    private final int downstreamDistance;
     private final boolean overlapsCds;
     private final String description;
 
-    private OverlapDistance(OverlapDistanceType odtype, int distance, String description, boolean cds) {
-        this(odtype, distance, UNITIALIZED, description, cds);
+    private OverlapDistance(OverlapDistanceType odtype, int distance, boolean overlapsCds, String description) {
+        this(odtype, distance, UNITIALIZED, overlapsCds, description);
     }
 
-    private OverlapDistance(OverlapDistanceType odtype, int distancea, int distanceb, String description, boolean cds) {
+    private OverlapDistance(OverlapDistanceType odtype, int upstreamDistance, int downstreamDistance, boolean overlapsCds, String description) {
         overlapDistanceType = odtype;
-        this.distanceA = distancea;
-        this.distanceB = distanceb;
+        this.upstreamDistance = upstreamDistance;
+        this.downstreamDistance = downstreamDistance;
         this.description = description;
-        this.overlapsCds = cds;
+        this.overlapsCds = overlapsCds;
     }
 
-    public static OverlapDistance fromUpstreamFlankingGene(int distance, String geneSymbol) {
-        String description = String.format("Intergenic: %s upstream of %s", distanceString(distance), geneSymbol);
-        return new OverlapDistance(OverlapDistanceType.INTERGENIC, distance, description, false);
+    public enum OverlapDistanceType {INTERGENIC, INTRONIC, EXONIC, CONTAINED_IN}
+
+    public OverlapDistanceType overlapDistanceType() {
+        return overlapDistanceType;
     }
 
-    public static OverlapDistance fromDownstreamFlankingGene(int distance, String geneSymbol) {
-        String description = String.format("Intergenic: %s downstream of %s", distanceString(distance), geneSymbol);
-        return new OverlapDistance(OverlapDistanceType.INTERGENIC, distance, description, false);
+    public boolean overlapsCds() {
+        return overlapsCds;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getShortestDistance() {
+        if (downstreamDistance == UNITIALIZED) {
+            return upstreamDistance;
+        } else {
+            return Math.abs(upstreamDistance) < Math.abs(downstreamDistance)
+                    ? upstreamDistance
+                    : downstreamDistance;
+        }
+    }
+
+    public static OverlapDistance fromUpstreamFlankingGene(int upstreamDistance, String geneSymbol) {
+        String description = String.format("Intergenic: %s upstream of %s", distanceString(upstreamDistance), geneSymbol);
+        return new OverlapDistance(OverlapDistanceType.INTERGENIC, upstreamDistance, false, description);
+    }
+
+    public static OverlapDistance fromDownstreamFlankingGene(int downstreamDistance, String geneSymbol) {
+        String description = String.format("Intergenic: %s downstream of %s", distanceString(downstreamDistance), geneSymbol);
+        return new OverlapDistance(OverlapDistanceType.INTERGENIC, downstreamDistance, false, description);
     }
 
     /**
@@ -47,7 +73,7 @@ public class OverlapDistance {
      */
     public static OverlapDistance fromExonic(String geneSymbol, boolean overlapsCds) {
         String description = "Exonic"; // we do not use the OverlapDistance to provide descriptions about exonic events
-        return new OverlapDistance(OverlapDistanceType.EXONIC, 0, description, overlapsCds);
+        return new OverlapDistance(OverlapDistanceType.EXONIC, 0, overlapsCds, description);
     }
 
     public static OverlapDistance fromIntronic(String geneSymbol, IntronDistance idistance) {
@@ -55,11 +81,11 @@ public class OverlapDistance {
                 distanceString(Math.abs(idistance.getDistanceToUpstreamExon())), distanceString(idistance.getDistanceToDownstreamExon()), geneSymbol);
         return new OverlapDistance(OverlapDistanceType.INTRONIC,
                 idistance.getDistanceToUpstreamExon(),
-                idistance.getDistanceToDownstreamExon(), description, false);
+                idistance.getDistanceToDownstreamExon(), false, description);
     }
 
     public static OverlapDistance fromContainedIn() {
-        return new OverlapDistance(OverlapDistanceType.CONTAINED_IN, 0, "", true);
+        return new OverlapDistance(OverlapDistanceType.CONTAINED_IN, 0, true, "");
     }
 
     private static String distanceString(int d) {
@@ -74,24 +100,4 @@ public class OverlapDistance {
             return String.format("%.2f Mb", x);
         }
     }
-
-    public boolean isOverlapsCds() {
-        return overlapsCds;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getShortestDistance() {
-        if (distanceB == UNITIALIZED) {
-            return distanceA;
-        } else {
-            return Math.abs(distanceA) < Math.abs(distanceB)
-                    ? distanceA
-                    : distanceB;
-        }
-    }
-
-    enum OverlapDistanceType {INTERGENIC, INTRONIC, EXONIC, CONTAINED_IN}
 }

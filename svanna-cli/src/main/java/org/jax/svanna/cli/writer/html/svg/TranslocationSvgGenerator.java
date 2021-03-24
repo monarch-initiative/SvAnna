@@ -2,7 +2,7 @@ package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.*;
 
 import java.io.IOException;
@@ -24,11 +24,11 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
     /**
      * transcripts on contig A
      */
-    private final List<Transcript> transcriptModelsA;
+    private final List<Gene> genesA;
     /**
      * transcripts on contig B
      */
-    private final List<Transcript> transcriptModelsB;
+    private final List<Gene> genesB;
 
     /**
      * enhancers on contig A
@@ -52,65 +52,64 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
      * The constructor calculates the left and right boundaries for display.
      * @param variant Variant object representing a translocation
      * @param breakended
-     * @param transcripts transcripts affected by this translocation
+     * @param genes genes affected by this translocation
      * @param enhancers Enhancers disrupted by this translocation
      */
     public TranslocationSvgGenerator(Variant variant,
                                      BreakendVariant breakended,
-                                     List<Transcript> transcripts,
+                                     List<Gene> genes,
                                      List<Enhancer> enhancers) {
-        super(variant, transcripts, enhancers);
+        super(variant, genes, enhancers);
         Breakend left = breakended.left();
         Breakend right = breakended.right();
-        this.transcriptModelsA = transcripts.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
-        this.transcriptModelsB = transcripts.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());
+        this.genesA = genes.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
+        this.genesB = genes.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());
         this.enhancersA = enhancers.stream().filter(e -> e.contigId() == left.contigId()).collect(Collectors.toList());
         this.enhancersB = enhancers.stream().filter(e -> e.contigId() == right.contigId()).collect(Collectors.toList());
-        int displayElementsA = transcriptModelsA.size() + enhancersA.size(); // number of display elements for translocation A
+        int nTranscripts = genesA.stream()
+                .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
+                .sum();
+        int displayElementsA = nTranscripts + enhancersA.size(); // number of display elements for translocation A
         this.separationLineY = displayElementsA*Constants.HEIGHT_PER_DISPLAY_ITEM + YSTART + 100;
         this.ystartB = this.separationLineY + 50;
 
         CoordinateSystem cs = CoordinateSystem.oneBased();
         this.componentA = new TranslocationComponentSvgGenerator(
-                getMin(transcriptModelsA, enhancersA, left.startWithCoordinateSystem(cs)),
-                getMax(transcriptModelsA, enhancersA, left.endWithCoordinateSystem(cs)),
-                transcriptModelsA, enhancersA, variant, left, YSTART);
+                getMin(genesA, enhancersA, left.startWithCoordinateSystem(cs)),
+                getMax(genesA, enhancersA, left.endWithCoordinateSystem(cs)),
+                genesA, enhancersA, variant, left, YSTART);
         this.componentB = new TranslocationComponentSvgGenerator(
-                getMin(transcriptModelsB, enhancersB, right.startWithCoordinateSystem(cs)),
-                getMax(transcriptModelsB, enhancersB, right.endWithCoordinateSystem(cs)),
-                transcriptModelsB, enhancersB, variant, right, ystartB);
+                getMin(genesB, enhancersB, right.startWithCoordinateSystem(cs)),
+                getMax(genesB, enhancersB, right.endWithCoordinateSystem(cs)),
+                genesB, enhancersB, variant, right, ystartB);
     }
 
-    private int getMin(List<Transcript> transcripts, List<Enhancer> enhancers, int contigPos) {
+    private static int getMin(List<Gene> genes, List<Enhancer> enhancers, int contigPos) {
         contigPos = Math.max(0, contigPos - 1000); // add 1000 bp padding
-        int minTranscriptPos = transcripts.stream().
-                map(tx -> tx.withStrand(Strand.POSITIVE)).
-                mapToInt(Transcript::start).
+        int minGenePos = genes.stream().
+                mapToInt(tx -> tx.startOnStrand(Strand.POSITIVE)).
                 min().orElse(UNINITIALIZED);
         int minEnhancerPos = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::start)
+                .mapToInt(e -> e.startOnStrand(Strand.POSITIVE))
                 .min().orElse(UNINITIALIZED);
-        if (minTranscriptPos == UNINITIALIZED && minEnhancerPos == UNINITIALIZED) {
+        if (minGenePos == UNINITIALIZED && minEnhancerPos == UNINITIALIZED) {
             throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
         } else if (minEnhancerPos == UNINITIALIZED) {
-            return Math.min(minTranscriptPos, contigPos);
-        } else if (minTranscriptPos == UNINITIALIZED) {
+            return Math.min(minGenePos, contigPos);
+        } else if (minGenePos == UNINITIALIZED) {
             return Math.min(minEnhancerPos, contigPos);
         } else {
-            return Math.min(contigPos, Math.min(minEnhancerPos, minTranscriptPos));
+            return Math.min(contigPos, Math.min(minEnhancerPos, minGenePos));
         }
     }
 
-    private int getMax(List<Transcript> transcripts, List<Enhancer> enhancers, int contigPos) {
+    private static int getMax(List<Gene> genes, List<Enhancer> enhancers, int contigPos) {
         contigPos =  contigPos + 1000; // add 1000 bp padding
-        int maxTranscriptPos = transcripts.stream().
-                map(tx -> tx.withStrand(Strand.POSITIVE)).
-                mapToInt(Transcript::end).
+        int maxTranscriptPos = genes.stream().
+                mapToInt(g -> g.endOnStrand(Strand.POSITIVE)).
                 max().orElse(UNINITIALIZED);
         int maxEnhancerPos = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::end)
+                .mapToInt(e -> e.endOnStrand(Strand.POSITIVE))
                 .max().orElse(UNINITIALIZED);
         if (maxTranscriptPos == UNINITIALIZED && maxEnhancerPos == UNINITIALIZED) {
             throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");

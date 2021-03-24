@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.cli.TestDataConfig;
-import org.jax.svanna.core.reference.TranscriptService;
+import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,19 +18,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class SvSvgGeneratorTest {
 
     @Autowired
-    public TranscriptService transcriptService;
+    public GeneService geneService;
 
     @Autowired
     public TestVariants testVariants;
 
     @Test
     public void testWriteSvg() {
-        SvSvgGenerator generator = new DeletionSvgGenerator(testVariants.deletions().gckUpstreamIntergenic_affectingEnhancer(), List.copyOf(transcriptService.getTxBySymbolMap().get("GCK")),
+        SvSvgGenerator generator = new DeletionSvgGenerator(testVariants.deletions().gckUpstreamIntergenic_affectingEnhancer(), List.of(geneService.bySymbol("GCK")),
                 List.of()
         );
         String svg = generator.getSvg();
         assertNotNull(svg);
-        System.out.println(svg);
         try {
             String path = "target/deletion.svg";
             BufferedWriter writer = new BufferedWriter(new FileWriter(path));

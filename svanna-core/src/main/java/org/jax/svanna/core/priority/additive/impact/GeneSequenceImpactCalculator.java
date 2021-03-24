@@ -199,6 +199,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                     } else
                         score = Math.min(INS_DOES_NOT_FIT_INTO_CODING_FRAME, score);
                 }
+                break; // insertion has length 0 and does not overlap with multiple exons
             } else {
                 nCodingBasesInPreviousExons += exon.nCodingBases();
             }

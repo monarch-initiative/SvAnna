@@ -4,15 +4,15 @@ import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.cli.writer.tabular.TabularResultWriter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.overlap.Overlapper;
+import org.jax.svanna.core.overlap.GeneOverlapper;
 
 public class ResultWriterFactory {
 
-    private final Overlapper overlapper;
+    private final GeneOverlapper overlapper;
     private final AnnotationDataService annotationDataService;
     private final PhenotypeDataService phenotypeDataService;
 
-    public ResultWriterFactory(Overlapper overlapper, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
+    public ResultWriterFactory(GeneOverlapper overlapper, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
         this.overlapper = overlapper;
         this.annotationDataService = annotationDataService;
         this.phenotypeDataService = phenotypeDataService;

@@ -97,18 +97,22 @@ public class GeneSequenceImpactCalculatorTest {
 
     @ParameterizedTest
     @CsvSource({
-            "187, 400,          187,220, 250,270, 380,400,           .0", // insertion within the middle exon
-//            "100, 400,          100,120, 140,180, 380,400,           1.", // intronic inversion
+            "187, 400,          187,220, 250,270, 380,400,  3,           .8", // in frame insertion that does not disrupt the reading frame
+            "187, 400,          187,220, 250,270, 380,400,  5,           .5", // in frame insertion that disrupts the reading frame
+            "186, 400,          186,220, 250,270, 380,400,  3,           .1", // out of frame insertion
+            "195, 400,          195,220, 250,270, 380,400,  3,           .7", // 5'UTR insertion
+            "10,  205,           10, 30, 150,170, 190,205,  3,           .7", // 3'UTR insertion
     })
     public void insertion(int start, int end,
                           int oneStart, int oneEnd, int twoStart, int twoEnd, int threeStart, int threeEnd,
+                          int insertionLength,
                           double expected) {
 
         TestContig ctg1 = TestContig.of(0, 1000);
         Route route = Route.of(
                 List.of(
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(200), "upstream", Event.GAP, 1),
-                        Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(200), "insertion", 3),
+                        Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(200), "insertion", insertionLength),
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(400), "downstream", Event.GAP, 1)
                 ));
 

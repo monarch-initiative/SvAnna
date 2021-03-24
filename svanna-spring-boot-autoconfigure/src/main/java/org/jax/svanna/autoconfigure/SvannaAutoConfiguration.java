@@ -10,6 +10,8 @@ import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.landscape.AnnotationDataService;
+import org.jax.svanna.core.overlap.GeneOverlapper;
+import org.jax.svanna.core.overlap.IntervalArrayGeneOverlapper;
 import org.jax.svanna.core.priority.SvPriorityFactory;
 import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.core.reference.TranscriptService;
@@ -142,6 +144,11 @@ public class SvannaAutoConfiguration {
         LogUtils.logDebug(LOGGER, "Done");
 
         return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneWithIds, similarityScoreCalculator);
+    }
+
+    @Bean
+    public GeneOverlapper geneOverlapper(GeneService geneService) {
+        return new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
     }
 
     @Bean

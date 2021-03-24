@@ -3,7 +3,7 @@ package org.jax.svanna.cli.writer.html.template;
 
 import org.jax.svanna.cli.writer.html.Visualizable;
 import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.overlap.Overlap;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.VariantType;
 
@@ -56,8 +56,8 @@ public class FilterAndCount {
                 if (Double.isNaN(priority))
                     unknown++;
             }
-            Set<String> symbols = visualizable.overlaps().stream()
-                    .map(Overlap::getGeneSymbol)
+            Set<String> symbols = visualizable.genes().stream()
+                    .map(Gene::geneSymbol)
                     .collect(Collectors.toSet());
             affectedGenes.addAll(symbols);
             affectedEnhancers.addAll(visualizable.enhancers());

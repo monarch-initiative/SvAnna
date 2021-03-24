@@ -115,6 +115,8 @@ public class AnnotateCommand extends SvAnnaCommand {
 
     @Override
     public Integer call() {
+        LogUtils.logWarn(LOGGER, "\n\nTHIS COMMAND IS CURRENTLY NOT WORKING\n\n");
+
         if ((vcfFile == null) == (phenopacketPath == null)) {
             LogUtils.logWarn(LOGGER,"Provide either path to a VCF file or path to a phenopacket (not both)");
             return 1;

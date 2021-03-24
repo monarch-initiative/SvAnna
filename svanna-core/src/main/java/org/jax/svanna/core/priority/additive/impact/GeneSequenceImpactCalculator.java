@@ -28,6 +28,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     private static final double INS_DOES_NOT_FIT_INTO_CODING_FRAME = .1;
     private static final double INS_FITS_INTO_CODING_FRAME_IS_OUT_OF_FRAME = .5;
     private static final double INS_FITS_INTO_CODING_FRAME_IS_INFRAME = .8;
+    private static final double ADDED_TO_PROMOTER_VARIANT = .3;
 
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;
@@ -74,7 +75,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                 .filter(s -> s.event() != Event.GAP)
                 .collect(Collectors.toSet());
 
-        Double score = Double.NaN;
+        double score = Double.NaN;
         for (Transcript tx : transcripts) {
             int txStart = tx.start();
             int promoterStart = txStart - promoterLength;
@@ -85,8 +86,10 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                 int segmentEnd = nonGapSegment.endOnStrand(tx.strand());
                 if (Coordinates.overlap(tx.coordinateSystem(), promoterStart, promoterEnd,
                         nonGapSegment.coordinateSystem(), segmentStart, segmentEnd)) {
-                    Double fitness = fitnessWithEvent.get(nonGapSegment.event());
-                    if (score.isNaN() || fitness < score)
+                    double fitness = fitnessWithEvent.get(nonGapSegment.event());
+                    // update to not penalize promoter variants THAT much
+                    fitness = Math.min(fitness + geneFactor * ADDED_TO_PROMOTER_VARIANT, geneFactor);
+                    if (Double.isNaN(score) || fitness < score)
                         score = fitness;
                 }
             }

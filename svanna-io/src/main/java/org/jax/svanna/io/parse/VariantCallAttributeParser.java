@@ -1,6 +1,7 @@
 package org.jax.svanna.io.parse;
 
 import htsjdk.variant.variantcontext.Genotype;
+import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.core.reference.Zygosity;
 import org.slf4j.Logger;
@@ -57,8 +58,13 @@ class VariantCallAttributeParser {
         // finally allelic depths
         if (genotype.hasAD()) {
             int[] ads = genotype.getAD();
-            builder.refReads(ads[0])
-                    .altReads(ads[1]);
+            if (ads.length == 1) // hemizygous, we assume ALT allele
+                builder.refReads(0).altReads(ads[0]);
+            else if (ads.length == 2)
+                builder.refReads(ads[0]).altReads(ads[1]);
+            else
+                LogUtils.logWarn(LOGGER, "Unexpected AD field in genotype {}", genotype.toBriefString());
+
         } else if (genotype.hasExtendedAttribute("DR") && genotype.hasExtendedAttribute("DV")) {
             // Sniffles:
             //  - ##FORMAT=<ID=DR,Number=1,Type=Integer,Description="# high-quality reference reads">

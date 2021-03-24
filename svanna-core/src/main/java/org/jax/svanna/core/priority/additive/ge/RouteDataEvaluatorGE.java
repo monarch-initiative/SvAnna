@@ -4,6 +4,7 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.priority.additive.*;
+import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
 import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Position;

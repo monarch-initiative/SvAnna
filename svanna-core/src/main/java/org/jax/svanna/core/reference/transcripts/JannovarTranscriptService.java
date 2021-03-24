@@ -62,10 +62,10 @@ public class JannovarTranscriptService implements TranscriptService {
                     }
                     map.get(contigId).add(tx);
                     txByAccession.put(tx.accessionId(), tx);
-                    if (!txBySymbol.containsKey(tx.hgvsSymbol())) {
-                        txBySymbol.put(tx.hgvsSymbol(), new HashSet<>());
+                    if (!txBySymbol.containsKey(tm.getGeneSymbol())) {
+                        txBySymbol.put(tm.getGeneSymbol(), new HashSet<>());
                     }
-                    txBySymbol.get(tx.hgvsSymbol()).add(tx);
+                    txBySymbol.get(tm.getGeneSymbol()).add(tx);
                 });
             }
         }

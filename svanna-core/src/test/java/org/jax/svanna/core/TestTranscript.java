@@ -1,15 +1,14 @@
 package org.jax.svanna.core;
 
+import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Exon;
-import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
-public class TestTranscript extends BaseGenomicRegion<TestTranscript> implements Transcript {
+public class TestTranscript extends BaseGenomicRegion<TestTranscript> implements CodingTranscript {
 
     private final GenomicRegion cdsRegion;
     private final List<Exon> exons;
@@ -39,13 +38,18 @@ public class TestTranscript extends BaseGenomicRegion<TestTranscript> implements
     }
 
     @Override
-    public String hgvsSymbol() {
-        return "HGVS_GENE_SYMBOL";
+    public boolean isCoding() {
+        return true;
     }
 
     @Override
-    public Optional<GenomicRegion> cdsRegion() {
-        return Optional.of(cdsRegion);
+    public Position codingStartPosition() {
+        return cdsRegion.startPosition();
+    }
+
+    @Override
+    public Position codingEndPosition() {
+        return cdsRegion.endPosition();
     }
 
     @Override

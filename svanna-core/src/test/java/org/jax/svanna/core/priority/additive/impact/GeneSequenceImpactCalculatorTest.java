@@ -1,7 +1,8 @@
-package org.jax.svanna.core.priority.additive;
+package org.jax.svanna.core.priority.additive.impact;
 
 import org.jax.svanna.core.TestContig;
 import org.jax.svanna.core.TestTranscript;
+import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.GeneDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,7 +52,7 @@ public class GeneSequenceImpactCalculatorTest {
                 ));
 
         Gene gene = GeneDefault.builder()
-                .geneName("A")
+                .geneSymbol("A")
                 .accessionId(TermId.of("NCBIGene:123"))
                 .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
                 .build();
@@ -77,12 +78,12 @@ public class GeneSequenceImpactCalculatorTest {
         Route route = Route.of(
                 List.of(
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(200), "upstream", Event.GAP, 1),
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(300), "deletion", Event.INVERSION, 1),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(300), "inversion", Event.INVERSION, 1),
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(500), "downstream", Event.GAP, 1)
                 ));
 
         Gene gene = GeneDefault.builder()
-                .geneName("A")
+                .geneSymbol("A")
                 .accessionId(TermId.of("NCBIGene:123"))
                 .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
                 .build();
@@ -92,6 +93,37 @@ public class GeneSequenceImpactCalculatorTest {
 
 
         assertThat(instance.projectImpact(projections.get(0)), closeTo(expected, ERROR));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "187, 400,          187,220, 250,270, 380,400,           .0", // insertion within the middle exon
+//            "100, 400,          100,120, 140,180, 380,400,           1.", // intronic inversion
+    })
+    public void insertion(int start, int end,
+                          int oneStart, int oneEnd, int twoStart, int twoEnd, int threeStart, int threeEnd,
+                          double expected) {
+
+        TestContig ctg1 = TestContig.of(0, 1000);
+        Route route = Route.of(
+                List.of(
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(200), "upstream", Event.GAP, 1),
+                        Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(200), "insertion", 3),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(400), "downstream", Event.GAP, 1)
+                ));
+
+        Gene gene = GeneDefault.builder()
+                .geneSymbol("A")
+                .accessionId(TermId.of("NCBIGene:123"))
+                .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
+                .build();
+
+        List<Projection<Gene>> projections = Projections.project(gene, route);
+        if (projections.isEmpty()) fail();
+
+
+        double impact = instance.projectImpact(projections.get(0));
+        assertThat(impact, closeTo(expected, ERROR));
     }
 
 }

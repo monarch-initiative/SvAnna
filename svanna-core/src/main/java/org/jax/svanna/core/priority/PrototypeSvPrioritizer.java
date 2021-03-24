@@ -266,7 +266,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
         // counts of gene regardless of relevance
         int genecount =  (int)affectedTranscripts
                 .stream()
-                .map(Transcript::hgvsSymbol)
+//                .map(Transcript::hgvsSymbol)
                 .distinct()
                 .count();
 
@@ -606,7 +606,7 @@ public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedS
         // counts of gene regardless of relevance
         int genecount =  (int)affectedTranscripts
                 .stream()
-                .map(Transcript::hgvsSymbol)
+//                .map(Transcript::hgvsSymbol)
                 .distinct()
                 .count();
 

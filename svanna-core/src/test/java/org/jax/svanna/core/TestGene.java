@@ -1,5 +1,6 @@
 package org.jax.svanna.core;
 
+import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -29,12 +30,17 @@ public class TestGene extends BaseGenomicRegion<TestGene> implements Gene {
     }
 
     @Override
-    public String geneName() {
+    public String geneSymbol() {
         return geneName;
     }
 
     @Override
-    public Set<Transcript> transcripts() {
+    public Set<Transcript> nonCodingTranscripts() {
+        return Set.of();
+    }
+
+    @Override
+    public Set<CodingTranscript> codingTranscripts() {
         return Set.of();
     }
 

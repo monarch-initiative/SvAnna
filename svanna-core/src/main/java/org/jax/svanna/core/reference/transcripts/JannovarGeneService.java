@@ -71,9 +71,9 @@ public class JannovarGeneService implements GeneService {
                     builder.accessionId(geneAccessionId);
 
                     if (altIds.containsKey("HGNC_SYMBOL")) {
-                        builder.geneName(altIds.get("HGNC_SYMBOL"));
+                        builder.geneSymbol(altIds.get("HGNC_SYMBOL"));
                     } else {
-                        builder.geneName(tm.getGeneSymbol());
+                        builder.geneSymbol(tm.getGeneSymbol());
                     }
 
                     builder.addTranscript(tx);
@@ -85,7 +85,7 @@ public class JannovarGeneService implements GeneService {
                 .map(buildGeneIfPossible())
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .collect(Collectors.toMap(Gene::geneName, Function.identity()));
+                .collect(Collectors.toMap(Gene::geneSymbol, Function.identity()));
 
         Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()
                 .collect(Collectors.groupingBy(Gene::contigId, Collectors.toSet()));

@@ -1,5 +1,7 @@
-package org.jax.svanna.core.priority.additive;
+package org.jax.svanna.core.priority.additive.impact;
 
+import org.jax.svanna.core.priority.additive.Event;
+import org.jax.svanna.core.priority.additive.Projection;
 import org.monarchinitiative.svart.GenomicRegion;
 
 import java.util.Set;

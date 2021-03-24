@@ -32,6 +32,6 @@ public class JannovarGeneServiceTest {
         List<Gene> genes = service.overlappingGenes(region);
 
         assertThat(genes, hasSize(3));
-        assertThat(genes.stream().map(Gene::geneName).collect(Collectors.toSet()), hasItems("SURF1", "SURF2", "SURF4"));
+        assertThat(genes.stream().map(Gene::geneSymbol).collect(Collectors.toSet()), hasItems("SURF1", "SURF2", "SURF4"));
     }
 }

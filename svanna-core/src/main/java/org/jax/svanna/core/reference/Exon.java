@@ -11,6 +11,10 @@ public class Exon implements Region<Exon> {
     private final Position startPosition, endPosition;
     private final CoordinateSystem coordinateSystem;
 
+    public static Exon of(CoordinateSystem coordinateSystem, int startPosition, int endPosition) {
+        return of(coordinateSystem, Position.of(startPosition), Position.of(endPosition));
+    }
+
     public static Exon of(CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
         return new Exon(coordinateSystem, startPosition, endPosition);
     }

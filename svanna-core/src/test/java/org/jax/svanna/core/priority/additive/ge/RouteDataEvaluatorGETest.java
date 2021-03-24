@@ -6,6 +6,8 @@ import org.jax.svanna.core.TestGene;
 import org.jax.svanna.core.TestTad;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.priority.additive.*;
+import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
+import org.jax.svanna.core.priority.additive.impact.SimpleSequenceImpactCalculator;
 import org.jax.svanna.core.reference.Gene;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

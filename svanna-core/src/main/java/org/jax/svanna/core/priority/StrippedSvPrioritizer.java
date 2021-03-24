@@ -152,7 +152,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
                 .map(Overlap::getTranscriptModel)
                 .collect(Collectors.toSet());
         long geneCount = affectedTranscripts.stream()
-                .map(Transcript::hgvsSymbol)
+//                .map(Transcript::hgvsSymbol)
                 .distinct()
                 .count();
 
@@ -243,7 +243,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
                 .map(Overlap::getTranscriptModel)
                 .collect(Collectors.toSet());
         long geneCount = affectedTranscripts.stream()
-                .map(Transcript::hgvsSymbol)
+//                .map(Transcript::hgvsSymbol)
                 .distinct()
                 .count();
 

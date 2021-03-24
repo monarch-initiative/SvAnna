@@ -3,6 +3,7 @@ package org.jax.svanna.core.overlap;
 import com.google.common.collect.ImmutableList;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
@@ -23,6 +24,8 @@ import static org.jax.svanna.core.overlap.OverlapType.*;
  */
 public class SvAnnOverlapper implements Overlapper {
 
+    // TODO - remove
+    private static final String GENE_PLACEHOLDER_SYMBOL = "*GENE*";
 
     /*
      * Implementation notes
@@ -159,6 +162,8 @@ public class SvAnnOverlapper implements Overlapper {
         // Otherwise, the event is downstream wrt. the tx.
         OverlapType type;
         OverlapDistance overlapDistance;
+//        String hgvsSymbol = tx.hgvsSymbol();
+        String hgvsSymbol = GENE_PLACEHOLDER_SYMBOL;
         if (distance < 0) {
             // event is upstream from the transcript
             if (distance >= -500) {
@@ -172,7 +177,7 @@ public class SvAnnOverlapper implements Overlapper {
             } else {
                 type = UPSTREAM_GENE_VARIANT;
             }
-            overlapDistance = OverlapDistance.fromUpstreamFlankingGene(distance, tx.hgvsSymbol());
+            overlapDistance = OverlapDistance.fromUpstreamFlankingGene(distance, hgvsSymbol);
         } else {
             // event is downstream from the tx
             if (distance <= 500) {
@@ -186,10 +191,10 @@ public class SvAnnOverlapper implements Overlapper {
             } else {
                 type = DOWNSTREAM_GENE_VARIANT;
             }
-            overlapDistance = OverlapDistance.fromDownstreamFlankingGene(distance, tx.hgvsSymbol());
+            overlapDistance = OverlapDistance.fromDownstreamFlankingGene(distance, hgvsSymbol);
         }
 
-        return new Overlap(type, tx, overlapDistance);
+        return new Overlap(type,  tx, hgvsSymbol, overlapDistance);
     }
 
     /**
@@ -202,7 +207,7 @@ public class SvAnnOverlapper implements Overlapper {
     private static List<Overlap> parseEventThatOverlapsWithATranscript(GenomicRegion region, List<Transcript> transcripts) {
         return transcripts.stream()
                 .map(tx -> region.contains(tx)
-                        ? new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tx, OverlapDistance.fromContainedIn(), String.format("%s/%s", tx.hgvsSymbol(), tx.accessionId()))
+                        ? new Overlap(TRANSCRIPT_CONTAINED_IN_SV, tx, GENE_PLACEHOLDER_SYMBOL, OverlapDistance.fromContainedIn(), String.format("%s/%s", GENE_PLACEHOLDER_SYMBOL, tx.accessionId()))
                         : genic(tx, region))
                 .collect(Collectors.toList());
     }
@@ -219,13 +224,12 @@ public class SvAnnOverlapper implements Overlapper {
     private static Overlap genic(Transcript tx, GenomicRegion event) {
         ExonPair exonPair = getAffectedExons(tx, event);
         boolean affectsCds = false; // note this can only only true if the SV is exonic and the transcript is coding
-        if (tx.isCoding()) {
-            GenomicRegion cds = tx.cdsRegion().get();
-            if (cds.overlapsWith(event) && exonPair.atLeastOneExonOverlap()) {
-                affectsCds = true;
-            }
+        if (tx instanceof CodingTranscript) {
+            CodingTranscript ctx = (CodingTranscript) tx;
+            boolean overlap = Coordinates.overlap(ctx.coordinateSystem(), ctx.codingStart(), ctx.codingEnd(), event.coordinateSystem(), event.start(), event.end());
+            affectsCds = overlap && exonPair.atLeastOneExonOverlap();
         }
-        String geneSymbol = tx.hgvsSymbol();
+        String geneSymbol = GENE_PLACEHOLDER_SYMBOL;
         String txAccession = tx.accessionId();
         if (exonPair.atLeastOneExonOverlap()) {
             // determine which exons are affected
@@ -239,11 +243,11 @@ public class SvAnnOverlapper implements Overlapper {
                 OverlapDistance overlapDistance = OverlapDistance.fromExonic(geneSymbol, affectsCds);
                 // check if the exon is coding or not
                 if (affectsCds) {
-                    return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tx, overlapDistance, msg);
+                    return new Overlap(SINGLE_EXON_IN_TRANSCRIPT, tx, GENE_PLACEHOLDER_SYMBOL, overlapDistance, msg);
                 } else if (tx.isCoding()) {
-                    return new Overlap(NON_CDS_REGION_IN_SINGLE_EXON, tx, overlapDistance, msg);
+                    return new Overlap(NON_CDS_REGION_IN_SINGLE_EXON, tx, GENE_PLACEHOLDER_SYMBOL, overlapDistance, msg);
                 } else {
-                    return new Overlap(SINGLE_EXON_IN_NC_TRANSCRIPT, tx, overlapDistance, msg);
+                    return new Overlap(SINGLE_EXON_IN_NC_TRANSCRIPT, tx, GENE_PLACEHOLDER_SYMBOL, overlapDistance, msg);
                 }
             } else {
                 String msg = String.format("%s/%s[exon %d-%d]",
@@ -252,7 +256,7 @@ public class SvAnnOverlapper implements Overlapper {
                         firstAffectedExon,
                         lastAffectedExon);
                 OverlapDistance odist = OverlapDistance.fromExonic(geneSymbol, affectsCds);
-                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, tx, odist, msg);
+                return new Overlap(MULTIPLE_EXON_IN_TRANSCRIPT, tx, GENE_PLACEHOLDER_SYMBOL, odist, msg);
             }
         } else {
             // if we get here, then both positions must be in the same intron
@@ -260,7 +264,7 @@ public class SvAnnOverlapper implements Overlapper {
 
             String msg = String.format("%s/%s[%s]", geneSymbol, txAccession, intronDist.getUpDownStreamDistance(tx.strand().isPositive()));
             OverlapDistance odist = OverlapDistance.fromIntronic(geneSymbol, intronDist);
-            return new Overlap(INTRONIC, tx, odist, msg);
+            return new Overlap(INTRONIC, tx, GENE_PLACEHOLDER_SYMBOL, odist, msg);
         }
     }
 

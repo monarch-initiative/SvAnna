@@ -16,17 +16,20 @@ public class Overlap {
 
     private final Transcript transcriptModel;
 
+    private final String hgvsSymbol;
+
     private final String description;
 
 
-    public Overlap(OverlapType type, Transcript tx, OverlapDistance odist) {
-        this(type, tx, odist, odist.getDescription());
+    public Overlap(OverlapType type, Transcript tx, String hgvsSymbol, OverlapDistance odist) {
+        this(type, tx, hgvsSymbol, odist, odist.getDescription());
     }
 
 
-    public Overlap(OverlapType type, Transcript tx, OverlapDistance odist, String desc) {
+    public Overlap(OverlapType type, Transcript tx, String hgvsSymbol, OverlapDistance odist, String desc) {
         this.overlapType = type;
         this.transcriptModel = tx;
+        this.hgvsSymbol = hgvsSymbol;
         this.overlapDistance = odist;
         this.description = desc;
     }
@@ -56,7 +59,7 @@ public class Overlap {
 
 
     public String getGeneSymbol() {
-        return this.transcriptModel.hgvsSymbol();
+        return hgvsSymbol;
     }
 
     public String getAccession() {

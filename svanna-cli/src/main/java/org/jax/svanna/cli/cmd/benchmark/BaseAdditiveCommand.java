@@ -66,7 +66,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
      * ------------  OUTPUT OPTIONS  ------------
      */
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
-    public String outprefix = "SVANNA";
+    public String outPrefix = null;
 
     @CommandLine.Option(names = {"-f", "--output-format"},
             paramLabel = "html",
@@ -95,6 +95,21 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
             return 1;
         }
         return 0;
+    }
+
+    private String resolveOutPrefix(Path vcfFile) {
+        if (outPrefix != null)
+            return outPrefix;
+
+        String vcfPath = vcfFile.toAbsolutePath().toString();
+        String prefixBase;
+        if (vcfPath.endsWith(".vcf.gz"))
+            prefixBase = vcfPath.substring(0, vcfPath.length() - 7);
+        else if (vcfPath.endsWith(".vcf"))
+            prefixBase = vcfPath.substring(0, vcfPath.length() - 4);
+        else
+            prefixBase = vcfPath;
+        return prefixBase + ".SVANNA";
     }
 
     protected void runAnalysis(Collection<TermId> patientTerms, Path vcfFile) throws IOException, ExecutionException, InterruptedException {
@@ -143,6 +158,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
             }
 
             ResultWriterFactory resultWriterFactory = context.getBean(ResultWriterFactory.class);
+            String prefix = resolveOutPrefix(vcfFile);
             for (OutputFormat outputFormat : outputFormats) {
                 ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat);
                 if (writer instanceof HtmlResultWriter) {
@@ -150,7 +166,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
                     HtmlResultFormatParameters parameters = new HtmlResultFormatParameters(reportNVariants, minAltReadSupport);
                     ((HtmlResultWriter) writer).setParameters(parameters);
                 }
-                writer.write(results, outprefix);
+                writer.write(results, prefix);
             }
         }
     }

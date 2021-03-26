@@ -7,6 +7,7 @@ import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.BreakendedSvannaVariant;
@@ -19,7 +20,10 @@ import org.monarchinitiative.svart.util.VcfConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -93,7 +97,14 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         VCFCodec codec = new VCFCodec();
         codec.setVCFHeader(header, header.getVCFHeaderVersion() == null ? VCFHeaderVersion.VCF4_1: header.getVCFHeaderVersion());
 
-        return Files.newBufferedReader(filePath).lines()
+        BufferedReader reader;
+        if (filePath.toFile().getName().endsWith(".gz"))
+            reader = new BufferedReader(new InputStreamReader(new GzipCompressorInputStream(new FileInputStream(filePath.toFile()))));
+        else
+            reader = Files.newBufferedReader(filePath);
+
+        return reader.lines()
+                .onClose(() -> {try {reader.close();} catch (IOException ignored) {}})
                 .map(toVariantContext(codec))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

@@ -2,10 +2,7 @@ package org.jax.svanna.cli.cmd.annotate;
 
 
 import org.jax.svanna.cli.Main;
-import org.jax.svanna.cli.cmd.ProgressReporter;
-import org.jax.svanna.cli.cmd.SvAnnaCommand;
-import org.jax.svanna.cli.cmd.TaskUtils;
-import org.jax.svanna.cli.cmd.Utils;
+import org.jax.svanna.cli.cmd.*;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
@@ -190,7 +187,7 @@ public class AnnotateCommand extends SvAnnaCommand {
                 ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat);
                 if (writer instanceof HtmlResultWriter) {
                     // TODO - is there a more elegant way to pass the HTML specific parameters into the writer?
-                    HtmlResultFormatParameters parameters = new HtmlResultFormatParameters(threshold, reportNVariants, minAltReadSupport);
+                    HtmlResultFormatParameters parameters = new HtmlResultFormatParameters(reportNVariants, minAltReadSupport);
                     ((HtmlResultWriter) writer).setParameters(parameters);
                 }
                 writer.write(results, outprefix);

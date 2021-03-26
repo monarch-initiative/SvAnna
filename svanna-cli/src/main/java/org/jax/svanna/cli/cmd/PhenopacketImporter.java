@@ -1,8 +1,9 @@
-package org.jax.svanna.cli.cmd.annotate;
+package org.jax.svanna.cli.cmd;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
+import org.jax.svanna.core.exception.LogUtils;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -27,7 +28,9 @@ import java.util.stream.Collectors;
  * @author Peter Robinson
  */
 public class PhenopacketImporter {
+
     private static final Logger logger = LoggerFactory.getLogger(PhenopacketImporter.class);
+    private static final JsonFormat.Parser JSON_PARSER = JsonFormat.parser();
     /** The Phenopacket that represents the individual being sequenced in the current run. */
     private final Phenopacket phenoPacket;
     /** Object representing the VCF file with variants identified in the subject of this Phenopacket. */
@@ -47,17 +50,24 @@ public class PhenopacketImporter {
             logger.error("Could not find phenopacket file at " + phenopacketPath);
             throw new IOException("Could not find phenopacket file at " + phenopacketPath);
         }
-        try (BufferedReader reader = Files.newBufferedReader(phenopacketPath)) {
-            String phenopacketJsonString = reader.lines().collect(Collectors.joining(System.lineSeparator()));
-            Phenopacket.Builder phenoPacketBuilder = Phenopacket.newBuilder();
-            JsonFormat.parser().merge(phenopacketJsonString, phenoPacketBuilder);
-            Phenopacket phenopacket = phenoPacketBuilder.build();
+        try {
+            Phenopacket phenopacket = readPhenopacket(phenopacketPath);
             return new PhenopacketImporter(phenopacket, ontology);
         } catch (InvalidProtocolBufferException e) {
             logger.error("Malformed phenopacket: " + e.getMessage());
             throw new IOException("Could not load phenopacket (" + phenopacketPath + "): " + e.getMessage());
         } catch (IOException e) {
             throw new IOException("I/O Error: Could not load phenopacket  (" + phenopacketPath + "): " + e.getMessage(), e);
+        }
+    }
+
+    public static Phenopacket readPhenopacket(Path phenopacketPath) throws IOException {
+        LogUtils.logInfo(logger, "Reading phenopacket from `{}`", phenopacketPath.toAbsolutePath());
+        try (BufferedReader reader = Files.newBufferedReader(phenopacketPath)) {
+            String phenopacketJsonString = reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            Phenopacket.Builder phenoPacketBuilder = Phenopacket.newBuilder();
+            JSON_PARSER.merge(phenopacketJsonString, phenoPacketBuilder);
+            return phenoPacketBuilder.build();
         }
     }
 

@@ -4,11 +4,15 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.Main;
-import org.jax.svanna.cli.cmd.SvAnnaCommand;
+import org.jax.svanna.cli.cmd.ProgressReporter;
+import org.jax.svanna.cli.cmd.TaskUtils;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
+import org.jax.svanna.core.priority.SvPrioritizer;
+import org.jax.svanna.core.priority.SvPrioritizerType;
+import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.priority.SvPriorityFactory;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
@@ -27,9 +31,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CommandLine.Command(name = "benchmark-curated-cases",
         aliases = {"BCC"},
@@ -38,21 +42,9 @@ import java.util.stream.Collectors;
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
-public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
+public class BenchmarkCuratedCasesCommand extends BaseBenchmarkCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCasesCommand.class);
-
-    private static final NumberFormat NF = NumberFormat.getNumberInstance();
-
-    static {
-        NF.setMaximumFractionDigits(2);
-    }
-
-    @CommandLine.Option(names = {"--similarity-threshold"}, description = "percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
-    public float similarityThreshold = 80.F;
-
-    @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
-    public float frequencyThreshold = 1.F;
 
     @CommandLine.Option(
             names = {"--vcf"},
@@ -60,15 +52,8 @@ public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
             description = "path to VCF file with variants to be used as neutral background")
     public Path vcfFile = null;
 
-
     @CommandLine.Option(names = {"-f", "--case-folder"}, description = "path to a folder with case report JSON files")
     public Path caseReportPath;
-
-    @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
-    public String outPrefix = "SVANNA_PC";
-
-    @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
-    public int nThreads = 2;
 
     @CommandLine.Parameters(description = "path(s) to JSON files with case reports curated by Hpo Case Annotator")
     public List<Path> caseReports;
@@ -94,12 +79,16 @@ public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants where at least >{}% of variant's region occurs in a repetitive region", similarityThreshold);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
             PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold);
+            List<SvannaVariant> allVariants = filter.filter(variants);
 
-            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
+            List<SvannaVariant> filteredVariants = allVariants.stream()
+                    .filter(SvannaVariant::passedFilters)
+                    .collect(Collectors.toList());
 
-            PrioritizationRunner prioritizationRunner = new PrioritizationRunner(filter, svPriorityFactory, nThreads);
+            LogUtils.logInfo(LOGGER, "Removed {} variants that failed the filtering", variants.size() - filteredVariants.size());
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
+            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
 
             int processed = 1;
             Map<String, List<VariantPriority>> results = new HashMap<>();
@@ -107,16 +96,31 @@ public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
             for (CaseReport aCase : cases) {
                 LogUtils.logInfo(LOGGER, "({}/{}) Processing case `{}`", processed, cases.size(), aCase.caseName());
 
-                // validate patient terms
-                Set<TermId> validatedPatientTermIds = phenotypeDataService.validateTerms(aCase.patientTerms()).stream()
-                        .map(Term::getId)
-                        .collect(Collectors.toSet());
+                // get and validate patient terms
+                Collection<TermId> patientTerms = aCase.patientTerms();
+                Set<Term> validatedPatientTerms = phenotypeDataService.validateTerms(patientTerms);
+                Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::getId).collect(Collectors.toSet());
+
+                // create the prioritizer seeded by the phenotype terms and prioritize the variants
+                SvPrioritizer<Variant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
 
                 // prepare the variants
-                List<SvannaVariant> caseVariants = new LinkedList<>(variants);
+                List<Variant> caseVariants = new LinkedList<>(filteredVariants);
                 Collection<SvannaVariant> targetVariants = aCase.variants();
-                caseVariants.addAll(targetVariants);
-                List<VariantPriority> priorities = prioritizationRunner.prioritize(validatedPatientTermIds, caseVariants);
+                List<SvannaVariant> filteredTargetVariants = filter.filter(targetVariants);
+                for (SvannaVariant filteredTargetVariant : filteredTargetVariants) {
+                    if (filteredTargetVariant.passedFilters())
+                        caseVariants.add(filteredTargetVariant);
+                    else
+                        LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters!", aCase.caseName(), LogUtils.variantSummary(filteredTargetVariant));
+                }
+
+                ProgressReporter progressReporter = new ProgressReporter(5_000);
+                Stream<VariantPriority> annotationStream = caseVariants.parallelStream()
+                        .onClose(progressReporter.summarize())
+                        .peek(progressReporter::logItem)
+                        .map(v -> new VariantPriority(v, prioritizer.prioritize(v)));
+                List<VariantPriority> priorities = TaskUtils.executeBlocking(() -> annotationStream.collect(Collectors.toList()), nThreads);
 
                 results.put(aCase.caseName(), priorities);
                 Set<String> causalIds = targetVariants.stream()

@@ -4,16 +4,11 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.Main;
-import org.jax.svanna.cli.cmd.ProgressReporter;
 import org.jax.svanna.cli.cmd.SvAnnaCommand;
-import org.jax.svanna.cli.cmd.TaskUtils;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.priority.SvPrioritizer;
-import org.jax.svanna.core.priority.SvPrioritizerType;
-import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.priority.SvPriorityFactory;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
@@ -35,7 +30,6 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @CommandLine.Command(name = "benchmark-curated-cases",
         aliases = {"BCC"},
@@ -100,16 +94,12 @@ public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants where at least >{}% of variant's region occurs in a repetitive region", similarityThreshold);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
             PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold);
-            List<SvannaVariant> allVariants = filter.filter(variants);
 
-            List<SvannaVariant> filteredVariants = allVariants.stream()
-                    .filter(SvannaVariant::passedFilters)
-                    .collect(Collectors.toList());
+            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
 
-            LogUtils.logInfo(LOGGER, "Removed {} variants that failed the filtering", variants.size() - filteredVariants.size());
+            PrioritizationRunner prioritizationRunner = new PrioritizationRunner(filter, svPriorityFactory, nThreads);
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
-            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
 
             int processed = 1;
             Map<String, List<VariantPriority>> results = new HashMap<>();
@@ -117,31 +107,16 @@ public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
             for (CaseReport aCase : cases) {
                 LogUtils.logInfo(LOGGER, "({}/{}) Processing case `{}`", processed, cases.size(), aCase.caseName());
 
-                // get and validate patient terms
-                Collection<TermId> patientTerms = aCase.patientTerms();
-                Set<Term> validatedPatientTerms = phenotypeDataService.validateTerms(patientTerms);
-                Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::getId).collect(Collectors.toSet());
-
-                // create the prioritizer seeded by the phenotype terms and prioritize the variants
-                SvPrioritizer<Variant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
+                // validate patient terms
+                Set<TermId> validatedPatientTermIds = phenotypeDataService.validateTerms(aCase.patientTerms()).stream()
+                        .map(Term::getId)
+                        .collect(Collectors.toSet());
 
                 // prepare the variants
-                List<Variant> caseVariants = new LinkedList<>(filteredVariants);
+                List<SvannaVariant> caseVariants = new LinkedList<>(variants);
                 Collection<SvannaVariant> targetVariants = aCase.variants();
-                List<SvannaVariant> filteredTargetVariants = filter.filter(targetVariants);
-                for (SvannaVariant filteredTargetVariant : filteredTargetVariants) {
-                    if (filteredTargetVariant.passedFilters())
-                        caseVariants.add(filteredTargetVariant);
-                    else
-                        LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters!", aCase.caseName(), LogUtils.variantSummary(filteredTargetVariant));
-                }
-
-                ProgressReporter progressReporter = new ProgressReporter(5_000);
-                Stream<VariantPriority> annotationStream = caseVariants.parallelStream()
-                        .onClose(progressReporter.summarize())
-                        .peek(progressReporter::logItem)
-                        .map(v -> new VariantPriority(v, prioritizer.prioritize(v)));
-                List<VariantPriority> priorities = TaskUtils.executeBlocking(() -> annotationStream.collect(Collectors.toList()), nThreads);
+                caseVariants.addAll(targetVariants);
+                List<VariantPriority> priorities = prioritizationRunner.prioritize(validatedPatientTermIds, caseVariants);
 
                 results.put(aCase.caseName(), priorities);
                 Set<String> causalIds = targetVariants.stream()
@@ -193,35 +168,4 @@ public class BenchmarkCuratedCasesCommand extends SvAnnaCommand {
         }
     }
 
-    private static class VariantPriority {
-        private final Variant variant;
-        private final SvPriority priority;
-
-
-        private VariantPriority(Variant variant, SvPriority priority) {
-            this.variant = variant;
-            this.priority = priority;
-        }
-
-        public Variant variant() {
-            return variant;
-        }
-
-        public SvPriority priority() {
-            return priority;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            VariantPriority that = (VariantPriority) o;
-            return Objects.equals(variant, that.variant) && Objects.equals(priority, that.priority);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(variant, priority);
-        }
-    }
 }

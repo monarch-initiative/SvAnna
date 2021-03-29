@@ -39,7 +39,7 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         }
         for (var gene : this.affectedGenes) {
             writeGene(gene, y, writer);
-            y += Constants.HEIGHT_PER_DISPLAY_ITEM;
+            y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);
     }

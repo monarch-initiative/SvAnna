@@ -29,7 +29,7 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
         y += 100;
         for (var gene : affectedGenes) {
             writeGene(gene, y, writer);
-            y += Constants.HEIGHT_PER_DISPLAY_ITEM;
+            y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);
     }
@@ -43,17 +43,14 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
      */
     private void writeInsertion(int xpos, int ypos, String msg, Writer writer) throws IOException {
         double start = translateGenomicToSvg(variant.start());
-        double end = translateGenomicToSvg(variant.end());
-        double width = end - start;
-        double Y = ypos + 0.5 * SV_HEIGHT;
         int verticalOffset = 20;
         int horizontalOffset = 7;
         String points = String.format("<polygon points=\"%d,%d %d,%d %d,%d\" />",
                 xpos, ypos, xpos-horizontalOffset, ypos-verticalOffset, xpos+horizontalOffset, ypos-verticalOffset);
-        String rect = String.format("<svg class mytriangle>%s</svg>\n",points);
+        String rect = String.format("<svg class mytriangle>%s</svg>\n", points);
         writer.write(rect);
-        Y = ypos+30;
-        writer.write(String.format("<text x=\"%f\" y=\"%f\"  fill=\"%s\">%s</text>\n",start -10,Y, PURPLE, msg));
+        double Y = ypos+30;
+        writer.write(String.format("<text x=\"%f\" y=\"%f\"  fill=\"%s\">%s</text>\n", start - 10,Y, PURPLE, msg));
     }
 
 

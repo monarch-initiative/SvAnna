@@ -41,7 +41,7 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
         y += 100;
         for (var gene : affectedGenes) {
             writeGene(gene, y, writer);
-            y += Constants.HEIGHT_PER_DISPLAY_ITEM;
+            y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);
     }

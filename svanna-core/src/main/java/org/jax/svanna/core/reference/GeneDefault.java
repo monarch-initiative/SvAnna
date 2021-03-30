@@ -88,7 +88,15 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
         return Objects.hash(super.hashCode(), accessionId, geneSymbol, codingTranscripts, noncodingTranscripts);
     }
 
-
+    @Override
+    public String toString() {
+        return "GeneDefault{" +
+                "geneSymbol='" + geneSymbol + '\'' +
+                ", accessionId=" + accessionId +
+                ", codingTranscripts=[" + codingTranscripts.stream().map(Transcript::accessionId).collect(Collectors.joining(", ")) + ']' +
+                ", noncodingTranscripts=[" + noncodingTranscripts.stream().map(Transcript::accessionId).collect(Collectors.joining(", ")) + ']' +
+                '}';
+    }
 
     // not thread safe
     public static class Builder {

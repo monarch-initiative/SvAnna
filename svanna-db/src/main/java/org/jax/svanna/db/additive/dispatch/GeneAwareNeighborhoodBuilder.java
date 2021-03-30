@@ -32,8 +32,10 @@ public class GeneAwareNeighborhoodBuilder extends TadNeighborhoodBuilder {
         if (arrangement.size() == 1) {
             V variant = arrangement.variants().get(0);
             List<Gene> genes = geneService.overlappingGenes(variant);
-            if (!genes.isEmpty()) {
-                // let's make this simple if the variant overlaps with one or more genes
+
+            // Let's make this simple if the variant overlaps with a single gene
+            // or with a group of genes that overlap each other
+            if (allGenesOverlapThemselves(genes)) {
                 int startPos = variant.start(), endPos = variant.end();
                 for (Gene gene : genes) {
                     int geneStart = gene.startOnStrandWithCoordinateSystem(variant.strand(), CS);
@@ -51,6 +53,21 @@ public class GeneAwareNeighborhoodBuilder extends TadNeighborhoodBuilder {
             }
         }
         return super.intrachromosomalNeighborhood(arrangement);
+    }
+
+    private static boolean allGenesOverlapThemselves(List<Gene> genes) {
+        if (genes.isEmpty())
+            return false;
+
+        for (int i = 0, nGenes = genes.size(); i < nGenes; i++) {
+            Gene current = genes.get(i);
+            List<Gene> remaining = genes.subList(i + 1, nGenes);
+            for (Gene other : remaining) {
+                if (!current.overlapsWith(other))
+                    return false;
+            }
+        }
+        return true;
     }
 
     @Override

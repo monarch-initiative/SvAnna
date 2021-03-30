@@ -250,7 +250,7 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
         }
 
         public boolean useEnhancers() {
-            return useVista && useFantom5;
+            return useVista || useFantom5;
         }
 
         public boolean useVista() {

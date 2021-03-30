@@ -71,8 +71,8 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
         switch (type) {
             case PROTOTYPE:
                 LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
-                Set<TermId> enhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
-                Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(enhancerTerms, patientTerms);
+                Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
+                Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(patientTerms, topLevelEnhancerTerms);
 
                 LogUtils.logDebug(LOGGER, "Preparing gene and disease data");
                 Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = phenotypeDataService.getRelevantGenesAndDiseases(patientTerms);
@@ -113,8 +113,8 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
         LogUtils.logDebug(LOGGER, "Enhancer factor: {}", prioritizationParameters.enhancerFactor());
         SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationParameters.enhancerFactor());
 
-        Set<TermId> availableTopLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
-        Set<TermId> relevantAncestorsForEnhancerFiltering = phenotypeDataService.getRelevantAncestors(availableTopLevelEnhancerTerms, patientFeatures);
+        Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
+        Set<TermId> relevantAncestorsForEnhancerFiltering = phenotypeDataService.getRelevantAncestors(patientFeatures, topLevelEnhancerTerms);
         EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = PhenotypeEnhancerGeneRelevanceCalculator.of(relevantAncestorsForEnhancerFiltering);
 
         return new RouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);

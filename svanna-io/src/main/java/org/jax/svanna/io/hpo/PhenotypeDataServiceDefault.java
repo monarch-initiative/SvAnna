@@ -143,10 +143,10 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     }
 
     @Override
-    public Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> hpoTermIds) {
-        Set<TermId> ancs = OntologyAlgorithm.getAncestorTerms(ontology, new HashSet<>(hpoTermIds), true);
-        return candidates.stream()
-                .filter(ancs::contains)
+    public Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> ancestorTerms) {
+        Set<TermId> candidateAncestors = OntologyAlgorithm.getAncestorTerms(ontology, Set.copyOf(candidates), true);
+        return candidateAncestors.stream()
+                .filter(ancestorTerms::contains)
                 .collect(Collectors.toSet());
     }
 

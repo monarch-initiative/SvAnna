@@ -209,8 +209,8 @@ public class AnnotateCommand extends SvAnnaCommand {
         Filter<SvannaVariant> variantFilter = new StructuralVariantFrequencyFilter(annotationDataService, similarityThreshold, frequencyThreshold);
 
         LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
-        Set<TermId> enhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
-        Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(enhancerTerms, patientTerms);
+        Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
+        Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(patientTerms, topLevelEnhancerTerms);
 
         LogUtils.logDebug(LOGGER, "Preparing gene and disease data");
         Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = phenotypeDataService.getRelevantGenesAndDiseases(patientTerms);

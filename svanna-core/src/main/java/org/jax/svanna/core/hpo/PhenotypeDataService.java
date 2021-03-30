@@ -42,7 +42,15 @@ public interface PhenotypeDataService {
      */
     Set<Term> validateTerms(Collection<TermId> hpoTermIds);
 
-    Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> hpoTermIds);
+    /**
+     * Get set of ancestors of the {@code candidates} terms (including the candidate terms) and retain the intersection
+     * of ancestors and {@code ancestorTerms}.
+     *
+     * @param candidates    candidate terms
+     * @param ancestorTerms ancestor terms to be used to filter ancestors of {@code candidates}
+     * @return set {@code candidates} ancestors that are in {#code ancestorTerms}
+     */
+    Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> ancestorTerms);
 
     double computeSimilarityScore(Collection<TermId> query, Collection<TermId> target);
 }

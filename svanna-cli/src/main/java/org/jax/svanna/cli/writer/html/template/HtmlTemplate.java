@@ -34,11 +34,7 @@ public class HtmlTemplate {
 
     public HtmlTemplate(List<String> htmlList,
                         Map<String, String> infoMap,
-                        Collection<Term> topLevelHpoTerms,
                         Collection<Term> originalHpoTerms) {
-
-        Map<TermId, String> toplevelHpoTermMap = topLevelHpoTerms.stream()
-                .collect(Collectors.toMap(Term::getId, Term::getName));
         Map<TermId, String> originalTermMap = originalHpoTerms.stream()
                 .collect(Collectors.toMap(Term::getId, Term::getName));
 
@@ -57,7 +53,7 @@ public class HtmlTemplate {
         templateData.put("phenopacket_file", infoMap.getOrDefault("phenopacket_file", NOT_AVAILABLE));
         templateData.put("n_affectedGenes", infoMap.getOrDefault("n_affectedGenes", NOT_AVAILABLE));
         templateData.put("n_affectedEnhancers", infoMap.getOrDefault("n_affectedEnhancers", NOT_AVAILABLE));
-        HpoHtmlComponent hpoHtmlComponent = new HpoHtmlComponent(toplevelHpoTermMap, originalTermMap);
+        HpoHtmlComponent hpoHtmlComponent = new HpoHtmlComponent(originalTermMap);
         templateData.put("hpoterms", hpoHtmlComponent.getHtml());
     }
 

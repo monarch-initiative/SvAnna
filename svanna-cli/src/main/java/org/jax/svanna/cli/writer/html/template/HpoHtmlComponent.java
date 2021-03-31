@@ -11,15 +11,17 @@ public class HpoHtmlComponent {
 
     private final String html;
 
-    public HpoHtmlComponent(Map<TermId, String> topLevelHpoTerms, Map<TermId, String> originalHpoTerms) {
+    public HpoHtmlComponent(Map<TermId, String> originalHpoTerms) {
 
         String sb = "<div class=\"row\">\n" +
                 "<div class=\"column\">\n" +
                 originalTermsTable(originalHpoTerms) +
                 "</div>\n" +
-                "<div class=\"column\">\n" +
-                topLevelTerms(topLevelHpoTerms) +
                 "</div>\n" +
+                "<div class=\"row\">\n" +
+                "<p>svanna performs simple phenotype-base prioritization by semantic similarity analysis (Resnik)," +
+                " corresponding to the OSS approach in <a href=\"https://pubmed.ncbi.nlm.nih.gov/19800049/\" " +
+                " target=\"_blank\">K&ouml;hler et al (2009)</a>.</p>\n" +
                 "</div>\n";
         this.html = sb;
     }
@@ -32,9 +34,9 @@ public class HpoHtmlComponent {
                     .append(hpoLink(entry.getKey())).append("</td></tr>\n");
         }
         sb.append("</table>\n");
-        sb.append("<p>The top-level terms are the general (ancestor) terms to which the observed HPO terms belong");
-        sb.append(" svanna performs simple phenotype-base prioritization by matching diseases with HPO annotations that ");
-        sb.append(" match any of these top-level terms</p>\n");
+        sb.append("<p>svanna performs simple phenotype-base prioritization by semantic similarity analysis (Resnik),");
+        sb.append(" corresponding to the OSS approach in <a href=\"https://pubmed.ncbi.nlm.nih.gov/19800049/\" ");
+        sb.append(" target=\"_blank\">K&ouml;hler et al (2009)</a></p>\n");
         return sb.toString();
     }
 

@@ -69,7 +69,7 @@ public class HtmlResultWriter implements ResultWriter {
                 .collect(Collectors.toList());
 
 
-        HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.topLevelPhenotypeTerms(), results.probandPhenotypeTerms());
+        HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.probandPhenotypeTerms());
         template.outputFile(outPath);
     }
 

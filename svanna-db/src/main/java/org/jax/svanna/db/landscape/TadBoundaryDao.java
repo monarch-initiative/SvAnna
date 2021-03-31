@@ -32,6 +32,7 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
 
     private final NamedParameterJdbcTemplate template;
 
+    // stability threshold as a fraction - in range [0,1]
     private final double stabilityThreshold;
 
     public TadBoundaryDao(DataSource dataSource, GenomicAssembly genomicAssembly, double stabilityThreshold) {

@@ -1,14 +1,14 @@
-package org.jax.svanna.cli.cmd.benchmark;
+package org.jax.svanna.cli.cmd.annotate;
 
-import org.jax.svanna.cli.cmd.ProgressReporter;
-import org.jax.svanna.cli.cmd.SvAnnaCommand;
-import org.jax.svanna.cli.cmd.TaskUtils;
+import org.jax.svanna.autoconfigure.SvannaProperties;
+import org.jax.svanna.cli.Main;
 import org.jax.svanna.cli.cmd.Utils;
+import org.jax.svanna.cli.cmd.*;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.ResultWriterFactory;
-import org.jax.svanna.cli.writer.html.HtmlResultFormatParameters;
+import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
@@ -16,6 +16,7 @@ import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.ModeOfInheritance;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
+import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.priority.*;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
@@ -24,12 +25,16 @@ import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssembly;
+import org.phenopackets.schema.v1.Phenopacket;
+import org.phenopackets.schema.v1.core.HtsFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import picocli.CommandLine;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.*;
@@ -37,9 +42,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public abstract class BaseAdditiveCommand extends SvAnnaCommand {
+@CommandLine.Command(name = "annotate-additive",
+        aliases = {"AAV"},
+        header = "Prioritize the variants with additive prioritizer",
+        mixinStandardHelpOptions = true,
+        version = Main.VERSION,
+        usageHelpWidth = Main.WIDTH,
+        footer = Main.FOOTER)
+public class AnnotateAdditiveCommand extends SvAnnaCommand {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseAdditiveCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateAdditiveCommand.class);
 
     protected static final NumberFormat NF = NumberFormat.getNumberInstance();
 
@@ -53,6 +65,22 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
      */
     private static final double MODE_OF_INHERITANCE_FACTOR = .5;
 
+    /*
+     * -------------- INPUT OPTIONS -------------
+     */
+
+    @CommandLine.Option(names = {"-p", "--phenopacket"}, description = "Path to phenopacket")
+    public Path phenopacketPath = null;
+
+    @CommandLine.Option(names = {"--vcf"}, description = "Path to input VCF file")
+    public Path vcfFile = null;
+
+    @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term ID(s)")
+    public List<String> hpoTermIdList = List.of();
+
+    /*
+     * ------------ ANALYSIS OPTIONS ------------
+     */
     @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
     public int nThreads = 2;
 
@@ -85,8 +113,58 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
     @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 2;
 
+    @Override
+    public Integer call(){
+        int status = checkArguments();
+        if (status!=0)
+            return status;
+
+        Set<TermId> phenotypeTermIds;
+        if (vcfFile != null) { // VCF & CLI
+            phenotypeTermIds = hpoTermIdList.stream()
+                    .map(TermId::of)
+                    .collect(Collectors.toSet());
+        } else { // phenopacket
+            try {
+                Phenopacket phenopacket = PhenopacketImporter.readPhenopacket(phenopacketPath);
+                phenotypeTermIds = phenopacket.getPhenotypicFeaturesList().stream()
+                        .map(pf -> TermId.of(pf.getType().getId()))
+                        .collect(Collectors.toSet());
+
+                Optional<Path> vcfFilePathOptional = getVcfFilePath(phenopacket);
+                if (vcfFilePathOptional.isEmpty())
+                    // complaint is logged within the function
+                    return 1;
+
+                vcfFile = vcfFilePathOptional.get();
+            } catch (IOException e) {
+                LogUtils.logError(LOGGER, "Error reading phenopacket at `{}`: {}", phenopacketPath, e.getMessage());
+                return 1;
+            }
+        }
+
+        try {
+            runAnalysis(phenotypeTermIds, vcfFile);
+        } catch (InterruptedException | ExecutionException | IOException e) {
+            LogUtils.logError(LOGGER, "Error: {}", e.getMessage());
+            return 1;
+        }
+
+        LogUtils.logInfo(LOGGER, "The analysis has completed successfully. Bye");
+        return 0;
+    }
 
     protected int checkArguments() {
+        if ((vcfFile == null) == (phenopacketPath == null)) {
+            LogUtils.logError(LOGGER,"Path to a VCF file or to a phenopacket must be supplied");
+            return 1;
+        }
+
+        if (phenopacketPath != null && !hpoTermIdList.isEmpty()) {
+            LogUtils.logError(LOGGER, "Passing HPO terms both through CLI and Phenopacket is not supported");
+            return 1;
+        }
+
         if (nThreads < 1) {
             LogUtils.logError(LOGGER, "Thread number must be positive: {}", nThreads);
             return 1;
@@ -97,7 +175,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
         }
 
         if (outputFormats.isEmpty()) {
-            LogUtils.logWarn(LOGGER, "Aborting the analysis since no valid output format was provided");
+            LogUtils.logError(LOGGER, "Aborting the analysis since no valid output format was provided");
             return 1;
         }
         return 0;
@@ -118,7 +196,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
         return prefixBase + ".SVANNA";
     }
 
-    protected void runAnalysis(Collection<TermId> patientTerms, Path vcfFile) throws IOException, ExecutionException, InterruptedException {
+    private void runAnalysis(Collection<TermId> patientTerms, Path vcfFile) throws IOException, ExecutionException, InterruptedException {
         Collection<OutputFormat> outputFormats = Utils.parseOutputFormats(this.outputFormats);
         try (ConfigurableApplicationContext context = getContext()) {
             GenomicAssembly genomicAssembly = context.getBean(GenomicAssembly.class);
@@ -167,17 +245,60 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
 
             AnalysisResults results = new AnalysisResults(vcfFile.toAbsolutePath().toString(), validatedPatientTerms, topLevelHpoTerms, filteredPrioritizedVariants);
 
+
             ResultWriterFactory resultWriterFactory = context.getBean(ResultWriterFactory.class);
             String prefix = resolveOutPrefix(vcfFile);
             for (OutputFormat outputFormat : outputFormats) {
                 ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat);
                 if (writer instanceof HtmlResultWriter) {
+                    SvannaProperties svannaProperties = context.getBean(SvannaProperties.class);
                     // TODO - is there a more elegant way to pass the HTML specific parameters into the writer?
-                    HtmlResultFormatParameters parameters = new HtmlResultFormatParameters(reportNVariants, minAltReadSupport);
-                    ((HtmlResultWriter) writer).setParameters(parameters);
+                    ((HtmlResultWriter) writer).setAnalysisParameters(getAnalysisParameters(svannaProperties));
                 }
                 writer.write(results, prefix);
             }
+        }
+    }
+
+    private AnalysisParameters getAnalysisParameters(SvannaProperties properties) {
+        AnalysisParameters analysisParameters = new AnalysisParameters();
+
+        analysisParameters.setDataDirectory(properties.dataDirectory());
+        analysisParameters.setJannovarCachePath(properties.jannovarCachePath());
+        analysisParameters.setPhenopacketPath(phenopacketPath == null ? null : phenopacketPath.toAbsolutePath().toString());
+        analysisParameters.setVcfPath(vcfFile.toAbsolutePath().toString());
+        analysisParameters.setSimilarityThreshold(similarityThreshold);
+        analysisParameters.setFrequencyThreshold(frequencyThreshold);
+        analysisParameters.addAllPopulationVariantOrigins(PopulationVariantOrigin.benign());
+        analysisParameters.setMinAltReadSupport(minAltReadSupport);
+        analysisParameters.setTopNVariantsReported(reportNVariants);
+        analysisParameters.setTadStabilityThreshold(properties.dataParameters().tadStabilityThresholdAsPercentage());
+        analysisParameters.setUseVistaEnhancers(properties.dataParameters().enhancers().useVista());
+        analysisParameters.setUseFantom5Enhancers(properties.dataParameters().enhancers().useFantom5());
+        analysisParameters.setPhenotypeTermSimilarityMeasure(properties.prioritizationParameters().termSimilarityMeasure().toString());
+
+        return analysisParameters;
+    }
+
+    private static Optional<Path> getVcfFilePath(Phenopacket phenopacket) {
+        // There should be exactly one VCF file
+        LinkedList<HtsFile> vcfFiles = phenopacket.getHtsFilesList().stream()
+                .filter(htsFile -> htsFile.getHtsFormat().equals(HtsFile.HtsFormat.VCF))
+                .distinct()
+                .collect(Collectors.toCollection(LinkedList::new));
+        if (vcfFiles.size() != 1) {
+            LogUtils.logWarn(LOGGER, "Expected to find 1 VCF file, found {}", vcfFiles.size());
+            return Optional.empty();
+        }
+
+        // The VCF file should have a proper URI
+        HtsFile vcf = vcfFiles.getFirst();
+        try {
+            URI uri = new URI(vcf.getUri());
+            return Optional.of(Path.of(uri));
+        } catch (URISyntaxException e) {
+            LogUtils.logWarn(LOGGER, "Invalid URI `{}`: {}", vcf.getUri(), e.getMessage());
+            return Optional.empty();
         }
     }
 

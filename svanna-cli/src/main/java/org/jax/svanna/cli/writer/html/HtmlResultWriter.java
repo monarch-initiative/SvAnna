@@ -30,19 +30,16 @@ public class HtmlResultWriter implements ResultWriter {
     private final VisualizableGenerator visualizableGenerator;
 
     private final Visualizer visualizer;
-    private HtmlResultFormatParameters parameters = HtmlResultFormatParameters.defaultParameters();
+
+    private AnalysisParameters analysisParameters;
 
     public HtmlResultWriter(GeneOverlapper overlapper, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
         visualizableGenerator = new VisualizableGeneratorSimple(overlapper, annotationDataService, phenotypeDataService);
         visualizer = new HtmlVisualizer();
     }
 
-    public HtmlResultFormatParameters parameters() {
-        return parameters;
-    }
-
-    public void setParameters(HtmlResultFormatParameters parameters) {
-        this.parameters = parameters;
+    public void setAnalysisParameters(AnalysisParameters parameters) {
+        this.analysisParameters = parameters;
     }
 
     @Override
@@ -51,21 +48,21 @@ public class HtmlResultWriter implements ResultWriter {
         Path outPath = Path.of(outString);
         LogUtils.logInfo(LOGGER, "Writing HTML results to `{}`", outPath.toAbsolutePath());
 
-        LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", parameters.reportNVariants());
+        LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", analysisParameters.topNVariantsReported());
         List<Visualizable> visualizables = results.variants().stream()
                 .map(visualizableGenerator::makeVisualizable)
                 .collect(Collectors.toList());
 
-        Map<String, String> variantCountSummary = summarizeVariantCounts(visualizables, parameters);
+        Map<String, String> variantCountSummary = summarizeVariantCounts(visualizables, analysisParameters.minAltReadSupport());
         variantCountSummary.put("vcf_file", results.variantSource());
 
         List<String> visualizations = visualizables.stream()
-                .filter(vp -> vp.variant().numberOfAltReads() >= parameters.minAltReadSupport()
+                .filter(vp -> vp.variant().numberOfAltReads() >= analysisParameters.minAltReadSupport()
                         && vp.variant().passedFilters()
                         && !Double.isNaN(vp.variant().svPriority().getPriority()))
                 .sorted(prioritizedVariantComparator())
                 .map(visualizer::getHtml)
-                .limit(parameters.reportNVariants())
+                .limit(analysisParameters.topNVariantsReported())
                 .collect(Collectors.toList());
 
 
@@ -73,8 +70,8 @@ public class HtmlResultWriter implements ResultWriter {
         template.outputFile(outPath);
     }
 
-    private Map<String, String> summarizeVariantCounts(List<Visualizable> visualizables, HtmlResultFormatParameters parameters) {
-        FilterAndCount fac = new FilterAndCount(visualizables, parameters.minAltReadSupport());
+    private Map<String, String> summarizeVariantCounts(List<Visualizable> visualizables, int minAltAlleleSupport) {
+        FilterAndCount fac = new FilterAndCount(visualizables, minAltAlleleSupport);
 
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("unparsable", String.valueOf(fac.getUnparsableCount()));

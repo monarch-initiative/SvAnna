@@ -41,6 +41,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.NumberFormat;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -51,6 +52,12 @@ import java.util.stream.Collectors;
 public class SvannaAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SvannaAutoConfiguration.class);
+
+    private static final NumberFormat NF = NumberFormat.getNumberInstance();
+
+    static {
+        NF.setMaximumFractionDigits(2);
+    }
 
     private static final Properties properties = readProperties();
 
@@ -89,8 +96,7 @@ public class SvannaAutoConfiguration {
 
     @Bean
     public AnnotationDataService annotationDataService(DataSource dataSource, GenomicAssembly genomicAssembly, SvannaProperties svannaProperties) {
-        double stabilityThreshold = svannaProperties.dataParameters().tadStabilityThreshold();
-        LogUtils.logDebug(LOGGER, "Including TAD boundaries with stability >{}", stabilityThreshold);
+        LogUtils.logDebug(LOGGER, "Including TAD boundaries with stability >{}%", NF.format(svannaProperties.dataParameters().tadStabilityThresholdAsPercentage()));
 
         SvannaProperties.EnhancerParameters enhancers = svannaProperties.dataParameters().enhancers();
         if (enhancers.useVista())
@@ -104,7 +110,7 @@ public class SvannaAutoConfiguration {
                 new EnhancerAnnotationDao(dataSource, genomicAssembly, enhancerParameters),
                 new RepetitiveRegionDao(dataSource, genomicAssembly),
                 new DbPopulationVariantDao(dataSource, genomicAssembly),
-                new TadBoundaryDao(dataSource, genomicAssembly, stabilityThreshold));
+                new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction()));
     }
 
     @Bean

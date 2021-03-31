@@ -47,6 +47,12 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
         NF.setMaximumFractionDigits(2);
     }
 
+    /**
+     * Gene contribution is multiplied by this factor if variant is heterozygous and the gene is not associated with
+     * a dominant disease.
+     */
+    private static final double MODE_OF_INHERITANCE_FACTOR = .5;
+
     @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
     public int nThreads = 2;
 
@@ -59,8 +65,8 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
-    @CommandLine.Option(names = {"--de-novo"}, description = "reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
-    public boolean deNovo = false;
+    @CommandLine.Option(names = {"--mode-of-inheritance"}, description = "reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
+    public boolean modeOfInheritance = false;
 
     /*
      * ------------  OUTPUT OPTIONS  ------------
@@ -139,7 +145,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
 
             // Prioritize
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
-            SvPrioritizerType svPrioritizerType = deNovo ? SvPrioritizerType.ADDITIVE_GRANULAR : SvPrioritizerType.ADDITIVE_SIMPLE;
+            SvPrioritizerType svPrioritizerType = modeOfInheritance ? SvPrioritizerType.ADDITIVE_GRANULAR : SvPrioritizerType.ADDITIVE_SIMPLE;
             SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(svPrioritizerType, patientTerms);
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");
@@ -156,8 +162,8 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
                 filteredPrioritizedVariants = TaskUtils.executeBlocking(() -> prioritized.collect(Collectors.toList()), nThreads);
             }
 
-            if (deNovo)
-                performDeNovoReassignment(filteredPrioritizedVariants, phenotypeDataService);
+            if (modeOfInheritance)
+                performModeOfInheritanceReassignment(filteredPrioritizedVariants, phenotypeDataService);
 
             AnalysisResults results = new AnalysisResults(vcfFile.toAbsolutePath().toString(), validatedPatientTerms, topLevelHpoTerms, filteredPrioritizedVariants);
 
@@ -175,10 +181,9 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
         }
     }
 
-    private static void performDeNovoReassignment(List<SvannaVariant> filteredPrioritizedVariants, PhenotypeDataService phenotypeDataService) {
+    private static void performModeOfInheritanceReassignment(List<SvannaVariant> filteredPrioritizedVariants, PhenotypeDataService phenotypeDataService) {
         // TODO - find a better place for this code
         LogUtils.logInfo(LOGGER, "Reassigning priorities");
-        double reassignmentFactor = .5;
         for (SvannaVariant variant : filteredPrioritizedVariants) {
             if (variant.svPriority() instanceof GeneAwareSvPriority) {
                 Zygosity zygosity = variant.zygosity();
@@ -204,7 +209,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
                         }
 
                         if (noDominantDisease && !diseases.isEmpty())
-                            geneContribution *= reassignmentFactor;
+                            geneContribution *= MODE_OF_INHERITANCE_FACTOR;
                     }
                     map.put(geneId, geneContribution);
                 }

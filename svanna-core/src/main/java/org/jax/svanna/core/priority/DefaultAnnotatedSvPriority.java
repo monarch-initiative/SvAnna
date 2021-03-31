@@ -70,14 +70,6 @@ class DefaultAnnotatedSvPriority implements AnnotatedSvPriority {
         return overlaps;
     }
 
-    /**
-     * An SvEvent is phenotypically relevant if it is assigned to one or more diseases.
-     */
-    @Override
-    public boolean hasPhenotypicRelevance() {
-        return this.diseases.size() > 0;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

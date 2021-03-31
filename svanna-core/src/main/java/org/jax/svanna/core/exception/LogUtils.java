@@ -3,6 +3,7 @@ package org.jax.svanna.core.exception;
 import org.monarchinitiative.svart.Breakend;
 import org.monarchinitiative.svart.Strand;
 import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 
 public class LogUtils {
@@ -12,6 +13,9 @@ public class LogUtils {
     }
 
     public static String variantSummary(Variant variant) {
+        if (VariantType.isSymbolic(variant.alt()))
+            return String.format("%s %s:%d-%d %s", variant.id(), variant.contigName(),
+                    variant.startOnStrand(Strand.POSITIVE), variant.endOnStrand(Strand.POSITIVE), variant.alt());
         return String.format("%s %s:%d-%d %s>%s", variant.id(), variant.contigName(),
                 variant.startOnStrand(Strand.POSITIVE), variant.endOnStrand(Strand.POSITIVE), variant.ref(), variant.alt());
     }

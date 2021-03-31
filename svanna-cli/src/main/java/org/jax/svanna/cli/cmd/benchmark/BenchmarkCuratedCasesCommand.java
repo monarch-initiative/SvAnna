@@ -11,9 +11,9 @@ import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.priority.SvPrioritizer;
+import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.priority.SvPriorityFactory;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
@@ -88,7 +88,7 @@ public class BenchmarkCuratedCasesCommand extends BaseBenchmarkCommand {
             LogUtils.logInfo(LOGGER, "Removed {} variants that failed the filtering", variants.size() - filteredVariants.size());
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
-            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
+            SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
 
             int processed = 1;
             Map<String, List<VariantPriority>> results = new HashMap<>();
@@ -102,7 +102,7 @@ public class BenchmarkCuratedCasesCommand extends BaseBenchmarkCommand {
                 Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::getId).collect(Collectors.toSet());
 
                 // create the prioritizer seeded by the phenotype terms and prioritize the variants
-                SvPrioritizer<Variant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
+                SvPrioritizer<Variant, SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
 
                 // prepare the variants
                 List<Variant> caseVariants = new LinkedList<>(filteredVariants);

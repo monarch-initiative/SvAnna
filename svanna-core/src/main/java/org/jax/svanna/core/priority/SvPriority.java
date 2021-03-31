@@ -6,8 +6,8 @@ public interface SvPriority extends Comparable<SvPriority> {
         return UnknownSvPriority.instance();
     }
 
-    static SvPriority of(double priority, boolean hasPhenotypicRelevance) {
-        return SvPriorityDefault.of(priority, hasPhenotypicRelevance);
+    static SvPriority of(double priority) {
+        return SvPriorityDefault.of(priority);
     }
 
     /**
@@ -20,11 +20,4 @@ public interface SvPriority extends Comparable<SvPriority> {
         return Double.compare(getPriority(), o.getPriority());
     }
 
-    /**
-     * If true, the SV overlaps with a transcript or genomic regulatory element that is annotated
-     * to an HPO term representing the phenotypic observations in the proband.
-     *
-     * @return true if the SV disrupts a gene or enhancer of potential phenotypic relevance.
-     */
-    boolean hasPhenotypicRelevance();
 }

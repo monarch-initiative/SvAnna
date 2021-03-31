@@ -8,7 +8,7 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.priority.SvPriorityFactory;
+import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
@@ -67,7 +67,7 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
             PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold);
 
-            SvPriorityFactory priorityFactory = context.getBean(SvPriorityFactory.class);
+            SvPrioritizerFactory priorityFactory = context.getBean(SvPrioritizerFactory.class);
             PrioritizationRunner prioritizationRunner = new PrioritizationRunner(priorityFactory, nThreads);
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);

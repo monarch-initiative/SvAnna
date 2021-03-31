@@ -31,7 +31,7 @@ public class RouteDataEvaluatorGETest {
     private final SequenceImpactCalculator<Enhancer> enhancerImpact = new SimpleSequenceImpactCalculator<>(1.);
     private final EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = EnhancerGeneRelevanceCalculator.defaultCalculator();
 
-    private RouteDataEvaluator<RouteDataGE> evaluator;
+    private RouteDataEvaluator<RouteDataGE, ? extends RouteResult> evaluator;
 
     @BeforeEach
     public void setUp() {
@@ -64,7 +64,7 @@ public class RouteDataEvaluatorGETest {
                 .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
-        double score = evaluator.evaluate(routeData);
+        double score = evaluator.evaluate(routeData).priority();
 
         assertThat(score, closeTo(expected, ERROR));
     }
@@ -97,7 +97,7 @@ public class RouteDataEvaluatorGETest {
                 .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
-        double score = evaluator.evaluate(routeData);
+        double score = evaluator.evaluate(routeData).priority();
 
         assertThat(score, closeTo(expected, ERROR));
     }
@@ -133,7 +133,7 @@ public class RouteDataEvaluatorGETest {
                 .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
-        double score = evaluator.evaluate(routeData);
+        double score = evaluator.evaluate(routeData).priority();
 
         assertThat(score, closeTo(expected, ERROR));
     }
@@ -171,7 +171,7 @@ public class RouteDataEvaluatorGETest {
                 .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
-        double score = evaluator.evaluate(routeData);
+        double score = evaluator.evaluate(routeData).priority();
 
         assertThat(score, closeTo(expected, ERROR));
     }
@@ -203,7 +203,7 @@ public class RouteDataEvaluatorGETest {
                 .addAltGene(TestGene.of(TermId.of("NCBIGene:C"), "C", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 120, 140))
                 .build();
 
-        double score = evaluator.evaluate(routeData);
+        double score = evaluator.evaluate(routeData).priority();
         assertThat(score, closeTo(expected, ERROR));
     }
 

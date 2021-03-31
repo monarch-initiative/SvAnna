@@ -1,19 +1,17 @@
-package org.jax.svanna.core.priority;
+package org.jax.svanna.core.priority.additive.ge;
 
-class SvPriorityDefault implements SvPriority {
+import org.jax.svanna.core.priority.additive.RouteResult;
+
+class SimpleRouteResult implements RouteResult {
 
     private final double priority;
 
-    static SvPriorityDefault of(double priority) {
-        return new SvPriorityDefault(priority);
-    }
-
-    private SvPriorityDefault(double priority) {
+    SimpleRouteResult(double priority) {
         this.priority = priority;
     }
 
     @Override
-    public double getPriority() {
+    public double priority() {
         return priority;
     }
 
@@ -21,7 +19,7 @@ class SvPriorityDefault implements SvPriority {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SvPriorityDefault that = (SvPriorityDefault) o;
+        SimpleRouteResult that = (SimpleRouteResult) o;
         return Double.compare(that.priority, priority) == 0;
     }
 
@@ -32,7 +30,7 @@ class SvPriorityDefault implements SvPriority {
 
     @Override
     public String toString() {
-        return "SvPriority{" +
+        return "SimpleRouteResult{" +
                 "priority=" + priority +
                 '}';
     }

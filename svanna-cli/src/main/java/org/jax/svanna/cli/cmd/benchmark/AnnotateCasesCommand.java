@@ -7,9 +7,9 @@ import org.jax.svanna.cli.cmd.SvAnnaCommand;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.priority.SvPrioritizer;
+import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.priority.SvPriorityFactory;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Variant;
@@ -67,7 +67,7 @@ public class AnnotateCasesCommand extends SvAnnaCommand {
         try (ConfigurableApplicationContext context = getContext()) {
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
-            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
+            SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
 
             int processed = 1;
             for (CaseReport aCase : cases) {
@@ -79,7 +79,7 @@ public class AnnotateCasesCommand extends SvAnnaCommand {
                 Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::getId).collect(Collectors.toSet());
 
                 // create the prioritizer seeded by the phenotype terms and prioritize the variants
-                SvPrioritizer<Variant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
+                SvPrioritizer<Variant, SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
 
                 Map<Variant, SvPriority> priorities = new HashMap<>();
                 for (Variant variant : aCase.variants()) {

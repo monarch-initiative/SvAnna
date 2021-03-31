@@ -12,13 +12,13 @@ import org.jax.svanna.cli.writer.html.HtmlResultFormatParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
+import org.jax.svanna.core.hpo.HpoDiseaseSummary;
+import org.jax.svanna.core.hpo.ModeOfInheritance;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.priority.SvPrioritizer;
-import org.jax.svanna.core.priority.SvPrioritizerType;
-import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.priority.SvPriorityFactory;
+import org.jax.svanna.core.priority.*;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -32,9 +32,7 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.NumberFormat;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -61,6 +59,8 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
+    @CommandLine.Option(names = {"--de-novo"}, description = "reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
+    public boolean deNovo = false;
 
     /*
      * ------------  OUTPUT OPTIONS  ------------
@@ -138,12 +138,13 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
             List<SvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize
-            SvPriorityFactory svPriorityFactory = context.getBean(SvPriorityFactory.class);
-            SvPrioritizer<SvannaVariant, SvPriority> prioritizer = svPriorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, patientTerms);
+            SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
+            SvPrioritizerType svPrioritizerType = deNovo ? SvPrioritizerType.ADDITIVE_GRANULAR : SvPrioritizerType.ADDITIVE_SIMPLE;
+            SvPrioritizer<SvannaVariant, SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(svPrioritizerType, patientTerms);
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");
-            AnalysisResults results;
             ProgressReporter priorityProgress = new ProgressReporter(5_000);
+            List<SvannaVariant> filteredPrioritizedVariants;
             try (Stream<SvannaVariant> variantStream = filteredVariants.parallelStream()
                     .peek(priorityProgress::logItem)
                     .onClose(priorityProgress.summarize())) {
@@ -152,10 +153,13 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
                     v.setSvPriority(priority);
                 });
 
-                List<SvannaVariant> filteredPrioritizedVariants = TaskUtils.executeBlocking(() -> prioritized.collect(Collectors.toList()), nThreads);
-
-                results = new AnalysisResults(vcfFile.toAbsolutePath().toString(), validatedPatientTerms, topLevelHpoTerms, filteredPrioritizedVariants);
+                filteredPrioritizedVariants = TaskUtils.executeBlocking(() -> prioritized.collect(Collectors.toList()), nThreads);
             }
+
+            if (deNovo)
+                performDeNovoReassignment(filteredPrioritizedVariants, phenotypeDataService);
+
+            AnalysisResults results = new AnalysisResults(vcfFile.toAbsolutePath().toString(), validatedPatientTerms, topLevelHpoTerms, filteredPrioritizedVariants);
 
             ResultWriterFactory resultWriterFactory = context.getBean(ResultWriterFactory.class);
             String prefix = resolveOutPrefix(vcfFile);
@@ -167,6 +171,44 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
                     ((HtmlResultWriter) writer).setParameters(parameters);
                 }
                 writer.write(results, prefix);
+            }
+        }
+    }
+
+    private static void performDeNovoReassignment(List<SvannaVariant> filteredPrioritizedVariants, PhenotypeDataService phenotypeDataService) {
+        // TODO - find a better place for this code
+        LogUtils.logInfo(LOGGER, "Reassigning priorities");
+        double reassignmentFactor = .5;
+        for (SvannaVariant variant : filteredPrioritizedVariants) {
+            if (variant.svPriority() instanceof GeneAwareSvPriority) {
+                Zygosity zygosity = variant.zygosity();
+                if (zygosity.equals(Zygosity.UNKNOWN))
+                    continue;
+
+                GeneAwareSvPriority priority = (GeneAwareSvPriority) variant.svPriority();
+                Map<String, Double> map = new HashMap<>();
+                for (String geneId : priority.geneIds()) {
+                    double geneContribution = priority.geneContribution(geneId);
+                    if (geneContribution < 1E-8)
+                        continue; // no contribution, the gene is not affected by the variant
+
+                    Set<HpoDiseaseSummary> diseases = phenotypeDataService.getDiseasesForGene(geneId);
+                    if (zygosity.equals(Zygosity.HETEROZYGOUS)) {
+                        boolean noDominantDisease = true;
+                        for (HpoDiseaseSummary disease : diseases) {
+                            if (disease.isCompatibleWithInheritance(ModeOfInheritance.AUTOSOMAL_DOMINANT)
+                                    || disease.isCompatibleWithInheritance(ModeOfInheritance.X_DOMINANT)) {
+                                noDominantDisease = false;
+                                break;
+                            }
+                        }
+
+                        if (noDominantDisease && !diseases.isEmpty())
+                            geneContribution *= reassignmentFactor;
+                    }
+                    map.put(geneId, geneContribution);
+                }
+                variant.setSvPriority(GeneAwareSvPriority.of(map));
             }
         }
     }

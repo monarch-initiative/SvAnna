@@ -12,7 +12,7 @@ import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.overlap.IntervalArrayGeneOverlapper;
-import org.jax.svanna.core.priority.SvPriorityFactory;
+import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
@@ -77,15 +77,14 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public SvPriorityFactory svPriorityFactory(GenomicAssembly genomicAssembly,
-                                               DataSource dataSource,
-                                               SvannaProperties svannaProperties,
-                                               SvannaDataResolver svannaDataResolver,
-                                               AnnotationDataService annotationDataService,
-                                               TranscriptService transcriptService,
-                                               GeneService geneService,
-                                               PhenotypeDataService phenotypeDataService) {
-        return new SvPriorityFactoryImpl(genomicAssembly, dataSource, svannaProperties, svannaDataResolver, annotationDataService, transcriptService, geneService, phenotypeDataService);
+    public SvPrioritizerFactory svPriorityFactory(GenomicAssembly genomicAssembly,
+                                                  DataSource dataSource,
+                                                  SvannaProperties svannaProperties,
+                                                  SvannaDataResolver svannaDataResolver,
+                                                  AnnotationDataService annotationDataService,
+                                                  GeneService geneService,
+                                                  PhenotypeDataService phenotypeDataService) {
+        return new SvPrioritizerFactoryImpl(genomicAssembly, dataSource, svannaProperties, svannaDataResolver, annotationDataService, geneService, phenotypeDataService);
     }
 
     @Bean

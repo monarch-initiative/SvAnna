@@ -4,9 +4,9 @@ import org.jax.svanna.cli.cmd.ProgressReporter;
 import org.jax.svanna.cli.cmd.TaskUtils;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.priority.SvPrioritizer;
+import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.priority.SvPriorityFactory;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Variant;
@@ -24,11 +24,11 @@ public class PrioritizationRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizationRunner.class);
     private static final int TICK = 5_000;
 
-    private final SvPriorityFactory priorityFactory;
+    private final SvPrioritizerFactory priorityFactory;
 
     private final int nThreads;
 
-    public PrioritizationRunner(SvPriorityFactory priorityFactory,
+    public PrioritizationRunner(SvPrioritizerFactory priorityFactory,
                                 int nThreads) {
         this.priorityFactory = priorityFactory;
         this.nThreads = nThreads;

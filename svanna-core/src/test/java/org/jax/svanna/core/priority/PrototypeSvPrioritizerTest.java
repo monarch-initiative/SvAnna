@@ -132,7 +132,7 @@ public class PrototypeSvPrioritizerTest {
 //                List.of(), // clinical modifiers
 //                List.of() // clinical courses
 //        );
-        return HpoDiseaseSummary.of(diseaseId.getValue(), name);
+        return HpoDiseaseSummary.of(diseaseId.getValue(), name, Set.of());
     }
 
     private static Map<TermId, Set<HpoDiseaseSummary>> makeDiseaseSummaryMap() {

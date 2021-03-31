@@ -2,15 +2,15 @@ package org.jax.svanna.autoconfigure;
 
 import com.google.common.collect.Sets;
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.priority.SvPrioritizer;
+import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.priority.SvPriorityFactory;
 import org.jax.svanna.core.priority.additive.*;
+import org.jax.svanna.core.priority.additive.ge.GranularRouteDataEvaluatorGE;
 import org.jax.svanna.core.priority.additive.ge.RouteDataEvaluatorGE;
 import org.jax.svanna.core.priority.additive.ge.RouteDataGE;
 import org.jax.svanna.core.priority.additive.impact.EnhancerSequenceImpactCalculator;
@@ -18,8 +18,6 @@ import org.jax.svanna.core.priority.additive.impact.GeneSequenceImpactCalculator
 import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.db.additive.DbRouteDataServiceGE;
 import org.jax.svanna.db.additive.dispatch.DispatcherDb;
 import org.jax.svanna.db.additive.dispatch.GeneAwareNeighborhoodBuilder;
@@ -36,46 +34,46 @@ import org.monarchinitiative.svart.Variant;
 import javax.sql.DataSource;
 import java.util.*;
 
-public class SvPriorityFactoryImpl implements SvPriorityFactory {
+public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
     private final GenomicAssembly genomicAssembly;
     private final DataSource dataSource;
     private final SvannaProperties svannaProperties;
     private final SvannaDataResolver svannaDataResolver;
     private final AnnotationDataService annotationDataService;
-    private final TranscriptService transcriptService;
     private final GeneService geneService;
     private final PhenotypeDataService phenotypeDataService;
 
 
-    public SvPriorityFactoryImpl(
+    SvPrioritizerFactoryImpl(
             GenomicAssembly genomicAssembly,
             DataSource dataSource,
             SvannaProperties svannaProperties,
             SvannaDataResolver svannaDataResolver, AnnotationDataService annotationDataService,
-            TranscriptService transcriptService,
-            GeneService geneService, PhenotypeDataService phenotypeDataService) {
+            GeneService geneService,
+            PhenotypeDataService phenotypeDataService) {
         this.genomicAssembly = genomicAssembly;
         this.dataSource = dataSource;
         this.svannaProperties = svannaProperties;
         this.svannaDataResolver = svannaDataResolver;
         this.annotationDataService = annotationDataService;
-        this.transcriptService = transcriptService;
         this.geneService = geneService;
         this.phenotypeDataService = phenotypeDataService;
     }
 
 
     @Override
-    public <V extends Variant, P extends SvPriority> SvPrioritizer<V, P> getPrioritizer(SvPrioritizerType type, Collection<TermId> patientTerms) {
-        switch (type) {
-            case PROTOTYPE:
-                LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
-                Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
-                Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(patientTerms, topLevelEnhancerTerms);
+    public <V extends Variant> SvPrioritizer<V, SvPriority> getPrioritizer(SvPrioritizerType type, Collection<TermId> phenotypeTerms) {
+        LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
+        Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
+        Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(phenotypeTerms, topLevelEnhancerTerms);
 
-                LogUtils.logDebug(LOGGER, "Preparing gene and disease data");
-                Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = phenotypeDataService.getRelevantGenesAndDiseases(patientTerms);
+        switch (type.baseType()) {
+            case PROTOTYPE:
+                LogUtils.logWarn(LOGGER, "PROTOTYPE SvPrioritizer is not currently supported");
+
+//                LogUtils.logDebug(LOGGER, "Preparing gene and disease data");
+//                Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = phenotypeDataService.getRelevantGenesAndDiseases(patientTerms);
 //                return new StrippedSvPrioritizer(annotationDataService,
 //                        new SvAnnOverlapper(transcriptService.getChromosomeMap()),
 //                        phenotypeDataService.geneBySymbol(),
@@ -90,38 +88,44 @@ public class SvPriorityFactoryImpl implements SvPriorityFactory {
                 NeighborhoodBuilder neighborhoodBuilder = new GeneAwareNeighborhoodBuilder(tadBoundaryDao, geneService);
                 Dispatcher dispatcher = new DispatcherDb(neighborhoodBuilder);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
-                RouteDataEvaluator<RouteDataGE> routeDataEvaluator = configureRouteDataEvaluator(patientTerms, svannaDataResolver);
 
-                return (SvPrioritizer<V, P>) AdditiveSvPrioritizer.<SvannaVariant, RouteDataGE>builder()
-                        .dispatcher(dispatcher)
-                        .routeDataService(dbRouteDataService)
-                        .routeDataEvaluator(routeDataEvaluator)
-                        .build();
+                SvannaProperties.PrioritizationParameters prioritizationParameters = svannaProperties.prioritizationParameters();
+                SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(prioritizationParameters.geneFactor(), prioritizationParameters.promoterLength());
+                GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeTerms, phenotypeDataService, svannaDataResolver);
+
+                SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationParameters.enhancerFactor());
+                EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = PhenotypeEnhancerGeneRelevanceCalculator.of(enhancerRelevantAncestors);
+
+
+                switch (type) {
+                    case ADDITIVE:
+                    case ADDITIVE_SIMPLE:
+                        LogUtils.logDebug(LOGGER, "Preparing ADDITIVE_SIMPLE SV prioritizer");
+                        RouteDataEvaluator<RouteDataGE, RouteResult> simpleEvaluator = new RouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
+                        return AdditiveSimpleSvPrioritizer.<V, RouteDataGE>builder()
+                                .dispatcher(dispatcher)
+                                .routeDataService(dbRouteDataService)
+                                .routeDataEvaluator(simpleEvaluator)
+                                .build();
+                    case ADDITIVE_GRANULAR:
+                        LogUtils.logDebug(LOGGER, "Preparing ADDITIVE_GRANULAR SV prioritizer");
+                        RouteDataEvaluator<RouteDataGE, GranularRouteResult> granularEvaluator = new GranularRouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
+                        return AdditiveGranularSvPrioritizer.<V, RouteDataGE>builder()
+                                .dispatcher(dispatcher)
+                                .routeDataService(dbRouteDataService)
+                                .routeDataEvaluator(granularEvaluator)
+                                .build();
+                    default:
+                        throw new IllegalArgumentException("Unsupported additive SvPrioritizerType `" + type + '`');
+                }
             default:
                 throw new IllegalArgumentException("Unknown SvPrioritizerType " + type);
         }
     }
 
-    private RouteDataEvaluatorGE configureRouteDataEvaluator(Collection<TermId> patientFeatures, SvannaDataResolver svannaDataResolver) {
-        SvannaProperties.PrioritizationParameters prioritizationParameters = svannaProperties.prioritizationParameters();
-        LogUtils.logDebug(LOGGER, "Gene factor: {}", prioritizationParameters.geneFactor());
-        LogUtils.logDebug(LOGGER, "Promoter length: {}", prioritizationParameters.promoterLength());
-        SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(prioritizationParameters.geneFactor(), prioritizationParameters.promoterLength());
-
-        GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeDataService, svannaDataResolver, patientFeatures);
-
-        LogUtils.logDebug(LOGGER, "Enhancer factor: {}", prioritizationParameters.enhancerFactor());
-        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationParameters.enhancerFactor());
-
-        Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
-        Set<TermId> relevantAncestorsForEnhancerFiltering = phenotypeDataService.getRelevantAncestors(patientFeatures, topLevelEnhancerTerms);
-        EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = PhenotypeEnhancerGeneRelevanceCalculator.of(relevantAncestorsForEnhancerFiltering);
-
-        return new RouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
-    }
-
-
-    private static GeneWeightCalculator configureGeneWeightCalculator(PhenotypeDataService phenotypeDataService, SvannaDataResolver svannaDataResolver, Collection<TermId> patientFeatures) {
+    private static GeneWeightCalculator configureGeneWeightCalculator(Collection<TermId> patientFeatures,
+                                                                      PhenotypeDataService phenotypeDataService,
+                                                                      SvannaDataResolver svannaDataResolver) {
         Ontology ontology = phenotypeDataService.ontology();
 
 

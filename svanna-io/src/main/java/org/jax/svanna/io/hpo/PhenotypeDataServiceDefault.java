@@ -2,10 +2,7 @@ package org.jax.svanna.io.hpo;
 
 import com.google.common.collect.Multimap;
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.hpo.GeneWithId;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
+import org.jax.svanna.core.hpo.*;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategoryMap;
@@ -17,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -33,7 +31,7 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
      */
     private final Multimap<TermId, TermId> diseaseToGeneMultiMap;
 
-    private final Map<TermId, Set<TermId>> geneToDiseaseIdMap;
+    private final Map<String, Set<TermId>> geneToDiseaseIdMap;
 
     /**
      * Map from disease IDs, e.g., OMIM:154700, to the corresponding HpoDisease object.
@@ -57,12 +55,13 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
         this.similarityScoreCalculator = similarityScoreCalculator;
     }
 
-    private Map<TermId, Set<TermId>> prepareGeneToDiseaseMap(Multimap<TermId, TermId> diseaseToGeneMultiMap) {
-        Map<TermId, Set<TermId>> geneToDiseaseMap = new HashMap<>();
+    private Map<String, Set<TermId>> prepareGeneToDiseaseMap(Multimap<TermId, TermId> diseaseToGeneMultiMap) {
+        Map<String, Set<TermId>> geneToDiseaseMap = new HashMap<>();
 
         for (Map.Entry<TermId, TermId> entry : diseaseToGeneMultiMap.entries()) {
-            geneToDiseaseMap.putIfAbsent(entry.getValue(), new HashSet<>());
-            geneToDiseaseMap.get(entry.getValue()).add(entry.getKey());
+            String geneAccessionId = entry.getValue().getValue();
+            geneToDiseaseMap.putIfAbsent(geneAccessionId, new HashSet<>());
+            geneToDiseaseMap.get(geneAccessionId).add(entry.getKey());
         }
 
         return geneToDiseaseMap;
@@ -93,7 +92,12 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
                 if (totalAnnotations.contains(tid)) {
                     for (TermId geneId : associatedGenes) {
                         builder.putIfAbsent(geneId, new HashSet<>());
-                        builder.get(geneId).add(HpoDiseaseSummary.of(disease.getDiseaseDatabaseId().getValue(), disease.getName()));
+                        builder.get(geneId).add(
+                                HpoDiseaseSummary.of(
+                                        disease.getDiseaseDatabaseId().getValue(),
+                                        disease.getName(),
+                                        parseModeOfInheritance(disease.getModesOfInheritance())
+                                ));
                     }
                 }
             }
@@ -102,14 +106,17 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     }
 
     @Override
-    public Set<HpoDiseaseSummary> getDiseasesForGene(TermId gene) {
-        if (!geneToDiseaseIdMap.containsKey(gene))
+    public Set<HpoDiseaseSummary> getDiseasesForGene(String accession) {
+        if (!geneToDiseaseIdMap.containsKey(accession))
             return Set.of();
-        return geneToDiseaseIdMap.get(gene).stream()
+        return geneToDiseaseIdMap.get(accession).stream()
                 .map(diseaseIdToDisease::get)
                 .filter(Objects::nonNull)
                 .filter(hpoDisease -> hpoDisease.getDiseaseDatabaseId() != null)
-                .map(disease -> HpoDiseaseSummary.of(disease.getDiseaseDatabaseId().getValue(), disease.getName()))
+                .map(disease -> HpoDiseaseSummary.of(
+                        disease.getDiseaseDatabaseId().getValue(),
+                        disease.getName(),
+                        parseModeOfInheritance(disease.getModesOfInheritance())))
                 .collect(Collectors.toSet());
     }
 
@@ -153,6 +160,58 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     @Override
     public double computeSimilarityScore(Collection<TermId> query, Collection<TermId> target) {
         return similarityScoreCalculator.computeSimilarityScore(query, target);
+    }
+
+    private static Set<ModeOfInheritance> parseModeOfInheritance(List<TermId> modesOfInheritance) {
+        return modesOfInheritance.stream()
+                .map(toModeOfInheritance())
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
+    }
+
+    private static Function<TermId, Optional<ModeOfInheritance>> toModeOfInheritance() {
+        return term -> {
+            switch (term.getValue()) {
+                case "HP:0000006": // Autosomal dominant inheritance
+                case "HP:0001444": // Autosomal dominant somatic cell mutation
+                case "HP:0012274": // Autosomal dominant inheritance with paternal imprinting
+                case "HP:0012275": // Autosomal dominant inheritance with maternal imprinting
+                case "HP:0025352": // Autosomal dominant germline de novo mutation
+                    return Optional.of(ModeOfInheritance.AUTOSOMAL_DOMINANT);
+                case "HP:0001417": // X-linked inheritance TODO - this might not be entirely correct binning
+                case "HP:0001423": // X-linked dominant inheritance
+                case "HP:0001470": // Sex-limited autosomal dominant
+                case "HP:0001475": // Male-limited autosomal dominant
+                    return Optional.of(ModeOfInheritance.X_DOMINANT);
+                case "HP:0000007": // Autosomal recessive inheritance
+                    return Optional.of(ModeOfInheritance.AUTOSOMAL_RECESSIVE);
+                case "HP:0001419": // X-linked recessive inheritance
+                case "HP:0031362": // Sex-limited autosomal recessive inheritance
+                    return Optional.of(ModeOfInheritance.X_RECESSIVE);
+                case "HP:0001427": // Mitochondrial inheritance
+                    return Optional.of(ModeOfInheritance.MITOCHONDRIAL);
+                case "HP:0001450": // Y-linked inheritance
+                    return Optional.of(ModeOfInheritance.Y_LINKED);
+                case "HP:0001425": // Heterogeneous
+                case "HP:0001426": // Multifactorial inheritance
+                case "HP:0001428": // Somatic mutation
+                case "HP:0001442": // Somatic mosaicism
+                case "HP:0003743": // Genetic anticipation
+                case "HP:0003745": // Sporadic
+                case "HP:0010982": // Polygenic inheritance
+                case "HP:0010983": // Oligogenic inheritance
+                case "HP:0010984": // Digenic inheritance
+                case "HP:0032382": // Uniparental disomy
+                case "HP:0001466": // Contiguous gene syndrome
+                case "HP:0001452": // Autosomal dominant contiguous gene syndrome
+                case "HP:0003744": // Genetic anticipation with paternal anticipation bias
+                    return Optional.of(ModeOfInheritance.UNKNOWN);
+                default:
+                    LogUtils.logWarn(LOGGER, "Unknown mode of inheritance `{}`", term.getValue());
+                    return Optional.of(ModeOfInheritance.UNKNOWN);
+            }
+        };
     }
 
 }

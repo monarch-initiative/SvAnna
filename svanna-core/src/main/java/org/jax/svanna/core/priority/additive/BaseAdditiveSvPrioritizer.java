@@ -10,17 +10,18 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
-public class AdditiveSvPrioritizer<V extends Variant, D extends RouteData> implements SvPrioritizer<V, SvPriority> {
+// TODO - V is not used, perhaps we should remove it to simplify?
+abstract class BaseAdditiveSvPrioritizer<V extends Variant, D extends RouteData, R extends RouteResult> implements SvPrioritizer<V, SvPriority> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AdditiveSvPrioritizer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseAdditiveSvPrioritizer.class);
 
     private final Dispatcher dispatcher;
 
     private final RouteDataService<D> routeDataService;
 
-    private final RouteDataEvaluator<D> routeDataEvaluator;
+    private final RouteDataEvaluator<D, R> routeDataEvaluator;
 
-    protected AdditiveSvPrioritizer(Builder<V, D> builder) {
+    protected BaseAdditiveSvPrioritizer(Builder<?, V, D, R> builder) {
         this.dispatcher = Objects.requireNonNull(builder.dispatcher);
         this.routeDataService = Objects.requireNonNull(builder.routeDataService);
         this.routeDataEvaluator = Objects.requireNonNull(builder.routeDataEvaluator);
@@ -31,14 +32,13 @@ public class AdditiveSvPrioritizer<V extends Variant, D extends RouteData> imple
         try {
             Routes routes = dispatcher.assembleRoutes(List.of(variant));
             D data = routeDataService.getData(routes);
-            double score = routeDataEvaluator.evaluate(data);
-
-            return SvPriority.of(score, true);
+            R result = routeDataEvaluator.evaluate(data);
+            return processRouteResult(result);
         } catch (IntrachromosomalBreakendException e) {
-            LogUtils.logTrace(LOGGER, "Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
+            LogUtils.logTrace(LOGGER, "Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
             return SvPriority.unknown();
         } catch (DispatchException e) {
-            LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", variant, e.getMessage());
+            LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
             return SvPriority.unknown();
         } catch (Exception e) {
             // TODO - remove once stable
@@ -47,45 +47,37 @@ public class AdditiveSvPrioritizer<V extends Variant, D extends RouteData> imple
         }
     }
 
-    public static <V extends Variant, D extends RouteData> Builder<V,D> builder() {
-        return new Builder<>();
-    }
+    protected abstract SvPriority processRouteResult(R routeResult);
 
-    public static class Builder<V extends Variant, D extends RouteData> {
+
+    public abstract static class Builder<T extends Builder<T, V, D, R>, V extends Variant, D extends RouteData, R extends RouteResult> {
 
         private Dispatcher dispatcher;
 
         private RouteDataService<D> routeDataService;
 
-        private RouteDataEvaluator<D> routeDataEvaluator;
+        private RouteDataEvaluator<D, R> routeDataEvaluator;
 
-        protected Builder() {
+        protected Builder() {}
 
-        }
-
-        public Builder<V, D> dispatcher(Dispatcher dispatcher) {
+        public T dispatcher(Dispatcher dispatcher) {
             this.dispatcher = dispatcher;
             return self();
         }
 
-        public Builder<V, D> routeDataService(RouteDataService<D> routeDataService) {
+        public T routeDataService(RouteDataService<D> routeDataService) {
             this.routeDataService = routeDataService;
             return self();
         }
 
-        public Builder<V, D> routeDataEvaluator(RouteDataEvaluator<D> routeDataEvaluator) {
+        public T routeDataEvaluator(RouteDataEvaluator<D, R> routeDataEvaluator) {
             this.routeDataEvaluator = routeDataEvaluator;
             return self();
         }
 
-        public AdditiveSvPrioritizer<V, D> build() {
-            return new AdditiveSvPrioritizer<>(self());
-        }
+        protected  abstract BaseAdditiveSvPrioritizer<V, D, R> build();
 
-        protected Builder<V, D> self() {
-            return this;
-        }
+        protected abstract T self();
 
     }
-
 }

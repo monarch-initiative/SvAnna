@@ -156,7 +156,7 @@ public class DispatcherDb implements Dispatcher {
                     SvannaVariant sv = (SvannaVariant) variant;
                     int copyNumber = sv.copyNumber();
                     if (copyNumber < 1 || copyNumber == 2)
-                        throw new DispatchException("Copy number was `" + copyNumber + "` for variant `" + LogUtils.variantSummary(variant) + "`");
+                        throw new DispatchException("Copy number was `" + copyNumber + "`");
 
                     segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
                             variant.id(), Event.DELETION, copyNumber - 1));

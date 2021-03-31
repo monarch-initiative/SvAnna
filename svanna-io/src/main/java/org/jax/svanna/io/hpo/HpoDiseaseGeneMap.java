@@ -116,7 +116,7 @@ public class HpoDiseaseGeneMap {
                 if (totalAnnotations.contains(tid)) {
                     for (TermId geneId : associatedGenes) {
                         gene2diseaseMap.putIfAbsent(geneId, new HashSet<>());
-                        gene2diseaseMap.get(geneId).add(HpoDiseaseSummary.of(disease.getDiseaseDatabaseId().getValue(), disease.getName()));
+                        gene2diseaseMap.get(geneId).add(HpoDiseaseSummary.of(disease.getDiseaseDatabaseId().getValue(), disease.getName(), Set.of()));
                     }
                 }
             }

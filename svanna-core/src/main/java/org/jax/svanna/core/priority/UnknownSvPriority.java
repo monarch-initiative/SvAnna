@@ -16,11 +16,6 @@ class UnknownSvPriority implements SvPriority {
     }
 
     @Override
-    public boolean hasPhenotypicRelevance() {
-        return false;
-    }
-
-    @Override
     public String toString() {
         return "UNKNOWN PRIORITY";
     }

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
+public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE, RouteResult> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RouteDataEvaluatorGE.class);
 
@@ -26,20 +26,21 @@ public class RouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE> {
 
     public RouteDataEvaluatorGE(SequenceImpactCalculator<Gene> geneImpactCalculator, GeneWeightCalculator geneWeightCalculator,
                                 SequenceImpactCalculator<Enhancer> enhancerImpactCalculator, EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator) {
-        this.geneImpactCalculator = geneImpactCalculator;
-        this.geneWeightCalculator = geneWeightCalculator;
-        this.enhancerImpactCalculator = enhancerImpactCalculator;
-        this.enhancerGeneRelevanceCalculator = enhancerGeneRelevanceCalculator;
+        this.geneImpactCalculator = Objects.requireNonNull(geneImpactCalculator);
+        this.geneWeightCalculator = Objects.requireNonNull(geneWeightCalculator);
+        this.enhancerImpactCalculator = Objects.requireNonNull(enhancerImpactCalculator);
+        this.enhancerGeneRelevanceCalculator = Objects.requireNonNull(enhancerGeneRelevanceCalculator);
     }
 
     @Override
-    public double evaluate(RouteDataGE routeData) {
+    public RouteResult evaluate(RouteDataGE routeData) {
         Routes routes = routeData.route();
 
         double reference = evaluateReference(routes.reference(), routeData.refTadBoundaries(), routeData.refGenes(), routeData.refEnhancers());
         double alternate = evaluateAlternate(routes.alternate(), routeData.altTadBoundaries(), routeData.altGenes(), routeData.altEnhancers());
 
-        return Math.abs(reference - alternate);
+        double priority = Math.abs(reference - alternate);
+        return new SimpleRouteResult(priority);
     }
 
 

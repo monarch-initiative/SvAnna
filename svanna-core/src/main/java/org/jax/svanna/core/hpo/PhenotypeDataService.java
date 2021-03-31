@@ -30,7 +30,11 @@ public interface PhenotypeDataService {
     Map<TermId, Set<HpoDiseaseSummary>> getRelevantGenesAndDiseases(Collection<TermId> hpoTermIds);
 
 
-    Set<HpoDiseaseSummary> getDiseasesForGene(TermId gene);
+    Set<HpoDiseaseSummary> getDiseasesForGene(String accession);
+
+    default Set<HpoDiseaseSummary> getDiseasesForGene(TermId gene) {
+        return getDiseasesForGene(gene.getValue());
+    }
 
     Set<Term> getTopLevelTerms(Collection<Term> hpoTermIds);
 

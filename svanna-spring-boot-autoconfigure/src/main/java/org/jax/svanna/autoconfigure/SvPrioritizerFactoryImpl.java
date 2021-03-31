@@ -29,7 +29,6 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
 import org.monarchinitiative.svart.GenomicAssembly;
-import org.monarchinitiative.svart.Variant;
 
 import javax.sql.DataSource;
 import java.util.*;
@@ -63,7 +62,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
 
     @Override
-    public <V extends Variant> SvPrioritizer<V, SvPriority> getPrioritizer(SvPrioritizerType type, Collection<TermId> phenotypeTerms) {
+    public SvPrioritizer<SvPriority> getPrioritizer(SvPrioritizerType type, Collection<TermId> phenotypeTerms) {
         LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
         Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
         Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(phenotypeTerms, topLevelEnhancerTerms);
@@ -102,7 +101,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
                     case ADDITIVE_SIMPLE:
                         LogUtils.logDebug(LOGGER, "Preparing ADDITIVE_SIMPLE SV prioritizer");
                         RouteDataEvaluator<RouteDataGE, RouteResult> simpleEvaluator = new RouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
-                        return AdditiveSimpleSvPrioritizer.<V, RouteDataGE>builder()
+                        return AdditiveSimpleSvPrioritizer.<RouteDataGE>builder()
                                 .dispatcher(dispatcher)
                                 .routeDataService(dbRouteDataService)
                                 .routeDataEvaluator(simpleEvaluator)
@@ -110,7 +109,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
                     case ADDITIVE_GRANULAR:
                         LogUtils.logDebug(LOGGER, "Preparing ADDITIVE_GRANULAR SV prioritizer");
                         RouteDataEvaluator<RouteDataGE, GranularRouteResult> granularEvaluator = new GranularRouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
-                        return AdditiveGranularSvPrioritizer.<V, RouteDataGE>builder()
+                        return AdditiveGranularSvPrioritizer.<RouteDataGE>builder()
                                 .dispatcher(dispatcher)
                                 .routeDataService(dbRouteDataService)
                                 .routeDataEvaluator(granularEvaluator)

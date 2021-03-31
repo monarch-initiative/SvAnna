@@ -102,7 +102,7 @@ public class BenchmarkCuratedCasesCommand extends BaseBenchmarkCommand {
                 Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::getId).collect(Collectors.toSet());
 
                 // create the prioritizer seeded by the phenotype terms and prioritize the variants
-                SvPrioritizer<Variant, SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
+                SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
 
                 // prepare the variants
                 List<Variant> caseVariants = new LinkedList<>(filteredVariants);

@@ -10,8 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
-// TODO - V is not used, perhaps we should remove it to simplify?
-abstract class BaseAdditiveSvPrioritizer<V extends Variant, D extends RouteData, R extends RouteResult> implements SvPrioritizer<V, SvPriority> {
+abstract class BaseAdditiveSvPrioritizer<D extends RouteData, R extends RouteResult> implements SvPrioritizer<SvPriority> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAdditiveSvPrioritizer.class);
 
@@ -21,14 +20,14 @@ abstract class BaseAdditiveSvPrioritizer<V extends Variant, D extends RouteData,
 
     private final RouteDataEvaluator<D, R> routeDataEvaluator;
 
-    protected BaseAdditiveSvPrioritizer(Builder<?, V, D, R> builder) {
+    protected BaseAdditiveSvPrioritizer(Builder<?, D, R> builder) {
         this.dispatcher = Objects.requireNonNull(builder.dispatcher);
         this.routeDataService = Objects.requireNonNull(builder.routeDataService);
         this.routeDataEvaluator = Objects.requireNonNull(builder.routeDataEvaluator);
     }
 
     @Override
-    public SvPriority prioritize(V variant) {
+    public SvPriority prioritize(Variant variant) {
         try {
             Routes routes = dispatcher.assembleRoutes(List.of(variant));
             D data = routeDataService.getData(routes);
@@ -50,7 +49,7 @@ abstract class BaseAdditiveSvPrioritizer<V extends Variant, D extends RouteData,
     protected abstract SvPriority processRouteResult(R routeResult);
 
 
-    public abstract static class Builder<T extends Builder<T, V, D, R>, V extends Variant, D extends RouteData, R extends RouteResult> {
+    public abstract static class Builder<T extends Builder<T, D, R>, D extends RouteData, R extends RouteResult> {
 
         private Dispatcher dispatcher;
 
@@ -75,7 +74,7 @@ abstract class BaseAdditiveSvPrioritizer<V extends Variant, D extends RouteData,
             return self();
         }
 
-        protected  abstract BaseAdditiveSvPrioritizer<V, D, R> build();
+        protected  abstract BaseAdditiveSvPrioritizer<D, R> build();
 
         protected abstract T self();
 

@@ -22,7 +22,7 @@ import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
 
 // class to show that we can replace the enhancer interval arrays with annotationDataService
 @SuppressWarnings("Duplicates") // TODO - remove Prototype prioritizer if this works
-public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, DiscreteSvPriority> {
+public class StrippedSvPrioritizer implements SvPrioritizer<DiscreteSvPriority> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StrippedSvPrioritizer.class);
 
@@ -68,7 +68,7 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
 
 
     @Override
-    public DiscreteSvPriority prioritize(SvannaVariant variant) {
+    public DiscreteSvPriority prioritize(Variant variant) {
         /*
         For each case we need to figure out the affected transcripts/genes.
         Then, we figure out the impact on the sequence (high/medium/low) and phenotype relevance.
@@ -282,15 +282,20 @@ public class StrippedSvPrioritizer implements SvPrioritizer<SvannaVariant, Discr
         return impact;
     }
 
-    private DiscreteSvPriority prioritizeCnv(SvannaVariant variant) {
-        if (variant.copyNumber() > 2)
-            return prioritizeDuplication(variant);
-        else if (variant.copyNumber() < 2 && variant.copyNumber() >= 0)
-            return prioritizeDeletion(variant);
-        else {
-            LogUtils.logWarn(LOGGER, "Variant `{}` has copy number `{}`", LogUtils.variantSummary(variant), variant.copyNumber());
-            return DiscreteSvPriority.unknown();
+    private DiscreteSvPriority prioritizeCnv(Variant variant) {
+        if (variant instanceof SvannaVariant) {
+            SvannaVariant svannaVariant = (SvannaVariant) variant;
+            if (svannaVariant.copyNumber() > 2)
+                return prioritizeDuplication(svannaVariant);
+            else if (svannaVariant.copyNumber() < 2 && svannaVariant.copyNumber() >= 0)
+                return prioritizeDeletion(svannaVariant);
+            else {
+                LogUtils.logWarn(LOGGER, "Variant `{}` has copy number `{}`", LogUtils.variantSummary(svannaVariant), svannaVariant.copyNumber());
+                return DiscreteSvPriority.unknown();
+            }
         }
+        LogUtils.logWarn(LOGGER, "Unable to prioritize CNV that is not SvAnna variant `{}`", LogUtils.variantSummary(variant));
+        return DiscreteSvPriority.unknown();
     }
 
     /**

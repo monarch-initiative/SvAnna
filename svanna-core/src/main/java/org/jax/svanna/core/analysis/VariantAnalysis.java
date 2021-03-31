@@ -4,8 +4,8 @@ import org.jax.svanna.core.reference.SvannaVariant;
 
 import java.util.stream.Stream;
 
-public interface VariantAnalysis<T extends SvannaVariant> {
+public interface VariantAnalysis {
 
-     Stream<T> analyze(Stream<T> variants);
+     Stream<SvannaVariant> analyze(Stream<SvannaVariant> variants);
 
 }

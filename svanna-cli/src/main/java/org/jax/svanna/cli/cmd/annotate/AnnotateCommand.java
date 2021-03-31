@@ -163,7 +163,7 @@ public class AnnotateCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Setting up filtering and prioritization");
             TranscriptService transcriptService = context.getBean(TranscriptService.class);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            VariantAnalysis<SvannaVariant> variantAnalysis = setupVariantAnalysis(patientTerms, transcriptService, annotationDataService, phenotypeDataService);
+            VariantAnalysis variantAnalysis = setupVariantAnalysis(patientTerms, transcriptService, annotationDataService, phenotypeDataService);
 
 
             LogUtils.logInfo(LOGGER, "Filtering and prioritizing variants");
@@ -200,7 +200,7 @@ public class AnnotateCommand extends SvAnnaCommand {
         }
     }
 
-    private VariantAnalysis<SvannaVariant> setupVariantAnalysis(Collection<TermId> patientTerms,
+    private VariantAnalysis setupVariantAnalysis(Collection<TermId> patientTerms,
                                                                 TranscriptService transcriptService,
                                                                 AnnotationDataService annotationDataService,
                                                                 PhenotypeDataService phenotypeDataService) {
@@ -216,7 +216,7 @@ public class AnnotateCommand extends SvAnnaCommand {
         Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = phenotypeDataService.getRelevantGenesAndDiseases(patientTerms);
 
         // setup prioritization parts
-        SvPrioritizer<SvannaVariant, ? extends SvPriority> prioritizer = new StrippedSvPrioritizer(annotationDataService,
+        SvPrioritizer<? extends SvPriority> prioritizer = new StrippedSvPrioritizer(annotationDataService,
                 new SvAnnOverlapper(transcriptService.getChromosomeMap()),
                 phenotypeDataService.geneBySymbol(),
 //                    topLevelHpoTermsAndLabels.keySet(),
@@ -224,7 +224,7 @@ public class AnnotateCommand extends SvAnnaCommand {
                 relevantGenesAndDiseases,
                 maxGenes);
 
-        return new FilterAndPrioritize<>(variantFilter, prioritizer);
+        return new FilterAndPrioritize(variantFilter, prioritizer);
     }
 
 }

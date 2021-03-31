@@ -9,7 +9,6 @@ import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +34,7 @@ public class PrioritizationRunner {
     }
 
     public List<VariantPriority> prioritize(Set<TermId> termIds, List<SvannaVariant> variants) {
-        SvPrioritizer<Variant, SvPriority> prioritizer = priorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, termIds);
+        SvPrioritizer<SvPriority> prioritizer = priorityFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, termIds);
 
         LogUtils.logInfo(LOGGER, "Prioritizing variants");
         ProgressReporter progressReporter = new ProgressReporter(TICK);

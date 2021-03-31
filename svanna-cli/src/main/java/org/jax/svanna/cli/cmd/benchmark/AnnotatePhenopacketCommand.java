@@ -65,6 +65,7 @@ public class AnnotatePhenopacketCommand extends BaseAdditiveCommand {
 
             Optional<Path> vcfFilePathOptional = getVcfFilePath(phenopacket);
             if (vcfFilePathOptional.isEmpty())
+                // complaint is logged within the function
                 return 1;
 
             Path vcfFile = vcfFilePathOptional.get();

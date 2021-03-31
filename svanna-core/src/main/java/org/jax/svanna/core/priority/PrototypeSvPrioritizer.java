@@ -29,7 +29,7 @@ import static org.jax.svanna.core.priority.Utils.atLeastOneSharedItem;
  *     <li>INTERMEDIATE-IMPACT is changed to LOW IMPACT</li>
  * </ol>
  */
-public class PrototypeSvPrioritizer implements SvPrioritizer<Variant, AnnotatedSvPriority> {
+public class PrototypeSvPrioritizer implements SvPrioritizer<AnnotatedSvPriority> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrototypeSvPrioritizer.class);
 

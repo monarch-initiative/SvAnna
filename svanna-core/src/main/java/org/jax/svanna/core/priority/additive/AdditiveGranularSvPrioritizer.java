@@ -1,12 +1,11 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.priority.SvPriority;
-import org.monarchinitiative.svart.Variant;
 
-public class AdditiveGranularSvPrioritizer<V extends Variant, D extends RouteData> extends BaseAdditiveSvPrioritizer<V, D, GranularRouteResult> {
+public class AdditiveGranularSvPrioritizer<D extends RouteData> extends BaseAdditiveSvPrioritizer<D, GranularRouteResult> {
 
 
-    protected AdditiveGranularSvPrioritizer(Builder<V, D> builder) {
+    protected AdditiveGranularSvPrioritizer(Builder<D> builder) {
         super(builder);
     }
 
@@ -15,21 +14,21 @@ public class AdditiveGranularSvPrioritizer<V extends Variant, D extends RouteDat
         return routeResult;
     }
 
-    public static <V extends Variant, D extends RouteData> Builder<V, D> builder() {
+    public static <D extends RouteData> Builder<D> builder() {
         return new Builder<>();
     }
 
-    public static class Builder<V extends Variant, D extends RouteData> extends BaseAdditiveSvPrioritizer.Builder<Builder<V, D>, V, D, GranularRouteResult> {
+    public static class Builder<D extends RouteData> extends BaseAdditiveSvPrioritizer.Builder<Builder<D>, D, GranularRouteResult> {
 
         private Builder() {}
 
         @Override
-        public AdditiveGranularSvPrioritizer<V, D> build() {
+        public AdditiveGranularSvPrioritizer<D> build() {
             return new AdditiveGranularSvPrioritizer<>(self());
         }
 
         @Override
-        protected Builder<V, D> self() {
+        protected Builder<D> self() {
             return this;
         }
 

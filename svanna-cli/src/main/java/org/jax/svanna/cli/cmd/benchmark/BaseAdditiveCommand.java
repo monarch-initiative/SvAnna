@@ -140,7 +140,7 @@ public abstract class BaseAdditiveCommand extends SvAnnaCommand {
             // Prioritize
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
             SvPrioritizerType svPrioritizerType = deNovo ? SvPrioritizerType.ADDITIVE_GRANULAR : SvPrioritizerType.ADDITIVE_SIMPLE;
-            SvPrioritizer<SvannaVariant, SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(svPrioritizerType, patientTerms);
+            SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(svPrioritizerType, patientTerms);
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");
             ProgressReporter priorityProgress = new ProgressReporter(5_000);

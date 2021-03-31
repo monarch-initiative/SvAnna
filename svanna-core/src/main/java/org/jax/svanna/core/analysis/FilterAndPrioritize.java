@@ -11,18 +11,18 @@ import java.util.stream.Stream;
  * Variant analysis consisting of two steps: filtering and prioritization.
  *
  */
-public class FilterAndPrioritize<T extends SvannaVariant> implements VariantAnalysis<T> {
+public class FilterAndPrioritize implements VariantAnalysis {
 
-    private final Filter<T> variantFilter;
-    private final SvPrioritizer<T, ? extends SvPriority> prioritizer;
+    private final Filter<SvannaVariant> variantFilter;
+    private final SvPrioritizer<? extends SvPriority> prioritizer;
 
-    public FilterAndPrioritize(Filter<T> filter, SvPrioritizer<T, ? extends SvPriority> prioritizer) {
+    public FilterAndPrioritize(Filter<SvannaVariant> filter, SvPrioritizer<? extends SvPriority> prioritizer) {
         this.variantFilter = filter;
         this.prioritizer = prioritizer;
     }
 
     @Override
-    public Stream<T> analyze(Stream<T> variants) {
+    public Stream<SvannaVariant> analyze(Stream<SvannaVariant> variants) {
         return variants.peek(v -> v.addFilterResult(variantFilter.runFilter(v)))
                 .peek(v -> v.setSvPriority(prioritizer.prioritize(v)));
     }

@@ -51,6 +51,8 @@ public enum OverlapType {
     UPSTREAM_GENE_VARIANT_500B("500b upstream gene variant", UPSTREAM_GENE_VARIANT),
     GENIC("affecting a gene"),
     INTRONIC("located completely within intron", GENIC),
+    AFFECTS_CODING_TRANSCRIPT_TSS("affects TSS of a coding transcript", GENIC),
+    AFFECTS_NONCODING_TRANSCRIPT_TSS("affects TSS of a non-coding transcript", GENIC),
     SINGLE_EXON_IN_TRANSCRIPT("single-exon in coding transcript", GENIC),
     NON_CDS_REGION_IN_SINGLE_EXON("non-coding region of single exon in coding transcript", SINGLE_EXON_IN_TRANSCRIPT),
     SINGLE_EXON_IN_NC_TRANSCRIPT("single-exon in non-coding transcript", SINGLE_EXON_IN_TRANSCRIPT),
@@ -64,7 +66,10 @@ public enum OverlapType {
     private final static Set<OverlapType> intergenicTypes = Set.of(
             DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_500KB, DOWNSTREAM_GENE_VARIANT_5KB, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_500B,
             UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_500KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_500B);
-    private final static Set<OverlapType> exonicTypes = Set.of(SINGLE_EXON_IN_TRANSCRIPT, MULTIPLE_EXON_IN_TRANSCRIPT, TRANSCRIPT_CONTAINED_IN_SV);
+    private final static Set<OverlapType> exonicTypes = Set.of(
+            SINGLE_EXON_IN_TRANSCRIPT, MULTIPLE_EXON_IN_TRANSCRIPT,
+            AFFECTS_CODING_TRANSCRIPT_TSS, AFFECTS_NONCODING_TRANSCRIPT_TSS,
+            TRANSCRIPT_CONTAINED_IN_SV);
     private final static Set<OverlapType> intronicTypes = Set.of(INTRONIC);
     private final static Set<OverlapType> upstreamTypes = Set.of(UPSTREAM_GENE_VARIANT, UPSTREAM_GENE_VARIANT_500KB, UPSTREAM_GENE_VARIANT_5KB, UPSTREAM_GENE_VARIANT_2KB, UPSTREAM_GENE_VARIANT_500B);
     private final static Set<OverlapType> downstreamTypes = Set.of(DOWNSTREAM_GENE_VARIANT, DOWNSTREAM_GENE_VARIANT_500KB, DOWNSTREAM_GENE_VARIANT_5KB, DOWNSTREAM_GENE_VARIANT_2KB, DOWNSTREAM_GENE_VARIANT_500B);
@@ -148,6 +153,7 @@ public enum OverlapType {
             case MULTIPLE_EXON_IN_TRANSCRIPT:
             case TRANSCRIPT_CONTAINED_IN_SV:
             case TRANSCRIPT_DISRUPTED_BY_INVERSION:
+            case AFFECTS_CODING_TRANSCRIPT_TSS:
                 return SvImpact.VERY_HIGH;
             case UPSTREAM_GENE_VARIANT_500B:
             case NON_CDS_REGION_IN_SINGLE_EXON:
@@ -158,6 +164,7 @@ public enum OverlapType {
             case DOWNSTREAM_GENE_VARIANT_5KB:
             case UPSTREAM_GENE_VARIANT_2KB:
             case DOWNSTREAM_GENE_VARIANT_2KB:
+            case AFFECTS_NONCODING_TRANSCRIPT_TSS:
                 return SvImpact.INTERMEDIATE;
             case INTRONIC:
                 return SvImpact.LOW;

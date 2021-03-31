@@ -150,6 +150,13 @@ public class IntervalArrayGeneOverlapper implements GeneOverlapper {
             affectsCds = overlap && affectedExons.atLeastOneExonOverlap();
         }
 
+        // TSS is defined as a 1bp-long region that spans the first base of the transcript
+        if (Coordinates.aContainsB(region.coordinateSystem(), region.startOnStrand(transcript.strand()), region.endOnStrand(transcript.strand()),
+                CoordinateSystem.oneBased(), transcript.startWithCoordinateSystem(CoordinateSystem.oneBased()), transcript.startWithCoordinateSystem(CoordinateSystem.oneBased()))) {
+            OverlapType overlapType = transcript instanceof CodingTranscript ? AFFECTS_CODING_TRANSCRIPT_TSS : AFFECTS_NONCODING_TRANSCRIPT_TSS;
+            return TranscriptOverlap.of(overlapType, accessionId, OverlapDistance.fromExonic(accessionId, affectsCds), accessionId);
+        }
+
         if (affectedExons.atLeastOneExonOverlap()) {
             // determine which exons are affected
             int firstAffectedExon = affectedExons.getFirstAffectedExon();

@@ -484,7 +484,7 @@ a.svg:hover, a.svg:active {
     <section>
       <a id="sample"></a>
         <article>
-        ${hpoterms?no_esc}
+        ${analysisMetadata?no_esc}
         <p><b>Phenopackets file</b>: ${phenopacket_file}
          <p><b>VCF file</b>: ${vcf_file}.</p>
       </article>

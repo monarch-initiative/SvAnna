@@ -14,7 +14,6 @@ import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -43,7 +42,7 @@ public class HtmlResultWriter implements ResultWriter {
     }
 
     @Override
-    public void write(AnalysisResults results, String prefix) throws IOException {
+    public void write(AnalysisResults results, String prefix) {
         String outString = prefix + OutputFormat.HTML.fileSuffix();
         Path outPath = Path.of(outString);
         LogUtils.logInfo(LOGGER, "Writing HTML results to `{}`", outPath.toAbsolutePath());
@@ -66,7 +65,7 @@ public class HtmlResultWriter implements ResultWriter {
                 .collect(Collectors.toList());
 
 
-        HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.probandPhenotypeTerms());
+        HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.probandPhenotypeTerms(), this.analysisParameters);
         template.outputFile(outPath);
     }
 

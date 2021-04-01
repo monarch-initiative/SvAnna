@@ -54,7 +54,7 @@ public class SvannaProperties {
 
     public static class DataParameters {
 
-        private double tadStabilityThreshold = .8;
+        private double tadStabilityThreshold = 80.;
 
         @NestedConfigurationProperty
         private EnhancerParameters enhancers = new EnhancerParameters();
@@ -67,8 +67,12 @@ public class SvannaProperties {
             return enhancers;
         }
 
-        public double tadStabilityThreshold() {
+        public double tadStabilityThresholdAsPercentage() {
             return tadStabilityThreshold;
+        }
+
+        public double tadStabilityThresholdAsFraction() {
+            return tadStabilityThreshold / 100.;
         }
 
         public void setTadStabilityThreshold(double tadStabilityThreshold) {

@@ -83,7 +83,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
                 return null;
 
             case ADDITIVE:
-                TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThreshold());
+                TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
                 NeighborhoodBuilder neighborhoodBuilder = new GeneAwareNeighborhoodBuilder(tadBoundaryDao, geneService);
                 Dispatcher dispatcher = new DispatcherDb(neighborhoodBuilder);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);

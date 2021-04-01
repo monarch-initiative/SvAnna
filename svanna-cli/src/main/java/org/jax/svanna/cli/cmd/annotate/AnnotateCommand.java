@@ -1,13 +1,14 @@
 package org.jax.svanna.cli.cmd.annotate;
 
 
+import org.jax.svanna.autoconfigure.SvannaProperties;
 import org.jax.svanna.cli.Main;
 import org.jax.svanna.cli.cmd.*;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.ResultWriterFactory;
-import org.jax.svanna.cli.writer.html.HtmlResultFormatParameters;
+import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.analysis.FilterAndPrioritize;
 import org.jax.svanna.core.analysis.VariantAnalysis;
@@ -17,6 +18,7 @@ import org.jax.svanna.core.filter.StructuralVariantFrequencyFilter;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
+import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.overlap.SvAnnOverlapper;
 import org.jax.svanna.core.priority.StrippedSvPrioritizer;
 import org.jax.svanna.core.priority.SvImpact;
@@ -187,8 +189,8 @@ public class AnnotateCommand extends SvAnnaCommand {
                 ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat);
                 if (writer instanceof HtmlResultWriter) {
                     // TODO - is there a more elegant way to pass the HTML specific parameters into the writer?
-                    HtmlResultFormatParameters parameters = new HtmlResultFormatParameters(reportNVariants, minAltReadSupport);
-                    ((HtmlResultWriter) writer).setParameters(parameters);
+                    SvannaProperties svannaProperties = context.getBean(SvannaProperties.class);
+                    ((HtmlResultWriter) writer).setAnalysisParameters(getAnalysisParameters(svannaProperties));
                 }
                 writer.write(results, outprefix);
             }
@@ -198,6 +200,27 @@ public class AnnotateCommand extends SvAnnaCommand {
             LogUtils.logError(LOGGER, "Error occurred: {}", e.getMessage());
             return 1;
         }
+    }
+
+
+    private AnalysisParameters getAnalysisParameters(SvannaProperties properties) {
+        AnalysisParameters analysisParameters = new AnalysisParameters();
+
+        analysisParameters.setDataDirectory(properties.dataDirectory());
+        analysisParameters.setJannovarCachePath(properties.jannovarCachePath());
+        analysisParameters.setPhenopacketPath(phenopacketPath == null ? null : phenopacketPath.toAbsolutePath().toString());
+        analysisParameters.setVcfPath(vcfFile.toAbsolutePath().toString());
+        analysisParameters.setSimilarityThreshold(similarityThreshold);
+        analysisParameters.setFrequencyThreshold(frequencyThreshold);
+        analysisParameters.addAllPopulationVariantOrigins(PopulationVariantOrigin.benign());
+        analysisParameters.setMinAltReadSupport(minAltReadSupport);
+        analysisParameters.setTopNVariantsReported(reportNVariants);
+        analysisParameters.setTadStabilityThreshold(properties.dataParameters().tadStabilityThresholdAsPercentage());
+        analysisParameters.setUseVistaEnhancers(properties.dataParameters().enhancers().useVista());
+        analysisParameters.setUseFantom5Enhancers(properties.dataParameters().enhancers().useFantom5());
+        analysisParameters.setPhenotypeTermSimilarityMeasure(properties.prioritizationParameters().termSimilarityMeasure().toString());
+
+        return analysisParameters;
     }
 
     private VariantAnalysis setupVariantAnalysis(Collection<TermId> patientTerms,

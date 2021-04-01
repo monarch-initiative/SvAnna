@@ -28,7 +28,8 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     private static final double INS_DOES_NOT_FIT_INTO_CODING_FRAME = .1;
     private static final double INS_FITS_INTO_CODING_FRAME_IS_OUT_OF_FRAME = .5;
     private static final double INS_FITS_INTO_CODING_FRAME_IS_INFRAME = .8;
-    private static final double ADDED_TO_PROMOTER_VARIANT = .3;
+    // fraction of the gene factor added to fitnessWithEvent to promoter variant
+    private static final double ADDED_TO_PROMOTER_VARIANT = .6;
 
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;

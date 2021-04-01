@@ -45,7 +45,7 @@ public class HtmlResultWriter implements ResultWriter {
     public void write(AnalysisResults results, String prefix) {
         String outString = prefix + OutputFormat.HTML.fileSuffix();
         Path outPath = Path.of(outString);
-        LogUtils.logInfo(LOGGER, "Writing HTML results to `{}`", outPath.toAbsolutePath());
+        LogUtils.logInfo(LOGGER, "Writing HTML results to {}", outPath.toAbsolutePath());
 
         LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", analysisParameters.topNVariantsReported());
         List<Visualizable> visualizables = results.variants().stream()

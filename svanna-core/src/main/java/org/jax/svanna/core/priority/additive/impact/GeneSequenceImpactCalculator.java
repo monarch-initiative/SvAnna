@@ -172,8 +172,8 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         int cdsStart = tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased());
         int cdsEnd = tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
 
-        // segment start and end are the same number in both half-open coordinate systems
-        int segmentPos = segment.startWithCoordinateSystem(CoordinateSystem.zeroBased());
+        // segment start and end of an empty region are the same numbers in both half-open coordinate systems
+        int segmentPos = segment.startOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
 
         double score = noImpact();
 
@@ -182,7 +182,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         int nCodingBasesInPreviousExons = 0;
         for (PaddedExon exon : paddedExons) {
             if (Coordinates.aContainsB(CoordinateSystem.zeroBased(), exon.paddedStart(), exon.paddedEnd(),
-                    segment.coordinateSystem(), segment.start(), segment.end())) {
+                    segment.coordinateSystem(), segment.startOnStrand(tx.strand()), segment.endOnStrand(tx.strand()))) {
                 // is the insertion in UTR?
                 if (segmentPos <= cdsStart) {
                     // 5'UTR
@@ -257,20 +257,19 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     }
 
     private static List<PaddedExon> mapToPaddedExons(CodingTranscript tx) {
-        if (tx.exons().isEmpty()) {
+        if (tx.exons().isEmpty())
             throw new IllegalArgumentException("Transcript with no exons: " + tx.accessionId());
-        }
-        int cdsStart = tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
-        int cdsEnd = tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased());
+
+        int cdsStart = tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased());
+        int cdsEnd = tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
 
         if (tx.exons().size() == 1) {
             Exon first = tx.exons().get(0);
             int start = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
             int end = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
-            int endPadded = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
 
-            int nCoding = cdsStart - cdsEnd;
-            return List.of(PaddedExon.of(start, start, end, endPadded, nCoding));
+            int nCoding = cdsEnd - cdsStart;
+            return List.of(PaddedExon.of(start, start, end, end, nCoding));
         }
 
 

@@ -146,7 +146,8 @@ public class IntervalArrayGeneOverlapper implements GeneOverlapper {
         boolean affectsCds = false; // note this can only only true if the SV is exonic and the transcript is coding
         if (transcript instanceof CodingTranscript) {
             CodingTranscript ctx = (CodingTranscript) transcript;
-            boolean overlap = Coordinates.overlap(ctx.coordinateSystem(), ctx.codingStart(), ctx.codingEnd(), region.coordinateSystem(), region.start(), region.end());
+            boolean overlap = Coordinates.overlap(ctx.coordinateSystem(), ctx.codingStart(), ctx.codingEnd(),
+                    region.coordinateSystem(), region.startOnStrand(ctx.strand()), region.endOnStrand(ctx.strand()));
             affectsCds = overlap && affectedExons.atLeastOneExonOverlap();
         }
 

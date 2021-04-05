@@ -10,17 +10,17 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
-abstract class BaseAdditiveSvPrioritizer<D extends RouteData, R extends RouteResult> implements SvPrioritizer<SvPriority> {
+abstract class BaseAdditiveSvPrioritizer<DATA extends RouteData, RESULT extends RouteResult> implements SvPrioritizer<SvPriority> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseAdditiveSvPrioritizer.class);
 
     private final Dispatcher dispatcher;
 
-    private final RouteDataService<D> routeDataService;
+    private final RouteDataService<DATA> routeDataService;
 
-    private final RouteDataEvaluator<D, R> routeDataEvaluator;
+    private final RouteDataEvaluator<DATA, RESULT> routeDataEvaluator;
 
-    protected BaseAdditiveSvPrioritizer(Builder<?, D, R> builder) {
+    protected BaseAdditiveSvPrioritizer(Builder<?, DATA, RESULT> builder) {
         this.dispatcher = Objects.requireNonNull(builder.dispatcher);
         this.routeDataService = Objects.requireNonNull(builder.routeDataService);
         this.routeDataEvaluator = Objects.requireNonNull(builder.routeDataEvaluator);
@@ -30,14 +30,17 @@ abstract class BaseAdditiveSvPrioritizer<D extends RouteData, R extends RouteRes
     public SvPriority prioritize(Variant variant) {
         try {
             Routes routes = dispatcher.assembleRoutes(List.of(variant));
-            D data = routeDataService.getData(routes);
-            R result = routeDataEvaluator.evaluate(data);
+            DATA data = routeDataService.getData(routes);
+            RESULT result = routeDataEvaluator.evaluate(data);
             return processRouteResult(result);
         } catch (IntrachromosomalBreakendException e) {
             LogUtils.logTrace(LOGGER, "Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
             return SvPriority.unknown();
         } catch (DispatchException e) {
             LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
+            return SvPriority.unknown();
+        } catch (EvaluationException e) {
+            LogUtils.logWarn(LOGGER, "Error during evaluation of variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
             return SvPriority.unknown();
         } catch (Exception e) {
             // TODO - remove once stable
@@ -46,16 +49,16 @@ abstract class BaseAdditiveSvPrioritizer<D extends RouteData, R extends RouteRes
         }
     }
 
-    protected abstract SvPriority processRouteResult(R routeResult);
+    protected abstract SvPriority processRouteResult(RESULT routeResult);
 
 
-    public abstract static class Builder<T extends Builder<T, D, R>, D extends RouteData, R extends RouteResult> {
+    protected abstract static class Builder<T extends Builder<T, DATA, RESULT>, DATA extends RouteData, RESULT extends RouteResult> {
 
         private Dispatcher dispatcher;
 
-        private RouteDataService<D> routeDataService;
+        private RouteDataService<DATA> routeDataService;
 
-        private RouteDataEvaluator<D, R> routeDataEvaluator;
+        private RouteDataEvaluator<DATA, RESULT> routeDataEvaluator;
 
         protected Builder() {}
 
@@ -64,17 +67,17 @@ abstract class BaseAdditiveSvPrioritizer<D extends RouteData, R extends RouteRes
             return self();
         }
 
-        public T routeDataService(RouteDataService<D> routeDataService) {
+        public T routeDataService(RouteDataService<DATA> routeDataService) {
             this.routeDataService = routeDataService;
             return self();
         }
 
-        public T routeDataEvaluator(RouteDataEvaluator<D, R> routeDataEvaluator) {
+        public T routeDataEvaluator(RouteDataEvaluator<DATA, RESULT> routeDataEvaluator) {
             this.routeDataEvaluator = routeDataEvaluator;
             return self();
         }
 
-        protected  abstract BaseAdditiveSvPrioritizer<D, R> build();
+        protected  abstract BaseAdditiveSvPrioritizer<DATA, RESULT> build();
 
         protected abstract T self();
 

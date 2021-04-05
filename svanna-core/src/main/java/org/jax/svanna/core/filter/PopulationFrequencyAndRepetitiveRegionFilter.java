@@ -19,27 +19,38 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
 
     private static final int BATCH = 100;
 
+    // FREQUENCY
     private static final FilterType FF_FILTER_TYPE = FilterType.FREQUENCY_FILTER;
-
     private static final FilterResult FF_FAIL = FilterResult.fail(FF_FILTER_TYPE);
     private static final FilterResult FF_PASS = FilterResult.pass(FF_FILTER_TYPE);
     private static final FilterResult FF_NOT_RUN = FilterResult.notRun(FF_FILTER_TYPE);
 
-    private static final FilterType RR_FILTER_TYPE = FilterType.REPETITIVE_REGION_FILTER;
-    private static final FilterResult RR_FAIL = FilterResult.fail(RR_FILTER_TYPE);
-    private static final FilterResult RR_PASS = FilterResult.pass(RR_FILTER_TYPE);
+//    // REPETITIVE REGIONS
+//    private static final FilterType RR_FILTER_TYPE = FilterType.REPETITIVE_REGION_FILTER;
+//    private static final FilterResult RR_FAIL = FilterResult.fail(RR_FILTER_TYPE);
+//    private static final FilterResult RR_PASS = FilterResult.pass(RR_FILTER_TYPE);
 
-    private static final Set<VariantType> freqFilterRecognizedVariants = Set.of(VariantType.INS, VariantType.DUP, VariantType.DEL, VariantType.INV, VariantType.CNV);
+    // READ_DEPTH
+    private static final FilterType COVERAGE_FILTER_TYPE = FilterType.COVERAGE_FILTER;
+    private static final FilterResult COVERAGE_FAIL = FilterResult.fail(COVERAGE_FILTER_TYPE);
+    private static final FilterResult COVERAGE_PASS = FilterResult.pass(COVERAGE_FILTER_TYPE);
+
+    private static final Set<VariantType> FREQ_FILTER_RECOGNIZED_VARIANTS = Set.of(
+            VariantType.INS, VariantType.DUP, VariantType.DEL, VariantType.INV, VariantType.CNV);
 
     private final AnnotationDataService annotationDataService;
     private final float similarityThreshold;
     private final float frequencyThreshold;
+    private final int minReads;
 
     public PopulationFrequencyAndRepetitiveRegionFilter(AnnotationDataService annotationDataService,
-                                                        float similarityThreshold, float frequencyThreshold) {
+                                                        float similarityThreshold,
+                                                        float frequencyThreshold,
+                                                        int minReads) {
         this.annotationDataService = annotationDataService;
         this.similarityThreshold = similarityThreshold;
         this.frequencyThreshold = frequencyThreshold;
+        this.minReads = minReads;
     }
 
 
@@ -92,40 +103,59 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
         List<PopulationVariant> populationVariants = annotationDataService.overlappingPopulationVariants(query, PopulationVariantOrigin.benign());
         List<RepetitiveRegion> repetitiveRegions = annotationDataService.overlappingRepetitiveRegions(query);
         for (T item : sublist) {
-            FilterResult freqFilterResult = null;
-            if (freqFilterRecognizedVariants.contains(item.variantType().baseType())) {
-                for (PopulationVariant populationVariant : populationVariants) {
-                    if (populationVariant.variantType().baseType() == item.variantType().baseType()
-                            && populationVariant.alleleFrequency() >= frequencyThreshold
-                            && FilterUtils.reciprocalOverlap(populationVariant, item) * 100.F > similarityThreshold) {
-                        freqFilterResult = FF_FAIL;
-                        break;
-                    }
-                }
-                if (freqFilterResult == null)
-                    freqFilterResult = FF_PASS;
-            } else {
-                freqFilterResult = FF_NOT_RUN;
-            }
+            FilterResult freqFilterResult = runFrequencyFilter(populationVariants, item);
             item.addFilterResult(freqFilterResult);
 
-            FilterResult repRegionFilterResult = null;
-            for (RepetitiveRegion repetitiveRegion : repetitiveRegions) {
-                if (FilterUtils.fractionShared(repetitiveRegion, item) * 100.F > similarityThreshold) {
-                    repRegionFilterResult = RR_FAIL;
-                    break;
-                }
-            }
-            if (repRegionFilterResult == null) {
-                repRegionFilterResult = RR_PASS;
-            }
+//            FilterResult repRegionFilterResult = runRepetitiveRegionsFilter(repetitiveRegions, item);
+//            item.addFilterResult(repRegionFilterResult);
 
-            item.addFilterResult(repRegionFilterResult);
+            FilterResult coverageFilterResult = runCoverageFilter(item);
+            item.addFilterResult(coverageFilterResult);
 
             results.add(item);
         }
 
         return results;
+    }
+
+    private <T extends SvannaVariant> FilterResult runFrequencyFilter(List<PopulationVariant> populationVariants, T item) {
+        FilterResult freqFilterResult = null;
+        if (FREQ_FILTER_RECOGNIZED_VARIANTS.contains(item.variantType().baseType())) {
+            for (PopulationVariant populationVariant : populationVariants) {
+                if (populationVariant.variantType().baseType() == item.variantType().baseType()
+                        && populationVariant.alleleFrequency() >= frequencyThreshold
+                        && FilterUtils.reciprocalOverlap(populationVariant, item) * 100.F > similarityThreshold) {
+                    freqFilterResult = FF_FAIL;
+                    break;
+                }
+            }
+            if (freqFilterResult == null)
+                freqFilterResult = FF_PASS;
+        } else {
+            freqFilterResult = FF_NOT_RUN;
+        }
+        return freqFilterResult;
+    }
+
+//    TODO - remove if not used
+//    private <T extends SvannaVariant> FilterResult runRepetitiveRegionsFilter(List<RepetitiveRegion> repetitiveRegions, T item) {
+//        FilterResult repRegionFilterResult = null;
+//        for (RepetitiveRegion repetitiveRegion : repetitiveRegions) {
+//            if (FilterUtils.fractionShared(repetitiveRegion, item) * 100.F > similarityThreshold) {
+//                repRegionFilterResult = RR_FAIL;
+//                break;
+//            }
+//        }
+//        if (repRegionFilterResult == null) {
+//            repRegionFilterResult = RR_PASS;
+//        }
+//        return repRegionFilterResult;
+//    }
+
+    private <T extends SvannaVariant> FilterResult runCoverageFilter(T item) {
+        return (item.numberOfAltReads() < minReads)
+                ? COVERAGE_FAIL
+                : COVERAGE_PASS;
     }
 
     private static <T extends SvannaVariant> Comparator<? super T> byPositionOnPositiveStrand() {

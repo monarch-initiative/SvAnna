@@ -5,11 +5,14 @@ import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Position;
 import org.monarchinitiative.svart.Strand;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 class CodingTranscriptDefault extends BaseTranscript<CodingTranscriptDefault> implements CodingTranscript {
+
+    private static final NumberFormat NF = NumberFormat.getInstance();
 
     private final Position codingStartPosition;
     private final Position codingEndPosition;
@@ -125,7 +128,7 @@ class CodingTranscriptDefault extends BaseTranscript<CodingTranscriptDefault> im
     public String toString() {
         return "CodingTranscript{" +
                 "accessionId=" + accessionId() +
-                ", " + contigName() + ':' + start() + '-' + end() + '(' + strand() + ')' +
+                ", " + contigName() + ':' + NF.format(start()) + '-' + NF.format(end()) + '(' + strand() + ')' +
                 ", cds=(" + codingStartPosition + '-' + codingEndPosition + ')' +
                 '}';
     }

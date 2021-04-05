@@ -122,7 +122,7 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
 
     private int writeTranslocation(Writer writer) throws IOException {
         String chrom = contig.name().startsWith("chr") ? contig.name() : "chr" + contig.name();
-        String description = String.format("Translocation breakpoint at %s:%d", chrom, positionOnContig);
+        String description = String.format("Translocation breakpoint at %s:%s", chrom, NF.format(positionOnContig));
         int ypos = this.ystart;
         int offset = 0;
         int n_display_items = 0;
@@ -134,7 +134,7 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
         }
         for (var gene : affectedGenes) {
             writeGene(gene, ypos, writer);
-            ypos += Constants.HEIGHT_PER_DISPLAY_ITEM;
+            ypos += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
             offset += Constants.HEIGHT_PER_DISPLAY_ITEM;
             n_display_items++;
         }

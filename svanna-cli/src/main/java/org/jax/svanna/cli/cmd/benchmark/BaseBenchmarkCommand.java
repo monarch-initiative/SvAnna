@@ -19,6 +19,9 @@ abstract class BaseBenchmarkCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
+    @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
+    public int minAltReadSupport = 3;
+
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outPrefix = "SVANNA_BB";
 

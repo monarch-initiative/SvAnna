@@ -73,6 +73,8 @@ public final class BreakendedSvannaVariant extends BaseBreakendVariant<Breakende
 
     @Override
     public synchronized boolean addFilterResult(FilterResult filterResult) {
+        if (!filterResult.wasRun())
+            return true;
         return filterResult.passed()
                 ? passedFilterTypes.add(filterResult.getFilterType())
                 : failedFilterTypes.add(filterResult.getFilterType());
@@ -153,10 +155,12 @@ public final class BreakendedSvannaVariant extends BaseBreakendVariant<Breakende
         }
 
         public Builder addFilterResult(FilterResult filterResult) {
-            if (filterResult.passed())
-                passedFilterTypes.add(filterResult.getFilterType());
-            else
-                failedFilterTypes.add(filterResult.getFilterType());
+            if (filterResult.wasRun()) {
+                if (filterResult.passed())
+                    passedFilterTypes.add(filterResult.getFilterType());
+                else
+                    failedFilterTypes.add(filterResult.getFilterType());
+            }
 
             return self();
         }

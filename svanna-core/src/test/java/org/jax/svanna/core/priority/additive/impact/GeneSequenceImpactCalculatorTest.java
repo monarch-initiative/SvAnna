@@ -36,7 +36,7 @@ public class GeneSequenceImpactCalculatorTest {
             "100, 400,          100,120, 325,350, 380,400,          1.",  // the middle exon is neighboring the deletion
             "100, 400,          100,120, 150,194, 380,400,          1.",  // the middle exon is neighboring the deletion
             " 50, 200,           50,100, 110,120, 180,200,          1.",  // the deletion is downstream of the gene
-            "300, 400,          300,320, 330,370, 380,400,           .3",  // the deletion is upstream of the gene (promoter)
+            "300, 400,          300,320, 330,370, 380,400,           .6",  // the deletion is upstream of the gene (promoter)
             "350, 500,          350,370, 380,420, 430,500,          1.",  // the deletion is just upstream of the promoter
     })
     public void deletion(int start, int end,

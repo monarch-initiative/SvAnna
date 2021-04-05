@@ -25,7 +25,7 @@ public class RouteAssemblyTest {
                     Variant.of(contig, "two", Strand.NEGATIVE, CoordinateSystem.oneBased(), Position.of(80), "TTT", "C")
             );
 
-            VariantArrangement<Variant> assembled = RouteAssembly.assemble(variants);
+            VariantArrangement assembled = RouteAssembly.assemble(variants);
 
             assertThat(assembled.variants(), hasSize(3));
             assertThat(assembled.variants().get(0), equalTo(variants.get(0).withStrand(Strand.POSITIVE)));
@@ -52,7 +52,7 @@ public class RouteAssemblyTest {
                     Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), Position.of(40), "C", "G")
             );
 
-            VariantArrangement<Variant> assembled = RouteAssembly.assemble(variants);
+            VariantArrangement assembled = RouteAssembly.assemble(variants);
 
             assertThat(assembled.variants(), hasSize(5));
             assertThat(assembled.variants().get(0), equalTo(variants.get(2)));
@@ -153,7 +153,7 @@ public class RouteAssemblyTest {
             TestContig contig = TestContig.of(1, 10);
             List<Variant> variants = List.of(Variant.of(contig, "rs123", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "C", "G"));
 
-            VariantArrangement<Variant> assembled = RouteAssembly.assemble(variants);
+            VariantArrangement assembled = RouteAssembly.assemble(variants);
 
             assertThat(assembled.variants(), hasSize(1));
             assertThat(assembled.variants(), hasItem(variants.get(0)));

@@ -1,12 +1,15 @@
-package org.jax.svanna.core.priority.additive.ge;
+package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.priority.additive.RouteResult;
-
-class SimpleRouteResult implements RouteResult {
+@Deprecated // TODO - remove if there is no usage for this class anymore
+public class SimpleRouteResult implements RouteResult {
 
     private final double priority;
 
-    SimpleRouteResult(double priority) {
+    public static SimpleRouteResult of(double priority) {
+        return new SimpleRouteResult(priority);
+    }
+
+    private SimpleRouteResult(double priority) {
         this.priority = priority;
     }
 

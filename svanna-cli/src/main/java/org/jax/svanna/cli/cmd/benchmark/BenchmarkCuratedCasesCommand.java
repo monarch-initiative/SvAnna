@@ -76,9 +76,9 @@ public class BenchmarkCuratedCasesCommand extends BaseBenchmarkCommand {
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
-            LogUtils.logInfo(LOGGER, "Filtering out the variants where at least >{}% of variant's region occurs in a repetitive region", similarityThreshold);
+            LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold);
+            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
             List<SvannaVariant> allVariants = filter.filter(variants);
 
             List<SvannaVariant> filteredVariants = allVariants.stream()

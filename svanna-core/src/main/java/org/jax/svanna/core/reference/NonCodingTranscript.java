@@ -5,10 +5,13 @@ import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Position;
 import org.monarchinitiative.svart.Strand;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 class NonCodingTranscript extends BaseTranscript<NonCodingTranscript> {
+
+    private static final NumberFormat NF = NumberFormat.getInstance();
 
     static NonCodingTranscript of(Contig contig, Strand strand, CoordinateSystem coordinateSystem,
                                   int start, int end,
@@ -36,12 +39,6 @@ class NonCodingTranscript extends BaseTranscript<NonCodingTranscript> {
     }
 
     @Override
-    public String toString() {
-        return "NonCodingTranscript{" +
-                "accessionId='" + accessionId() + '\'' + '}';
-    }
-
-    @Override
     protected NonCodingTranscript newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position start, Position end) {
         List<Exon> exons;
         if (strand() != strand) {
@@ -62,5 +59,13 @@ class NonCodingTranscript extends BaseTranscript<NonCodingTranscript> {
         }
 
         return new NonCodingTranscript(contig, strand, coordinateSystem, start, end, accessionId(), exons);
+    }
+
+    @Override
+    public String toString() {
+        return "NonCodingTranscript{" +
+                "accessionId='" + accessionId() + '\'' +
+                ", " + contigName() + ':' + NF.format(start()) + '-' + NF.format(end()) + '(' + strand() + ')' +
+                '}';
     }
 }

@@ -3,6 +3,7 @@ package org.jax.svanna.core.reference;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 
+import java.text.NumberFormat;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -10,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
+
+    private static final NumberFormat NF = NumberFormat.getInstance();
 
     private final TermId accessionId;
     private final String geneSymbol;
@@ -90,9 +93,7 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
 
     @Override
     public String toString() {
-        return "GeneDefault{" +
-                "geneSymbol='" + geneSymbol + '\'' +
-                ", accessionId=" + accessionId +
+        return "Gene " + geneSymbol + '[' + accessionId + "] " + '(' + contigName() + ':' + NF.format(start()) + '-' + NF.format(end()) + " (" + strand() + ')' +
                 ", codingTranscripts=[" + codingTranscripts.stream().map(Transcript::accessionId).collect(Collectors.joining(", ")) + ']' +
                 ", noncodingTranscripts=[" + noncodingTranscripts.stream().map(Transcript::accessionId).collect(Collectors.joining(", ")) + ']' +
                 '}';

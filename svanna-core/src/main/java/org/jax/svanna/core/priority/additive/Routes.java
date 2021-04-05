@@ -2,30 +2,49 @@ package org.jax.svanna.core.priority.additive;
 
 import org.monarchinitiative.svart.GenomicRegion;
 
+import java.util.Objects;
+import java.util.Set;
+
 public class Routes {
 
-    private final GenomicRegion reference;
-    private final Route alternate;
+    private final Set<GenomicRegion> references;
+    private final Set<Route> alternates;
 
-    public static Routes of(GenomicRegion reference, Route alternate) {
-        // TODO - normalize coordinate system of reference
-        return new Routes(reference, alternate);
+    public static Routes of(Set<GenomicRegion> references, Set<Route> alternates) {
+        return new Routes(references, alternates);
     }
 
-    private Routes(GenomicRegion reference, Route alternate) {
-        this.reference = reference;
-        this.alternate = alternate;
+    private Routes(Set<GenomicRegion> references, Set<Route> alternates) {
+        this.references = references;
+        this.alternates = alternates;
     }
 
-    public GenomicRegion reference() {
-        return reference;
+    public Set<GenomicRegion> references() {
+        return references;
     }
 
-    public Route alternate() {
-        return alternate;
+    public Set<Route> alternates() {
+        return alternates;
     }
 
-    public boolean isIntraChromosomal() {
-        return alternate.segmentContigs().size() == 1;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Routes that = (Routes) o;
+        return Objects.equals(references, that.references) && Objects.equals(alternates, that.alternates);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(references, alternates);
+    }
+
+    @Override
+    public String toString() {
+        return "Routes{" +
+                "n references: " + references.size() +
+                ", n alternates: " + alternates.size() +
+                '}';
     }
 }

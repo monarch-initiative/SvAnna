@@ -13,45 +13,28 @@ import java.util.*;
  */
 public class RouteDataGE extends RouteData {
 
-    private final Set<Gene> refGenes;
-    private final Set<Gene> altGenes;
-    private final Set<Enhancer> refEnhancers;
-    private final Set<Enhancer> altEnhancers;
-    private final List<TadBoundary> refTadBoundaries;
-    private final List<TadBoundary> altTadBoundaries;
+    private final Set<Gene> genes;
+    private final Set<Enhancer> enhancers;
+    private final List<TadBoundary> tadBoundaries;
+
 
     protected RouteDataGE(Builder builder) {
         super(builder.route);
-        this.refGenes = builder.refGenes;
-        this.altGenes = builder.altGenes;
-        this.refEnhancers = builder.refEnhancers;
-        this.altEnhancers = builder.altEnhancers;
-        this.refTadBoundaries = builder.refBoundaries;
-        this.altTadBoundaries = builder.altBoundaries;
+        this.genes = builder.genes;
+        this.enhancers = builder.enhancers;
+        this.tadBoundaries = builder.boundaries;
     }
 
-    public Set<Gene> refGenes() {
-        return refGenes;
+    public Set<Gene> genes() {
+        return genes;
     }
 
-    public Set<Gene> altGenes() {
-        return altGenes;
+    public Set<Enhancer> enhancers() {
+        return enhancers;
     }
 
-    public Set<Enhancer> refEnhancers() {
-        return refEnhancers;
-    }
-
-    public Set<Enhancer> altEnhancers() {
-        return altEnhancers;
-    }
-
-    public List<TadBoundary> refTadBoundaries() {
-        return refTadBoundaries;
-    }
-
-    public List<TadBoundary> altTadBoundaries() {
-        return altTadBoundaries;
+    public List<TadBoundary> tadBoundaries() {
+        return tadBoundaries;
     }
 
     @Override
@@ -60,23 +43,20 @@ public class RouteDataGE extends RouteData {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         RouteDataGE that = (RouteDataGE) o;
-        return Objects.equals(refGenes, that.refGenes) && Objects.equals(altGenes, that.altGenes) && Objects.equals(refEnhancers, that.refEnhancers) && Objects.equals(altEnhancers, that.altEnhancers) && Objects.equals(refTadBoundaries, that.refTadBoundaries) && Objects.equals(altTadBoundaries, that.altTadBoundaries);
+        return Objects.equals(genes, that.genes) && Objects.equals(enhancers, that.enhancers) && Objects.equals(tadBoundaries, that.tadBoundaries);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), refGenes, altGenes, refEnhancers, altEnhancers, refTadBoundaries, altTadBoundaries);
+        return Objects.hash(super.hashCode(), genes, enhancers, tadBoundaries);
     }
 
     @Override
     public String toString() {
         return "RouteDataGE{" +
-                "refGenes=" + refGenes +
-                ", altGenes=" + altGenes +
-                ", refEnhancers=" + refEnhancers +
-                ", altEnhancers=" + altEnhancers +
-                ", refTadBoundaries=" + refTadBoundaries +
-                ", altTadBoundaries=" + altTadBoundaries +
+                "genes=" + genes +
+                ", enhancers=" + enhancers +
+                ", tadBoundaries=" + tadBoundaries +
                 '}';
     }
 
@@ -88,82 +68,45 @@ public class RouteDataGE extends RouteData {
 
         private final Routes route;
 
-        private final Set<Gene> refGenes;
-        private final Set<Gene> altGenes;
-
-        private final Set<Enhancer> refEnhancers;
-        private final Set<Enhancer> altEnhancers;
-
-        private final List<TadBoundary> refBoundaries;
-        private final List<TadBoundary> altBoundaries;
+        private final Set<Gene> genes;
+        private final Set<Enhancer> enhancers;
+        private final List<TadBoundary> boundaries;
 
         private Builder(Routes route) {
             this.route = Objects.requireNonNull(route);
-            this.refGenes = new HashSet<>();
-            this.altGenes = new HashSet<>();
-            this.refEnhancers = new HashSet<>();
-            this.altEnhancers = new HashSet<>();
-            this.refBoundaries = new ArrayList<>();
-            this.altBoundaries = new ArrayList<>();
+            this.genes = new HashSet<>();
+            this.enhancers = new HashSet<>();
+            this.boundaries = new LinkedList<>();
+
         }
 
-        public Builder addRefGene(Gene genes) {
-            this.refGenes.add(genes);
+        public Builder addGene(Gene gene) {
+            this.genes.add(gene);
             return this;
         }
 
-        public Builder addRefGenes(Collection<Gene> genes) {
-            this.refGenes.addAll(genes);
+        public Builder addGenes(Collection<Gene> genes) {
+            this.genes.addAll(genes);
             return this;
         }
 
-        public Builder addAltGene(Gene genes) {
-            this.altGenes.add(genes);
+        public Builder addEnhancers(Collection<Enhancer> enhancers) {
+            this.enhancers.addAll(enhancers);
             return this;
         }
 
-        public Builder addAltGenes(Collection<Gene> genes) {
-            this.altGenes.addAll(genes);
+        public Builder addEnhancer(Enhancer enhancer) {
+            this.enhancers.add(enhancer);
             return this;
         }
 
-        public Builder addRefEnhancers(Collection<Enhancer> enhancers) {
-            this.refEnhancers.addAll(enhancers);
+        public Builder addTadBoundary(TadBoundary boundary) {
+            this.boundaries.add(boundary);
             return this;
         }
 
-        public Builder addRefEnhancer(Enhancer enhancers) {
-            this.refEnhancers.add(enhancers);
-            return this;
-        }
-
-        public Builder addAltEnhancers(Collection<Enhancer> enhancers) {
-            this.altEnhancers.addAll(enhancers);
-            return this;
-        }
-
-        public Builder addAltEnhancer(Enhancer enhancers) {
-            this.altEnhancers.add(enhancers);
-            return this;
-        }
-
-        public Builder addAltTadBoundaries(List<TadBoundary> boundaries) {
-            this.altBoundaries.addAll(boundaries);
-            return this;
-        }
-
-        public Builder addRefTadBoundary(TadBoundary boundary) {
-            this.refBoundaries.add(boundary);
-            return this;
-        }
-
-        public Builder addAltTadBoundary(TadBoundary boundary) {
-            this.altBoundaries.add(boundary);
-            return this;
-        }
-
-        public Builder addRefTadBoundaries(List<TadBoundary> boundaries) {
-            this.refBoundaries.addAll(boundaries);
+        public Builder addTadBoundaries(List<TadBoundary> boundaries) {
+            this.boundaries.addAll(boundaries);
             return this;
         }
 

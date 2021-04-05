@@ -1,6 +1,5 @@
 package org.jax.svanna.db.additive;
 
-import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.TadBoundary;
@@ -34,76 +33,30 @@ public class DbRouteDataServiceGE implements RouteDataService<RouteDataGE> {
     public RouteDataGE getData(Routes route) {
         RouteDataGE.Builder builder = RouteDataGE.builder(route);
 
-        GenomicRegion reference = route.reference();
-        Predicate<? super GenomicRegion> isContainedInRoute = reference::contains;
-        List<Gene> referenceGenes = geneService.overlappingGenes(reference).stream()
-                .filter(isContainedInRoute)
-                .collect(Collectors.toList());
-        builder.addRefGenes(referenceGenes);
+        for (GenomicRegion reference : route.references()) {
+            Predicate<? super GenomicRegion> isContainedInRoute = reference::contains;
+            List<Gene> genes = geneService.overlappingGenes(reference).stream()
+                    .filter(isContainedInRoute)
+                    .collect(Collectors.toList());
 
-        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(reference).stream()
-                .filter(isContainedInRoute)
-                .collect(Collectors.toList());
-        builder.addRefEnhancers(enhancers);
+            List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(reference).stream()
+                    .filter(isContainedInRoute)
+                    .collect(Collectors.toList());
 
-        List<TadBoundary> boundaries = annotationDataService.overlappingTadBoundaries(reference).stream()
-                .filter(isContainedInRoute)
-                .filter(notOverlappingWithGene(referenceGenes))
-                .collect(Collectors.toList());
-        builder.addRefTadBoundaries(boundaries);
+            List<TadBoundary> boundaries = annotationDataService.overlappingTadBoundaries(reference).stream()
+                    .filter(isContainedInRoute)
+                    .filter(notOverlappingWithGene(genes))
+                    .collect(Collectors.toList());
 
-        if (route.isIntraChromosomal()) {
-            // the ALT genes, enhancers, and TADs are the same as for the REF
-            return builder.addAltGenes(referenceGenes)
-                    .addAltEnhancers(enhancers)
-                    .addAltTadBoundaries(boundaries)
-                    .build();
-        } else {
-            List<GenomicRegion> metaSegments = route.alternate().metaSegments();
-            if (metaSegments.size() <= 1) {
-                // Interchromosomal route consists of segments on >1 contigs by definition
-                LogUtils.logWarn(LOGGER, "Interchromosomal route but only {} meta segment(s). This should not happen..", metaSegments.size());
-                if (metaSegments.size() == 1) {
-                    GenomicRegion segment = metaSegments.get(0);
-                    getDataForAltSegment(segment, builder);
-                }
-            } else {
-                GenomicRegion first = metaSegments.get(0);
-                getDataForAltSegment(first, builder);
-
-                for (int i = 1, maxIdx = metaSegments.size() - 1; i < maxIdx; i++) {
-                    GenomicRegion metaSegment = metaSegments.get(i);
-                    List<Gene> genes = geneService.overlappingGenes(metaSegment);
-                    builder.addAltGenes(genes);
-                    builder.addAltEnhancers(annotationDataService.overlappingEnhancers(metaSegment));
-                    builder.addAltTadBoundaries(annotationDataService.overlappingTadBoundaries(metaSegment).stream()
-                            .filter(notOverlappingWithGene(genes))
-                            .collect(Collectors.toList())
-                    );
-                }
-
-                GenomicRegion last = metaSegments.get(metaSegments.size() - 1);
-                getDataForAltSegment(last, builder);
-            }
-            return builder.build();
+            builder.addGenes(genes)
+                    .addEnhancers(enhancers)
+                    .addTadBoundaries(boundaries);
         }
+
+        return builder.build();
     }
 
-    private void getDataForAltSegment(GenomicRegion segment, RouteDataGE.Builder builder) {
-        List<Gene> genes = geneService.overlappingGenes(segment);
-        builder.addAltGenes(genes.stream()
-                .filter(segment::contains)
-                .collect(Collectors.toList()));
-        builder.addAltEnhancers(annotationDataService.overlappingEnhancers(segment).stream()
-                .filter(segment::contains)
-                .collect(Collectors.toList()));
-        builder.addAltTadBoundaries(annotationDataService.overlappingTadBoundaries(segment).stream()
-                .filter(segment::contains)
-                .filter(notOverlappingWithGene(genes))
-                .collect(Collectors.toList()));
-    }
-
-    private Predicate<? super TadBoundary> notOverlappingWithGene(Collection<Gene> genes) {
+    private static Predicate<? super TadBoundary> notOverlappingWithGene(Collection<Gene> genes) {
         return tad -> genes.stream().noneMatch(g -> g.overlapsWith(tad));
     }
 

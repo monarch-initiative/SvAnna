@@ -93,6 +93,9 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
+    @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
+    public int minAltReadSupport = 3;
+
     @CommandLine.Option(names = {"--mode-of-inheritance"}, description = "reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
     public boolean modeOfInheritance = false;
 
@@ -109,9 +112,6 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
 
     @CommandLine.Option(names = {"-n", "--report-top-variants"}, paramLabel = "50", description = "Report top n variants (default: ${DEFAULT-VALUE})")
     public int reportNVariants = 100;
-
-    @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
-    public int minAltReadSupport = 2;
 
     @Override
     public Integer call(){
@@ -216,14 +216,14 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
 
             // Filter
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
+            LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            LogUtils.logInfo(LOGGER, "Filtering out the variants where at least >{}% of variant's region occurs in a repetitive region", similarityThreshold);
-            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold);
+            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
             List<SvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
-            SvPrioritizerType svPrioritizerType = modeOfInheritance ? SvPrioritizerType.ADDITIVE_GRANULAR : SvPrioritizerType.ADDITIVE_SIMPLE;
+            SvPrioritizerType svPrioritizerType = SvPrioritizerType.ADDITIVE;
             SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(svPrioritizerType, patientTerms);
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");

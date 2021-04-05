@@ -40,6 +40,8 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfVariantParser.class);
 
+    private static final FilterResult FAILED_VARIANT_FILTER_RESULT = FilterResult.fail(FilterType.FAILED_VARIANT_FILTER);
+
     private final VariantCallAttributeParser attributeParser;
 
     private final VcfConverter vcfConverter;
@@ -159,7 +161,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
         // variants with low quality
         if (!vc.getFilters().isEmpty())
-            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
+            builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
 
         return Optional.of(builder.variantCallAttributes(attrs).build());
     }
@@ -227,7 +229,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
         // variants with low quality
         if (!vc.getFilters().isEmpty())
-            builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
+            builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
 
         return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
     }

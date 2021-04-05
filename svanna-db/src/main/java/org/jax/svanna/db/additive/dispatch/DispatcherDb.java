@@ -1,171 +1,231 @@
 package org.jax.svanna.db.additive.dispatch;
 
 import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.priority.additive.*;
-import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.core.reference.GeneService;
+import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.monarchinitiative.svart.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class DispatcherDb implements Dispatcher {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DispatcherDb.class);
     private static final CoordinateSystem CS = CoordinateSystem.zeroBased();
 
-    private final NeighborhoodBuilder neighborhoodBuilder;
+    private final GeneService geneService;
+    private final TadBoundaryDao tadBoundaryDao;
 
-    public DispatcherDb(NeighborhoodBuilder neighborhoodBuilder) {
-        this.neighborhoodBuilder = neighborhoodBuilder;
+    public DispatcherDb(GeneService geneService, TadBoundaryDao tadBoundaryDao) {
+        this.geneService = geneService;
+        this.tadBoundaryDao = tadBoundaryDao;
     }
 
     @Override
-    public <V extends Variant> Routes assembleRoutes(List<V> variants) throws DispatchException {
+    public Routes assembleRoutes(List<Variant> variants) throws DispatchException {
         // variants are sorted and put to the same strand - either POSITIVE or NEGATIVE
-        VariantArrangement<V> sortedVariants = RouteAssembly.assemble(variants);
+        VariantArrangement arrangement = RouteAssembly.assemble(variants);
 
-        Neighborhood neighborhood = sortedVariants.hasBreakend()
-                ? neighborhoodBuilder.interchromosomalNeighborhood(sortedVariants)
-                : neighborhoodBuilder.intrachromosomalNeighborhood(sortedVariants);
 
-        return buildRoutes(neighborhood, variants);
+        if (arrangement.hasBreakend()) {
+            if (arrangement.size() != 1)
+                throw new DispatchException("Dispatching from more than one breakend variant is not currently supported, got " + arrangement.size());
+            /*
+             Assume reciprocal translocation:
+
+             - get BreakendVariant
+             - get left breakend
+               - left TAD pair
+             - get right breakend
+               - right TAD pair
+             - define reference routes using left and right TAD pairs
+             - define alternate routes using left upstream and right downstream
+             */
+            Variant v = arrangement.variants().get(arrangement.breakendIndex());
+            BreakendVariant bv;
+            try {
+                bv = (BreakendVariant) v;
+            } catch (ClassCastException e) {
+                LogUtils.logWarn(LOGGER, "Expected to get BreakendVariant, got `{}`. {}", v.getClass().getSimpleName(), e.getMessage());
+                throw new DispatchException(e);
+            }
+            return interchromosomalArrangement(bv);
+        } else {
+            return intrachromosomalArrangement(arrangement);
+        }
     }
 
-    static <T extends Variant> Routes buildRoutes(Neighborhood neighborhood, List<T> variants) {
-        GenomicRegion reference = buildReferencePath(neighborhood.upstream(), neighborhood.downstreamRef());
-        Route alternate = buildAltRoute(neighborhood.upstream(), neighborhood.downstreamAlt(), variants);
-        return Routes.of(reference, alternate);
+    private Routes interchromosomalArrangement(BreakendVariant bv) throws DispatchException {
+        // reference regions
+        Breakend left = bv.left();
+        List<Gene> leftGenes = geneService.overlappingGenes(left);
+        Breakend right = bv.right();
+        List<Gene> rightGenes = geneService.overlappingGenes(right);
+        Pair<GenomicRegion> pair = (!leftGenes.isEmpty() || !rightGenes.isEmpty())
+                ? calculateGeneBoundsForBreakends(left, leftGenes, right, rightGenes) // dispatch for the genes only
+                : calculateBoundsBasedOnBreakendsOnly(left, right);     // dispatch using variant data only for intergenic events
+//                : calculateTadBounds(left, right);     // dispatch using TADs
+        GenomicRegion leftReference = pair.left();
+        GenomicRegion rightReference = pair.right();
+
+        // ALT segments : left
+        List<Segment> leftSegments = new LinkedList<>();
+        leftSegments.add(Segment.of(left.contig(), left.strand(), CS,
+                leftReference.startPositionWithCoordinateSystem(CS), left.startPositionWithCoordinateSystem(CS),
+                "left-upstream", Event.GAP, 1));
+        Segment leftBndSegment = Segment.of(left.contig(), left.strand(), CS,
+                left.startPositionWithCoordinateSystem(CS), left.endPositionWithCoordinateSystem(CS),
+                left.id(), Event.BREAKEND, 1);
+        leftSegments.add(leftBndSegment);
+
+        if (bv.changeLength() != 0)
+            // there is an inserted sequence within breakend
+            leftSegments.add(Segment.insertion(left.contig(), left.strand(), CS,
+                    left.endPositionWithCoordinateSystem(CS), left.endPositionWithCoordinateSystem(CS),
+                    "ins" + bv.id(), bv.changeLength()));
+
+        Segment rightBndSegment = Segment.of(right.contig(), right.strand(), CS,
+                right.startPositionWithCoordinateSystem(CS), right.endPositionWithCoordinateSystem(CS),
+                right.id(), Event.BREAKEND, 1);
+        leftSegments.add(rightBndSegment);
+        leftSegments.add(Segment.of(right.contig(), right.strand(), CS,
+                right.endPositionWithCoordinateSystem(CS), rightReference.endPositionWithCoordinateSystem(CS),
+                "right-downstream", Event.GAP, 1));
+
+        // ALT segments : right
+        List<Segment> rightSegments = new LinkedList<>();
+        rightSegments.add(Segment.of(right.contig(), right.strand(), CS,
+                rightReference.startPositionWithCoordinateSystem(CS), right.startPositionWithCoordinateSystem(CS),
+                "right-upstream", Event.GAP, 1));
+        rightSegments.add(rightBndSegment);
+        rightSegments.add(leftBndSegment);
+        rightSegments.add(Segment.of(left.contig(), left.strand(), CS, left.endPositionWithCoordinateSystem(CS), leftReference.endPositionWithCoordinateSystem(CS), "left-downstream", Event.GAP, 1));
+
+        return Routes.of(Set.of(leftReference, rightReference), Set.of(Route.of(leftSegments), Route.of(rightSegments)));
     }
 
-    private static GenomicRegion buildReferencePath(GenomicRegion upstream, GenomicRegion downstream) {
-        validateReferenceInput(upstream, downstream);
+    private Routes intrachromosomalArrangement(VariantArrangement arrangement) {
+        LinkedList<? extends Variant> variants = arrangement.variants();
+        Variant first = variants.getFirst();
 
-        return GenomicRegion.of(upstream.contig(), upstream.strand(), upstream.coordinateSystem(),
-                upstream.start(),
-                downstream.endOnStrandWithCoordinateSystem(upstream.strand(), upstream.coordinateSystem()));
-    }
+        int upstreamBound = -1, downstreamBound = -1;
+        if (variants.size() == 1) {
+            List<Gene> genes = geneService.overlappingGenes(first);
 
-    private static void validateReferenceInput(GenomicRegion upstream, GenomicRegion downstream) {
-        if (upstream == null)
-            throw new IllegalArgumentException("Upstream region cannot be null");
+            // Let's make this simple if the variant overlaps with a single gene
+            // or with a group of genes that overlap each other
+            if (allGenesOverlapThemselves(genes)) {
+                Pair<Integer> coordinates = findStartAndEnd(genes, first.strand(), CS);
+                upstreamBound = Math.min(coordinates.left(), first.startWithCoordinateSystem(CS));
+                downstreamBound = Math.max(coordinates.right(), first.endWithCoordinateSystem(CS));
+            }
+        }
+        if (upstreamBound < 0 || downstreamBound < 0) {
+            // use TADs
+            Variant last = variants.getLast();
+            if (first.strand() != last.strand())
+                throw new DispatchException("First and last variants must be on the same strand");
 
-        if (downstream == null)
-            throw new IllegalArgumentException("Downstream region cannot be null");
-
-        if (!upstream.contig().equals(downstream.contig()))
-            throw new IllegalArgumentException("Upstream and downstream segments must be on the same contig for the reference path");
-    }
-
-    private static <T extends Variant> Route buildAltRoute(GenomicRegion upstream, GenomicRegion downstream, List<T> variants) {
-        T first = variants.get(0);
-        if (!upstream.contig().equals(first.contig()))
-            throw new DispatchException("Upstream must be on the same contig as the first variant");
-        int firstStart = first.startWithCoordinateSystem(CS);
-
-        List<Segment> segments = new LinkedList<>();
-
-        int upstreamStart = Math.min(upstream.startOnStrandWithCoordinateSystem(first.strand(), CS), upstream.endOnStrandWithCoordinateSystem(first.strand(), CS));
-        Segment firstSegment = Segment.of(upstream.contig(), first.strand(), CS,
-                Position.of(upstreamStart), Position.of(firstStart),
-                "upstream", Event.GAP, 1);
-        segments.add(firstSegment);
-        segments.addAll(makeVariantSegment(first, first.strand()));
-
-
-        for (int i = 1; i < variants.size(); i++) {
-            T previous = variants.get(i - 1);
-            T current = variants.get(i);
-            if (!previous.contig().equals(current.contig()))
-                throw new DispatchException("Different contigs (" + previous.contigName() + " vs. " + current.contigName() + " )" +
-                        " in variants " + LogUtils.variantSummary(previous) + " and " + LogUtils.variantSummary(current));
-
-            int gapStart = previous.endOnStrandWithCoordinateSystem(previous.strand(), CS);
-            int gapEnd = current.startOnStrandWithCoordinateSystem(previous.strand(), CS);
-            Segment gap = Segment.of(previous.contig(), previous.strand(), CS, Position.of(gapStart), Position.of(gapEnd), "gap-" + i, Event.GAP, 1);
-            segments.add(gap);
-
-            segments.addAll(makeVariantSegment(current, previous.strand()));
+            upstreamBound = upstreamBound(first) + first.coordinateSystem().startDelta(CS);
+            downstreamBound = downstreamBound(last) + last.coordinateSystem().endDelta(CS);
         }
 
+        GenomicRegion reference = GenomicRegion.of(first.contig(), first.strand(), CS, upstreamBound, downstreamBound);
+        Route altRoute = RouteUtils.buildRoute(upstreamBound, downstreamBound, variants);
 
-        T last = variants.get(variants.size() - 1);
-        Strand lastStrand;
-        int lastEnd;
-        if (last instanceof BreakendVariant) {
-            Breakend right = ((BreakendVariant) last).right();
-            lastStrand = right.strand();
-            lastEnd = right.endWithCoordinateSystem(CS);
-        } else{
-            lastStrand = last.strand();
-            lastEnd = last.endWithCoordinateSystem(CS);
-        }
-
-        int downstreamEnd = downstream.endOnStrandWithCoordinateSystem(lastStrand, CS);
-        segments.add(Segment.of(downstream.contig(), lastStrand, CS,
-                Position.of(lastEnd), Position.of(downstreamEnd),
-                "downstream", Event.GAP, 1));
-
-
-        return Route.of(segments);
+        return Routes.of(Set.of(reference), Set.of(altRoute));
     }
 
-    private static <T extends Variant> List<Segment> makeVariantSegment(T variant, Strand previous) {
-        List<Segment> segments;
-        // variant coordinates are always on the Strand.POSITIVE, except for breakends
-        int start = variant.startOnStrandWithCoordinateSystem(previous, CS);
-        int end = variant.endOnStrandWithCoordinateSystem(previous, CS);
-        switch (variant.variantType().baseType()) {
-            case SNV:
-                segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
-                        variant.id(), Event.SNV, 1));
-                break;
-            case INV:
-                segments = List.of(Segment.of(variant.contig(), previous, CS,
-                        Position.of(start), Position.of(end),
-                        variant.id(), Event.INVERSION, 1));
-                break;
-            case DEL:
-                segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
-                        variant.id(), Event.DELETION, 0));
-                break;
-            case DUP:
-                segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
-                        variant.id(), Event.DUPLICATION, 2));
-                break;
-            case INS:
-                segments = List.of(Segment.insertion(variant.contig(), previous, CS, Position.of(start), Position.of(end),
-                        variant.id(), variant.changeLength()));
-                break;
-            case BND:
-                try {
-                    BreakendVariant bnd = (BreakendVariant) variant;
-                    Breakend left = bnd.left();
-                    Breakend right = bnd.right();
-                    segments = List.of(
-                            Segment.of(left.contig(), left.strand(), CS,
-                                    left.startPositionWithCoordinateSystem(CS), left.endPositionWithCoordinateSystem(CS),
-                                    left.id(), Event.BREAKEND, 1),
-                            Segment.of(right.contig(), right.strand(), CS,
-                                    right.startPositionWithCoordinateSystem(CS), right.endPositionWithCoordinateSystem(CS),
-                                    right.id(), Event.BREAKEND, 1));
-                    break;
-                } catch (ClassCastException e) {
-                    throw new DispatchException("Should have been breakend but was " + variant.getClass().getSimpleName());
-                }
-            case CNV:
-                if (variant instanceof SvannaVariant) {
-                    SvannaVariant sv = (SvannaVariant) variant;
-                    int copyNumber = sv.copyNumber();
-                    if (copyNumber < 1 || copyNumber == 2)
-                        throw new DispatchException("Copy number was `" + copyNumber + "`");
-
-                    segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
-                            variant.id(), Event.DELETION, copyNumber - 1));
-                    break;
-                }
-            default:
-                throw new DispatchException("Unsupported variant type " + variant.variantType());
+    private static Pair<GenomicRegion> calculateGeneBoundsForBreakends(Breakend left, List<Gene> leftGenes, Breakend right, List<Gene> rightGenes) {
+        GenomicRegion leftRegion;
+        if (leftGenes.isEmpty())
+            leftRegion = left;
+        else {
+            Pair<Integer> pair = findStartAndEnd(leftGenes, left.strand(), CS);
+            leftRegion = GenomicRegion.of(left.contig(), left.strand(), CS, pair.left(), pair.right());
         }
-        return segments;
+        GenomicRegion rightRegion;
+        if (rightGenes.isEmpty())
+            rightRegion = right;
+        else {
+            Pair<Integer> pair = findStartAndEnd(rightGenes, right.strand(), CS);
+            rightRegion = GenomicRegion.of(right.contig(), right.strand(), CS, pair.left(), pair.right());
+        }
+
+        return Pair.of(leftRegion, rightRegion);
     }
 
+    private Pair<GenomicRegion> calculateTadBounds(Breakend left, Breakend right) {
+        int leftUpstream = upstreamBound(left);
+        int leftDownstream = downstreamBound(left);
+        GenomicRegion leftReference = GenomicRegion.of(left.contig(), left.strand(), CS, leftUpstream, leftDownstream);
+
+        int rightUpstream = upstreamBound(right);
+        int rightDownstream = downstreamBound(right);
+        GenomicRegion rightReference = GenomicRegion.of(right.contig(), right.strand(), CS, rightUpstream, rightDownstream);
+
+        return Pair.of(leftReference, rightReference);
+    }
+
+    private static Pair<GenomicRegion> calculateBoundsBasedOnBreakendsOnly(Breakend left, Breakend right) {
+        return Pair.of(left, right);
+    }
+
+    private int upstreamBound(GenomicRegion query) {
+        Optional<TadBoundary> upstreamTad = tadBoundaryDao.upstreamOf(query);
+        if (upstreamTad.isPresent()) {
+            TadBoundary tadBoundary = upstreamTad.get();
+            return tadBoundary.asPosition().pos() + tadBoundary.coordinateSystem().startDelta(query.coordinateSystem());
+        } else
+            // empty position of the contig start in query's coordinate system
+            return CoordinateSystem.zeroBased().startDelta(query.coordinateSystem());
+    }
+
+    private int downstreamBound(GenomicRegion query) {
+        Optional<TadBoundary> downstreamTad = tadBoundaryDao.downstreamOf(query);
+        if (downstreamTad.isPresent()) {
+            TadBoundary tadBoundary = downstreamTad.get();
+            return tadBoundary.asPosition().pos() + tadBoundary.coordinateSystem().endDelta(query.coordinateSystem());
+        } else
+            // empty coordinate of the contig end in query's coordinate system
+            return query.contig().length() + CoordinateSystem.zeroBased().endDelta(query.coordinateSystem());
+    }
+
+
+    private static boolean allGenesOverlapThemselves(List<Gene> genes) {
+        if (genes.isEmpty())
+            return false;
+
+        for (int i = 0, nGenes = genes.size(); i < nGenes; i++) {
+            Gene current = genes.get(i);
+            List<Gene> remaining = genes.subList(i + 1, nGenes);
+            for (Gene other : remaining) {
+                if (!current.overlapsWith(other))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    private static Pair<Integer> findStartAndEnd(Collection<? extends GenomicRegion> regions, Strand strand, CoordinateSystem coordinateSystem) {
+        int startPos = -1, endPos = -1;
+        for (GenomicRegion region : regions) {
+            int geneStart = region.startOnStrandWithCoordinateSystem(strand, coordinateSystem);
+            if (startPos == -1)
+                startPos = geneStart;
+            else
+                startPos = Math.min(startPos, geneStart);
+
+            int geneEnd = region.endOnStrandWithCoordinateSystem(strand, coordinateSystem);
+            if (endPos == -1)
+                endPos = geneEnd;
+            else
+                endPos = Math.max(endPos, geneEnd);
+        }
+        return Pair.of(startPos, endPos);
+    }
 }

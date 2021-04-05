@@ -174,10 +174,12 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
         }
 
         public Builder addFilterResult(FilterResult filterResult) {
-            if (filterResult.passed())
-                passedFilterTypes.add(filterResult.getFilterType());
-            else
-                failedFilterTypes.add(filterResult.getFilterType());
+            if (filterResult.wasRun()) {
+                if (filterResult.passed())
+                    passedFilterTypes.add(filterResult.getFilterType());
+                else
+                    failedFilterTypes.add(filterResult.getFilterType());
+            }
 
             return self();
         }

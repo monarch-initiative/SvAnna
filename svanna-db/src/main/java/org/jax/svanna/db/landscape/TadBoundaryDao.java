@@ -102,6 +102,10 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         return template.query(sql, paramsSource, processResults());
     }
 
+    /**
+     * Get the closest upstream TAD boundary or empty optional if no such TAD boundary exists. The returned TAD boundary
+     * is adjusted to <code>region</code>'s strand.
+     */
     public Optional<TadBoundary> upstreamOf(GenomicRegion region) {
         SqlParameterSource paramSource = new MapSqlParameterSource()
                 .addValue("contig", region.contigId())
@@ -120,6 +124,10 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         return template.query(sql, paramSource, mapToTadBoundary(region.strand()));
     }
 
+    /**
+     * Get the closest downstream TAD boundary or empty optional if no such TAD boundary exists. The returned TAD boundary
+     * is adjusted to <code>region</code>'s strand.
+     */
     public Optional<TadBoundary> downstreamOf(GenomicRegion region) {
         SqlParameterSource paramSource = new MapSqlParameterSource()
                 .addValue("contig", region.contigId())

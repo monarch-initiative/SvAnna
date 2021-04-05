@@ -17,6 +17,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
@@ -35,7 +36,7 @@ public class RouteDataEvaluatorGETest {
 
     @BeforeEach
     public void setUp() {
-        evaluator = new RouteDataEvaluatorGE(geneImpact, geneWeightCalculator, enhancerImpact, enhancerGeneRelevanceCalculator);
+        evaluator = new GranularRouteDataEvaluatorGE(geneImpact, geneWeightCalculator, enhancerImpact, enhancerGeneRelevanceCalculator);
     }
 
     @ParameterizedTest
@@ -54,14 +55,10 @@ public class RouteDataEvaluatorGETest {
                 positiveDeletion(ctg1, delStart, delEnd),
                 positiveGap(ctg1, delEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addRefEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addAltEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addRefEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addAltEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
+                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
+                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -85,16 +82,11 @@ public class RouteDataEvaluatorGETest {
                 positiveDeletion(ctg1, delStart, delEnd),
                 positiveGap(ctg1, delEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addRefEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addAltEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addRefTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addAltTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addRefEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addAltEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
+                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
+                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
+                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -121,16 +113,11 @@ public class RouteDataEvaluatorGETest {
                 positiveDuplication(ctg1, dupStart, dupEnd),
                 positiveGap(ctg1, dupEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addRefEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addAltEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addRefTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addAltTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addRefEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addAltEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
+                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
+                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
+                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -159,16 +146,11 @@ public class RouteDataEvaluatorGETest {
                 positiveInversion(ctg1, invStart, invEnd),
                 positiveGap(ctg1, invEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addRefEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addAltEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addRefTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addAltTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addRefEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addAltEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addRefGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
+                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
+                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
+                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -194,13 +176,13 @@ public class RouteDataEvaluatorGETest {
         );
         // TODO - fix the route setup
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addAltEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addAltTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addAltEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
-                .addAltEnhancer(TestEnhancer.of("c", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 105, 110))
-                .addAltGene(TestGene.of(TermId.of("NCBIGene:C"), "C", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 120, 140))
+                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
+                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
+                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
+                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of("c", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 105, 110))
+                .addGene(TestGene.of(TermId.of("NCBIGene:C"), "C", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 120, 140))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -208,7 +190,7 @@ public class RouteDataEvaluatorGETest {
     }
 
     private static Routes makeRoutes(GenomicRegion reference, Segment... segments) {
-        return Routes.of(reference, Route.of(List.of(segments)));
+        return Routes.of(Set.of(reference), Set.of(Route.of(List.of(segments))));
     }
 
     private static Segment positiveDeletion(Contig contig, int start, int end) {

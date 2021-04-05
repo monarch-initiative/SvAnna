@@ -11,7 +11,6 @@ import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.priority.additive.ge.GranularRouteDataEvaluatorGE;
-import org.jax.svanna.core.priority.additive.ge.RouteDataEvaluatorGE;
 import org.jax.svanna.core.priority.additive.ge.RouteDataGE;
 import org.jax.svanna.core.priority.additive.impact.EnhancerSequenceImpactCalculator;
 import org.jax.svanna.core.priority.additive.impact.GeneSequenceImpactCalculator;
@@ -20,8 +19,6 @@ import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.db.additive.DbRouteDataServiceGE;
 import org.jax.svanna.db.additive.dispatch.DispatcherDb;
-import org.jax.svanna.db.additive.dispatch.GeneAwareNeighborhoodBuilder;
-import org.jax.svanna.db.additive.dispatch.NeighborhoodBuilder;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -67,7 +64,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
         Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
         Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(phenotypeTerms, topLevelEnhancerTerms);
 
-        switch (type.baseType()) {
+        switch (type) {
             case PROTOTYPE:
                 LogUtils.logWarn(LOGGER, "PROTOTYPE SvPrioritizer is not currently supported");
 
@@ -84,8 +81,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
             case ADDITIVE:
                 TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
-                NeighborhoodBuilder neighborhoodBuilder = new GeneAwareNeighborhoodBuilder(tadBoundaryDao, geneService);
-                Dispatcher dispatcher = new DispatcherDb(neighborhoodBuilder);
+                Dispatcher dispatcher = new DispatcherDb(geneService, tadBoundaryDao);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
 
                 SvannaProperties.PrioritizationParameters prioritizationParameters = svannaProperties.prioritizationParameters();
@@ -95,28 +91,14 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
                 SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationParameters.enhancerFactor());
                 EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = PhenotypeEnhancerGeneRelevanceCalculator.of(enhancerRelevantAncestors);
 
+                LogUtils.logDebug(LOGGER, "Preparing ADDITIVE SV prioritizer");
+                RouteDataEvaluator<RouteDataGE, GranularRouteResult> granularEvaluator = new GranularRouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
+                return AdditiveGranularSvPrioritizer.builder()
+                        .dispatcher(dispatcher)
+                        .routeDataService(dbRouteDataService)
+                        .routeDataEvaluator(granularEvaluator)
+                        .build();
 
-                switch (type) {
-                    case ADDITIVE:
-                    case ADDITIVE_SIMPLE:
-                        LogUtils.logDebug(LOGGER, "Preparing ADDITIVE_SIMPLE SV prioritizer");
-                        RouteDataEvaluator<RouteDataGE, RouteResult> simpleEvaluator = new RouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
-                        return AdditiveSimpleSvPrioritizer.<RouteDataGE>builder()
-                                .dispatcher(dispatcher)
-                                .routeDataService(dbRouteDataService)
-                                .routeDataEvaluator(simpleEvaluator)
-                                .build();
-                    case ADDITIVE_GRANULAR:
-                        LogUtils.logDebug(LOGGER, "Preparing ADDITIVE_GRANULAR SV prioritizer");
-                        RouteDataEvaluator<RouteDataGE, GranularRouteResult> granularEvaluator = new GranularRouteDataEvaluatorGE(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);
-                        return AdditiveGranularSvPrioritizer.<RouteDataGE>builder()
-                                .dispatcher(dispatcher)
-                                .routeDataService(dbRouteDataService)
-                                .routeDataEvaluator(granularEvaluator)
-                                .build();
-                    default:
-                        throw new IllegalArgumentException("Unsupported additive SvPrioritizerType `" + type + '`');
-                }
             default:
                 throw new IllegalArgumentException("Unknown SvPrioritizerType " + type);
         }

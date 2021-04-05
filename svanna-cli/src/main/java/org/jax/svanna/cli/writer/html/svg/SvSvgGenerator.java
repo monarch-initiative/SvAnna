@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  */
 public abstract class SvSvgGenerator {
 
+    protected static final NumberFormat NF = NumberFormat.getInstance();
 
     /** Canvas height of the SVG.*/
     protected int SVG_HEIGHT;

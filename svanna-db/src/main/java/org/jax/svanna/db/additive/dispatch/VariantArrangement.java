@@ -10,19 +10,18 @@ import java.util.Objects;
  * A list of variants arranged in an order that allows creating the annotation route. The variant list contains max 1
  * breakend variant, location of the breakend variant is indicated by the {@link #breakendIndex}.
  *
- * @param <T>
  */
-class VariantArrangement<T extends Variant> {
+class VariantArrangement {
 
-    private final LinkedList<T> variants;
+    private final LinkedList<Variant> variants;
     private final int breakendIndex;
 
-    private VariantArrangement(List<T> variants, int breakendIndex) {
+    private VariantArrangement(List<Variant> variants, int breakendIndex) {
         this.variants = new LinkedList<>(variants);
         this.breakendIndex = breakendIndex;
     }
 
-    public LinkedList<T> variants() {
+    public LinkedList<Variant> variants() {
         return variants;
     }
 
@@ -42,7 +41,7 @@ class VariantArrangement<T extends Variant> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VariantArrangement<?> that = (VariantArrangement<?>) o;
+        VariantArrangement that = (VariantArrangement) o;
         return breakendIndex == that.breakendIndex && Objects.equals(variants, that.variants);
     }
 
@@ -51,11 +50,11 @@ class VariantArrangement<T extends Variant> {
         return Objects.hash(variants, breakendIndex);
     }
 
-    static <T extends Variant> VariantArrangement<T> intrachromosomal(List<T> variants) {
-        return new VariantArrangement<>(variants, -1);
+    static VariantArrangement intrachromosomal(List<Variant> variants) {
+        return new VariantArrangement(variants, -1);
     }
 
-    static <T extends Variant> VariantArrangement<T> interchromosomal(List<T> variants, int breakendIdx) {
-        return new VariantArrangement<>(variants, breakendIdx);
+    static VariantArrangement interchromosomal(List<Variant> variants, int breakendIdx) {
+        return new VariantArrangement(variants, breakendIdx);
     }
 }

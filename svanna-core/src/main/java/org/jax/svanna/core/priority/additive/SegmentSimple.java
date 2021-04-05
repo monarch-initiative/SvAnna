@@ -2,9 +2,12 @@ package org.jax.svanna.core.priority.additive;
 
 import org.monarchinitiative.svart.*;
 
+import java.text.NumberFormat;
 import java.util.Objects;
 
 class SegmentSimple extends BaseGenomicRegion<SegmentSimple> implements Segment {
+
+    private static final NumberFormat NF = NumberFormat.getInstance();
 
     protected final String id;
     protected final Event event;
@@ -58,7 +61,7 @@ class SegmentSimple extends BaseGenomicRegion<SegmentSimple> implements Segment 
     @Override
     public String toString() {
         return "SegmentSimple{" +
-                contigId() + ':' + start() + '-' + end() + '(' + strand() + ')' +
+                contigId() + ':' + NF.format(start()) + '-' + NF.format(end()) + '(' + strand() + ')' +
                 "id='" + id + '\'' +
                 ", copies=" + copies +
                 '}';

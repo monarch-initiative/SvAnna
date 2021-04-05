@@ -4,7 +4,6 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
@@ -101,7 +100,7 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
         GenomicRegion query = GenomicRegion.of(variant.contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), minPos, maxPos);
         LogUtils.logTrace(LOGGER, "Filtering variants on contig `{}-{}-{}`", query.contigId(), query.start(), query.end());
         List<PopulationVariant> populationVariants = annotationDataService.overlappingPopulationVariants(query, PopulationVariantOrigin.benign());
-        List<RepetitiveRegion> repetitiveRegions = annotationDataService.overlappingRepetitiveRegions(query);
+//        List<RepetitiveRegion> repetitiveRegions = annotationDataService.overlappingRepetitiveRegions(query);
         for (T item : sublist) {
             FilterResult freqFilterResult = runFrequencyFilter(populationVariants, item);
             item.addFilterResult(freqFilterResult);

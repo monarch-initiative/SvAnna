@@ -3,10 +3,7 @@ package org.jax.svanna.cli.cmd.benchmark;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.reference.DefaultSvannaVariant;
-import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.VariantCallAttributes;
-import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.core.reference.*;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.util.VariantTrimmer;
@@ -133,33 +130,27 @@ class CaseReportImporter {
                             .collect(Collectors.toMap(f -> f[0], f -> f.length == 2 ? f[1] : ""));
                 }
 
-                VariantCallAttributes.Builder attrBuilder = VariantCallAttributes.builder();
-                String zygosityId = v.getZygosity().getId();
-                if (zygosityId.equals("GENO:0000135")) {
-                    attrBuilder.zygosity(Zygosity.HETEROZYGOUS)
-                            .dp(20)
-                            .refReads(10)
-                            .altReads(10);
-                } else if (zygosityId.equals("GENO:0000136")) {
-                    attrBuilder.zygosity(Zygosity.HOMOZYGOUS)
-                            .dp(20)
-                            .refReads(0)
-                            .altReads(20);
-                } else if (zygosityId.equals("GENO:0000134")) {
-                    attrBuilder.zygosity(Zygosity.HEMIZYGOUS)
-                            .dp(10)
-                            .refReads(0)
-                            .altReads(10);
-                } else {
-                    LogUtils.logWarn(LOGGER, "Unknown zygosity id={} label={}", zygosityId, v.getZygosity().getLabel());
-                    attrBuilder.zygosity(Zygosity.UNKNOWN);
-                }
+                VariantCallAttributes.Builder attrBuilder = parseVariantCallAttributes(v);
 
                 if (infoFields.containsKey("SVTYPE")) {
+                    String[] cipos = infoFields.getOrDefault("CIPOS", "0,0").split(",");
+                    ConfidenceInterval ciPos = ConfidenceInterval.of(Integer.parseInt(cipos[0]), Integer.parseInt(cipos[1]));
+                    Position start = Position.of(vcfAllele.getPos(), ciPos);
+
+                    String[] ciends = infoFields.getOrDefault("CIEND", "0,0").split(",");
+                    ConfidenceInterval ciEnd = ConfidenceInterval.of(Integer.parseInt(ciends[0]), Integer.parseInt(ciends[1]));
+
                     String svtype = infoFields.get("SVTYPE");
                     if (svtype.equalsIgnoreCase("BND")) {
-                        // TODO - figure out how to parse breakends
-                        LogUtils.logWarn(LOGGER, "Skipping breakend variant in `{}`", caseName);
+                        // BREAKEND
+                        String mateId = infoFields.getOrDefault("MATEID", "");
+                        String eventId = infoFields.getOrDefault("EVENTID", "");
+                        BreakendedSvannaVariant.Builder builder = VCF_CONVERTER.convertBreakend(BreakendedSvannaVariant.builder(),
+                                contig, variantId, start,
+                                vcfAllele.getRef(), vcfAllele.getAlt(),
+                                ciEnd, mateId, eventId);
+                        builder.variantCallAttributes(attrBuilder.build());
+                        variants.add(builder.build());
                         continue;
                     }
                     if (!infoFields.containsKey("END")) {
@@ -167,12 +158,6 @@ class CaseReportImporter {
                         continue;
                     }
 
-                    String[] cipos = infoFields.getOrDefault("CIPOS", "0,0").split(",");
-                    ConfidenceInterval ciPos = ConfidenceInterval.of(Integer.parseInt(cipos[0]), Integer.parseInt(cipos[1]));
-                    Position start = Position.of(vcfAllele.getPos(), ciPos);
-
-                    String[] ciends = infoFields.getOrDefault("CIEND", "0,0").split(",");
-                    ConfidenceInterval ciEnd = ConfidenceInterval.of(Integer.parseInt(ciends[0]), Integer.parseInt(ciends[1]));
                     Position end = Position.of(Integer.parseInt(infoFields.get("END")), ciEnd);
 
                     int changeLength = end.pos() - start.pos() + 1;
@@ -187,7 +172,9 @@ class CaseReportImporter {
 
                     try {
                         // SYMBOLIC
-                        DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convertSymbolic(DefaultSvannaVariant.builder(), contig, variantId, start, end, vcfAllele.getRef(), '<' + vcfAllele.getAlt() + '>', changeLength);
+                        DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convertSymbolic(DefaultSvannaVariant.builder(),
+                                contig, variantId, start, end,
+                                vcfAllele.getRef(), '<' + vcfAllele.getAlt() + '>', changeLength);
                         builder.variantCallAttributes(attrBuilder.build());
                         variants.add(builder.build());
                     } catch (Exception e) {
@@ -197,7 +184,8 @@ class CaseReportImporter {
                 } else {
                     // SEQUENCE
                     DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convert(DefaultSvannaVariant.builder(),
-                            contig, variantId, vcfAllele.getPos(), vcfAllele.getRef(), vcfAllele.getAlt());
+                            contig, variantId, vcfAllele.getPos(),
+                            vcfAllele.getRef(), vcfAllele.getAlt());
                     builder.variantCallAttributes(attrBuilder.build());
                     variants.add(builder.build());
                 }
@@ -207,6 +195,36 @@ class CaseReportImporter {
         }
 
         return Optional.of(new CaseReport(caseName, terms, variants));
+    }
+
+    private static VariantCallAttributes.Builder parseVariantCallAttributes(org.phenopackets.schema.v1.core.Variant v) {
+        VariantCallAttributes.Builder attrBuilder = VariantCallAttributes.builder();
+        String zygosityId = v.getZygosity().getId();
+        switch (zygosityId) {
+            case "GENO:0000135":
+                attrBuilder.zygosity(Zygosity.HETEROZYGOUS)
+                        .dp(20)
+                        .refReads(10)
+                        .altReads(10);
+                break;
+            case "GENO:0000136":
+                attrBuilder.zygosity(Zygosity.HOMOZYGOUS)
+                        .dp(20)
+                        .refReads(0)
+                        .altReads(20);
+                break;
+            case "GENO:0000134":
+                attrBuilder.zygosity(Zygosity.HEMIZYGOUS)
+                        .dp(10)
+                        .refReads(0)
+                        .altReads(10);
+                break;
+            default:
+                LogUtils.logWarn(LOGGER, "Unknown zygosity id={} label={}", zygosityId, v.getZygosity().getLabel());
+                attrBuilder.zygosity(Zygosity.UNKNOWN);
+                break;
+        }
+        return attrBuilder;
     }
 
 }

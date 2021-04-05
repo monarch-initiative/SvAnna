@@ -98,6 +98,8 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
 
     @Override
     public synchronized boolean addFilterResult(FilterResult filterResult) {
+        if (!filterResult.wasRun())
+            return true;
         return filterResult.passed()
                 ? passedFilterTypes.add(filterResult.getFilterType())
                 : failedFilterTypes.add(filterResult.getFilterType());

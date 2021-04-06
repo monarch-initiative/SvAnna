@@ -39,8 +39,8 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @CommandLine.Command(name = "annotate-additive",
         aliases = {"AAV"},
@@ -82,7 +82,7 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
      * ------------ ANALYSIS OPTIONS ------------
      */
     @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
-    public int nThreads = 2;
+    public int parallelism = 2;
 
     /*
      * ------------ FILTERING OPTIONS ------------
@@ -165,13 +165,13 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
             return 1;
         }
 
-        if (nThreads < 1) {
-            LogUtils.logError(LOGGER, "Thread number must be positive: {}", nThreads);
+        if (parallelism < 1) {
+            LogUtils.logError(LOGGER, "Thread number must be positive: {}", parallelism);
             return 1;
         }
         int processorsAvailable = Runtime.getRuntime().availableProcessors();
-        if (nThreads > processorsAvailable) {
-            LogUtils.logWarn(LOGGER, "You asked for more threads ({}) than processors ({}) available on the system", nThreads, processorsAvailable);
+        if (parallelism > processorsAvailable) {
+            LogUtils.logWarn(LOGGER, "You asked for more threads ({}) than processors ({}) available on the system", parallelism, processorsAvailable);
         }
 
         if (outputFormats.isEmpty()) {
@@ -228,17 +228,14 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");
             ProgressReporter priorityProgress = new ProgressReporter(5_000);
-            List<SvannaVariant> filteredPrioritizedVariants;
-            try (Stream<SvannaVariant> variantStream = filteredVariants.parallelStream()
-                    .peek(priorityProgress::logItem)
-                    .onClose(priorityProgress.summarize())) {
-                Stream<SvannaVariant> prioritized = variantStream.peek(v -> {
-                    SvPriority priority = prioritizer.prioritize(v);
-                    v.setSvPriority(priority);
-                });
+            Function<SvannaVariant, SvannaVariant> prioritizationFunction = v -> {
+                priorityProgress.logItem(v);
+                SvPriority priority = prioritizer.prioritize(v);
+                v.setSvPriority(priority);
+                return v;
+            };
 
-                filteredPrioritizedVariants = TaskUtils.executeBlocking(() -> prioritized.collect(Collectors.toList()), nThreads);
-            }
+            List<SvannaVariant> filteredPrioritizedVariants = TaskUtils.executeBlocking(filteredVariants, prioritizationFunction, parallelism);
 
             if (modeOfInheritance)
                 performModeOfInheritanceReassignment(filteredPrioritizedVariants, phenotypeDataService);

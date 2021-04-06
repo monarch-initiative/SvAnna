@@ -64,8 +64,8 @@ public class HtmlResultWriter implements ResultWriter {
                 .filter(s -> s.variant().numberOfAltReads() >= analysisParameters.minAltReadSupport()
                         && s.variant().passedFilters()
                         && !Double.isNaN(s.variant().svPriority().getPriority()))
-                .limit(analysisParameters.topNVariantsReported())
                 .sorted(prioritizedVariantComparator())
+                .limit(analysisParameters.topNVariantsReported())
                 .map(visualizableGenerator::makeVisualizable)
                 .map(visualizer::getHtml)
                 .collect(Collectors.toList());

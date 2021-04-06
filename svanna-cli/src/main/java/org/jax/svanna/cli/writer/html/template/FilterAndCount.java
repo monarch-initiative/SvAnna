@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.template;
 
 
-import org.jax.svanna.cli.writer.html.Visualizable;
+import org.jax.svanna.cli.writer.html.VariantLandscape;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
@@ -31,7 +31,7 @@ public class FilterAndCount {
     private final int unableToBePrioritized;
 
 
-    public FilterAndCount(List<Visualizable> visualizables, int minAltAllele) {
+    public FilterAndCount(List<VariantLandscape> variantLandscapes, int minAltAllele) {
         this.categoryToByVariantTypeCountMap = new HashMap<>();
         for (var cat : ImpactFilterCategory.values()) {
             this.categoryToByVariantTypeCountMap.put(cat, new HashMap<>());
@@ -44,8 +44,8 @@ public class FilterAndCount {
         int unknown = 0;
 
         // iterate through priorities and rearrangements
-        for (Visualizable visualizable : visualizables) {
-            SvannaVariant variant = visualizable.variant();
+        for (VariantLandscape variantLandscape : variantLandscapes) {
+            SvannaVariant variant = variantLandscape.variant();
             if (variant.numberOfAltReads() < minAltAllele) {
                 this.categoryToByVariantTypeCountMap.get(ALT_ALLELE_COUNT).merge(variant.variantType(), 1, Integer::sum);
             } else if (!variant.passedFilters()) {
@@ -56,11 +56,11 @@ public class FilterAndCount {
                 if (Double.isNaN(priority))
                     unknown++;
             }
-            Set<String> symbols = visualizable.genes().stream()
+            Set<String> symbols = variantLandscape.genes().stream()
                     .map(Gene::geneSymbol)
                     .collect(Collectors.toSet());
             affectedGenes.addAll(symbols);
-            affectedEnhancers.addAll(visualizable.enhancers());
+            affectedEnhancers.addAll(variantLandscape.enhancers());
         }
         unableToBePrioritized = unknown;
         nAffectedGenes = affectedGenes.size();

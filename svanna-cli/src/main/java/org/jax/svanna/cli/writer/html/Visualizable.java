@@ -1,31 +1,33 @@
 package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.reference.Gene;
-import org.jax.svanna.core.reference.SvannaVariant;
 
 import java.util.List;
 import java.util.Set;
 
-public interface Visualizable {
-
-    String getType();
-
-    SvannaVariant variant();
+/**
+ * Information related to a single variant that is required to generate an entry within the analysis report.
+ */
+public interface Visualizable extends VariantLandscape {
 
     List<HtmlLocation> locations();
 
     Set<HpoDiseaseSummary> diseaseSummaries();
 
-    List<GeneOverlap> overlaps();
+    List<RepetitiveRegion> repetitiveRegions();
 
-    List<Gene> genes();
-
-    /** @return the total number of genes affected by this structural variant. */
-    int getGeneCount();
-
-    List<Enhancer> enhancers();
+    /**
+     * @return the total number of genes affected by this structural variant.
+     */
+    default int getGeneCount() {
+        return (int) overlaps().stream()
+                .map(GeneOverlap::gene)
+                .map(Gene::geneSymbol)
+                .distinct()
+                .count();
+    }
 
 }

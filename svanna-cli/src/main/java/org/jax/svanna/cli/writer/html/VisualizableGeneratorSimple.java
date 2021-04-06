@@ -5,9 +5,9 @@ import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
 
 import java.util.Collection;
@@ -38,20 +38,24 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
     }
 
     @Override
-    public Visualizable makeVisualizable(SvannaVariant variant) {
+    public VariantLandscape prepareLandscape(SvannaVariant variant) {
         List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
-        List<String> geneSymbols = overlaps.stream()
-                .map(GeneOverlap::gene)
-                .map(Gene::geneSymbol)
-                .collect(Collectors.toList());
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
+        return SimpleVariantLandscape.of(variant, overlaps, enhancers);
+    }
 
-        Set<HpoDiseaseSummary> diseaseSummaries = geneSymbols.stream()
+    @Override
+    public Visualizable makeVisualizable(VariantLandscape variantLandscape) {
+        List<RepetitiveRegion> repetitiveRegions = annotationDataService.overlappingRepetitiveRegions(variantLandscape.variant());
+
+        Set<HpoDiseaseSummary> diseaseSummaries = variantLandscape.overlaps().stream()
+                .map(geneOverlap -> geneOverlap.gene().geneSymbol())
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
                 .map(id -> phenotypeDataService.getDiseasesForGene(id.getGeneId()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
-        return SomeVisualizable.of(variant, diseaseSummaries, overlaps, enhancers);
+
+        return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions);
     }
 }

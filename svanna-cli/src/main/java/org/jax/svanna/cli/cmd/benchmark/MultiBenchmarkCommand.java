@@ -25,6 +25,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -58,7 +59,10 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
 
         List<CaseReport> cases = CaseReportImporter.readCasesProvidedAsPositionalArguments(caseReports);
 
-        try (ConfigurableApplicationContext context = getContext()) {
+        Path outputPath = Path.of(outPrefix + ".csv.gz");
+        LogUtils.logInfo(LOGGER, "Writing out the results to `{}`", outputPath.toAbsolutePath());
+        try (ConfigurableApplicationContext context = getContext();
+             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(outputPath.toFile()))))) {
             GenomicAssembly genomicAssembly = context.getBean(GenomicAssembly.class);
             VariantParser<SvannaVariant> parser = new VcfVariantParser(genomicAssembly, false);
 
@@ -72,7 +76,9 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
 
-            Map<String, Map<String, List<VariantPriority>>> results = new HashMap<>();
+            CSVPrinter printer = CSVFormat.DEFAULT
+                    .withHeader("BACKGROUND_VCF", "CASE_NAME", "VARIANT_ID", "VTYPE", "IS_CAUSAL", "PRIORITY")
+                    .print(writer);
             Map<String, Set<String>> causalVariantIds = prepareCausalVariantIds(cases);
             int vcfsProcessed = 1;
             for (Path vcfPath : vcfPaths) {
@@ -119,21 +125,42 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
                     casesProcessed++;
                 }
 
-                results.put(vcfPath.toFile().getName(), vcfResults);
+                String backgroundVcfName = vcfPath.toFile().getName();
+                LogUtils.logTrace(LOGGER, "Writing the results for `{}`", backgroundVcfName);
+
+                for (Map.Entry<String, List<VariantPriority>> caseResults : vcfResults.entrySet()) {
+                    String caseName = caseResults.getKey();
+                    Set<String> variantIds = causalVariantIds.get(caseName);
+
+                    for (VariantPriority variantPriority : caseResults.getValue()) {
+                        Variant variant = variantPriority.variant();
+
+                        printer.print(backgroundVcfName); // BACKGROUND_VCF
+                        printer.print(caseName); // CASE_NAME
+                        printer.print(variant.id()); // VARIANT_ID
+                        printer.print(variant.variantType()); // VTYPE
+                        printer.print(variantIds.contains(variant.id())); // IS_CAUSAL
+                        printer.print(variantPriority.priority().getPriority()); // PRIORITY
+
+                        printer.println();
+                    }
+                }
+
                 vcfsProcessed++;
             }
 
-            try {
-                writeOutTheResults(results, causalVariantIds);
-            } catch (IOException e) {
-                LogUtils.logError(LOGGER, "Error: {}", e);
-                return 1;
-            }
-
+            LogUtils.logInfo(LOGGER, "Analysis completed successfully. Bye!");
             return 0;
 
         } catch (Exception e) {
             LogUtils.logError(LOGGER, "Error occurred: {}", e.getMessage());
+            LogUtils.logError(LOGGER, "Attempting to remove an incomplete result file at {}", outputPath.toAbsolutePath());
+            try {
+                Files.deleteIfExists(outputPath);
+            } catch (IOException ioException) {
+                LogUtils.logError(LOGGER, "Unable to remove the result file: {}", ioException.getMessage());
+            }
+            LogUtils.logError(LOGGER, "Removed the result file");
             return 1;
         }
 
@@ -152,36 +179,4 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
     }
 
 
-    private void writeOutTheResults(Map<String, Map<String, List<VariantPriority>>> results, Map<String, Set<String>> causalVariantIds) throws IOException {
-        Path outputPath = Path.of(outPrefix + ".csv.gz");
-        LogUtils.logInfo(LOGGER, "Writing out the results to `{}`", outputPath.toAbsolutePath());
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(outputPath.toFile()))))) {
-            CSVPrinter printer = CSVFormat.DEFAULT
-                    .withHeader("BACKGROUND_VCF", "CASE_NAME", "VARIANT_ID", "VTYPE", "IS_CAUSAL", "PRIORITY")
-                    .print(writer);
-
-            for (Map.Entry<String, Map<String , List<VariantPriority>>> vcfResults : results.entrySet()) {
-                String backgroundVcfName = vcfResults.getKey();
-                LogUtils.logTrace(LOGGER, "Writing the results for `{}`", backgroundVcfName);
-
-                for (Map.Entry<String, List<VariantPriority>> caseResults : vcfResults.getValue().entrySet()) {
-                    String caseName = caseResults.getKey();
-                    Set<String> variantIds = causalVariantIds.get(caseName);
-
-                    for (VariantPriority variantPriority : caseResults.getValue()) {
-                        Variant variant = variantPriority.variant();
-
-                        printer.print(backgroundVcfName); // BACKGROUND_VCF
-                        printer.print(caseName); // CASE_NAME
-                        printer.print(variant.id()); // VARIANT_ID
-                        printer.print(variant.variantType()); // VTYPE
-                        printer.print(variantIds.contains(variant.id())); // IS_CAUSAL
-                        printer.print(variantPriority.priority().getPriority()); // PRIORITY
-
-                        printer.println();
-                    }
-                }
-            }
-        }
-    }
 }

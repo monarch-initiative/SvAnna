@@ -9,7 +9,6 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +31,9 @@ public class HtmlResultWriter implements ResultWriter {
 
     private AnalysisParameters analysisParameters;
 
-    public HtmlResultWriter(GeneOverlapper overlapper, AnnotationDataService annotationDataService, PhenotypeDataService phenotypeDataService) {
+    public HtmlResultWriter(GeneOverlapper overlapper,
+                            AnnotationDataService annotationDataService,
+                            PhenotypeDataService phenotypeDataService) {
         visualizableGenerator = new VisualizableGeneratorSimple(overlapper, annotationDataService, phenotypeDataService);
         visualizer = new HtmlVisualizer();
     }
@@ -48,29 +49,33 @@ public class HtmlResultWriter implements ResultWriter {
         LogUtils.logInfo(LOGGER, "Writing HTML results to {}", outPath.toAbsolutePath());
 
         LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", analysisParameters.topNVariantsReported());
-        List<Visualizable> visualizables = results.variants().stream()
-                .map(visualizableGenerator::makeVisualizable)
+        // Add data required to create the header summary table in the HTML report (genes, enhancers, etc.)
+        List<VariantLandscape> variantLandscapes = results.variants().stream()
+                .map(visualizableGenerator::prepareLandscape)
                 .collect(Collectors.toList());
 
-        Map<String, String> variantCountSummary = summarizeVariantCounts(visualizables, analysisParameters.minAltReadSupport());
+        // Generate the summary table
+        Map<String, String> variantCountSummary = summarizeVariantCounts(variantLandscapes, analysisParameters.minAltReadSupport());
         variantCountSummary.put("vcf_file", results.variantSource());
 
-        List<String> visualizations = visualizables.stream()
-                .filter(vp -> vp.variant().numberOfAltReads() >= analysisParameters.minAltReadSupport()
-                        && vp.variant().passedFilters()
-                        && !Double.isNaN(vp.variant().svPriority().getPriority()))
+        // Limit performing of the expensive DB lookups to several dozens of variants that will be reported
+        // in the report, and not to the entire variant corpus
+        List<String> visualizations = variantLandscapes.stream()
+                .filter(s -> s.variant().numberOfAltReads() >= analysisParameters.minAltReadSupport()
+                        && s.variant().passedFilters()
+                        && !Double.isNaN(s.variant().svPriority().getPriority()))
                 .sorted(prioritizedVariantComparator())
-                .map(visualizer::getHtml)
                 .limit(analysisParameters.topNVariantsReported())
+                .map(visualizableGenerator::makeVisualizable)
+                .map(visualizer::getHtml)
                 .collect(Collectors.toList());
-
 
         HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.probandPhenotypeTerms(), this.analysisParameters);
         template.outputFile(outPath);
     }
 
-    private Map<String, String> summarizeVariantCounts(List<Visualizable> visualizables, int minAltAlleleSupport) {
-        FilterAndCount fac = new FilterAndCount(visualizables, minAltAlleleSupport);
+    private Map<String, String> summarizeVariantCounts(List<VariantLandscape> variantLandscapes, int minAltAlleleSupport) {
+        FilterAndCount fac = new FilterAndCount(variantLandscapes, minAltAlleleSupport);
 
         Map<String, String> infoMap = new HashMap<>();
         infoMap.put("unparsable", String.valueOf(fac.getUnparsableCount()));
@@ -80,15 +85,12 @@ public class HtmlResultWriter implements ResultWriter {
         return infoMap;
     }
 
-    private static Comparator<? super Visualizable> prioritizedVariantComparator() {
+    private static Comparator<? super VariantLandscape> prioritizedVariantComparator() {
         return (l, r) -> {
-            SvannaVariant rv = r.variant();
-            SvannaVariant lv = l.variant();
-
-            int priority = rv.svPriority().compareTo(lv.svPriority()); // the order is intentional
+            int priority = r.variant().svPriority().compareTo(l.variant().svPriority()); // the order is intentional
             if (priority != 0)
                 return priority;
-            return Variant.compare(lv, rv);
+            return Variant.compare(l.variant(), r.variant());
         };
     }
 

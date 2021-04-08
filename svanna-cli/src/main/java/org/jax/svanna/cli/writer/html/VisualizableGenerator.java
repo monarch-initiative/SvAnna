@@ -4,6 +4,8 @@ import org.jax.svanna.core.reference.SvannaVariant;
 
 public interface VisualizableGenerator {
 
-    Visualizable makeVisualizable(SvannaVariant variant);
+    VariantLandscape prepareLandscape(SvannaVariant variant);
+
+    Visualizable makeVisualizable(VariantLandscape variantLandscape);
 
 }

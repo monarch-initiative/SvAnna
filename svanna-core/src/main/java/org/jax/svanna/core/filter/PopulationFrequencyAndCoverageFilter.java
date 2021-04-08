@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PopulationFrequencyAndRepetitiveRegionFilter {
+public class PopulationFrequencyAndCoverageFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PopulationFrequencyAndRepetitiveRegionFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PopulationFrequencyAndCoverageFilter.class);
 
     private static final int BATCH = 100;
 
@@ -23,11 +23,6 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
     private static final FilterResult FF_FAIL = FilterResult.fail(FF_FILTER_TYPE);
     private static final FilterResult FF_PASS = FilterResult.pass(FF_FILTER_TYPE);
     private static final FilterResult FF_NOT_RUN = FilterResult.notRun(FF_FILTER_TYPE);
-
-//    // REPETITIVE REGIONS
-//    private static final FilterType RR_FILTER_TYPE = FilterType.REPETITIVE_REGION_FILTER;
-//    private static final FilterResult RR_FAIL = FilterResult.fail(RR_FILTER_TYPE);
-//    private static final FilterResult RR_PASS = FilterResult.pass(RR_FILTER_TYPE);
 
     // READ_DEPTH
     private static final FilterType COVERAGE_FILTER_TYPE = FilterType.COVERAGE_FILTER;
@@ -42,10 +37,10 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
     private final float frequencyThreshold;
     private final int minReads;
 
-    public PopulationFrequencyAndRepetitiveRegionFilter(AnnotationDataService annotationDataService,
-                                                        float similarityThreshold,
-                                                        float frequencyThreshold,
-                                                        int minReads) {
+    public PopulationFrequencyAndCoverageFilter(AnnotationDataService annotationDataService,
+                                                float similarityThreshold,
+                                                float frequencyThreshold,
+                                                int minReads) {
         this.annotationDataService = annotationDataService;
         this.similarityThreshold = similarityThreshold;
         this.frequencyThreshold = frequencyThreshold;
@@ -100,13 +95,9 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
         GenomicRegion query = GenomicRegion.of(variant.contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), minPos, maxPos);
         LogUtils.logTrace(LOGGER, "Filtering variants on contig `{}-{}-{}`", query.contigId(), query.start(), query.end());
         List<PopulationVariant> populationVariants = annotationDataService.overlappingPopulationVariants(query, PopulationVariantOrigin.benign());
-//        List<RepetitiveRegion> repetitiveRegions = annotationDataService.overlappingRepetitiveRegions(query);
         for (T item : sublist) {
             FilterResult freqFilterResult = runFrequencyFilter(populationVariants, item);
             item.addFilterResult(freqFilterResult);
-
-//            FilterResult repRegionFilterResult = runRepetitiveRegionsFilter(repetitiveRegions, item);
-//            item.addFilterResult(repRegionFilterResult);
 
             FilterResult coverageFilterResult = runCoverageFilter(item);
             item.addFilterResult(coverageFilterResult);
@@ -135,21 +126,6 @@ public class PopulationFrequencyAndRepetitiveRegionFilter {
         }
         return freqFilterResult;
     }
-
-//    TODO - remove if not used
-//    private <T extends SvannaVariant> FilterResult runRepetitiveRegionsFilter(List<RepetitiveRegion> repetitiveRegions, T item) {
-//        FilterResult repRegionFilterResult = null;
-//        for (RepetitiveRegion repetitiveRegion : repetitiveRegions) {
-//            if (FilterUtils.fractionShared(repetitiveRegion, item) * 100.F > similarityThreshold) {
-//                repRegionFilterResult = RR_FAIL;
-//                break;
-//            }
-//        }
-//        if (repRegionFilterResult == null) {
-//            repRegionFilterResult = RR_PASS;
-//        }
-//        return repRegionFilterResult;
-//    }
 
     private <T extends SvannaVariant> FilterResult runCoverageFilter(T item) {
         return (item.numberOfAltReads() < minReads)

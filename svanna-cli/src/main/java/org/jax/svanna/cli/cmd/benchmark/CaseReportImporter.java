@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class CaseReportImporter {
@@ -29,6 +31,8 @@ class CaseReportImporter {
     private static final VcfConverter VCF_CONVERTER = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.removingCommonBase()));
 
     private static final JsonFormat.Parser JSON_PARSER = JsonFormat.parser();
+    // Matches a string like `PMID:30269814-Nguyen-2018-PIGS-Family_2-II-1`
+    private static final Pattern PHENOPACKET_ID_PATTERN = Pattern.compile("PMID:(?<pmid>\\d+)-(?<author>[\\w_-]+)-(?<year>\\d{4})-(?<gene>[\\w\\d]+)-(?<proband>[\\w\\d‐\\-:,/._]+)", Pattern.UNICODE_CHARACTER_CLASS);
 
     private CaseReportImporter() {
     }
@@ -40,7 +44,7 @@ class CaseReportImporter {
         cases.addAll(readCasesProvidedAsPositionalArguments(caseReports));
         cases.addAll(readCasesProvidedViaCaseFolderOption(caseReportPath));
 
-        cases.sort(Comparator.comparing(CaseReport::caseName));
+        cases.sort(Comparator.comparing(cr -> cr.caseSummary().caseSummary()));
         return cases;
     }
 
@@ -97,7 +101,13 @@ class CaseReportImporter {
             return Optional.empty();
         }
 
-        String caseName = phenopacket.getId();
+        Optional<CaseSummary> csOpt = parsePhenopacketId(phenopacket.getId());
+        if (csOpt.isEmpty()) {
+            LogUtils.logWarn(LOGGER, "Invalid phenopacket id {}", phenopacket.getId());
+            return Optional.empty();
+        }
+
+        CaseSummary caseSummary = csOpt.get();
 
         Set<TermId> terms = phenopacket.getPhenotypicFeaturesList().stream()
                 .map(pf -> TermId.of(pf.getType().getId()))
@@ -109,7 +119,7 @@ class CaseReportImporter {
             if (v.getAlleleCase() == org.phenopackets.schema.v1.core.Variant.AlleleCase.VCF_ALLELE) {
                 VcfAllele vcfAllele = v.getVcfAllele();
                 if (!vcfAllele.getGenomeAssembly().equals("GRCh38")) {
-                    LogUtils.logWarn(LOGGER, "Unexpected genomic assembly `{}` in case `{}`", vcfAllele.getGenomeAssembly(), caseName);
+                    LogUtils.logWarn(LOGGER, "Unexpected genomic assembly `{}` in case `{}`", vcfAllele.getGenomeAssembly(), caseSummary.caseSummary());
                     continue;
                 }
 
@@ -119,7 +129,7 @@ class CaseReportImporter {
                     continue;
                 }
 
-                String variantId = String.format("%s[%d]", caseName, i);
+                String variantId = String.format("%s[%d]", caseSummary.caseSummary(), i);
                 String info = vcfAllele.getInfo();
                 Map<String, String> infoFields;
                 if (info.isEmpty()) {
@@ -154,7 +164,7 @@ class CaseReportImporter {
                         continue;
                     }
                     if (!infoFields.containsKey("END")) {
-                        LogUtils.logWarn(LOGGER, "Unable to find variant END in `{}`", caseName);
+                        LogUtils.logWarn(LOGGER, "Unable to find variant END in `{}`", caseSummary.caseSummary());
                         continue;
                     }
 
@@ -194,7 +204,17 @@ class CaseReportImporter {
             i++;
         }
 
-        return Optional.of(new CaseReport(caseName, terms, variants));
+        return Optional.of(CaseReport.of(caseSummary, terms, variants));
+    }
+
+    private static Optional<CaseSummary> parsePhenopacketId(String phenopacketId) {
+        Matcher matcher = PHENOPACKET_ID_PATTERN.matcher(phenopacketId);
+        if (!matcher.matches())
+            return Optional.empty();
+
+        return Optional.of(
+                CaseSummary.of(matcher.group("author"), matcher.group("pmid"),
+                        matcher.group("year"), matcher.group("gene"), matcher.group("proband")));
     }
 
     private static VariantCallAttributes.Builder parseVariantCallAttributes(org.phenopackets.schema.v1.core.Variant v) {

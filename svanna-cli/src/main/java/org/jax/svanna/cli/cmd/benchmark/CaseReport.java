@@ -8,18 +8,22 @@ import java.util.Objects;
 
 class CaseReport {
 
-    private final String caseName;
+    private final CaseSummary caseSummary;
     private final Collection<TermId> patientTerms;
     private final Collection<SvannaVariant> variants;
 
-    CaseReport(String caseName, Collection<TermId> patientTerms, Collection<SvannaVariant> variants) {
-        this.caseName = caseName;
+    static CaseReport of(CaseSummary caseSummary, Collection<TermId> patientTerms, Collection<SvannaVariant> variants) {
+        return new CaseReport(caseSummary, patientTerms, variants);
+    }
+
+    private CaseReport(CaseSummary caseSummary, Collection<TermId> patientTerms, Collection<SvannaVariant> variants) {
+        this.caseSummary = caseSummary;
         this.patientTerms = patientTerms;
         this.variants = variants;
     }
 
-    public String caseName() {
-        return caseName;
+    public CaseSummary caseSummary() {
+        return caseSummary;
     }
 
     public Collection<TermId> patientTerms() {
@@ -35,18 +39,18 @@ class CaseReport {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CaseReport that = (CaseReport) o;
-        return Objects.equals(caseName, that.caseName) && Objects.equals(patientTerms, that.patientTerms) && Objects.equals(variants, that.variants);
+        return Objects.equals(caseSummary, that.caseSummary) && Objects.equals(patientTerms, that.patientTerms) && Objects.equals(variants, that.variants);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(caseName, patientTerms, variants);
+        return Objects.hash(caseSummary, patientTerms, variants);
     }
 
     @Override
     public String toString() {
         return "CaseReport{" +
-                "caseName='" + caseName + '\'' +
+                "caseSummary='" + caseSummary + '\'' +
                 ", patientTerms=" + patientTerms +
                 ", variants=" + variants +
                 '}';

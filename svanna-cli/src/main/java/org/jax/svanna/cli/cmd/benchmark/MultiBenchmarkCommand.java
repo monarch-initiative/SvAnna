@@ -5,7 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.Main;
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
+import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
@@ -69,7 +69,7 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where the ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
 
             SvPrioritizerFactory priorityFactory = context.getBean(SvPrioritizerFactory.class);
             PrioritizationRunner prioritizationRunner = new PrioritizationRunner(priorityFactory, nThreads);
@@ -101,7 +101,7 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
 
                 int casesProcessed = 1;
                 for (CaseReport caseReport : cases) {
-                    LogUtils.logInfo(LOGGER, "({}/{}) Processing case `{}`", casesProcessed, cases.size(), caseReport.caseName());
+                    LogUtils.logInfo(LOGGER, "({}/{}) Processing case `{}`", casesProcessed, cases.size(), caseReport.caseSummary());
 
                     // get and validate patient terms
                     Collection<TermId> patientTerms = caseReport.patientTerms();
@@ -116,11 +116,11 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
                         if (filteredTargetVariant.passedFilters())
                             caseVariants.add(filteredTargetVariant);
                         else
-                            LogUtils.logWarn(LOGGER, "Variant {} in {} did not pass the filters!", LogUtils.variantSummary(filteredTargetVariant), caseReport.caseName());
+                            LogUtils.logWarn(LOGGER, "Variant {} in {} did not pass the filters!", LogUtils.variantSummary(filteredTargetVariant), caseReport.caseSummary());
                     }
 
                     List<VariantPriority> priorities = prioritizationRunner.prioritize(validatedPatientTermIds, caseVariants);
-                    vcfResults.put(caseReport.caseName(), priorities);
+                    vcfResults.put(caseReport.caseSummary().caseSummary(), priorities);
 
                     casesProcessed++;
                 }
@@ -173,7 +173,7 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
             Set<String> ids = aCase.variants().stream()
                     .map(Variant::id)
                     .collect(Collectors.toSet());
-            causalVariantIds.put(aCase.caseName(), ids);
+            causalVariantIds.put(aCase.caseSummary().caseSummary(), ids);
         }
         return causalVariantIds;
     }

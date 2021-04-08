@@ -6,8 +6,8 @@ svanna:
   jannovarCachePath:
 
   #dataParameters:
-    # TAD must be present in at least 80% of the tissues to be included in the analysis
-    #tadStabilityThreshold: 0.8
+    # TAD must be present in at least 90% of the tissues to be included in the analysis
+    #tadStabilityThreshold: 90
     #enhancers:
       # Include VISTA developmental enhancers in the analysis
       #useVista: True

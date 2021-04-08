@@ -11,7 +11,7 @@ import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.filter.PopulationFrequencyAndRepetitiveRegionFilter;
+import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.ModeOfInheritance;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
@@ -218,7 +218,7 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndRepetitiveRegionFilter filter = new PopulationFrequencyAndRepetitiveRegionFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
             List<SvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize

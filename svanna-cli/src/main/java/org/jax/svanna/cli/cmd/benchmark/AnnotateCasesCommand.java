@@ -71,7 +71,7 @@ public class AnnotateCasesCommand extends SvAnnaCommand {
 
             int processed = 1;
             for (CaseReport aCase : cases) {
-                LogUtils.logInfo(LOGGER, "({}/{}) Processing case `{}`", processed, cases.size(), aCase.caseName());
+                LogUtils.logInfo(LOGGER, "({}/{}) Processing case `{}`", processed, cases.size(), aCase.caseSummary());
 
                 // get and validate patient terms
                 Collection<TermId> patientTerms = aCase.patientTerms();
@@ -86,7 +86,7 @@ public class AnnotateCasesCommand extends SvAnnaCommand {
                     SvPriority priority = prioritizer.prioritize(variant);
                     priorities.put(variant, priority);
                 }
-                results.put(aCase.caseName(), priorities);
+                results.put(aCase.caseSummary().caseSummary(), priorities);
                 processed++;
             }
         } catch (Exception e) {

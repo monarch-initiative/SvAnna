@@ -56,14 +56,15 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     @Override
     public double projectImpact(Projection<Gene> projection) {
-        Double score = checkPromoter(projection.route().segments(), projection.source().transcripts());
+        double promoterImpact = checkPromoter(projection.route().segments(), projection.source().transcripts());
 
-        if (!score.isNaN())
-            return score;
-
-        return projection.isIntraSegment()
+        double geneImpact = projection.isIntraSegment()
                 ? processIntraSegmentProjection(projection)
                 : processInterSegmentProjection(projection);
+
+        return Double.isNaN(promoterImpact)
+                ? geneImpact
+                : Math.min(geneImpact, promoterImpact);
     }
 
     @Override
@@ -71,7 +72,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         return geneFactor;
     }
 
-    private Double checkPromoter(List<Segment> segments, Set<Transcript> transcripts) {
+    private double checkPromoter(List<Segment> segments, Set<Transcript> transcripts) {
         Set<Segment> nonGapSegments = segments.stream()
                 .filter(s -> s.event() != Event.GAP)
                 .collect(Collectors.toSet());

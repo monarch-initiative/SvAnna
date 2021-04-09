@@ -1,6 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.Variant;
 
@@ -12,8 +13,9 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
 
     public DeletionSvgGenerator(Variant variant,
                                 List<Gene> genes,
-                                List<Enhancer> enhancers) {
-        super(variant, genes, enhancers);
+                                List<Enhancer> enhancers,
+                                List<RepetitiveRegion> repeats) {
+        super(variant, genes, enhancers, repeats);
     }
 
 
@@ -30,6 +32,11 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s deletion", deletionLength);
         writeDeletion(starty, deletionDescription, writer);
         y += 100;
+        int y_offset = writeRepeats(writer, y);
+        if (y_offset >0) {
+            // this means we found repeats
+            y += y_offset + 10;
+        }
         for (var e : affectedEnhancers) {
             writeEnhancer(e, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;
@@ -42,7 +49,6 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
     }
 
     /**
-     * PROTOTYPE -- THIS MAYBE NOT BE THE BEST WAY TO REPRESENT OTHER TUPES OF SV
      * @param ypos  The y position where we will write the cartoon
      * @param msg A String describing the SV
      * @param writer a file handle

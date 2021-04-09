@@ -2,6 +2,7 @@ package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.*;
 
@@ -38,6 +39,10 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
      * enhancers on contig B
      */
     private final List<Enhancer> enhancersB;
+
+    private final List<RepetitiveRegion> repeatsA;
+    private final List<RepetitiveRegion> repeatsB;
+
     /**
      * Flag to denote a value is not relevant. This may happen for instance if we have no enhancers.
      */
@@ -58,14 +63,17 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
     public TranslocationSvgGenerator(Variant variant,
                                      BreakendVariant breakended,
                                      List<Gene> genes,
-                                     List<Enhancer> enhancers) {
-        super(variant, genes, enhancers);
+                                     List<Enhancer> enhancers,
+                                     List<RepetitiveRegion> repeats) {
+        super(variant, genes, enhancers, repeats);
         Breakend left = breakended.left();
         Breakend right = breakended.right();
         this.genesA = genes.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
         this.genesB = genes.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());
         this.enhancersA = enhancers.stream().filter(e -> e.contigId() == left.contigId()).collect(Collectors.toList());
         this.enhancersB = enhancers.stream().filter(e -> e.contigId() == right.contigId()).collect(Collectors.toList());
+        this.repeatsA = repeats.stream().filter(r -> r.contigId() == left.contigId()).collect(Collectors.toList());
+        this.repeatsB = repeats.stream().filter(r -> r.contigId() == right.contigId()).collect(Collectors.toList());
         int nTranscripts = genesA.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
                 .sum();
@@ -77,11 +85,11 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         this.componentA = new TranslocationComponentSvgGenerator(
                 getMin(genesA, enhancersA, left.startWithCoordinateSystem(cs)),
                 getMax(genesA, enhancersA, left.endWithCoordinateSystem(cs)),
-                genesA, enhancersA, variant, left, YSTART);
+                genesA, enhancersA, repeatsA, variant, left, YSTART);
         this.componentB = new TranslocationComponentSvgGenerator(
                 getMin(genesB, enhancersB, right.startWithCoordinateSystem(cs)),
                 getMax(genesB, enhancersB, right.endWithCoordinateSystem(cs)),
-                genesB, enhancersB, variant, right, ystartB);
+                genesB, enhancersB, repeatsB, variant, right, ystartB);
     }
 
     private static int getMin(List<Gene> genes, List<Enhancer> enhancers, int contigPos) {

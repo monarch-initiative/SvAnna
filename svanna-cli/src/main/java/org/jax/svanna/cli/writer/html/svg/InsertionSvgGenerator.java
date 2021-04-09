@@ -1,6 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.Variant;
 
@@ -13,8 +14,9 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
 
     public InsertionSvgGenerator(Variant variant,
                                  List<Gene> transcripts,
-                                 List<Enhancer> enhancers) {
-        super(variant, transcripts, enhancers);
+                                 List<Enhancer> enhancers,
+                                 List<RepetitiveRegion> repeats) {
+        super(variant, transcripts, enhancers, repeats);
     }
 
     public void write(Writer writer) throws IOException {
@@ -27,6 +29,11 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
         String insertionDescription = String.format("%s insertion", insertionLength);
         writeInsertion(xpos, starty, insertionDescription, writer);
         y += 100;
+        int y_offset = writeRepeats(writer, y);
+        if (y_offset >0) {
+            // this means we found repeats
+            y += y_offset + 10;
+        }
         for (var gene : affectedGenes) {
             writeGene(gene, y, writer);
             y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;

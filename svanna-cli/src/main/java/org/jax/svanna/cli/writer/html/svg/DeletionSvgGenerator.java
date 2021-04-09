@@ -32,11 +32,7 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s deletion", deletionLength);
         writeDeletion(starty, deletionDescription, writer);
         y += 100;
-        int y_offset = writeRepeats(writer, y);
-        if (y_offset >0) {
-            // this means we found repeats
-            y += y_offset + 10;
-        }
+        y = writeRepeats(writer, y);
         for (var e : affectedEnhancers) {
             writeEnhancer(e, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;

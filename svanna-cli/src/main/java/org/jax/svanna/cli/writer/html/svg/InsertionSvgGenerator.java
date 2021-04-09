@@ -29,11 +29,7 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
         String insertionDescription = String.format("%s insertion", insertionLength);
         writeInsertion(xpos, starty, insertionDescription, writer);
         y += 100;
-        int y_offset = writeRepeats(writer, y);
-        if (y_offset >0) {
-            // this means we found repeats
-            y += y_offset + 10;
-        }
+        y = writeRepeats(writer, y);
         for (var gene : affectedGenes) {
             writeGene(gene, y, writer);
             y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;

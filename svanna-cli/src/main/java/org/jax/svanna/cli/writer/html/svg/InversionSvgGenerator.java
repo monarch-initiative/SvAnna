@@ -35,11 +35,7 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         String inversionDescription = String.format("%s inversion", inversionLength);
         writeInversion(starty, inversionDescription, writer);
         y += 100;
-        int y_offset = writeRepeats(writer, y);
-        if (y_offset >0) {
-            // this means we found repeats
-            y += y_offset + 10;
-        }
+        y = writeRepeats(writer, y);
         for (var e : this.affectedEnhancers) {
             writeEnhancer(e, y, writer);
             y += Constants.HEIGHT_PER_DISPLAY_ITEM;

@@ -557,6 +557,9 @@ public abstract class SvSvgGenerator {
             //System.out.printf("xstart %f end %f width %f\n", xstart, end, width);
             YPOS += (REPEAT_HEIGHT + 10);
         }
+        if (this.repeats.size()>0) {
+            YPOS += 10; // Add a little extra space only if we actually wrote one or more repeats
+        }
         return YPOS;
     }
 

@@ -91,8 +91,8 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
                 " from SVANNA.TAD_BOUNDARY " +
                 " where CONTIG = :contig " +
                 "   and :start < MIDPOINT " +
-                "   and MIDPOINT < :end " +
-                "   and STABILITY > :stability" +
+                "   and MIDPOINT <= :end " +
+                "   and STABILITY >= :stability" +
                 " order by MIDPOINT";
         SqlParameterSource paramsSource = new MapSqlParameterSource()
                 .addValue("contig", query.contigId())
@@ -114,12 +114,12 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         String sql = region.strand().isPositive()
                 ? "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and MIDPOINT < :position and STABILITY > :stability " +
+                "    where CONTIG = :contig and MIDPOINT < :position and STABILITY >= :stability " +
                 "  order by MIDPOINT DESC"
 
                 : "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and MIDPOINT > :position and STABILITY > :stability " +
+                "    where CONTIG = :contig and MIDPOINT > :position and STABILITY >= :stability " +
                 "  order by MIDPOINT";
         return template.query(sql, paramSource, mapToTadBoundary(region.strand()));
     }
@@ -136,11 +136,11 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         String sql = region.strand().isPositive()
                 ? "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and MIDPOINT > :position and STABILITY > :stability " +
+                "    where CONTIG = :contig and MIDPOINT > :position and STABILITY >= :stability " +
                 "  order by MIDPOINT"
                 : "select top 1 CONTIG, MIDPOINT, ID, STABILITY " +
                 "  from SVANNA.TAD_BOUNDARY " +
-                "    where CONTIG = :contig and MIDPOINT < :position and STABILITY > :stability " +
+                "    where CONTIG = :contig and MIDPOINT < :position and STABILITY >= :stability " +
                 "  order by MIDPOINT DESC";
         return template.query(sql, paramSource, mapToTadBoundary(region.strand()));
     }
@@ -149,7 +149,7 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         return (rs) -> {
             List<TadBoundary> boundaries = new LinkedList<>();
             while (rs.next()) {
-                boundaries.add(mapRowToTadBoundary(rs));
+                boundaries.add(mapRowToTadBoundary(rs, Strand.POSITIVE));
             }
             return boundaries;
         };
@@ -158,16 +158,20 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
     private ResultSetExtractor<Optional<TadBoundary>> mapToTadBoundary(Strand strand) {
         return rs -> {
             if (rs.first()) {
-                TadBoundary boundary = mapRowToTadBoundary(rs);
-                return Optional.of(boundary.withStrand(strand));
+                return Optional.of(mapRowToTadBoundary(rs, strand));
             }
             return Optional.empty();
         };
     }
 
-    private TadBoundary mapRowToTadBoundary(ResultSet rs) throws SQLException {
-        Position pos = Position.of(rs.getInt("MIDPOINT"));
-        return TadBoundaryDefault.of(genomicAssembly.contigById(rs.getInt("CONTIG")),
+    private TadBoundary mapRowToTadBoundary(ResultSet rs, Strand strand) throws SQLException {
+        Contig contig = genomicAssembly.contigById(rs.getInt("CONTIG"));
+        int midpoint = rs.getInt("MIDPOINT");
+
+        Position pos = strand.isPositive()
+                ? Position.of(midpoint)
+                : Position.of(Coordinates.invertPosition(CS, contig, midpoint));
+        return TadBoundaryDefault.of(contig,
                 Strand.POSITIVE, CS,
                 pos, pos,
                 rs.getString("ID"),

@@ -126,8 +126,8 @@ public abstract class SvSvgGenerator {
             case INS:
             default:
                 // get min/max for SVs with one region
-                this.genomicMinPos= getGenomicMinPos(this.variant.start(), genes, enhancers, repeats);
-                this.genomicMaxPos = getGenomicMaxPos(this.variant.end(), genes, enhancers, repeats);
+                this.genomicMinPos= getGenomicMinPos(this.variant.startWithCoordinateSystem(CoordinateSystem.zeroBased()), genes, enhancers, repeats);
+                this.genomicMaxPos = getGenomicMaxPos(this.variant.endWithCoordinateSystem(CoordinateSystem.zeroBased()), genes, enhancers, repeats);
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
                 int extraSpaceOnSide = (int)(0.1*(this.genomicSpan));
                 this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
@@ -187,18 +187,15 @@ public abstract class SvSvgGenerator {
      */
     int getGenomicMinPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
         int geneMin = genes.stream()
-                .map(t -> t.withStrand(Strand.POSITIVE))
-                .mapToInt(GenomicRegion::start)
+                .mapToInt(gene -> gene.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .min()
                 .orElse(Integer.MAX_VALUE);
         int enhancerMin = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::start)
+                .mapToInt(e -> e.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .min()
                 .orElse(Integer.MAX_VALUE);
         int repeatMin = repeats.stream()
-                .map(r -> r.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::start)
+                .mapToInt(rr -> rr.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .min()
                 .orElse(Integer.MAX_VALUE);
         return Math.min(Math.min(geneMin, repeatMin), Math.min(enhancerMin, pos));
@@ -217,18 +214,15 @@ public abstract class SvSvgGenerator {
      */
     int getGenomicMaxPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
         int geneMax = genes.stream()
-                .map(t -> t.withStrand(Strand.POSITIVE))
-                .mapToInt(GenomicRegion::end)
+                .mapToInt(g -> g.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .max()
                 .orElse(Integer.MIN_VALUE);
         int enhancerMax = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::end)
+                .mapToInt(e -> e.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .max()
                 .orElse(Integer.MIN_VALUE);
         int repeatMax = repeats.stream()
-                .map(r -> r.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::end)
+                .mapToInt(rr -> rr.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .max()
                 .orElse(Integer.MIN_VALUE);
         return Math.max(Math.max(geneMax, repeatMax), Math.max(enhancerMax, pos));

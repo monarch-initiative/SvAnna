@@ -1,5 +1,6 @@
 package org.jax.svanna.cli.writer.html;
 
+import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
@@ -8,16 +9,20 @@ import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.GeneOverlapper;
+import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VisualizableGeneratorSimple implements VisualizableGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(VisualizableGeneratorSimple.class);
 
     private final GeneOverlapper overlapper;
 
@@ -46,9 +51,11 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     @Override
     public Visualizable makeVisualizable(VariantLandscape variantLandscape) {
-        List<RepetitiveRegion> repetitiveRegions = annotationDataService.overlappingRepetitiveRegions(variantLandscape.variant());
+        SvannaVariant variant = variantLandscape.variant();
+        List<GeneOverlap> overlaps = variantLandscape.overlaps();
+        List<RepetitiveRegion> repetitiveRegions = prepareRepetitiveRegions(variant, overlaps);
 
-        Set<HpoDiseaseSummary> diseaseSummaries = variantLandscape.overlaps().stream()
+        Set<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
                 .map(geneOverlap -> geneOverlap.gene().geneSymbol())
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
@@ -58,4 +65,48 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
         return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions);
     }
+
+    private List<RepetitiveRegion> prepareRepetitiveRegions(SvannaVariant variant, List<GeneOverlap> overlaps) {
+        List<RepetitiveRegion> repetitiveRegions = new LinkedList<>();
+        if (overlaps.isEmpty()) {
+            LogUtils.logWarn(LOGGER, "No gene for variant {}", variant.id());
+        } else {
+            if (!(variant instanceof BreakendVariant)) {
+                GenomicRegion viewport = calculateUpperLowerBounds(variant, overlaps);
+                repetitiveRegions.addAll(annotationDataService.overlappingRepetitiveRegions(viewport));
+            } else {
+                Map<Integer, List<GeneOverlap>> overlapsByContig = overlaps.stream()
+                        .collect(Collectors.groupingBy(go -> go.gene().contigId(), Collectors.toUnmodifiableList()));
+                BreakendVariant bv = (BreakendVariant) variant;
+                List<GeneOverlap> leftOverlaps = overlapsByContig.getOrDefault(bv.left().contigId(), List.of());
+                if (!leftOverlaps.isEmpty()) {
+                    GenomicRegion viewport = calculateUpperLowerBounds(bv.left(), leftOverlaps);
+                    repetitiveRegions.addAll(annotationDataService.overlappingRepetitiveRegions(viewport));
+                }
+                List<GeneOverlap> rightOverlaps = overlapsByContig.getOrDefault(bv.right().contigId(), List.of());
+                if (!rightOverlaps.isEmpty()) {
+                    GenomicRegion viewport = calculateUpperLowerBounds(bv.right(), rightOverlaps);
+                    repetitiveRegions.addAll(annotationDataService.overlappingRepetitiveRegions(viewport));
+                }
+            }
+        }
+        return repetitiveRegions;
+    }
+
+    private static GenomicRegion calculateUpperLowerBounds(GenomicRegion variant, List<GeneOverlap> overlaps) {
+        int start = variant.start();
+        int end = variant.end();
+
+        for (GeneOverlap overlap : overlaps) {
+            Gene gene = overlap.gene();
+            int s = gene.startOnStrandWithCoordinateSystem(variant.strand(), variant.coordinateSystem());
+            start = Math.min(s, start);
+
+            int e = gene.endOnStrandWithCoordinateSystem(variant.strand(), variant.coordinateSystem());
+            end = Math.max(e, end);
+        }
+
+        return GenomicRegion.of(variant.contig(), variant.strand(), variant.coordinateSystem(), start, end);
+    }
+
 }

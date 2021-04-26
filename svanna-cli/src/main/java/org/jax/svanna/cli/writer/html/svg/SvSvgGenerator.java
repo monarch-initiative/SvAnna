@@ -10,7 +10,6 @@ import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
-import org.monarchinitiative.svart.impl.DefaultGenomicRegion;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -190,10 +189,10 @@ public abstract class SvSvgGenerator {
                 int offset = 20;
                 Position leftStart = Position.of(Math.max(0,reg.start()-offset));
                 Position leftEnd = Position.of(Math.max(0,reg.start()+offset));
-                GenomicRegion leftRegion = DefaultGenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),leftStart, leftEnd);
+                GenomicRegion leftRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),leftStart, leftEnd);
                 Position rightStart = Position.of(Math.max(0,reg.end()-offset));
                 Position rightEnd = Position.of(Math.max(0,reg.end()+offset));
-                GenomicRegion rightRegion = DefaultGenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),rightStart, rightEnd);
+                GenomicRegion rightRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),rightStart, rightEnd);
                 if (variant.overlapsWith(leftRegion) || variant.overlapsWith(rightRegion)) {
                     overlaps.add(repeat);
                 }
@@ -201,7 +200,7 @@ public abstract class SvSvgGenerator {
                 int offset = Math.min(10, (int) (0.1 * len));
                 Position startPos = Position.of(Math.max(0, reg.start() - offset));
                 Position endPos = Position.of(reg.end() + offset);
-                GenomicRegion variantOverlapRegion = DefaultGenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(), startPos, endPos);
+                GenomicRegion variantOverlapRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(), startPos, endPos);
                 if (variant.overlapsWith(variantOverlapRegion)) {
                     overlaps.add(repeat);
                 }

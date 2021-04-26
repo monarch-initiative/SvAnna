@@ -230,8 +230,11 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         // variants with low quality
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
-
-        return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
+        try {
+            return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     private Optional<? extends SvannaVariant> parseBreakendAllele(VariantContext vc, Contig contig) {

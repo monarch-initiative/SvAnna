@@ -8,6 +8,7 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.BreakendedSvannaVariant;
@@ -141,13 +142,19 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
 
             Allele altAllele = alts.get(0);
             String alt = altAllele.getDisplayString();
-
-            if (VariantType.isSymbolic(alt)) {
-                return (VariantType.isBreakend(alt))
-                        ? parseBreakendAllele(vc, contig)
-                        : parseSymbolicVariantAllele(vc, contig);
-            } else
-                return parseSequenceVariantAllele(vc, contig);
+            try {
+                if (VariantType.isSymbolic(alt)) {
+                    return (VariantType.isBreakend(alt))
+                            ? parseBreakendAllele(vc, contig)
+                            : parseSymbolicVariantAllele(vc, contig);
+                } else
+                    return parseSequenceVariantAllele(vc, contig);
+            } catch (InvalidCoordinatesException e) {
+                LogUtils.logWarn(LOGGER, "Invalid coordinates in variant `{}`: {}", makeVariantRepresentation(vc), e.getMessage());
+            } catch (RuntimeException e) {
+                LogUtils.logWarn(LOGGER, "Invalid variant `{}`: {}", makeVariantRepresentation(vc), e.getMessage());
+            }
+            return Optional.empty();
         };
     }
 
@@ -230,11 +237,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         // variants with low quality
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
-        try {
-            return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+        return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
     }
 
     private Optional<? extends SvannaVariant> parseBreakendAllele(VariantContext vc, Contig contig) {

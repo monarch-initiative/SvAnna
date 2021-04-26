@@ -10,6 +10,7 @@ import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.impl.DefaultGenomicRegion;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -110,7 +111,7 @@ public abstract class SvSvgGenerator {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-        this.repeats = repeats;
+        this.repeats = getOverlappingRepeats(variant, repeats);
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
@@ -119,7 +120,7 @@ public abstract class SvSvgGenerator {
             this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
             this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
-            + repeats.size()*(REPEAT_HEIGHT+10);
+            + this.repeats.size()*(REPEAT_HEIGHT+10);
         }
         switch (variantType.baseType()) {
             case DEL:
@@ -172,6 +173,41 @@ public abstract class SvSvgGenerator {
         this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
+    }
+
+    /**
+     * TODO -- It would be better to put logic like this where the repeats are extracted!
+     * @param variant
+     * @param repeats
+     * @return
+     */
+    List<RepetitiveRegion> getOverlappingRepeats(Variant variant, List<RepetitiveRegion> repeats) {
+        List<RepetitiveRegion> overlaps = new ArrayList<>();
+        for (RepetitiveRegion repeat : repeats) {
+            int len = repeat.length();
+            GenomicRegion reg = repeat.withStrand(Strand.POSITIVE);
+            if (len > 100) {
+                int offset = 20;
+                Position leftStart = Position.of(Math.max(0,reg.start()-offset));
+                Position leftEnd = Position.of(Math.max(0,reg.start()+offset));
+                GenomicRegion leftRegion = DefaultGenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),leftStart, leftEnd);
+                Position rightStart = Position.of(Math.max(0,reg.end()-offset));
+                Position rightEnd = Position.of(Math.max(0,reg.end()+offset));
+                GenomicRegion rightRegion = DefaultGenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),rightStart, rightEnd);
+                if (variant.overlapsWith(leftRegion) || variant.overlapsWith(rightRegion)) {
+                    overlaps.add(repeat);
+                }
+            } else {
+                int offset = Math.min(10, (int) (0.1 * len));
+                Position startPos = Position.of(Math.max(0, reg.start() - offset));
+                Position endPos = Position.of(reg.end() + offset);
+                GenomicRegion variantOverlapRegion = DefaultGenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(), startPos, endPos);
+                if (variant.overlapsWith(variantOverlapRegion)) {
+                    overlaps.add(repeat);
+                }
+            }
+        }
+        return overlaps;
     }
 
 
@@ -436,11 +472,10 @@ public abstract class SvSvgGenerator {
             double startpos = translateGenomicToSvg(intronStarts.get(i));
             double endpos = translateGenomicToSvg(intronEnds.get(i));
             double midpoint = 0.5 * (startpos + endpos);
-            double Y = ypos;
-            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    startpos, Y, midpoint, Y - INTRON_MIDPOINT_ELEVATION));
-            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    midpoint, Y - INTRON_MIDPOINT_ELEVATION, endpos, Y));
+            writer.write(String.format("<line x1=\"%f\" y1=\"%d\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
+                    startpos, ypos, midpoint, ypos - INTRON_MIDPOINT_ELEVATION));
+            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%d\" stroke=\"black\"/>\n",
+                    midpoint, ypos - INTRON_MIDPOINT_ELEVATION, endpos, ypos));
         }
     }
 
@@ -533,27 +568,28 @@ public abstract class SvSvgGenerator {
         writer.write(txt);
     }
 
-
+    /**
+     * We will show repeats that overlap with the variant or are within 10% of its extent
+     * Especially for the shorter repeats, we are interested if there is
+     * a repeat in the vicinity that might be related to the SV, but might not actually overlap with the SV.
+     */
     protected int writeRepeats(Writer writer, int ypos) throws IOException {
         int YPOS = ypos;
         for (RepetitiveRegion repeat : this.repeats) {
             double xstart = translateGenomicToSvg(repeat.startOnStrand(Strand.POSITIVE));
             double end = translateGenomicToSvg(repeat.endOnStrand(Strand.POSITIVE));
             double width = end - xstart;
-            String name = String.format("%s (%d nt)",repeat.repeatFamily().name(), repeat.length());
+            String name = String.format("%s (%d nt)", repeat.repeatFamily().name(), repeat.length());
             String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                    end+10, YPOS+ REPEAT_HEIGHT, PURPLE, name);
+                    end + 10, YPOS + REPEAT_HEIGHT, PURPLE, name);
             writer.write(txt);
             String rect = String.format("<rect x=\"%f\" y=\"%d\" width=\"%f\" height=\"%d\"  " +
                             "style=\"stroke:%s; fill: %s\" />\n",
                     xstart, YPOS, width, REPEAT_HEIGHT, BLACK, VIOLET);
             writer.write(rect);
-            //System.out.printf("xstart %f end %f width %f\n", xstart, end, width);
             YPOS += (REPEAT_HEIGHT + 10);
         }
-        if (this.repeats.size()>0) {
-            YPOS += 10; // Add a little extra space only if we actually wrote one or more repeats
-        }
+        YPOS += 10; // Add a little extra space
         return YPOS;
     }
 

@@ -394,10 +394,10 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(itemValueRow("UCSC", ucscBuilder.toString()));
         int totalReads = nAltReads + nRefReads;
         if (totalReads != minSequenceDepth) {
-            LOGGER.warn("Sum of alt ({})/ref({}) reads not equal to minDepth ({})", nAltReads, nRefReads, minSequenceDepth);
+            LOGGER.warn("Sum of alt ({})/ref({}) reads not equal to minDepth ({}) for variant {}", nAltReads, nRefReads, minSequenceDepth, visualizable.variant().id());
         }
         if (totalReads == 0) {
-            LOGGER.warn("Total reads zero (should never happen), setting to 1.");
+            LOGGER.warn("Total reads zero (should never happen), setting to 1 for variant {}.", visualizable.variant().id());
             totalReads = 1;
         }
         String refReads = String.format("%d/%d reads (%.1f%%)", nRefReads, totalReads, 100.0 * (float)nRefReads/totalReads);
@@ -454,7 +454,7 @@ public class HtmlVisualizer implements Visualizer {
         int nRefReads = visualizable.variant().numberOfRefReads();
         int totalReads = nAltReads + nRefReads;
         if (totalReads == 0) {
-            LOGGER.warn("Total reads zero (should never happen), setting to 1.");
+            LOGGER.warn("Total reads zero (should never happen), setting to 1 for variant {}.", visualizable.variant().id());
             totalReads = 1;
         }
         String refReads = String.format("%d/%d reads (%.1f%%)", nRefReads, totalReads, 100.0 * (float)nRefReads/totalReads);

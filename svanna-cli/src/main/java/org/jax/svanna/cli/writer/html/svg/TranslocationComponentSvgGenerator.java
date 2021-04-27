@@ -3,6 +3,7 @@ package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.*;
 
@@ -44,10 +45,11 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
     public TranslocationComponentSvgGenerator(int minPos, int maxPos,
                                               List<Gene> genes,
                                               List<Enhancer> enhancers,
+                                              List<RepetitiveRegion> repeats,
                                               Variant variant,
                                               Breakend breakend,
                                               int ystart) {
-        super(minPos, maxPos, variant, genes, enhancers);
+        super(minPos, maxPos, variant, genes, enhancers, repeats);
         this.contig = breakend.contig();
         this.positionOnContig = breakend.startWithCoordinateSystem(CoordinateSystem.oneBased());
         this.ystart = ystart;

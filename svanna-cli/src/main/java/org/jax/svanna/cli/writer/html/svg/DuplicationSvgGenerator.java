@@ -1,6 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
 import org.monarchinitiative.svart.Variant;
 
@@ -17,8 +18,9 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
 
     public DuplicationSvgGenerator(Variant variant,
                                    List<Gene> genes,
-                                   List<Enhancer> enhancers) {
-        super(variant, genes, enhancers);
+                                   List<Enhancer> enhancers,
+                                   List<RepetitiveRegion> repeats) {
+        super(variant, genes, enhancers, repeats);
 
         duplicationStart = Math.min(variant.start(), variant.end());
         duplicationEnd = Math.max(variant.start(), variant.end());
@@ -39,6 +41,7 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s duplication", deletionLength);
         writeDuplication(starty, deletionDescription, writer);
         y += 100;
+        y = writeRepeats(writer, y);
         for (var gene : affectedGenes) {
             writeGene(gene, y, writer);
             y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;

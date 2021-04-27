@@ -173,23 +173,24 @@ public class HtmlVisualizer implements Visualizer {
         }
         try {
             SvSvgGenerator gen;
+            //visualizable.repetitiveRegions()
             switch (variant.variantType().baseType()) {
                 case DEL:
-                    gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
+                    gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
                     break;
                 case INS:
-                    gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
+                    gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
                     break;
                 case INV:
-                    gen = new InversionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
+                    gen = new InversionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
                     break;
                 case DUP:
-                    gen = new DuplicationSvgGenerator(variant, visualizable.genes(), visualizable.enhancers());
+                    gen = new DuplicationSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
                     break;
                 case TRA:
                 case BND:
                     if (variant instanceof BreakendVariant) {
-                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, visualizable.genes(), visualizable.enhancers());
+                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
                         break;
                     }
                     // fall through to default

@@ -45,7 +45,7 @@ public class TranslocationSvGeneratorTest {
         Variant variant = testVariants.translocations().translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
         List<Gene> genes = geneOverlapper.getOverlaps(variant).stream().map(GeneOverlap::gene).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
-        TranslocationSvgGenerator gen = new TranslocationSvgGenerator(variant, ((BreakendVariant) variant), genes, enhancerList);
+        TranslocationSvgGenerator gen = new TranslocationSvgGenerator(variant, ((BreakendVariant) variant), genes, enhancerList, List.of());
         String svg = gen.getSvg();
         assertNotNull(svg);
         try {

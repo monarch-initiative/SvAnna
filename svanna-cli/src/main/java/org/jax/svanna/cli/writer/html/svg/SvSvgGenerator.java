@@ -3,6 +3,7 @@ package org.jax.svanna.cli.writer.html.svg;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
+import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Gene;
@@ -34,6 +35,8 @@ public abstract class SvSvgGenerator {
     protected final List<Gene> affectedGenes;
     /** List of enhancers that are affected by the SV and that are to be shown in the SVG. */
     protected final List<Enhancer> affectedEnhancers;
+    /** List of repetitive regions that overlap with the SV. */
+    private final List<RepetitiveRegion> repeats;
     /** Variant on {@link Strand#POSITIVE} */
     protected final Variant variant;
 
@@ -69,6 +72,8 @@ public abstract class SvSvgGenerator {
     protected final double INTRON_MIDPOINT_ELEVATION = 10.0;
     /** Height of the symbols that represent the transcripts */
     private final double EXON_HEIGHT = 20;
+    /** Height of the symbols that represent repetitive regions. */
+    private final int REPEAT_HEIGHT = 12;
     /** Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}*/
     protected final double Y_SKIP_BENEATH_TRANSCRIPTS = 30;
     /** Height of the symbol that represents the structural variant. */
@@ -100,10 +105,12 @@ public abstract class SvSvgGenerator {
      */
     public SvSvgGenerator(Variant variant,
                           List<Gene> genes,
-                          List<Enhancer> enhancers) {
+                          List<Enhancer> enhancers,
+                          List<RepetitiveRegion> repeats) {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
+        this.repeats = getOverlappingRepeats(variant, repeats);
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
@@ -111,15 +118,16 @@ public abstract class SvSvgGenerator {
         if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
             this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
-            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
+            + this.repeats.size()*(REPEAT_HEIGHT+10);
         }
         switch (variantType.baseType()) {
             case DEL:
             case INS:
             default:
                 // get min/max for SVs with one region
-                this.genomicMinPos= getGenomicMinPos(this.variant.start(), genes, enhancers);
-                this.genomicMaxPos = getGenomicMaxPos(this.variant.end(), genes, enhancers);
+                this.genomicMinPos= getGenomicMinPos(this.variant.startWithCoordinateSystem(CoordinateSystem.zeroBased()), genes, enhancers, repeats);
+                this.genomicMaxPos = getGenomicMaxPos(this.variant.endWithCoordinateSystem(CoordinateSystem.zeroBased()), genes, enhancers, repeats);
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
                 int extraSpaceOnSide = (int)(0.1*(this.genomicSpan));
                 this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
@@ -136,10 +144,12 @@ public abstract class SvSvgGenerator {
                           int maxPos,
                           Variant variant,
                           List<Gene> genes,
-                          List<Enhancer> enhancers) {
+                          List<Enhancer> enhancers,
+                          List<RepetitiveRegion> repeats) {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
+        this.repeats = repeats;
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
@@ -164,6 +174,41 @@ public abstract class SvSvgGenerator {
         this.svgSpan = svgMaxPos - svgMinPos;
     }
 
+    /**
+     * TODO -- It would be better to put logic like this where the repeats are extracted!
+     * @param variant
+     * @param repeats
+     * @return
+     */
+    List<RepetitiveRegion> getOverlappingRepeats(Variant variant, List<RepetitiveRegion> repeats) {
+        List<RepetitiveRegion> overlaps = new ArrayList<>();
+        for (RepetitiveRegion repeat : repeats) {
+            int len = repeat.length();
+            GenomicRegion reg = repeat.withStrand(Strand.POSITIVE);
+            if (len > 100) {
+                int offset = 20;
+                Position leftStart = Position.of(Math.max(0,reg.start()-offset));
+                Position leftEnd = Position.of(Math.max(0,reg.start()+offset));
+                GenomicRegion leftRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),leftStart, leftEnd);
+                Position rightStart = Position.of(Math.max(0,reg.end()-offset));
+                Position rightEnd = Position.of(Math.max(0,reg.end()+offset));
+                GenomicRegion rightRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),rightStart, rightEnd);
+                if (variant.overlapsWith(leftRegion) || variant.overlapsWith(rightRegion)) {
+                    overlaps.add(repeat);
+                }
+            } else {
+                int offset = Math.min(10, (int) (0.1 * len));
+                Position startPos = Position.of(Math.max(0, reg.start() - offset));
+                Position endPos = Position.of(reg.end() + offset);
+                GenomicRegion variantOverlapRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(), startPos, endPos);
+                if (variant.overlapsWith(variantOverlapRegion)) {
+                    overlaps.add(repeat);
+                }
+            }
+        }
+        return overlaps;
+    }
+
 
 
     /**
@@ -175,18 +220,20 @@ public abstract class SvSvgGenerator {
      * @param enhancers   Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMinPos(int pos, List<Gene> genes, List<Enhancer> enhancers) {
+    int getGenomicMinPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
         int geneMin = genes.stream()
-                .map(t -> t.withStrand(Strand.POSITIVE))
-                .mapToInt(GenomicRegion::start)
+                .mapToInt(gene -> gene.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .min()
                 .orElse(Integer.MAX_VALUE);
         int enhancerMin = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::start)
+                .mapToInt(e -> e.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .min()
                 .orElse(Integer.MAX_VALUE);
-        return Math.min(geneMin, Math.min(enhancerMin, pos));
+        int repeatMin = repeats.stream()
+                .mapToInt(rr -> rr.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .min()
+                .orElse(Integer.MAX_VALUE);
+        return Math.min(Math.min(geneMin, repeatMin), Math.min(enhancerMin, pos));
     }
 
 
@@ -200,18 +247,20 @@ public abstract class SvSvgGenerator {
      * @param enhancers   Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMaxPos(int pos, List<Gene> genes, List<Enhancer> enhancers) {
+    int getGenomicMaxPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
         int geneMax = genes.stream()
-                .map(t -> t.withStrand(Strand.POSITIVE))
-                .mapToInt(GenomicRegion::end)
+                .mapToInt(g -> g.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .max()
                 .orElse(Integer.MIN_VALUE);
         int enhancerMax = enhancers.stream()
-                .map(e -> e.withStrand(Strand.POSITIVE))
-                .mapToInt(Region::end)
+                .mapToInt(e -> e.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .max()
                 .orElse(Integer.MIN_VALUE);
-        return Math.max(geneMax, Math.max(enhancerMax, pos));
+        int repeatMax = repeats.stream()
+                .mapToInt(rr -> rr.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .max()
+                .orElse(Integer.MIN_VALUE);
+        return Math.max(Math.max(geneMax, repeatMax), Math.max(enhancerMax, pos));
     }
 
 
@@ -422,11 +471,10 @@ public abstract class SvSvgGenerator {
             double startpos = translateGenomicToSvg(intronStarts.get(i));
             double endpos = translateGenomicToSvg(intronEnds.get(i));
             double midpoint = 0.5 * (startpos + endpos);
-            double Y = ypos;
-            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    startpos, Y, midpoint, Y - INTRON_MIDPOINT_ELEVATION));
-            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    midpoint, Y - INTRON_MIDPOINT_ELEVATION, endpos, Y));
+            writer.write(String.format("<line x1=\"%f\" y1=\"%d\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
+                    startpos, ypos, midpoint, ypos - INTRON_MIDPOINT_ELEVATION));
+            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%d\" stroke=\"black\"/>\n",
+                    midpoint, ypos - INTRON_MIDPOINT_ELEVATION, endpos, ypos));
         }
     }
 
@@ -517,6 +565,31 @@ public abstract class SvSvgGenerator {
         txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
                 xcloseToStart, y, PURPLE, contigName);
         writer.write(txt);
+    }
+
+    /**
+     * We will show repeats that overlap with the variant or are within 10% of its extent
+     * Especially for the shorter repeats, we are interested if there is
+     * a repeat in the vicinity that might be related to the SV, but might not actually overlap with the SV.
+     */
+    protected int writeRepeats(Writer writer, int ypos) throws IOException {
+        int YPOS = ypos;
+        for (RepetitiveRegion repeat : this.repeats) {
+            double xstart = translateGenomicToSvg(repeat.startOnStrand(Strand.POSITIVE));
+            double end = translateGenomicToSvg(repeat.endOnStrand(Strand.POSITIVE));
+            double width = end - xstart;
+            String name = String.format("%s (%d nt)", repeat.repeatFamily().name(), repeat.length());
+            String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
+                    end + 10, YPOS + REPEAT_HEIGHT, PURPLE, name);
+            writer.write(txt);
+            String rect = String.format("<rect x=\"%f\" y=\"%d\" width=\"%f\" height=\"%d\"  " +
+                            "style=\"stroke:%s; fill: %s\" />\n",
+                    xstart, YPOS, width, REPEAT_HEIGHT, BLACK, VIOLET);
+            writer.write(rect);
+            YPOS += (REPEAT_HEIGHT + 10);
+        }
+        YPOS += 10; // Add a little extra space
+        return YPOS;
     }
 
 

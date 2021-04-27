@@ -33,7 +33,7 @@ public class InversionSvgGeneratorTest {
         Variant variant = testVariants.inversions().gckExonic();
         List<Gene> genes = geneOverlapper.getOverlaps(variant).stream().map(GeneOverlap::gene).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
-        SvSvgGenerator gen = new InversionSvgGenerator(variant, genes, enhancerList);
+        SvSvgGenerator gen = new InversionSvgGenerator(variant, genes, enhancerList, List.of());
         String svg = gen.getSvg();
         assertNotNull(svg);
         try {

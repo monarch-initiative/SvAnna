@@ -85,6 +85,7 @@ public class JannovarGeneService implements GeneService {
                 .map(buildGeneIfPossible())
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .filter(gene -> !gene.codingTranscripts().isEmpty())
                 .collect(Collectors.toMap(Gene::geneSymbol, Function.identity()));
 
         Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()

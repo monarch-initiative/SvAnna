@@ -69,7 +69,7 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where the ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport, maxLength);
 
             SvPrioritizerFactory priorityFactory = context.getBean(SvPrioritizerFactory.class);
             PrioritizationRunner prioritizationRunner = new PrioritizationRunner(priorityFactory, nThreads);

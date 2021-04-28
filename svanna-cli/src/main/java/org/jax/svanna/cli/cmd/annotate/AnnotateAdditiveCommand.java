@@ -99,6 +99,9 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"--mode-of-inheritance"}, description = "reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
     public boolean modeOfInheritance = false;
 
+    @CommandLine.Option(names = {"max-length"}, description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
+    public int maxLength = 100_000;
+
     /*
      * ------------  OUTPUT OPTIONS  ------------
      */
@@ -218,7 +221,7 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport, maxLength);
             List<SvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize

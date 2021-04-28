@@ -22,6 +22,9 @@ abstract class BaseBenchmarkCommand extends SvAnnaCommand {
     @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 3;
 
+    @CommandLine.Option(names = {"max-length"}, description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
+    public int maxLength = 100_000;
+
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outPrefix = "SVANNA_BB";
 

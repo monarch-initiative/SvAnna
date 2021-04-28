@@ -43,7 +43,8 @@ public enum FilterType {
     BED_FILTER("bed", "Gene panel target region (Bed)"),
     PRIORITY_SCORE_FILTER("gene-priority", "Gene priority score"),
     REPETITIVE_REGION_FILTER("repeats", "Repetitive region"),
-    COVERAGE_FILTER("coverage", "Failed required coverage depth filter");
+    COVERAGE_FILTER("coverage", "Failed required coverage depth filter"),
+    MAX_LENGTH_FILTER("max-length", "Failed required maximum length filter");
 
     private final String vcfValue;
     private final String stringValue;

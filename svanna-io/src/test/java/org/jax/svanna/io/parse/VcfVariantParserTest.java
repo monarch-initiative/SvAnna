@@ -204,9 +204,9 @@ public class VcfVariantParserTest {
 
             List<SvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/sniffles.vcf"));
 
-            assertThat(variants, hasSize(5));
+            assertThat(variants, hasSize(6));
             assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
-                    hasItems(VariantType.DEL, VariantType.DUP, VariantType.INV, VariantType.INS, VariantType.SYMBOLIC)); // INVDUP -> SYMBOLIC
+                    hasItems(VariantType.DEL, VariantType.DUP, VariantType.INV, VariantType.INS, VariantType.INS, VariantType.SYMBOLIC)); // INVDUP -> SYMBOLIC
 
             // check general fields for the first variant
             // CM000663.2	1366938	1	N	<DEL>	.	PASS	IMPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=1367108;ZMW=9;STD_quant_start=11.333333;STD_quant_stop=10.000000;Kurtosis_quant_start=6.000000;Kurtosis_quant_stop=6.000000;SVTYPE=DEL;SUPTYPE=AL;SVLEN=-170;STRANDS=+-;STRANDS2=4,5,4,5;RE=9;REF_strand=0,0;Strandbias_pval=1;AF=1	GT:DR:DV	1/1:0:9
@@ -225,6 +225,14 @@ public class VcfVariantParserTest {
             assertThat(del.minDepthOfCoverage(), equalTo(9));
             assertThat(del.numberOfRefReads(), equalTo(0));
             assertThat(del.numberOfAltReads(),equalTo(9));
+
+            // Check that bad INS coordinates in Sniffles are fixed
+            SvannaVariant ins = variants.get(4);
+            assertThat(ins.contigName(), equalTo("1"));
+            assertThat(ins.strand(), equalTo(Strand.POSITIVE));
+            assertThat(ins.coordinateSystem(), equalTo(CoordinateSystem.oneBased()));
+            assertThat(ins.start(), equalTo(240_229_701));
+            assertThat(ins.end(), equalTo(240_229_700));
         }
 
 

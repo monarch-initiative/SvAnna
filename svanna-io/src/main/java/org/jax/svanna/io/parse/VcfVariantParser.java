@@ -225,9 +225,13 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         String alt = vc.getAlternateAllele(0).getDisplayString();
         int svlen = vc.getAttributeAsInt("SVLEN", 0);
         if (alt.equals("<INV>") && svlen != 0) { // happens in Sniffles input
-            if (LOGGER.isInfoEnabled())
-                LOGGER.info("Correcting SVLEN `{}!=0` for an inversion `{}`", svlen, makeVariantRepresentation(vc));
+            LogUtils.logInfo(LOGGER, "Correcting SVLEN `{}!=0` for an inversion `{}`", svlen, makeVariantRepresentation(vc));
             svlen = 0;
+        }
+
+        if (ref.equals("N") && alt.equals("<INS>") && start.pos() == end.pos() - 1) { // happens in Sniffles input
+            LogUtils.logInfo(LOGGER, "Correcting INS coordinates which are inconsistent with VCF specification for `{}`", makeVariantRepresentation(vc));
+            end = end.shift(-1);
         }
 
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));

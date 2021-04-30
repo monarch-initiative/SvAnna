@@ -9,6 +9,7 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
+import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,8 @@ public class HtmlResultWriter implements ResultWriter {
 
     private AnalysisParameters analysisParameters;
 
+    public boolean doNotReportBreakends = false;
+
     public HtmlResultWriter(GeneOverlapper overlapper,
                             AnnotationDataService annotationDataService,
                             PhenotypeDataService phenotypeDataService) {
@@ -40,6 +43,10 @@ public class HtmlResultWriter implements ResultWriter {
 
     public void setAnalysisParameters(AnalysisParameters parameters) {
         this.analysisParameters = parameters;
+    }
+
+    public void setDoNotReportBreakends(boolean doNotReportBreakends) {
+        this.doNotReportBreakends = doNotReportBreakends;
     }
 
     @Override
@@ -64,6 +71,7 @@ public class HtmlResultWriter implements ResultWriter {
                 .filter(s -> s.variant().numberOfAltReads() >= analysisParameters.minAltReadSupport()
                         && s.variant().passedFilters()
                         && !Double.isNaN(s.variant().svPriority().getPriority()))
+                .filter(v -> !(v.variant() instanceof BreakendVariant) || !doNotReportBreakends)
                 .sorted(prioritizedVariantComparator())
                 .limit(analysisParameters.topNVariantsReported())
                 .map(visualizableGenerator::makeVisualizable)

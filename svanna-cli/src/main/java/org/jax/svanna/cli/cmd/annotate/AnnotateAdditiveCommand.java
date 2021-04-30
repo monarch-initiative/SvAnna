@@ -116,6 +116,9 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"-n", "--report-top-variants"}, paramLabel = "50", description = "Report top n variants (default: ${DEFAULT-VALUE})")
     public int reportNVariants = 100;
 
+    @CommandLine.Option(names = {"--no-breakends"}, description = "do not include breakend variants into HTML report (default: ${DEFAULT-VALUE})")
+    public boolean doNotReportBreakends = false;
+
     @Override
     public Integer call(){
         int status = checkArguments();
@@ -253,7 +256,9 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
                 if (writer instanceof HtmlResultWriter) {
                     SvannaProperties svannaProperties = context.getBean(SvannaProperties.class);
                     // TODO - is there a more elegant way to pass the HTML specific parameters into the writer?
-                    ((HtmlResultWriter) writer).setAnalysisParameters(getAnalysisParameters(svannaProperties));
+                    HtmlResultWriter wrt = (HtmlResultWriter) writer;
+                    wrt.setAnalysisParameters(getAnalysisParameters(svannaProperties));
+                    wrt.setDoNotReportBreakends(doNotReportBreakends);
                 }
                 writer.write(results, prefix);
             }

@@ -76,3 +76,11 @@ create index SVANNA.TAD_BOUNDARY__CONTIG_START_END_IDX
 create index SVANNA.TAD_BOUNDARY__CONTIG_MIDPOINT_IDX
 on SVANNA.TAD_BOUNDARY (CONTIG, MIDPOINT);
 
+drop table if exists SVANNA.RESNIK_SIMILARITY;
+create table SVANNA.RESNIK_SIMILARITY
+(
+    LEFT_ID    INT   not null, -- left term ID. The id for `HP:0001234` is 1234
+    RIGHT_ID   INT   not null, -- right term ID
+    SIMILARITY FLOAT not null  -- Resnik similarity value
+);
+create unique index SVANNA.RESNIK_SIMILARITY__IDX on SVANNA.RESNIK_SIMILARITY (LEFT_ID, RIGHT_ID);

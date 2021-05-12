@@ -86,9 +86,16 @@ public class SvannaProperties {
         RESNIK_ASYMMETRIC
     }
 
+    public enum TermSimilarityMode {
+        IN_MEMORY,
+        DATABASE
+    }
+
     public static class PrioritizationParameters {
 
         private TermSimilarityMeasure termSimilarityMeasure = TermSimilarityMeasure.RESNIK_SYMMETRIC;
+
+        private TermSimilarityMode termSimilarityMode = TermSimilarityMode.DATABASE;
 
         private int maxGenes = 100;
 
@@ -112,6 +119,14 @@ public class SvannaProperties {
 
         public void setTermSimilarityMeasure(TermSimilarityMeasure termSimilarityMeasure) {
             this.termSimilarityMeasure = termSimilarityMeasure;
+        }
+
+        public TermSimilarityMode termSimilarityMode() {
+            return termSimilarityMode;
+        }
+
+        public void setTermSimilarityMode(TermSimilarityMode termSimilarityMode) {
+            this.termSimilarityMode = termSimilarityMode;
         }
 
         public double geneFactor() {

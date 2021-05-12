@@ -18,8 +18,8 @@ import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.db.landscape.*;
+import org.jax.svanna.db.phenotype.ResnikSimilarityDao;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
-import org.jax.svanna.io.hpo.PrecomputedResnikSimilaritiesParser;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -54,14 +54,38 @@ public class SvannaAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SvannaAutoConfiguration.class);
 
     private static final NumberFormat NF = NumberFormat.getNumberInstance();
+    private static final Properties properties = readProperties();
+    private static final String SVANNA_VERSION = properties.getProperty("svanna.version", "unknown version");
 
     static {
         NF.setMaximumFractionDigits(2);
     }
 
-    private static final Properties properties = readProperties();
+    private static TermSimilarityCalculator prepareSimilarityCalculator(DataSource svannaDatasource,
+                                                                        SvannaProperties.TermSimilarityMode termSimilarityMode) {
+        ResnikSimilarityDao dao = new ResnikSimilarityDao(svannaDatasource);
+        switch (termSimilarityMode) {
+            case IN_MEMORY:
+                LogUtils.logDebug(LOGGER, "Using `{}` similarity calculator mode", termSimilarityMode);
+                return new InMemoryTermSimilarityCalculator(dao.getAllSimilarities());
+            default:
+                LogUtils.logWarn(LOGGER, "Unknown term similarity mode: {}. Falling back to DATABASE", termSimilarityMode);
+            case DATABASE:
+                LogUtils.logDebug(LOGGER, "Using similarity calculator mode {}", termSimilarityMode);
+                return (a, b) -> dao.getSimilarity(TermPair.symmetric(a, b));
+        }
+    }
 
-    private static final String SVANNA_VERSION = properties.getProperty("svanna.version", "unknown version");
+    private static Properties readProperties() {
+        Properties properties = new Properties();
+
+        try (InputStream is = SvannaAutoConfiguration.class.getResourceAsStream("/svanna.properties")) {
+            properties.load(is);
+        } catch (IOException e) {
+            LogUtils.logWarn(LOGGER, "Error loading properties: {}", e.getMessage());
+        }
+        return properties;
+    }
 
     @Bean
     @ConditionalOnMissingBean(name = "svannaDataDirectory")
@@ -114,7 +138,7 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver, SvannaProperties properties) throws UndefinedResourceException, IOException {
+    public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver, DataSource svannaDatasource, SvannaProperties properties) throws UndefinedResourceException, IOException {
         LogUtils.logDebug(LOGGER, "Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
         Path hpoaPath = svannaDataResolver.phenotypeHpoaPath().toAbsolutePath();
@@ -134,14 +158,11 @@ public class SvannaAutoConfiguration {
         SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.prioritizationParameters().termSimilarityMeasure();
         LogUtils.logDebug(LOGGER, "Initializing phenotype term similarity calculator `{}`", similarityMeasure);
 
+        TermSimilarityCalculator similarityCalculator = prepareSimilarityCalculator(svannaDatasource, properties.prioritizationParameters().termSimilarityMode());
         if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {
-            LogUtils.logDebug(LOGGER, "Reading precomputed Resnik term similarities from `{}`", svannaDataResolver.precomputedResnikSimilaritiesPath());
-            Map<TermPair, Double> resnikSimilarities = PrecomputedResnikSimilaritiesParser.readSimilarities(svannaDataResolver.precomputedResnikSimilaritiesPath());
-            similarityScoreCalculator = new ResnikSimilarityScoreCalculator(resnikSimilarities, true);
+            similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, true);
         } else if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_ASYMMETRIC) {
-            LogUtils.logDebug(LOGGER, "Reading precomputed Resnik term similarities from `{}`", svannaDataResolver.precomputedResnikSimilaritiesPath());
-            Map<TermPair, Double> resnikSimilarities = PrecomputedResnikSimilaritiesParser.readSimilarities(svannaDataResolver.precomputedResnikSimilaritiesPath());
-            similarityScoreCalculator = new ResnikSimilarityScoreCalculator(resnikSimilarities, false);
+            similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, false);
         } else {
             throw new UndefinedResourceException("Unknown term similarity measure " + similarityMeasure);
         }
@@ -193,15 +214,4 @@ public class SvannaAutoConfiguration {
         return new HikariDataSource(config);
     }
 
-
-    private static Properties readProperties() {
-        Properties properties = new Properties();
-
-        try (InputStream is = SvannaAutoConfiguration.class.getResourceAsStream("/svanna.properties")) {
-            properties.load(is);
-        } catch (IOException e) {
-            LogUtils.logWarn(LOGGER, "Error loading properties: {}", e.getMessage());
-        }
-        return properties;
-    }
 }

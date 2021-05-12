@@ -5,9 +5,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.jax.svanna.core.exception.LogUtils;
@@ -20,6 +17,7 @@ import org.jax.svanna.db.landscape.DbPopulationVariantDao;
 import org.jax.svanna.db.landscape.EnhancerAnnotationDao;
 import org.jax.svanna.db.landscape.RepetitiveRegionDao;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
+import org.jax.svanna.db.phenotype.ResnikSimilarityDao;
 import org.jax.svanna.ingest.Main;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
@@ -131,7 +129,7 @@ public class BuildDb implements Callable<Integer> {
             ingestPopulationVariants(tmpDir, properties, assembly, dataSource, hg19ToHg38Chain);
             ingestRepeats(tmpDir, properties, assembly, dataSource);
             ingestTads(tmpDir, properties, assembly, dataSource, hg19ToHg38Chain);
-            precomputeResnikSimilarity(buildDir);
+            precomputeResnikSimilarity(buildDir, dataSource);
 
             LOGGER.info("The ingest is complete");
             return 0;
@@ -246,28 +244,13 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static void precomputeResnikSimilarity(Path buildDir) {
+    private static void precomputeResnikSimilarity(Path buildDir, DataSource dataSource) {
         Path ontologyPath = buildDir.resolve("hp.obo");
         Path hpoaPath = buildDir.resolve("phenotype.hpoa");
         Map<TermPair, Double> similarityMap = ResnikSimilarity.precomputeResnikSimilarity(ontologyPath, hpoaPath);
 
-        Path resnikSimilarityPath = buildDir.resolve("resnik_similarity.csv.gz");
-        LogUtils.logInfo(LOGGER, "Compressing the precomputed similarities into `{}`", resnikSimilarityPath.toAbsolutePath());
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(resnikSimilarityPath.toFile()))))) {
-            CSVPrinter printer = CSVFormat.DEFAULT
-                    .withHeader("LEFT", "RIGHT", "SIMILARITY")
-                    .print(writer);
-
-            for (Map.Entry<TermPair, Double> entry : similarityMap.entrySet()) {
-                TermPair tp = entry.getKey();
-                printer.print(tp.left().getValue());
-                printer.print(tp.right().getValue());
-                printer.print(entry.getValue());
-                printer.println();
-            }
-        } catch (IOException e) {
-            LogUtils.logWarn(LOGGER, "Error storing similarities: {}", e.getMessage());
-        }
+        ResnikSimilarityDao dao = new ResnikSimilarityDao(dataSource);
+        similarityMap.forEach(dao::insertItem);
     }
 
     private static <T extends GenomicRegion> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {

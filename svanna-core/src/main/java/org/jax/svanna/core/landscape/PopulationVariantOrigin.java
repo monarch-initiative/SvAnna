@@ -33,6 +33,11 @@ public enum PopulationVariantOrigin {
     HGSVC2,
 
     /**
+     * Download section is <a href="https://ftp.ncbi.nih.gov/snp/organisms/human_9606_b151_GRCh38p7/VCF/">here</a>
+     */
+    DBSNP,
+
+    /**
      * CNV syndrome data available from the <a href="https://decipher.sanger.ac.uk/disorders#syndromes/overview">DECIPHER project</a>.
      * <p>
      * Download section is <a href="https://decipher.sanger.ac.uk/about#downloads/data">here</a>.

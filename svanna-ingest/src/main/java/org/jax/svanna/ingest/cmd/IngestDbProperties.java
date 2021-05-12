@@ -112,6 +112,8 @@ public class IngestDbProperties {
         private String gnomadSvVcfUrl;
         private String hgsvc2VcfUrl;
 
+        private String dbsnpVcfUrl;
+
         public String hgsvc2VcfUrl() {
             return hgsvc2VcfUrl;
         }
@@ -142,6 +144,14 @@ public class IngestDbProperties {
 
         public void setDgvUrl(String dgvUrl) {
             this.dgvUrl = dgvUrl;
+        }
+
+        public String dbsnpVcfUrl() {
+            return dbsnpVcfUrl;
+        }
+
+        public void setDbsnpVcfUrl(String dbsnpVcfUrl) {
+            this.dbsnpVcfUrl = dbsnpVcfUrl;
         }
     }
 

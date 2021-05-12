@@ -27,6 +27,7 @@ import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.ingest.parse.RepetitiveRegionParser;
 import org.jax.svanna.ingest.parse.enhancer.fantom.FantomEnhancerParser;
 import org.jax.svanna.ingest.parse.enhancer.vista.VistaEnhancerParser;
+import org.jax.svanna.ingest.parse.population.DbsnpVcfParser;
 import org.jax.svanna.ingest.parse.population.DgvFileParser;
 import org.jax.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.jax.svanna.ingest.parse.population.HgSvc2VcfParser;
@@ -210,6 +211,13 @@ public class BuildDb implements Callable<Integer> {
         int hgsvc2Updated = ingestTrack(hgSvc2VcfParser, ingestDao);
         LOGGER.info("HGSVC2 ingest updated {} rows", hgsvc2Updated);
 
+        // dbSNP
+        URL dbsnp = new URL(properties.variants().dbsnpVcfUrl());
+        Path dbSnpPath = downloadUrl(dbsnp, tmpDir);
+        LOGGER.info("Ingesting dbSNP data");
+        IngestRecordParser<PopulationVariant> dbsnpVcfParser = new DbsnpVcfParser(assembly, dbSnpPath);
+        int dbsnpUpdated = ingestTrack(dbsnpVcfParser, ingestDao);
+        LOGGER.info("dbSNP ingest updated {} rows", dbsnpUpdated);
     }
 
     private static void ingestRepeats(Path tmpDir, IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource) throws IOException {

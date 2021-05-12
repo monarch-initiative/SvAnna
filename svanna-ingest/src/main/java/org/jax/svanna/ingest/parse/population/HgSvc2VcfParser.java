@@ -10,12 +10,9 @@ import org.jax.svanna.core.landscape.BasePopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.ingest.parse.IOUtils;
-import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.GenomicAssembly;
 import org.monarchinitiative.svart.Variant;
-import org.monarchinitiative.svart.util.VariantTrimmer;
-import org.monarchinitiative.svart.util.VcfConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,20 +22,15 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class HgSvc2VcfParser implements IngestRecordParser<PopulationVariant> {
+public class HgSvc2VcfParser extends AbstractVcfIngestRecordParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HgSvc2VcfParser.class);
 
-    private final GenomicAssembly genomicAssembly;
-
     private final Path hgsvcVcfPath;
 
-    private final VcfConverter vcfConverter;
-
     public HgSvc2VcfParser(GenomicAssembly genomicAssembly, Path hgsvcVcfPath) {
-        this.genomicAssembly = genomicAssembly;
+        super(genomicAssembly);
         this.hgsvcVcfPath = hgsvcVcfPath;
-        this.vcfConverter = new VcfConverter(genomicAssembly, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.removingCommonBase()));
     }
 
 
@@ -56,7 +48,7 @@ public class HgSvc2VcfParser implements IngestRecordParser<PopulationVariant> {
 
     private Function<VariantContext, Optional<? extends PopulationVariant>> toPopulationVariant() {
         return vc -> {
-            Contig contig = genomicAssembly.contigByName(vc.getContig());
+            Contig contig = vcfConverter.parseContig(vc.getContig());
             if (contig.isUnknown()) {
                 if (LOGGER.isWarnEnabled())
                     LOGGER.warn("Unknown contig `{}` in record `{}`", vc.getContig(), vc);

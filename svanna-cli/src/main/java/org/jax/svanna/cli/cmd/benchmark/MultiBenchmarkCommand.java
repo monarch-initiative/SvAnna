@@ -77,7 +77,7 @@ public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
 
             CSVPrinter printer = CSVFormat.DEFAULT
-                    .withHeader("BACKGROUND_VCF", "CASE_NAME", "VARIANT_ID", "VTYPE", "IS_CAUSAL", "PRIORITY")
+                    .withHeader("background_vcf", "case_name", "variant_id", "vtype", "is_causal", "priority")
                     .print(writer);
             Map<String, Set<String>> causalVariantIds = prepareCausalVariantIds(cases);
             int vcfsProcessed = 1;

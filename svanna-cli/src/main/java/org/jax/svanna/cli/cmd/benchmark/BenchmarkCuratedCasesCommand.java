@@ -150,7 +150,7 @@ public class BenchmarkCuratedCasesCommand extends BaseBenchmarkCommand {
         LogUtils.logInfo(LOGGER, "Writing out the results to `{}`", outputPath.toAbsolutePath());
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(outputPath.toFile()))))) {
             CSVPrinter printer = CSVFormat.DEFAULT
-                    .withHeader("CASE_NAME", "VARIANT_ID", "VTYPE", "IS_CAUSAL", "PRIORITY")
+                    .withHeader("case_name", "variant_id", "vtype", "is_causal", "priority")
                     .print(writer);
 
             for (Map.Entry<String, List<VariantPriority>> aCase : results.entrySet()) {

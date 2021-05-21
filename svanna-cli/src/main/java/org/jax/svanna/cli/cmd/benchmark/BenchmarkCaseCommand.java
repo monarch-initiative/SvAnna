@@ -156,17 +156,17 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(output.toFile()))))) {
             CSVPrinter printer = CSVFormat.DEFAULT
-                    .withHeader("CASE_NAME", "VCF_NAME", "VARIANT_ID", "VTYPE", "IS_CAUSAL", "PRIORITY")
+                    .withHeader("background_vcf", "case_name", "variant_id", "vtype", "is_causal", "priority")
                     .print(writer);
             for (VariantPriority variantPriority : priorities) {
                 Variant variant = variantPriority.variant();
 
-                printer.print(caseName); // CASE_NAME
-                printer.print(vcfName); // VCF_NAME
-                printer.print(variant.id()); // VARIANT_ID
-                printer.print(variant.variantType()); // VTYPE
-                printer.print(causalVariantIds.contains(variant.id())); // IS_CAUSAL
-                printer.print(variantPriority.priority().getPriority()); // PRIORITY
+                printer.print(vcfName); // background_vcf
+                printer.print(caseName); // case_name
+                printer.print(variant.id()); // variant_id
+                printer.print(variant.variantType()); // vtype
+                printer.print(causalVariantIds.contains(variant.id())); // is_causal
+                printer.print(variantPriority.priority().getPriority()); // priority
 
                 printer.println();
             }

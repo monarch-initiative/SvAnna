@@ -153,7 +153,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
         Path output = (outputPath != null)
                 ? outputPath
                 : Path.of(outPrefix + ".csv.gz");
-        LogUtils.logInfo(LOGGER, "Writing the results for `{}` to ", caseName, output.toAbsolutePath());
+        LogUtils.logInfo(LOGGER, "Writing the results for `{}` to `{}`", caseName, output.toAbsolutePath());
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(output.toFile()))))) {
             CSVPrinter printer = CSVFormat.DEFAULT

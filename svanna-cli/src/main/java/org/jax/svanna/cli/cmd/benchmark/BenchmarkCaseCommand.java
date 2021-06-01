@@ -115,10 +115,11 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             Collection<SvannaVariant> targetVariants = caseReport.variants();
             List<SvannaVariant> filteredTargetVariants = filter.filter(targetVariants);
             for (SvannaVariant filteredTargetVariant : filteredTargetVariants) {
-                if (filteredTargetVariant.passedFilters())
+                if (filteredTargetVariant.passedFilters()) {
                     caseVariants.add(filteredTargetVariant);
-                else
-                    LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters!", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant));
+                } else {
+                    LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters! {}", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant), filteredTargetVariant);
+                }
             }
 
             ProgressReporter progressReporter = new ProgressReporter(5_000);

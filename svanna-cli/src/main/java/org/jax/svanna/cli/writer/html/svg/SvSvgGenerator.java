@@ -30,13 +30,13 @@ public abstract class SvSvgGenerator {
     protected static final NumberFormat NF = NumberFormat.getInstance();
 
     /** Canvas height of the SVG.*/
-    protected int SVG_HEIGHT;
+    protected final int SVG_HEIGHT;
     /** List of transcripts that are affected by the SV and that are to be shown in the SVG. */
     protected final List<Gene> affectedGenes;
     /** List of enhancers that are affected by the SV and that are to be shown in the SVG. */
     protected final List<Enhancer> affectedEnhancers;
-    /** List of repetitive regions that overlap with the SV. */
-    private final List<RepetitiveRegion> repeats;
+    /** Object to write tracks for repetitive regions in the field of view. */
+    private final SvgRepeatWriter repeatWriter;
     /** Variant on {@link Strand#POSITIVE} */
     protected final Variant variant;
 
@@ -110,17 +110,12 @@ public abstract class SvSvgGenerator {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-        this.repeats = getOverlappingRepeats(variant, repeats);
+
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
                 .sum();
-        if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
-            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
-        } else {
-            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
-            + this.repeats.size()*(REPEAT_HEIGHT+10);
-        }
+
         switch (variantType.baseType()) {
             case DEL:
             case INS:
@@ -138,6 +133,13 @@ public abstract class SvSvgGenerator {
                 this.svgMaxPos = translateGenomicToSvg(genomicMaxPos);
                 this.svgSpan = svgMaxPos - svgMinPos;
         }
+        this.repeatWriter = new SvgRepeatWriter(repeats, this.paddedGenomicMinPos, this.paddedGenomicSpan);
+        if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
+            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+        } else {
+            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
+                    + (int)this.repeatWriter.verticalSpace();
+        }
     }
 
     public SvSvgGenerator(int minPos,
@@ -149,7 +151,7 @@ public abstract class SvSvgGenerator {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-        this.repeats = repeats;
+
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
@@ -172,44 +174,8 @@ public abstract class SvSvgGenerator {
         this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
+        this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicSpan);
     }
-
-    /**
-     * TODO -- It would be better to put logic like this where the repeats are extracted!
-     * @param variant
-     * @param repeats
-     * @return
-     */
-    List<RepetitiveRegion> getOverlappingRepeats(Variant variant, List<RepetitiveRegion> repeats) {
-        List<RepetitiveRegion> overlaps = new ArrayList<>();
-        for (RepetitiveRegion repeat : repeats) {
-            int len = repeat.length();
-            GenomicRegion reg = repeat.withStrand(Strand.POSITIVE);
-            if (len > 100) {
-                int offset = 20;
-                Position leftStart = Position.of(Math.max(0,reg.start()-offset));
-                Position leftEnd = Position.of(Math.max(0,reg.start()+offset));
-                GenomicRegion leftRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),leftStart, leftEnd);
-                Position rightStart = Position.of(Math.max(0,reg.end()-offset));
-                Position rightEnd = Position.of(Math.max(0,reg.end()+offset));
-                GenomicRegion rightRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),rightStart, rightEnd);
-                if (variant.overlapsWith(leftRegion) || variant.overlapsWith(rightRegion)) {
-                    overlaps.add(repeat);
-                }
-            } else {
-                int offset = Math.min(10, (int) (0.1 * len));
-                Position startPos = Position.of(Math.max(0, reg.start() - offset));
-                Position endPos = Position.of(reg.end() + offset);
-                GenomicRegion variantOverlapRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(), startPos, endPos);
-                if (variant.overlapsWith(variantOverlapRegion)) {
-                    overlaps.add(repeat);
-                }
-            }
-        }
-        return overlaps;
-    }
-
-
 
     /**
      * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
@@ -574,21 +540,8 @@ public abstract class SvSvgGenerator {
      */
     protected int writeRepeats(Writer writer, int ypos) throws IOException {
         int YPOS = ypos;
-        for (RepetitiveRegion repeat : this.repeats) {
-            double xstart = translateGenomicToSvg(repeat.startOnStrand(Strand.POSITIVE));
-            double end = translateGenomicToSvg(repeat.endOnStrand(Strand.POSITIVE));
-            double width = end - xstart;
-            String name = String.format("%s (%d nt)", repeat.repeatFamily().name(), repeat.length());
-            String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                    end + 10, YPOS + REPEAT_HEIGHT, PURPLE, name);
-            writer.write(txt);
-            String rect = String.format("<rect x=\"%f\" y=\"%d\" width=\"%f\" height=\"%d\"  " +
-                            "style=\"stroke:%s; fill: %s\" />\n",
-                    xstart, YPOS, width, REPEAT_HEIGHT, BLACK, VIOLET);
-            writer.write(rect);
-            YPOS += (REPEAT_HEIGHT + 10);
-        }
-        YPOS += 10; // Add a little extra space
+        this.repeatWriter.write(writer, ypos);
+        YPOS += this.repeatWriter.verticalSpace();
         return YPOS;
     }
 

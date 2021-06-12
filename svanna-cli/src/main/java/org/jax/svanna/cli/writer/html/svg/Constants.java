@@ -12,6 +12,9 @@ class Constants {
     static final int HEIGHT_FOR_SV_DISPLAY = 200;
     static final int HEIGHT_PER_DISPLAY_ITEM = 80;
 
+    /** Height of the symbols that represent the repeat tracks */
+    static final double REPEAT_HEIGHT = 15;
+
     private Constants() {
         // private no-op
     }

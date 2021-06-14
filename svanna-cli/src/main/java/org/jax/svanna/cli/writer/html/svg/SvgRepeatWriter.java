@@ -84,7 +84,9 @@ public class SvgRepeatWriter {
                 double x_end_repeat = translateGenomicToSvg(end);
                 double repeat_width = x_end_repeat - x_repeat;
                 String repeatColor = Constants.repeatToColor(family);
-                writer.write(SvgUtil.svgbox(x_repeat, y, repeat_width, REPEAT_HEIGHT, "black", repeatColor) + "\n");
+               // writer.write(SvgUtil.svgbox(x_repeat, y, repeat_width, REPEAT_HEIGHT, "black", repeatColor) + "\n");
+                //writer.write(SvgUtil.svgboxNoFrame(x_repeat, y, repeat_width, REPEAT_HEIGHT, repeatColor) + "\n");
+                writer.write(SvgUtil.svgboxThinFrame(x_repeat, y, repeat_width, REPEAT_HEIGHT, "black", repeatColor) + "\n");
             }
             y += REPEAT_HEIGHT;
         }

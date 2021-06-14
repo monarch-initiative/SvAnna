@@ -22,6 +22,20 @@ public class SvgUtil {
                 xpos, ypos, width, height, stroke, SvSvgGenerator.WHITE);
     }
 
+    /** write a box with no fill */
+    public static String svgboxThinFrame(double xpos, double ypos, double width, double height, String stroke, String fill) {
+        return String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" " +
+                        "style=\"stroke:%s;stroke-width:0.2;fill:%s\" />\n",
+                xpos, ypos, width, height, stroke, fill);
+    }
+
+    /** write a box with no fill */
+    public static String svgboxNoFrame(double xpos, double ypos, double width, double height, String color) {
+        return String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" " +
+                        "style=\"stroke:none;fill:%s\" />\n",
+                xpos, ypos, width, height, color);
+    }
+
     public static String svgtext(double xpos, double ypos, String color, String message) {
         return String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
                 xpos, ypos, color, message);

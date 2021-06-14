@@ -288,7 +288,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     private static double insertionUtrFitness(int segmentLength, int utrLength) {
         double impact = (double) segmentLength / utrLength;
-        return Math.max(impact, 0.);
+        return 1 - Math.min(impact, 1.);
     }
 
     private static List<PaddedExon> mapToPaddedExons(CodingTranscript tx) {

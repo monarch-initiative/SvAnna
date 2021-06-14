@@ -49,7 +49,9 @@ public class SvgRepeatWriter {
     protected double translateGenomicToSvg(int genomicCoordinate) {
         double pos = genomicCoordinate - paddedGenomicMinPos;
         if (pos < 0) {
-            throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
+            String msg = String.format("(repeat writer)Bad left boundary (genomic coordinate: %d) with paddedGenomicMinPos=%d and paddedGenomicSpan=%.1f pos=%.1f\n",
+                    genomicCoordinate, paddedGenomicMinPos, paddedGenomicSpan, pos);
+            throw new SvAnnRuntimeException(msg); // should never happen
         }
         double prop = pos / paddedGenomicSpan;
         return prop * Constants.SVG_WIDTH;
@@ -60,7 +62,8 @@ public class SvgRepeatWriter {
     public void write(Writer writer, double ystart) throws IOException {
         double y = ystart;
         double minx = translateGenomicToSvg(this.paddedGenomicMinPos);
-        double trackwidth = translateGenomicToSvg((int)this.paddedGenomicSpan);
+        double maxx = translateGenomicToSvg(this.paddedGenomicMinPos + (int)this.paddedGenomicSpan);
+        double trackwidth = maxx-minx;
         for (var e : this.repeatFamilyMap.entrySet()) {
             String family = e.getKey();
             writer.write(SvgUtil.svgbox(minx, y, trackwidth, REPEAT_HEIGHT, "black") + "\n");
@@ -69,7 +72,9 @@ public class SvgRepeatWriter {
             for (var repeat : repeatList) {
                 int start = repeat.startOnStrand(Strand.POSITIVE);
                 double x_repeat = translateGenomicToSvg(start);
-                double repeat_width = translateGenomicToSvg(repeat.length());
+                int end = repeat.endOnStrand(Strand.POSITIVE);
+                double x_end_repeat = translateGenomicToSvg(end);
+                double repeat_width = x_end_repeat - x_repeat;
                 writer.write(SvgUtil.svgbox(x_repeat, y, repeat_width, REPEAT_HEIGHT, "black", "red") + "\n");
             }
             y += REPEAT_HEIGHT;

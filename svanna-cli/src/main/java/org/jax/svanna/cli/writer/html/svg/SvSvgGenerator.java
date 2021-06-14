@@ -278,7 +278,9 @@ public abstract class SvSvgGenerator {
     protected double translateGenomicToSvg(int genomicCoordinate) {
         double pos = genomicCoordinate - paddedGenomicMinPos;
         if (pos < 0) {
-            throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
+            String msg = String.format("Bad left boundary (genomic coordinate: %s) with paddedGenomicMinPos=%d and paddedGenomicSpan=%d pos=%d\n",
+                    genomicCoordinate, paddedGenomicMinPos, paddedGenomicSpan, pos);
+            throw new SvAnnRuntimeException(msg); // should never happen
         }
         double prop = pos / paddedGenomicSpan;
         return prop * Constants.SVG_WIDTH;

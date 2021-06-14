@@ -52,6 +52,16 @@ public class SvannaProperties {
         this.prioritizationParameters = prioritizationParameters;
     }
 
+    public enum TermSimilarityMeasure {
+        RESNIK_SYMMETRIC,
+        RESNIK_ASYMMETRIC
+    }
+
+    public enum TermSimilarityMode {
+        IN_MEMORY,
+        DATABASE
+    }
+
     public static class DataParameters {
 
         private double tadStabilityThreshold = 80.;
@@ -81,16 +91,6 @@ public class SvannaProperties {
 
     }
 
-    public enum TermSimilarityMeasure {
-        RESNIK_SYMMETRIC,
-        RESNIK_ASYMMETRIC
-    }
-
-    public enum TermSimilarityMode {
-        IN_MEMORY,
-        DATABASE
-    }
-
     public static class PrioritizationParameters {
 
         private TermSimilarityMeasure termSimilarityMeasure = TermSimilarityMeasure.RESNIK_SYMMETRIC;
@@ -104,6 +104,7 @@ public class SvannaProperties {
         private double enhancerFactor = .25;
 
         private int promoterLength = 2000;
+        private double promoterFitnessGain = .6;
 
         public int maxGenes() {
             return maxGenes;
@@ -153,6 +154,13 @@ public class SvannaProperties {
             this.promoterLength = promoterLength;
         }
 
+        public double promoterFitnessGain() {
+            return promoterFitnessGain;
+        }
+
+        public void setPromoterFitnessGain(double promoterFitnessGain) {
+            this.promoterFitnessGain = promoterFitnessGain;
+        }
     }
 
     public static class EnhancerParameters {

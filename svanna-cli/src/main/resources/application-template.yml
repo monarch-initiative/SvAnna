@@ -30,3 +30,5 @@ svanna:
     #enhancerFactor: .25
     # Number of bases prepended to a transcript and evaluated as a promoter region
     #promoterLength: 2000
+    # Set to 0. to score promoter variants as strictly as coding variants, or to 1. to skip
+    #promoterFitnessGain: .6

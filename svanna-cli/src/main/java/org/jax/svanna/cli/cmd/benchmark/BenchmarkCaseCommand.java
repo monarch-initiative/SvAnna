@@ -115,10 +115,11 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             Collection<SvannaVariant> targetVariants = caseReport.variants();
             List<SvannaVariant> filteredTargetVariants = filter.filter(targetVariants);
             for (SvannaVariant filteredTargetVariant : filteredTargetVariants) {
-                if (filteredTargetVariant.passedFilters())
+                if (filteredTargetVariant.passedFilters()) {
                     caseVariants.add(filteredTargetVariant);
-                else
-                    LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters!", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant));
+                } else {
+                    LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters! {}", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant), filteredTargetVariant);
+                }
             }
 
             ProgressReporter progressReporter = new ProgressReporter(5_000);
@@ -152,17 +153,17 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
         Path output = (outputPath != null)
                 ? outputPath
                 : Path.of(outPrefix + ".csv.gz");
-        LogUtils.logInfo(LOGGER, "Writing the results for `{}` to ", caseName, output.toAbsolutePath());
+        LogUtils.logInfo(LOGGER, "Writing the results for `{}` to `{}`", caseName, output.toAbsolutePath());
 
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(output.toFile()))))) {
             CSVPrinter printer = CSVFormat.DEFAULT
-                    .withHeader("background_vcf", "case_name", "variant_id", "vtype", "is_causal", "priority")
+                    .withHeader("case_name", "background_vcf", "variant_id", "vtype", "is_causal", "priority")
                     .print(writer);
             for (VariantPriority variantPriority : priorities) {
                 Variant variant = variantPriority.variant();
 
-                printer.print(vcfName); // background_vcf
                 printer.print(caseName); // case_name
+                printer.print(vcfName); // background_vcf
                 printer.print(variant.id()); // variant_id
                 printer.print(variant.variantType()); // vtype
                 printer.print(causalVariantIds.contains(variant.id())); // is_causal

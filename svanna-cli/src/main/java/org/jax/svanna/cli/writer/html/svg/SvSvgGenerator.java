@@ -88,6 +88,7 @@ public abstract class SvSvgGenerator {
     public final static String BLUE ="#4dbbd5";
     public final static String BROWN="#7e6148";
     public final static String DARKBLUE = "#3c5488";
+    public final static String DarkGrey = "#A9A9A9";
     public final static String VIOLET = "#8333ff";
     public final static String ORANGE = "#ff9900";
     public final static String BRIGHT_GREEN = "#00a087";
@@ -134,7 +135,8 @@ public abstract class SvSvgGenerator {
                 this.svgMaxPos = translateGenomicToSvg(genomicMaxPos);
                 this.svgSpan = svgMaxPos - svgMinPos;
         }
-        this.repeatWriter = new SvgRepeatWriter(repeats, this.genomicMinPos, this.genomicMaxPos);
+        this.repeatWriter = new SvgRepeatWriter(repeats, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
+                this.genomicMinPos, this.genomicMaxPos);
         if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
             this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
@@ -175,7 +177,7 @@ public abstract class SvSvgGenerator {
         this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
-        this.repeatWriter = new SvgRepeatWriter(repeats, genomicMinPos, genomicMaxPos);
+        this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicMaxPos,this.genomicMinPos, this.genomicMaxPos);
     }
 
     /**
@@ -300,9 +302,7 @@ public abstract class SvSvgGenerator {
     protected void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
-        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
-                        "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, EXON_HEIGHT, DARKGREEN, GREEN);
+        String rect = SvgUtil.svgbox(start, Y, width, EXON_HEIGHT, DARKGREEN, GREEN);
         writer.write(rect);
     }
 
@@ -318,9 +318,7 @@ public abstract class SvSvgGenerator {
     protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
-        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\"  " +
-                        "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, EXON_HEIGHT, DARKGREEN, YELLOW);
+        String rect = SvgUtil.svgbox(start, Y, width, EXON_HEIGHT, DARKGREEN, YELLOW);
         writer.write(rect);
     }
 
@@ -331,9 +329,7 @@ public abstract class SvSvgGenerator {
         double xstart = translateGenomicToSvg(xstartGenomic);
         double xend = translateGenomicToSvg(xendGenomic);
         double width = xend - xstart;
-        String rect = String.format("<rect x=\"%f\" y=\"%d\" width=\"%f\" height=\"%f\"  " +
-                        "style=\"stroke:%s; fill: %s\" />\n",
-                xstart, ypos, width, EXON_HEIGHT, BLACK, VIOLET);
+        String rect = SvgUtil.svgbox(xstart, ypos, width, EXON_HEIGHT, BLACK, VIOLET);
         writer.write(rect);
         writeEnhancerName(enhancer, xstart, ypos, writer);
     }
@@ -346,8 +342,7 @@ public abstract class SvSvgGenerator {
         String tissues = enhancer.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
         String geneName = String.format("%s (tau %.2f)", tissues, enhancer.tau());
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
-        String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
-                xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
+        String txt = SvgUtil.svgtext(xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
         writer.write(txt);
     }
 
@@ -440,10 +435,10 @@ public abstract class SvSvgGenerator {
             double startpos = translateGenomicToSvg(intronStarts.get(i));
             double endpos = translateGenomicToSvg(intronEnds.get(i));
             double midpoint = 0.5 * (startpos + endpos);
-            writer.write(String.format("<line x1=\"%f\" y1=\"%d\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    startpos, ypos, midpoint, ypos - INTRON_MIDPOINT_ELEVATION));
-            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%d\" stroke=\"black\"/>\n",
-                    midpoint, ypos - INTRON_MIDPOINT_ELEVATION, endpos, ypos));
+            String line = SvgUtil.svgline(startpos, ypos, midpoint, ypos - INTRON_MIDPOINT_ELEVATION);
+            writer.write(line);
+            line = SvgUtil.svgline(midpoint, ypos - INTRON_MIDPOINT_ELEVATION, endpos, ypos);
+            writer.write(line);
         }
     }
 
@@ -485,54 +480,42 @@ public abstract class SvSvgGenerator {
         String positionString = String.format("%s:%s-%s (%s strand)", tx.contigName(), startPos, endPos, strand);
         String geneName = String.format("%s (%s)", geneSymbol, tx.accessionId());
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
-        String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
-                xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
+        String txt = SvgUtil.svgtext(xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
         writer.write(txt);
     }
 
 
     protected void writeScale(Writer writer, int ypos) throws IOException {
         int verticalOffset = 10;
-        String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;" +
-                " stroke-dasharray: 5 2\" />\n", this.svgMinPos, ypos, this.svgMaxPos, ypos);
-        String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
-        String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
+        String dashedLine = SvgUtil.svgdashedline( this.svgMinPos, ypos, this.svgMaxPos, ypos, 5, 2);
+        String leftVertical = SvgUtil.svgline(this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
+        String rightVertical = SvgUtil.svgline(this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
         String sequenceLength = getSequenceLengthString(svgScaleBasePairs);
-        writer.write(line);
+        writer.write(dashedLine);
         writer.write(leftVertical);
         writer.write(rightVertical);
         int y = ypos - 15;
         double xmiddle = 0.45 * (this.svgMinPos + this.svgMaxPos);
-        String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                xmiddle, y, PURPLE, sequenceLength);
+        String txt = SvgUtil.svgtext(xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
     }
 
     protected void writeScale(Writer writer, Contig contig, int ypos) throws IOException {
         int verticalOffset = 10;
-        String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;" +
-                " stroke-dasharray: 5 2\" />\n", this.svgMinPos, ypos, this.svgMaxPos, ypos);
-        String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
-        String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
+        String dashedLine = SvgUtil.svgdashedline( this.svgMinPos, ypos, this.svgMaxPos, ypos, 5, 2);
+        String leftVertical = SvgUtil.svgline(this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
+        String rightVertical = SvgUtil.svgline(this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
         String sequenceLength = getSequenceLengthString(svgScaleBasePairs);
-        writer.write(line);
+        writer.write(dashedLine);
         writer.write(leftVertical);
         writer.write(rightVertical);
         int y = ypos - 15;
         double xmiddle = 0.45 * (this.svgMinPos + this.svgMaxPos);
         double xcloseToStart = 0.1 * (this.svgMinPos + this.svgMaxPos);
-        String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                xmiddle, y, PURPLE, sequenceLength);
+        String txt = SvgUtil.svgtext(xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
         String contigName = contig.ucscName();
-        txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                xcloseToStart, y, PURPLE, contigName);
+        txt = SvgUtil.svgtext(xcloseToStart, y, PURPLE, contigName);
         writer.write(txt);
     }
 

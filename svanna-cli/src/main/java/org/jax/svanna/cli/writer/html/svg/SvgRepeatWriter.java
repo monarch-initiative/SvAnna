@@ -17,6 +17,8 @@ import static org.jax.svanna.cli.writer.html.svg.Constants.REPEAT_HEIGHT;
  */
 public class SvgRepeatWriter {
     private final Map<String, List<RepetitiveRegion>> repeatFamilyMap;
+    private final int paddedGenomicMinPos;
+    private final int paddedGenomicMaxPos;
     private final int genomicMinPos;
     private final int genomicMaxPos;
     private final double genomicSpan;
@@ -24,11 +26,15 @@ public class SvgRepeatWriter {
 
 
     public SvgRepeatWriter(List<RepetitiveRegion> repeats,
+                           int paddedGenomicMinimumPos,
+                           int paddedGenomicMaximumPos,
                            int genomicMinimumPos,
                            int genomicMaximumPos) {
+        this.paddedGenomicMinPos = paddedGenomicMinimumPos;
+        this.paddedGenomicMaxPos = paddedGenomicMaximumPos;
         this.genomicMinPos = genomicMinimumPos;
         this.genomicMaxPos = genomicMaximumPos;
-        this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
+        this.genomicSpan = this.paddedGenomicMaxPos - this.paddedGenomicMinPos;
         repeatFamilyMap = new TreeMap<>();
         for (var repeat : repeats) {
             repeatFamilyMap.putIfAbsent(repeat.repeatFamily().name(), new ArrayList<>());
@@ -49,10 +55,10 @@ public class SvgRepeatWriter {
      * @return the SVG x coordinate that corresponds to a given genomic position
      */
     protected double translateGenomicToSvg(int genomicCoordinate) {
-        double pos = genomicCoordinate - genomicMinPos;
+        double pos = genomicCoordinate - paddedGenomicMinPos;
         if (pos < 0) {
             String msg = String.format("(repeat writer)Bad left boundary (genomic coordinate: %d) with genomicMinPos=%d and genomicSpan=%.1f pos=%.1f\n",
-                    genomicCoordinate, genomicMinPos, genomicSpan, pos);
+                    genomicCoordinate, paddedGenomicMinPos, genomicSpan, pos);
             throw new SvAnnRuntimeException(msg); // should never happen
         }
         double prop = pos / genomicSpan;
@@ -68,8 +74,8 @@ public class SvgRepeatWriter {
         double trackwidth = maxx-minx;
         for (var e : this.repeatFamilyMap.entrySet()) {
             String family = e.getKey();
-            writer.write(SvgUtil.svgbox(minx, y, trackwidth, REPEAT_HEIGHT, SvSvgGenerator.BLACK) + "\n");
-            writer.write(SvgUtil.svgtext(minx + trackwidth + 10, y, SvSvgGenerator.BLACK, family) + "\n");
+            writer.write(SvgUtil.svgbox(minx, y, trackwidth, REPEAT_HEIGHT, SvSvgGenerator.DarkGrey) + "\n");
+            writer.write(SvgUtil.svgtext(minx + trackwidth + 10, y, SvSvgGenerator.BLACK, family, 12, 12) + "\n");
             List<RepetitiveRegion> repeatList = e.getValue();
             for (var repeat : repeatList) {
                 int start = repeat.startOnStrand(Strand.POSITIVE);

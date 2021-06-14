@@ -37,7 +37,6 @@ class Constants {
     private final static String Cyan = "#00FFFF";
     private final static String DarkBlue = "#00008B";
     private final static String DarkCyan = "#008B8B";
-    private final static String DarkGoldenRod = "#B8860B";
     private final static String DarkGreen = "#006400";
     private final static String DarkKhaki = "#BDB76B";
     private final static String DarkMagenta = "#8B008B";

@@ -27,5 +27,24 @@ public class SvgUtil {
                 xpos, ypos, color, message);
     }
 
+    public static String svgtext(double xpos, double ypos, String color, String message, int fontsize, int yoffset) {
+        return String.format("<text x=\"%f\" y=\"%f\" style=\"sfill=:%s;font-size: %dpx\">%s</text>\n",
+                xpos, ypos+yoffset, color, fontsize, message);
+    }
+
+
+    public static String svgline(double x1, double y1, double x2, double y2) {
+        return String.format("<line x1=\"%f\" y1=\"%f\"  x2=\"%f\"  y2=\"%f\" style=\"stroke: #000000; fill:none;" +
+                        " stroke-width: 1px;\" />\n",x1,y1,x2,y2);
+    }
+
+
+    public static String svgdashedline(double x1, double y1, double x2, double y2, int dash1, int dash2) {
+        return String.format("<line x1=\"%f\" y1=\"%f\"  x2=\"%f\"  y2=\"%f\" style=\"stroke: #000000; fill:none;" +
+                " stroke-width: 1px;" +
+                " stroke-dasharray: %d %d\" />\n",x1,y1,x2,y2, dash1, dash2);
+    }
+
+
 
 }

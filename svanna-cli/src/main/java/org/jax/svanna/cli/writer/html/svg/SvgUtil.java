@@ -18,8 +18,8 @@ public class SvgUtil {
     /** write a box with no fill */
     public static String svgbox(double xpos, double ypos, double width, double height, String stroke) {
         return String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" " +
-                        "style=\"stroke:%s\" />\n",
-                xpos, ypos, width, height, stroke);
+                        "style=\"stroke:%s;fill:%s\" />\n",
+                xpos, ypos, width, height, stroke, SvSvgGenerator.WHITE);
     }
 
     public static String svgtext(double xpos, double ypos, String color, String message) {

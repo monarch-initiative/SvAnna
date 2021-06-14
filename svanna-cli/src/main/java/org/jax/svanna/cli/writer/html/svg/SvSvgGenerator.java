@@ -92,6 +92,7 @@ public abstract class SvSvgGenerator {
     public final static String ORANGE = "#ff9900";
     public final static String BRIGHT_GREEN = "#00a087";
     public final static String YELLOW = "#FFFFE0"; //lightyellow
+    public final static String WHITE = "#FFFFFF";
 
 
     private final VariantType variantType;
@@ -133,7 +134,7 @@ public abstract class SvSvgGenerator {
                 this.svgMaxPos = translateGenomicToSvg(genomicMaxPos);
                 this.svgSpan = svgMaxPos - svgMinPos;
         }
-        this.repeatWriter = new SvgRepeatWriter(repeats, this.paddedGenomicMinPos, this.paddedGenomicSpan);
+        this.repeatWriter = new SvgRepeatWriter(repeats, this.genomicMinPos, this.genomicMaxPos);
         if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
             this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
@@ -174,7 +175,7 @@ public abstract class SvSvgGenerator {
         this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
-        this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicSpan);
+        this.repeatWriter = new SvgRepeatWriter(repeats, genomicMinPos, genomicMaxPos);
     }
 
     /**
@@ -278,7 +279,7 @@ public abstract class SvSvgGenerator {
     protected double translateGenomicToSvg(int genomicCoordinate) {
         double pos = genomicCoordinate - paddedGenomicMinPos;
         if (pos < 0) {
-            String msg = String.format("Bad left boundary (genomic coordinate: %s) with paddedGenomicMinPos=%d and paddedGenomicSpan=%d pos=%d\n",
+            String msg = String.format("Bad left boundary (genomic coordinate: %s) with paddedGenomicMinPos=%d and paddedGenomicSpan=%f pos=%f\n",
                     genomicCoordinate, paddedGenomicMinPos, paddedGenomicSpan, pos);
             throw new SvAnnRuntimeException(msg); // should never happen
         }

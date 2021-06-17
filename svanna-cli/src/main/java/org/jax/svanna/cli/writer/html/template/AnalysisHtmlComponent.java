@@ -21,7 +21,7 @@ public class AnalysisHtmlComponent {
     }
 
     private String keyValueTableRow(String key, String value) {
-        return "<tr><td>" + key + "</td><td>" + value + "</td?</tr>\n";
+        return "<tr><td>" + key + "</td><td>" + value + "</td></tr>\n";
     }
 
     private String keyValueTableRow(String key, double value) {

@@ -30,13 +30,13 @@ public abstract class SvSvgGenerator {
     protected static final NumberFormat NF = NumberFormat.getInstance();
 
     /** Canvas height of the SVG.*/
-    protected int SVG_HEIGHT;
+    protected final int SVG_HEIGHT;
     /** List of transcripts that are affected by the SV and that are to be shown in the SVG. */
     protected final List<Gene> affectedGenes;
     /** List of enhancers that are affected by the SV and that are to be shown in the SVG. */
     protected final List<Enhancer> affectedEnhancers;
-    /** List of repetitive regions that overlap with the SV. */
-    private final List<RepetitiveRegion> repeats;
+    /** Object to write tracks for repetitive regions in the field of view. */
+    private final SvgRepeatWriter repeatWriter;
     /** Variant on {@link Strand#POSITIVE} */
     protected final Variant variant;
 
@@ -88,10 +88,12 @@ public abstract class SvSvgGenerator {
     public final static String BLUE ="#4dbbd5";
     public final static String BROWN="#7e6148";
     public final static String DARKBLUE = "#3c5488";
+    public final static String DarkGrey = "#A9A9A9";
     public final static String VIOLET = "#8333ff";
     public final static String ORANGE = "#ff9900";
     public final static String BRIGHT_GREEN = "#00a087";
     public final static String YELLOW = "#FFFFE0"; //lightyellow
+    public final static String WHITE = "#FFFFFF";
 
 
     private final VariantType variantType;
@@ -110,17 +112,12 @@ public abstract class SvSvgGenerator {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-        this.repeats = getOverlappingRepeats(variant, repeats);
+
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
                 .sum();
-        if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
-            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
-        } else {
-            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
-            + this.repeats.size()*(REPEAT_HEIGHT+10);
-        }
+
         switch (variantType.baseType()) {
             case DEL:
             case INS:
@@ -138,6 +135,14 @@ public abstract class SvSvgGenerator {
                 this.svgMaxPos = translateGenomicToSvg(genomicMaxPos);
                 this.svgSpan = svgMaxPos - svgMinPos;
         }
+        this.repeatWriter = new SvgRepeatWriter(repeats, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
+                this.genomicMinPos, this.genomicMaxPos);
+        if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
+            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+        } else {
+            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
+                    + (int)this.repeatWriter.verticalSpace();
+        }
     }
 
     public SvSvgGenerator(int minPos,
@@ -149,7 +154,7 @@ public abstract class SvSvgGenerator {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-        this.repeats = repeats;
+
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
@@ -172,44 +177,8 @@ public abstract class SvSvgGenerator {
         this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
+        this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicMaxPos,this.genomicMinPos, this.genomicMaxPos);
     }
-
-    /**
-     * TODO -- It would be better to put logic like this where the repeats are extracted!
-     * @param variant
-     * @param repeats
-     * @return
-     */
-    List<RepetitiveRegion> getOverlappingRepeats(Variant variant, List<RepetitiveRegion> repeats) {
-        List<RepetitiveRegion> overlaps = new ArrayList<>();
-        for (RepetitiveRegion repeat : repeats) {
-            int len = repeat.length();
-            GenomicRegion reg = repeat.withStrand(Strand.POSITIVE);
-            if (len > 100) {
-                int offset = 20;
-                Position leftStart = Position.of(Math.max(0,reg.start()-offset));
-                Position leftEnd = Position.of(Math.max(0,reg.start()+offset));
-                GenomicRegion leftRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),leftStart, leftEnd);
-                Position rightStart = Position.of(Math.max(0,reg.end()-offset));
-                Position rightEnd = Position.of(Math.max(0,reg.end()+offset));
-                GenomicRegion rightRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(),rightStart, rightEnd);
-                if (variant.overlapsWith(leftRegion) || variant.overlapsWith(rightRegion)) {
-                    overlaps.add(repeat);
-                }
-            } else {
-                int offset = Math.min(10, (int) (0.1 * len));
-                Position startPos = Position.of(Math.max(0, reg.start() - offset));
-                Position endPos = Position.of(reg.end() + offset);
-                GenomicRegion variantOverlapRegion = GenomicRegion.of(reg.contig(), reg.strand(), reg.coordinateSystem(), startPos, endPos);
-                if (variant.overlapsWith(variantOverlapRegion)) {
-                    overlaps.add(repeat);
-                }
-            }
-        }
-        return overlaps;
-    }
-
-
 
     /**
      * For plotting SVs, we need to know the minimum and maximum genomic position. We do this with this method
@@ -312,7 +281,9 @@ public abstract class SvSvgGenerator {
     protected double translateGenomicToSvg(int genomicCoordinate) {
         double pos = genomicCoordinate - paddedGenomicMinPos;
         if (pos < 0) {
-            throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
+            String msg = String.format("Bad left boundary (genomic coordinate: %s) with paddedGenomicMinPos=%d and paddedGenomicSpan=%f pos=%f\n",
+                    genomicCoordinate, paddedGenomicMinPos, paddedGenomicSpan, pos);
+            throw new SvAnnRuntimeException(msg); // should never happen
         }
         double prop = pos / paddedGenomicSpan;
         return prop * Constants.SVG_WIDTH;
@@ -331,9 +302,7 @@ public abstract class SvSvgGenerator {
     protected void writeCdsExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
-        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\" rx=\"2\" " +
-                        "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, EXON_HEIGHT, DARKGREEN, GREEN);
+        String rect = SvgUtil.svgbox(start, Y, width, EXON_HEIGHT, DARKGREEN, GREEN);
         writer.write(rect);
     }
 
@@ -349,9 +318,7 @@ public abstract class SvSvgGenerator {
     protected void writeUtrExon(double start, double end, int ypos, Writer writer) throws IOException {
         double width = end - start;
         double Y = ypos - 0.5 * EXON_HEIGHT;
-        String rect = String.format("<rect x=\"%f\" y=\"%f\" width=\"%f\" height=\"%f\"  " +
-                        "style=\"stroke:%s; fill: %s\" />\n",
-                start, Y, width, EXON_HEIGHT, DARKGREEN, YELLOW);
+        String rect = SvgUtil.svgbox(start, Y, width, EXON_HEIGHT, DARKGREEN, YELLOW);
         writer.write(rect);
     }
 
@@ -362,9 +329,7 @@ public abstract class SvSvgGenerator {
         double xstart = translateGenomicToSvg(xstartGenomic);
         double xend = translateGenomicToSvg(xendGenomic);
         double width = xend - xstart;
-        String rect = String.format("<rect x=\"%f\" y=\"%d\" width=\"%f\" height=\"%f\"  " +
-                        "style=\"stroke:%s; fill: %s\" />\n",
-                xstart, ypos, width, EXON_HEIGHT, BLACK, VIOLET);
+        String rect = SvgUtil.svgbox(xstart, ypos, width, EXON_HEIGHT, BLACK, VIOLET);
         writer.write(rect);
         writeEnhancerName(enhancer, xstart, ypos, writer);
     }
@@ -377,8 +342,7 @@ public abstract class SvSvgGenerator {
         String tissues = enhancer.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getName).collect(Collectors.joining(", "));
         String geneName = String.format("%s (tau %.2f)", tissues, enhancer.tau());
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
-        String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
-                xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
+        String txt = SvgUtil.svgtext(xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
         writer.write(txt);
     }
 
@@ -471,10 +435,10 @@ public abstract class SvSvgGenerator {
             double startpos = translateGenomicToSvg(intronStarts.get(i));
             double endpos = translateGenomicToSvg(intronEnds.get(i));
             double midpoint = 0.5 * (startpos + endpos);
-            writer.write(String.format("<line x1=\"%f\" y1=\"%d\" x2=\"%f\" y2=\"%f\" stroke=\"black\"/>\n",
-                    startpos, ypos, midpoint, ypos - INTRON_MIDPOINT_ELEVATION));
-            writer.write(String.format("<line x1=\"%f\" y1=\"%f\" x2=\"%f\" y2=\"%d\" stroke=\"black\"/>\n",
-                    midpoint, ypos - INTRON_MIDPOINT_ELEVATION, endpos, ypos));
+            String line = SvgUtil.svgline(startpos, ypos, midpoint, ypos - INTRON_MIDPOINT_ELEVATION);
+            writer.write(line);
+            line = SvgUtil.svgline(midpoint, ypos - INTRON_MIDPOINT_ELEVATION, endpos, ypos);
+            writer.write(line);
         }
     }
 
@@ -516,54 +480,42 @@ public abstract class SvSvgGenerator {
         String positionString = String.format("%s:%s-%s (%s strand)", tx.contigName(), startPos, endPos, strand);
         String geneName = String.format("%s (%s)", geneSymbol, tx.accessionId());
         double y = Y_SKIP_BENEATH_TRANSCRIPTS + ypos;
-        String txt = String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\">%s</text>\n",
-                xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
+        String txt = SvgUtil.svgtext(xpos, y, PURPLE, String.format("%s  %s", geneName, positionString));
         writer.write(txt);
     }
 
 
     protected void writeScale(Writer writer, int ypos) throws IOException {
         int verticalOffset = 10;
-        String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;" +
-                " stroke-dasharray: 5 2\" />\n", this.svgMinPos, ypos, this.svgMaxPos, ypos);
-        String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
-        String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
+        String dashedLine = SvgUtil.svgdashedline( this.svgMinPos, ypos, this.svgMaxPos, ypos, 5, 2);
+        String leftVertical = SvgUtil.svgline(this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
+        String rightVertical = SvgUtil.svgline(this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
         String sequenceLength = getSequenceLengthString(svgScaleBasePairs);
-        writer.write(line);
+        writer.write(dashedLine);
         writer.write(leftVertical);
         writer.write(rightVertical);
         int y = ypos - 15;
         double xmiddle = 0.45 * (this.svgMinPos + this.svgMaxPos);
-        String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                xmiddle, y, PURPLE, sequenceLength);
+        String txt = SvgUtil.svgtext(xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
     }
 
     protected void writeScale(Writer writer, Contig contig, int ypos) throws IOException {
         int verticalOffset = 10;
-        String line = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;" +
-                " stroke-dasharray: 5 2\" />\n", this.svgMinPos, ypos, this.svgMaxPos, ypos);
-        String leftVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
-        String rightVertical = String.format("<line x1=\"%f\" y1=\"%d\"  x2=\"%f\"  y2=\"%d\" style=\"stroke: #000000; fill:none;" +
-                " stroke-width: 1px;\" />\n", this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
+        String dashedLine = SvgUtil.svgdashedline( this.svgMinPos, ypos, this.svgMaxPos, ypos, 5, 2);
+        String leftVertical = SvgUtil.svgline(this.svgMinPos, ypos + verticalOffset, this.svgMinPos, ypos - verticalOffset);
+        String rightVertical = SvgUtil.svgline(this.svgMaxPos, ypos + verticalOffset, this.svgMaxPos, ypos - verticalOffset);
         String sequenceLength = getSequenceLengthString(svgScaleBasePairs);
-        writer.write(line);
+        writer.write(dashedLine);
         writer.write(leftVertical);
         writer.write(rightVertical);
         int y = ypos - 15;
         double xmiddle = 0.45 * (this.svgMinPos + this.svgMaxPos);
         double xcloseToStart = 0.1 * (this.svgMinPos + this.svgMaxPos);
-        String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                xmiddle, y, PURPLE, sequenceLength);
+        String txt = SvgUtil.svgtext(xmiddle, y, PURPLE, sequenceLength);
         writer.write(txt);
         String contigName = contig.ucscName();
-        txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                xcloseToStart, y, PURPLE, contigName);
+        txt = SvgUtil.svgtext(xcloseToStart, y, PURPLE, contigName);
         writer.write(txt);
     }
 
@@ -574,21 +526,8 @@ public abstract class SvSvgGenerator {
      */
     protected int writeRepeats(Writer writer, int ypos) throws IOException {
         int YPOS = ypos;
-        for (RepetitiveRegion repeat : this.repeats) {
-            double xstart = translateGenomicToSvg(repeat.startOnStrand(Strand.POSITIVE));
-            double end = translateGenomicToSvg(repeat.endOnStrand(Strand.POSITIVE));
-            double width = end - xstart;
-            String name = String.format("%s (%d nt)", repeat.repeatFamily().name(), repeat.length());
-            String txt = String.format("<text x=\"%f\" y=\"%d\" fill=\"%s\">%s</text>\n",
-                    end + 10, YPOS + REPEAT_HEIGHT, PURPLE, name);
-            writer.write(txt);
-            String rect = String.format("<rect x=\"%f\" y=\"%d\" width=\"%f\" height=\"%d\"  " +
-                            "style=\"stroke:%s; fill: %s\" />\n",
-                    xstart, YPOS, width, REPEAT_HEIGHT, BLACK, VIOLET);
-            writer.write(rect);
-            YPOS += (REPEAT_HEIGHT + 10);
-        }
-        YPOS += 10; // Add a little extra space
+        this.repeatWriter.write(writer, ypos);
+        YPOS += this.repeatWriter.verticalSpace();
         return YPOS;
     }
 

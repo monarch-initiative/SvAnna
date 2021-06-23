@@ -40,7 +40,7 @@ public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator 
         double maxSimilarity = 0.;
         for (TermId diseaseId : diseaseIds) {
             Collection<TermId> diseaseHpoIds = diseaseIdToTermIds.get(diseaseId);
-            double resnikSimilarity = phenotypeDataService.computeSimilarityScore(diseaseHpoIds, patientFeatures);
+            double resnikSimilarity = phenotypeDataService.computeSimilarityScore(patientFeatures, diseaseHpoIds);
             maxSimilarity = Math.max(maxSimilarity, resnikSimilarity);
         }
 

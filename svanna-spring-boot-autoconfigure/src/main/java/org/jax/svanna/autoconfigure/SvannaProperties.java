@@ -52,6 +52,28 @@ public class SvannaProperties {
         this.prioritizationParameters = prioritizationParameters;
     }
 
+    public enum TermSimilarityMeasure {
+        RESNIK_SYMMETRIC,
+        RESNIK_ASYMMETRIC
+    }
+
+    /**
+     * Describe the way how to get information content (IC) of the most informative common ancestor (MICA) for two
+     * HPO terms.
+     */
+    public enum IcMicaMode {
+        /**
+         * All positive <code>IC(MICA(t1,t2))</code> values are loaded into main memory. This mode is faster but more
+         * memory intensive.
+         */
+        IN_MEMORY,
+
+        /**
+         * The <code>IC(MICA(t1,t2))</code> values are retrieved using individual database lookups, when required.
+         */
+        DATABASE
+    }
+
     public static class DataParameters {
 
         private double tadStabilityThreshold = 80.;
@@ -81,21 +103,11 @@ public class SvannaProperties {
 
     }
 
-    public enum TermSimilarityMeasure {
-        RESNIK_SYMMETRIC,
-        RESNIK_ASYMMETRIC
-    }
-
-    public enum TermSimilarityMode {
-        IN_MEMORY,
-        DATABASE
-    }
-
     public static class PrioritizationParameters {
 
         private TermSimilarityMeasure termSimilarityMeasure = TermSimilarityMeasure.RESNIK_SYMMETRIC;
 
-        private TermSimilarityMode termSimilarityMode = TermSimilarityMode.DATABASE;
+        private IcMicaMode icMicaMode = IcMicaMode.DATABASE;
 
         private int maxGenes = 100;
 
@@ -104,6 +116,7 @@ public class SvannaProperties {
         private double enhancerFactor = .25;
 
         private int promoterLength = 2000;
+        private double promoterFitnessGain = .6;
 
         public int maxGenes() {
             return maxGenes;
@@ -121,12 +134,12 @@ public class SvannaProperties {
             this.termSimilarityMeasure = termSimilarityMeasure;
         }
 
-        public TermSimilarityMode termSimilarityMode() {
-            return termSimilarityMode;
+        public IcMicaMode icMicaMode() {
+            return icMicaMode;
         }
 
-        public void setTermSimilarityMode(TermSimilarityMode termSimilarityMode) {
-            this.termSimilarityMode = termSimilarityMode;
+        public void setIcMicaMode(IcMicaMode icMicaMode) {
+            this.icMicaMode = icMicaMode;
         }
 
         public double geneFactor() {
@@ -153,6 +166,13 @@ public class SvannaProperties {
             this.promoterLength = promoterLength;
         }
 
+        public double promoterFitnessGain() {
+            return promoterFitnessGain;
+        }
+
+        public void setPromoterFitnessGain(double promoterFitnessGain) {
+            this.promoterFitnessGain = promoterFitnessGain;
+        }
     }
 
     public static class EnhancerParameters {

@@ -270,7 +270,7 @@ public class HtmlVisualizer implements Visualizer {
                 return String.format("inv(%s)(%d; %d) (%s)", invLoc.getChrom(), invBegin, invEnd, lengthInv);
         }
 
-        return "Unimplemented variant type: " + svtype.toString();
+        return "Unimplemented variant type: " + svtype;
     }
 
 
@@ -389,7 +389,7 @@ public class HtmlVisualizer implements Visualizer {
             for (var loc : locations) {
                 ucscBuilder.append("<li>").append(getUcscLink(loc)).append("</li>\n");
             }
-            ucscBuilder.append("</ul></p>\n");
+            ucscBuilder.append("</ul>\n");
         }
         sb.append(itemValueRow("UCSC", ucscBuilder.toString()));
         int totalReads = nAltReads + nRefReads;

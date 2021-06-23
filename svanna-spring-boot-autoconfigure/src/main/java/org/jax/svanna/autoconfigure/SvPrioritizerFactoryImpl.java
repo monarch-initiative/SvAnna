@@ -85,7 +85,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
 
                 SvannaProperties.PrioritizationParameters prioritizationParameters = svannaProperties.prioritizationParameters();
-                SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(prioritizationParameters.geneFactor(), prioritizationParameters.promoterLength());
+                SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(prioritizationParameters.geneFactor(), prioritizationParameters.promoterLength(), prioritizationParameters.promoterFitnessGain());
                 GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeTerms, phenotypeDataService, svannaDataResolver);
 
                 SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationParameters.enhancerFactor());

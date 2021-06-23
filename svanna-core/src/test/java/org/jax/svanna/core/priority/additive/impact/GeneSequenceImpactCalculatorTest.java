@@ -27,7 +27,7 @@ public class GeneSequenceImpactCalculatorTest {
 
     @BeforeEach
     public void setUp() {
-        instance = new GeneSequenceImpactCalculator(1., 50);
+        instance = new GeneSequenceImpactCalculator(1., 50, .6);
     }
 
     @ParameterizedTest

@@ -28,21 +28,21 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     private static final double INS_DOES_NOT_FIT_INTO_CODING_FRAME = .1;
     private static final double INS_FITS_INTO_CODING_FRAME_IS_OUT_OF_FRAME = .5;
     private static final double INS_FITS_INTO_CODING_FRAME_IS_INFRAME = .8;
-    // fraction of the gene factor added to fitnessWithEvent to promoter variant
-    private static final double ADDED_TO_PROMOTER_VARIANT = .6;
-
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;
 
-    private final int promoterLength;
-
     private final double geneFactor;
+    private final int promoterLength;
+    private final double promoterFitnessGain;
 
     private final Map<Event, Double> fitnessWithEvent;
 
-    public GeneSequenceImpactCalculator(double geneFactor, int promoterLength) {
+    public GeneSequenceImpactCalculator(double geneFactor, int promoterLength, double promoterFitnessGain) {
         this.promoterLength = promoterLength;
         this.geneFactor = geneFactor;
+        if (promoterFitnessGain > 1.)
+            LogUtils.logWarn(LOGGER, "Promoter fitness gain {} cannot be greater than 1. Clipping to 1", promoterFitnessGain);
+        this.promoterFitnessGain = Math.min(promoterFitnessGain, 1.);
         this.fitnessWithEvent = Map.of(
                 Event.GAP, geneFactor,
                 Event.SNV, .85 * geneFactor,
@@ -89,8 +89,10 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                 if (Coordinates.overlap(tx.coordinateSystem(), promoterStart, promoterEnd,
                         nonGapSegment.coordinateSystem(), segmentStart, segmentEnd)) {
                     double fitness = fitnessWithEvent.get(nonGapSegment.event());
-                    // update to not penalize promoter variants THAT much
-                    fitness = Math.min(fitness + geneFactor * ADDED_TO_PROMOTER_VARIANT, geneFactor);
+                    // In theory, `fitness + geneFactor * promoterFitnessGain` can be above 1, which does not make sense.
+                    // Let's not allow that to happen.
+                    double bla = Math.min(fitness + geneFactor * promoterFitnessGain, 1.);
+                    fitness = Math.min(bla, geneFactor);
                     if (Double.isNaN(score) || fitness < score)
                         score = fitness;
                 }
@@ -187,10 +189,10 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                 // is the insertion in UTR?
                 if (segmentPos <= cdsStart) {
                     // 5'UTR
-                    score = Math.min(insertionUtrFitness(segment, tx.fivePrimeUtrLength()), score);
+                    score = Math.min(insertionUtrFitness(segment.length(), tx.fivePrimeUtrLength()), score);
                 } else if (cdsEnd < segmentPos) {
                     // 3'UTR
-                    score = Math.min(insertionUtrFitness(segment, tx.threePrimeUtrLength()), score);
+                    score = Math.min(insertionUtrFitness(segment.length(), tx.threePrimeUtrLength()), score);
                 } else {
                     // coding region
                     int nCurrentCodingBases = segmentPos - Math.max(cdsStart, exon.start());
@@ -214,46 +216,78 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     }
 
     double scoreDefaultSegment(Segment segment, CodingTranscript tx) {
-        int cdsStart = tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased());
-        int cdsEnd = tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
+        double score = noImpact();
+        if (segment.event().equals(Event.GAP))
+            return score;
 
         int segmentStart = segment.startOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
         int segmentEnd = segment.endOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
 
-        double score = noImpact();
+        UtrData utrData = new UtrData(tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased()),
+                tx.fivePrimeUtrLength(),
+                tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased()),
+                tx.threePrimeUtrLength());
 
         List<PaddedExon> paddedExons = mapToPaddedExons(tx);
+        boolean isFirstExonOfTranscript = true;
         for (PaddedExon paddedExon : paddedExons) {
-            double exonScore = evaluateExon(segmentStart, segmentEnd, segment.event(), paddedExon, cdsStart, cdsEnd);
+            double exonScore = evaluateExon(segmentStart, segmentEnd, segment.event(), paddedExon, utrData, isFirstExonOfTranscript);
             score = Math.min(exonScore, score);
+            if (isFirstExonOfTranscript)
+                isFirstExonOfTranscript = false;
         }
 
         return score;
     }
 
-    private double evaluateExon(int segmentStart, int segmentEnd, Event event, PaddedExon exon, int cdsStart, int cdsEnd) {
+    private double evaluateExon(int segmentStart, int segmentEnd, Event event, PaddedExon exon, UtrData utrData, boolean isFirstExonOfTranscript) {
+        double score = noImpact();
         if (!Coordinates.overlap(CoordinateSystem.zeroBased(), segmentStart, segmentEnd, CoordinateSystem.zeroBased(), exon.paddedStart(), exon.paddedEnd()))
-            return noImpact();
-        if (event.equals(Event.GAP))
-            return noImpact();
+            // segment does not affect the exon at all
+            return score;
 
-        boolean affectsCds = Coordinates.overlap(CoordinateSystem.zeroBased(), segmentStart, segmentEnd, CoordinateSystem.zeroBased(), cdsStart, cdsEnd);
+        // from now on the segment overlaps with the exon
+        boolean affectsCds = Coordinates.overlap(CoordinateSystem.zeroBased(), segmentStart, segmentEnd,
+                CoordinateSystem.zeroBased(), utrData.cdsStart, utrData.cdsEnd);
+
+        // check if segment overlaps with transcription start site
+        if (isFirstExonOfTranscript) {
+            boolean segmentContainsExonStart = segmentStart <= exon.start() && exon.start() < segmentEnd;
+            if (segmentContainsExonStart)
+                return fitnessWithEvent.getOrDefault(event, score);
+        }
+
         if (!affectsCds) {
-            // may be 5UTR or 3UTR
-            if (cdsEnd < segmentStart) { // 3UTR
-                // TODO - improve as 3'UTR might be in fact multi-exonic
-                int utr3length = Coordinates.length(CoordinateSystem.zeroBased(), exon.start(), exon.end());
-                if (utr3length != 0) {
-                    double seqImpact = 2. * Coordinates.length(CoordinateSystem.zeroBased(), segmentStart, segmentEnd) / utr3length;
-                    return Math.max(1 - seqImpact, 0.);
+            if (segmentEnd <= utrData.cdsStart) { // 5UTR
+                if (utrData.fiveUtrLength == 0) {
+                    LogUtils.logWarn(LOGGER, "5'UTR was 0bp long!");
+                    return score;
                 }
+                return defaultUtrFitness(segmentEnd - segmentStart, utrData.fiveUtrLength);
+            } else if (utrData.cdsEnd < segmentStart) { // 3UTR
+                // get 3'UTR
+                if (utrData.threeUtrLength == 0) {
+                    LogUtils.logWarn(LOGGER, "3'UTR was 0bp long!");
+                    return score;
+                }
+                return defaultUtrFitness(segmentEnd - segmentStart, utrData.threeUtrLength);
+            } else {
+                // something fishy! Complain!
+                throw new IllegalArgumentException("Segment " + segmentStart + '-' + segmentEnd + " should overlap with 5UTR or 3UTR, but it does not!");
             }
         }
-        return fitnessWithEvent.getOrDefault(event, noImpact());
+
+        return fitnessWithEvent.getOrDefault(event, score);
     }
 
-    private static double insertionUtrFitness(Segment segment, int utrLength) {
-        double impact = (double) segment.length() / utrLength;
+    private static double defaultUtrFitness(int segmentLength, int utrLength) {
+        // min fitness is attained if >=50% of the UTR length is affected
+        double seqImpact = 2. * segmentLength / utrLength;
+        return Math.max(1 - seqImpact, 0.);
+    }
+
+    private static double insertionUtrFitness(int segmentLength, int utrLength) {
+        double impact = (double) segmentLength / utrLength;
         return 1 - Math.min(impact, 1.);
     }
 
@@ -310,6 +344,18 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         exons.add(PaddedExon.of(lastExonPaddedStart, lastExonStart, lastExonEnd, lastExonEnd, nCodingLast));
 
         return exons;
+    }
+
+    private static class UtrData {
+
+        private final int cdsStart, fiveUtrLength, cdsEnd, threeUtrLength;
+
+        private UtrData(int cdsStart, int fiveUtrLength, int cdsEnd, int threeUtrLength) {
+            this.cdsStart = cdsStart;
+            this.fiveUtrLength = fiveUtrLength;
+            this.cdsEnd = cdsEnd;
+            this.threeUtrLength = threeUtrLength;
+        }
     }
 
 }

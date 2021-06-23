@@ -62,16 +62,16 @@ public class SvannaAutoConfiguration {
     }
 
     private static TermSimilarityCalculator prepareSimilarityCalculator(DataSource svannaDatasource,
-                                                                        SvannaProperties.TermSimilarityMode termSimilarityMode) {
+                                                                        SvannaProperties.IcMicaMode icMicaMode) {
         ResnikSimilarityDao dao = new ResnikSimilarityDao(svannaDatasource);
-        switch (termSimilarityMode) {
+        switch (icMicaMode) {
             case IN_MEMORY:
-                LogUtils.logDebug(LOGGER, "Using `{}` similarity calculator mode", termSimilarityMode);
+                LogUtils.logDebug(LOGGER, "Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
                 return new InMemoryTermSimilarityCalculator(dao.getAllSimilarities());
             default:
-                LogUtils.logWarn(LOGGER, "Unknown term similarity mode: {}. Falling back to DATABASE", termSimilarityMode);
+                LogUtils.logWarn(LOGGER, "Unknown value `{}` for getting IC of the most informative common ancestor for HPO terms. Falling back to DATABASE", icMicaMode);
             case DATABASE:
-                LogUtils.logDebug(LOGGER, "Using similarity calculator mode {}", termSimilarityMode);
+                LogUtils.logDebug(LOGGER, "Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
                 return (a, b) -> dao.getSimilarity(TermPair.symmetric(a, b));
         }
     }
@@ -158,7 +158,7 @@ public class SvannaAutoConfiguration {
         SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.prioritizationParameters().termSimilarityMeasure();
         LogUtils.logDebug(LOGGER, "Initializing phenotype term similarity calculator `{}`", similarityMeasure);
 
-        TermSimilarityCalculator similarityCalculator = prepareSimilarityCalculator(svannaDatasource, properties.prioritizationParameters().termSimilarityMode());
+        TermSimilarityCalculator similarityCalculator = prepareSimilarityCalculator(svannaDatasource, properties.prioritizationParameters().icMicaMode());
         if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {
             similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, true);
         } else if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_ASYMMETRIC) {

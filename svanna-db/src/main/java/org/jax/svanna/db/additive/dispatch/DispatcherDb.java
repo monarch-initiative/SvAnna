@@ -214,17 +214,21 @@ public class DispatcherDb implements Dispatcher {
     private static Pair<Integer> findStartAndEnd(Collection<? extends GenomicRegion> regions, Strand strand, CoordinateSystem coordinateSystem) {
         int startPos = -1, endPos = -1;
         for (GenomicRegion region : regions) {
-            int geneStart = region.startOnStrandWithCoordinateSystem(strand, coordinateSystem);
+            int regionStart, regionEnd;
+            if (region.strand().equals(strand)) {
+                regionStart = region.startWithCoordinateSystem(coordinateSystem);
+                regionEnd = region.endOnStrandWithCoordinateSystem(strand, coordinateSystem);
+            } else {
+                regionStart = Coordinates.invertPosition(coordinateSystem, region.contig(), region.end());
+                regionEnd = Coordinates.invertPosition(coordinateSystem, region.contig(), region.start());
+            }
             if (startPos == -1)
-                startPos = geneStart;
-            else
-                startPos = Math.min(startPos, geneStart);
+                startPos = regionStart;
+            startPos = Math.min(startPos, regionStart);
 
-            int geneEnd = region.endOnStrandWithCoordinateSystem(strand, coordinateSystem);
             if (endPos == -1)
-                endPos = geneEnd;
-            else
-                endPos = Math.max(endPos, geneEnd);
+                endPos = regionEnd;
+            endPos = Math.max(endPos, regionEnd);
         }
         return Pair.of(startPos, endPos);
     }

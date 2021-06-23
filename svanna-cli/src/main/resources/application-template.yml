@@ -18,10 +18,11 @@ svanna:
   #prioritizationParameters:
     # term similarity measure, choose from {RESNIK_SYMMETRIC, RESNIK_ASYMMETRIC}
     #termSimilarityMeasure: RESNIK_SYMMETRIC
-    # term similarity mode, choose from {IN_MEMORY, DATABASE}.
-    # DATABASE is slower but also more memory efficient
+    # The mode for getting information content of the most informative common ancestors for terms t1, and t2.
+    # Choose from {IN_MEMORY, DATABASE}.
     # IN_MEMORY is faster but uses more memory
-    #termSimilarityMode: DATABASE
+    # DATABASE is slower but also more memory efficient
+    #icMicaMode: DATABASE
     # An event involving max N genes to be considered by the prototype prioritizer
     #maxGenes: 100
     # Scaling factor to use for calculating fitness of a gene with or without a variant
@@ -30,3 +31,5 @@ svanna:
     #enhancerFactor: .25
     # Number of bases prepended to a transcript and evaluated as a promoter region
     #promoterLength: 2000
+    # Set to 0. to score promoter variants as strictly as coding variants, or to 1. to skip
+    #promoterFitnessGain: .6

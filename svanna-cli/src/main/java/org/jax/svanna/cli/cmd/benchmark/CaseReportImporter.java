@@ -114,7 +114,6 @@ class CaseReportImporter {
                 .collect(Collectors.toSet());
 
         Set<SvannaVariant> variants = new HashSet<>();
-        int i = 0;
         for (org.phenopackets.schema.v1.core.Variant v : phenopacket.getVariantsList()) {
             if (v.getAlleleCase() == org.phenopackets.schema.v1.core.Variant.AlleleCase.VCF_ALLELE) {
                 VcfAllele vcfAllele = v.getVcfAllele();
@@ -129,7 +128,7 @@ class CaseReportImporter {
                     continue;
                 }
 
-                String variantId = String.format("%s[%d]", caseSummary.caseSummary(), i);
+                String variantId = String.format("causal:%s:%s:%s:%s", vcfAllele.getChr(), vcfAllele.getPos(), vcfAllele.getRef(), vcfAllele.getAlt());
                 String info = vcfAllele.getInfo();
                 Map<String, String> infoFields;
                 if (info.isEmpty()) {
@@ -200,8 +199,6 @@ class CaseReportImporter {
                     variants.add(builder.build());
                 }
             }
-
-            i++;
         }
 
         return Optional.of(CaseReport.of(caseSummary, terms, variants));

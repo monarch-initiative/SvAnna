@@ -42,6 +42,7 @@ import java.util.stream.Stream;
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
+@Deprecated // Use BenchmarkCaseCommand instead
 public class BenchmarkCuratedCasesCommand extends BaseBenchmarkCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCasesCommand.class);

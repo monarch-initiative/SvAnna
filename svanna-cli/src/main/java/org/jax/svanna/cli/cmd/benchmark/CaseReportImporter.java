@@ -212,7 +212,7 @@ class CaseReportImporter {
         }
 
         return Optional.of(
-                CaseSummary.of(matcher.group("author"), matcher.group("pmid"),
+                CaseSummary.of(phenopacketId, matcher.group("author"), matcher.group("pmid"),
                         matcher.group("year"), matcher.group("gene"), matcher.group("proband")));
     }
 

@@ -1,8 +1,5 @@
 package org.jax.svanna.cli.cmd.benchmark;
 
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.Main;
 import org.jax.svanna.cli.cmd.ProgressReporter;
 import org.jax.svanna.cli.cmd.TaskUtils;
@@ -26,10 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import picocli.CommandLine;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -51,7 +45,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
 
     @CommandLine.Option(
             names = {"-o", "--output"},
-            description="Where to write the output"
+            description = "Where to write the output"
     )
     public Path outputPath;
 
@@ -65,6 +59,15 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             description = "path to Phenopacket JSON file with case reports curated by Hpo Case Annotator")
     public Path caseReport;
 
+    private static String stripVcfSuffixes(Path vcfFile) {
+        String name = vcfFile.toFile().getName();
+        if (name.endsWith(".vcf")) {
+            return name.substring(0, name.length() - 4);
+        } else if (name.endsWith(".vcf.gz")) {
+            return name.substring(0, name.length() - 7);
+        }
+        return name;
+    }
 
     @Override
     public Integer call() throws Exception {
@@ -135,8 +138,14 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
 
             // ---------------------------------------------
 
+            String vcfName = stripVcfSuffixes(vcfFile);
+            BenchmarkResults results = new BenchmarkResults(caseReport.caseSummary().phenopacketId(), vcfName, priorities);
+
             try {
-                writeOutTheResults(caseReport.caseSummary().caseSummary(), vcfFile.toFile().getName(), priorities, causalIds);
+                Path output = (outputPath != null)
+                        ? outputPath
+                        : Path.of(outPrefix + ".csv.gz");
+                writeOutResults(output.toFile(), results, causalIds);
             } catch (IOException e) {
                 LogUtils.logError(LOGGER, "Error: {}", e);
                 return 1;
@@ -147,31 +156,6 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             return 1;
         }
 
-    }
-
-    private void writeOutTheResults(String caseName, String vcfName, List<VariantPriority> priorities, Set<String> causalVariantIds) throws IOException {
-        Path output = (outputPath != null)
-                ? outputPath
-                : Path.of(outPrefix + ".csv.gz");
-        LogUtils.logInfo(LOGGER, "Writing the results for `{}` to `{}`", caseName, output.toAbsolutePath());
-
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(output.toFile()))))) {
-            CSVPrinter printer = CSVFormat.DEFAULT
-                    .withHeader("case_name", "background_vcf", "variant_id", "vtype", "is_causal", "priority")
-                    .print(writer);
-            for (VariantPriority variantPriority : priorities) {
-                Variant variant = variantPriority.variant();
-
-                printer.print(caseName); // case_name
-                printer.print(vcfName); // background_vcf
-                printer.print(variant.id()); // variant_id
-                printer.print(variant.variantType()); // vtype
-                printer.print(causalVariantIds.contains(variant.id())); // is_causal
-                printer.print(variantPriority.priority().getPriority()); // priority
-
-                printer.println();
-            }
-        }
     }
 
 }

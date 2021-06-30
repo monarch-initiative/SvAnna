@@ -1,0 +1,150 @@
+{
+  "id": "Hsiao-2015-26189818-NF1-UAB_1",
+  "subject": {
+    "id": "UAB-1",
+    "ageAtCollection": {
+      "age": "P4Y"
+    },
+    "sex": "MALE",
+    "taxonomy": {
+      "id": "NCBITaxon:9606",
+      "label": "Homo sapiens"
+    }
+  },
+  "phenotypicFeatures": [{
+    "type": {
+      "id": "HP:0009732",
+      "label": "Plexiform neurofibroma"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:26189818",
+        "description": "Decoding NF1 Intragenic Copy-Number Variations."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0009735",
+      "label": "Spinal neurofibromas"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:26189818",
+        "description": "Decoding NF1 Intragenic Copy-Number Variations."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0009736",
+      "label": "Tibial pseudarthrosis"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:26189818",
+        "description": "Decoding NF1 Intragenic Copy-Number Variations."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0007565",
+      "label": "Multiple cafe-au-lait spots"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:26189818",
+        "description": "Decoding NF1 Intragenic Copy-Number Variations."
+      }
+    }]
+  }],
+  "genes": [{
+    "id": "NCBIGene:4763",
+    "symbol": "NF1"
+  }],
+  "variants": [{
+    "vcfAllele": {
+      "genomeAssembly": "GRCh38",
+      "id": "23e877479db3d31cd3b09ee1a22feda5",
+      "chr": "17",
+      "pos": 31150798,
+      "ref": "N",
+      "alt": "DEL",
+      "info": "SVTYPE\u003dDEL;END\u003d31157725"
+    },
+    "zygosity": {
+      "id": "GENO:0000135",
+      "label": "heterozygous"
+    }
+  }],
+  "diseases": [{
+    "term": {
+      "id": "OMIM:162200",
+      "label": "NEUROFIBROMATOSIS, TYPE I; NF1"
+    }
+  }],
+  "metaData": {
+    "created": "2021-06-24T14:32:58Z",
+    "createdBy": "Hpo Case Annotator : 1.0.15-SNAPSHOT",
+    "submittedBy": "HPO:probinson",
+    "resources": [{
+      "id": "hp",
+      "name": "human phenotype ontology",
+      "url": "http://purl.obolibrary.org/obo/hp.owl",
+      "version": "2018-03-08",
+      "namespacePrefix": "HP",
+      "iriPrefix": "http://purl.obolibrary.org/obo/HP_"
+    }, {
+      "id": "pato",
+      "name": "Phenotype And Trait Ontology",
+      "url": "http://purl.obolibrary.org/obo/pato.owl",
+      "version": "2018-03-28",
+      "namespacePrefix": "PATO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/PATO_"
+    }, {
+      "id": "geno",
+      "name": "Genotype Ontology",
+      "url": "http://purl.obolibrary.org/obo/geno.owl",
+      "version": "19-03-2018",
+      "namespacePrefix": "GENO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/GENO_"
+    }, {
+      "id": "ncbitaxon",
+      "name": "NCBI organismal classification",
+      "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+      "version": "2018-03-02",
+      "namespacePrefix": "NCBITaxon"
+    }, {
+      "id": "eco",
+      "name": "Evidence and Conclusion Ontology",
+      "url": "http://purl.obolibrary.org/obo/eco.owl",
+      "version": "2018-11-10",
+      "namespacePrefix": "ECO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/ECO_"
+    }, {
+      "id": "omim",
+      "name": "Online Mendelian Inheritance in Man",
+      "url": "https://www.omim.org",
+      "namespacePrefix": "OMIM"
+    }],
+    "phenopacketSchemaVersion": "1.0.0",
+    "externalReferences": [{
+      "id": "PMID:26189818",
+      "description": "Decoding NF1 Intragenic Copy-Number Variations."
+    }]
+  }
+}

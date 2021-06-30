@@ -264,7 +264,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                     return score;
                 }
                 return defaultUtrFitness(segmentEnd - segmentStart, utrData.fiveUtrLength);
-            } else if (utrData.cdsEnd < segmentStart) { // 3UTR
+            } else if (utrData.cdsEnd <= segmentStart) { // 3UTR
                 // get 3'UTR
                 if (utrData.threeUtrLength == 0) {
                     LogUtils.logWarn(LOGGER, "3'UTR was 0bp long!");

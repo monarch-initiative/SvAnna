@@ -1,0 +1,285 @@
+{
+  "id": "Witzel-2017-28369036-SMARCD2-BII.1",
+  "subject": {
+    "id": "BII.1",
+    "ageAtCollection": {
+      "age": "P1Y1M"
+    },
+    "sex": "FEMALE",
+    "taxonomy": {
+      "id": "NCBITaxon:9606",
+      "label": "Homo sapiens"
+    }
+  },
+  "phenotypicFeatures": [{
+    "type": {
+      "id": "HP:0001508",
+      "label": "Failure to thrive"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0002164",
+      "label": "Nail dysplasia"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0010314",
+      "label": "Premature thelarche"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0000956",
+      "label": "Acanthosis nigricans"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0002041",
+      "label": "Intractable diarrhea"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0000698",
+      "label": "Conical tooth"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0032434",
+      "label": "Delayed umbilical cord separation"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0100806",
+      "label": "Sepsis"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0001007",
+      "label": "Hirsutism"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0001263",
+      "label": "Global developmental delay"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0001763",
+      "label": "Pes planus"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0030431",
+      "label": "Osteochondroma"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0032152",
+      "label": "Keratosis pilaris"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:28369036",
+        "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+      }
+    }]
+  }],
+  "genes": [{
+    "id": "NCBIGene:6603",
+    "symbol": "SMARCD2"
+  }],
+  "variants": [{
+    "vcfAllele": {
+      "genomeAssembly": "GRCh38",
+      "id": "dea7c5a2f59009cce209e9137dba0890",
+      "chr": "17",
+      "pos": 63837200,
+      "ref": "N",
+      "alt": "DUP",
+      "info": "SVTYPE\u003dDUP;END\u003d63837225"
+    },
+    "zygosity": {
+      "id": "GENO:0000136",
+      "label": "homozygous"
+    }
+  }],
+  "diseases": [{
+    "term": {
+      "id": "OMIM:245480",
+      "label": "SPECIFIC GRANULE DEFICIENCY; SGD"
+    }
+  }],
+  "metaData": {
+    "created": "2021-06-24T14:32:58Z",
+    "createdBy": "Hpo Case Annotator : 1.0.15-SNAPSHOT",
+    "submittedBy": "HPO:ddanis",
+    "resources": [{
+      "id": "hp",
+      "name": "human phenotype ontology",
+      "url": "http://purl.obolibrary.org/obo/hp.owl",
+      "version": "2018-03-08",
+      "namespacePrefix": "HP",
+      "iriPrefix": "http://purl.obolibrary.org/obo/HP_"
+    }, {
+      "id": "pato",
+      "name": "Phenotype And Trait Ontology",
+      "url": "http://purl.obolibrary.org/obo/pato.owl",
+      "version": "2018-03-28",
+      "namespacePrefix": "PATO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/PATO_"
+    }, {
+      "id": "geno",
+      "name": "Genotype Ontology",
+      "url": "http://purl.obolibrary.org/obo/geno.owl",
+      "version": "19-03-2018",
+      "namespacePrefix": "GENO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/GENO_"
+    }, {
+      "id": "ncbitaxon",
+      "name": "NCBI organismal classification",
+      "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+      "version": "2018-03-02",
+      "namespacePrefix": "NCBITaxon"
+    }, {
+      "id": "eco",
+      "name": "Evidence and Conclusion Ontology",
+      "url": "http://purl.obolibrary.org/obo/eco.owl",
+      "version": "2018-11-10",
+      "namespacePrefix": "ECO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/ECO_"
+    }, {
+      "id": "omim",
+      "name": "Online Mendelian Inheritance in Man",
+      "url": "https://www.omim.org",
+      "namespacePrefix": "OMIM"
+    }],
+    "phenopacketSchemaVersion": "1.0.0",
+    "externalReferences": [{
+      "id": "PMID:28369036",
+      "description": "Chromatin-remodeling factor SMARCD2 regulates transcriptional networks controlling differentiation of neutrophil granulocytes."
+    }]
+  }
+}

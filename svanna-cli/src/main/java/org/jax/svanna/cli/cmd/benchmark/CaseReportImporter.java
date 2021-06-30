@@ -31,8 +31,8 @@ class CaseReportImporter {
     private static final VcfConverter VCF_CONVERTER = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.removingCommonBase()));
 
     private static final JsonFormat.Parser JSON_PARSER = JsonFormat.parser();
-    // Matches a string like `PMID:30269814-Nguyen-2018-PIGS-Family_2-II-1`
-    private static final Pattern PHENOPACKET_ID_PATTERN = Pattern.compile("PMID:(?<pmid>\\d+)-(?<author>[\\w_-]+)-(?<year>\\d{4})-(?<gene>[\\w\\d]+)-(?<proband>[\\w\\d‐\\-:,/._]+)", Pattern.UNICODE_CHARACTER_CLASS);
+    // Matches a string like `Nguyen-2018-30269814-PIGS-Family_2_II_1`
+    private static final Pattern PHENOPACKET_ID_PATTERN = Pattern.compile("(?<author>[\\w_-]+)-(?<year>\\d{4})-(?<pmid>\\d+)-(?<gene>[\\w\\d]+)-(?<proband>[\\w\\d‐\\-:,._]+)", Pattern.UNICODE_CHARACTER_CLASS);
 
     private CaseReportImporter() {
     }
@@ -114,7 +114,6 @@ class CaseReportImporter {
                 .collect(Collectors.toSet());
 
         Set<SvannaVariant> variants = new HashSet<>();
-        int i = 0;
         for (org.phenopackets.schema.v1.core.Variant v : phenopacket.getVariantsList()) {
             if (v.getAlleleCase() == org.phenopackets.schema.v1.core.Variant.AlleleCase.VCF_ALLELE) {
                 VcfAllele vcfAllele = v.getVcfAllele();
@@ -129,7 +128,7 @@ class CaseReportImporter {
                     continue;
                 }
 
-                String variantId = String.format("%s[%d]", caseSummary.caseSummary(), i);
+                String variantId = String.format("causal:%s", vcfAllele.getId());
                 String info = vcfAllele.getInfo();
                 Map<String, String> infoFields;
                 if (info.isEmpty()) {
@@ -200,8 +199,6 @@ class CaseReportImporter {
                     variants.add(builder.build());
                 }
             }
-
-            i++;
         }
 
         return Optional.of(CaseReport.of(caseSummary, terms, variants));
@@ -209,11 +206,13 @@ class CaseReportImporter {
 
     private static Optional<CaseSummary> parsePhenopacketId(String phenopacketId) {
         Matcher matcher = PHENOPACKET_ID_PATTERN.matcher(phenopacketId);
-        if (!matcher.matches())
+        if (!matcher.matches()) {
+            LogUtils.logWarn(LOGGER, "Unparsable phenopacket ID `{}`. Did you export phenopackets with the latest HpoCaseAnnotator development version?", phenopacketId);
             return Optional.empty();
+        }
 
         return Optional.of(
-                CaseSummary.of(matcher.group("author"), matcher.group("pmid"),
+                CaseSummary.of(phenopacketId, matcher.group("author"), matcher.group("pmid"),
                         matcher.group("year"), matcher.group("gene"), matcher.group("proband")));
     }
 

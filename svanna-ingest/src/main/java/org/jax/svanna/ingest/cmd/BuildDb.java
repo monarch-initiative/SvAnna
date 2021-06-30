@@ -7,6 +7,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.output.MigrateResult;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.core.landscape.Enhancer;
@@ -164,7 +165,8 @@ public class BuildDb implements Callable<Integer> {
                 .dataSource(dataSource)
                 .locations(LOCATIONS)
                 .load();
-        return flyway.migrate();
+        MigrateResult migrate = flyway.migrate();
+        return migrate.migrationsExecuted;
     }
 
     private static void ingestEnhancers(IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource) throws IOException {

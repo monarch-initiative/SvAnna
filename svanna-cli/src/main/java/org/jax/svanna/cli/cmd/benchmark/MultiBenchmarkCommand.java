@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
+@Deprecated // Use BenchmarkCaseCommand instead
 public class MultiBenchmarkCommand extends BaseBenchmarkCommand {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiBenchmarkCommand.class);

@@ -29,11 +29,6 @@
 
         <!--    TESTS    -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jax.svanna</groupId>
             <artifactId>svanna-test</artifactId>
             <version>${project.parent.version}</version>

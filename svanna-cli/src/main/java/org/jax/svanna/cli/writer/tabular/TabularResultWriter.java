@@ -31,12 +31,6 @@ public class TabularResultWriter implements ResultWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TabularResultWriter.class);
 
-    // SvAnna works with these filters
-    private static final List<FilterType> FILTER_TYPES = List.of(
-            FilterType.FAILED_VARIANT_FILTER,
-            FilterType.FREQUENCY_FILTER,
-            FilterType.REPETITIVE_REGION_FILTER);
-
     private final String suffix;
 
     private final char columnSeparator;
@@ -90,8 +84,8 @@ public class TabularResultWriter implements ResultWriter {
 
     private static String failedFilters(Filterable filterable) {
         List<String> failedFilters = new LinkedList<>();
-        for (FilterType filterType : FILTER_TYPES) {
-            if (!filterable.passedFilter(filterType))
+        for (FilterType filterType : FilterType.svannaFilterTypes()) {
+            if (filterable.failedFilter(filterType))
                 failedFilters.add(filterType.vcfValue());
         }
         return String.join(";", failedFilters);

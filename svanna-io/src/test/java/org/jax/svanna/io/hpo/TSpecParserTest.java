@@ -1,14 +1,14 @@
 package org.jax.svanna.io.hpo;
 
 
-import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.SomeEnhancer;
 import org.jax.svanna.io.TestDataConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.ConfidenceInterval;
-import org.monarchinitiative.variant.api.Contig;
-import org.monarchinitiative.variant.api.GenomicAssembly;
+import org.monarchinitiative.svart.ConfidenceInterval;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.GenomicAssembly;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * This class uses the example file {@code src/test/resources/tspec-small.tsv} to test
- * the {@link TSpecParser} and the {@link Enhancer} classes. The file contains information about
+ * the {@link TSpecParser} and the {@link SomeEnhancer} classes. The file contains information about
  * ten enhancers.
  */
 @SpringBootTest(classes = TestDataConfig.class)
@@ -46,7 +46,7 @@ public class TSpecParserTest {
      */
     @Test
     public void if_eleven_enhancers_retrieved_then_ok() {
-        Map<TermId, List<Enhancer>> id2enhancerMap = instance.getId2enhancerMap();
+        Map<TermId, List<SomeEnhancer>> id2enhancerMap = instance.getId2enhancerMap();
 
         int actual = id2enhancerMap.values().stream().mapToInt(List::size).sum();
         assertEquals(11, actual);
@@ -54,7 +54,7 @@ public class TSpecParserTest {
 
     @Test
     public void if_seven_tissues_retrieved_then_ok() {
-        Map<TermId, List<Enhancer>> id2enhancerMap = instance.getId2enhancerMap();
+        Map<TermId, List<SomeEnhancer>> id2enhancerMap = instance.getId2enhancerMap();
         assertEquals(7, id2enhancerMap.size());
     }
 
@@ -79,19 +79,19 @@ public class TSpecParserTest {
      */
     @Test
     public void testThymusEnhancer() {
-        Map<TermId, List<Enhancer>> id2enhancerMap = instance.getId2enhancerMap();
+        Map<TermId, List<SomeEnhancer>> id2enhancerMap = instance.getId2enhancerMap();
         TermId thymusHpoId = TermId.of("HP:0000777");
         TermId thymus = TermId.of("UBERON:0002370");
-        List<Enhancer> enhancers = id2enhancerMap.get(thymus);
+        List<SomeEnhancer> enhancers = id2enhancerMap.get(thymus);
         assertEquals(1, enhancers.size());
-        Enhancer thymusEnhancer = enhancers.get(0);
+        SomeEnhancer thymusEnhancer = enhancers.get(0);
         assertNotNull(thymusEnhancer);
         Contig chr10 =  genomicAssembly.contigByName("chr10");
         assertEquals(chr10, thymusEnhancer.contig());
         assertEquals(100014348, thymusEnhancer.start());
         assertEquals(100014634, thymusEnhancer.end());
-        assertEquals(thymusHpoId, thymusEnhancer.hpoId());
-        assertEquals(0.708151, thymusEnhancer.tau(), EPSILON);
+        assertEquals(thymusHpoId, thymusEnhancer.maxTauHpoTermId());
+        assertEquals(0.708151, thymusEnhancer.maxTau(), EPSILON);
         // both the start and end are precise, i.e., the confidence interval is +/- 0
         assertEquals(ConfidenceInterval.precise(), thymusEnhancer.startPosition().confidenceInterval());
         assertEquals(ConfidenceInterval.precise(), thymusEnhancer.endPosition().confidenceInterval());
@@ -99,10 +99,10 @@ public class TSpecParserTest {
 
     @Test
     public void if_five_brain_enhancers_retrieved_then_ok() {
-        Map<TermId, List<Enhancer>> id2enhancerMap = instance.getId2enhancerMap();
+        Map<TermId, List<SomeEnhancer>> id2enhancerMap = instance.getId2enhancerMap();
         TermId brainHpd = TermId.of("HP:0012443"); // 	Abnormality of brain morphology
         TermId brain = TermId.of("UBERON:0000955");
-        List<Enhancer> enhancers = id2enhancerMap.get(brain);
+        List<SomeEnhancer> enhancers = id2enhancerMap.get(brain);
         assertEquals(5, enhancers.size());
     }
 

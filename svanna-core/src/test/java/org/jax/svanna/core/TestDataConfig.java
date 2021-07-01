@@ -5,12 +5,14 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.overlap.Overlapper;
 import org.jax.svanna.core.overlap.SvAnnOverlapper;
-import org.jax.svanna.core.reference.GenomicAssemblyProvider;
+import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.core.reference.TranscriptService;
+import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
 import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.GenomicAssembly;
+import org.monarchinitiative.svart.GenomicAssemblies;
+import org.monarchinitiative.svart.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,13 +26,11 @@ import java.util.stream.Stream;
 @Configuration
 public class TestDataConfig {
 
-    private static final Path GENOME_ASSEMBLY_REPORT_PATH = Paths.get("src/test/resources/GCA_000001405.28_GRCh38.p13_assembly_report.txt");
-
     private static final Path JANNOVAR_DATA = Paths.get("src/test/resources/hg38_refseq_small.ser");
 
     @Bean
-    public GenomicAssembly genomicAssembly() throws Exception {
-        return GenomicAssemblyProvider.fromAssemblyReport(GENOME_ASSEMBLY_REPORT_PATH);
+    public GenomicAssembly genomicAssembly() {
+        return GenomicAssemblies.GRCh38p13();
     }
 
     /**
@@ -69,17 +69,22 @@ public class TestDataConfig {
     }
 
     @Bean
+    public GeneService geneService(GenomicAssembly assembly, JannovarData jannovarData) {
+        return JannovarGeneService.of(assembly, jannovarData);
+    }
+
+    @Bean
     public Map<String, GeneWithId> geneWithIdMap() {
-        GeneWithId surf1 = new GeneWithId("SURF1", TermId.of("NCBIGene:6834"));
-        GeneWithId surf2 = new GeneWithId("SURF2", TermId.of("NCBIGene:6835"));
-        GeneWithId fbn1 = new GeneWithId("FBN1", TermId.of("NCBIGene:2200"));
-        GeneWithId znf436 = new GeneWithId("ZNF436", TermId.of("NCBIGene:80818"));
-        GeneWithId zbtb48 = new GeneWithId("ZBTB48", TermId.of("NCBIGene:3104"));
-        GeneWithId hnf4a = new GeneWithId("HNF4A", TermId.of("NCBIGene:3172"));
-        GeneWithId gck = new GeneWithId("GCK", TermId.of("NCBIGene:2645"));
-        GeneWithId brca2 = new GeneWithId("BRCA2", TermId.of("NCBIGene:675"));
-        GeneWithId col4a5 = new GeneWithId("COL4A5", TermId.of("NCBIGene:1287"));
-        GeneWithId sry = new GeneWithId("SRY", TermId.of("NCBIGene:6736"));
+        GeneWithId surf1 = GeneWithId.of("SURF1", TermId.of("NCBIGene:6834"));
+        GeneWithId surf2 = GeneWithId.of("SURF2", TermId.of("NCBIGene:6835"));
+        GeneWithId fbn1 = GeneWithId.of("FBN1", TermId.of("NCBIGene:2200"));
+        GeneWithId znf436 =  GeneWithId.of("ZNF436", TermId.of("NCBIGene:80818"));
+        GeneWithId zbtb48 =  GeneWithId.of("ZBTB48", TermId.of("NCBIGene:3104"));
+        GeneWithId hnf4a =  GeneWithId.of("HNF4A", TermId.of("NCBIGene:3172"));
+        GeneWithId gck =  GeneWithId.of("GCK", TermId.of("NCBIGene:2645"));
+        GeneWithId brca2 =  GeneWithId.of("BRCA2", TermId.of("NCBIGene:675"));
+        GeneWithId col4a5 = GeneWithId.of("COL4A5", TermId.of("NCBIGene:1287"));
+        GeneWithId sry = GeneWithId.of("SRY", TermId.of("NCBIGene:6736"));
 
         return Stream.of(
                 new AbstractMap.SimpleImmutableEntry<>("SURF1", surf1),

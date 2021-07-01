@@ -1,8 +1,8 @@
 package org.jax.svanna.cli;
 
 
-import org.jax.svanna.cli.cmd.annotate.AnnotateCommand;
-import org.jax.svanna.cli.cmd.download.DownloadCommand;
+import org.jax.svanna.cli.cmd.AnnotateCommand;
+import org.jax.svanna.cli.cmd.GenerateConfigCommand;
 import picocli.CommandLine;
 
 import java.util.Locale;
@@ -22,7 +22,7 @@ public class Main implements Callable<Integer>  {
 
     public static final int WIDTH = 120;
 
-    public static final String FOOTER = "See the full documentation at `https://github.com/TheJacksonLaboratory/svann`";
+    public static final String FOOTER = "See the full documentation at `https://github.com/TheJacksonLaboratory/SvAnna`";
 
     private static final CommandLine.Help.ColorScheme COLOR_SCHEME = new CommandLine.Help.ColorScheme.Builder()
             .commands(bold, fg_blue, underline)
@@ -37,7 +37,7 @@ public class Main implements Callable<Integer>  {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
-                .addSubcommand("download", new DownloadCommand())
+                .addSubcommand("generate-config", new GenerateConfigCommand())
                 .addSubcommand("annotate", new AnnotateCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));

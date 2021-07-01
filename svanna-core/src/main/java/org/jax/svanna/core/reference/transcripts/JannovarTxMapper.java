@@ -2,8 +2,10 @@ package org.jax.svanna.core.reference.transcripts;
 
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
+import org.jax.svanna.core.reference.CodingTranscript;
+import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +19,8 @@ import java.util.Optional;
 class JannovarTxMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JannovarTxMapper.class);
+
+    private static final CoordinateSystem CS = CoordinateSystem.zeroBased();
 
     private final GenomicAssembly assembly;
 
@@ -38,20 +42,24 @@ class JannovarTxMapper {
                 ? Strand.POSITIVE
                 : Strand.NEGATIVE;
 
-        // these coordinates are already adjusted to the appropriate strand
-        GenomeInterval cdsRegion = tm.getCDSRegion();
-        int cdsStart = cdsRegion.getBeginPos();
-        int cdsEnd = cdsRegion.getEndPos();
-
         // process exons
-        List<GenomicRegion> exons = new ArrayList<>();
+        List<Exon> exons = new ArrayList<>();
         for (GenomeInterval exon : tm.getExonRegions()) {
-            exons.add(GenomicRegion.zeroBased(contig, strand, Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
+            exons.add(Exon.of(CS, Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
         }
 
-        return Optional.of(
-                Transcript.of(
-                        contig, strand, CoordinateSystem.ZERO_BASED, txRegion.getBeginPos(), txRegion.getEndPos(),
-                        cdsStart, cdsEnd, tm.getAccession(), tm.getGeneSymbol(), tm.isCoding(), exons));
+        // these coordinates are already adjusted to the appropriate strand
+        Transcript tx;
+        if (tm.isCoding()) {
+            GenomeInterval cdsRegion = tm.getCDSRegion();
+            tx = CodingTranscript.of(contig, strand, CS,
+                    Position.of(txRegion.getBeginPos()), Position.of(txRegion.getEndPos()),
+                    tm.getAccession(), exons, Position.of(cdsRegion.getBeginPos()), Position.of(cdsRegion.getEndPos()));
+        } else {
+            tx = Transcript.noncoding(contig, strand, CS, txRegion.getBeginPos(), txRegion.getEndPos(),
+                    tm.getAccession(), exons);
+        }
+
+        return Optional.of(tx);
     }
 }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <logger name="de.charite.compbio.jannovar" level="ERROR"/>
+    <logger name="org.monarchinitiative.phenol" level="INFO"/>
+    <logger name="org.flywaydb" level="WARN"/>
+    <logger name="org.jax.svanna" level="INFO"/>
+    <root level="info">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>

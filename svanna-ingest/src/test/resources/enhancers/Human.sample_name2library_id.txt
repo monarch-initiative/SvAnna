@@ -1,0 +1,1829 @@
+acute myeloid leukemia (FAB M5) cell line:THP-1 (fresh)	CNhs10722
+acute myeloid leukemia (FAB M5) cell line:THP-1 (revived)	CNhs10723
+acute myeloid leukemia (FAB M5) cell line:THP-1 (thawed)	CNhs10724
+lung adenocarcinoma cell line:PC-14	CNhs10726
+chronic myelogenous leukemia cell line:KU812	CNhs10727
+extraskeletal myxoid chondrosarcoma cell line:H-EMC-SS	CNhs10728
+renal cell carcinoma cell line:OS-RC-2	CNhs10729
+malignant trichilemmal cyst cell line:DJM-1	CNhs10730
+glioma cell line:GI-1	CNhs10731
+maxillary sinus tumor cell line:HSQ-89	CNhs10732
+gall bladder carcinoma cell line:TGBC2TKB	CNhs10733
+chronic lymphocytic leukemia (T-CLL) cell line:SKW-3	CNhs11714
+papillotubular adenocarcinoma cell line:TGBC18TKB	CNhs10734
+transitional-cell carcinoma cell line:5637	CNhs10735
+breast carcinoma cell line:MDA-MB-453	CNhs10736
+colon carcinoma cell line:COLO-320	CNhs10737
+adult T-cell leukemia cell line:ATN-1	CNhs10738
+Burkitt's lymphoma cell line:DAUDI	CNhs10739
+choriocarcinoma cell line:BeWo	CNhs10740
+splenic lymphoma with villous lymphocytes cell line:SLVL	CNhs10741
+astrocytoma cell line:TM-31	CNhs10742
+epidermoid carcinoma cell line:A431	CNhs10743
+b cell line:RPMI1788	CNhs10744
+anaplastic carcinoma cell line:8305C	CNhs10745
+acute lymphoblastic leukemia (T-ALL) cell line:HPB-ALL	CNhs10746
+non T non B acute lymphoblastic leukemia (ALL) cell line:P30/OHK	CNhs10747
+epidermoid carcinoma cell line:Ca Ski	CNhs10748
+bile duct carcinoma cell line:HuCCT1	CNhs10750
+giant cell carcinoma cell line:Lu99B	CNhs10751
+oral squamous cell carcinoma cell line:Ca9-22	CNhs10752
+Hodgkin's lymphoma cell line:HD-Mar2	CNhs11715
+signet ring carcinoma cell line:Kato III	CNhs10753
+papillary adenocarcinoma cell line:8505C	CNhs11716
+ductal cell carcinoma cell line:KLM-1	CNhs11100
+prostate cancer cell line:PC-3	CNhs11243
+synovial sarcoma cell line:HS-SY-II	CNhs11244
+schwannoma cell line:HS-PSS, tech_rep1	CNhs11183
+schwannoma cell line:HS-PSS, tech_rep2	CNhs11245
+epithelioid sarcoma cell line:HS-ES-1	CNhs11247
+glioblastoma cell line:A172, tech_rep1	CNhs11185
+glioblastoma cell line:A172, tech_rep2	CNhs11248
+endometrial stromal sarcoma cell line:OMC-9	CNhs11249
+cord blood derived cell line:COBL-a untreated	CNhs11045
+embryonic kidney cell line: HEK293/SLAM untreated	CNhs11046
+embryonic kidney cell line: HEK293/SLAM infection, 24hr	CNhs11047
+cord blood derived cell line:COBL-a 24h infection(-C)	CNhs11049
+cord blood derived cell line:COBL-a 24h infection	CNhs11050
+chronic myelogenous leukemia cell line:K562	CNhs11250
+acute lymphoblastic leukemia (B-ALL) cell line:BALL-1	CNhs11251
+squamous cell lung carcinoma cell line:LC-1F	CNhs14238
+squamous cell carcinoma cell line:EC-GI-10	CNhs11252
+acute lymphoblastic leukemia (T-ALL) cell line:Jurkat	CNhs11253
+melanoma cell line:G-361	CNhs11254
+rectal cancer cell line:TT1TKB	CNhs11255
+gall bladder carcinoma cell line:TGBC14TKB	CNhs11256
+renal cell carcinoma cell line:TUHR10TKB	CNhs11257
+myeloma cell line:PCM6	CNhs11258
+retinoblastoma cell line:Y79	CNhs11267
+Burkitt's lymphoma cell line:RAJI	CNhs11268
+rhabdomyosarcoma cell line:RMS-YM	CNhs11269
+breast carcinoma cell line:MCF7	CNhs11943
+signet ring carcinoma cell line:NUGC-4	CNhs11270
+hepatoma cell line:Li-7	CNhs11271
+glioblastoma cell line:T98G	CNhs11272
+squamous cell lung carcinoma cell line:EBC-1	CNhs11273
+giant cell carcinoma cell line:LU65	CNhs11274
+ductal cell carcinoma cell line:MIA Paca2	CNhs11259
+prostate cancer cell line:DU145	CNhs11260
+transitional-cell carcinoma cell line:JMSU1	CNhs11261
+mesothelioma cell line:ACC-MESO-1	CNhs11263
+mesothelioma cell line:ACC-MESO-4	CNhs11264
+epithelioid sarcoma cell line:HS-ES-2R	CNhs14239
+bile duct carcinoma cell line:TFK-1	CNhs11265
+endometrial carcinoma cell line:OMC-2	CNhs11266
+lung adenocarcinoma cell line:A549	CNhs11275
+squamous cell lung carcinoma cell line:RERF-LC-AI	CNhs14240
+neuroblastoma cell line:CHP-134	CNhs11276
+large cell lung carcinoma cell line:IA-LM	CNhs11277
+osteosarcoma cell line:143B/TK^(-)neo^(R)	CNhs11279
+colon carcinoma cell line:CACO-2	CNhs11280
+melanoma cell line:COLO 679	CNhs11281
+acute lymphoblastic leukemia (B-ALL) cell line:NALM-6	CNhs11282
+cholangiocellular carcinoma cell line:HuH-28	CNhs11283
+neuroblastoma cell line:NB-1	CNhs11284
+small cell lung carcinoma cell line:LK-2	CNhs11285
+oral squamous cell carcinoma cell line:SAS	CNhs11810
+oral squamous cell carcinoma cell line:HSC-3	CNhs11717
+gastric cancer cell line:AZ521	CNhs11286
+oral squamous cell carcinoma cell line:HO-1-u-1	CNhs11287
+cervical cancer cell line:D98-AH2	CNhs11288
+cervical cancer cell line:ME-180	CNhs11289
+neuroblastoma cell line:NH-12	CNhs11811
+osteosarcoma cell line:HS-Os-1	CNhs11290
+gastric cancer cell line:GSS	CNhs14241
+small cell lung carcinoma cell line:WA-hT	CNhs11812
+xeroderma pigentosum b cell line:XPL 17	CNhs11813
+mesenchymal stem cell line:Hu5/E18	CNhs11718
+leiomyoma cell line:10964C	CNhs11722
+leiomyoma cell line:15242A	CNhs11723
+leiomyoma cell line:15425	CNhs11724
+argyrophil small cell carcinoma cell line:TC-YIK	CNhs11725
+testicular germ cell embryonal carcinoma cell line:NEC8	CNhs11726
+testicular germ cell embryonal carcinoma cell line:NEC14	CNhs12351
+testicular germ cell embryonal carcinoma cell line:NEC15	CNhs12362
+Wilms' tumor cell line:HFWT	CNhs11728
+myxofibrosarcoma cell line:MFH-ino	CNhs11729
+embryonic pancreas cell line:2C6	CNhs11814
+embryonic pancreas cell line:1B2C6	CNhs11731
+embryonic pancreas cell line:1C3D3	CNhs11732
+embryonic pancreas cell line:1C3IKEI	CNhs11733
+neuroblastoma cell line:NBsusSR	CNhs11818
+small-cell gastrointestinal carcinoma cell line:ECC4	CNhs11734
+small cell gastrointestinal carcinoma cell line:ECC10	CNhs11736
+gastric adenocarcinoma cell line:MKN45	CNhs11819
+gastric adenocarcinoma cell line:MKN1	CNhs11737
+gastrointestinal carcinoma cell line:ECC12	CNhs11738
+squamous cell carcinoma cell line:T3M-5	CNhs11739
+choriocarcinoma cell line:T3M-3	CNhs11820
+granulosa cell tumor cell line:KGN	CNhs11740
+diffuse large B-cell lymphoma cell line:CTB-1	CNhs11741
+hepatoblastoma cell line:HuH-6	CNhs11742
+clear cell carcinoma cell line:TEN	CNhs11930
+neuroectodermal tumor cell line:FU-RPNT-1	CNhs11744
+clear cell carcinoma cell line:JHOC-5	CNhs11745
+serous adenocarcinoma cell line:JHOS-2	CNhs11746
+carcinosarcoma cell line:JHUCS-1	CNhs11747
+endometrioid adenocarcinoma cell line:JHUEM-1	CNhs11748
+squamous cell carcinoma cell line:JHUS-nk1	CNhs11749
+lens epithelial cell line:SRA 01/04	CNhs11750
+mucinous adenocarcinoma cell line:JHOM-1	CNhs11752
+neuroectodermal tumor cell line:FU-RPNT-2	CNhs11753
+myxofibrosarcoma cell line:NMFH-1	CNhs11821
+bone marrow stromal cell line:StromaNKtert	CNhs11931
+Krukenberg tumor cell line:HSKTC	CNhs11822
+glassy cell carcinoma cell line:HOKUG	CNhs11824
+mixed mullerian tumor cell line:HTMMT	CNhs11944
+meningioma cell line:HKBMM	CNhs11945
+large cell non-keratinizing squamous carcinoma cell line:SKG-II-SF	CNhs11825
+serous cystadenocarcinoma cell line:HTOA	CNhs11827
+tridermal teratoma cell line:HGRT	CNhs11828
+sacrococcigeal teratoma cell line:HTST	CNhs11829
+peripheral neuroectodermal tumor cell line:KU-SN	CNhs11830
+pancreatic carcinoma cell line:NOR-P1	CNhs11832
+acute myeloid leukemia (FAB M7) cell line:M-MOK	CNhs13049
+chondrosarcoma cell line:SW 1353	CNhs11833
+basal cell carcinoma cell line:TE 354.T	CNhs11932
+carcinoid cell line:NCI-H1770	CNhs11834
+osteoclastoma cell line:Hs 706.T	CNhs11835
+Ewing's sarcoma cell line:Hs 863.T	CNhs11836
+pleomorphic hepatocellular carcinoma cell line:SNU-387	CNhs11933
+transitional cell carcinoma cell line:Hs 769.T	CNhs11837
+alveolar cell carcinoma cell line:SW 1573	CNhs11838
+bronchioalveolar carcinoma cell line:NCI-H358	CNhs11840
+bronchogenic carcinoma cell line:ChaGo-K-1	CNhs11841
+fibrous histiocytoma cell line:GCT TIB-223	CNhs11842
+hairy cell leukemia cell line:Mo	CNhs11843
+bronchioalveolar carcinoma cell line:NCI-H650	CNhs14138
+acantholytic squamous carcinoma cell line:HCC1806	CNhs11844
+biphenotypic B myelomonocytic leukemia cell line:MV-4-11	CNhs11845
+carcinoid cell line:SK-PN-DW	CNhs11846
+leiomyoblastoma cell line:G-402	CNhs11848
+pharyngeal carcinoma cell line:Detroit 562	CNhs11849
+liposarcoma cell line:SW 872	CNhs11851
+lymphangiectasia cell line:DS-1	CNhs11852
+neuroepithelioma cell line:SK-N-MC	CNhs11853
+neurofibroma cell line:Hs 53.T	CNhs11854
+pagetoid sarcoma cell line:Hs 925.T	CNhs11856
+carcinoid cell line:NCI-H727	CNhs14244
+spindle cell sarcoma cell line:Hs 132.T	CNhs11857
+lung adenocarcinoma, papillary cell line:NCI-H441	CNhs14245
+mycosis fungoides, T cell lymphoma cell line:HuT 102 TIB-162	CNhs11858
+leukemia, chronic megakaryoblastic cell line:MEG-01	CNhs11859
+fibrosarcoma cell line:HT-1080	CNhs11860
+medulloblastoma cell line:ONS-76	CNhs11861
+bronchial squamous cell carcinoma cell line:KNS-62	CNhs11862
+acute myeloid leukemia (FAB M5) cell line:NOMO-1	CNhs13050
+acute myeloid leukemia (FAB M2) cell line:NKM-1	CNhs11864
+chronic myelogenous leukemia (CML) cell line:MEG-A2	CNhs11865
+acute myeloid leukemia (FAB M5) cell line:P31/FUJ	CNhs13051
+myelodysplastic syndrome cell line:SKM-1	CNhs11934
+neuroectodermal tumor cell line:TASK1	CNhs11866
+lymphoma, malignant, hairy B-cell cell line:MLMA	CNhs11935
+thyroid carcinoma cell line:KHM-5M	CNhs14140
+NK T cell leukemia cell line:KHYG-1	CNhs11867
+hepatic mesenchymal tumor cell line:LI90	CNhs11868
+somatostatinoma cell line:QGP-1	CNhs11869
+liposarcoma cell line:KMLS-1	CNhs11870
+thyroid carcinoma cell line:TCO-1	CNhs11872
+mucinous cystadenocarcinoma cell line:MCAS	CNhs11873
+choriocarcinoma cell line:SCH	CNhs11875
+testicular germ cell embryonal carcinoma cell line:ITO-II	CNhs11876
+rhabdomyosarcoma cell line:KYM-1	CNhs11877
+acute myeloid leukemia (FAB M2) cell line:Kasumi-1	CNhs13502
+teratocarcinoma cell line:NCC-IT-A3	CNhs11878
+keratoacanthoma cell line:HKA-1	CNhs11880
+acute myeloid leukemia (FAB M2) cell line:Kasumi-6	CNhs13052
+anaplastic large cell lymphoma cell line:Ki-JK	CNhs11881
+adenocarcinoma cell line:IM95m	CNhs11882
+tubular adenocarcinoma cell line:SUIT-2	CNhs11883
+teratocarcinoma cell line:NCR-G1	CNhs11884
+small cell cervical cancer cell line:HCSC-1	CNhs11885
+chronic myeloblastic leukemia (CML) cell line:KCL-22	CNhs11886
+acute myeloid leukemia (FAB M7) cell line:MKPL-1	CNhs11888
+thymic carcinoma cell line:Ty-82	CNhs14139
+anaplastic squamous cell carcinoma cell line:RPMI 2650	CNhs11889
+teratocarcinoma cell line:PA-1	CNhs11890
+hereditary spherocytic anemia cell line:WIL2-NS	CNhs11891
+Wilms' tumor cell line:G-401	CNhs11892
+adrenal cortex adenocarcinoma cell line:SW-13	CNhs11893
+normal intestinal epithelial cell line:FHs 74 Int	CNhs11950
+normal embryonic palatal mesenchymal cell line:HEPM	CNhs11894
+epitheloid carcinoma cell line: HelaS3 ENCODE, biol_rep1	CNhs12325
+epitheloid carcinoma cell line: HelaS3 ENCODE, biol_rep2	CNhs12326
+epitheloid carcinoma cell line: HelaS3 ENCODE, biol_rep3	CNhs12327
+hepatocellular carcinoma cell line: HepG2 ENCODE, biol_rep1	CNhs12328
+hepatocellular carcinoma cell line: HepG2 ENCODE, biol_rep2	CNhs12329
+hepatocellular carcinoma cell line: HepG2 ENCODE, biol_rep3	CNhs12330
+B lymphoblastoid cell line: GM12878 ENCODE, biol_rep1	CNhs12331
+B lymphoblastoid cell line: GM12878 ENCODE, biol_rep2	CNhs12332
+B lymphoblastoid cell line: GM12878 ENCODE, biol_rep3	CNhs12333
+chronic myelogenous leukemia cell line:K562 ENCODE, biol_rep1	CNhs12334
+chronic myelogenous leukemia cell line:K562 ENCODE, biol_rep2	CNhs12335
+chronic myelogenous leukemia cell line:K562 ENCODE, biol_rep3	CNhs12336
+acute myeloid leukemia (FAB M0) cell line:KG-1	CNhs13053
+acute myeloid leukemia (FAB M1) cell line:HYT-1	CNhs13054
+acute myeloid leukemia (FAB M3) cell line:HL60	CNhs13055
+acute myeloid leukemia (FAB M4) cell line:FKH-1	CNhs13503
+acute myeloid leukemia (FAB M4) cell line:HNT-34	CNhs13504
+acute myeloid leukemia (FAB M4eo) cell line:EoL-1	CNhs13056
+acute myeloid leukemia (FAB M4eo) cell line:EoL-3	CNhs13057
+acute myeloid leukemia (FAB M5) cell line:U-937 DE-4	CNhs13058
+acute myeloid leukemia (FAB M6) cell line:EEB	CNhs13059
+acute myeloid leukemia (FAB M6) cell line:F-36E	CNhs13060
+acute myeloid leukemia (FAB M6) cell line:F-36P	CNhs13505
+medulloblastoma cell line:D283 Med	CNhs12805
+large cell lung carcinoma cell line:NCI-H460	CNhs12806
+plasma cell leukemia cell line:ARH-77	CNhs12807
+small cell lung carcinoma cell line:DMS 144	CNhs12808
+small cell lung carcinoma cell line:NCI-H82	CNhs12809
+merkel cell carcinoma cell line:MKL-1	CNhs12838
+merkel cell carcinoma cell line:MS-1	CNhs12839
+mesothelioma cell line:NCI-H28	CNhs13061
+mesothelioma cell line:NCI-H226	CNhs13062
+mesothelioma cell line:NCI-H2052	CNhs13063
+mesothelioma cell line:NCI-H2452	CNhs13064
+mesothelioma cell line:Mero-14, tech_rep1	CNhs13065
+mesothelioma cell line:Mero-25	CNhs13066
+mesothelioma cell line:Mero-41	CNhs13067
+mesothelioma cell line:Mero-48a	CNhs13068
+mesothelioma cell line:Mero-82	CNhs13069
+mesothelioma cell line:Mero-83	CNhs13070
+mesothelioma cell line:Mero-84	CNhs13072
+mesothelioma cell line:Mero-95	CNhs13073
+mesothelioma cell line:No36	CNhs13074
+mesothelioma cell line:ONE58	CNhs13075
+serous adenocarcinoma cell line:SK-OV-3-R, biol_rep1	CNhs13099
+serous adenocarcinoma cell line:SK-OV-3-R after co-culture with SOC-57-02-G, biol_rep1	CNhs13508
+Hep-2 cells treated with Streptococci strain 5448, biol_rep1	CNhs13477
+Hep-2 cells treated with Streptococci strain 5448, biol_rep2	CNhs13496
+Hep-2 cells treated with Streptococci strain 5448, biol_rep3	CNhs13497
+Hep-2 cells treated with Streptococci strain JRS4, biol_rep1	CNhs13478
+Hep-2 cells treated with Streptococci strain JRS4, biol_rep2	CNhs13498
+Hep-2 cells treated with Streptococci strain JRS4, biol_rep3	CNhs13499
+Hep-2 cells mock treated, biol_rep1	CNhs13479
+Hep-2 cells mock treated, biol_rep2	CNhs13500
+Hep-2 cells mock treated, biol_rep3	CNhs13501
+mesodermal tumor cell line:HIRS-BM	CNhs12191
+leiomyosarcoma cell line:Hs 5.T	CNhs12192
+non-small cell lung cancer cell line:NCI-H1385	CNhs12193
+acute myeloid leukemia (FAB M0) cell line:Kasumi-3	CNhs13241
+mesothelioma cell line:Mero-14, tech_rep2	CNhs14376
+acute myeloid leukemia (FAB M5) cell line:THP-1 (cytoplasmic fraction)	CNhs14556
+Fibroblast - skin, normal donor2 (cytoplasmic fraction)	CNhs14561
+Fibroblast - skin normal, donor2 (nuclear fraction)	CNhs12582
+Fibroblast - skin spinal muscular atrophy, donor3 (nuclear fraction)	CNhs12398
+Fibroblast - skin dystrophia myotonica, donor3 (nuclear fraction)	CNhs12399
+Fibroblast - Aortic Adventitial donor3 (cytoplasmic fraction)	CNhs14559
+Fibroblast - Aortic Adventitial, donor3 (nuclear fraction)	CNhs12400
+Smooth Muscle Cells - Aortic, donor0 (cytoplasmic fraction)	CNhs12401
+Smooth Muscle Cells - Aortic, donor0 (nuclear fraction)	CNhs12402
+Small Airway Epithelial Cells donor3 (cytoplasmic fraction)	CNhs14563
+Small Airway Epithelial Cells, donor3 (nuclear fraction)	CNhs12583
+Preadipocyte - breast donor2 (cytoplasmic fraction)	CNhs14562
+Preadipocyte - breast, donor2 (nuclear fraction)	CNhs12584
+Fibroblast - skin, normal donor1 (cytoplasmic fraction)	CNhs14560
+Fibroblast - skin normal, donor1 (nuclear fraction)	CNhs12403
+Fibroblast - skin spinal muscular atrophy, donor1 (nuclear fraction)	CNhs12404
+Fibroblast - skin dystrophia myotonica, donor1 (nuclear fraction)	CNhs12405
+Fibroblast - Aortic Adventitial donor2 (cytoplasmic fraction)	CNhs14558
+Fibroblast - Aortic Adventitial, donor2 (nuclear fraction)	CNhs12581
+Small Airway Epithelial Cells donor2 (cytoplasmic fraction)	CNhs14564
+Small Airway Epithelial Cells donor2 (nuclear fraction)	CNhs14565
+Endothelial Cells - Aortic, donor0	CNhs10837
+Smooth Muscle Cells - Aortic, donor0	CNhs10838
+Smooth Muscle Cells - Umbilical artery, donor0	CNhs10839
+Mesenchymal stem cells - umbilical, donor0	CNhs12492
+Retinal Pigment Epithelial Cells, donor0	CNhs10842
+Urothelial cells, donor0	CNhs10843
+Mesenchymal stem cells - adipose, donor0	CNhs10844
+Mesenchymal stem cells - hepatic, donor0	CNhs10845
+Mesenchymal Stem Cells - Vertebral, donor1	CNhs10846
+Sebocyte, donor1	CNhs10847
+Gingival epithelial cells, donor1 (GEA11)	CNhs11061
+Fibroblast - Gingival, donor4 (GFH2)	CNhs10848
+Fibroblast - Periodontal Ligament, donor4 (PL29)	CNhs12493
+CD14+ Monocytes, donor1	CNhs10852
+CD4+ T Cells, donor1	CNhs10853
+CD8+ T Cells, donor1	CNhs10854
+Dendritic Cells - monocyte immature derived, donor1, rep2	CNhs11062
+Dendritic Cells - monocyte immature derived, donor1, tech_rep1	CNhs10855
+Dendritic Cells - plasmacytoid, donor1	CNhs10857
+CD14+ monocyte derived endothelial progenitor cells, donor1	CNhs10858
+Natural Killer Cells, donor1	CNhs10859
+Peripheral Blood Mononuclear Cells, donor1	CNhs10860
+Macrophage - monocyte derived, donor1	CNhs10861
+Neutrophils, donor1	CNhs10862
+Smooth Muscle Cells - Brain Vascular, donor1	CNhs10863
+Astrocyte - cerebral cortex, donor1	CNhs10864
+Endothelial Cells - Lymphatic, donor1	CNhs10865
+Fibroblast - Gingival, donor1	CNhs10866
+Fibroblast - Periodontal Ligament, donor1	CNhs10867
+Smooth Muscle Cells - Colonic, donor1	CNhs10868
+Skeletal Muscle Satellite Cells, donor1	CNhs10869
+Myoblast, donor1	CNhs10870
+Ciliary Epithelial Cells, donor1	CNhs10871
+Endothelial Cells - Umbilical vein, donor1	CNhs10872
+Fibroblast - Aortic Adventitial, donor1	CNhs10874
+Intestinal epithelial cells (polarized), donor1	CNhs10875
+Mesothelial Cells, donor1	CNhs10850
+Anulus Pulposus Cell, donor1	CNhs10876
+Pancreatic stromal cells, donor1	CNhs10877
+Fibroblast - Pulmonary Artery, donor1	CNhs10878
+Keratinocyte - oral, donor1	CNhs10879
+Nucleus Pulposus Cell, donor1	CNhs10881
+Prostate Epithelial Cells (polarized), donor1	CNhs10882
+Prostate Stromal Cells, donor1	CNhs10883
+Sertoli Cells, donor1	CNhs10851
+Small Airway Epithelial Cells, donor1	CNhs10884
+Smooth Muscle Cells - Prostate, donor1	CNhs11920
+Smooth Muscle Cells - Uterine, donor1	CNhs11921
+Adipocyte - subcutaneous, donor1	CNhs12494
+Chondrocyte - de diff, donor1	CNhs11923
+Endothelial Cells - Aortic, donor1	CNhs12495
+Endothelial Cells - Artery, donor1	CNhs12496
+Endothelial Cells - Microvascular, donor1	CNhs11925
+Endothelial Cells - Thoracic, donor1	CNhs11926
+Endothelial Cells - Vein, donor1	CNhs12497
+Fibroblast - Cardiac, donor1	CNhs12498
+Fibroblast - Dermal, donor1	CNhs12499
+Fibroblast - Lung, donor1	CNhs12500
+Hair Follicle Dermal Papilla Cells, donor1	CNhs12501
+Keratinocyte - epidermal, donor1	CNhs11064
+Mammary Epithelial Cell, donor1	CNhs11077
+Melanocyte - light, donor1	CNhs11303
+Neural stem cells, donor1	CNhs11063
+Osteoblast - differentiated, donor1	CNhs11311
+Osteoblast, donor1	CNhs11078
+Placental Epithelial Cells, donor1	CNhs11079
+Preadipocyte - subcutaneous, donor1	CNhs11081
+Preadipocyte - visceral, donor1	CNhs11082
+Skeletal Muscle Cells, donor1	CNhs11083
+Skeletal muscle cells differentiated into Myotubes - multinucleated, donor1	CNhs11084
+Smooth Muscle Cells - Aortic, donor1	CNhs11085
+Smooth Muscle Cells - Brachiocephalic, donor1	CNhs11086
+Smooth Muscle Cells - Carotid, donor1	CNhs11087
+Smooth Muscle Cells - Coronary Artery, donor1	CNhs11088
+Smooth Muscle Cells - Internal Thoracic Artery, donor1	CNhs11067
+Smooth Muscle Cells - Pulmonary Artery, donor1	CNhs11089
+Smooth Muscle Cells - Subclavian Artery, donor1	CNhs11090
+Smooth Muscle Cells - Umbilical Artery, donor1	CNhs11091
+Synoviocyte, donor1	CNhs11068
+Tracheal Epithelial Cells, donor1	CNhs11092
+Sebocyte, donor2	CNhs11951
+Gingival epithelial cells, donor2 (GEA14)	CNhs11896
+Fibroblast - Gingival, donor5 (GFH3)	CNhs11952
+Fibroblast - Periodontal Ligament, donor5 (PL30)	CNhs11953
+CD14+ Monocytes, donor2	CNhs11954
+CD4+ T Cells, donor2	CNhs11955
+CD8+ T Cells, donor2	CNhs11956
+CD14+ monocyte derived endothelial progenitor cells, donor2	CNhs11897
+Natural Killer Cells, donor2	CNhs11957
+Peripheral Blood Mononuclear Cells, donor2	CNhs11958
+Macrophage - monocyte derived, donor2	CNhs11899
+Neutrophils, donor2	CNhs11959
+Smooth Muscle Cells - Brain Vascular, donor2	CNhs11900
+Astrocyte - cerebral cortex, donor2	CNhs11960
+Endothelial Cells - Lymphatic, donor2	CNhs11901
+Fibroblast - Gingival, donor2	CNhs11961
+Fibroblast - Periodontal Ligament, donor2	CNhs11962
+Smooth Muscle Cells - Colonic, donor2	CNhs11963
+Skeletal Muscle Satellite Cells, donor2	CNhs11964
+Myoblast, donor2	CNhs11965
+Ciliary Epithelial Cells, donor2	CNhs11966
+Endothelial Cells - Umbilical vein, donor2	CNhs11967
+Fibroblast - Aortic Adventitial, donor2	CNhs11968
+Adipocyte - breast, donor2	CNhs11969
+Preadipocyte - breast, donor2	CNhs11971
+Preadipocyte - omental, donor2	CNhs11902
+Prostate Epithelial Cells, donor2	CNhs11972
+Prostate Stromal Cells, donor2	CNhs11973
+Sertoli Cells, donor2	CNhs11974
+Small Airway Epithelial Cells, donor2	CNhs11975
+Smooth Muscle Cells - Prostate, donor2	CNhs11976
+Adipocyte - subcutaneous, donor2	CNhs11371
+Chondrocyte - de diff, donor2	CNhs11372
+Chondrocyte - re diff, donor2	CNhs11373
+Endothelial Cells - Aortic, donor2	CNhs11375
+Endothelial Cells - Artery, donor2	CNhs11977
+Endothelial Cells - Microvascular, donor2	CNhs11376
+Endothelial Cells - Thoracic, donor2	CNhs11978
+Endothelial Cells - Vein, donor2	CNhs11377
+Fibroblast - Cardiac, donor2	CNhs11378
+Fibroblast - Dermal, donor2	CNhs11379
+Fibroblast - Lung, donor2	CNhs11380
+Hair Follicle Dermal Papilla Cells, donor2	CNhs11979
+Keratinocyte - epidermal, donor2	CNhs11381
+Mammary Epithelial Cell, donor2	CNhs11382
+Melanocyte - light, donor2	CNhs11383
+Neural stem cells, donor2	CNhs11384
+Osteoblast - differentiated, donor2	CNhs11980
+Osteoblast, donor2	CNhs11385
+Placental Epithelial Cells, donor2	CNhs11386
+Preadipocyte - subcutaneous, donor2	CNhs11981
+Preadipocyte - visceral, donor2	CNhs11982
+Skeletal Muscle Cells, donor2	CNhs11983
+Skeletal muscle cells differentiated into Myotubes - multinucleated, donor2	CNhs11984
+Smooth Muscle Cells - Aortic, donor2	CNhs11305
+Smooth Muscle Cells - Brachiocephalic, donor2	CNhs11985
+Smooth Muscle Cells - Carotid, donor2	CNhs11986
+Smooth Muscle Cells - Coronary Artery, donor2	CNhs11987
+Smooth Muscle Cells - Internal Thoracic Artery, donor2	CNhs11988
+Smooth Muscle Cells - Pulmonary Artery, donor2	CNhs11989
+Smooth Muscle Cells - Subclavian Artery, donor2	CNhs11990
+Smooth Muscle Cells - Umbilical Artery, donor2	CNhs11991
+Synoviocyte, donor2	CNhs11992
+Tracheal Epithelial Cells, donor2	CNhs11993
+Adipocyte - breast, donor1	CNhs11051
+Sebocyte, donor3	CNhs11995
+Gingival epithelial cells, donor3 (GEA15)	CNhs11903
+Fibroblast - Periodontal Ligament, donor6 (PLH3)	CNhs11996
+CD14+ Monocytes, donor3	CNhs11997
+CD4+ T Cells, donor3	CNhs11998
+CD8+ T Cells, donor3	CNhs11999
+Dendritic Cells - monocyte immature derived, donor3	CNhs12000
+CD14+ monocyte derived endothelial progenitor cells, donor3	CNhs11904
+Natural Killer Cells, donor3	CNhs12001
+Peripheral Blood Mononuclear Cells, donor3	CNhs12002
+Macrophage - monocyte derived, donor3	CNhs12003
+Neutrophils, donor3	CNhs11905
+Smooth Muscle Cells - Brain Vascular, donor3	CNhs12004
+Astrocyte - cerebral cortex, donor3	CNhs12005
+Endothelial Cells - Lymphatic, donor3	CNhs11906
+Fibroblast - Gingival, donor3	CNhs12006
+Fibroblast - Periodontal Ligament, donor3	CNhs11907
+Smooth Muscle Cells - Colonic, donor3	CNhs12007
+Skeletal Muscle Satellite Cells, donor3	CNhs12008
+Myoblast, donor3	CNhs11908
+Ciliary Epithelial Cells, donor3	CNhs12009
+Endothelial Cells - Umbilical vein, donor3	CNhs12010
+Fibroblast - Aortic Adventitial, donor3	CNhs12011
+Mesothelial Cells, donor3	CNhs12012
+Preadipocyte - omental, donor3	CNhs12013
+Prostate Epithelial Cells, donor3	CNhs12014
+Prostate Stromal Cells, donor3	CNhs12015
+Small Airway Epithelial Cells, donor3	CNhs12016
+Adipocyte - subcutaneous, donor3	CNhs12017
+Nucleus Pulposus Cell, donor2	CNhs12019
+Chondrocyte - de diff, donor3	CNhs12020
+Chondrocyte - re diff, donor3	CNhs12021
+Endothelial Cells - Aortic, donor3	CNhs12022
+Endothelial Cells - Artery, donor3	CNhs12023
+Endothelial Cells - Microvascular, donor3	CNhs12024
+Endothelial Cells - Vein, donor3	CNhs12026
+Fibroblast - Cardiac, donor3	CNhs12027
+Fibroblast - Dermal, donor3	CNhs12028
+Fibroblast - Lung, donor3	CNhs12029
+Hair Follicle Dermal Papilla Cells, donor3	CNhs12030
+Keratinocyte - epidermal, donor3	CNhs12031
+Mammary Epithelial Cell, donor3	CNhs12032
+Melanocyte - light, donor3	CNhs12033
+Osteoblast - differentiated, donor3	CNhs12035
+Osteoblast, donor3	CNhs12036
+Placental Epithelial Cells, donor3	CNhs12037
+Preadipocyte - subcutaneous, donor3	CNhs12038
+Preadipocyte - visceral, donor3	CNhs12039
+Skeletal Muscle Cells, donor3	CNhs12040
+Skeletal muscle cells differentiated into Myotubes - multinucleated, donor3	CNhs12041
+Smooth Muscle Cells - Aortic, donor3	CNhs11309
+Smooth Muscle Cells - Brachiocephalic, donor3	CNhs12043
+Smooth Muscle Cells - Carotid, donor3	CNhs12044
+Smooth Muscle Cells - Coronary Artery, donor3	CNhs12045
+Smooth Muscle Cells - Internal Thoracic Artery, donor3	CNhs12046
+Smooth Muscle Cells - Pulmonary Artery, donor3	CNhs12047
+Smooth Muscle Cells - Subclavian Artery, donor3	CNhs12048
+Smooth Muscle Cells - Umbilical Artery, donor3	CNhs12049
+Synoviocyte, donor3	CNhs12050
+Tracheal Epithelial Cells, donor3	CNhs12051
+Fibroblast - Dermal, donor4	CNhs12052
+Skeletal Muscle Cells, donor4	CNhs12053
+Fibroblast - Cardiac, donor4	CNhs11909
+Bronchial Epithelial Cell, donor4	CNhs12054
+Fibroblast - Dermal, donor5	CNhs12055
+Skeletal Muscle Cells, donor5	CNhs12056
+Fibroblast - Cardiac, donor5	CNhs12057
+Bronchial Epithelial Cell, donor5	CNhs12058
+Fibroblast - Dermal, donor6	CNhs12059
+Skeletal Muscle Cells, donor6	CNhs12060
+Fibroblast - Cardiac, donor6	CNhs12061
+Bronchial Epithelial Cell, donor6	CNhs12062
+Nucleus Pulposus Cell, donor3	CNhs12063
+Anulus Pulposus Cell, donor2	CNhs12064
+Mesenchymal Stem Cells - bone marrow, donor4	CNhs11316
+Smooth Muscle Cells - Prostate, donor3	CNhs11910
+Smooth Muscle Cells - Uterine, donor3	CNhs11927
+Preadipocyte - breast, donor1	CNhs11052
+Preadipocyte - omental, donor1	CNhs11065
+Preadipocyte - perirenal, donor1	CNhs12065
+Adipocyte - omental, donor1	CNhs11054
+Adipocyte - omental, donor2	CNhs12067
+Adipocyte - omental, donor3	CNhs12068
+Adipocyte - perirenal, donor1	CNhs12069
+Mast cell - stimulated, donor1	CNhs11073
+Pericytes, donor1	CNhs11317
+Fibroblast - Choroid Plexus, donor1	CNhs11319
+Meningeal Cells, donor1	CNhs11320
+Neurons, donor1	CNhs12338
+Oligodendrocyte - precursors, donor1	CNhs12586
+Schwann Cells, donor1	CNhs12073
+Perineurial Cells, donor1	CNhs12587
+Astrocyte - cerebellum, donor1	CNhs11321
+Melanocyte - dark, donor1	CNhs12591
+Hair Follicle Outer Root Sheath Cells, donor1	CNhs12339
+Fibroblast - Lymphatic, donor1	CNhs11322
+Esophageal Epithelial Cells, donor1	CNhs11323
+Smooth Muscle Cells - Esophageal, donor1	CNhs11324
+Smooth Muscle Cells - Intestinal, donor1	CNhs12595
+Alveolar Epithelial Cells, donor1	CNhs11325
+Bronchial Epithelial Cell, donor1	CNhs11327
+Smooth Muscle Cells - Bronchial, donor1	CNhs11328
+Smooth Muscle Cells - Tracheal, donor1	CNhs11329
+Renal Glomerular Endothelial Cells, donor1	CNhs12074
+Renal Proximal Tubular Epithelial Cell, donor1	CNhs11330
+Renal Cortical Epithelial Cells, donor1	CNhs11331
+Renal Epithelial Cells, donor1	CNhs11332
+Renal Mesangial Cells, donor1	CNhs11333
+Smooth Muscle Cells - Bladder, donor1	CNhs12893
+Urothelial Cells, donor1	CNhs11334
+Hepatic Sinusoidal Endothelial Cells, donor1	CNhs12075
+Hepatocyte, donor1	CNhs12340
+Hepatic Stellate Cells (lipocyte), donor1	CNhs11335
+Cardiac Myocyte, donor1	CNhs12341
+Corneal Epithelial Cells, donor1	CNhs11336
+Keratocytes, donor1	CNhs11337
+Retinal Pigment Epithelial Cells, donor1	CNhs11338
+Lens Epithelial Cells, donor1	CNhs12342
+Iris Pigment Epithelial Cells, donor1	CNhs12596
+Fibroblast - Conjunctival, donor1	CNhs11339
+Trabecular Meshwork Cells, donor1	CNhs11340
+Amniotic Epithelial Cells, donor1	CNhs11341
+Fibroblast - Villous Mesenchymal, donor1	CNhs11343
+Mesenchymal Stem Cells - bone marrow, donor1	CNhs11344
+Mesenchymal Stem Cells - adipose, donor1	CNhs11345
+Mesenchymal Stem Cells - hepatic, donor1	CNhs11346
+Mesenchymal Stem Cells - umbilical, donor1	CNhs11347
+Fibroblast - Mammary, donor1	CNhs11348
+Smooth Muscle Cells - Umbilical Vein, donor1	CNhs12597
+CD19+ B Cells, donor1	CNhs12343
+Mesenchymal Stem Cells - amniotic membrane, donor1	CNhs11349
+Mesenchymal Stem Cells - Wharton's Jelly, donor1	CNhs11057
+Multipotent Cord Blood Unrestricted Somatic Stem Cells, donor1	CNhs11350
+Fibroblast - skin normal, donor1	CNhs11351
+Fibroblast - skin walker warburg, donor1	CNhs11352
+Fibroblast - skin spinal muscular atrophy, donor1	CNhs11074
+Fibroblast - skin dystrophia myotonica, donor1	CNhs11353
+Fibroblast - skin dystrophia myotonica, donor2	CNhs11354
+Fibroblast - skin spinal muscular atrophy, donor2	CNhs11911
+Fibroblast - skin spinal muscular atrophy, donor3	CNhs11912
+Fibroblast - skin dystrophia myotonica, donor3	CNhs11913
+Fibroblast - skin normal, donor2	CNhs11914
+Mast cell, donor1	CNhs12566
+Mast cell, donor2	CNhs12594
+Mast cell, donor3	CNhs12593
+Mast cell, donor4	CNhs12592
+Pericytes, donor2	CNhs12079
+Fibroblast - Choroid Plexus, donor2	CNhs12344
+Meningeal Cells, donor2	CNhs12080
+Neurons, donor2	CNhs12726
+Schwann Cells, donor2	CNhs12345
+Perineurial Cells, donor2	CNhs12590
+Astrocyte - cerebellum, donor2	CNhs12081
+Melanocyte - dark, donor2	CNhs12346
+Hair Follicle Outer Root Sheath Cells, donor2	CNhs12347
+Fibroblast - Lymphatic, donor2	CNhs12082
+Esophageal Epithelial Cells, donor2	CNhs12083
+Smooth Muscle Cells - Esophageal, donor2	CNhs12727
+Alveolar Epithelial Cells, donor2	CNhs12084
+Bronchial Epithelial Cell, donor2	CNhs12085
+Smooth Muscle Cells - Bronchial, donor2	CNhs12348
+Smooth Muscle Cells - Tracheal, donor2	CNhs12567
+Renal Glomerular Endothelial Cells, donor2	CNhs12086
+Renal Proximal Tubular Epithelial Cell, donor2	CNhs12087
+Renal Cortical Epithelial Cells, donor2	CNhs12728
+Renal Epithelial Cells, donor2	CNhs12088
+Renal Mesangial Cells, donor2	CNhs12089
+Urothelial Cells, donor2	CNhs12091
+Hepatic Sinusoidal Endothelial Cells, donor2	CNhs12092
+Hepatocyte, donor2	CNhs12349
+Hepatic Stellate Cells (lipocyte), donor2	CNhs12093
+Cardiac Myocyte, donor2	CNhs12350
+Corneal Epithelial Cells, donor2	CNhs12094
+Keratocytes, donor2	CNhs12095
+Retinal Pigment Epithelial Cells, donor2	CNhs12096
+Lens Epithelial Cells, donor2	CNhs12568
+Trabecular Meshwork Cells, donor2	CNhs12097
+Amniotic Epithelial Cells, donor2	CNhs12098
+Fibroblast - Villous Mesenchymal, donor2	CNhs12099
+Mesenchymal Stem Cells - bone marrow, donor2	CNhs12100
+Mesenchymal Stem Cells - adipose, donor2	CNhs12101
+Mesenchymal Stem Cells - hepatic, donor2	CNhs12730
+Mesenchymal Stem Cells - umbilical, donor2	CNhs12102
+Fibroblast - Mammary, donor2	CNhs12103
+Smooth Muscle Cells - Umbilical Vein, donor2	CNhs12569
+CD19+ B Cells, donor2	CNhs12352
+Mesenchymal Stem Cells - amniotic membrane, donor2	CNhs12104
+Multipotent Cord Blood Unrestricted Somatic Stem Cells, donor2	CNhs12105
+Pericytes, donor3	CNhs12116
+Fibroblast - Choroid Plexus, donor3	CNhs12620
+Meningeal Cells, donor3	CNhs12731
+Neurons, donor3	CNhs13815
+Schwann Cells, donor3	CNhs12621
+Astrocyte - cerebellum, donor3	CNhs12117
+Melanocyte - dark, donor3	CNhs12570
+Fibroblast - Lymphatic, donor3	CNhs12118
+Esophageal Epithelial Cells, donor3	CNhs12622
+Alveolar Epithelial Cells, donor3	CNhs12119
+Bronchial Epithelial Cell, donor3	CNhs12623
+Smooth Muscle Cells - Tracheal, donor3	CNhs12894
+Renal Glomerular Endothelial Cells, donor3	CNhs12624
+Renal Proximal Tubular Epithelial Cell, donor3	CNhs12120
+Renal Epithelial Cells, donor3	CNhs12732
+Renal Mesangial Cells, donor3	CNhs12121
+Urothelial Cells, donor3	CNhs12122
+Hepatic Sinusoidal Endothelial Cells, donor3	CNhs12625
+Hepatocyte, donor3	CNhs12626
+Hepatic Stellate Cells (lipocyte), donor3	CNhs12627
+Cardiac Myocyte, donor3	CNhs12571
+Corneal Epithelial Cells, donor3	CNhs12123
+Keratocytes, donor3	CNhs12921
+Retinal Pigment Epithelial Cells, donor3	CNhs12733
+Lens Epithelial Cells, donor3	CNhs12572
+Fibroblast - Conjunctival, donor3	CNhs12734
+Trabecular Meshwork Cells, donor3	CNhs12124
+Amniotic Epithelial Cells, donor3	CNhs12125
+Fibroblast - Villous Mesenchymal, donor3	CNhs12920
+Mesenchymal Stem Cells - bone marrow, donor3	CNhs12126
+Mesenchymal Stem Cells - adipose, donor3	CNhs12922
+Mesenchymal Stem Cells - umbilical, donor3	CNhs12127
+Fibroblast - Mammary, donor3	CNhs12128
+Smooth Muscle Cells - Umbilical Vein, donor3	CNhs13076
+CD19+ B Cells, donor3	CNhs12354
+mesenchymal precursor cell - adipose, donor1	CNhs12363
+mesenchymal precursor cell - adipose, donor2	CNhs12364
+mesenchymal precursor cell - adipose, donor3	CNhs12365
+mesenchymal precursor cell - bone marrow, donor1	CNhs12366
+mesenchymal precursor cell - bone marrow, donor2	CNhs12367
+mesenchymal precursor cell - cardiac, donor1	CNhs12368
+mesenchymal precursor cell - cardiac, donor2	CNhs12369
+mesenchymal precursor cell - cardiac, donor3	CNhs12370
+mesenchymal precursor cell - cardiac, donor4	CNhs12371
+mesenchymal precursor cell - ovarian cancer left ovary, donor1	CNhs12372
+mesenchymal precursor cell - ovarian cancer right ovary, donor1	CNhs12373
+mesenchymal precursor cell - ovarian cancer metastasis, donor1	CNhs12374
+mesenchymal precursor cell - ovarian cancer right ovary, donor2	CNhs12375
+mesenchymal precursor cell - ovarian cancer left ovary, donor3	CNhs12376
+mesenchymal precursor cell - ovarian cancer right ovary, donor3 (SOC-57-02)	CNhs12377
+mesenchymal precursor cell - ovarian cancer metastasis, donor3	CNhs12378
+tenocyte, donor1	CNhs12639
+tenocyte, donor2	CNhs12640
+tenocyte, donor3	CNhs12641
+Bronchial Epithelial Cell, donor7	CNhs12642
+salivary acinar cells, donor1	CNhs12810
+salivary acinar cells, donor2	CNhs12811
+salivary acinar cells, donor3	CNhs12812
+CD4+CD25+CD45RA- memory regulatory T cells, donor1	CNhs13195
+Renal Glomerular Endothelial Cells, donor4	CNhs13080
+CD4+CD25-CD45RA+ naive conventional T cells, donor1	CNhs13223
+CD14+CD16- Monocytes, donor1	CNhs13224
+CD14+CD16+ Monocytes, donor1	CNhs13541
+CD4+CD25-CD45RA+ naive conventional T cells expanded, donor1	CNhs13202
+CD4+CD25-CD45RA- memory conventional T cells expanded, donor1	CNhs13215
+CD4+CD25+CD45RA+ naive regulatory T cells expanded, donor1	CNhs13203
+CD4+CD25+CD45RA- memory regulatory T cells expanded, donor1	CNhs13204
+CD4+CD25-CD45RA+ naive conventional T cells, donor2	CNhs13205
+CD4+CD25+CD45RA- memory regulatory T cells, donor2	CNhs13206
+CD14+CD16- Monocytes, donor2	CNhs13216
+CD14-CD16+ Monocytes, donor2	CNhs13207
+CD14+CD16+ Monocytes, donor2	CNhs13208
+mesenchymal precursor cell - ovarian cancer left ovary, donor2	CNhs13092
+mesenchymal precursor cell - ovarian cancer metastasis, donor2	CNhs13093
+mesenchymal precursor cell - ovarian cancer left ovary, donor4	CNhs13094
+mesenchymal precursor cell - ovarian cancer right ovary, donor4	CNhs13096
+mesenchymal precursor cell - ovarian cancer metastasis, donor4	CNhs13097
+mesenchymal precursor cell - bone marrow, donor3	CNhs13098
+mesenchymal precursor cell - ovarian cancer right ovary, donor3 (SOC-57-02-G)	CNhs13507
+CD14+ monocytes - treated with BCG, donor1	CNhs13465
+CD14+ monocytes - treated with IFN + N-hexane, donor1	CNhs13466
+CD14+ monocytes - treated with Trehalose dimycolate (TDM), donor1	CNhs13467
+CD14+ monocytes - mock treated, donor1	CNhs13468
+CD14+ monocytes - treated with Group A streptococci, donor1	CNhs13469
+CD14+ monocytes - treated with lipopolysaccharide, donor1	CNhs13470
+CD14+ monocytes - treated with Salmonella, donor1	CNhs13471
+CD14+ monocytes - treated with Cryptococcus, donor1	CNhs13472
+CD14+ monocytes - treated with Candida, donor1	CNhs13473
+CD14+ monocytes - treated with B-glucan, donor1	CNhs13474
+CD14+ monocytes - treated with BCG, donor2	CNhs13475
+CD14+ monocytes - treated with IFN + N-hexane, donor2	CNhs13476
+CD14+ monocytes - treated with Trehalose dimycolate (TDM), donor2	CNhs13483
+CD14+ monocytes - mock treated, donor2	CNhs13484
+CD14+ monocytes - treated with Group A streptococci, donor2	CNhs13532
+CD14+ monocytes - treated with lipopolysaccharide, donor2	CNhs13533
+CD14+ monocytes - treated with Salmonella, donor2	CNhs13485
+CD14+ monocytes - treated with Cryptococcus, donor2	CNhs13487
+CD14+ monocytes - treated with Candida, donor2	CNhs13488
+CD14+ monocytes - treated with B-glucan, donor2	CNhs13489
+CD14+ monocytes - treated with BCG, donor3	CNhs13543
+CD14+ monocytes - treated with IFN + N-hexane, donor3	CNhs13490
+CD14+ monocytes - treated with Trehalose dimycolate (TDM), donor3	CNhs13544
+CD14+ monocytes - mock treated, donor3	CNhs13491
+CD14+ monocytes - treated with Group A streptococci, donor3	CNhs13492
+CD14+ monocytes - treated with lipopolysaccharide, donor3	CNhs13545
+CD14+ monocytes - treated with Salmonella, donor3	CNhs13493
+CD14+ monocytes - treated with Cryptococcus, donor3	CNhs13546
+CD14+ monocytes - treated with Candida, donor3	CNhs13494
+CD14+ monocytes - treated with B-glucan, donor3	CNhs13495
+migratory langerhans cells, donor1	CNhs13535
+migratory langerhans cells, donor2	CNhs13536
+migratory langerhans cells, donor3	CNhs13547
+immature langerhans cells, donor1	CNhs13537
+immature langerhans cells, donor2	CNhs13480
+CD4+CD25-CD45RA+ naive conventional T cells, donor3	CNhs13512
+CD4+CD25+CD45RA+ naive regulatory T cells, donor3	CNhs13513
+CD4+CD25+CD45RA- memory regulatory T cells, donor3	CNhs13538
+CD4+CD25-CD45RA- memory conventional T cells, donor3	CNhs13539
+CD14+CD16- Monocytes, donor3	CNhs13540
+CD14-CD16+ Monocytes, donor3	CNhs13548
+CD14+CD16+ Monocytes, donor3	CNhs13549
+CD4+CD25-CD45RA+ naive conventional T cells expanded, donor2	CNhs13813
+CD4+CD25-CD45RA- memory conventional T cells expanded, donor2	CNhs13920
+CD4+CD25+CD45RA+ naive regulatory T cells expanded, donor2	CNhs13918
+CD4+CD25+CD45RA- memory regulatory T cells expanded, donor2	CNhs13811
+CD4+CD25-CD45RA+ naive conventional T cells expanded, donor3	CNhs13814
+CD4+CD25-CD45RA- memory conventional T cells expanded, donor3	CNhs13921
+CD4+CD25+CD45RA+ naive regulatory T cells expanded, donor3	CNhs13919
+CD4+CD25+CD45RA- memory regulatory T cells expanded, donor3	CNhs13812
+Fibroblast - Gingival, donor6 (aggressive periodontitis)	CNhs14128
+Fibroblast - Gingival, donor6 (control)	CNhs14129
+Fibroblast - Gingival, donor7 (aggressive periodontitis)	CNhs14130
+Fibroblast - Gingival, donor7 (control)	CNhs14131
+Fibroblast - Gingival, donor8 (chronic periodontitis)	CNhs14132
+Fibroblast - Gingival, donor8 (control)	CNhs14133
+Fibroblast - Gingival, donor9 (control)	CNhs14134
+Fibroblast - Gingival, donor10 (periodontitis)	CNhs14135
+Mallassez-derived cells, donor2	CNhs13550
+Mallassez-derived cells, donor3	CNhs13551
+CD34 cells differentiated to erythrocyte lineage, biol_ rep1	CNhs13552
+CD34 cells differentiated to erythrocyte lineage, biol_ rep2	CNhs13553
+Olfactory epithelial cells, donor1	CNhs13816
+Olfactory epithelial cells, donor2	CNhs13817
+Olfactory epithelial cells, donor3	CNhs13818
+Olfactory epithelial cells, donor4	CNhs13819
+gamma delta positive T cells, donor1	CNhs13914
+gamma delta positive T cells, donor2	CNhs13915
+Mast cell, expanded, donor5	CNhs13924
+Mast cell, expanded and stimulated, donor5	CNhs13925
+Mast cell, expanded, donor8	CNhs13926
+Mast cell, expanded and stimulated, donor8	CNhs13927
+Smooth muscle cells - airway, asthmatic, donor1	CNhs14183
+Smooth muscle cells - airway, asthmatic, donor2	CNhs14184
+Smooth muscle cells - airway, asthmatic, donor3	CNhs14186
+Smooth muscle cells - airway, asthmatic, donor4	CNhs14187
+Smooth muscle cells - airway, asthmatic, donor5	CNhs14188
+Smooth muscle cells - airway, asthmatic, donor6	CNhs14189
+Smooth muscle cells - airway, control, donor1	CNhs14190
+Smooth muscle cells - airway, control, donor2	CNhs14191
+Smooth muscle cells - airway, control, donor3	CNhs14192
+Smooth muscle cells - airway, control, donor4	CNhs14193
+Whole blood (ribopure), donor090325, donation1	CNhs11075
+Whole blood (ribopure), donor090325, donation2	CNhs11076
+Whole blood (ribopure), donor090309, donation1	CNhs11675
+Whole blood (ribopure), donor090309, donation2	CNhs11671
+Whole blood (ribopure), donor090309, donation3	CNhs11948
+Whole blood (ribopure), donor090612, donation1	CNhs11672
+Whole blood (ribopure), donor090612, donation2	CNhs11673
+Whole blood (ribopure), donor090612, donation3	CNhs11949
+CD34+ stem cells - adult bone marrow derived, donor1, tech_rep1	CNhs12588
+nasal epithelial cells, donor1, tech_rep1	CNhs12589
+nasal epithelial cells, donor2	CNhs12574
+amniotic membrane cells, donor1	CNhs12502
+amniotic membrane cells, donor2	CNhs12503
+amniotic membrane cells, donor3	CNhs12379
+chorionic membrane cells, donor1	CNhs12504
+chorionic membrane cells, donor2	CNhs12506
+chorionic membrane cells, donor3	CNhs12380
+Basophils, donor3	CNhs12575
+Dendritic Cells - monocyte immature derived, donor2	CNhs12195
+Dendritic Cells - plasmacytoid, donor2	CNhs12196
+Dendritic Cells - plasmacytoid, donor3	CNhs12200
+CD34+ Progenitors, donor1	CNhs13227
+CD34+ Progenitors, donor2	CNhs12205
+CD4+CD25+CD45RA+ naive regulatory T cells, donor1	CNhs13238
+CD4+CD25-CD45RA- memory conventional T cells, donor1	CNhs13239
+CD14-CD16+ Monocytes, donor1	CNhs13229
+CD4+CD25+CD45RA+ naive regulatory T cells, donor2	CNhs13235
+CD4+CD25-CD45RA- memory conventional T cells, donor2	CNhs13237
+common myeloid progenitor CMP, donor1	CNhs12518
+granulocyte macrophage progenitor, donor1	CNhs12519
+promyelocytes/myelocytes PMC, donor1	CNhs12520
+neutrophil PMN, donor1	CNhs12522
+common myeloid progenitor CMP, donor2	CNhs12523
+granulocyte macrophage progenitor, donor2	CNhs12524
+promyelocytes/myelocytes PMC, donor2	CNhs12525
+neutrophil PMN, donor2	CNhs12526
+granulocyte macrophage progenitor, donor3	CNhs12528
+promyelocytes/myelocytes PMC, donor3	CNhs12529
+neutrophil PMN, donor3	CNhs12530
+Mallassez-derived cells, donor1 (MZH3)	CNhs12538
+CD8+ T Cells (pluriselect), donor090325, donation1	CNhs12201
+CD19+ B Cells (pluriselect), donor090325, donation1	CNhs12531
+Mesothelial Cells, donor2	CNhs12197
+CD8+ T Cells (pluriselect), donor090325, donation2	CNhs12199
+CD19+ B Cells (pluriselect), donor090325, donation2	CNhs12175
+CD8+ T Cells (pluriselect), donor090309, donation1	CNhs12176
+CD19+ B Cells (pluriselect), donor090309, donation1	CNhs12177
+CD8+ T Cells (pluriselect), donor090309, donation2	CNhs12178
+CD19+ B Cells (pluriselect), donor090309, donation2	CNhs12179
+CD8+ T Cells (pluriselect), donor090309, donation3	CNhs12180
+CD19+ B Cells (pluriselect), donor090309, donation3	CNhs12181
+CD8+ T Cells (pluriselect), donor090612, donation1	CNhs12182
+CD19+ B Cells (pluriselect), donor090612, donation1	CNhs12183
+CD8+ T Cells (pluriselect), donor090612, donation2	CNhs12184
+CD19+ B Cells (pluriselect), donor090612, donation2	CNhs12185
+CD8+ T Cells (pluriselect), donor090612, donation3	CNhs12187
+CD19+ B Cells (pluriselect), donor090612, donation3	CNhs12188
+CD133+ stem cells - cord blood derived, pool1	CNhs12545
+CD133+ stem cells - adult bone marrow derived, pool1	CNhs12552
+CD34+ stem cells - adult bone marrow derived, donor1, tech_rep2	CNhs12553
+nasal epithelial cells, donor1, tech_rep2	CNhs12554
+mature adipocyte, donor1	CNhs12558
+mature adipocyte, donor2	CNhs12559
+mature adipocyte, donor3	CNhs12560
+mature adipocyte, donor4	CNhs12562
+Basophils, donor1	CNhs12546
+Basophils, donor2	CNhs12563
+Eosinophils, donor1	CNhs12547
+Eosinophils, donor2	CNhs12548
+Eosinophils, donor3	CNhs12549
+Lymphatic Endothelial cells response to VEGFC, 00hr00min, biol_rep1 (MM XIX - 1)	CNhs11936
+Lymphatic Endothelial cells response to VEGFC, 00hr15min, biol_rep1 (MM XIX - 2)	CNhs13100
+Lymphatic Endothelial cells response to VEGFC, 00hr30min, biol_rep1 (MM XIX - 3)	CNhs13101
+Lymphatic Endothelial cells response to VEGFC, 00hr45min, biol_rep1 (MM XIX - 4)	CNhs13102
+Lymphatic Endothelial cells response to VEGFC, 01hr00min, biol_rep1 (MM XIX - 5)	CNhs13103
+Lymphatic Endothelial cells response to VEGFC, 01hr20min, biol_rep1 (MM XIX - 6)	CNhs13104
+Lymphatic Endothelial cells response to VEGFC, 01hr40min, biol_rep1 (MM XIX - 7)	CNhs13105
+Lymphatic Endothelial cells response to VEGFC, 02hr00min, biol_rep1 (MM XIX - 8)	CNhs13106
+Lymphatic Endothelial cells response to VEGFC, 02hr30min, biol_rep1 (MM XIX - 9)	CNhs13107
+Lymphatic Endothelial cells response to VEGFC, 03hr00min, biol_rep1 (MM XIX - 10)	CNhs13108
+Lymphatic Endothelial cells response to VEGFC, 03hr30min, biol_rep1 (MM XIX - 11)	CNhs13109
+Lymphatic Endothelial cells response to VEGFC, 04hr, biol_rep1 (MM XIX - 12)	CNhs13110
+Lymphatic Endothelial cells response to VEGFC, 05hr, biol_rep1 (MM XIX - 13)	CNhs13111
+Lymphatic Endothelial cells response to VEGFC, 06hr, biol_rep1 (MM XIX - 14)	CNhs13112
+Lymphatic Endothelial cells response to VEGFC, 07hr, biol_rep1 (MM XIX - 15)	CNhs13113
+Lymphatic Endothelial cells response to VEGFC, 08hr, biol_rep1 (MM XIX - 16)	CNhs11937
+Lymphatic Endothelial cells response to VEGFC, 00hr00min, biol_rep2 (MM XIV - 1)	CNhs13157
+Lymphatic Endothelial cells response to VEGFC, 00hr15min, biol_rep2 (MM XIV - 2)	CNhs13158
+Lymphatic Endothelial cells response to VEGFC, 00hr30min, biol_rep2 (MM XIV - 3)	CNhs13159
+Lymphatic Endothelial cells response to VEGFC, 00hr45min, biol_rep2 (MM XIV - 4)	CNhs13160
+Lymphatic Endothelial cells response to VEGFC, 01hr00min, biol_rep2 (MM XIV - 5)	CNhs13161
+Lymphatic Endothelial cells response to VEGFC, 01hr20min, biol_rep2 (MM XIV - 6)	CNhs13162
+Lymphatic Endothelial cells response to VEGFC, 01hr40min, biol_rep2 (MM XIV - 7)	CNhs13163
+Lymphatic Endothelial cells response to VEGFC, 02hr00min, biol_rep2 (MM XIV - 8)	CNhs13164
+Lymphatic Endothelial cells response to VEGFC, 02hr30min, biol_rep2 (MM XIV - 9)	CNhs13165
+Lymphatic Endothelial cells response to VEGFC, 03hr00min, biol_rep2 (MM XIV - 10)	CNhs13166
+Lymphatic Endothelial cells response to VEGFC, 03hr30min, biol_rep2 (MM XIV - 11)	CNhs13168
+Lymphatic Endothelial cells response to VEGFC, 04hr, biol_rep2 (MM XIV - 12)	CNhs13169
+Lymphatic Endothelial cells response to VEGFC, 05hr, biol_rep2 (MM XIV - 13)	CNhs13170
+Lymphatic Endothelial cells response to VEGFC, 06hr, biol_rep2 (MM XIV - 14)	CNhs13171
+Lymphatic Endothelial cells response to VEGFC, 07hr, biol_rep2 (MM XIV - 15)	CNhs13172
+Lymphatic Endothelial cells response to VEGFC, 08hr, biol_rep2 (MM XIV - 16)	CNhs13173
+Lymphatic Endothelial cells response to VEGFC, 00hr00min, biol_rep3 (MM XXII - 1 )	CNhs13276
+Lymphatic Endothelial cells response to VEGFC, 00hr15min, biol_rep3 (MM XXII - 2)	CNhs13277
+Lymphatic Endothelial cells response to VEGFC, 00hr30min, biol_rep3 (MM XXII - 3)	CNhs13278
+Lymphatic Endothelial cells response to VEGFC, 00hr45min, biol_rep3 (MM XXII - 4)	CNhs13279
+Lymphatic Endothelial cells response to VEGFC, 01hr00min, biol_rep3 (MM XXII - 5)	CNhs13280
+Lymphatic Endothelial cells response to VEGFC, 01hr20min, biol_rep3 (MM XXII - 6)	CNhs13281
+Lymphatic Endothelial cells response to VEGFC, 01hr40min, biol_rep3 (MM XXII - 7)	CNhs13282
+Lymphatic Endothelial cells response to VEGFC, 02hr00min, biol_rep3 (MM XXII - 8)	CNhs13283
+Lymphatic Endothelial cells response to VEGFC, 02hr30min, biol_rep3 (MM XXII - 9)	CNhs13284
+Lymphatic Endothelial cells response to VEGFC, 03hr00min, biol_rep3 (MM XXII - 10)	CNhs13285
+Lymphatic Endothelial cells response to VEGFC, 03hr30min, biol_rep3 (MM XXII - 11)	CNhs13286
+Lymphatic Endothelial cells response to VEGFC, 04hr, biol_rep3 (MM XXII - 12)	CNhs13287
+Lymphatic Endothelial cells response to VEGFC, 05hr, biol_rep3 (MM XXII - 13)	CNhs13288
+Lymphatic Endothelial cells response to VEGFC, 06hr, biol_rep3 (MM XXII - 14)	CNhs13289
+Lymphatic Endothelial cells response to VEGFC, 07hr, biol_rep3 (MM XXII - 15)	CNhs13290
+Lymphatic Endothelial cells response to VEGFC, 08hr, biol_rep3 (MM XXII - 16)	CNhs13291
+H9 Embryonic Stem cells, biol_rep1 (H9ES-1)	CNhs11917
+H9 Embryoid body cells, melanocytic induction, day00, biol_rep1 (H9EB-1 d0)	CNhs12822
+H9 Embryoid body cells, melanocytic induction, day01, biol_rep1 (H9EB-1 d1)	CNhs12823
+H9 Embryoid body cells, melanocytic induction, day03, biol_rep1 (H9EB-1 d3)	CNhs12895
+H9 Embryoid body cells, melanocytic induction, day06, biol_rep1 (H9EB-1 d6)	CNhs12896
+H9 Embryoid body cells, melanocytic induction, day09, biol_rep1 (H9EB-1 d9)	CNhs12897
+H9 Embryoid body cells, melanocytic induction, day12, biol_rep1 (H9EB-1 d12)	CNhs12948
+H9 Embryoid body cells, melanocytic induction, day12, biol_rep1 (H9EB-1 d12)	CNhs12994
+H9 Embryoid body cells, melanocytic induction, day15, biol_rep1 (H9EB-1 d15)	CNhs12898
+H9 Embryoid body cells, melanocytic induction, day18, biol_rep1 (H9EB-1 d18)	CNhs12899
+H9 Embryoid body cells, melanocytic induction, day21, biol_rep1 (H9EB-1 d21)	CNhs12900
+H9 Embryoid body cells, melanocytic induction, day24, biol_rep1 (H9EB-1 d24)	CNhs12901
+H9 Embryoid body cells, melanocytic induction, day27, biol_rep1 (H9EB-1 d27)	CNhs12902
+H9 Embryoid body cells, melanocytic induction, day30, biol_rep1 (H9EB-1 d30)	CNhs12903
+H9 Embryoid body cells, melanocytic induction, day34, biol_rep1 (H9EB-1 d34)	CNhs12904
+H9 Embryoid body cells, melanocytic induction, day41, biol_rep1 (H9EB-1 d41)	CNhs12905
+Melanocyte, donor1 (MC+1)	CNhs12816
+Aortic smooth muscle cell response to FGF2, 00hr00min, biol_rep1 (LK1)	CNhs13339
+Aortic smooth muscle cell response to FGF2, 00hr15min, biol_rep1 (LK4)	CNhs13340
+Aortic smooth muscle cell response to FGF2, 00hr30min, biol_rep1 (LK7)	CNhs13341
+Aortic smooth muscle cell response to FGF2, 00hr45min, biol_rep1 (LK10)	CNhs13343
+Aortic smooth muscle cell response to FGF2, 01hr, biol_rep1 (LK13)	CNhs12741
+Aortic smooth muscle cell response to FGF2, 02hr, biol_rep1 (LK16)	CNhs13344
+Aortic smooth muscle cell response to FGF2, 03hr, biol_rep1 (LK19)	CNhs13345
+Aortic smooth muscle cell response to FGF2, 04hr, biol_rep1 (LK22)	CNhs13346
+Aortic smooth muscle cell response to FGF2, 05hr, biol_rep1 (LK25)	CNhs13347
+Aortic smooth muscle cell response to FGF2, 06hr, biol_rep1 (LK28)	CNhs13348
+Aortic smooth muscle cell response to IL1b, 00hr00min, biol_rep1 (LK31)	CNhs13349
+Aortic smooth muscle cell response to IL1b, 00hr15min, biol_rep1 (LK34)	CNhs13350
+Aortic smooth muscle cell response to IL1b, 00hr30min, biol_rep1 (LK37)	CNhs13351
+Aortic smooth muscle cell response to IL1b, 00hr45min, biol_rep1 (LK40)	CNhs13352
+Aortic smooth muscle cell response to IL1b, 01hr, biol_rep1 (LK43)	CNhs13353
+Aortic smooth muscle cell response to IL1b, 02hr, biol_rep1 (LK46)	CNhs13354
+Aortic smooth muscle cell response to IL1b, 03hr, biol_rep1 (LK49)	CNhs13355
+Aortic smooth muscle cell response to IL1b, 04hr, biol_rep1 (LK52)	CNhs13682
+Aortic smooth muscle cell response to IL1b, 05hr, biol_rep1 (LK55)	CNhs13356
+Aortic smooth muscle cell response to IL1b, 06hr, biol_rep1 (LK58)	CNhs13357
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr00min, biol_rep1 (A1 T0)	CNhs11918
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr15min, biol_rep1 (A1 T1)	CNhs12381
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr30min, biol_rep1 (A1 T2)	CNhs12382
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr45min, biol_rep1 (A1 T3)	CNhs12383
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr00min, biol_rep1 (A1 T4)	CNhs12384
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr20min, biol_rep1 (A1 T5)	CNhs12386
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr40min, biol_rep1 (A1 T6)	CNhs12387
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 02hr00min, biol_rep1 (A1 T7)	CNhs12388
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 02hr30min, biol_rep1 (A1 T8)	CNhs12389
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 03hr, biol_rep1 (A1 T9)	CNhs12390
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 04hr, biol_rep1 (A1 T10)	CNhs12391
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 08hr, biol_rep1 (A1 T11)	CNhs12392
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 24hr, biol_rep1 (A1 T12)	CNhs12393
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day04, biol_rep1 (A1 T13)	CNhs12394
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day07, biol_rep1 (A1 T14)	CNhs12395
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day14, biol_rep1 (A1 T15)	CNhs12396
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day21, biol_rep1 (A1 T16)	CNhs12397
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day28, biol_rep1 (A1 T17)	CNhs11919
+Saos-2 osteosarcoma cell line, untreated control, day28, biol_rep1 (B1 T17)	CNhs14194
+Monocyte-derived macrophages response to LPS, 00hr00min, donor1 (t1 Subject1)	CNhs11941
+Monocyte-derived macrophages response to LPS, 00hr15min, donor1 (t2 Subject1)	CNhs13145
+Monocyte-derived macrophages response to LPS, 00hr30min, donor1 (t3 Subject1)	CNhs13146
+Monocyte-derived macrophages response to LPS, 00hr45min, donor1 (t4 Subject1)	CNhs13147
+Monocyte-derived macrophages response to LPS, 01hr00min, donor1 (t5 Subject1)	CNhs13148
+Monocyte-derived macrophages response to LPS, 01hr20min, donor1 (t6 Subject1)	CNhs13149
+Monocyte-derived macrophages response to LPS, 01hr40min, donor1 (t7 Subject1)	CNhs13150
+Monocyte-derived macrophages response to LPS, 02hr00min, donor1 (t8 Subject1)	CNhs13151
+Monocyte-derived macrophages response to LPS, 02hr30min, donor1 (t9 Subject1)	CNhs13152
+Monocyte-derived macrophages response to LPS, 03hr00min, donor1 (t10 Subject1)	CNhs12924
+Monocyte-derived macrophages response to LPS, 03hr30min, donor1 (t11 Subject1)	CNhs13153
+Monocyte-derived macrophages response to LPS, 04hr, donor1 (t12 Subject1)	CNhs13154
+Monocyte-derived macrophages response to LPS, 05hr, donor1 (t13 Subject1)	CNhs13155
+Monocyte-derived macrophages response to LPS, 06hr, donor1 (t14 Subject1)	CNhs12925
+Monocyte-derived macrophages response to LPS, 07hr, donor1 (t15 Subject1)	CNhs12926
+Monocyte-derived macrophages response to LPS, 08hr, donor1 (t16 Subject1)	CNhs12927
+Monocyte-derived macrophages response to LPS, 10hr, donor1 (t17 Subject1)	CNhs12928
+Monocyte-derived macrophages response to LPS, 12hr, donor1 (t18 Subject1)	CNhs12813
+Monocyte-derived macrophages response to LPS, 14hr, donor1 (t19 Subject1)	CNhs12929
+Monocyte-derived macrophages response to LPS, 16hr, donor1 (t20 Subject1)	CNhs12930
+Monocyte-derived macrophages response to LPS, 18hr, donor1 (t21 Subject1)	CNhs12814
+Monocyte-derived macrophages response to LPS, 20hr, donor1 (t22 Subject1)	CNhs12931
+Monocyte-derived macrophages response to LPS, 22hr, donor1 (t23 Subject1)	CNhs12815
+Monocyte-derived macrophages response to LPS, 24hr, donor1 (t24 Subject1)	CNhs12932
+Monocyte-derived macrophages response to LPS, 36hr, donor1 (t25 Subject1)	CNhs12933
+Monocyte-derived macrophages response to LPS, 48hr, donor1 (t26 Subject1)	CNhs11942
+H9 Embryonic Stem cells, biol_rep2 (H9ES-2)	CNhs12824
+H9 Embryoid body cells, melanocytic induction, day00, biol_rep2 (H9EB-2 d0)	CNhs12825
+H9 Embryoid body cells, melanocytic induction, day01, biol_rep2 (H9EB-2 d1)	CNhs12826
+H9 Embryoid body cells, melanocytic induction, day03, biol_rep2 (H9EB-2 d3)	CNhs12827
+H9 Embryoid body cells, melanocytic induction, day06, biol_rep2 (H9EB-2 d6)	CNhs12828
+H9 Embryoid body cells, melanocytic induction, day09, biol_rep2 (H9EB-2 d9)	CNhs12829
+H9 Embryoid body cells, melanocytic induction, day12, biol_rep2 (H9EB-2 d12)	CNhs12830
+H9 Embryoid body cells, melanocytic induction, day15, biol_rep2 (H9EB-2 d15)	CNhs12831
+H9 Embryoid body cells, melanocytic induction, day18, biol_rep2 (H9EB-2 d18)	CNhs12832
+H9 Embryoid body cells, melanocytic induction, day21, biol_rep2 (H9EB-2 d21)	CNhs12833
+H9 Embryoid body cells, melanocytic induction, day24, biol_rep2 (H9EB-2 d24)	CNhs12834
+H9 Embryoid body cells, melanocytic induction, day27, biol_rep2 (H9EB-2 d27)	CNhs12835
+H9 Embryoid body cells, melanocytic induction, day30, biol_rep2 (H9EB-2 d30)	CNhs12836
+H9 Embryoid body cells, melanocytic induction, day34, biol_rep2 (H9EB-2 d34)	CNhs12906
+H9 Embryoid body cells, melanocytic induction, day41, biol_rep2 (H9EB-2 d41)	CNhs12907
+Melanocyte, donor2 (MC+2)	CNhs13156
+Aortic smooth muscle cell response to FGF2, 00hr00min, biol_rep2 (LK2)	CNhs13358
+Aortic smooth muscle cell response to FGF2, 00hr15min, biol_rep2 (LK5)	CNhs13359
+Aortic smooth muscle cell response to FGF2, 00hr30min, biol_rep2 (LK8)	CNhs13360
+Aortic smooth muscle cell response to FGF2, 00hr45min, biol_rep2 (LK11)	CNhs13361
+Aortic smooth muscle cell response to FGF2, 01hr, biol_rep2 (LK14)	CNhs13362
+Aortic smooth muscle cell response to FGF2, 02hr, biol_rep2 (LK17)	CNhs13363
+Aortic smooth muscle cell response to FGF2, 03hr, biol_rep2 (LK20)	CNhs13364
+Aortic smooth muscle cell response to FGF2, 04hr, biol_rep2 (LK23)	CNhs13365
+Aortic smooth muscle cell response to FGF2, 05hr, biol_rep2 (LK26)	CNhs13367
+Aortic smooth muscle cell response to FGF2, 06hr, biol_rep2 (LK29)	CNhs13368
+Aortic smooth muscle cell response to IL1b, 00hr00min, biol_rep2 (LK32)	CNhs13369
+Aortic smooth muscle cell response to IL1b, 00hr15min, biol_rep2 (LK35)	CNhs13370
+Aortic smooth muscle cell response to IL1b, 00hr30min, biol_rep2 (LK38)	CNhs13371
+Aortic smooth muscle cell response to IL1b, 00hr45min, biol_rep2 (LK41)	CNhs13372
+Aortic smooth muscle cell response to IL1b, 01hr, biol_rep2 (LK44)	CNhs13373
+Aortic smooth muscle cell response to IL1b, 02hr, biol_rep2 (LK47)	CNhs13374
+Aortic smooth muscle cell response to IL1b, 03hr, biol_rep2 (LK50)	CNhs13375
+Aortic smooth muscle cell response to IL1b, 04hr, biol_rep2 (LK53)	CNhs13376
+Aortic smooth muscle cell response to IL1b, 05hr, biol_rep2 (LK56)	CNhs13377
+Aortic smooth muscle cell response to IL1b, 06hr, biol_rep2 (LK59)	CNhs13378
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr00min, biol_rep2 (A2 T0)	CNhs12859
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr15min, biol_rep2 (A2 T1)	CNhs12860
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr30min, biol_rep2 (A2 T2)	CNhs12861
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr45min, biol_rep2 (A2 T3)	CNhs12862
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr00min, biol_rep2 (A2 T4)	CNhs12863
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr20min, biol_rep2 (A2 T5)	CNhs12864
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr40min, biol_rep2 (A2 T6)	CNhs12866
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 02hr00min, biol_rep2 (A2 T7)	CNhs12867
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 02hr30min, biol_rep2 (A2 T8)	CNhs12868
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 03hr, biol_rep2 (A2 T9)	CNhs12869
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 04hr, biol_rep2 (A2 T10)	CNhs12870
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 08hr, biol_rep2 (A2 T11)	CNhs12871
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 24hr, biol_rep2 (A2 T12)	CNhs12872
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day04, biol_rep2 (A2 T13)	CNhs12873
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day07, biol_rep2 (A2 T14)	CNhs12874
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day14, biol_rep2 (A2 T15)	CNhs12953
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day21, biol_rep2 (A2 T16)	CNhs12875
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day28, biol_rep2 (A2 T17)	CNhs12876
+Saos-2 osteosarcoma cell line, untreated control, day28, biol_rep2 (B2 T17)	CNhs14195
+Monocyte-derived macrophages response to LPS, 00hr00min, donor2 (t1 Subject2)	CNhs13379
+Monocyte-derived macrophages response to LPS, 00hr15min, donor2 (t2 Subject2)	CNhs13380
+Monocyte-derived macrophages response to LPS, 00hr30min, donor2 (t3 Subject2)	CNhs13381
+Monocyte-derived macrophages response to LPS, 00hr45min, donor2 (t4 Subject2)	CNhs13382
+Monocyte-derived macrophages response to LPS, 01hr00min, donor2 (t5 Subject2)	CNhs13383
+Monocyte-derived macrophages response to LPS, 01hr20min, donor2 (t6 Subject2)	CNhs13384
+Monocyte-derived macrophages response to LPS, 01hr40min, donor2 (t7 Subject2)	CNhs13385
+Monocyte-derived macrophages response to LPS, 02hr00min, donor2 (t8 Subject2)	CNhs13386
+Monocyte-derived macrophages response to LPS, 02hr30min, donor2 (t9 Subject2)	CNhs13387
+Monocyte-derived macrophages response to LPS, 03hr00min, donor2 (t10 Subject2)	CNhs13388
+Monocyte-derived macrophages response to LPS, 03hr30min, donor2 (t11 Subject2)	CNhs13389
+Monocyte-derived macrophages response to LPS, 04hr, donor2 (t12 Subject2)	CNhs13391
+Monocyte-derived macrophages response to LPS, 05hr, donor2 (t13 Subject2)	CNhs13392
+Monocyte-derived macrophages response to LPS, 06hr, donor2 (t14 Subject2)	CNhs13393
+Monocyte-derived macrophages response to LPS, 07hr, donor2 (t15 Subject2)	CNhs13394
+Monocyte-derived macrophages response to LPS, 08hr, donor2 (t16 Subject2)	CNhs13395
+Monocyte-derived macrophages response to LPS, 10hr, donor2 (t17 Subject2)	CNhs13396
+Monocyte-derived macrophages response to LPS, 12hr, donor2 (t18 Subject2)	CNhs13397
+Monocyte-derived macrophages response to LPS, 14hr, donor2 (t19 Subject2)	CNhs13398
+Monocyte-derived macrophages response to LPS, 16hr, donor2 (t20 Subject2)	CNhs13399
+Monocyte-derived macrophages response to LPS, 18hr, donor2 (t21 Subject2)	CNhs13400
+Monocyte-derived macrophages response to LPS, 20hr, donor2 (t22 Subject2)	CNhs13401
+Monocyte-derived macrophages response to LPS, 22hr, donor2 (t23 Subject2)	CNhs13402
+Monocyte-derived macrophages response to LPS, 24hr, donor2 (t24 Subject2)	CNhs13403
+Monocyte-derived macrophages response to LPS, 36hr, donor2 (t25 Subject2)	CNhs13404
+Monocyte-derived macrophages response to LPS, 48hr, donor2 (t26 Subject2)	CNhs13405
+H9 Embryonic Stem cells, biol_rep3 (H9ES-3)	CNhs12837
+H9 Embryoid body cells, melanocytic induction, day00, biol_rep3 (H9EB-3 d0)	CNhs12908
+H9 Embryoid body cells, melanocytic induction, day01, biol_rep3 (H9EB-3 d1)	CNhs12909
+H9 Embryoid body cells, melanocytic induction, day03, biol_rep3 (H9EB-3 d3)	CNhs12910
+H9 Embryoid body cells, melanocytic induction, day06, biol_rep3 (H9EB-3 d6)	CNhs12911
+H9 Embryoid body cells, melanocytic induction, day09, biol_rep3 (H9EB-3 d9)	CNhs12951
+H9 Embryoid body cells, melanocytic induction, day12, biol_rep3 (H9EB-3 d12)	CNhs12949
+H9 Embryoid body cells, melanocytic induction, day12, biol_rep3 (H9EB-3 d12)	CNhs12995
+H9 Embryoid body cells, melanocytic induction, day15, biol_rep3 (H9EB-3 d15)	CNhs12912
+H9 Embryoid body cells, melanocytic induction, day18, biol_rep3 (H9EB-3 d18)	CNhs12914
+H9 Embryoid body cells, melanocytic induction, day21, biol_rep3 (H9EB-3 d21)	CNhs12915
+H9 Embryoid body cells, melanocytic induction, day24, biol_rep3 (H9EB-3 d24)	CNhs12916
+H9 Embryoid body cells, melanocytic induction, day27, biol_rep3 (H9EB-3 d27)	CNhs12917
+H9 Embryoid body cells, melanocytic induction, day30, biol_rep3 (H9EB-3 d30)	CNhs12918
+H9 Embryoid body cells, melanocytic induction, day34, biol_rep3 (H9EB-3 d34)	CNhs12919
+H9 Embryoid body cells, melanocytic induction, day41, biol_rep3 (H9EB-3 d41)	CNhs12950
+Melanocyte, donor3 (MC+3)	CNhs13406
+Aortic smooth muscle cell response to FGF2, 00hr00min, biol_rep3 (LK3)	CNhs13567
+Aortic smooth muscle cell response to FGF2, 00hr15min, biol_rep3 (LK6)	CNhs13568
+Aortic smooth muscle cell response to FGF2, 00hr30min, biol_rep3 (LK9)	CNhs13569
+Aortic smooth muscle cell response to FGF2, 00hr45min, biol_rep3 (LK12)	CNhs13571
+Aortic smooth muscle cell response to FGF2, 01hr, biol_rep3 (LK15)	CNhs13683
+Aortic smooth muscle cell response to FGF2, 02hr, biol_rep3 (LK18)	CNhs13572
+Aortic smooth muscle cell response to FGF2, 03hr, biol_rep3 (LK21)	CNhs13573
+Aortic smooth muscle cell response to FGF2, 04hr, biol_rep3 (LK24)	CNhs13574
+Aortic smooth muscle cell response to FGF2, 05hr, biol_rep3 (LK27)	CNhs13575
+Aortic smooth muscle cell response to FGF2, 06hr, biol_rep3 (LK30)	CNhs13576
+Aortic smooth muscle cell response to IL1b, 00hr00min, biol_rep3 (LK33)	CNhs13577
+Aortic smooth muscle cell response to IL1b, 00hr15min, biol_rep3 (LK36)	CNhs13578
+Aortic smooth muscle cell response to IL1b, 00hr30min, biol_rep3 (LK39)	CNhs13579
+Aortic smooth muscle cell response to IL1b, 00hr45min, biol_rep3 (LK42)	CNhs13580
+Aortic smooth muscle cell response to IL1b, 01hr, biol_rep3 (LK45)	CNhs13581
+Aortic smooth muscle cell response to IL1b, 02hr, biol_rep3 (LK48)	CNhs13582
+Aortic smooth muscle cell response to IL1b, 03hr, biol_rep3 (LK51)	CNhs13583
+Aortic smooth muscle cell response to IL1b, 04hr, biol_rep3 (LK54)	CNhs13584
+Aortic smooth muscle cell response to IL1b, 05hr, biol_rep3 (LK57)	CNhs13585
+Aortic smooth muscle cell response to IL1b, 06hr, biol_rep3 (LK60)	CNhs13586
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr00min, biol_rep3 (A3 T0)	CNhs12952
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr15min, biol_rep3 (A3 T1)	CNhs12877
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr30min, biol_rep3 (A3 T2)	CNhs12954
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 00hr45min, biol_rep3 (A3 T3)	CNhs12878
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr00min, biol_rep3 (A3 T4)	CNhs12955
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr20min, biol_rep3 (A3 T5)	CNhs12879
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 01hr40min, biol_rep3 (A3 T6)	CNhs12880
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 02hr00min, biol_rep3 (A3 T7)	CNhs12881
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 02hr30min, biol_rep3 (A3 T8)	CNhs12882
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 03hr, biol_rep3 (A3 T9)	CNhs12883
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 04hr, biol_rep3 (A3 T10)	CNhs12884
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 08hr, biol_rep3 (A3 T11)	CNhs12885
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, 24hr, biol_rep3 (A3 T12)	CNhs12886
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day04, biol_rep3 (A3 T13)	CNhs12887
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day07, biol_rep3 (A3 T14)	CNhs12888
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day14, biol_rep3 (A3 T15)	CNhs12890
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day21, biol_rep3 (A3 T16)	CNhs12891
+Saos-2 osteosarcoma treated with ascorbic acid and BGP to induce calcification, day28, biol_rep3 (A3 T17)	CNhs12892
+Saos-2 osteosarcoma cell line, untreated control, day28, biol_rep3 (B3 T17)	CNhs14196
+Monocyte-derived macrophages response to LPS, 00hr00min, donor3 (t1 Subject3)	CNhs13174
+Monocyte-derived macrophages response to LPS, 00hr15min, donor3 (t2 Subject3)	CNhs13175
+Monocyte-derived macrophages response to LPS, 00hr30min, donor3 (t3 Subject3)	CNhs13176
+Monocyte-derived macrophages response to LPS, 00hr45min, donor3 (t4 Subject3)	CNhs13177
+Monocyte-derived macrophages response to LPS, 01hr00min, donor3 (t5 Subject3)	CNhs13178
+Monocyte-derived macrophages response to LPS, 01hr20min, donor3 (t6 Subject3)	CNhs13179
+Monocyte-derived macrophages response to LPS, 01hr40min, donor3 (t7 Subject3)	CNhs13180
+Monocyte-derived macrophages response to LPS, 02hr00min, donor3 (t8 Subject3)	CNhs13181
+Monocyte-derived macrophages response to LPS, 02hr30min, donor3 (t9 Subject3)	CNhs13182
+Monocyte-derived macrophages response to LPS, 03hr00min, donor3 (t10 Subject3)	CNhs13183
+Monocyte-derived macrophages response to LPS, 03hr30min, donor3 (t11 Subject3)	CNhs13184
+Monocyte-derived macrophages response to LPS, 04hr, donor3 (t12 Subject3)	CNhs13185
+Monocyte-derived macrophages response to LPS, 05hr, donor3 (t13 Subject3)	CNhs13186
+Monocyte-derived macrophages response to LPS, 06hr, donor3 (t14 Subject3)	CNhs13187
+Monocyte-derived macrophages response to LPS, 07hr, donor3 (t15 Subject3)	CNhs13325
+Monocyte-derived macrophages response to LPS, 08hr, donor3 (t16 Subject3)	CNhs13326
+Monocyte-derived macrophages response to LPS, 10hr, donor3 (t17 Subject3)	CNhs13327
+Monocyte-derived macrophages response to LPS, 12hr, donor3 (t18 Subject3)	CNhs13328
+Monocyte-derived macrophages response to LPS, 14hr, donor3 (t19 Subject3)	CNhs13329
+Monocyte-derived macrophages response to LPS, 16hr, donor3 (t20 Subject3)	CNhs13330
+Monocyte-derived macrophages response to LPS, 18hr, donor3 (t21 Subject3)	CNhs13331
+Monocyte-derived macrophages response to LPS, 20hr, donor3 (t22 Subject3)	CNhs13332
+Monocyte-derived macrophages response to LPS, 22hr, donor3 (t23 Subject3)	CNhs13333
+Monocyte-derived macrophages response to LPS, 24hr, donor3 (t24 Subject3)	CNhs13334
+Monocyte-derived macrophages response to LPS, 36hr, donor3 (t25 Subject3)	CNhs13335
+Adipocyte differentiation, day04, donor1	CNhs12516
+Adipocyte differentiation, day08, donor1	CNhs12517
+Adipocyte differentiation, day12, donor1	CNhs13336
+Adipocyte differentiation, day04, donor2	CNhs13410
+Adipocyte differentiation, day08, donor2	CNhs13411
+Adipocyte differentiation, day12, donor2	CNhs13412
+Adipocyte differentiation, day04, donor3	CNhs13413
+Adipocyte differentiation, day08, donor3	CNhs13415
+Adipocyte differentiation, day12, donor3	CNhs13416
+Adipocyte differentiation, day04, donor4	CNhs13417
+Adipocyte differentiation, day08, donor4	CNhs13418
+Adipocyte differentiation, day12, donor4	CNhs13419
+MCF7 breast cancer cell line response to EGF1, 00hr15min, biol_rep1	CNhs12420
+MCF7 breast cancer cell line response to EGF1, 00hr30min, biol_rep1	CNhs12421
+MCF7 breast cancer cell line response to EGF1, 00hr45min, biol_rep1	CNhs12422
+MCF7 breast cancer cell line response to EGF1, 01hr00min, biol_rep1	CNhs12423
+MCF7 breast cancer cell line response to EGF1, 01hr20min, biol_rep1	CNhs12424
+MCF7 breast cancer cell line response to EGF1, 01hr40min, biol_rep1	CNhs12425
+MCF7 breast cancer cell line response to EGF1, 02hr00min, biol_rep1	CNhs12426
+MCF7 breast cancer cell line response to EGF1, 02hr30min, biol_rep1	CNhs12427
+MCF7 breast cancer cell line response to EGF1, 03hr00min, biol_rep1	CNhs12428
+MCF7 breast cancer cell line response to EGF1, 03hr30min, biol_rep1	CNhs12429
+MCF7 breast cancer cell line response to EGF1, 04hr, biol_rep1	CNhs12430
+MCF7 breast cancer cell line response to EGF1, 05hr, biol_rep1	CNhs12431
+MCF7 breast cancer cell line response to EGF1, 06hr, biol_rep1	CNhs12432
+MCF7 breast cancer cell line response to EGF1, 07hr, biol_rep1	CNhs12434
+MCF7 breast cancer cell line response to HRG, 00hr15min, biol_rep1	CNhs12435
+MCF7 breast cancer cell line response to HRG, 00hr30min, biol_rep1	CNhs12436
+MCF7 breast cancer cell line response to HRG, 00hr45min, biol_rep1	CNhs12437
+MCF7 breast cancer cell line response to HRG, 01hr00min, biol_rep1	CNhs12438
+MCF7 breast cancer cell line response to HRG, 01hr20min, biol_rep1	CNhs12439
+MCF7 breast cancer cell line response to HRG, 01hr40min, biol_rep1	CNhs12440
+MCF7 breast cancer cell line response to HRG, 02hr00min, biol_rep1	CNhs12441
+MCF7 breast cancer cell line response to HRG, 02hr30min, biol_rep1	CNhs12442
+MCF7 breast cancer cell line response to HRG, 03hr00min, biol_rep1	CNhs12443
+MCF7 breast cancer cell line response to HRG, 03hr30min, biol_rep1	CNhs12444
+MCF7 breast cancer cell line response to HRG, 04hr, biol_rep1	CNhs12445
+MCF7 breast cancer cell line response to HRG, 05hr, biol_rep1	CNhs12446
+MCF7 breast cancer cell line response to HRG, 06hr, biol_rep1	CNhs12447
+MCF7 breast cancer cell line response to HRG, 07hr, biol_rep1	CNhs12448
+MCF7 breast cancer cell line response to HRG, 08hr, biol_rep1	CNhs12740
+K562 erythroblastic leukemia response to hemin, 00hr00min, biol_rep1	CNhs12458
+K562 erythroblastic leukemia response to hemin, 00hr15min, biol_rep1	CNhs12459
+K562 erythroblastic leukemia response to hemin, 00hr30min, biol_rep1	CNhs12460
+K562 erythroblastic leukemia response to hemin, 00hr45min, biol_rep1	CNhs12461
+K562 erythroblastic leukemia response to hemin, 01hr00min, biol_rep1	CNhs12462
+K562 erythroblastic leukemia response to hemin, 01hr20min, biol_rep1	CNhs12463
+K562 erythroblastic leukemia response to hemin, 01hr40min, biol_rep1	CNhs12464
+K562 erythroblastic leukemia response to hemin, 02hr00min, biol_rep1	CNhs12737
+K562 erythroblastic leukemia response to hemin, 02hr30min, biol_rep1	CNhs12465
+K562 erythroblastic leukemia response to hemin, 03hr00min, biol_rep1	CNhs12466
+K562 erythroblastic leukemia response to hemin, 03hr30min, biol_rep1	CNhs12467
+K562 erythroblastic leukemia response to hemin, 04hr, biol_rep1	CNhs12468
+K562 erythroblastic leukemia response to hemin, 06hr, biol_rep1	CNhs12469
+K562 erythroblastic leukemia response to hemin, 12hr, biol_rep1	CNhs12470
+K562 erythroblastic leukemia response to hemin, 24hr, biol_rep1	CNhs12471
+K562 erythroblastic leukemia response to hemin, day02, biol_rep1	CNhs12472
+K562 erythroblastic leukemia response to hemin, day03, biol_rep1	CNhs12473
+K562 erythroblastic leukemia response to hemin, day04, biol_rep1	CNhs12474
+MCF7 breast cancer cell line response to EGF1, 00hr00min, biol_rep2	CNhs12475
+MCF7 breast cancer cell line response to EGF1, 00hr15min, biol_rep2	CNhs12476
+MCF7 breast cancer cell line response to EGF1, 00hr30min, biol_rep2	CNhs12477
+MCF7 breast cancer cell line response to EGF1, 00hr45min, biol_rep2	CNhs12478
+MCF7 breast cancer cell line response to EGF1, 01hr00min, biol_rep2	CNhs12479
+MCF7 breast cancer cell line response to EGF1, 01hr20min, biol_rep2	CNhs12480
+MCF7 breast cancer cell line response to EGF1, 01hr40min, biol_rep2	CNhs12482
+MCF7 breast cancer cell line response to EGF1, 02hr00min, biol_rep2	CNhs12483
+MCF7 breast cancer cell line response to EGF1, 02hr30min, biol_rep2	CNhs12484
+MCF7 breast cancer cell line response to EGF1, 03hr00min, biol_rep2	CNhs12485
+MCF7 breast cancer cell line response to EGF1, 03hr30min, biol_rep2	CNhs12486
+MCF7 breast cancer cell line response to EGF1, 04hr, biol_rep2	CNhs12487
+MCF7 breast cancer cell line response to EGF1, 05hr, biol_rep2	CNhs12488
+MCF7 breast cancer cell line response to EGF1, 06hr, biol_rep2	CNhs12489
+MCF7 breast cancer cell line response to EGF1, 07hr, biol_rep2	CNhs12490
+MCF7 breast cancer cell line response to EGF1, 08hr, biol_rep2	CNhs12491
+MCF7 breast cancer cell line response to HRG, 00hr15min, biol_rep2	CNhs12652
+MCF7 breast cancer cell line response to HRG, 00hr30min, biol_rep2	CNhs12653
+MCF7 breast cancer cell line response to HRG, 00hr45min, biol_rep2	CNhs12654
+MCF7 breast cancer cell line response to HRG, 01hr00min, biol_rep2	CNhs12655
+MCF7 breast cancer cell line response to HRG, 01hr20min, biol_rep2	CNhs12656
+MCF7 breast cancer cell line response to HRG, 01hr40min, biol_rep2	CNhs12657
+MCF7 breast cancer cell line response to HRG, 02hr00min, biol_rep2	CNhs12658
+MCF7 breast cancer cell line response to HRG, 02hr30min, biol_rep2	CNhs12659
+MCF7 breast cancer cell line response to HRG, 03hr00min, biol_rep2	CNhs12660
+MCF7 breast cancer cell line response to HRG, 03hr30min, biol_rep2	CNhs12662
+MCF7 breast cancer cell line response to HRG, 04hr, biol_rep2	CNhs12663
+MCF7 breast cancer cell line response to HRG, 05hr, biol_rep2	CNhs12664
+MCF7 breast cancer cell line response to HRG, 06hr, biol_rep2	CNhs12665
+MCF7 breast cancer cell line response to HRG, 07hr, biol_rep2	CNhs12666
+MCF7 breast cancer cell line response to HRG, 08hr, biol_rep2	CNhs12667
+K562 erythroblastic leukemia response to hemin, 00hr00min, biol_rep2	CNhs12684
+K562 erythroblastic leukemia response to hemin, 00hr15min, biol_rep2	CNhs12686
+K562 erythroblastic leukemia response to hemin, 00hr30min, biol_rep2	CNhs12687
+K562 erythroblastic leukemia response to hemin, 00hr45min, biol_rep2	CNhs12688
+K562 erythroblastic leukemia response to hemin, 01hr00min, biol_rep2	CNhs12689
+K562 erythroblastic leukemia response to hemin, 01hr20min, biol_rep2	CNhs12690
+K562 erythroblastic leukemia response to hemin, 01hr40min, biol_rep2	CNhs12691
+K562 erythroblastic leukemia response to hemin, 02hr00min, biol_rep2	CNhs12692
+K562 erythroblastic leukemia response to hemin, 02hr30min, biol_rep2	CNhs12693
+K562 erythroblastic leukemia response to hemin, 03hr00min, biol_rep2	CNhs12694
+K562 erythroblastic leukemia response to hemin, 03hr30min, biol_rep2	CNhs12695
+K562 erythroblastic leukemia response to hemin, 04hr, biol_rep2	CNhs12696
+K562 erythroblastic leukemia response to hemin, 06hr, biol_rep2	CNhs12697
+K562 erythroblastic leukemia response to hemin, 12hr, biol_rep2	CNhs12698
+K562 erythroblastic leukemia response to hemin, 24hr, biol_rep2	CNhs12699
+K562 erythroblastic leukemia response to hemin, day02, biol_rep2	CNhs12700
+K562 erythroblastic leukemia response to hemin, day03, biol_rep2	CNhs12701
+K562 erythroblastic leukemia response to hemin, day04, biol_rep2	CNhs12702
+MCF7 breast cancer cell line response to EGF1, 00hr00min, biol_rep3	CNhs12703
+MCF7 breast cancer cell line response to EGF1, 00hr15min, biol_rep3	CNhs12704
+MCF7 breast cancer cell line response to EGF1, 00hr30min, biol_rep3	CNhs12738
+MCF7 breast cancer cell line response to EGF1, 00hr45min, biol_rep3	CNhs12739
+MCF7 breast cancer cell line response to EGF1, 01hr00min, biol_rep3	CNhs12705
+MCF7 breast cancer cell line response to EGF1, 01hr20min, biol_rep3	CNhs12742
+MCF7 breast cancer cell line response to EGF1, 01hr40min, biol_rep3	CNhs12743
+MCF7 breast cancer cell line response to EGF1, 02hr00min, biol_rep3	CNhs12744
+MCF7 breast cancer cell line response to EGF1, 02hr30min, biol_rep3	CNhs12746
+MCF7 breast cancer cell line response to EGF1, 03hr00min, biol_rep3	CNhs12747
+MCF7 breast cancer cell line response to EGF1, 03hr30min, biol_rep3	CNhs12748
+MCF7 breast cancer cell line response to EGF1, 04hr, biol_rep3	CNhs12749
+MCF7 breast cancer cell line response to EGF1, 05hr, biol_rep3	CNhs12750
+MCF7 breast cancer cell line response to EGF1, 06hr, biol_rep3	CNhs12751
+MCF7 breast cancer cell line response to EGF1, 07hr, biol_rep3	CNhs12752
+MCF7 breast cancer cell line response to EGF1, 08hr, biol_rep3	CNhs12753
+MCF7 breast cancer cell line response to HRG, 00hr15min, biol_rep3	CNhs12754
+MCF7 breast cancer cell line response to HRG, 00hr30min, biol_rep3	CNhs12755
+MCF7 breast cancer cell line response to HRG, 00hr45min, biol_rep3	CNhs12756
+MCF7 breast cancer cell line response to HRG, 01hr00min, biol_rep3	CNhs12757
+MCF7 breast cancer cell line response to HRG, 01hr20min, biol_rep3	CNhs12758
+MCF7 breast cancer cell line response to HRG, 01hr40min, biol_rep3	CNhs12759
+MCF7 breast cancer cell line response to HRG, 02hr00min, biol_rep3	CNhs12760
+MCF7 breast cancer cell line response to HRG, 02hr30min, biol_rep3	CNhs12761
+MCF7 breast cancer cell line response to HRG, 03hr00min, biol_rep3	CNhs12762
+MCF7 breast cancer cell line response to HRG, 03hr30min, biol_rep3	CNhs12763
+MCF7 breast cancer cell line response to HRG, 04hr, biol_rep3	CNhs12764
+MCF7 breast cancer cell line response to HRG, 05hr, biol_rep3	CNhs12765
+MCF7 breast cancer cell line response to HRG, 06hr, biol_rep3	CNhs12766
+MCF7 breast cancer cell line response to HRG, 07hr, biol_rep3	CNhs12767
+MCF7 breast cancer cell line response to HRG, 08hr, biol_rep3	CNhs12768
+K562 erythroblastic leukemia response to hemin, 00hr00min, biol_rep3	CNhs12786
+K562 erythroblastic leukemia response to hemin, 00hr15min, biol_rep3	CNhs12787
+K562 erythroblastic leukemia response to hemin, 00hr30min, biol_rep3	CNhs12788
+K562 erythroblastic leukemia response to hemin, 00hr45min, biol_rep3	CNhs12789
+K562 erythroblastic leukemia response to hemin, 01hr00min, biol_rep3	CNhs12790
+K562 erythroblastic leukemia response to hemin, 01hr20min, biol_rep3	CNhs12791
+K562 erythroblastic leukemia response to hemin, 01hr40min, biol_rep3	CNhs12792
+K562 erythroblastic leukemia response to hemin, 02hr00min, biol_rep3	CNhs12794
+K562 erythroblastic leukemia response to hemin, 02hr30min, biol_rep3	CNhs12795
+K562 erythroblastic leukemia response to hemin, 03hr00min, biol_rep3	CNhs12796
+K562 erythroblastic leukemia response to hemin, 03hr30min, biol_rep3	CNhs12797
+K562 erythroblastic leukemia response to hemin, 04hr, biol_rep3	CNhs12798
+K562 erythroblastic leukemia response to hemin, 06hr, biol_rep3	CNhs12799
+K562 erythroblastic leukemia response to hemin, 12hr, biol_rep3	CNhs12800
+K562 erythroblastic leukemia response to hemin, 24hr, biol_rep3	CNhs12801
+K562 erythroblastic leukemia response to hemin, day02, biol_rep3	CNhs12802
+K562 erythroblastic leukemia response to hemin, day03, biol_rep3	CNhs12803
+K562 erythroblastic leukemia response to hemin, day04, biol_rep3	CNhs12804
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr00min, biol_rep1	CNhs13337
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr00min, biol_rep2	CNhs13420
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr00min, biol_rep3	CNhs13421
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr15min, biol_rep1	CNhs13422
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr15min, biol_rep2	CNhs13423
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr15min, biol_rep3	CNhs13424
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr30min, biol_rep1	CNhs13425
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr30min, biol_rep2	CNhs13426
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr30min, biol_rep3	CNhs13427
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr45min, biol_rep1	CNhs13428
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr45min, biol_rep2	CNhs13429
+mesenchymal stem cells (adipose derived), adipogenic induction, 00hr45min, biol_rep3	CNhs13430
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr00min, biol_rep1	CNhs13431
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr00min, biol_rep2	CNhs13432
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr00min, biol_rep3	CNhs13433
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr20min, biol_rep1	CNhs13434
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr20min, biol_rep2	CNhs13598
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr20min, biol_rep3	CNhs13599
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr40min, biol_rep1	CNhs13600
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr40min, biol_rep2	CNhs13601
+mesenchymal stem cells (adipose derived), adipogenic induction, 01hr40min, biol_rep3	CNhs13602
+mesenchymal stem cells (adipose derived), adipogenic induction, 02hr00min, biol_rep1	CNhs13603
+mesenchymal stem cells (adipose derived), adipogenic induction, 02hr00min, biol_rep2	CNhs13604
+mesenchymal stem cells (adipose derived), adipogenic induction, 02hr00min, biol_rep3	CNhs13605
+mesenchymal stem cells (adipose derived), adipogenic induction, 02hr30min, biol_rep1	CNhs13606
+mesenchymal stem cells (adipose derived), adipogenic induction, 02hr30min, biol_rep2	CNhs13607
+mesenchymal stem cells (adipose derived), adipogenic induction, 02hr30min, biol_rep3	CNhs13608
+mesenchymal stem cells (adipose derived), adipogenic induction, 03hr00min, biol_rep1	CNhs13609
+mesenchymal stem cells (adipose derived), adipogenic induction, 03hr00min, biol_rep2	CNhs13610
+mesenchymal stem cells (adipose derived), adipogenic induction, 03hr00min, biol_rep3	CNhs13611
+mesenchymal stem cells (adipose derived), adipogenic induction, 12hr00min, biol_rep1	CNhs13612
+mesenchymal stem cells (adipose derived), adipogenic induction, 12hr00min, biol_rep2	CNhs13613
+mesenchymal stem cells (adipose derived), adipogenic induction, 12hr00min, biol_rep3	CNhs13614
+mesenchymal stem cells (adipose derived), adipogenic induction, day01, biol_rep1	CNhs13615
+mesenchymal stem cells (adipose derived), adipogenic induction, day01, biol_rep2	CNhs13616
+mesenchymal stem cells (adipose derived), adipogenic induction, day01, biol_rep3	CNhs13617
+mesenchymal stem cells (adipose derived), adipogenic induction, day02, biol_rep1	CNhs13619
+mesenchymal stem cells (adipose derived), adipogenic induction, day02, biol_rep2	CNhs13620
+mesenchymal stem cells (adipose derived), adipogenic induction, day02, biol_rep3	CNhs13621
+mesenchymal stem cells (adipose derived), adipogenic induction, day04, biol_rep1	CNhs13622
+mesenchymal stem cells (adipose derived), adipogenic induction, day04, biol_rep2	CNhs13623
+mesenchymal stem cells (adipose derived), adipogenic induction, day04, biol_rep3	CNhs13624
+mesenchymal stem cells (adipose derived), adipogenic induction, day08, biol_rep1	CNhs13625
+mesenchymal stem cells (adipose derived), adipogenic induction, day08, biol_rep2	CNhs13626
+mesenchymal stem cells (adipose derived), adipogenic induction, day08, biol_rep3	CNhs13627
+mesenchymal stem cells (adipose derived), adipogenic induction, day12, biol_rep1	CNhs13628
+mesenchymal stem cells (adipose derived), adipogenic induction, day12, biol_rep2	CNhs13629
+mesenchymal stem cells (adipose derived), adipogenic induction, day12, biol_rep3	CNhs13630
+mesenchymal stem cells (adipose derived), adipogenic induction, day14, biol_rep1	CNhs13338
+mesenchymal stem cells (adipose derived), adipogenic induction, day14, biol_rep2	CNhs13631
+mesenchymal stem cells (adipose derived), adipogenic induction, day14, biol_rep3	CNhs13632
+mesenchymal stem cells (adipose derived), undifferentiated control, biol_rep1	CNhs13692
+mesenchymal stem cells (adipose derived), undifferentiated control, biol_rep2	CNhs13633
+mesenchymal stem cells (adipose derived), undifferentiated control, biol_rep3	CNhs13634
+Monocyte-derived macrophages response to mock influenza infection, 00hr00min, donor1 (868_121:MI_0h)	CNhs13637
+Monocyte-derived macrophages response to udorn influenza infection, 00hr00min, donor1 (868_121:Ud_0h)	CNhs13554
+Monocyte-derived macrophages response to udorn influenza infection, 02hr00min, donor1 (868_121:Ud_2h)	CNhs13555
+Monocyte-derived macrophages response to udorn influenza infection, 07hr00min, donor1 (868_121:Ud_7h)	CNhs13556
+Monocyte-derived macrophages response to udorn influenza infection, 24hr00min, donor1 (868_121:Ud_24h)	CNhs13557
+Monocyte-derived macrophages response to mock influenza infection, 24hr00min, donor1 (868_121:MI_24h)	CNhs13693
+Monocyte-derived macrophages response to mock influenza infection, 00hr00min, donor4 (227_121:MI_0h)	CNhs13638
+Monocyte-derived macrophages response to udorn influenza infection, 00hr00min, donor4 (227_121:Ud_0h)	CNhs13639
+Monocyte-derived macrophages response to udorn influenza infection, 02hr00min, donor4 (227_121:Ud_2h)	CNhs13640
+Monocyte-derived macrophages response to udorn influenza infection, 07hr00min, donor4 (227_121:Ud_7h)	CNhs13641
+Monocyte-derived macrophages response to udorn influenza infection, 24hr00min, donor4 (227_121:Ud_24h)	CNhs13643
+Monocyte-derived macrophages response to mock influenza infection, 24hr00min, donor4 (227_121:MI_24h)	CNhs13644
+Monocyte-derived macrophages response to mock influenza infection, 00hr00min, donor2 (150_120:MI_0h)	CNhs13645
+Monocyte-derived macrophages response to udorn influenza infection, 00hr00min, donor2 (150_120:Ud_0h)	CNhs13646
+Monocyte-derived macrophages response to udorn influenza infection, 02hr00min, donor2 (150_120:Ud_2h)	CNhs13647
+Monocyte-derived macrophages response to udorn influenza infection, 07hr00min, donor2 (150_120:Ud_7h)	CNhs13559
+Monocyte-derived macrophages response to udorn influenza infection, 24hr00min, donor2 (150_120:Ud_24h)	CNhs13560
+Monocyte-derived macrophages response to mock influenza infection, 24hr00min, donor2 (150_120:MI_24h)	CNhs13648
+Monocyte-derived macrophages response to mock influenza infection, 00hr00min, donor3 (536_119:MI_0h)	CNhs13649
+Monocyte-derived macrophages response to udorn influenza infection, 00hr00min, donor3 (536_119:Ud_0h)	CNhs13650
+Monocyte-derived macrophages response to udorn influenza infection, 02hr00min, donor3 (536_119:Ud_2h)	CNhs13651
+Monocyte-derived macrophages response to udorn influenza infection, 07hr00min, donor3 (536_119:Ud_7h)	CNhs13561
+Monocyte-derived macrophages response to udorn influenza infection, 24hr00min, donor3 (536_119:Ud_24h)	CNhs13562
+Monocyte-derived macrophages response to mock influenza infection, 24hr00min, donor3 (536_119:MI_24h)	CNhs13652
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day01, biol_rep1	CNhs13653
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day02, biol_rep1	CNhs13654
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day03, biol_rep1	CNhs13655
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day04, biol_rep1	CNhs13656
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day05, biol_rep1	CNhs13657
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day06, biol_rep1	CNhs13658
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day07, biol_rep1	CNhs13659
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day08, biol_rep1	CNhs13660
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day09, biol_rep1	CNhs13661
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day10, biol_rep1	CNhs13662
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day11, biol_rep1	CNhs13710
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day12, biol_rep1	CNhs13711
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day01, biol_rep2	CNhs13712
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day02, biol_rep2	CNhs13714
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day03, biol_rep2	CNhs13715
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day04, biol_rep2	CNhs13716
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day05, biol_rep2	CNhs13717
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day06, biol_rep2	CNhs13718
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day07, biol_rep2	CNhs13719
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day08, biol_rep2	CNhs13720
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day09, biol_rep2	CNhs13721
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day10, biol_rep2	CNhs13722
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day11, biol_rep2	CNhs13723
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day12, biol_rep2	CNhs13724
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day01, biol_rep3	CNhs13725
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day02, biol_rep3	CNhs13726
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day03, biol_rep3	CNhs13727
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day04, biol_rep3	CNhs13728
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day05, biol_rep3	CNhs13729
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day06, biol_rep3	CNhs13730
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day07, biol_rep3	CNhs13731
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day08, biol_rep3	CNhs13732
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day09, biol_rep3	CNhs13733
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day10, biol_rep3	CNhs13734
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day11, biol_rep3	CNhs13735
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day12, biol_rep3	CNhs13736
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day00, biol_rep1 (UH-1)	CNhs13694
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day00, biol_rep2 (UH-2)	CNhs13695
+HES3-GFP Embryonic Stem cells, cardiomyocytic induction, day00, biol_rep3 (UH-3)	CNhs13738
+iPS differentiation to neuron, control donor C11-CRL2429, day00, rep1	CNhs14045
+iPS differentiation to neuron, control donor C11-CRL2429, day06, rep1	CNhs14046
+iPS differentiation to neuron, control donor C11-CRL2429, day12, rep1	CNhs14047
+iPS differentiation to neuron, control donor C11-CRL2429, day18, rep1	CNhs13916
+iPS differentiation to neuron, control donor C11-CRL2429, day00, rep2	CNhs13822
+iPS differentiation to neuron, control donor C11-CRL2429, day06, rep2	CNhs13823
+iPS differentiation to neuron, control donor C11-CRL2429, day12, rep2	CNhs13824
+iPS differentiation to neuron, control donor C11-CRL2429, day18, rep2	CNhs13825
+iPS differentiation to neuron, control donor C11-CRL2429, day00, rep3	CNhs14049
+iPS differentiation to neuron, control donor C11-CRL2429, day06, rep3	CNhs14050
+iPS differentiation to neuron, control donor C11-CRL2429, day12, rep3	CNhs14051
+iPS differentiation to neuron, control donor C11-CRL2429, day18, rep3	CNhs13917
+iPS differentiation to neuron, control donor C32-CRL1502, day00, rep1	CNhs13826
+iPS differentiation to neuron, control donor C32-CRL1502, day06, rep1	CNhs13827
+iPS differentiation to neuron, control donor C32-CRL1502, day12, rep1	CNhs13828
+iPS differentiation to neuron, control donor C32-CRL1502, day18, rep1	CNhs13829
+iPS differentiation to neuron, control donor C32-CRL1502, day00, rep2	CNhs13839
+iPS differentiation to neuron, control donor C32-CRL1502, day06, rep2	CNhs13840
+iPS differentiation to neuron, control donor C32-CRL1502, day12, rep2	CNhs13841
+iPS differentiation to neuron, control donor C32-CRL1502, day18, rep2	CNhs13842
+iPS differentiation to neuron, control donor C32-CRL1502, day00, rep3	CNhs14052
+iPS differentiation to neuron, control donor C32-CRL1502, day06, rep3	CNhs14053
+iPS differentiation to neuron, control donor C32-CRL1502, day12, rep3	CNhs14054
+iPS differentiation to neuron, control donor C32-CRL1502, day18, rep3	CNhs14055
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day00, rep1	CNhs13830
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day06, rep1	CNhs13831
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day12, rep1	CNhs13832
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day18, rep1	CNhs13833
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day00, rep2	CNhs13843
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day06, rep2	CNhs13844
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day12, rep2	CNhs13845
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day18, rep2	CNhs13846
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day00, rep3	CNhs14056
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day06, rep3	CNhs14057
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day12, rep3	CNhs14058
+iPS differentiation to neuron, down-syndrome donor C11-CCL54, day18, rep3	CNhs14059
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day00, rep1	CNhs13835
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day06, rep1	CNhs13836
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day12, rep1	CNhs13837
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day18, rep1	CNhs13838
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day00, rep2	CNhs14060
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day06, rep2	CNhs14061
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day12, rep2	CNhs14062
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day18, rep2	CNhs13922
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day00, rep3	CNhs14063
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day06, rep3	CNhs14064
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day12, rep3	CNhs14065
+iPS differentiation to neuron, down-syndrome donor C18-CCL54, day18, rep3	CNhs14066
+Myoblast differentiation to myotubes, day00, control donor1	CNhs13847
+Myoblast differentiation to myotubes, day01, control donor1	CNhs13848
+Myoblast differentiation to myotubes, day02, control donor1	CNhs13849
+Myoblast differentiation to myotubes, day03, control donor1	CNhs13850
+Myoblast differentiation to myotubes, day04, control donor1	CNhs13851
+Myoblast differentiation to myotubes, day06, control donor1	CNhs13852
+Myoblast differentiation to myotubes, day08, control donor1	CNhs13853
+Myoblast differentiation to myotubes, day10, control donor1	CNhs13854
+Myoblast differentiation to myotubes, day12, control donor1	CNhs14566
+Myoblast differentiation to myotubes, day00, control donor2	CNhs14567
+Myoblast differentiation to myotubes, day01, control donor2	CNhs14568
+Myoblast differentiation to myotubes, day02, control donor2	CNhs14570
+Myoblast differentiation to myotubes, day03, control donor2	CNhs14571
+Myoblast differentiation to myotubes, day04, control donor2	CNhs14572
+Myoblast differentiation to myotubes, day06, control donor2	CNhs14573
+Myoblast differentiation to myotubes, day08, control donor2	CNhs14574
+Myoblast differentiation to myotubes, day10, control donor2	CNhs14575
+Myoblast differentiation to myotubes, day12, control donor2	CNhs14576
+Myoblast differentiation to myotubes, day00, control donor3	CNhs14577
+Myoblast differentiation to myotubes, day01, control donor3	CNhs14578
+Myoblast differentiation to myotubes, day02, control donor3	CNhs14579
+Myoblast differentiation to myotubes, day03, control donor3	CNhs14580
+Myoblast differentiation to myotubes, day04, control donor3	CNhs14581
+Myoblast differentiation to myotubes, day06, control donor3	CNhs14582
+Myoblast differentiation to myotubes, day08, control donor3	CNhs14583
+Myoblast differentiation to myotubes, day10, control donor3	CNhs14584
+Myoblast differentiation to myotubes, day12, control donor3	CNhs14585
+Myoblast differentiation to myotubes, day00, Duchenne Muscular Dystrophy donor1	CNhs14586
+Myoblast differentiation to myotubes, day01, Duchenne Muscular Dystrophy donor1	CNhs14587
+Myoblast differentiation to myotubes, day02, Duchenne Muscular Dystrophy donor1	CNhs14588
+Myoblast differentiation to myotubes, day03, Duchenne Muscular Dystrophy donor1	CNhs14589
+Myoblast differentiation to myotubes, day04, Duchenne Muscular Dystrophy donor1	CNhs14590
+Myoblast differentiation to myotubes, day06, Duchenne Muscular Dystrophy donor1	CNhs14591
+Myoblast differentiation to myotubes, day08, Duchenne Muscular Dystrophy donor1	CNhs14592
+Myoblast differentiation to myotubes, day10, Duchenne Muscular Dystrophy donor1	CNhs14594
+Myoblast differentiation to myotubes, day12, Duchenne Muscular Dystrophy donor1	CNhs14595
+Myoblast differentiation to myotubes, day00, Duchenne Muscular Dystrophy donor2	CNhs14596
+Myoblast differentiation to myotubes, day01, Duchenne Muscular Dystrophy donor2	CNhs14597
+Myoblast differentiation to myotubes, day02, Duchenne Muscular Dystrophy donor2	CNhs14598
+Myoblast differentiation to myotubes, day03, Duchenne Muscular Dystrophy donor2	CNhs14599
+Myoblast differentiation to myotubes, day04, Duchenne Muscular Dystrophy donor2	CNhs14600
+Myoblast differentiation to myotubes, day06, Duchenne Muscular Dystrophy donor2	CNhs14601
+Myoblast differentiation to myotubes, day08, Duchenne Muscular Dystrophy donor2	CNhs14602
+Myoblast differentiation to myotubes, day10, Duchenne Muscular Dystrophy donor2	CNhs14603
+Myoblast differentiation to myotubes, day12, Duchenne Muscular Dystrophy donor2	CNhs14604
+Myoblast differentiation to myotubes, day00, Duchenne Muscular Dystrophy donor3	CNhs14605
+Myoblast differentiation to myotubes, day01, Duchenne Muscular Dystrophy donor3	CNhs14606
+Myoblast differentiation to myotubes, day02, Duchenne Muscular Dystrophy donor3	CNhs14607
+Myoblast differentiation to myotubes, day04, Duchenne Muscular Dystrophy donor3	CNhs14609
+Myoblast differentiation to myotubes, day06, Duchenne Muscular Dystrophy donor3	CNhs14610
+Myoblast differentiation to myotubes, day08, Duchenne Muscular Dystrophy donor3	CNhs14611
+Myoblast differentiation to myotubes, day10, Duchenne Muscular Dystrophy donor3	CNhs14612
+Myoblast differentiation to myotubes, day12, Duchenne Muscular Dystrophy donor3	CNhs14613
+H1 embryonic stem cells differentiation to CD34+ HSC, day00, biol_rep1	CNhs14067
+H1 embryonic stem cells differentiation to CD34+ HSC, day00, biol_rep2	CNhs14068
+H1 embryonic stem cells differentiation to CD34+ HSC, day00, biol_rep3	CNhs13964
+H1 embryonic stem cells differentiation to CD34+ HSC, day03, biol_rep1	CNhs13965
+H1 embryonic stem cells differentiation to CD34+ HSC, day03, biol_rep2	CNhs13966
+H1 embryonic stem cells differentiation to CD34+ HSC, day03, biol_rep3	CNhs13968
+H1 embryonic stem cells differentiation to CD34+ HSC, day09, biol_rep1	CNhs13969
+H1 embryonic stem cells differentiation to CD34+ HSC, day09, biol_rep2	CNhs13970
+H1 embryonic stem cells differentiation to CD34+ HSC, day09, biol_rep3	CNhs13971
+293SLAM rinderpest infection, 00hr, biol_rep1	CNhs14406
+293SLAM rinderpest infection, 00hr, biol_rep2	CNhs14407
+293SLAM rinderpest infection, 00hr, biol_rep3	CNhs14408
+293SLAM rinderpest infection, 06hr, biol_rep1	CNhs14410
+293SLAM rinderpest infection, 06hr, biol_rep2	CNhs14411
+293SLAM rinderpest infection, 06hr, biol_rep3	CNhs14412
+293SLAM rinderpest infection, 12hr, biol_rep1	CNhs14413
+293SLAM rinderpest infection, 12hr, biol_rep2	CNhs14414
+293SLAM rinderpest infection, 12hr, biol_rep3	CNhs14415
+293SLAM rinderpest infection, 24hr, biol_rep1	CNhs14416
+293SLAM rinderpest infection, 24hr, biol_rep2	CNhs14417
+293SLAM rinderpest infection, 24hr, biol_rep3	CNhs14418
+COBL-a rinderpest infection, 00hr, biol_rep1	CNhs14419
+COBL-a rinderpest infection, 00hr, biol_rep2	CNhs14420
+COBL-a rinderpest infection, 00hr, biol_rep3	CNhs14421
+COBL-a rinderpest infection, 06hr, biol_rep1	CNhs14422
+COBL-a rinderpest infection, 06hr, biol_rep2	CNhs14423
+COBL-a rinderpest infection, 06hr, biol_rep3	CNhs14424
+COBL-a rinderpest infection, 12hr, biol_rep1	CNhs14425
+COBL-a rinderpest infection, 12hr, biol_rep2	CNhs14426
+COBL-a rinderpest infection, 12hr, biol_rep3	CNhs14427
+COBL-a rinderpest infection, 24hr, biol_rep1	CNhs14428
+COBL-a rinderpest infection, 24hr, biol_rep2	CNhs14429
+COBL-a rinderpest infection, 24hr, biol_rep3	CNhs14430
+COBL-a rinderpest infection, 48hr, biol_rep1	CNhs14431
+COBL-a rinderpest infection, 48hr, biol_rep2	CNhs14432
+COBL-a rinderpest infection, 48hr, biol_rep3	CNhs14434
+COBL-a rinderpest(-C) infection, 06hr, biol_rep1	CNhs14435
+COBL-a rinderpest(-C) infection, 06hr, biol_rep2	CNhs14436
+COBL-a rinderpest(-C) infection, 06hr, biol_rep3	CNhs14437
+COBL-a rinderpest(-C) infection, 12hr, biol_rep1	CNhs14438
+COBL-a rinderpest(-C) infection, 12hr, biol_rep2	CNhs14439
+COBL-a rinderpest(-C) infection, 12hr, biol_rep3	CNhs14440
+COBL-a rinderpest(-C) infection, 24hr, biol_rep1	CNhs14441
+COBL-a rinderpest(-C) infection, 24hr, biol_rep2	CNhs14442
+COBL-a rinderpest(-C) infection, 24hr, biol_rep3	CNhs14443
+COBL-a rinderpest(-C) infection, 48hr, biol_rep1	CNhs14444
+COBL-a rinderpest(-C) infection, 48hr, biol_rep2	CNhs14445
+COBL-a rinderpest(-C) infection, 48hr, biol_rep3	CNhs14446
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr00min, biol_rep1	CNhs14463
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr00min, biol_rep2	CNhs14464
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr00min, biol_rep3	CNhs14465
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr15min, biol_rep1	CNhs14466
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr15min, biol_rep2	CNhs14467
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr15min, biol_rep3	CNhs14468
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr30min, biol_rep1	CNhs14469
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr30min, biol_rep2	CNhs14470
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr30min, biol_rep3	CNhs14471
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr45min, biol_rep1	CNhs14472
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr45min, biol_rep2	CNhs14473
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 00hr45min, biol_rep3	CNhs14474
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr00min, biol_rep1	CNhs14475
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr00min, biol_rep2	CNhs14476
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr00min, biol_rep3	CNhs14477
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr20min, biol_rep1	CNhs14478
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr20min, biol_rep2	CNhs14479
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr20min, biol_rep3	CNhs14480
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr40min, biol_rep1	CNhs14482
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr40min, biol_rep2	CNhs14483
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 01hr40min, biol_rep3	CNhs14484
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 02hr00min, biol_rep1	CNhs14485
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 02hr00min, biol_rep2	CNhs14486
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 02hr00min, biol_rep3	CNhs14487
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 02hr30min, biol_rep1	CNhs14488
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 02hr30min, biol_rep2	CNhs14489
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 02hr30min, biol_rep3	CNhs14490
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 03hr00min, biol_rep1	CNhs14491
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 03hr00min, biol_rep2	CNhs14492
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 03hr00min, biol_rep3	CNhs14493
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 03hr30min, biol_rep1	CNhs14494
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 03hr30min, biol_rep2	CNhs14495
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 03hr30min, biol_rep3	CNhs14496
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 04hr00min, biol_rep1	CNhs14497
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 04hr00min, biol_rep2	CNhs14498
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 04hr00min, biol_rep3	CNhs14499
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 05hr00min, biol_rep1	CNhs14500
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 05hr00min, biol_rep2	CNhs14501
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 05hr00min, biol_rep3	CNhs14518
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 06hr00min, biol_rep1	CNhs14519
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 06hr00min, biol_rep2	CNhs14520
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 06hr00min, biol_rep3	CNhs14522
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 07hr00min, biol_rep1	CNhs14523
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 07hr00min, biol_rep2	CNhs14524
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 07hr00min, biol_rep3	CNhs14525
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 08hr00min, biol_rep1	CNhs14526
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 08hr00min, biol_rep2	CNhs14527
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 08hr00min, biol_rep3	CNhs14528
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 12hr00min, biol_rep2	CNhs14530
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 12hr00min, biol_rep3	CNhs14531
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 16hr00min, biol_rep1	CNhs14532
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 16hr00min, biol_rep2	CNhs14533
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 16hr00min, biol_rep3	CNhs14534
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 24hr00min, biol_rep1	CNhs14535
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 24hr00min, biol_rep2	CNhs14536
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 24hr00min, biol_rep3	CNhs14537
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 42hr00min, biol_rep1	CNhs14538
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 42hr00min, biol_rep2	CNhs14539
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 42hr00min, biol_rep3	CNhs14540
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 60hr00min, biol_rep1	CNhs14541
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 60hr00min, biol_rep2	CNhs14542
+ARPE-19 EMT induced with TGF-beta and TNF-alpha, 60hr00min, biol_rep3	CNhs14543
+hIPS, biol_rep1	CNhs14214
+hIPS, biol_rep2	CNhs14215
+hIPS, biol_rep3	CNhs14216
+hIPS +CCl2, biol_rep1	CNhs14217
+hIPS +CCl2, biol_rep2	CNhs14218
+hIPS +CCl2, biol_rep3	CNhs14219
+MCF7 breast cancer cell line response to EGF1, 00hr00min, biol_rep1	CNhs12564
+MCF7 breast cancer cell line response to EGF1, 08hr, biol_rep1	CNhs12565
+Clontech Human Universal Reference Total RNA, pool1	CNhs10608
+SABiosciences XpressRef Human Universal Total RNA, pool1	CNhs10610
+Universal RNA - Human Normal Tissues Biochain, pool1	CNhs10612
+adipose tissue, adult, pool1	CNhs10615
+bladder, adult, pool1	CNhs10616
+brain, adult, pool1	CNhs10617
+cervix, adult, pool1	CNhs10618
+colon, adult, pool1	CNhs10619
+esophagus, adult, pool1	CNhs10620
+heart, adult, pool1	CNhs10621
+kidney, adult, pool1	CNhs10622
+liver, adult, pool1	CNhs10624
+lung, adult, pool1	CNhs10625
+ovary, adult, pool1	CNhs10626
+placenta, adult, pool1	CNhs10627
+prostate, adult, pool1	CNhs10628
+skeletal muscle, adult, pool1	CNhs10629
+small intestine, adult, pool1	CNhs10630
+spleen, adult, pool1	CNhs10631
+testis, adult, pool1	CNhs10632
+thymus, adult, pool1	CNhs10633
+thyroid, adult, pool1	CNhs10634
+trachea, adult, pool1	CNhs10635
+retina, adult, pool1	CNhs10636
+temporal lobe, adult, pool1	CNhs10637
+postcentral gyrus, adult, pool1	CNhs10638
+pons, adult, pool1	CNhs10640
+parietal lobe, adult, pool1	CNhs10641
+paracentral gyrus, adult, pool1	CNhs10642
+occipital pole, adult, pool1	CNhs10643
+nucleus accumbens, adult, pool1	CNhs10644
+medulla oblongata, adult, pool1	CNhs10645
+insula, adult, pool1	CNhs10646
+frontal lobe, adult, pool1	CNhs10647
+dura mater, adult, donor1	CNhs10648
+corpus callosum, adult, pool1	CNhs10649
+thymus, fetal, pool1	CNhs10650
+spleen, fetal, pool1	CNhs10651
+kidney, fetal, pool1	CNhs10652
+heart, fetal, pool1	CNhs10653
+tonsil, adult, pool1	CNhs10654
+smooth muscle, adult, pool1	CNhs11755
+pancreas, adult, donor1	CNhs11756
+heart, adult, diseased post-infarction, donor1	CNhs11757
+heart, adult, diseased, donor1	CNhs11758
+aorta, adult, pool1	CNhs11760
+blood, adult, pool1	CNhs11761
+eye, fetal, donor1	CNhs11762
+uterus, fetal, donor1	CNhs11763
+spinal cord, fetal, donor1	CNhs11764
+umbilical cord, fetal, donor1	CNhs11765
+trachea, fetal, donor1	CNhs11766
+tongue, fetal, donor1	CNhs11768
+thyroid, fetal, donor1	CNhs11769
+throat, fetal, donor1	CNhs11770
+stomach, fetal, donor1	CNhs11771
+temporal lobe, fetal, donor1, tech_rep1	CNhs11772
+temporal lobe, fetal, donor1, tech_rep2	CNhs12996
+small intestine, fetal, donor1	CNhs11773
+skin, fetal, donor1	CNhs11774
+skeletal muscle, fetal, donor1	CNhs11776
+rectum, fetal, donor1	CNhs11777
+lung, fetal, donor1	CNhs11680
+diaphragm, fetal, donor1	CNhs11779
+colon, fetal, donor1	CNhs11780
+duodenum, fetal, donor1, tech_rep1	CNhs11781
+duodenum, fetal, donor1, tech_rep2	CNhs12997
+parietal lobe, fetal, donor1	CNhs11782
+occipital lobe, fetal, donor1	CNhs11784
+skin, adult, donor1	CNhs11785
+lung, right lower lobe, adult, donor1	CNhs11786
+occipital lobe, adult, donor1	CNhs11787
+lymph node, adult, donor1	CNhs11788
+left ventricle, adult, donor1	CNhs11789
+left atrium, adult, donor1	CNhs11790
+breast, adult, donor1	CNhs11792
+adrenal gland, adult, pool1	CNhs11793
+colon, adult, donor1	CNhs11794
+cerebellum, adult, pool1	CNhs11795
+brain, adult, donor1	CNhs11796
+brain, fetal, pool1	CNhs11797
+liver, fetal, pool1	CNhs11798
+salivary gland, adult, pool1	CNhs11677
+testis, adult, pool2	CNhs12998
+uterus, adult, pool1	CNhs11676
+medial frontal gyrus, adult, donor10252	CNhs12310
+amygdala, adult, donor10252	CNhs12311
+putamen, adult, donor10252	CNhs13912
+hippocampus, adult, donor10252	CNhs12312
+thalamus, adult, donor10252	CNhs12314
+medulla oblongata, adult, donor10252	CNhs12315
+medial temporal gyrus, adult, donor10252	CNhs12316
+parietal lobe, adult, donor10252	CNhs12317
+substantia nigra, adult, donor10252	CNhs12318
+spinal cord, adult, donor10252	CNhs12227
+pineal gland, adult, donor10252	CNhs12228
+globus pallidus, adult, donor10252	CNhs12319
+pituitary gland, adult, donor10252	CNhs12229
+occipital cortex, adult, donor10252	CNhs12320
+caudate nucleus, adult, donor10252	CNhs12321
+locus coeruleus, adult, donor10252	CNhs12322
+cerebellum, adult, donor10252	CNhs12323
+amygdala - adult, donor10196	CNhs13793
+thalamus - adult, donor10196	CNhs13794
+hippocampus - adult, donor10196	CNhs13795
+medial frontal gyrus - adult, donor10196	CNhs13796
+parietal lobe - adult, donor10196	CNhs13797
+occipital cortex - adult, donor10196	CNhs13798
+cerebellum - adult, donor10196	CNhs13799
+medulla oblongata - adult, donor10196	CNhs13800
+globus pallidus - adult, donor10196	CNhs13801
+putamen, adult, donor10196	CNhs12324
+caudate nucleus - adult, donor10196	CNhs13802
+substantia nigra - adult, donor10196	CNhs13803
+pineal gland - adult, donor10196	CNhs13804
+pituitary gland - adult, donor10196	CNhs13805
+spinal cord - adult, donor10196	CNhs13807
+locus coeruleus - adult, donor10196	CNhs13808
+medial temporal gyrus - adult, donor10196	CNhs13809
+adipose, donor1	CNhs13972
+adipose, donor2	CNhs13973
+adipose, donor3	CNhs13974
+adipose, donor4	CNhs13975
+cerebral meninges, adult	CNhs12840
+appendix, adult	CNhs12842
+artery, adult	CNhs12843
+vein, adult	CNhs12844
+bone marrow, adult	CNhs12845
+diencephalon, adult	CNhs12610
+olfactory region, adult	CNhs12611
+ductus deferens, adult	CNhs12846
+epididymis, adult	CNhs12847
+gall bladder, adult	CNhs12848
+parotid gland, adult	CNhs12849
+penis, adult	CNhs12850
+seminal vesicle, adult	CNhs12851
+submaxillary gland, adult	CNhs12852
+tongue, adult	CNhs12853
+vagina, adult	CNhs12854
+heart - mitral valve, adult	CNhs12855
+heart - pulmonic valve, adult	CNhs12856
+heart - tricuspid valve, adult	CNhs12857
+throat, adult	CNhs12858
+eye - vitreous humor, donor1	CNhs13440
+eye - muscle inferior rectus, donor1	CNhs13444
+optic nerve, donor1	CNhs13449
+skeletal muscle - soleus muscle, donor1	CNhs13454
+Skin - palm, donor1	CNhs13458
+tongue epidermis (fungiform papillae), donor1	CNhs13460
+achilles tendon, donor2	CNhs13435
+cerebrospinal fluid, donor2	CNhs13437
+cruciate ligament, donor2	CNhs13439
+eye - muscle superior, donor2	CNhs13441
+eye - muscle lateral, donor2	CNhs13442
+eye - muscle medial, donor2	CNhs13443
+Fingernail (including nail plate, eponychium and hyponychium), donor2	CNhs13445
+Urethra, donor2	CNhs13464
+medial frontal gyrus, newborn, donor10223	CNhs14069
+medial temporal gyrus, newborn, donor10223	CNhs14070
+caudate nucleus, newborn, donor10223	CNhs14071
+occipital cortex, newborn, donor10223	CNhs14073
+parietal lobe, newborn, donor10223	CNhs14074
+cerebellum, newborn, donor10223	CNhs14075
+substantia nigra, newborn, donor10223	CNhs14076
+spinal cord, newborn, donor10223	CNhs14077
+amygdala, newborn, donor10223	CNhs14078
+medulla oblongata, newborn, donor10223	CNhs14079
+locus coeruleus, newborn, donor10223	CNhs14080
+hippocampus, newborn, donor10223	CNhs14081
+globus pallidus, newborn, donor10223	CNhs14082
+putamen, newborn, donor10223	CNhs14083
+thalamus, newborn, donor10223	CNhs14084
+globus pallidus, adult, donor10258	CNhs14549
+medial frontal gyrus, adult, donor10258	CNhs14221
+spinal cord, adult, donor10258	CNhs14222
+thalamus, adult, donor10258, tech_rep1	CNhs14223
+thalamus, adult, donor10258, tech_rep2	CNhs14551
+substantia nigra, adult, donor10258	CNhs14224
+putamen, adult, donor10258, tech_rep1	CNhs14225
+putamen, adult, donor10258, tech_rep2	CNhs14618
+parietal cortex, adult, donor10258	CNhs14226
+hippocampus, adult, donor10258	CNhs14227
+locus coeruleus, adult, donor10258	CNhs14550
+medial temporal gyrus, adult, donor10258, tech_rep1	CNhs14229
+medial temporal gyrus, adult, donor10258, tech_rep2	CNhs14552
+pineal gland, adult, donor10258	CNhs14230
+pituitary gland, adult, donor10258	CNhs14231
+caudate nucleus, adult, donor10258	CNhs14232

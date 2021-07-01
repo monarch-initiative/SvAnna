@@ -7,8 +7,9 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svanna.core.reference.Transcript;
 import org.jax.svanna.core.reference.TranscriptService;
-import org.monarchinitiative.variant.api.GenomicAssembly;
-import org.monarchinitiative.variant.api.Strand;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Strand;
 
 import java.util.*;
 
@@ -61,10 +62,10 @@ public class JannovarTranscriptService implements TranscriptService {
                     }
                     map.get(contigId).add(tx);
                     txByAccession.put(tx.accessionId(), tx);
-                    if (!txBySymbol.containsKey(tx.hgvsSymbol())) {
-                        txBySymbol.put(tx.hgvsSymbol(), new HashSet<>());
+                    if (!txBySymbol.containsKey(tm.getGeneSymbol())) {
+                        txBySymbol.put(tm.getGeneSymbol(), new HashSet<>());
                     }
-                    txBySymbol.get(tx.hgvsSymbol()).add(tx);
+                    txBySymbol.get(tm.getGeneSymbol()).add(tx);
                 });
             }
         }
@@ -101,12 +102,12 @@ public class JannovarTranscriptService implements TranscriptService {
 
         @Override
         public int getBegin(Transcript transcript) {
-            return transcript.withStrand(Strand.POSITIVE).toZeroBased().start();
+            return transcript.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         }
 
         @Override
         public int getEnd(Transcript transcript) {
-            return transcript.withStrand(Strand.POSITIVE).toZeroBased().end();
+            return transcript.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         }
     }
 

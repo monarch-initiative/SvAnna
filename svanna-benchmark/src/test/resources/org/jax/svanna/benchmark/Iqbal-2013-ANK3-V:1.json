@@ -1,0 +1,165 @@
+{
+  "id": "Iqbal-2013-23390136-ANK3-V:1",
+  "subject": {
+    "id": "V:1",
+    "ageAtCollection": {
+      "age": "P14Y"
+    },
+    "sex": "MALE",
+    "taxonomy": {
+      "id": "NCBITaxon:9606",
+      "label": "Homo sapiens"
+    }
+  },
+  "phenotypicFeatures": [{
+    "type": {
+      "id": "HP:0001249",
+      "label": "Intellectual disability"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:23390136",
+        "description": "Homozygous and heterozygous disruptions of ANK3: at the crossroads of neurodevelopmental and psychiatric disorders."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0007018",
+      "label": "Attention deficit hyperactivity disorder"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:23390136",
+        "description": "Homozygous and heterozygous disruptions of ANK3: at the crossroads of neurodevelopmental and psychiatric disorders."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0002360",
+      "label": "Sleep disturbance"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:23390136",
+        "description": "Homozygous and heterozygous disruptions of ANK3: at the crossroads of neurodevelopmental and psychiatric disorders."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0000729",
+      "label": "Autistic behavior"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:23390136",
+        "description": "Homozygous and heterozygous disruptions of ANK3: at the crossroads of neurodevelopmental and psychiatric disorders."
+      }
+    }]
+  }, {
+    "type": {
+      "id": "HP:0000750",
+      "label": "Delayed speech and language development"
+    },
+    "evidence": [{
+      "evidenceCode": {
+        "id": "ECO:0000033",
+        "label": "author statement supported by traceable reference"
+      },
+      "reference": {
+        "id": "PMID:23390136",
+        "description": "Homozygous and heterozygous disruptions of ANK3: at the crossroads of neurodevelopmental and psychiatric disorders."
+      }
+    }]
+  }],
+  "genes": [{
+    "id": "NCBIGene:288",
+    "symbol": "ANK3"
+  }],
+  "variants": [{
+    "vcfAllele": {
+      "genomeAssembly": "GRCh38",
+      "id": "0eb92fb9f27465e26ce2f51ca3b7854c",
+      "chr": "2",
+      "pos": 94761849,
+      "ref": "N",
+      "alt": "N[10:60116218[",
+      "info": "SVTYPE\u003dBND"
+    },
+    "zygosity": {
+      "id": "GENO:0000135",
+      "label": "heterozygous"
+    }
+  }],
+  "diseases": [{
+    "term": {
+      "id": "OMIM:615493",
+      "label": "MENTAL RETARDATION, AUTOSOMAL RECESSIVE 37; MRT37"
+    }
+  }],
+  "metaData": {
+    "created": "2021-06-24T14:32:58Z",
+    "createdBy": "Hpo Case Annotator : 1.0.15-SNAPSHOT",
+    "submittedBy": "HPO:ddanis",
+    "resources": [{
+      "id": "hp",
+      "name": "human phenotype ontology",
+      "url": "http://purl.obolibrary.org/obo/hp.owl",
+      "version": "2018-03-08",
+      "namespacePrefix": "HP",
+      "iriPrefix": "http://purl.obolibrary.org/obo/HP_"
+    }, {
+      "id": "pato",
+      "name": "Phenotype And Trait Ontology",
+      "url": "http://purl.obolibrary.org/obo/pato.owl",
+      "version": "2018-03-28",
+      "namespacePrefix": "PATO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/PATO_"
+    }, {
+      "id": "geno",
+      "name": "Genotype Ontology",
+      "url": "http://purl.obolibrary.org/obo/geno.owl",
+      "version": "19-03-2018",
+      "namespacePrefix": "GENO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/GENO_"
+    }, {
+      "id": "ncbitaxon",
+      "name": "NCBI organismal classification",
+      "url": "http://purl.obolibrary.org/obo/ncbitaxon.owl",
+      "version": "2018-03-02",
+      "namespacePrefix": "NCBITaxon"
+    }, {
+      "id": "eco",
+      "name": "Evidence and Conclusion Ontology",
+      "url": "http://purl.obolibrary.org/obo/eco.owl",
+      "version": "2018-11-10",
+      "namespacePrefix": "ECO",
+      "iriPrefix": "http://purl.obolibrary.org/obo/ECO_"
+    }, {
+      "id": "omim",
+      "name": "Online Mendelian Inheritance in Man",
+      "url": "https://www.omim.org",
+      "namespacePrefix": "OMIM"
+    }],
+    "phenopacketSchemaVersion": "1.0.0",
+    "externalReferences": [{
+      "id": "PMID:23390136",
+      "description": "Homozygous and heterozygous disruptions of ANK3: at the crossroads of neurodevelopmental and psychiatric disorders."
+    }]
+  }
+}

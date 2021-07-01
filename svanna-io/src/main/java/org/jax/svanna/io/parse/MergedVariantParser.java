@@ -1,7 +1,6 @@
 package org.jax.svanna.io.parse;
 
-import org.monarchinitiative.variant.api.*;
-import org.monarchinitiative.variant.api.impl.SymbolicVariant;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +18,7 @@ import java.util.stream.Stream;
 /**
  * This parser expects to get path to a BED-like file with records that describe symbolic variants only.
  */
+@Deprecated(forRemoval = true)
 public class MergedVariantParser implements VariantParser<Variant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MergedVariantParser.class);
@@ -97,7 +97,7 @@ public class MergedVariantParser implements VariantParser<Variant> {
                 VariantType vt = cco.variantType;
                 switch (vt.baseType()) {
                     case DEL:
-                        changeLength = cco.begin.pos() - cco.end.pos() + 1;
+                        changeLength = cco.begin.pos() - cco.end.pos();
                         break;
                     case DUP:
                         changeLength = cco.end.pos() - cco.begin.pos();
@@ -110,7 +110,7 @@ public class MergedVariantParser implements VariantParser<Variant> {
                         LOGGER.warn("Unsupported variant type {}", vt);
                         throw new RuntimeException();
                 }
-                return SymbolicVariant.zeroBased(cco.contig, cco.id, cco.begin, cco.end, "N", '<' + vt.baseType().name() + '>', changeLength);
+                return Variant.of(cco.contig, cco.id, Strand.POSITIVE, CoordinateSystem.zeroBased(), cco.begin, cco.end, "", '<' + vt.baseType().name() + '>', changeLength);
             });
         };
 
@@ -118,7 +118,7 @@ public class MergedVariantParser implements VariantParser<Variant> {
 
     private Optional<CoreCoords> makeCoreCoords(String[] tokens) {
         Contig contig = assembly.contigByName(tokens[0]);
-        if (contig == null) {
+        if (contig.isUnknown()) {
             LOGGER.warn("Unknown contig {} in line {}", tokens[0], String.join(DELIMITER, tokens));
             return Optional.empty();
         }

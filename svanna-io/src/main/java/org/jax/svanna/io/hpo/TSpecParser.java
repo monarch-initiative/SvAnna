@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableMap;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import org.jax.svanna.core.exception.SvAnnRuntimeException;
-import org.jax.svanna.core.reference.Enhancer;
+import org.jax.svanna.core.reference.SomeEnhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.variant.api.*;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,15 +36,15 @@ public class TSpecParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(TSpecParser.class);
     /** key: an HPO id, e.g., HP:0001234; value: corresponding label. TODO may not be needed here, it is more for output*/
     private final Map<TermId, String> id2labelMap;
-    /** Key: An HPO id; value: List of {@link Enhancer} objects annotated to the HPO id. */
-    private final Map<TermId, List<Enhancer>> id2enhancerMap;
+    /** Key: An HPO id; value: List of {@link SomeEnhancer} objects annotated to the HPO id. */
+    private final Map<TermId, List<SomeEnhancer>> id2enhancerMap;
     /** Key: A chromosome id; value: a Jannovar Interval array for searching for overlapping enhancers. */
-    private final Map<Integer, IntervalArray<Enhancer>> chromosomeToEnhancerIntervalArrayMap;
+    private final Map<Integer, IntervalArray<SomeEnhancer>> chromosomeToEnhancerIntervalArrayMap;
 
     public TSpecParser(Path tspecPath, GenomicAssembly assembly) {
         id2labelMap = new HashMap<>();
         id2enhancerMap = new HashMap<>();
-        final List<Enhancer> enhancers = new ArrayList<>();
+        final List<SomeEnhancer> enhancers = new ArrayList<>();
         try (BufferedReader br = Files.newBufferedReader(tspecPath)) {
             String line;
             br.readLine(); // skip header
@@ -67,7 +67,7 @@ public class TSpecParser {
                 TermId hpoId = TermId.of(fields[6]);
                 String hpoLabel = fields[7];
                 id2labelMap.putIfAbsent(tid, otherOntologyLabel);
-                Enhancer enhancer = Enhancer.of(contig, Strand.POSITIVE, CoordinateSystem.ZERO_BASED,
+                SomeEnhancer enhancer = SomeEnhancer.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(),
                         Position.of(start), Position.of(end),
                         tau, hpoId, otherOntologyLabel);
                 id2enhancerMap.putIfAbsent(tid, new ArrayList<>());
@@ -78,21 +78,21 @@ public class TSpecParser {
             e.printStackTrace();
         }
         // Now create the Interval Array
-        ImmutableMap.Builder<Integer, IntervalArray<Enhancer>> builder = new ImmutableMap.Builder<>();
-        HashMap<Integer, ArrayList<Enhancer>> enhancerMap = new HashMap<>();
+        ImmutableMap.Builder<Integer, IntervalArray<SomeEnhancer>> builder = new ImmutableMap.Builder<>();
+        HashMap<Integer, ArrayList<SomeEnhancer>> enhancerMap = new HashMap<>();
         assembly.contigs().stream()
                 .map(Contig::id).
                  forEach(i -> enhancerMap.put(i, new ArrayList<>()));
 
-        for (Enhancer e : enhancers)
+        for (SomeEnhancer e : enhancers)
             enhancerMap.get(e.contigId()).add(e);
         Set<Contig> chromosomeIdSet = enhancers
                .stream()
-               .map(Enhancer::contig)
+               .map(SomeEnhancer::contig)
                .collect(Collectors.toSet());
         EnhancerIntervalEndExtractor enhancerEndExtractor = new EnhancerIntervalEndExtractor();
         for (Contig contig: chromosomeIdSet) {
-            IntervalArray<Enhancer> iTree = new IntervalArray<>(enhancerMap.get(contig.id()), enhancerEndExtractor);
+            IntervalArray<SomeEnhancer> iTree = new IntervalArray<>(enhancerMap.get(contig.id()), enhancerEndExtractor);
             builder.put(contig.id(), iTree);
         }
         chromosomeToEnhancerIntervalArrayMap = builder.build();
@@ -102,27 +102,27 @@ public class TSpecParser {
         return id2labelMap;
     }
 
-    public Map<TermId, List<Enhancer>> getId2enhancerMap() {
+    public Map<TermId, List<SomeEnhancer>> getId2enhancerMap() {
         return id2enhancerMap;
     }
 
-    public Map<Integer, IntervalArray<Enhancer>> getChromosomeToEnhancerIntervalArrayMap() {
+    public Map<Integer, IntervalArray<SomeEnhancer>> getChromosomeToEnhancerIntervalArrayMap() {
         return chromosomeToEnhancerIntervalArrayMap;
     }
 
     /**
      * This class is required to build the Interval Array using Jannovar classes.
-     * Note that in our implementation, all {@link Enhancer} objects are on the POSITIVE strand.
+     * Note that in our implementation, all {@link SomeEnhancer} objects are on the POSITIVE strand.
      */
-    static class EnhancerIntervalEndExtractor implements IntervalEndExtractor<Enhancer> {
+    private static class EnhancerIntervalEndExtractor implements IntervalEndExtractor<SomeEnhancer> {
         @Override
-        public int getBegin(Enhancer x) {
-            return x.start();
+        public int getBegin(SomeEnhancer x) {
+            return x.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         }
 
         @Override
-        public int getEnd(Enhancer x) {
-            return x.end();
+        public int getEnd(SomeEnhancer x) {
+            return x.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         }
     }
 

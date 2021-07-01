@@ -4,6 +4,7 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
+import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.core.reference.Zygosity;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;

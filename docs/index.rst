@@ -1,8 +1,8 @@
-svann: Annotation of Structural Variants in VCF files
+SvAnna: Annotation of Structural Variants in VCF files
 =====================================================
 
 
-svann
+SvAnna
 ~~~~~
 
 This application annotates structural variants in VCF files, focussing specifically on long-read WGS analysis

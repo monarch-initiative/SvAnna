@@ -67,55 +67,69 @@ public class AnnotateCommand extends SvAnnaCommand {
      * -------------- INPUT OPTIONS -------------
      */
 
-    @CommandLine.Option(names = {"-p", "--phenopacket"}, description = "Path to phenopacket")
+    @CommandLine.Option(names = {"-p", "--phenopacket"},
+            description = "Path to phenopacket")
     public Path phenopacketPath = null;
 
-    @CommandLine.Option(names = {"--vcf"}, description = "Path to input VCF file")
-    public Path vcfFile = null;
-
-    @CommandLine.Option(names = {"-t", "--term"}, description = "HPO term ID(s)")
+    @CommandLine.Option(names = {"-t", "--term"},
+            description = "HPO term ID(s)")
     public List<String> hpoTermIdList = List.of();
+
+    @CommandLine.Option(names = {"--vcf"},
+            description = "Path to input VCF file")
+    public Path vcfFile = null;
 
     /*
      * ------------ ANALYSIS OPTIONS ------------
      */
-    @CommandLine.Option(names = {"--n-threads"}, paramLabel = "2", description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"--n-threads"},
+            paramLabel = "2",
+            description = "Process variants using n threads (default: ${DEFAULT-VALUE})")
     public int parallelism = 2;
 
     /*
      * ------------ FILTERING OPTIONS ------------
      */
-    @CommandLine.Option(names = {"--similarity-threshold"}, description = "percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
-    public float similarityThreshold = 80.F;
-
-    @CommandLine.Option(names = {"--frequency-threshold"}, description = "frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"--frequency-threshold"},
+            description = "Frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
-    @CommandLine.Option(names={"--min-read-support"}, description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"max-length"},
+            description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
+    public int maxLength = 250_000_000;
+
+    @CommandLine.Option(names={"--min-read-support"},
+            description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 3;
 
-    @CommandLine.Option(names = {"--mode-of-inheritance"}, description = "reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"--mode-of-inheritance"},
+            description = "Reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
     public boolean modeOfInheritance = false;
 
-    @CommandLine.Option(names = {"max-length"}, description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
-    public int maxLength = 250_000_000;
+    @CommandLine.Option(names = {"--similarity-threshold"},
+            description = "Percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
+    public float similarityThreshold = 80.F;
 
     /*
      * ------------  OUTPUT OPTIONS  ------------
      */
-    @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
-    public String outPrefix = null;
+    @CommandLine.Option(names = {"--no-breakends"},
+            description = "Do not include breakend variants into HTML report (default: ${DEFAULT-VALUE})")
+    public boolean doNotReportBreakends = false;
 
-    @CommandLine.Option(names = {"-f", "--output-format"},
+    @CommandLine.Option(names = {"--output-format"},
             paramLabel = "html",
             description = "Comma separated list of output formats to use for writing the results (default: ${DEFAULT-VALUE})")
     public String outputFormats = "html";
 
-    @CommandLine.Option(names = {"-n", "--report-top-variants"}, paramLabel = "50", description = "Report top n variants (default: ${DEFAULT-VALUE})")
-    public int reportNVariants = 100;
+    @CommandLine.Option(names = {"--prefix"},
+            description = "Prefix for output files (default: based on the input VCF name)")
+    public String outPrefix = null;
 
-    @CommandLine.Option(names = {"--no-breakends"}, description = "do not include breakend variants into HTML report (default: ${DEFAULT-VALUE})")
-    public boolean doNotReportBreakends = false;
+    @CommandLine.Option(names = {"--report-top-variants"},
+            paramLabel = "100",
+            description = "Report top n variants (default: ${DEFAULT-VALUE})")
+    public int reportNVariants = 100;
 
     @Override
     public Integer call(){

@@ -44,7 +44,7 @@ abstract class BaseAdditiveSvPrioritizer<DATA extends RouteData, RESULT extends 
             return SvPriority.unknown();
         } catch (Exception e) {
             // TODO - remove once stable
-            LogUtils.logError(LOGGER, "Error during evaluation of variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
+            LogUtils.logError(LOGGER, "Error during evaluation of variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage(), e);
             throw e;
         }
     }

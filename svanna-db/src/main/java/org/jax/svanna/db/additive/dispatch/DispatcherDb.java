@@ -133,10 +133,7 @@ public class DispatcherDb implements Dispatcher {
                 throw new DispatchException("First and last variants must be on the same strand");
 
             upstreamBound = upstreamBound(first) + first.coordinateSystem().startDelta(CS);
-            // Subtract one to not include the TAD as a relevant genomic element for evaluation. Otherwise, using the
-            // upstream & downstream bounds to query overlapping TADs will fetch the TAD used to delimit the downstream
-            // bound. This is because 0-based coordinate system includes the end position.
-            downstreamBound = downstreamBound(last) + last.coordinateSystem().endDelta(CS) - 1;
+            downstreamBound = downstreamBound(last) + last.coordinateSystem().endDelta(CS);
         }
 
         GenomicRegion reference = GenomicRegion.of(first.contig(), first.strand(), CS, upstreamBound, downstreamBound);
@@ -194,7 +191,10 @@ public class DispatcherDb implements Dispatcher {
         Optional<TadBoundary> downstreamTad = tadBoundaryDao.downstreamOf(query);
         if (downstreamTad.isPresent()) {
             TadBoundary tadBoundary = downstreamTad.get();
-            return tadBoundary.asPosition().pos() + tadBoundary.coordinateSystem().endDelta(query.coordinateSystem());
+            // Subtract one to not include the TAD as a relevant genomic element for evaluation. Otherwise, using the
+            // upstream & downstream bounds to query overlapping TADs will fetch the TAD used to delimit the downstream
+            // bound. This is because 0-based coordinate system includes the end position.
+            return tadBoundary.asPosition().pos() + tadBoundary.coordinateSystem().endDelta(query.coordinateSystem()) - 1;
         } else
             // empty coordinate of the contig end in query's coordinate system
             return query.contig().length() + CoordinateSystem.zeroBased().endDelta(query.coordinateSystem());

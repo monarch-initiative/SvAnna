@@ -91,7 +91,7 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
                 " from SVANNA.TAD_BOUNDARY " +
                 " where CONTIG = :contig " +
                 "   and :start < MIDPOINT " +
-                "   and MIDPOINT <= :end " +
+                "   and MIDPOINT < :end " +
                 "   and STABILITY >= :stability" +
                 " order by MIDPOINT";
         SqlParameterSource paramsSource = new MapSqlParameterSource()

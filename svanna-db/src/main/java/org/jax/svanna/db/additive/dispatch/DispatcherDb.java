@@ -115,7 +115,7 @@ public class DispatcherDb implements Dispatcher {
         Variant first = variants.getFirst();
 
         int upstreamBound = -1, downstreamBound = -1;
-        if (variants.size() == 1) {
+        if (!dispatchOptions.forceEvaluateTad() && variants.size() == 1) {
             List<Gene> genes = geneService.overlappingGenes(first);
 
             // Let's make this simple if the variant overlaps with a single gene
@@ -133,7 +133,10 @@ public class DispatcherDb implements Dispatcher {
                 throw new DispatchException("First and last variants must be on the same strand");
 
             upstreamBound = upstreamBound(first) + first.coordinateSystem().startDelta(CS);
-            downstreamBound = downstreamBound(last) + last.coordinateSystem().endDelta(CS);
+            // Subtract one to not include the TAD as a relevant genomic element for evaluation. Otherwise, using the
+            // upstream & downstream bounds to query overlapping TADs will fetch the TAD used to delimit the downstream
+            // bound. This is because 0-based coordinate system includes the end position.
+            downstreamBound = downstreamBound(last) + last.coordinateSystem().endDelta(CS) - 1;
         }
 
         GenomicRegion reference = GenomicRegion.of(first.contig(), first.strand(), CS, upstreamBound, downstreamBound);

@@ -83,6 +83,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
             case ADDITIVE:
                 TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
                 DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritizationParameters().forceTadEvaluation());
+                LogUtils.logInfo(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
                 Dispatcher dispatcher = new DispatcherDb(geneService, tadBoundaryDao, dispatchOptions);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
 

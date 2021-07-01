@@ -1,9 +1,7 @@
-package org.jax.svanna.cli.cmd.annotate;
+package org.jax.svanna.cli.cmd;
 
 import org.jax.svanna.autoconfigure.SvannaProperties;
 import org.jax.svanna.cli.Main;
-import org.jax.svanna.cli.cmd.Utils;
-import org.jax.svanna.cli.cmd.*;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
@@ -42,16 +40,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@CommandLine.Command(name = "annotate-additive",
-        aliases = {"AAV"},
-        header = "Prioritize the variants with additive prioritizer",
+@CommandLine.Command(name = "annotate",
+        aliases = {"A"},
+        header = "Prioritize the variants",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
-public class AnnotateAdditiveCommand extends SvAnnaCommand {
+public class AnnotateCommand extends SvAnnaCommand {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateAdditiveCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
 
     protected static final NumberFormat NF = NumberFormat.getNumberInstance();
 

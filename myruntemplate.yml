@@ -1,7 +1,0 @@
-# Required properties template, the file follows YAML syntax.
-svanna:
-  # path to folder with SvAnna database and the other required files
-  dataDirectory: /Volumes/myBackup2/svanna/
-  # path to Jannovar transcript database
-  jannovarCachePath: /Users/robinp/GIT/jannovar/data/hg38_refseq_curated.ser
-

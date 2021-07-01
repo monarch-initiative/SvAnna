@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.benchmark;
+package org.jax.svanna.benchmark;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
@@ -37,16 +37,6 @@ class CaseReportImporter {
     private CaseReportImporter() {
     }
 
-
-    public static List<CaseReport> readCaseReports(List<Path> caseReports, Path caseReportPath) {
-        List<CaseReport> cases = new ArrayList<>();
-
-        cases.addAll(readCasesProvidedAsPositionalArguments(caseReports));
-        cases.addAll(readCasesProvidedViaCaseFolderOption(caseReportPath));
-
-        cases.sort(Comparator.comparing(cr -> cr.caseSummary().caseSummary()));
-        return cases;
-    }
 
     public static List<CaseReport> readCasesProvidedAsPositionalArguments(List<Path> caseReports) {
         if (caseReports != null) {

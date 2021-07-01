@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.benchmark;
+package org.jax.svanna.benchmark;
 
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.TermId;

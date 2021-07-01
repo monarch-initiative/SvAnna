@@ -3,7 +3,7 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>svann</artifactId>
+        <artifactId>SvAnna</artifactId>
         <groupId>org.jax.svanna</groupId>
         <version>0.3.1-SNAPSHOT</version>
     </parent>
@@ -20,10 +20,6 @@
             <groupId>org.jax.svanna</groupId>
             <artifactId>svanna-spring-boot-starter</artifactId>
             <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>
@@ -46,6 +42,10 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java-util</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
         </dependency>
 
         <!--    TESTS    -->

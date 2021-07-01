@@ -68,8 +68,8 @@ public class DispatcherDbTest {
         when(tadBoundaryDao.downstreamOf(right))
                 .thenReturn(Optional.of(TADS.get(3)));
 
-
-        DispatcherDb polyDispatcherDb = new DispatcherDb(geneService, tadBoundaryDao);
+        DispatchOptions dispatchOptions = DispatchOptions.of(false);
+        DispatcherDb polyDispatcherDb = new DispatcherDb(geneService, tadBoundaryDao, dispatchOptions);
 
         Routes routes = polyDispatcherDb.assembleRoutes(List.of(bv));
 

@@ -19,10 +19,12 @@ public class DispatcherDb implements Dispatcher {
 
     private final GeneService geneService;
     private final TadBoundaryDao tadBoundaryDao;
+    private final DispatchOptions dispatchOptions;
 
-    public DispatcherDb(GeneService geneService, TadBoundaryDao tadBoundaryDao) {
+    public DispatcherDb(GeneService geneService, TadBoundaryDao tadBoundaryDao, DispatchOptions dispatchOptions) {
         this.geneService = geneService;
         this.tadBoundaryDao = tadBoundaryDao;
+        this.dispatchOptions = dispatchOptions;
     }
 
     @Override

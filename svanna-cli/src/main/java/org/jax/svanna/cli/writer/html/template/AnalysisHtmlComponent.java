@@ -25,15 +25,15 @@ public class AnalysisHtmlComponent {
     }
 
     private String keyValueTableRow(String key, double value) {
-        return "<tr><td>" + key + "</td><td>" + String.format("%.1f", value) + "</td?</tr>\n";
+        return "<tr><td>" + key + "</td><td>" + String.format("%.1f", value) + "</td></tr>\n";
     }
 
     private String keyValueTableRow(String key, int value) {
-        return "<tr><td>" + key + "</td><td>" + value + "</td?</tr>\n";
+        return "<tr><td>" + key + "</td><td>" + value + "</td></tr>\n";
     }
 
     private String keyValueTableRow(String key, boolean value) {
-        return "<tr><td>" + key + "</td><td>" + (value ? "Yes": "No") + "</td?</tr>\n";
+        return "<tr><td>" + key + "</td><td>" + (value ? "Yes": "No") + "</td></tr>\n";
     }
 
     private String parametersTable(AnalysisParameters analysisParameters) {

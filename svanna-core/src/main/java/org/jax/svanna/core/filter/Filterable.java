@@ -28,6 +28,8 @@ public interface Filterable {
 
     boolean passedFilter(FilterType filterType);
 
+    boolean failedFilter(FilterType filterType);
+
     boolean addFilterResult(FilterResult filterResult);
 
 }

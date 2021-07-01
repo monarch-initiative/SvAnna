@@ -97,6 +97,11 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
     }
 
     @Override
+    public synchronized boolean failedFilter(FilterType filterType) {
+        return failedFilterTypes.contains(filterType) && !passedFilterTypes.contains(filterType);
+    }
+
+    @Override
     public synchronized boolean addFilterResult(FilterResult filterResult) {
         if (!filterResult.wasRun())
             return true;

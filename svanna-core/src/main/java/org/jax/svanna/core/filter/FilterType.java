@@ -20,6 +20,8 @@
 
 package org.jax.svanna.core.filter;
 
+import java.util.EnumSet;
+
 /**
  * This is a simple class of enumerated constants that describe the type of
  * filtering that was applied to a Gene/Variant.
@@ -62,4 +64,8 @@ public enum FilterType {
         return stringValue;
     }
 
+    // SvAnna works with these filters
+    public static EnumSet<FilterType> svannaFilterTypes() {
+        return EnumSet.of(FAILED_VARIANT_FILTER, COVERAGE_FILTER, MAX_LENGTH_FILTER);
+    }
 }

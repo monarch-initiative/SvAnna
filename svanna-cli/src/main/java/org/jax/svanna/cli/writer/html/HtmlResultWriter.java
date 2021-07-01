@@ -9,6 +9,7 @@ import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
+import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ public class HtmlResultWriter implements ResultWriter {
         LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", analysisParameters.topNVariantsReported());
         // Add data required to create the header summary table in the HTML report (genes, enhancers, etc.)
         List<VariantLandscape> variantLandscapes = results.variants().stream()
+                .sorted(prioritizedVariantComparator())
                 .map(visualizableGenerator::prepareLandscape)
                 .collect(Collectors.toList());
 
@@ -72,7 +74,6 @@ public class HtmlResultWriter implements ResultWriter {
                         && s.variant().passedFilters()
                         && !Double.isNaN(s.variant().svPriority().getPriority()))
                 .filter(v -> !(v.variant() instanceof BreakendVariant) || !doNotReportBreakends)
-                .sorted(prioritizedVariantComparator())
                 .limit(analysisParameters.topNVariantsReported())
                 .map(visualizableGenerator::makeVisualizable)
                 .map(visualizer::getHtml)
@@ -93,12 +94,12 @@ public class HtmlResultWriter implements ResultWriter {
         return infoMap;
     }
 
-    private static Comparator<? super VariantLandscape> prioritizedVariantComparator() {
+    private static Comparator<? super SvannaVariant> prioritizedVariantComparator() {
         return (l, r) -> {
-            int priority = r.variant().svPriority().compareTo(l.variant().svPriority()); // the order is intentional
+            int priority = r.svPriority().compareTo(l.svPriority()); // the order is intentional
             if (priority != 0)
                 return priority;
-            return Variant.compare(l.variant(), r.variant());
+            return Variant.compare(l, r);
         };
     }
 

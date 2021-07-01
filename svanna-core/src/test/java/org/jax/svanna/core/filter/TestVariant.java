@@ -37,6 +37,11 @@ public class TestVariant extends BaseVariant<TestVariant> implements SvannaVaria
     }
 
     @Override
+    public boolean failedFilter(FilterType filterType) {
+        return failedFilterTypes.contains(filterType) && !passedFilterTypes.contains(filterType);
+    }
+
+    @Override
     public synchronized boolean addFilterResult(FilterResult filterResult) {
         return filterResult.passed()
                 ? passedFilterTypes.add(filterResult.getFilterType())

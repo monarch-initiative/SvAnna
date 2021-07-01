@@ -18,6 +18,7 @@ import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.db.additive.DbRouteDataServiceGE;
+import org.jax.svanna.db.additive.dispatch.DispatchOptions;
 import org.jax.svanna.db.additive.dispatch.DispatcherDb;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
@@ -81,7 +82,9 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
             case ADDITIVE:
                 TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
-                Dispatcher dispatcher = new DispatcherDb(geneService, tadBoundaryDao);
+                DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritizationParameters().forceTadEvaluation());
+                LogUtils.logInfo(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
+                Dispatcher dispatcher = new DispatcherDb(geneService, tadBoundaryDao, dispatchOptions);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
 
                 SvannaProperties.PrioritizationParameters prioritizationParameters = svannaProperties.prioritizationParameters();

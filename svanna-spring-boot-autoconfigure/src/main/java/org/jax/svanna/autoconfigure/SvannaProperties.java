@@ -106,17 +106,13 @@ public class SvannaProperties {
     public static class PrioritizationParameters {
 
         private TermSimilarityMeasure termSimilarityMeasure = TermSimilarityMeasure.RESNIK_SYMMETRIC;
-
         private IcMicaMode icMicaMode = IcMicaMode.DATABASE;
-
         private int maxGenes = 100;
-
         private double geneFactor = 1.;
-
         private double enhancerFactor = .25;
-
         private int promoterLength = 2000;
         private double promoterFitnessGain = .6;
+        private boolean forceTadEvaluation = false;
 
         public int maxGenes() {
             return maxGenes;
@@ -173,6 +169,15 @@ public class SvannaProperties {
         public void setPromoterFitnessGain(double promoterFitnessGain) {
             this.promoterFitnessGain = promoterFitnessGain;
         }
+
+        public boolean forceTadEvaluation() {
+            return forceTadEvaluation;
+        }
+
+        public void setForceTadEvaluation(boolean forceTadEvaluation) {
+            this.forceTadEvaluation = forceTadEvaluation;
+        }
+
     }
 
     public static class EnhancerParameters {

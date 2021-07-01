@@ -7,6 +7,7 @@ import org.monarchinitiative.svart.BreakendVariant;
 
 import java.util.List;
 
+@Deprecated(forRemoval = true)
 public class RepetitiveRegionVariantFilter implements Filter<SvannaVariant> {
 
     private static final FilterType FILTER_TYPE = FilterType.REPETITIVE_REGION_FILTER;

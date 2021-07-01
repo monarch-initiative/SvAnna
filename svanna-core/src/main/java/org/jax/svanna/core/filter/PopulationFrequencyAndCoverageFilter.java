@@ -145,7 +145,7 @@ public class PopulationFrequencyAndCoverageFilter {
     }
 
     private <T extends SvannaVariant> FilterResult runMaxLengthFilter(T item) {
-        return item.length() > maxLength
+        return Math.abs(item.length()) > maxLength
                 ? MAX_LENGTH_FAIL
                 : MAX_LENGTH_PASS;
     }

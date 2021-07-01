@@ -100,7 +100,7 @@ public class AnnotateAdditiveCommand extends SvAnnaCommand {
     public boolean modeOfInheritance = false;
 
     @CommandLine.Option(names = {"max-length"}, description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
-    public int maxLength = 100_000;
+    public int maxLength = 250_000_000;
 
     /*
      * ------------  OUTPUT OPTIONS  ------------

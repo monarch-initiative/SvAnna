@@ -7,6 +7,7 @@ import org.jax.svanna.core.landscape.RepeatFamily;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = TestDataConfig.class)
+@Disabled("for removal")
 public class RepetitiveRegionVariantFilterTest {
 
     @Mock

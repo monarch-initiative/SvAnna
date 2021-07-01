@@ -237,8 +237,8 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
         DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), contig, vc.getID(), start, end, ref, alt, svlen);
 
-        // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
-        // variants with low quality
+        // we assume that `PASS` is not added in between variant context's filters by HtsJDK,
+        // and all the other values denote low quality variants
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
         return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());

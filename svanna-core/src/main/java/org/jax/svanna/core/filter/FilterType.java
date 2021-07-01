@@ -20,6 +20,8 @@
 
 package org.jax.svanna.core.filter;
 
+import java.util.EnumSet;
+
 /**
  * This is a simple class of enumerated constants that describe the type of
  * filtering that was applied to a Gene/Variant.
@@ -42,6 +44,7 @@ public enum FilterType {
     INHERITANCE_FILTER("inheritance", "Inheritance"),
     BED_FILTER("bed", "Gene panel target region (Bed)"),
     PRIORITY_SCORE_FILTER("gene-priority", "Gene priority score"),
+    @Deprecated
     REPETITIVE_REGION_FILTER("repeats", "Repetitive region"),
     COVERAGE_FILTER("coverage", "Failed required coverage depth filter"),
     MAX_LENGTH_FILTER("max-length", "Failed required maximum length filter");
@@ -62,4 +65,8 @@ public enum FilterType {
         return stringValue;
     }
 
+    // SvAnna works with these filters
+    public static EnumSet<FilterType> svannaFilterTypes() {
+        return EnumSet.of(FAILED_VARIANT_FILTER, COVERAGE_FILTER, MAX_LENGTH_FILTER);
+    }
 }

@@ -1,10 +1,5 @@
-package org.jax.svanna.cli;
+package org.jax.svanna.benchmark;
 
-
-import org.jax.svanna.cli.cmd.GenerateConfigCommand;
-import org.jax.svanna.cli.cmd.annotate.AnnotateAdditiveCommand;
-import org.jax.svanna.cli.cmd.annotate.AnnotateCommand;
-import org.jax.svanna.cli.cmd.download.DownloadCommand;
 import picocli.CommandLine;
 
 import java.util.Locale;
@@ -12,7 +7,7 @@ import java.util.concurrent.Callable;
 
 import static picocli.CommandLine.Help.Ansi.Style.*;
 
-@CommandLine.Command(name = "svanna-cli.jar",
+@CommandLine.Command(name = "svanna-benchmark.jar",
         header = "Structural variant annotation",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
@@ -20,11 +15,11 @@ import static picocli.CommandLine.Help.Ansi.Style.*;
         footer = Main.FOOTER)
 public class Main implements Callable<Integer>  {
 
-    public static final String VERSION = "svanna v0.2.9-SNAPSHOT";
+    public static final String VERSION = "svanna v0.3.1-SNAPSHOT";
 
     public static final int WIDTH = 120;
 
-    public static final String FOOTER = "See the full documentation at `https://github.com/TheJacksonLaboratory/svann`";
+    public static final String FOOTER = "See the full documentation at `https://github.com/TheJacksonLaboratory/SvAnna`";
 
     private static final CommandLine.Help.ColorScheme COLOR_SCHEME = new CommandLine.Help.ColorScheme.Builder()
             .commands(bold, fg_blue, underline)
@@ -39,10 +34,7 @@ public class Main implements Callable<Integer>  {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
-                .addSubcommand("download", new DownloadCommand())
-                .addSubcommand("generate-config", new GenerateConfigCommand())
-                .addSubcommand("annotate", new AnnotateCommand())
-                .addSubcommand("annotate-additive", new AnnotateAdditiveCommand());
+                .addSubcommand("benchmark-case", new BenchmarkCaseCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));
     }

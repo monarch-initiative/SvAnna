@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.benchmark;
+package org.jax.svanna.benchmark;
 
 import java.util.Objects;
 

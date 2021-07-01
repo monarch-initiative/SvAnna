@@ -15,6 +15,7 @@
         <module>svanna-spring-boot-autoconfigure</module>
         <module>svanna-spring-boot-starter</module>
         <module>svanna-cli</module>
+        <module>svanna-benchmark</module>
     </modules>
     <groupId>org.jax.svanna</groupId>
     <version>0.3.1-SNAPSHOT</version>

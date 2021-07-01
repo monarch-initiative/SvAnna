@@ -1,4 +1,4 @@
-package org.jax.svanna.cli.cmd.benchmark;
+package org.jax.svanna.benchmark;
 
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.junit.jupiter.api.Disabled;
@@ -41,7 +41,6 @@ public class CaseReportImporterTest {
     public void symbolicCasePath() throws Exception {
         Path path = Path.of(CaseReportImporterTest.class.getResource("Hsiao-2015-NF1-UAB-1.json").toURI());
         List<CaseReport> caseReports = CaseReportImporter.readCasesProvidedAsPositionalArguments(List.of(path));
-        caseReports.forEach(System.err::println);
 
         assertThat(caseReports, hasSize(1));
 

@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 /**
  * This parser expects to get path to a BED-like file with records that describe symbolic variants only.
  */
+@Deprecated(forRemoval = true)
 public class MergedVariantParser implements VariantParser<Variant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MergedVariantParser.class);

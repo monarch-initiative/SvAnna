@@ -4,7 +4,6 @@ package org.jax.svanna.cli;
 import org.jax.svanna.cli.cmd.GenerateConfigCommand;
 import org.jax.svanna.cli.cmd.annotate.AnnotateAdditiveCommand;
 import org.jax.svanna.cli.cmd.annotate.AnnotateCommand;
-import org.jax.svanna.cli.cmd.download.DownloadCommand;
 import picocli.CommandLine;
 
 import java.util.Locale;
@@ -39,7 +38,6 @@ public class Main implements Callable<Integer>  {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
-                .addSubcommand("download", new DownloadCommand())
                 .addSubcommand("generate-config", new GenerateConfigCommand())
                 .addSubcommand("annotate", new AnnotateCommand())
                 .addSubcommand("annotate-additive", new AnnotateAdditiveCommand());

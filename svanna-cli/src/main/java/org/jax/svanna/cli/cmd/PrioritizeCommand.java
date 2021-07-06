@@ -40,16 +40,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@CommandLine.Command(name = "annotate",
-        aliases = {"A"},
+@CommandLine.Command(name = "prioritize",
+        aliases = {"P"},
         header = "Prioritize the variants",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
-public class AnnotateCommand extends SvAnnaCommand {
+public class PrioritizeCommand extends SvAnnaCommand {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizeCommand.class);
 
     protected static final NumberFormat NF = NumberFormat.getNumberInstance();
 

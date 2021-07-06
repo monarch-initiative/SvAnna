@@ -1,10 +1,17 @@
-# svann
+# SvAnna
 
-This is a tool to provide annotations for structural variants in VCF files.
+Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing
 
-## Running the tool
-We plan to make it easier to set things up for the final tool, but here is what we need
-to do now to run this app.
+Most users should download the latest SvAnna distribution ZIP file from
+the [Releases page](https://github.com/TheJacksonLaboratory/SvAnna/releases).
+
+Please consult the Read the docs site for detailed documentation - TODO - setup RTD.
+
+## Attic
+
+**The text below is out of sync, and the most useful parts of the text will be moved to *Read the docs*.**
+
+**The documentation needs to be completed.**
 
 ### Creating the Jannovar transcript file
 [Jannovar](https://github.com/charite/jannovar) is a Java app/library for annotating

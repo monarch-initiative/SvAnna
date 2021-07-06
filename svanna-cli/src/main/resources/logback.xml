@@ -5,9 +5,9 @@
             <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+    <logger name="org.jax.svanna" level="INFO"/>
     <logger name="de.charite.compbio.jannovar" level="ERROR"/>
     <logger name="org.monarchinitiative.phenol" level="INFO"/>
-    <logger name="org.jax.svanna" level="DEBUG"/>
     <logger name="org.springframework.boot" level="WARN"/>
     <logger name="com.zaxxer.hikari" level="WARN"/>
     <root level="info">

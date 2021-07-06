@@ -11,10 +11,6 @@ svanna:
     #enhancers:
       # Include VISTA developmental enhancers in the analysis
       #useVista: true
-      # Include FANTOM5 enhancers in the analysis
-      #useFantom5: false
-      # FANTOM5 enhancer must have at least 50% specificity to a tissue
-      #fantom5TissueSpecificity: 0.5
   #prioritizationParameters:
     # Evaluate effect of all variants (including single-gene events) in context of the TAD domain
     #forceTadEvaluation: false
@@ -25,12 +21,8 @@ svanna:
     # IN_MEMORY is faster but uses more memory
     # DATABASE is slower but also more memory efficient
     #icMicaMode: DATABASE
-    # An event involving max N genes to be considered by the prototype prioritizer
+    # An event involving max N genes to be considered by the prioritizer
     #maxGenes: 100
-    # Scaling factor to use for calculating fitness of a gene with or without a variant
-    #geneFactor: 1.
-    # Scaling factor to use for calculating fitness of an enhancer with or without a variant
-    #enhancerFactor: .25
     # Number of bases prepended to a transcript and evaluated as a promoter region
     #promoterLength: 2000
     # Set to 0. to score promoter variants as strictly as coding variants, or to 1. to skip

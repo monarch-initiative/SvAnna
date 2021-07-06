@@ -18,11 +18,11 @@ are required to build SvAnna from source. Most users should download the prebuil
 Installation
 ~~~~~~~~~~~~
 
-Go the GitHub page of `SvAnna <https://github.com/TheJacksonLaboratory/svann>`_, and clone or download the project.
+Go the GitHub page of `SvAnna <https://github.com/TheJacksonLaboratory/SvAnna>`_, and clone or download the project.
 Build the executable from source with maven, and then test the build. ::
 
-    $ git clone https://github.com/TheJacksonLaboratory/svann
-    $ cd svann
+    $ git clone https://github.com/TheJacksonLaboratory/SvAnna
+    $ cd SvAnna
     $ ./mvnw package
     $ java -jar svanna-cli/target/svanna-cli.jar
     $ Usage: <main class> [options] [command] [command options]

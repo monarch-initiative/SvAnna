@@ -1,9 +1,7 @@
-SvAnna: Annotation of Structural Variants in VCF files
-=====================================================
+SvAnna:
+=======
 
-
-SvAnna
-~~~~~
+Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing
 
 This application annotates structural variants in VCF files, focussing specifically on long-read WGS analysis
 of germline variants.
@@ -15,8 +13,9 @@ of germline variants.
    :caption: Contents:
 
    setup
-   enhancers
    running
-   BND<bndannotations>
+   outputformats
    structuralvariation
+   enhancers
+   BND<bndannotations>
 

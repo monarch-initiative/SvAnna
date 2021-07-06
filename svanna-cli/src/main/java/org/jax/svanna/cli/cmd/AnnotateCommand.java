@@ -40,8 +40,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@CommandLine.Command(name = "annotate",
-        aliases = {"A"},
+@CommandLine.Command(name = "prioritize",
+        aliases = {"P"},
         header = "Prioritize the variants",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,

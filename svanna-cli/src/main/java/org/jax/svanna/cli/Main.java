@@ -1,8 +1,8 @@
 package org.jax.svanna.cli;
 
 
-import org.jax.svanna.cli.cmd.AnnotateCommand;
 import org.jax.svanna.cli.cmd.GenerateConfigCommand;
+import org.jax.svanna.cli.cmd.PrioritizeCommand;
 import picocli.CommandLine;
 
 import java.util.Locale;
@@ -38,7 +38,7 @@ public class Main implements Callable<Integer>  {
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
                 .addSubcommand("generate-config", new GenerateConfigCommand())
-                .addSubcommand("annotate", new AnnotateCommand());
+                .addSubcommand("prioritize", new PrioritizeCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));
     }

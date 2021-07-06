@@ -47,9 +47,9 @@ import java.util.stream.Collectors;
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
-public class AnnotateCommand extends SvAnnaCommand {
+public class PrioritizeCommand extends SvAnnaCommand {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnnotateCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizeCommand.class);
 
     protected static final NumberFormat NF = NumberFormat.getNumberInstance();
 

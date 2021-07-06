@@ -1,10 +1,14 @@
 ##fileformat=VCFv4.2
 ##fileDate=2021-01-01T00:00:00.000Z
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structural variant described in this record">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth per allele">
 ##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth at this position for this sample">
-##FORMAT=<ID=SAC,Number=.,Type=Integer,Description="Number of reads on the forward and reverse strand supporting each allele including reference">
-##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
 ##contig=<ID=CM000663.2,length=248956422>
 ##contig=<ID=CM000664.2,length=242193529>
 ##contig=<ID=CM000665.2,length=198295559>
@@ -29,4 +33,12 @@
 ##contig=<ID=CM000684.2,length=50818468>
 ##contig=<ID=CM000685.2,length=156040895>
 ##contig=<ID=CM000686.2,length=57227415>
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Joe
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Sample
+CM000679.2	31150798	Hsiao-2015-26189818-NF1-UAB_1-FigS1	N	<DEL>	1000	PASS	SVTYPE=DEL;END=31157725;SVLEN=-6926	GT:DP:AD	0/1:10:5,5
+CM000679.2	43100079	Musani-2017-29310340-BRCA1-proband-FigS2	N	<DEL>	1000	PASS	SVTYPE=DEL;END=43110335;SVLEN=-10255	GT:DP:AD	0/1:10:5,5
+CM000664.2	109923337	Koyama-2017-28347285-NPHP1-II_2-FigS3	N	<DEL>	1000	PASS	SVTYPE=DEL;CIPOS=-25,25;CIEND=-25,25;END=110405062;IMPRECISE;SVLEN=-481724	GT:DP:AD	0/1:10:5,5
+CM000675.2	72835296	Hebbar-2018-29695797-PIBF1-proband-FigS4	N	<DUP>	1000	PASS	SVTYPE=DUP;END=72835332;SVLEN=35	GT:DP:AD	0/1:10:5,5
+CM000665.2	9725702	Mizuguchi-2020-33157260-BRPF1-II_1-FigS5	N	<INV>	1000	PASS	SVTYPE=INV;END=9737931;SVLEN=0	GT:DP:AD	0/1:10:5,5
+CM000685.2	64205190	Mi-2020-33265914-AMER1-Proband_B-FigS6	N	<DEL>	1000	PASS	SVTYPE=DEL;END=64206761;SVLEN=-1570	GT:DP:AD	0/1:10:5,5
+CM000674.2	6124705	Othman-2010-20696945-VWF-index-FigS7	AAAAGGAAACAATG	A	1000	PASS	.	GT:DP:AD	0/1:10:5,5
+CM000665.2	11007013	Pesz-2018-29621621-SLC6A1-proband-FigS8	N	N[CM000666.2:139383334[	1000	PASS	SVTYPE=BND	GT:DP:AD	0/1:10:5,5

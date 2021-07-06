@@ -12,6 +12,7 @@ of germline variants.
    :maxdepth: 2
    :caption: Contents:
 
+   quickstart
    setup
    running
    outputformats

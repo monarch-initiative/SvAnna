@@ -78,6 +78,7 @@ First generate a virtual environment and install the required sphinx packages. :
 To create the documentation, ensure you are using the ``p38`` environment and enter the following command. ::
 
     source p38/bin/activate
+    cd docs
     make html
     
 This will generate HTML pages under ``_build/html``.

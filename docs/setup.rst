@@ -137,12 +137,11 @@ Open the file in your favorite text editor and provide the following three bits 
 1. ``dataDirectory`` - location the the folder with SvAnna data. The directory is expected to have a structure like::
 
     svanna_folder
-       |- gencode.v35.chr_patch_hapl_scaff.basic.annotation.gtf.gz
-       |- Homo_sapiens.gene_info.gz
-       |- hp.obo
-       |- mim2gene_medgen
-       |- phenotype.hpoa
-       \- svanna_db.mv.db
+      |- svanna_db.mv.db
+      |- hp.obo
+      |- phenotype.hpoa
+      |- mim2gene_medgen
+      \- Homo_sapiens.gene_info.gz
 
   where ``svanna_folder`` corresponds to content of the ZIP files downloaded in the previous section
 

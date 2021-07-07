@@ -162,7 +162,6 @@ public class IngestDbProperties {
         private String hpoAnnotationsUrl;
         private String mim2geneMedgenUrl;
         private String geneInfoUrl;
-        private String gencodeUrl;
 
         public String hpoOboUrl() {
             return hpoOboUrl;
@@ -196,13 +195,6 @@ public class IngestDbProperties {
             this.geneInfoUrl = geneInfoUrl;
         }
 
-        public String gencodeUrl() {
-            return gencodeUrl;
-        }
-
-        public void setGencodeUrl(String gencodeUrl) {
-            this.gencodeUrl = gencodeUrl;
-        }
     }
 
     @ConfigurationProperties(prefix = "svanna.tad.phenotype")

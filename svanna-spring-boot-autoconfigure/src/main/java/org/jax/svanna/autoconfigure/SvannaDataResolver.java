@@ -46,7 +46,4 @@ public class SvannaDataResolver {
         return svannaDataDirectory.resolve("Homo_sapiens.gene_info.gz");
     }
 
-    public Path precomputedResnikSimilaritiesPath() {
-        return svannaDataDirectory.resolve("resnik_similarity.csv.gz");
-    }
 }

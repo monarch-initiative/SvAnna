@@ -307,7 +307,7 @@ public class BuildDb implements Callable<Integer> {
     private static void downloadPhenotypeFiles(Path buildDir, IngestDbProperties properties) throws IOException {
         IngestDbProperties.PhenotypeProperties phenotype = properties.phenotype();
         List<String> fieldsToDownload = List.of(phenotype.hpoOboUrl(), phenotype.hpoAnnotationsUrl(),
-                phenotype.mim2geneMedgenUrl(), phenotype.geneInfoUrl(), phenotype.gencodeUrl());
+                phenotype.mim2geneMedgenUrl(), phenotype.geneInfoUrl());
         for (String field : fieldsToDownload) {
             URL url = new URL(field);
             downloadUrl(url, buildDir);

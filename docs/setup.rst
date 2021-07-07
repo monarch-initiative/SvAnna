@@ -36,10 +36,8 @@ SvAnna database files
 
 SvAnna database files are available for download from:
 
-.. TODO - complete
-
 **hg38/GRCh38**
-  Download `2107_hg38 <https://svanna.s3.amazonaws.com/2107_hg38.zip>`_ (~TODO GB for download, ~TODO GB unpacked)
+  Download `svanna.zip <https://svanna.s3.amazonaws.com/svanna.zip>`_ (~600 MB for download,  2.6 GB unpacked)
 
 After the download, unzip the archive(s) content into a folder and note the folder path.
 

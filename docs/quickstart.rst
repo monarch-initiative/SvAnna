@@ -22,7 +22,7 @@ Run the following commands to setup SvAnna.
 
 Download and extract SvAnna distribution ZIP archive from `here <https://github.com/TheJacksonLaboratory/SvAnna/releases>`_. Then, run::
 
-  java -jar svanna-cli-1.0.0-RC1/svanna-cli-1.0.0-RC1.jar --help
+  java -jar svanna-cli-1.0.0-RC1.jar --help
 
 .. note::
   If things went well, the command above should print the following help message::
@@ -38,8 +38,8 @@ Download and extract SvAnna distribution ZIP archive from `here <https://github.
 
 Download SvAnna database files::
 
-  svanna_data=TODO
-  wget $svanna_data && unzip TODO
+  svanna_data=https://svanna.s3.amazonaws.com/svanna.zip
+  wget $svanna_data && unzip svanna.zip
   wget https://squirls.s3.amazonaws.com/jannovar_v0.35.zip && unzip jannovar_v0.35.zip
 
 

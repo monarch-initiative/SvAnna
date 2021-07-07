@@ -66,8 +66,8 @@ eight variants reported in the SvAnna manuscript. First, let's download the VCF 
 
 Now, let's prioritize the variants::
 
-  java -jar `pwd`/svanna/svanna-cli-1.0.0-RC1.jar prioritize svanna-config.yml --output-format html,csv,vcf --term HP:123456 --vcf example.vcf
+  java -jar `pwd`/svanna/svanna-cli-1.0.0-RC1.jar prioritize svanna-config.yml --output-format html,csv,vcf --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147
 
-SvAnna will annotate the VCF file and store the results next to the VCF file.
+SvAnna will prioritize the variants and store the results in HTML file next to the VCF file.
 
-
+Read the :ref:`rstrunning` section to learn about additional options SvAnna offers.

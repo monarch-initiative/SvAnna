@@ -25,6 +25,23 @@ public class GeneServiceTest {
     @Autowired
     private GenomicAssembly genomicAssembly;
 
+    @Test
+    public void getChromosomeMap() {
+        assertThat(geneService.getChromosomeMap().keySet(), hasItems(1, 7, 9, 13, 15, 20, 23, 24));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "SURF1, 4681",
+            "HNF4A, 77045",
+    })
+    public void bySymbol(String symbol, int length) {
+        Gene gene = geneService.bySymbol(symbol);
+
+        assertThat(gene.geneSymbol(), equalTo(symbol));
+        assertThat(gene.length(), equalTo(length));
+    }
+
     @ParameterizedTest
     @CsvSource({
             "9,  133356485, 133356544, ''", // right between the SURF1 and SURF2 genes

@@ -1,8 +1,8 @@
 package org.jax.svanna.db;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 
-public class SvAnnaDbException extends SvAnnRuntimeException {
+public class SvAnnaDbException extends SvAnnaRuntimeException {
 
     public SvAnnaDbException() {
         super();

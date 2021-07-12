@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority.additive.impact;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;

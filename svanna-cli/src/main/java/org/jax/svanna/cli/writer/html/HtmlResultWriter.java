@@ -5,7 +5,7 @@ import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.html.template.FilterAndCount;
 import org.jax.svanna.cli.writer.html.template.HtmlTemplate;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;

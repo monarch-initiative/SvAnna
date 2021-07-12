@@ -12,14 +12,32 @@ public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enh
 
     private final String id;
 
+    private final EnhancerSource enhancerSource;
+
+    private final boolean isDevelopmental;
+
+    private final double tau;
+
+    private final Set<EnhancerTissueSpecificity> specificities;
+
     public static TestEnhancer of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end) {
-        return new TestEnhancer(id, contig, strand, coordinateSystem, Position.of(start), Position.of(end));
+        return of(id, contig, strand, coordinateSystem, start, end, EnhancerSource.UNKNOWN, false, 0.5, Set.of());
     }
 
+    public static TestEnhancer of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end,
+                                  EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
+        return new TestEnhancer(id, contig, strand, coordinateSystem, Position.of(start), Position.of(end),
+                enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
+    }
 
-    protected TestEnhancer(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
+    protected TestEnhancer(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+                           EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
         super(contig, strand, coordinateSystem, startPosition, endPosition);
         this.id = id;
+        this.enhancerSource = enhancerSource;
+        this.isDevelopmental = isDevelopmental;
+        this.tau = tau;
+        this.specificities = specificities;
     }
 
     @Override
@@ -29,27 +47,28 @@ public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enh
 
     @Override
     public EnhancerSource enhancerSource() {
-        return EnhancerSource.UNKNOWN;
+        return enhancerSource;
     }
 
     @Override
     public boolean isDevelopmental() {
-        return false;
+        return isDevelopmental;
     }
 
     @Override
     public Set<EnhancerTissueSpecificity> tissueSpecificity() {
-        return Set.of();
+        return specificities;
     }
 
     @Override
     public double tau() {
-        return 0.5;
+        return tau;
     }
 
     @Override
     protected TestEnhancer newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new TestEnhancer(id, contig, strand, coordinateSystem, startPosition, endPosition);
+        return new TestEnhancer(id, contig, strand, coordinateSystem, startPosition, endPosition,
+                enhancerSource, isDevelopmental, tau, specificities);
     }
 
     @Override
@@ -58,18 +77,22 @@ public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enh
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         TestEnhancer that = (TestEnhancer) o;
-        return Objects.equals(id, that.id);
+        return isDevelopmental == that.isDevelopmental && Double.compare(that.tau, tau) == 0 && Objects.equals(id, that.id) && enhancerSource == that.enhancerSource && Objects.equals(specificities, that.specificities);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id);
+        return Objects.hash(super.hashCode(), id, enhancerSource, isDevelopmental, tau, specificities);
     }
 
     @Override
     public String toString() {
         return "TestEnhancer{" +
                 "id='" + id + '\'' +
+                ", enhancerSource=" + enhancerSource +
+                ", isDevelopmental=" + isDevelopmental +
+                ", tau=" + tau +
+                ", specificities=" + specificities +
                 '}';
     }
 }

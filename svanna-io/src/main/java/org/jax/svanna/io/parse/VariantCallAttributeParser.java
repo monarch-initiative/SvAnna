@@ -1,7 +1,7 @@
 package org.jax.svanna.io.parse;
 
 import htsjdk.variant.variantcontext.Genotype;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.core.reference.Zygosity;
 import org.slf4j.Logger;
@@ -13,17 +13,11 @@ class VariantCallAttributeParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VariantCallAttributeParser.class);
 
-    private static final VariantCallAttributeParser INSTANCE = new VariantCallAttributeParser();
-
-    static VariantCallAttributeParser getInstance() {
-        return INSTANCE;
-    }
-
     private VariantCallAttributeParser() {
         // private no-op
     }
 
-    VariantCallAttributes parseAttributes(Map<String, Object> attributes, Genotype genotype) {
+    static VariantCallAttributes parseAttributes(Map<String, Object> attributes, Genotype genotype) {
         VariantCallAttributes.Builder builder = VariantCallAttributes.builder();
 
         // first, parse zygosity

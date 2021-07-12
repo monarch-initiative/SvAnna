@@ -1,10 +1,11 @@
 package org.jax.svanna.core.filter;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.VariantMetadata;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +29,7 @@ public class PopulationFrequencyAndCoverageFilter {
     private static final FilterType COVERAGE_FILTER_TYPE = FilterType.COVERAGE_FILTER;
     private static final FilterResult COVERAGE_FAIL = FilterResult.fail(COVERAGE_FILTER_TYPE);
     private static final FilterResult COVERAGE_PASS = FilterResult.pass(COVERAGE_FILTER_TYPE);
-
-    // VARIANT_LENGTH
-    private static final FilterType MAX_LENGTH_FILTER_TYPE = FilterType.MAX_LENGTH_FILTER;
-    private static final FilterResult MAX_LENGTH_FAIL = FilterResult.fail(MAX_LENGTH_FILTER_TYPE);
-    private static final FilterResult MAX_LENGTH_PASS = FilterResult.pass(MAX_LENGTH_FILTER_TYPE);
+    private static final FilterResult COVERAGE_NOT_RUN = FilterResult.notRun(COVERAGE_FILTER_TYPE);
 
     private static final Set<VariantType> FREQ_FILTER_RECOGNIZED_VARIANTS = Set.of(
             VariantType.INS, VariantType.DUP, VariantType.DEL, VariantType.INV, VariantType.CNV);
@@ -41,18 +38,15 @@ public class PopulationFrequencyAndCoverageFilter {
     private final float similarityThreshold;
     private final float frequencyThreshold;
     private final int minReads;
-    private final int maxLength;
 
     public PopulationFrequencyAndCoverageFilter(AnnotationDataService annotationDataService,
                                                 float similarityThreshold,
                                                 float frequencyThreshold,
-                                                int minReads,
-                                                int maxLength) {
+                                                int minReads) {
         this.annotationDataService = annotationDataService;
         this.similarityThreshold = similarityThreshold;
         this.frequencyThreshold = frequencyThreshold;
         this.minReads = minReads;
-        this.maxLength = maxLength;
     }
 
 
@@ -110,9 +104,6 @@ public class PopulationFrequencyAndCoverageFilter {
             FilterResult coverageFilterResult = runCoverageFilter(item);
             item.addFilterResult(coverageFilterResult);
 
-            FilterResult maxLengthResult = runMaxLengthFilter(item);
-            item.addFilterResult(maxLengthResult);
-
             results.add(item);
         }
 
@@ -139,15 +130,11 @@ public class PopulationFrequencyAndCoverageFilter {
     }
 
     private <T extends SvannaVariant> FilterResult runCoverageFilter(T item) {
-        return (item.numberOfAltReads() < minReads)
+        return (item.numberOfAltReads() == VariantMetadata.MISSING_DEPTH_PLACEHOLDER)
+                ? COVERAGE_NOT_RUN
+                : (item.numberOfAltReads() < minReads)
                 ? COVERAGE_FAIL
                 : COVERAGE_PASS;
-    }
-
-    private <T extends SvannaVariant> FilterResult runMaxLengthFilter(T item) {
-        return Math.abs(item.length()) > maxLength
-                ? MAX_LENGTH_FAIL
-                : MAX_LENGTH_PASS;
     }
 
     private static <T extends SvannaVariant> Comparator<? super T> byPositionOnPositiveStrand() {

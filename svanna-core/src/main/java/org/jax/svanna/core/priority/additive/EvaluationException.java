@@ -1,8 +1,8 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 
-public class EvaluationException extends SvAnnRuntimeException {
+public class EvaluationException extends SvAnnaRuntimeException {
 
     public EvaluationException() {
         super();

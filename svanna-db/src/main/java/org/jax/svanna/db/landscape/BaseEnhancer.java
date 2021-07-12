@@ -1,5 +1,8 @@
-package org.jax.svanna.core.landscape;
+package org.jax.svanna.db.landscape;
 
+import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.core.landscape.EnhancerSource;
+import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.monarchinitiative.svart.*;
 
 import java.util.HashSet;

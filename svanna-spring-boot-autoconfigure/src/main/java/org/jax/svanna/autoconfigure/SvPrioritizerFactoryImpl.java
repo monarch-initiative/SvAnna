@@ -1,7 +1,7 @@
 package org.jax.svanna.autoconfigure;
 
 import com.google.common.collect.Sets;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.Enhancer;
@@ -31,7 +31,7 @@ import org.monarchinitiative.svart.GenomicAssembly;
 import javax.sql.DataSource;
 import java.util.*;
 
-public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
+class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
     private final GenomicAssembly genomicAssembly;
     private final DataSource dataSource;
@@ -65,25 +65,12 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
         Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
         Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(phenotypeTerms, topLevelEnhancerTerms);
 
+        //noinspection SwitchStatementWithTooFewBranches
         switch (type) {
-            case PROTOTYPE:
-                LogUtils.logWarn(LOGGER, "PROTOTYPE SvPrioritizer is not currently supported");
-
-//                LogUtils.logDebug(LOGGER, "Preparing gene and disease data");
-//                Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = phenotypeDataService.getRelevantGenesAndDiseases(patientTerms);
-//                return new StrippedSvPrioritizer(annotationDataService,
-//                        new SvAnnOverlapper(transcriptService.getChromosomeMap()),
-//                        phenotypeDataService.geneBySymbol(),
-//                    topLevelHpoTermsAndLabels.keySet(),
-//                        enhancerRelevantAncestors,
-//                        relevantGenesAndDiseases,
-//                        MAX_GENES); // get from svannaProperties if needed
-                return null;
-
             case ADDITIVE:
                 TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
                 DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritizationParameters().forceTadEvaluation());
-                LogUtils.logInfo(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
+                LogUtils.logDebug(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
                 Dispatcher dispatcher = new DispatcherDb(geneService, tadBoundaryDao, dispatchOptions);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
 

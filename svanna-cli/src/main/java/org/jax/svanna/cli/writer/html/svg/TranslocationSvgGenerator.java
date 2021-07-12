@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
@@ -101,7 +101,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
                 .mapToInt(e -> e.startOnStrand(Strand.POSITIVE))
                 .min().orElse(UNINITIALIZED);
         if (minGenePos == UNINITIALIZED && minEnhancerPos == UNINITIALIZED) {
-            throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
+            throw new SvAnnaRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
         } else if (minEnhancerPos == UNINITIALIZED) {
             return Math.min(minGenePos, contigPos);
         } else if (minGenePos == UNINITIALIZED) {
@@ -120,7 +120,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
                 .mapToInt(e -> e.endOnStrand(Strand.POSITIVE))
                 .max().orElse(UNINITIALIZED);
         if (maxTranscriptPos == UNINITIALIZED && maxEnhancerPos == UNINITIALIZED) {
-            throw new SvAnnRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
+            throw new SvAnnaRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
         } else if (maxEnhancerPos == UNINITIALIZED) {
             return Math.max(maxTranscriptPos, contigPos);
         } else if (maxTranscriptPos == UNINITIALIZED) {

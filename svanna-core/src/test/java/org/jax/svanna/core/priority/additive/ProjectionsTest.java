@@ -213,12 +213,22 @@ public class ProjectionsTest {
 
             SortedSet<Projection<? extends GenomicRegion>> projections = new TreeSet<>(GenomicRegion::compare);
 
-            GenomicRegion first = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(25), Position.of(30));
-            projections.addAll(Projections.project(first, inversion));
-            GenomicRegion second = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(35), Position.of(40));
-            projections.addAll(Projections.project(second, inversion));
+            GenomicRegion one = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(25), Position.of(30));
+            projections.addAll(Projections.project(one, inversion));
+            GenomicRegion two = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(35), Position.of(40));
+            projections.addAll(Projections.project(two, inversion));
 
-            projections.forEach(System.err::println);
+            assertThat(projections, hasSize(2));
+
+            Projection<? extends GenomicRegion> first = projections.first();
+            assertThat(first.start(), equalTo(30));
+            assertThat(first.end(), equalTo(35));
+            assertThat(first.spannedEvents(), is(empty()));
+
+            Projection<? extends GenomicRegion> last = projections.last();
+            assertThat(last.start(), equalTo(40));
+            assertThat(last.end(), equalTo(45));
+            assertThat(last.spannedEvents(), is(empty()));
         }
 
         @ParameterizedTest

@@ -8,7 +8,7 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.PopulationVariant;
@@ -307,7 +307,7 @@ public class BuildDb implements Callable<Integer> {
     private static void downloadPhenotypeFiles(Path buildDir, IngestDbProperties properties) throws IOException {
         IngestDbProperties.PhenotypeProperties phenotype = properties.phenotype();
         List<String> fieldsToDownload = List.of(phenotype.hpoOboUrl(), phenotype.hpoAnnotationsUrl(),
-                phenotype.mim2geneMedgenUrl(), phenotype.geneInfoUrl(), phenotype.gencodeUrl());
+                phenotype.mim2geneMedgenUrl(), phenotype.geneInfoUrl());
         for (String field : fieldsToDownload) {
             URL url = new URL(field);
             downloadUrl(url, buildDir);

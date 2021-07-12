@@ -15,21 +15,10 @@ public class VariantCallAttributes {
 
     private VariantCallAttributes(Builder builder) {
         zygosity = Objects.requireNonNull(builder.zygosity);
-
-        if (builder.dp < VariantMetadata.MISSING_DEPTH_PLACEHOLDER) {
-            throw new IllegalArgumentException("Minimum depth of coverage must be greater than `-1`: " + builder.dp);
-        }
         dp = builder.dp;
-
-        if (builder.refReads < VariantMetadata.MISSING_DEPTH_PLACEHOLDER) {
-            throw new IllegalArgumentException("Number of reads supporting ref allele must be greater than `-1`: " + builder.refReads);
-        }
         refReads = builder.refReads;
-
-        if (builder.altReads < VariantMetadata.MISSING_DEPTH_PLACEHOLDER) {
-            throw new IllegalArgumentException("Number of reads supporting alt allele must be greater than `-1`: " + builder.altReads);
-        }
         altReads = builder.altReads;
+
         if (builder.copyNumber < -1) {
             throw new IllegalArgumentException("Copy number must be greater than `-1`: " + builder.copyNumber);
         }
@@ -92,9 +81,7 @@ public class VariantCallAttributes {
         private int altReads = VariantMetadata.MISSING_DEPTH_PLACEHOLDER;
         private int copyNumber = -1;
 
-        private Builder() {
-
-        }
+        private Builder() {}
 
         public Builder zygosity(Zygosity zygosity) {
             this.zygosity = zygosity;

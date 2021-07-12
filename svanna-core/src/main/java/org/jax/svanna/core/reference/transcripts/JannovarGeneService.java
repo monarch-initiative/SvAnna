@@ -6,7 +6,7 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.GeneDefault;
 import org.jax.svanna.core.reference.GeneService;
@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
  * Note that no checking is performed to ensure that the transcript coordinates actually make sense in the given
  * assembly, it is the user's responsibility to provide suitable inputs.
  */
+// TODO - the class might be moved outside of svanna-core
 public class JannovarGeneService implements GeneService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JannovarGeneService.class);
@@ -64,7 +65,7 @@ public class JannovarGeneService implements GeneService {
 
                     ImmutableSortedMap<String, String> altIds = tm.getAltGeneIDs();
                     if (!altIds.containsKey("ENTREZ_ID")) {
-                        LogUtils.logWarn(LOGGER, "Missing entrez id for gene {}", tm.getGeneSymbol());
+                        LogUtils.logDebug(LOGGER, "Missing entrez id for gene {}", tm.getGeneSymbol());
                         return;
                     }
                     TermId geneAccessionId = TermId.of("NCBIGene", altIds.get("ENTREZ_ID"));
@@ -122,14 +123,14 @@ public class JannovarGeneService implements GeneService {
 
     private static Function<Map.Entry<String, GeneDefault.Builder>, Optional<Gene>> buildGeneIfPossible() {
         return entry -> {
-            Gene gene;
             try {
-                gene = entry.getValue().build();
+                return Optional.of(entry.getValue().build());
             } catch (Exception e) {
-                LogUtils.logWarn(LOGGER, "Unable to remap gene {}: {}", entry.getKey(), e.getMessage());
+                // TODO - we may do a more granular catching, the code should mainly throw IllegalArgumentException
+                LogUtils.logDebug(LOGGER, "Unable to remap gene {}: {}", entry.getKey(), e.getMessage());
                 return Optional.empty();
             }
-            return Optional.of(gene);
+
         };
     }
 

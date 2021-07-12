@@ -7,16 +7,13 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import org.jax.svanna.autoconfigure.exception.MissingResourceException;
 import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.overlap.IntervalArrayGeneOverlapper;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
-import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.db.phenotype.ResnikSimilarityDao;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
@@ -174,20 +171,13 @@ public class SvannaAutoConfiguration {
 
     @Bean
     public GeneOverlapper geneOverlapper(GeneService geneService) {
-        return new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
+        return GeneOverlapper.intervalArrayOverlapper(geneService.getChromosomeMap());
     }
 
     @Bean
     public GeneService geneService(GenomicAssembly genomicAssembly, JannovarData jannovarData) {
         return JannovarGeneService.of(genomicAssembly, jannovarData);
     }
-
-
-    @Bean
-    public TranscriptService transcriptService(GenomicAssembly genomicAssembly, JannovarData jannovarData) {
-        return JannovarTranscriptService.of(genomicAssembly, jannovarData);
-    }
-
 
     @Bean
     public JannovarData jannovarData(SvannaProperties svannaProperties) throws SerializationException {

@@ -5,7 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.benchmark.util.ProgressReporter;
 import org.jax.svanna.benchmark.util.TaskUtils;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
@@ -50,9 +50,6 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
 
     @CommandLine.Option(names = {"--min-read-support"}, description = "Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 3;
-
-    @CommandLine.Option(names = {"--max-length"}, description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
-    public int maxLength = 100_000;
 
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outPrefix = "svanna-benchmark";
@@ -103,15 +100,15 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             GenomicAssembly genomicAssembly = context.getBean(GenomicAssembly.class);
 
             LogUtils.logInfo(LOGGER, "Reading variants from `{}`", vcfFile);
-            VariantParser<SvannaVariant> parser = new VcfVariantParser(genomicAssembly, false);
-            List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
+            VariantParser<? extends SvannaVariant> parser = new VcfVariantParser(genomicAssembly);
+            List<? extends SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport, maxLength);
-            List<SvannaVariant> allVariants = filter.filter(variants);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
+            List<? extends SvannaVariant> allVariants = filter.filter(variants);
 
             List<SvannaVariant> filteredVariants = allVariants.stream()
                     .filter(SvannaVariant::passedFilters)

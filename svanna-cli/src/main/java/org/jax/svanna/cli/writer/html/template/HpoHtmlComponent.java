@@ -16,11 +16,6 @@ public class HpoHtmlComponent {
                 "<div class=\"column\">\n" +
                 originalTermsTable(originalHpoTerms) +
                 "</div>\n" +
-                "</div>\n" +
-                "<div class=\"row\">\n" +
-                "<p>svanna performs simple phenotype-base prioritization by semantic similarity analysis (Resnik)," +
-                " corresponding to the OSS approach in <a href=\"https://pubmed.ncbi.nlm.nih.gov/19800049/\" " +
-                " target=\"_blank\">K&ouml;hler et al (2009)</a>.</p>\n" +
                 "</div>\n";
     }
 

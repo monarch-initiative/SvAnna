@@ -51,9 +51,6 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
     @CommandLine.Option(names = {"--min-read-support"}, description = "Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 3;
 
-    @CommandLine.Option(names = {"--max-length"}, description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
-    public int maxLength = 100_000;
-
     @CommandLine.Option(names = {"-x", "--prefix"}, description = "prefix for output files (default: ${DEFAULT-VALUE})")
     public String outPrefix = "svanna-benchmark";
 
@@ -110,7 +107,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport, maxLength);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
             List<? extends SvannaVariant> allVariants = filter.filter(variants);
 
             List<SvannaVariant> filteredVariants = allVariants.stream()

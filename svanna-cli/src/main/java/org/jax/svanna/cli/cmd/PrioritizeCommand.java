@@ -93,11 +93,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
             description = "Frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
-    @CommandLine.Option(names = {"max-length"},
-            description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
-    @Deprecated(forRemoval = true)
-    public int maxLength = 250_000_000;
-
     @CommandLine.Option(names = {"--min-read-support"},
             description = "Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 3;
@@ -299,7 +294,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport, maxLength);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
             List<FullSvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize

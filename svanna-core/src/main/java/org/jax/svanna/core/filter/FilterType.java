@@ -33,21 +33,10 @@ import java.util.EnumSet;
 public enum FilterType {
 
     FAILED_VARIANT_FILTER("filter", "Failed previous VCF filters"),
-    QUALITY_FILTER("quality", "Quality"),
-    INTERVAL_FILTER("interval", "Interval"),
-    ENTREZ_GENE_ID_FILTER("gene-id", "Gene id"),
-    PATHOGENICITY_FILTER("path", "Pathogenicity"),
-    REGULATORY_FEATURE_FILTER("reg-feat", "Regulatory feature"),
+
     FREQUENCY_FILTER("freq", "Frequency"),
-    KNOWN_VARIANT_FILTER("known-var", "Known variant"),
-    VARIANT_EFFECT_FILTER("var-effect", "Variant effect"),
-    INHERITANCE_FILTER("inheritance", "Inheritance"),
-    BED_FILTER("bed", "Gene panel target region (Bed)"),
-    PRIORITY_SCORE_FILTER("gene-priority", "Gene priority score"),
-    @Deprecated
-    REPETITIVE_REGION_FILTER("repeats", "Repetitive region"),
-    COVERAGE_FILTER("coverage", "Failed required coverage depth filter"),
-    MAX_LENGTH_FILTER("max-length", "Failed required maximum length filter");
+
+    COVERAGE_FILTER("coverage", "Failed required coverage depth filter");
 
     private final String vcfValue;
     private final String stringValue;
@@ -67,6 +56,6 @@ public enum FilterType {
 
     // SvAnna works with these filters
     public static EnumSet<FilterType> svannaFilterTypes() {
-        return EnumSet.of(FAILED_VARIANT_FILTER, COVERAGE_FILTER, MAX_LENGTH_FILTER);
+        return EnumSet.of(FAILED_VARIANT_FILTER, FREQUENCY_FILTER, COVERAGE_FILTER);
     }
 }

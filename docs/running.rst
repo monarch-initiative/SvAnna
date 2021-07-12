@@ -22,9 +22,9 @@ stored in one or more :ref:`rstoutputformats`.
 
 To prioritize variants in the `example.vcf`_ file (an example VCF file with 8 variants stored in SvAnna repository), run::
 
-  java -jar svanna-cli.jar prioritize --config svanna-config.yaml --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147
+  java -jar svanna-cli.jar prioritize --config svanna-config.yaml --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147 --prefix /path/to/output
 
-After the annotation, the results are stored at ``output.html``.
+After the annotation, the results are stored at ``/path/to/output.html``.
 
 Mandatory arguments
 ~~~~~~~~~~~~~~~~~~~
@@ -57,6 +57,9 @@ SvAnna allows to fine-tune the prioritization using the following *optional* opt
 * ``--output-format`` - comma separated list of output formats to use for writing the results. See :ref:`rstoutputformats` section for available output formats (default ``html``)
 * ``--prefix`` - prefix for output files (default: based on the input VCF name)
 * ``--report-top-variants`` - report top *n* variants in the HTML report (default: ``100``)
+* ``--uncompressed-output`` - the tabular and VCF output files are compressed by default. Use this flag if you want to disable compressing the output files (default: ``false``)
 
+
+See the next section to learn more about the SvAnna :ref:`rstoutputformats`.
 
 .. _example.vcf: https://github.com/TheJacksonLaboratory/Squirls/blob/development/squirls-cli/src/examples/example.vcf

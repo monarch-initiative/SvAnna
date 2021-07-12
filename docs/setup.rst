@@ -152,7 +152,8 @@ Open the file in your favorite text editor and provide the following three bits 
 Optional parameters
 ~~~~~~~~~~~~~~~~~~~
 
-The optional parameters do not necessarily need to be touched unless you know what you're doing.
+The optional parameters do not necessarily need to be touched unless you know what you're doing. We will provide the
+details later.
 
 .. TODO - describe the optional parameters.
 

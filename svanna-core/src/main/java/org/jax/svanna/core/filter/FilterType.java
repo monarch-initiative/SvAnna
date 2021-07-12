@@ -47,6 +47,7 @@ public enum FilterType {
     @Deprecated
     REPETITIVE_REGION_FILTER("repeats", "Repetitive region"),
     COVERAGE_FILTER("coverage", "Failed required coverage depth filter"),
+    @Deprecated
     MAX_LENGTH_FILTER("max-length", "Failed required maximum length filter");
 
     private final String vcfValue;

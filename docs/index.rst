@@ -16,7 +16,8 @@ of germline variants.
    setup
    running
    outputformats
-   structuralvariation
-   enhancers
-   BND<bndannotations>
 
+
+.. structuralvariation
+.. enhancers
+.. BND<bndannotations>

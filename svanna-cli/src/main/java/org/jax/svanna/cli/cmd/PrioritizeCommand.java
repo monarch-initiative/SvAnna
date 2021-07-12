@@ -93,7 +93,8 @@ public class PrioritizeCommand extends SvAnnaCommand {
             description = "Frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
 
-    @CommandLine.Option(names = {"max-length"},
+    @Deprecated
+    @CommandLine.Option(names = {"--max-length"},
             description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
     public int maxLength = 250_000_000;
 

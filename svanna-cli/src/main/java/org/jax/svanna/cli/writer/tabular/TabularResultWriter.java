@@ -47,7 +47,7 @@ public class TabularResultWriter implements ResultWriter {
     public void write(AnalysisResults analysisResults, String prefix) throws IOException {
         try (BufferedWriter writer = openWriter(prefix)) {
             CSVPrinter printer = CSVFormat.DEFAULT.withDelimiter(columnSeparator)
-                    .withHeader("CONTIG", "START", "END", "ID", "VTYPE", "FAILED_FILTERS", "PRIORITY")
+                    .withHeader("contig", "start", "end", "id", "vtype", "failed_filters", "tadsv")
                     .print(writer);
             analysisResults.variants().stream()
                     .filter(sv -> !Double.isNaN(sv.svPriority().getPriority()))

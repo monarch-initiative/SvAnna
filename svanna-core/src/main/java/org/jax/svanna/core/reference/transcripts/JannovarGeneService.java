@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
  * Note that no checking is performed to ensure that the transcript coordinates actually make sense in the given
  * assembly, it is the user's responsibility to provide suitable inputs.
  */
+// TODO - the class might be moved outside of svanna-core
 public class JannovarGeneService implements GeneService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JannovarGeneService.class);

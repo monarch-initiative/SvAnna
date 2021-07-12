@@ -31,7 +31,7 @@ public class GeneOverlap {
     }
 
     public TranscriptOverlap highestEffectTranscriptOverlap() {
-        return topTranscriptOverlap().orElseThrow(() -> new SvAnnRuntimeException(""));
+        return topTranscriptOverlap().orElseThrow(() -> new SvAnnaRuntimeException("No transcript overlap"));
     }
 
     public OverlapType overlapType() {

@@ -2,9 +2,9 @@ package org.jax.svanna.core.priority;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.TestDataConfig;
+import org.jax.svanna.core.TestEnhancer;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.landscape.BaseEnhancer;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerSource;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
@@ -18,7 +18,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -95,19 +98,19 @@ public class PrototypeSvPrioritizerTest {
         EnhancerTissueSpecificity arteries = EnhancerTissueSpecificity.of(Term.of("UBERON:0000947", "aorta"), Term.of("HP:0011004", "Abnormal systemic arterial morphology"), .6);
 
 
-        Enhancer surf1Enhancer = BaseEnhancer.of(assembly.contigByName("9"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(133_356_501), Position.of(133_356_530),
-                "surf1Enhancer", EnhancerSource.UNKNOWN, false, .3, Set.of(growth));
-        Enhancer gckEnhancer = BaseEnhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(),Position.of(44_190_001), Position.of(44_190_050),
-                "gckEnhancer", EnhancerSource.UNKNOWN, false, .4, Set.of(liver));
-        Enhancer chr20Enhancer = BaseEnhancer.of(assembly.contigByName("20"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(51_642_723), Position.of(51_642_826),
-                "chr20Enhancer", EnhancerSource.UNKNOWN, false, .5, Set.of(brain));
-        Enhancer closeToGckNotPhenotypicallyRelevant = BaseEnhancer.of(assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(44_195_001), Position.of(44_195_500),
-                "closeToGckNotPhenotypicallyRelevant", EnhancerSource.UNKNOWN, true, .1, Set.of(brain));
+        Enhancer surf1Enhancer = TestEnhancer.of("surf1Enhancer", assembly.contigByName("9"), Strand.POSITIVE, CoordinateSystem.zeroBased(),
+                133_356_501, 133_356_530, EnhancerSource.UNKNOWN, false, .3, Set.of(growth));
+        Enhancer gckEnhancer = TestEnhancer.of("gckEnhancer", assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(), 44_190_001, 44_190_050,
+                EnhancerSource.UNKNOWN, false, .4, Set.of(liver));
+        Enhancer chr20Enhancer = TestEnhancer.of("chr20Enhancer", assembly.contigByName("20"), Strand.POSITIVE, CoordinateSystem.zeroBased(), 51_642_723, 51_642_826,
+                EnhancerSource.UNKNOWN, false, .5, Set.of(brain));
+        Enhancer closeToGckNotPhenotypicallyRelevant = TestEnhancer.of("closeToGckNotPhenotypicallyRelevant", assembly.contigByName("7"), Strand.POSITIVE, CoordinateSystem.zeroBased(), 44_195_001, 44_195_500,
+                EnhancerSource.UNKNOWN, true, .1, Set.of(brain));
         // the relevant HPO term for aorta is Abnormal systemic arterial morphology
         // Enhancers expect to get an HPO term and an UBERON/CL label
         int fbn1TSS = 48_646_788;
-        Enhancer fbn190kbUpstream = BaseEnhancer.of(assembly.contigByName("15"), Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(fbn1TSS + 90_000), Position.of(fbn1TSS + 90_000 + 300),
-                        "fbn190kbUpstream", EnhancerSource.UNKNOWN, false, .6, Set.of(arteries));
+        Enhancer fbn190kbUpstream = TestEnhancer.of("fbn190kbUpstream", assembly.contigByName("15"), Strand.POSITIVE, CoordinateSystem.zeroBased(), fbn1TSS + 90_000, fbn1TSS + 90_000 + 300,
+                        EnhancerSource.UNKNOWN, false, .6, Set.of(arteries));
 
         IntervalArray<Enhancer> chr7Array = new IntervalArray<>(List.of(gckEnhancer, closeToGckNotPhenotypicallyRelevant), new EnhancerEndExtractor());
         IntervalArray<Enhancer> chr9Array = new IntervalArray<>(List.of(surf1Enhancer), new EnhancerEndExtractor());

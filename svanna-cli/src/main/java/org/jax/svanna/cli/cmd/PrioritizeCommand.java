@@ -95,6 +95,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
 
     @CommandLine.Option(names = {"max-length"},
             description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
+    @Deprecated(forRemoval = true)
     public int maxLength = 250_000_000;
 
     @CommandLine.Option(names = {"--min-read-support"},

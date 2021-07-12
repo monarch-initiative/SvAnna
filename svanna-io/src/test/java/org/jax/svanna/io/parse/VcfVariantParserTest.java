@@ -6,6 +6,7 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.TestDataConfig;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -46,7 +47,7 @@ public class VcfVariantParserTest {
 
         @Test
         public void createVariantList() throws Exception {
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
             List<? extends Variant> variants = instance.createVariantAlleleList(SV_EXAMPLE_PATH);
 
@@ -80,9 +81,9 @@ public class VcfVariantParserTest {
 
         @Test
         public void createVariantList_Pbsv() throws Exception{
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
-            List<SvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/pbsv.vcf"));
+            List<FullSvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/pbsv.vcf"));
 
             assertThat(variants, hasSize(6));
             assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
@@ -143,9 +144,9 @@ public class VcfVariantParserTest {
 
         @Test
         public void createVariantList_Svim() throws Exception {
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
-            List<SvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/svim.vcf"));
+            List<FullSvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/svim.vcf"));
 
             assertThat(variants, hasSize(6));
             assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
@@ -200,9 +201,9 @@ public class VcfVariantParserTest {
 
         @Test
         public void createVariantList_Sniffles() throws Exception {
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
-            List<SvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/sniffles.vcf"));
+            List<FullSvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/sniffles.vcf"));
 
             assertThat(variants, hasSize(6));
             assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
@@ -238,7 +239,7 @@ public class VcfVariantParserTest {
 
         @Test
         public void toVariants_multiallelicBreakendVariant() {
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
             String line = "2\t321681\tbnd_W\tG\tG]17:198982],C\t6\tPASS\tSVTYPE=BND;MATEID=bnd_Y;EVENT=tra1\tGT\t./.";
             VariantContext vc = VCF_CODEC.decode(line);
@@ -249,7 +250,7 @@ public class VcfVariantParserTest {
 
         @Test
         public void toVariants_multiallelicSymbolicVariant() {
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
             String line = "2\t321682\tdel0\tT\t<DEL>,C\t6\tPASS\tSVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62\tGT:GQ:DP\t0/1:12:11";
             VariantContext vc = VCF_CODEC.decode(line);
@@ -260,7 +261,7 @@ public class VcfVariantParserTest {
 
         @Test
         public void toVariants_symbolic_unknownContig() {
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
             String line = "bacon\t12665100\tdup0\tA\t<DUP>\t14\tPASS\tSVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500;DP=5\tGT:GQ:CN:CNQ\t./.:0:3:16.2";
             VariantContext vc = VCF_CODEC.decode(line);
@@ -271,7 +272,7 @@ public class VcfVariantParserTest {
 
         @Test
         public void toVariants_sequence_unknownContig() {
-            VcfVariantParser instance = new VcfVariantParser(GRCh38p13, false);
+            VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
             String line = "bacon\t14370\trs6054257\tG\tA\t29\tPASS\tDP=14;AF=0.5;DB\tGT:GQ:DP\t1/1:43:5";
             VariantContext vc = VCF_CODEC.decode(line);
@@ -288,7 +289,7 @@ public class VcfVariantParserTest {
         @Test
         public void toVariants_symbolicDeletion() {
             GenomicAssembly assembly = testAssembly(List.of(TestContig.of(1, 10), TestContig.of(2, 20)));
-            VcfVariantParser parser = new VcfVariantParser(assembly, false);
+            VcfVariantParser parser = new VcfVariantParser(assembly);
 
             String line = "1\t2\tdel0\tT\t<DEL>\t6\tPASS\tSVTYPE=DEL;END=7;SVLEN=-5;CIPOS=-1,2;CIEND=-2,1\tGT:GQ:DP:AD\t0/1:12:11:6,5";
 
@@ -321,7 +322,7 @@ public class VcfVariantParserTest {
         @Test
         public void toVariants_sequenceVariant() {
             GenomicAssembly assembly = testAssembly(List.of(TestContig.of(1, 10), TestContig.of(2, 20)));
-            VcfVariantParser parser = new VcfVariantParser(assembly, false);
+            VcfVariantParser parser = new VcfVariantParser(assembly);
 
             String line = "1\t2\tdel1\tTTC\tTT\t6\tPASS\tAF=0.5\tGT:GQ:DP:AD\t0/1:12:11:6,5";
             VariantContext vc = VCF_CODEC.decode(line);
@@ -354,7 +355,7 @@ public class VcfVariantParserTest {
         @Test
         public void toVariants_breakendVariant() {
             GenomicAssembly assembly = testAssembly(List.of(TestContig.of(1, 10), TestContig.of(2, 20)));
-            VcfVariantParser parser = new VcfVariantParser(assembly, false);
+            VcfVariantParser parser = new VcfVariantParser(assembly);
 
             String line = "1\t3\tbnd_V\tT\t]2:16]AAGT\t6\tPASS\tSVTYPE=BND;CIPOS=-1,2;CIEND=-2,1;MATEID=bnd_U;EVENT=tra2\tGT\t./.";
             VariantContext vc = VCF_CODEC.decode(line);

@@ -31,7 +31,7 @@ import org.monarchinitiative.svart.GenomicAssembly;
 import javax.sql.DataSource;
 import java.util.*;
 
-public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
+class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
     private final GenomicAssembly genomicAssembly;
     private final DataSource dataSource;
@@ -70,7 +70,7 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
             case ADDITIVE:
                 TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
                 DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritizationParameters().forceTadEvaluation());
-                LogUtils.logInfo(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
+                LogUtils.logDebug(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
                 Dispatcher dispatcher = new DispatcherDb(geneService, tadBoundaryDao, dispatchOptions);
                 RouteDataService<RouteDataGE> dbRouteDataService = new DbRouteDataServiceGE(annotationDataService, geneService);
 

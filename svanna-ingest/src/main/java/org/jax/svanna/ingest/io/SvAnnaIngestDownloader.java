@@ -5,10 +5,6 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * Command to download the {@code hp.obo} and {@code phenotype.hpoa} files that
- * we will need to run the LIRICAL approach.
- */
 public class SvAnnaIngestDownloader {
 
     /** Directory to which we will download the files. */

@@ -2,6 +2,7 @@ package org.jax.svanna.cli.writer;
 
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.cli.writer.tabular.TabularResultWriter;
+import org.jax.svanna.cli.writer.vcf.VcfResultWriter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
@@ -19,17 +20,18 @@ public class ResultWriterFactory {
     }
 
 
-    public ResultWriter resultWriterForFormat(OutputFormat outputFormat) {
+    public ResultWriter resultWriterForFormat(OutputFormat outputFormat, boolean compress) {
         switch (outputFormat) {
             case HTML:
                 return new HtmlResultWriter(overlapper, annotationDataService, phenotypeDataService);
             case TSV:
-                return new TabularResultWriter(OutputFormat.TSV.fileSuffix(), '\t', true);
+                return new TabularResultWriter(OutputFormat.TSV.fileSuffix(), '\t', compress);
             case CSV:
-                return new TabularResultWriter(OutputFormat.CSV.fileSuffix(), ',', true);
+                return new TabularResultWriter(OutputFormat.CSV.fileSuffix(), ',', compress);
             case VCF:
+                return new VcfResultWriter(compress);
             default:
-                throw new RuntimeException("Unsupported right now");
+                throw new RuntimeException("The output format " + outputFormat + " is not supported");
         }
     }
 

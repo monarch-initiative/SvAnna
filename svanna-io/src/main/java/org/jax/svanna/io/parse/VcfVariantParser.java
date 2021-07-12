@@ -11,10 +11,8 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.jax.svanna.core.exception.LogUtils;
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
-import org.jax.svanna.core.reference.BreakendedSvannaVariant;
-import org.jax.svanna.core.reference.DefaultSvannaVariant;
-import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.VariantCallAttributes;
+import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.util.VariantTrimmer;
 import org.monarchinitiative.svart.util.VcfConverter;
@@ -32,31 +30,19 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.jax.svanna.io.parse.Utils.makeVariantRepresentation;
-
 /**
  * Parse variants stored in a VCF file. The parser is <em>NOT</em> thread safe!
  */
-public class VcfVariantParser implements VariantParser<SvannaVariant> {
+public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfVariantParser.class);
 
     private static final FilterResult FAILED_VARIANT_FILTER_RESULT = FilterResult.fail(FilterType.FAILED_VARIANT_FILTER);
 
-    private final VariantCallAttributeParser attributeParser;
-
     private final VcfConverter vcfConverter;
 
-    private final boolean requireVcfIndex;
-
     public VcfVariantParser(GenomicAssembly assembly) {
-        this(assembly, false);
-    }
-
-    public VcfVariantParser(GenomicAssembly assembly, boolean requireVcfIndex) {
-        this.attributeParser = VariantCallAttributeParser.getInstance();
         this.vcfConverter = new VcfConverter(assembly, VariantTrimmer.leftShiftingTrimmer(VariantTrimmer.removingCommonBase()));
-        this.requireVcfIndex = requireVcfIndex;
     }
 
     /**
@@ -74,8 +60,12 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         };
     }
 
+    private static String makeVariantRepresentation(VariantContext vc) {
+        return String.format("%s-%d:(%s)", vc.getContig(), vc.getStart(), vc.getID());
+    }
+
     @Override
-    public Stream<SvannaVariant> createVariantAlleles(Path filePath) throws IOException {
+    public Stream<FullSvannaVariant> createVariantAlleles(Path filePath) throws IOException {
         /*
         Sniffles VCF contains corrupted VCF records like
 
@@ -93,12 +83,12 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         So, this is a workaround that drops the corrupted lines:
          */
         VCFHeader header;
-        try (VCFFileReader reader = new VCFFileReader(filePath, requireVcfIndex)) {
+        try (VCFFileReader reader = new VCFFileReader(filePath, false)) {
             header = reader.getHeader();
         }
 
         VCFCodec codec = new VCFCodec();
-        codec.setVCFHeader(header, header.getVCFHeaderVersion() == null ? VCFHeaderVersion.VCF4_1: header.getVCFHeaderVersion());
+        codec.setVCFHeader(header, header.getVCFHeaderVersion() == null ? VCFHeaderVersion.VCF4_1 : header.getVCFHeaderVersion());
 
         BufferedReader reader;
         if (filePath.toFile().getName().endsWith(".gz"))
@@ -124,7 +114,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
      *
      * @return function that maps variant context to collection of {@link Variant}s
      */
-    Function<VariantContext, Optional<? extends SvannaVariant>> toVariants() {
+    protected Function<VariantContext, Optional<FullSvannaVariant>> toVariants() {
         return vc -> {
             Contig contig = vcfConverter.parseContig(vc.getContig());
             if (contig.isUnknown()) {
@@ -158,8 +148,8 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         };
     }
 
-    private Optional<? extends SvannaVariant> parseSequenceVariantAllele(VariantContext vc, Contig contig) {
-        VariantCallAttributes attrs = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
+    private Optional<FullSvannaVariant> parseSequenceVariantAllele(VariantContext vc, Contig contig) {
+        VariantCallAttributes attrs = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
         DefaultSvannaVariant.Builder builder = vcfConverter.convert(DefaultSvannaVariant.builder(),
                 contig, vc.getID(), vc.getStart(),
@@ -170,10 +160,10 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
 
-        return Optional.of(builder.variantCallAttributes(attrs).build());
+        return Optional.of(builder.variantCallAttributes(attrs).variantContext(vc).build());
     }
 
-    private Optional<? extends SvannaVariant> parseSymbolicVariantAllele(VariantContext vc, Contig contig) {
+    private Optional<FullSvannaVariant> parseSymbolicVariantAllele(VariantContext vc, Contig contig) {
         // parse start pos and CIPOS
         ConfidenceInterval cipos;
         List<Integer> cp = vc.getAttributeAsIntList("CIPOS", 0);
@@ -234,17 +224,17 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
             end = end.shift(-1);
         }
 
-        VariantCallAttributes variantCallAttributes = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
+        VariantCallAttributes variantCallAttributes = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
         DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), contig, vc.getID(), start, end, ref, alt, svlen);
 
         // we assume that `PASS` is not added in between variant context's filters by HtsJDK,
         // and all the other values denote low quality variants
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
-        return Optional.of(builder.variantCallAttributes(variantCallAttributes).build());
+        return Optional.of(builder.variantCallAttributes(variantCallAttributes).variantContext(vc).build());
     }
 
-    private Optional<? extends SvannaVariant> parseBreakendAllele(VariantContext vc, Contig contig) {
+    private Optional<FullSvannaVariant> parseBreakendAllele(VariantContext vc, Contig contig) {
         // sanity checks
         if (vc.getAlternateAlleles().size() > 1) {
             if (LOGGER.isWarnEnabled())
@@ -280,7 +270,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         String mateId = vc.getAttributeAsString("MATEID", "");
         String eventId = vc.getAttributeAsString("EVENT", "");
 
-        VariantCallAttributes attrs = attributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
+        VariantCallAttributes attrs = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
         BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(), contig, vc.getID(), pos,
                 vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString(),
@@ -291,7 +281,7 @@ public class VcfVariantParser implements VariantParser<SvannaVariant> {
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
 
-        return Optional.of(builder.variantCallAttributes(attrs).build());
+        return Optional.of(builder.variantCallAttributes(attrs).variantContext(vc).build());
     }
 
 }

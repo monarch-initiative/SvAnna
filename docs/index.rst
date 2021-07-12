@@ -3,9 +3,8 @@ SvAnna:
 
 Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing
 
-This application annotates structural variants in VCF files, focussing specifically on long-read WGS analysis
+SvAnna performs phenotype-driven prioritization of structural variants in VCF files, focusing specifically on long-read WGS analysis
 of germline variants.
-
 
 
 .. toctree::

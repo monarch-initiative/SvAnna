@@ -46,7 +46,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'SvAnna'
-copyright = u'2021'
+copyright = u'2021, Daniel Danis, Peter N Robinson'
 author = u'Daniel Danis, Peter Robinson'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -142,7 +142,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'SvAnna.tex', u'svann Documentation',
-     u'Peter Robinson', 'manual'),
+     u'Daniel Danis, Peter N Robinson', 'manual'),
 ]
 
 

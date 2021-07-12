@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 import static picocli.CommandLine.Help.Ansi.Style.*;
 
 @CommandLine.Command(name = "svanna-cli.jar",
-        header = "Structural variant annotation",
+        header = "Structural variant prioritization",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,

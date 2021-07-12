@@ -101,9 +101,9 @@ public class PrioritizeCommand extends SvAnnaCommand {
             description = "Reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
     public boolean modeOfInheritance = false;
 
-    @CommandLine.Option(names = {"--similarity-threshold"},
+    @CommandLine.Option(names = {"--overlap-threshold"},
             description = "Percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
-    public float similarityThreshold = 80.F;
+    public float overlapThreshold = 80.F;
 
     /*
      * ------------  OUTPUT OPTIONS  ------------
@@ -121,14 +121,14 @@ public class PrioritizeCommand extends SvAnnaCommand {
             description = "Prefix for output files (default: based on the input VCF name)")
     public String outPrefix = null;
 
-    @CommandLine.Option(names = {"--uncompressed-output"},
-            description = "Write tabular and VCF output formats with no compression (default: ${DEFAULT-VALUE})")
-    public boolean uncompressed = false;
-
     @CommandLine.Option(names = {"--report-top-variants"},
             paramLabel = "100",
             description = "Report top n variants (default: ${DEFAULT-VALUE})")
     public int reportNVariants = 100;
+
+    @CommandLine.Option(names = {"--uncompressed-output"},
+            description = "Write tabular and VCF output formats with no compression (default: ${DEFAULT-VALUE})")
+    public boolean uncompressed = false;
 
     private static Optional<Path> getVcfFilePath(Phenopacket phenopacket) {
         // There should be exactly one VCF file
@@ -291,10 +291,10 @@ public class PrioritizeCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
             // Filter
-            LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
+            LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", overlapThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, overlapThreshold, frequencyThreshold, minAltReadSupport);
             List<FullSvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize
@@ -342,7 +342,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
         analysisParameters.setJannovarCachePath(properties.jannovarCachePath());
         analysisParameters.setPhenopacketPath(phenopacketPath == null ? null : phenopacketPath.toAbsolutePath().toString());
         analysisParameters.setVcfPath(vcfFile.toAbsolutePath().toString());
-        analysisParameters.setSimilarityThreshold(similarityThreshold);
+        analysisParameters.setSimilarityThreshold(overlapThreshold);
         analysisParameters.setFrequencyThreshold(frequencyThreshold);
         analysisParameters.addAllPopulationVariantOrigins(PopulationVariantOrigin.benign());
         analysisParameters.setMinAltReadSupport(minAltReadSupport);

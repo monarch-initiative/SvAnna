@@ -3,11 +3,10 @@
 
 # You can set these variables from the command line.
 SPHINXOPTS    =
-SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = svann
+SPHINXBUILD   = sphinx-build
+SPHINXPROJ    = SvAnna
 SOURCEDIR     = .
 BUILDDIR      = _build
-html_static_path = ['..']
 
 # Put it first so that "make" without argument is like "make help".
 help:

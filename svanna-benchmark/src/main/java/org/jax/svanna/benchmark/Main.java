@@ -8,14 +8,14 @@ import java.util.concurrent.Callable;
 import static picocli.CommandLine.Help.Ansi.Style.*;
 
 @CommandLine.Command(name = "svanna-benchmark.jar",
-        header = "Structural variant annotation",
+        header = "Structural variant prioritization",
         mixinStandardHelpOptions = true,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
 public class Main implements Callable<Integer>  {
 
-    public static final String VERSION = "svanna v0.3.1-SNAPSHOT";
+    public static final String VERSION = "svanna-benchmark v1.0.0-RC1-SNAPSHOT";
 
     public static final int WIDTH = 120;
 

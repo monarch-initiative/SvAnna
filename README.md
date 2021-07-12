@@ -1,4 +1,7 @@
-# SvAnna
+# SvAnna - Structural Variant Annotation and Analysis
+
+![Java CI with Maven](https://github.com/TheJacksonLaboratory/SvAnna/workflows/Java%20CI%20with%20Maven/badge.svg)
+[![Documentation Status](https://readthedocs.org/projects/squirls/badge/?version=latest)](https://svanna.readthedocs.io/en/latest/?badge=latest)
 
 ![Java CI with Maven](https://github.com/TheJacksonLaboratory/SvAnna/workflows/Java%20CI%20with%20Maven/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/svanna/badge/?version=latest)](https://svanna.readthedocs.io/en/latest/?badge=latest)

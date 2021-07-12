@@ -376,8 +376,8 @@ a[name="othergenes"] table.vartab a::first-letter {
 
 
 footer {
-	background-color: #05396b;
-	color: white;
+	background-color: #ffffff;
+	color: black;
 	padding: 1rem 2rem;
 }
 
@@ -473,7 +473,7 @@ a.svg:hover, a.svg:active {
   <nav>
       <div id="navi">
           <ul>
-              <li><a href="#sample">Sample</a></li>
+              <li><a href="#analysisSummary">Analysis summary</a></li>
               <li><a href="#variantCounts">Variant counts</a></li>
               <li><a href="#prioritizedVars">Prioritized SVs</a></li>
               <li><a href="#about">About</a></li>
@@ -482,7 +482,7 @@ a.svg:hover, a.svg:active {
   </nav>
   <main>
     <section>
-      <a id="sample"></a>
+      <a id="analysisSummary"></a>
         <article>
         ${analysisMetadata?no_esc}
         <p><b>Phenopackets file</b>: ${phenopacket_file}
@@ -511,9 +511,11 @@ a.svg:hover, a.svg:active {
 
 
       <section>
-        <a name="about"></a>
+        <a id="about"></a>
         <article>
           <h2>About</h2>
+            <p>SvAnna performs phenotype-driven prioritization using semantic similarity (Resnik), corresponding to the
+                OSS approach in <a href=\"https://pubmed.ncbi.nlm.nih.gov/19800049/\" target=\"_blank\">K&ouml;hler et al (2009)</a>.</p>
             <p>SvAnna shows candidate SVs that affect genes associated with the top candidates.</p>
 
 
@@ -522,7 +524,11 @@ a.svg:hover, a.svg:active {
       <span id="tooltip" display="none" style="position: absolute; display: none;"></span>
   </main>
   <footer>
-    <p>SvAnna &copy; 2020</p>
+      <div style="text-align: center">
+          <p>Developed by <em>Daniel Danis</em> and <em>Peter N Robinson</em> at <a href="https://www.jax.org">The Jackson Laboratory for Genomic Medicine</a>.</p>
+          <p>Problems, suggestions, or comments? Feel free to submit an issue to our <a href="https://github.com/TheJacksonLaboratory/SvAnna/issues">GitHub tracker</a>.</p>
+          <p>&#169; 2021 Daniel Danis, Peter N Robinson</p>
+      </div>
   </footer>
 
   <script>

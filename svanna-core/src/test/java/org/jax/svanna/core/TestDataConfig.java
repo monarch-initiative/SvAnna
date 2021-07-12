@@ -4,9 +4,7 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
-import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
@@ -54,11 +52,6 @@ public class TestDataConfig {
     @Bean
     public TestVariants testVariants(GenomicAssembly genomicAssembly) {
         return new TestVariants(genomicAssembly);
-    }
-
-    @Bean
-    public TranscriptService transcriptService(GenomicAssembly assembly, JannovarData jannovarData) {
-        return JannovarTranscriptService.of(assembly, jannovarData);
     }
 
     @Bean

@@ -4,9 +4,7 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
-import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -50,11 +48,6 @@ public class TestDataConfig {
     @Bean
     public JannovarData jannovarData() throws Exception {
         return new JannovarDataSerializer(JANNOVAR_DATA.toString()).load();
-    }
-
-    @Bean
-    public TranscriptService transcriptService(GenomicAssembly assembly, JannovarData jannovarData) {
-        return JannovarTranscriptService.of(assembly, jannovarData);
     }
 
     @Bean

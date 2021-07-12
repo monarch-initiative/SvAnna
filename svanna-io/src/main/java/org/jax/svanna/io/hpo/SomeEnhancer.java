@@ -1,4 +1,4 @@
-package org.jax.svanna.core.reference;
+package org.jax.svanna.io.hpo;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;

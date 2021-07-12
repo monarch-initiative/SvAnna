@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.core.reference.SomeEnhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;

@@ -1,7 +1,6 @@
 package org.jax.svanna.io.hpo;
 
 
-import org.jax.svanna.core.reference.SomeEnhancer;
 import org.jax.svanna.io.TestDataConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

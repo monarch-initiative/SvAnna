@@ -1,6 +1,6 @@
 package org.jax.svanna.db.additive.dispatch;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.reference.Gene;

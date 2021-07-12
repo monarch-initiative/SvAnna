@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.reference.Gene;
 
 import java.util.*;

@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.*;
 

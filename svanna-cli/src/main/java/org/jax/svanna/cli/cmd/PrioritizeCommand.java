@@ -8,7 +8,7 @@ import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.ModeOfInheritance;

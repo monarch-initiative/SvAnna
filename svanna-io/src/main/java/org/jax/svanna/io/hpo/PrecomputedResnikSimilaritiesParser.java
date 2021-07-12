@@ -1,7 +1,7 @@
 package org.jax.svanna.io.hpo;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;

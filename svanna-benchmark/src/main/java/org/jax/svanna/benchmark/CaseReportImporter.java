@@ -2,7 +2,7 @@ package org.jax.svanna.benchmark;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.core.reference.Zygosity;

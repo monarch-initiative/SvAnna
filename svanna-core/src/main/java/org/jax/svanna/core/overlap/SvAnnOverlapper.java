@@ -2,7 +2,7 @@ package org.jax.svanna.core.overlap;
 
 import com.google.common.collect.ImmutableList;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;

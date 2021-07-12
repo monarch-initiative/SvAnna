@@ -7,7 +7,7 @@ import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import de.charite.compbio.jannovar.data.SerializationException;
 import org.jax.svanna.autoconfigure.exception.MissingResourceException;
 import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;

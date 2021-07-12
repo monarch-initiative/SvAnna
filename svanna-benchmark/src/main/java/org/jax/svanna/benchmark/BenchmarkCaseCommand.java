@@ -5,7 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.benchmark.util.ProgressReporter;
 import org.jax.svanna.benchmark.util.TaskUtils;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;

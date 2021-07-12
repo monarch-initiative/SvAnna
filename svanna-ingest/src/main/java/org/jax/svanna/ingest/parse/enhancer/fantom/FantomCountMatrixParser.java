@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.parse.enhancer.fantom;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.parse.enhancer.AnnotatedTissue;
@@ -73,7 +73,7 @@ public class FantomCountMatrixParser {
     public FantomCountMatrixParser(GenomicAssembly assembly, Path hg38CountsPath, Map<String, AnnotatedTissue> fantomIdToAnnotatedTissueMap) {
         this.fantomCountsPath = hg38CountsPath;
         if (!hg38CountsPath.toFile().getName().endsWith("gz")) {
-            throw new SvAnnRuntimeException("We were expecting a gz file but got " + hg38CountsPath);
+            throw new SvAnnaRuntimeException("We were expecting a gz file but got " + hg38CountsPath);
         }
         this.assembly = assembly;
         determine_dimensions();
@@ -108,7 +108,7 @@ public class FantomCountMatrixParser {
                 enhancerFromData(enhancerIds[i], cpm, tissueList).ifPresent(enhancers::add);
             }
         } catch (IOException e) {
-            throw new SvAnnRuntimeException(e.getMessage());
+            throw new SvAnnaRuntimeException(e.getMessage());
         }
         LOGGER.info("We got {} enhancers", enhancers.size());
     }
@@ -149,7 +149,7 @@ public class FantomCountMatrixParser {
                     TermId tissueId = this.idToFantomSampleMap.get(id).getTissueId();
                     if (tissueId == null) {
                         // should never happen
-                        throw new SvAnnRuntimeException("Bad sample id " + id);
+                        throw new SvAnnaRuntimeException("Bad sample id " + id);
                     }
                     int tissueIndex = tissueToIndexMap.get(tissueId);
                     // add the counts from an individual sample to the corresponding tissue
@@ -274,7 +274,7 @@ public class FantomCountMatrixParser {
         TermId topTerm = tissueList.get(maxIndex);
         if (! this.uberonToAnnotatedTissueMap.containsKey(topTerm)) {
             // should never happen
-            throw new SvAnnRuntimeException("Could not find " + topTerm.getValue() +" in uberonToAnnotatedTissueMap");
+            throw new SvAnnaRuntimeException("Could not find " + topTerm.getValue() +" in uberonToAnnotatedTissueMap");
         }
         AnnotatedTissue atissue = this.uberonToAnnotatedTissueMap.get(topTerm);
         return new FantomEnhancer(chrom, start, end, specificity, atissue, totalCounts);
@@ -445,7 +445,7 @@ public class FantomCountMatrixParser {
             for (Map.Entry<Integer, Integer> entry : fieldNumberMap.entrySet()) {
                 System.out.printf("[ERROR] %d fields: %d times\n", entry.getKey(), entry.getValue());
             }
-            throw new SvAnnRuntimeException("Bad number of fields");
+            throw new SvAnnaRuntimeException("Bad number of fields");
         }
         this.n_enhancers = linecount - 1; // subtract one for the header
         this.n_samples = N - 1; // subtract one for the first column

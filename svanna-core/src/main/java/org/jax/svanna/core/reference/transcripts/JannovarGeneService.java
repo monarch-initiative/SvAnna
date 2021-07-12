@@ -6,7 +6,7 @@ import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.GeneDefault;
 import org.jax.svanna.core.reference.GeneService;

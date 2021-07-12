@@ -1,7 +1,7 @@
 package org.jax.svanna.io.hpo;
 
 import com.google.common.collect.Multimap;
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
@@ -65,23 +65,23 @@ public class HpoDiseaseGeneMap {
     public static HpoDiseaseGeneMap loadGenesAndDiseaseMap(Path dataDirectory) {
         Path hpoPath = dataDirectory.resolve(HP_OBO);
         if (!hpoPath.toFile().isFile()) {
-            throw new SvAnnRuntimeException("Could not find hp.obo. Did you run the download command?");
+            throw new SvAnnaRuntimeException("Could not find hp.obo. Did you run the download command?");
         }
         Ontology ontology = OntologyLoader.loadOntology(hpoPath.toFile());
 
         Path phenotypeHpoaPath = dataDirectory.resolve(PHENOTYPE_HPOA);
         if (!phenotypeHpoaPath.toFile().isFile()) {
-            throw new SvAnnRuntimeException("Could not find phenotype.hpoa. Did you run the download command?");
+            throw new SvAnnaRuntimeException("Could not find phenotype.hpoa. Did you run the download command?");
         }
 
         Path mim2geneMedgenPath = dataDirectory.resolve(MIM_2_GENE_MEDGEN);
         if (!mim2geneMedgenPath.toFile().isFile()) {
-            throw new SvAnnRuntimeException("Could not find mim2gene_medgen Did you run the download command?");
+            throw new SvAnnaRuntimeException("Could not find mim2gene_medgen Did you run the download command?");
         }
 
         Path geneInfoPath = dataDirectory.resolve(HOMO_SAPIENS_GENE_INFO_GZ);
         if (!geneInfoPath.toFile().isFile()) {
-            throw new SvAnnRuntimeException("Could not find Homo_sapiens_gene_info.gz. Did you run the download command?");
+            throw new SvAnnaRuntimeException("Could not find Homo_sapiens_gene_info.gz. Did you run the download command?");
         }
         List<String> desiredDatabasePrefixes = List.of("OMIM");
         String orphaToGeneFile = null; // OK, this will not cause a crash, we will refactor in phenol
@@ -161,7 +161,7 @@ public class HpoDiseaseGeneMap {
                 String label = this.ontology.getTermMap().get(t).getName();
                 labelmap.put(t, label);
             } else {
-                throw new SvAnnRuntimeException("Could not identify term " + t.getValue());
+                throw new SvAnnaRuntimeException("Could not identify term " + t.getValue());
             }
         }
         return labelmap;

@@ -3,7 +3,7 @@ package org.jax.svanna.io.hpo;
 import com.google.common.collect.ImmutableMap;
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.reference.SomeEnhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
@@ -51,7 +51,7 @@ public class TSpecParser {
             while ((line = br.readLine()) != null) {
                 String [] fields = line.split("\t");
                 if (fields.length != 8) {
-                    throw new SvAnnRuntimeException("Bad tspec line: " + line);
+                    throw new SvAnnaRuntimeException("Bad tspec line: " + line);
                 }
                 String chr = fields[0];
                 Contig contig = assembly.contigByName(chr);

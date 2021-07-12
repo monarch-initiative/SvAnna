@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.parse.enhancer.fantom;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.parse.enhancer.AnnotatedTissue;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -48,7 +48,7 @@ public class FantomSampleParser {
             while ((line = br.readLine()) != null) {
                 String[] fields = line.split("\t");
                 if (fields.length != 2) {
-                    throw new SvAnnRuntimeException("Malformed FANTOM Sample line with "
+                    throw new SvAnnaRuntimeException("Malformed FANTOM Sample line with "
                             + fields.length + " fields: " + line);
                 }
                 //String label = fields[0]; - not needed

@@ -1,6 +1,6 @@
 package org.jax.svanna.core.filter;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;

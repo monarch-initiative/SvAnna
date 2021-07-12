@@ -1,7 +1,7 @@
 package org.jax.svanna.core.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;

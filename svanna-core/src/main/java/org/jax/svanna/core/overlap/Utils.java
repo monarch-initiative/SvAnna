@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.CoordinateSystem;

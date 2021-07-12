@@ -1,7 +1,7 @@
 package org.jax.svanna.autoconfigure;
 
 import com.google.common.collect.Sets;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.Enhancer;

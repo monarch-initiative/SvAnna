@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.GeneWithId;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.AnnotationDataService;

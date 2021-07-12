@@ -1,8 +1,8 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 
-public class DispatchException extends SvAnnRuntimeException {
+public class DispatchException extends SvAnnaRuntimeException {
 
     public DispatchException() {
         super();

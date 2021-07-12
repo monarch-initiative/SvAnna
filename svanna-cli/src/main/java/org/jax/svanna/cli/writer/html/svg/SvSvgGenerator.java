@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
@@ -283,7 +283,7 @@ public abstract class SvSvgGenerator {
         if (pos < 0) {
             String msg = String.format("Bad left boundary (genomic coordinate: %s) with paddedGenomicMinPos=%d and paddedGenomicSpan=%f pos=%f\n",
                     genomicCoordinate, paddedGenomicMinPos, paddedGenomicSpan, pos);
-            throw new SvAnnRuntimeException(msg); // should never happen
+            throw new SvAnnaRuntimeException(msg); // should never happen
         }
         double prop = pos / paddedGenomicSpan;
         return prop * Constants.SVG_WIDTH;

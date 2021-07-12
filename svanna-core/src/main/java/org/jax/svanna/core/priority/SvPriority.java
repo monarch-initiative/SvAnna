@@ -1,5 +1,8 @@
 package org.jax.svanna.core.priority;
 
+/**
+ * Interface that represents result of gene prioritization, e.g. the <em>TAD<sub>SV</sub></em> score
+ */
 public interface SvPriority extends Comparable<SvPriority> {
 
     static SvPriority unknown() {

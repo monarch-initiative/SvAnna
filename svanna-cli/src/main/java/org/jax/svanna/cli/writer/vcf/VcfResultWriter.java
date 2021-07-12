@@ -11,7 +11,7 @@ import htsjdk.variant.vcf.*;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.Prioritized;
 import org.jax.svanna.io.FullSvannaVariant;

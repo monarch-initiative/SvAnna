@@ -1,7 +1,7 @@
 package org.jax.svanna.io.hpo;
 
 import com.google.common.collect.Multimap;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.*;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory;

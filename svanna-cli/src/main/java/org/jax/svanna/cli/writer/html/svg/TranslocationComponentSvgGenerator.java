@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
@@ -89,7 +89,7 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
         double pos = genomicCoordinate - genomicMin;
         double genomicSpan = genomicMax - genomicMin;
         if (pos < 0) {
-            throw new SvAnnRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
+            throw new SvAnnaRuntimeException("Bad left boundary (genomic coordinate-"); // should never happen
         }
         double prop = pos / genomicSpan;
         return prop * Constants.SVG_WIDTH;

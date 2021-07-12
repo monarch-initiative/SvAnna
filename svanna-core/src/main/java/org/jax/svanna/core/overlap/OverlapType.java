@@ -1,7 +1,5 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.priority.SvImpact;
-
 import java.util.Set;
 
 /**
@@ -145,32 +143,6 @@ public enum OverlapType {
 
     public String getName() {
         return name;
-    }
-
-    public SvImpact defaultSvImpact() {
-        switch (this) {
-            case SINGLE_EXON_IN_TRANSCRIPT:
-            case MULTIPLE_EXON_IN_TRANSCRIPT:
-            case TRANSCRIPT_CONTAINED_IN_SV:
-            case TRANSCRIPT_DISRUPTED_BY_INVERSION:
-            case AFFECTS_CODING_TRANSCRIPT_TSS:
-                return SvImpact.VERY_HIGH;
-            case UPSTREAM_GENE_VARIANT_500B:
-            case NON_CDS_REGION_IN_SINGLE_EXON:
-            case SINGLE_EXON_IN_NC_TRANSCRIPT:
-            case GENIC:
-                return SvImpact.HIGH;
-            case UPSTREAM_GENE_VARIANT_5KB:
-            case DOWNSTREAM_GENE_VARIANT_5KB:
-            case UPSTREAM_GENE_VARIANT_2KB:
-            case DOWNSTREAM_GENE_VARIANT_2KB:
-            case AFFECTS_NONCODING_TRANSCRIPT_TSS:
-                return SvImpact.INTERMEDIATE;
-            case INTRONIC:
-                return SvImpact.LOW;
-            default:
-                return SvImpact.VERY_LOW;
-        }
     }
 
 

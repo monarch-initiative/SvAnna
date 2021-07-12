@@ -3,13 +3,8 @@ package org.jax.svanna.cli;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.overlap.IntervalArrayGeneOverlapper;
-import org.jax.svanna.core.overlap.Overlapper;
-import org.jax.svanna.core.overlap.SvAnnOverlapper;
 import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
-import org.jax.svanna.core.reference.transcripts.JannovarTranscriptService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -56,23 +51,13 @@ public class TestDataConfig {
     }
 
     @Bean
-    public TranscriptService transcriptService(GenomicAssembly assembly, JannovarData jannovarData) {
-        return JannovarTranscriptService.of(assembly, jannovarData);
-    }
-
-    @Bean
     public GeneService geneService(GenomicAssembly assembly, JannovarData jannovarData) {
         return JannovarGeneService.of(assembly, jannovarData);
     }
 
     @Bean
     public GeneOverlapper geneOverlapper(GeneService geneService) {
-        return new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
-    }
-
-    @Bean
-    public Overlapper overlapper(TranscriptService transcriptService) {
-        return new SvAnnOverlapper(transcriptService.getChromosomeMap());
+        return GeneOverlapper.intervalArrayOverlapper(geneService.getChromosomeMap());
     }
 
 }

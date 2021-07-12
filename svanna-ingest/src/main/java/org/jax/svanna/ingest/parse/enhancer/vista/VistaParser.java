@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.parse.enhancer.vista;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.parse.enhancer.AnnotatedTissue;
 import org.jax.svanna.ingest.parse.enhancer.IngestedEnhancer;
@@ -36,7 +36,7 @@ public class VistaParser {
         try (BufferedReader br = new BufferedReader(new FileReader(vistaPath))) {
             String line = br.readLine();// header
             if (! line.startsWith("name")) {
-                throw new SvAnnRuntimeException("Malformed VISTA header: " + line);
+                throw new SvAnnaRuntimeException("Malformed VISTA header: " + line);
             }
             while ((line=br.readLine()) != null) {
                 String [] fields = line.split("\t");
@@ -50,16 +50,16 @@ public class VistaParser {
                 for (String tissue : tissueList) {
                     int j = tissue.indexOf("[");
                     if (j<0) {
-                        throw new SvAnnRuntimeException("Malformed tissue field:" + tissue);
+                        throw new SvAnnaRuntimeException("Malformed tissue field:" + tissue);
                     }
                     String label = tissue.substring(0,j);
                     int k = tissue.indexOf("]");
                     if (k<0) {
-                        throw new SvAnnRuntimeException("Malformed tissue field:" + tissue);
+                        throw new SvAnnaRuntimeException("Malformed tissue field:" + tissue);
                     }
                     TermId uberon = TermId.of(tissue.substring(j+1,k));
                     if (! uberonToHpoMap.containsKey(uberon)) {
-                        throw new SvAnnRuntimeException(uberon.getValue() + " not found");
+                        throw new SvAnnaRuntimeException(uberon.getValue() + " not found");
                     }
                     HpoMapping hpoMapping = uberonToHpoMap.get(uberon);
                     // The following object just holds the UBERON/Cell Ontology term and the corresponding HPO term

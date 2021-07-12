@@ -1,5 +1,5 @@
 /**
- * The package defines elements of the genomic landscape used in SvAnna to prioritize variants, as well as interfaces
- * that will us individual elements that are relevant for a query region.
+ * The package defines elements of the genomic landscape used in SvAnna to prioritize variants. The elements are defined
+ * as interfaces, most of them extend Svart's {@link org.monarchinitiative.svart.GenomicRegion}.
  */
 package org.jax.svanna.core.landscape;

@@ -7,7 +7,7 @@ import java.util.Objects;
  * an intron), and stores the number of the intron (1-based) as well as the distances to the upstream and
  * downstream exons
  */
-public class IntronDistance {
+class IntronDistance {
 
     private static final IntronDistance EMPTY = new IntronDistance(0, 0, 0);
 
@@ -15,21 +15,21 @@ public class IntronDistance {
     private final int distanceToUpstreamExon;
     private final int distanceToDownstreamExon;
 
-    public IntronDistance(int intronNumber, int upDistance, int downDistance) {
+    IntronDistance(int intronNumber, int upDistance, int downDistance) {
         this.intronNumber = intronNumber;
         this.distanceToUpstreamExon = upDistance;
         this.distanceToDownstreamExon = downDistance;
     }
 
-    public static IntronDistance empty() {
+    static IntronDistance empty() {
         return EMPTY;
     }
 
-    public int getIntronNumber() {
+    int getIntronNumber() {
         return intronNumber;
     }
 
-    public String getUpDownStreamDistance(boolean posStrand) {
+    String getUpDownStreamDistance(boolean posStrand) {
         if (posStrand) {
             int exonUp = intronNumber; // upstream exon in chromosomal coordinates
             int exonDown = intronNumber + 1; // downstream exon in chromosomal coordinates
@@ -51,15 +51,15 @@ public class IntronDistance {
         }
     }
 
-    public int getDistanceToUpstreamExon() {
+    int getDistanceToUpstreamExon() {
         return distanceToUpstreamExon;
     }
 
-    public int getDistanceToDownstreamExon() {
+    int getDistanceToDownstreamExon() {
         return distanceToDownstreamExon;
     }
 
-    public boolean isEmpty() {
+    boolean isEmpty() {
         return this.equals(EMPTY);
     }
 

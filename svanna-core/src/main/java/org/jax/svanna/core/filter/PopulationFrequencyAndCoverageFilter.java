@@ -5,6 +5,7 @@ import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.VariantMetadata;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ public class PopulationFrequencyAndCoverageFilter {
     private static final FilterType COVERAGE_FILTER_TYPE = FilterType.COVERAGE_FILTER;
     private static final FilterResult COVERAGE_FAIL = FilterResult.fail(COVERAGE_FILTER_TYPE);
     private static final FilterResult COVERAGE_PASS = FilterResult.pass(COVERAGE_FILTER_TYPE);
+    private static final FilterResult COVERAGE_NOT_RUN = FilterResult.notRun(COVERAGE_FILTER_TYPE);
 
     private static final Set<VariantType> FREQ_FILTER_RECOGNIZED_VARIANTS = Set.of(
             VariantType.INS, VariantType.DUP, VariantType.DEL, VariantType.INV, VariantType.CNV);
@@ -128,7 +130,9 @@ public class PopulationFrequencyAndCoverageFilter {
     }
 
     private <T extends SvannaVariant> FilterResult runCoverageFilter(T item) {
-        return (item.numberOfAltReads() < minReads)
+        return (item.numberOfAltReads() == VariantMetadata.MISSING_DEPTH_PLACEHOLDER)
+                ? COVERAGE_NOT_RUN
+                : (item.numberOfAltReads() < minReads)
                 ? COVERAGE_FAIL
                 : COVERAGE_PASS;
     }

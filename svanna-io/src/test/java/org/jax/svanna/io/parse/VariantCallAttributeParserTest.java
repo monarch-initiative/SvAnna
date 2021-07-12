@@ -50,7 +50,8 @@ public class VariantCallAttributeParserTest {
                 Arguments.of(decodeLine("CM000663.2\t45825473\t2\tN\t<DUP>\t.\tPASS\tPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=154318883;ZMW=1;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=DUP;SUPTYPE=SR;SVLEN=108493410;STRANDS=-+;STRANDS2=1,0,1,0;RE=1;REF_strand=0,0;Strandbias_pval=1;AF=1\tGT:DR:DV\t./.:0:1"), 0, Zygosity.UNKNOWN, 1, 0, 1),
                 Arguments.of(decodeLine("CM000663.2\t47681767\t3\tN\t<INV>\t.\tPASS\tPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000663.2;END=200616263;ZMW=1;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=INV;SUPTYPE=SR;SVLEN=152934496;STRANDS=++;STRANDS2=1,0,0,1;RE=1;REF_strand=0,0;Strandbias_pval=1;AF=1\tGT:DR:DV\t./.:0:1"), 0, Zygosity.UNKNOWN, 1, 0, 1),
                 Arguments.of(decodeLine("CM000671.2\t134183094\t5\tN\t<INS>\t.\tPASS\tIMPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000671.2;END=134183094;ZMW=10;STD_quant_start=0.316228;STD_quant_stop=3986.130668;Kurtosis_quant_start=7.000000;Kurtosis_quant_stop=-1.392315;SVTYPE=INS;SUPTYPE=AL,SR;SVLEN=7365;STRANDS=+-;STRANDS2=5,5,5,5;RE=10;REF_strand=0,0;Strandbias_pval=1;AF=1\tGT:DR:DV\t1/1:0:10"), 0, Zygosity.HOMOZYGOUS, 10, 0, 10),
-                Arguments.of(decodeLine("CM000684.2\t11454286\t4\tN\t<INVDUP>\t.\tPASS\tPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000684.2;END=11455841;ZMW=2;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=INVDUP;SUPTYPE=SR;SVLEN=1555;STRANDS=--;STRANDS2=0,3,3,0;RE=2;REF_strand=12,15;Strandbias_pval=0.255172;AF=0.0689655\tGT:DR:DV\t0/0:27:2"), 0, Zygosity.HOMOZYGOUS, 2, 27, 2));
+                Arguments.of(decodeLine("CM000684.2\t11454286\t4\tN\t<INVDUP>\t.\tPASS\tPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000684.2;END=11455841;ZMW=2;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=INVDUP;SUPTYPE=SR;SVLEN=1555;STRANDS=--;STRANDS2=0,3,3,0;RE=2;REF_strand=12,15;Strandbias_pval=0.255172;AF=0.0689655\tGT:DR:DV\t0/0:27:2"), 0, Zygosity.HOMOZYGOUS, 2, 27, 2),
+                Arguments.of(decodeLine("CM000684.2\t11454286\t4\tN\t<INVDUP>\t.\tPASS\tPRECISE;SVMETHOD=Snifflesv1.0.12;CHR2=CM000684.2;END=11455841;ZMW=2;STD_quant_start=0.000000;STD_quant_stop=0.000000;Kurtosis_quant_start=-nan;Kurtosis_quant_stop=-nan;SVTYPE=INVDUP;SUPTYPE=SR;SVLEN=1555;STRANDS=--;STRANDS2=0,3,3,0;REF_strand=12,15;Strandbias_pval=0.255172;AF=0.0689655\tGT\t1/1"), 0, Zygosity.HOMOZYGOUS, -1, -1, -1));
     }
 
     @ParameterizedTest
@@ -73,6 +74,7 @@ public class VariantCallAttributeParserTest {
                 Arguments.of(decodeLine("CM000663.2\t13054707\tpbsv.BND.CM000663.2:13054707-CM000663.2:13256071\tC\tC]CM000663.2:13256071]\t.\tPASS\tSVTYPE=BND;CIPOS=0,0;MATEID=pbsv.BND.CM000663.2:13256071-CM000663.2:13054707;MATEDIST=201364\tGT:AD:DP\t0/1:1,1:2"), 0, Zygosity.HETEROZYGOUS, 2, 1, 1, -1),
                 Arguments.of(decodeLine("CM000663.2\t60776838\tpbsv.INV.3\tT\t<INV>\t.\tPASS\tSVTYPE=INV;END=60778680\tGT:AD:DP\t0/1:5,1:6"), 0, Zygosity.HETEROZYGOUS, 6, 5, 1, -1),
                 Arguments.of(decodeLine("CM000663.2\t61025427\tpbsv.INS.DUP.4\tA\t<DUP>\t.\tPASS\tSVTYPE=DUP;END=61025468;SVLEN=41\tGT:AD:DP\t0/1:2,4:6"), 0, Zygosity.HETEROZYGOUS, 6, 2, 4, -1),
+                Arguments.of(decodeLine("CM000663.2\t61025427\tpbsv.INS.DUP.4\tA\t<DUP>\t.\tPASS\tSVTYPE=DUP;END=61025468;SVLEN=41\tGT\t0/1"), 0, Zygosity.HETEROZYGOUS, -1, -1, -1, -1),
                 Arguments.of(decodeLine("CM000663.2\t144101291\tpbsv.CNV.5\tG\t<CNV>\t.\tPASS\tSVTYPE=cnv;END=144106919;SVLEN=5628;SHADOWED\tCN\t4"), 0, Zygosity.UNKNOWN, -1, -1, -1, 4));
     }
 
@@ -96,6 +98,7 @@ public class VariantCallAttributeParserTest {
                 Arguments.of(decodeLine("CM000663.2\t1177318\tsvim.BND.3\tN\tN[CM000666.2:182304220[\t1\tPASS\tSVTYPE=BND;SUPPORT=1;STD_POS1=.;STD_POS2=.\tGT:DP:AD\t./.:.:.,."), 0, Zygosity.UNKNOWN, -1, -1, 1, -1),
                 Arguments.of(decodeLine("CM000663.2\t1382231\tsvim.DUP_TANDEM.4\tN\t<DUP:TANDEM>\t2\tPASS\tSVTYPE=DUP:TANDEM;END=1382898;SVLEN=668;SUPPORT=2;STD_SPAN=13.44;STD_POS=6.72\tGT:CN:DP:AD\t./.:2:.:.,."), 0, Zygosity.UNKNOWN, -1, -1, 2, 2),
                 Arguments.of(decodeLine("CM000663.2\t26641623\tsvim.INV.5\tN\t<INV>\t3\tPASS\tSVTYPE=INV;END=26646431;SUPPORT=8;STD_SPAN=.;STD_POS=.\tGT:DP:AD\t0/1:14:6,8"), 0, Zygosity.HETEROZYGOUS, 14, 6, 8, -1),
+                Arguments.of(decodeLine("CM000663.2\t26641623\tsvim.INV.5\tN\t<INV>\t3\tPASS\tSVTYPE=INV;END=26646431;STD_SPAN=.;STD_POS=.\tGT\t0/1"), 0, Zygosity.HETEROZYGOUS, -1, -1, -1, -1),
                 Arguments.of(decodeLine("CM000663.2\t168055351\tsvim.DUP_INT.6\tN\t<DUP:INT>\t17\tPASS\tSVTYPE=DUP:INT;CUTPASTE;END=168056494;SVLEN=1144;SUPPORT=16;STD_SPAN=3.08;STD_POS=1.54\tGT:DP:AD\t1/1:16:0,16"), 0, Zygosity.HOMOZYGOUS, 16, 0, 16, -1));
     }
 

@@ -65,21 +65,8 @@ public class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
         Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
         Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(phenotypeTerms, topLevelEnhancerTerms);
 
+        //noinspection SwitchStatementWithTooFewBranches
         switch (type) {
-            case PROTOTYPE:
-                LogUtils.logWarn(LOGGER, "PROTOTYPE SvPrioritizer is not currently supported");
-
-//                LogUtils.logDebug(LOGGER, "Preparing gene and disease data");
-//                Map<TermId, Set<HpoDiseaseSummary>> relevantGenesAndDiseases = phenotypeDataService.getRelevantGenesAndDiseases(patientTerms);
-//                return new StrippedSvPrioritizer(annotationDataService,
-//                        new SvAnnOverlapper(transcriptService.getChromosomeMap()),
-//                        phenotypeDataService.geneBySymbol(),
-//                    topLevelHpoTermsAndLabels.keySet(),
-//                        enhancerRelevantAncestors,
-//                        relevantGenesAndDiseases,
-//                        MAX_GENES); // get from svannaProperties if needed
-                return null;
-
             case ADDITIVE:
                 TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
                 DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritizationParameters().forceTadEvaluation());

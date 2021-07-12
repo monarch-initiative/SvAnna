@@ -3,9 +3,6 @@ package org.jax.svanna.cli;
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.overlap.IntervalArrayGeneOverlapper;
-import org.jax.svanna.core.overlap.Overlapper;
-import org.jax.svanna.core.overlap.SvAnnOverlapper;
 import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.core.reference.TranscriptService;
 import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
@@ -67,12 +64,7 @@ public class TestDataConfig {
 
     @Bean
     public GeneOverlapper geneOverlapper(GeneService geneService) {
-        return new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
-    }
-
-    @Bean
-    public Overlapper overlapper(TranscriptService transcriptService) {
-        return new SvAnnOverlapper(transcriptService.getChromosomeMap());
+        return GeneOverlapper.intervalArrayOverlapper(geneService.getChromosomeMap());
     }
 
 }

@@ -1,6 +1,5 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.reference.Gene;
 
 import java.util.*;
@@ -28,10 +27,6 @@ public class GeneOverlap {
 
     public Collection<TranscriptOverlap> transcriptOverlaps() {
         return txOverlapByAccessionId.values();
-    }
-
-    public TranscriptOverlap highestEffectTranscriptOverlap() {
-        return topTranscriptOverlap().orElseThrow(() -> new SvAnnaRuntimeException("No transcript overlap"));
     }
 
     public OverlapType overlapType() {

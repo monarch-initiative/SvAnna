@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.jax.svanna.core.overlap.OverlapType.*;
 
-public class IntervalArrayGeneOverlapper implements GeneOverlapper {
+class IntervalArrayGeneOverlapper implements GeneOverlapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalArrayGeneOverlapper.class);
 
@@ -24,7 +24,7 @@ public class IntervalArrayGeneOverlapper implements GeneOverlapper {
      */
     private final Map<Integer, IntervalArray<Gene>> geneIntervalArrays;
 
-    public IntervalArrayGeneOverlapper(Map<Integer, IntervalArray<Gene>> geneIntervalArrays) {
+    IntervalArrayGeneOverlapper(Map<Integer, IntervalArray<Gene>> geneIntervalArrays) {
         this.geneIntervalArrays = geneIntervalArrays;
     }
 

@@ -11,7 +11,6 @@ import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.overlap.IntervalArrayGeneOverlapper;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.reference.GeneService;
 import org.jax.svanna.core.reference.TranscriptService;
@@ -174,7 +173,7 @@ public class SvannaAutoConfiguration {
 
     @Bean
     public GeneOverlapper geneOverlapper(GeneService geneService) {
-        return new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
+        return GeneOverlapper.intervalArrayOverlapper(geneService.getChromosomeMap());
     }
 
     @Bean

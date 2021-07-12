@@ -18,6 +18,7 @@ import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.priority.*;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -37,7 +38,7 @@ import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "prioritize",
@@ -49,19 +50,17 @@ import java.util.stream.Collectors;
         footer = Main.FOOTER)
 public class PrioritizeCommand extends SvAnnaCommand {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizeCommand.class);
-
     protected static final NumberFormat NF = NumberFormat.getNumberInstance();
-
-    static {
-        NF.setMaximumFractionDigits(2);
-    }
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizeCommand.class);
     /**
      * Gene contribution is multiplied by this factor if variant is heterozygous and the gene is not associated with
      * a dominant disease.
      */
     private static final double MODE_OF_INHERITANCE_FACTOR = .5;
+
+    static {
+        NF.setMaximumFractionDigits(2);
+    }
 
     /*
      * -------------- INPUT OPTIONS -------------
@@ -98,8 +97,8 @@ public class PrioritizeCommand extends SvAnnaCommand {
             description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
     public int maxLength = 250_000_000;
 
-    @CommandLine.Option(names={"--min-read-support"},
-            description="Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
+    @CommandLine.Option(names = {"--min-read-support"},
+            description = "Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 3;
 
     @CommandLine.Option(names = {"--mode-of-inheritance"},
@@ -126,15 +125,78 @@ public class PrioritizeCommand extends SvAnnaCommand {
             description = "Prefix for output files (default: based on the input VCF name)")
     public String outPrefix = null;
 
+    @CommandLine.Option(names = {"--uncompressed-output"},
+            description = "Write tabular and VCF output formats with no compression (default: ${DEFAULT-VALUE})")
+    public boolean uncompressed = false;
+
     @CommandLine.Option(names = {"--report-top-variants"},
             paramLabel = "100",
             description = "Report top n variants (default: ${DEFAULT-VALUE})")
     public int reportNVariants = 100;
 
+    private static Optional<Path> getVcfFilePath(Phenopacket phenopacket) {
+        // There should be exactly one VCF file
+        LinkedList<HtsFile> vcfFiles = phenopacket.getHtsFilesList().stream()
+                .filter(htsFile -> htsFile.getHtsFormat().equals(HtsFile.HtsFormat.VCF))
+                .distinct()
+                .collect(Collectors.toCollection(LinkedList::new));
+        if (vcfFiles.size() != 1) {
+            LogUtils.logWarn(LOGGER, "Expected to find 1 VCF file, found {}", vcfFiles.size());
+            return Optional.empty();
+        }
+
+        // The VCF file should have a proper URI
+        HtsFile vcf = vcfFiles.getFirst();
+        try {
+            URI uri = new URI(vcf.getUri());
+            return Optional.of(Path.of(uri));
+        } catch (URISyntaxException e) {
+            LogUtils.logWarn(LOGGER, "Invalid URI `{}`: {}", vcf.getUri(), e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    private static void performModeOfInheritanceReassignment(List<? extends SvannaVariant> filteredPrioritizedVariants, PhenotypeDataService phenotypeDataService) {
+        // TODO - find a better place for this code
+        LogUtils.logInfo(LOGGER, "Reassigning priorities");
+        for (SvannaVariant variant : filteredPrioritizedVariants) {
+            if (variant.svPriority() instanceof GeneAwareSvPriority) {
+                Zygosity zygosity = variant.zygosity();
+                if (zygosity.equals(Zygosity.UNKNOWN))
+                    continue;
+
+                GeneAwareSvPriority priority = (GeneAwareSvPriority) variant.svPriority();
+                Map<String, Double> map = new HashMap<>();
+                for (String geneId : priority.geneIds()) {
+                    double geneContribution = priority.geneContribution(geneId);
+                    if (geneContribution < 1E-8)
+                        continue; // no contribution, the gene is not affected by the variant
+
+                    Set<HpoDiseaseSummary> diseases = phenotypeDataService.getDiseasesForGene(geneId);
+                    if (zygosity.equals(Zygosity.HETEROZYGOUS)) {
+                        boolean noDominantDisease = true;
+                        for (HpoDiseaseSummary disease : diseases) {
+                            if (disease.isCompatibleWithInheritance(ModeOfInheritance.AUTOSOMAL_DOMINANT)
+                                    || disease.isCompatibleWithInheritance(ModeOfInheritance.X_DOMINANT)) {
+                                noDominantDisease = false;
+                                break;
+                            }
+                        }
+
+                        if (noDominantDisease && !diseases.isEmpty())
+                            geneContribution *= MODE_OF_INHERITANCE_FACTOR;
+                    }
+                    map.put(geneId, geneContribution);
+                }
+                variant.setSvPriority(GeneAwareSvPriority.of(map));
+            }
+        }
+    }
+
     @Override
-    public Integer call(){
+    public Integer call() {
         int status = checkArguments();
-        if (status!=0)
+        if (status != 0)
             return status;
 
         Set<TermId> phenotypeTermIds;
@@ -174,7 +236,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
 
     protected int checkArguments() {
         if ((vcfFile == null) == (phenopacketPath == null)) {
-            LogUtils.logError(LOGGER,"Path to a VCF file or to a phenopacket must be supplied");
+            LogUtils.logError(LOGGER, "Path to a VCF file or to a phenopacket must be supplied");
             return 1;
         }
 
@@ -228,8 +290,8 @@ public class PrioritizeCommand extends SvAnnaCommand {
             Set<Term> topLevelHpoTerms = phenotypeDataService.getTopLevelTerms(validatedPatientTerms);
 
             LogUtils.logInfo(LOGGER, "Reading variants from `{}`", vcfFile);
-            VariantParser<SvannaVariant> parser = new VcfVariantParser(genomicAssembly, false);
-            List<SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
+            VariantParser<FullSvannaVariant> parser = new VcfVariantParser(genomicAssembly);
+            List<FullSvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
             LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
 
             // Filter
@@ -237,7 +299,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
             PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport, maxLength);
-            List<SvannaVariant> filteredVariants = filter.filter(variants);
+            List<FullSvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
@@ -246,14 +308,14 @@ public class PrioritizeCommand extends SvAnnaCommand {
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");
             ProgressReporter priorityProgress = new ProgressReporter(5_000);
-            Function<SvannaVariant, SvannaVariant> prioritizationFunction = v -> {
+            UnaryOperator<FullSvannaVariant> prioritizationFunction = v -> {
                 priorityProgress.logItem(v);
                 SvPriority priority = prioritizer.prioritize(v);
                 v.setSvPriority(priority);
                 return v;
             };
 
-            List<SvannaVariant> filteredPrioritizedVariants = TaskUtils.executeBlocking(filteredVariants, prioritizationFunction, parallelism);
+            List<FullSvannaVariant> filteredPrioritizedVariants = TaskUtils.executeBlocking(filteredVariants, prioritizationFunction, parallelism);
 
             if (modeOfInheritance)
                 performModeOfInheritanceReassignment(filteredPrioritizedVariants, phenotypeDataService);
@@ -264,13 +326,13 @@ public class PrioritizeCommand extends SvAnnaCommand {
             ResultWriterFactory resultWriterFactory = context.getBean(ResultWriterFactory.class);
             String prefix = resolveOutPrefix(vcfFile);
             for (OutputFormat outputFormat : outputFormats) {
-                ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat);
+                ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat, !uncompressed);
                 if (writer instanceof HtmlResultWriter) {
                     SvannaProperties svannaProperties = context.getBean(SvannaProperties.class);
                     // TODO - is there a more elegant way to pass the HTML specific parameters into the writer?
-                    HtmlResultWriter wrt = (HtmlResultWriter) writer;
-                    wrt.setAnalysisParameters(getAnalysisParameters(svannaProperties));
-                    wrt.setDoNotReportBreakends(doNotReportBreakends);
+                    HtmlResultWriter htmlWriter = (HtmlResultWriter) writer;
+                    htmlWriter.setAnalysisParameters(getAnalysisParameters(svannaProperties));
+                    htmlWriter.setDoNotReportBreakends(doNotReportBreakends);
                 }
                 writer.write(results, prefix);
             }
@@ -295,64 +357,5 @@ public class PrioritizeCommand extends SvAnnaCommand {
         analysisParameters.setPhenotypeTermSimilarityMeasure(properties.prioritizationParameters().termSimilarityMeasure().toString());
 
         return analysisParameters;
-    }
-
-    private static Optional<Path> getVcfFilePath(Phenopacket phenopacket) {
-        // There should be exactly one VCF file
-        LinkedList<HtsFile> vcfFiles = phenopacket.getHtsFilesList().stream()
-                .filter(htsFile -> htsFile.getHtsFormat().equals(HtsFile.HtsFormat.VCF))
-                .distinct()
-                .collect(Collectors.toCollection(LinkedList::new));
-        if (vcfFiles.size() != 1) {
-            LogUtils.logWarn(LOGGER, "Expected to find 1 VCF file, found {}", vcfFiles.size());
-            return Optional.empty();
-        }
-
-        // The VCF file should have a proper URI
-        HtsFile vcf = vcfFiles.getFirst();
-        try {
-            URI uri = new URI(vcf.getUri());
-            return Optional.of(Path.of(uri));
-        } catch (URISyntaxException e) {
-            LogUtils.logWarn(LOGGER, "Invalid URI `{}`: {}", vcf.getUri(), e.getMessage());
-            return Optional.empty();
-        }
-    }
-
-    private static void performModeOfInheritanceReassignment(List<SvannaVariant> filteredPrioritizedVariants, PhenotypeDataService phenotypeDataService) {
-        // TODO - find a better place for this code
-        LogUtils.logInfo(LOGGER, "Reassigning priorities");
-        for (SvannaVariant variant : filteredPrioritizedVariants) {
-            if (variant.svPriority() instanceof GeneAwareSvPriority) {
-                Zygosity zygosity = variant.zygosity();
-                if (zygosity.equals(Zygosity.UNKNOWN))
-                    continue;
-
-                GeneAwareSvPriority priority = (GeneAwareSvPriority) variant.svPriority();
-                Map<String, Double> map = new HashMap<>();
-                for (String geneId : priority.geneIds()) {
-                    double geneContribution = priority.geneContribution(geneId);
-                    if (geneContribution < 1E-8)
-                        continue; // no contribution, the gene is not affected by the variant
-
-                    Set<HpoDiseaseSummary> diseases = phenotypeDataService.getDiseasesForGene(geneId);
-                    if (zygosity.equals(Zygosity.HETEROZYGOUS)) {
-                        boolean noDominantDisease = true;
-                        for (HpoDiseaseSummary disease : diseases) {
-                            if (disease.isCompatibleWithInheritance(ModeOfInheritance.AUTOSOMAL_DOMINANT)
-                                    || disease.isCompatibleWithInheritance(ModeOfInheritance.X_DOMINANT)) {
-                                noDominantDisease = false;
-                                break;
-                            }
-                        }
-
-                        if (noDominantDisease && !diseases.isEmpty())
-                            geneContribution *= MODE_OF_INHERITANCE_FACTOR;
-                    }
-                    map.put(geneId, geneContribution);
-                }
-                variant.setSvPriority(GeneAwareSvPriority.of(map));
-            }
-        }
     }
 }

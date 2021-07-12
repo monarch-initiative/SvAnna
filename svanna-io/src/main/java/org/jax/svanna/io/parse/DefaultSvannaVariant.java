@@ -1,8 +1,12 @@
-package org.jax.svanna.core.reference;
+package org.jax.svanna.io.parse;
 
+import htsjdk.variant.variantcontext.VariantContext;
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.priority.SvPriority;
+import org.jax.svanna.core.reference.VariantCallAttributes;
+import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svart.*;
 
 import java.util.HashSet;
@@ -10,12 +14,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements SvannaVariant {
+public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements FullSvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
     private final Set<FilterType> failedFilterTypes;
-    private final AtomicReference<SvPriority> priority = new AtomicReference<>();
+    private final AtomicReference<SvPriority> priority;
+    private final VariantContext variantContext;
 
     private DefaultSvannaVariant(Contig contig,
                                  String id,
@@ -28,12 +33,16 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                                  int changeLength,
                                  VariantCallAttributes variantCallAttributes,
                                  Set<FilterType> passedFilterTypes,
-                                 Set<FilterType> failedFilterTypes) {
+                                 Set<FilterType> failedFilterTypes,
+                                 AtomicReference<SvPriority> priority,
+                                 VariantContext variantContext) {
         // for creating a novel instance from an existing instance in `newVariantInstance`
         super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
         this.variantCallAttributes = Objects.requireNonNull(variantCallAttributes);
         this.passedFilterTypes = passedFilterTypes;
         this.failedFilterTypes = failedFilterTypes;
+        this.priority = priority;
+        this.variantContext = variantContext;
     }
 
     private DefaultSvannaVariant(Builder builder) {
@@ -41,6 +50,8 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
         variantCallAttributes = Objects.requireNonNull(builder.variantCallAttributes, "Variant call attributes cannot be null");
         passedFilterTypes = builder.passedFilterTypes;
         failedFilterTypes = builder.failedFilterTypes;
+        priority = builder.priority;
+        variantContext = builder.variantContext;
     }
 
     public static Builder builder() {
@@ -48,18 +59,20 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
     }
 
     public static DefaultSvannaVariant of(Contig contig,
-                                   String id,
-                                   Strand strand,
-                                   CoordinateSystem coordinateSystem,
-                                   Position startPosition,
-                                   Position endPosition,
-                                   String ref,
-                                   String alt,
-                                   int changeLength,
-                                   VariantCallAttributes variantCallAttributes) {
+                                          String id,
+                                          Strand strand,
+                                          CoordinateSystem coordinateSystem,
+                                          Position startPosition,
+                                          Position endPosition,
+                                          String ref,
+                                          String alt,
+                                          int changeLength,
+                                          VariantCallAttributes variantCallAttributes,
+                                          SvPriority svPriority,
+                                          VariantContext variantContext) {
         return new DefaultSvannaVariant(
                 contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
-                variantCallAttributes, new HashSet<>(), new HashSet<>());
+                variantCallAttributes, new HashSet<>(), new HashSet<>(), new AtomicReference<>(svPriority), variantContext);
     }
 
     @Override
@@ -83,7 +96,9 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                 changeLength,
                 variantCallAttributes,
                 passedFilterTypes,
-                failedFilterTypes);
+                failedFilterTypes,
+                priority,
+                variantContext);
     }
 
     @Override
@@ -146,17 +161,22 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
     }
 
     @Override
+    public VariantContext variantContext() {
+        return variantContext;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DefaultSvannaVariant that = (DefaultSvannaVariant) o;
-        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes) && Objects.equals(priority, that.priority);
+        return Objects.equals(variantCallAttributes, that.variantCallAttributes) && Objects.equals(passedFilterTypes, that.passedFilterTypes) && Objects.equals(failedFilterTypes, that.failedFilterTypes) && Objects.equals(priority, that.priority) && Objects.equals(variantContext, that.variantContext);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes, priority);
+        return Objects.hash(super.hashCode(), variantCallAttributes, passedFilterTypes, failedFilterTypes, priority, variantContext);
     }
 
     @Override
@@ -166,14 +186,17 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                 ", passedFilterTypes=" + passedFilterTypes +
                 ", failedFilterTypes=" + failedFilterTypes +
                 ", priority=" + priority.get() +
+                ", variantContext=" + variantContext +
                 "} " + super.toString();
     }
 
     public static class Builder extends BaseVariant.Builder<Builder> {
 
-        private VariantCallAttributes variantCallAttributes;
         private final Set<FilterType> passedFilterTypes = new HashSet<>();
         private final Set<FilterType> failedFilterTypes = new HashSet<>();
+        private final AtomicReference<SvPriority> priority = new AtomicReference<>();
+        private VariantCallAttributes variantCallAttributes;
+        private VariantContext variantContext;
 
         public Builder variantCallAttributes(VariantCallAttributes variantCallAttributes) {
             this.variantCallAttributes = variantCallAttributes;
@@ -188,6 +211,16 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                     failedFilterTypes.add(filterResult.getFilterType());
             }
 
+            return self();
+        }
+
+        public Builder priority(SvPriority svPriority) {
+            priority.set(svPriority);
+            return self();
+        }
+
+        public Builder variantContext(VariantContext variantContext) {
+            this.variantContext = variantContext;
             return self();
         }
 

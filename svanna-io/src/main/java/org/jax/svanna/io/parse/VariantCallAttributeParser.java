@@ -13,17 +13,11 @@ class VariantCallAttributeParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VariantCallAttributeParser.class);
 
-    private static final VariantCallAttributeParser INSTANCE = new VariantCallAttributeParser();
-
-    static VariantCallAttributeParser getInstance() {
-        return INSTANCE;
-    }
-
     private VariantCallAttributeParser() {
         // private no-op
     }
 
-    VariantCallAttributes parseAttributes(Map<String, Object> attributes, Genotype genotype) {
+    static VariantCallAttributes parseAttributes(Map<String, Object> attributes, Genotype genotype) {
         VariantCallAttributes.Builder builder = VariantCallAttributes.builder();
 
         // first, parse zygosity

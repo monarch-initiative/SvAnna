@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.writer;
 
-import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.Term;
 
 import java.util.List;
@@ -15,12 +15,12 @@ public class AnalysisResults {
 
     private final Set<Term> topLevelPhenotypeTerms;
 
-    private final List<? extends SvannaVariant> variants;
+    private final List<FullSvannaVariant> variants;
 
     public AnalysisResults(String variantSource,
                            Set<Term> probandPhenotypeTerms,
                            Set<Term> topLevelPhenotypeTerms,
-                           List<? extends SvannaVariant> variants) {
+                           List<FullSvannaVariant> variants) {
         this.variantSource = Objects.requireNonNull(variantSource, "Variant source cannot be null");
         this.probandPhenotypeTerms = Objects.requireNonNull(probandPhenotypeTerms, "Phenotype terms cannot be null");
         this.topLevelPhenotypeTerms = Objects.requireNonNull(topLevelPhenotypeTerms, "Top level phenotype terms cannot be null");
@@ -35,7 +35,7 @@ public class AnalysisResults {
         return topLevelPhenotypeTerms;
     }
 
-    public List<? extends SvannaVariant> variants() {
+    public List<FullSvannaVariant> variants() {
         return variants;
     }
 

@@ -30,11 +30,6 @@ public class DbAnnotationDataService implements AnnotationDataService {
     }
 
     @Override
-    public List<Enhancer> allEnhancers() {
-        return enhancerAnnotationDao.getAllItems();
-    }
-
-    @Override
     public Set<TermId> enhancerPhenotypeAssociations() {
         return enhancerAnnotationDao.getPhenotypeAssociations();
     }

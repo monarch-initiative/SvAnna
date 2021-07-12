@@ -1,7 +1,6 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.exception.LogUtils;
-import org.jax.svanna.core.landscape.BaseEnhancer;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerSource;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;

@@ -5,9 +5,14 @@ import org.monarchinitiative.svart.GenomicRegion;
 
 import static org.jax.svanna.core.overlap.OverlapType.*;
 
+// TODO - find out if this class is necessary
 public class OverlapTypeCalculator {
 
-    public static OverlapType calculate(GenomicRegion variant, Transcript transcript) {
+    private OverlapTypeCalculator() {
+        // private no-op
+    }
+
+    static OverlapType calculate(GenomicRegion variant, Transcript transcript) {
         return transcript.overlapsWith(variant)
                 ? forOverlappingTranscript(variant, transcript)
                 : forIntergenicVariant(variant, transcript);

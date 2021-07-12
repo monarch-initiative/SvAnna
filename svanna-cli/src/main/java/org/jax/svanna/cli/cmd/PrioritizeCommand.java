@@ -8,7 +8,7 @@ import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.hpo.ModeOfInheritance;
@@ -92,11 +92,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
     @CommandLine.Option(names = {"--frequency-threshold"},
             description = "Frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE})")
     public float frequencyThreshold = 1.F;
-
-    @Deprecated
-    @CommandLine.Option(names = {"--max-length"},
-            description = "Do not prioritize variants longer than this (default: ${DEFAULT-VALUE})")
-    public int maxLength = 250_000_000;
 
     @CommandLine.Option(names = {"--min-read-support"},
             description = "Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
@@ -299,7 +294,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", overlapThreshold, frequencyThreshold);
             LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
-            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, overlapThreshold, frequencyThreshold, minAltReadSupport, maxLength);
+            PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, overlapThreshold, frequencyThreshold, minAltReadSupport);
             List<FullSvannaVariant> filteredVariants = filter.filter(variants);
 
             // Prioritize

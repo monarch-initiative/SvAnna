@@ -1,6 +1,6 @@
 package org.jax.svanna.db.phenotype;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.db.SvAnnaDbException;
 import org.monarchinitiative.phenol.ontology.data.TermId;

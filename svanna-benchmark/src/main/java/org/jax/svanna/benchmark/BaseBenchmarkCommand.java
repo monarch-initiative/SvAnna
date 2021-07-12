@@ -1,6 +1,6 @@
 package org.jax.svanna.benchmark;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

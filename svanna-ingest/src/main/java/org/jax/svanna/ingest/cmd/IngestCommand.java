@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.cmd;
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.Main;
@@ -117,7 +117,7 @@ public class IngestCommand implements Callable<Integer> {
             try {
                 return new File(resource.toURI());
             } catch (URISyntaxException e) {
-                throw new SvAnnRuntimeException("Could not retrieve file from resources directory: " + e.getMessage());
+                throw new SvAnnaRuntimeException("Could not retrieve file from resources directory: " + e.getMessage());
             }
         }
     }

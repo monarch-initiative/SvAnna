@@ -1,4 +1,4 @@
-package org.jax.svanna.core.exception;
+package org.jax.svanna.core;
 
 import org.monarchinitiative.svart.Breakend;
 import org.monarchinitiative.svart.Strand;

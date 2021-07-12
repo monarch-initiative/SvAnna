@@ -1,13 +1,16 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.monarchinitiative.svart.Strand;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static org.jax.svanna.cli.writer.html.svg.Constants.REPEAT_HEIGHT;
 
@@ -59,7 +62,7 @@ public class SvgRepeatWriter {
         if (pos < 0) {
             String msg = String.format("(repeat writer)Bad left boundary (genomic coordinate: %d) with genomicMinPos=%d and genomicSpan=%.1f pos=%.1f\n",
                     genomicCoordinate, paddedGenomicMinPos, genomicSpan, pos);
-            throw new SvAnnRuntimeException(msg); // should never happen
+            throw new SvAnnaRuntimeException(msg); // should never happen
         }
         double prop = pos / genomicSpan;
         return prop * Constants.SVG_WIDTH;

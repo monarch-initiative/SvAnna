@@ -4,7 +4,7 @@ import htsjdk.samtools.util.CloseableIterator;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.landscape.BasePopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariant;
 import org.jax.svanna.core.landscape.PopulationVariantOrigin;

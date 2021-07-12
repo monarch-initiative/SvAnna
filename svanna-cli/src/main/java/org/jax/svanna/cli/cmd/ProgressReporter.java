@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.cmd;
 
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

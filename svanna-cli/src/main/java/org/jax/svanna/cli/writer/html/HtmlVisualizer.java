@@ -2,7 +2,7 @@ package org.jax.svanna.cli.writer.html;
 
 
 import org.jax.svanna.cli.writer.html.svg.*;
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.hpo.HpoDiseaseSummary;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
@@ -109,7 +109,7 @@ public class HtmlVisualizer implements Visualizer {
         int len = sVend - sVbegin;
         if (len < 0) {
             // should never happen
-            throw new SvAnnRuntimeException("[ERROR] Malformed Htmllocation: " + hloc);
+            throw new SvAnnaRuntimeException("[ERROR] Malformed Htmllocation: " + hloc);
         }
         int OFFSET;
         if (len<2) {
@@ -199,7 +199,7 @@ public class HtmlVisualizer implements Visualizer {
                     return String.format("SVG generation for variant type %s not implemented.", variant.variantType().toString());
             }
             return gen.getSvg();
-        } catch (SvAnnRuntimeException e) {
+        } catch (SvAnnaRuntimeException e) {
             LOGGER.warn("Error: {}", e.getMessage());
             return "<p>" + e.getMessage() +"</p>\n";
         }
@@ -228,14 +228,14 @@ public class HtmlVisualizer implements Visualizer {
             case INS:
                 int len = variant.changeLength();
                 if (locations.size() != 1) {
-                    throw new SvAnnRuntimeException("Was expecting one location for insertion but got " + locations.size());
+                    throw new SvAnnaRuntimeException("Was expecting one location for insertion but got " + locations.size());
                 }
                 loc = locations.get(0);
 
                 return String.format("%s:%sins%dbp", loc.getChrom(), decimalFormat.format(loc.getBegin()), len);
             case DEL:
                 if (locations.size() != 1) {
-                    throw new SvAnnRuntimeException("Was expecting one location for deletion but got " + locations.size());
+                    throw new SvAnnaRuntimeException("Was expecting one location for deletion but got " + locations.size());
                 }
                 loc = locations.get(0);
                 String lend = getLengthDisplayString(visualizable.variant().length());
@@ -243,7 +243,7 @@ public class HtmlVisualizer implements Visualizer {
             case TRA:
             case BND:
                 if (locations.size() != 2) {
-                    throw new SvAnnRuntimeException("Was expecting two locations for translocation but got " + locations.size());
+                    throw new SvAnnaRuntimeException("Was expecting two locations for translocation but got " + locations.size());
                 }
                 HtmlLocation locA = locations.get(0);
                 HtmlLocation locB = locations.get(1);
@@ -252,7 +252,7 @@ public class HtmlVisualizer implements Visualizer {
                 return String.format("t(%s, %s)", translocationA, translocationB);
             case DUP:
                 if (locations.size() != 1) {
-                    throw new SvAnnRuntimeException("Was expecting one location for duplication but got " + locations.size());
+                    throw new SvAnnaRuntimeException("Was expecting one location for duplication but got " + locations.size());
                 }
                 HtmlLocation dupLoc = locations.get(0);
                 int dupBegin = Math.min(dupLoc.getBegin(), dupLoc.getEnd());
@@ -261,7 +261,7 @@ public class HtmlVisualizer implements Visualizer {
                 return String.format("%s:%d-%d duplication (%s)", dupLoc.getChrom(), dupBegin, dupEnd, lengthDup);
             case INV:
                 if (locations.size() != 1) {
-                    throw new SvAnnRuntimeException("Was expecting one location for inversion but got " + locations.size());
+                    throw new SvAnnaRuntimeException("Was expecting one location for inversion but got " + locations.size());
                 }
                 HtmlLocation invLoc = locations.get(0);
                 int invBegin = Math.min(invLoc.getBegin(), invLoc.getEnd());

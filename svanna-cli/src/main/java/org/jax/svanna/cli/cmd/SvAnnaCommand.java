@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.cmd;
 
 import org.jax.svanna.cli.writer.ResultWriterFactory;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.PhenotypeDataService;
 import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;

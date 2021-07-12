@@ -8,7 +8,7 @@ import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.VariantCallAttributes;

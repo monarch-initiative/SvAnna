@@ -5,7 +5,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.ResultWriter;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.filter.Filterable;
 import org.jax.svanna.core.reference.Prioritized;

@@ -1,8 +1,8 @@
 package org.jax.svanna.ingest.parse.enhancer.fantom;
 
-import org.jax.svanna.core.landscape.BaseEnhancer;
 import org.jax.svanna.core.landscape.EnhancerSource;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
+import org.jax.svanna.db.landscape.BaseEnhancer;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Position;

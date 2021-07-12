@@ -2,27 +2,6 @@ package org.jax.svanna.core.landscape;
 
 public enum RepeatFamily {
 
-    // DNA
-    //DNA?
-    //DNA/hAT
-    //DNA/hAT?
-    //DNA/hAT-Ac
-    //DNA/hAT-Blackjack
-    //DNA/hAT-Charlie
-    //DNA/hAT-Tag1
-    //DNA/hAT-Tip100
-    //DNA/hAT-Tip100?
-    //DNA/Merlin
-    //DNA/MULE-MuDR
-    //DNA/PIF-Harbinger
-    //DNA/PiggyBac
-    //DNA/PiggyBac?
-    //DNA/TcMar
-    //DNA/TcMar?
-    //DNA/TcMar-Mariner
-    //DNA/TcMar-Pogo
-    //DNA/TcMar-Tc2
-    //DNA/TcMar-Tigger
     DNA,
     DNA_hAT(DNA),
     DNA_hAT_Ac(DNA, DNA_hAT),
@@ -40,12 +19,10 @@ public enum RepeatFamily {
     DNA_TcMar_Tc2(DNA, DNA_TcMar),
     DNA_TcMar_Tigger(DNA, DNA_TcMar),
 
-    // LINE/CR1, LINE/Dong-R4, LINE/L1, LINE/L2, LINE/Penelope, LINE/RTE-BovB, LINE/RTE-X
     LINE,
 
     LOW_COMPLEXITY,
 
-    //LTR, LTR?, LTR/ERV1, LTR/ERV1?, LTR/ERVK, LTR/ERVL, LTR/ERVL?, , LTR/ERVL-MaLR, LTR/Gypsy, LTR/Gypsy?
     LTR,
     LTR_ERV1(LTR),
     LTR_ERVK(LTR),
@@ -53,7 +30,6 @@ public enum RepeatFamily {
     LTR_ERVL_MaLR(LTR, LTR_ERVL),
     LTR_Gypsy(LTR),
 
-    //SINE?, SINE/5S-Deu-L2, SINE/Alu, SINE/MIR, SINE?/tRNA, SINE/tRNA, SINE/tRNA-Deu, SINE/tRNA-RTE
     SINE,
     SINE_5SDeuL2(SINE),
     SINE_ALU(SINE),
@@ -62,11 +38,8 @@ public enum RepeatFamily {
     SINE_tRNA_Deu(SINE, SINE_tRNA),
     SINE_tRNA_RTE(SINE, SINE_tRNA),
 
-    //Retroposon/SVA
     RETROPOSON,
 
-    //RC?/Helitron?
-    //RC/Helitron
     RC_HELITRON,
 
     RNA,

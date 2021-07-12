@@ -2,7 +2,7 @@ package org.jax.svanna.ingest.hpomap;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.jax.svanna.core.exception.SvAnnRuntimeException;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.io.*;
@@ -46,7 +46,7 @@ public class HpoTissueMapParser {
 
       String[] fields = line.split(",");
       if (fields.length != 4) {
-        throw new SvAnnRuntimeException("Malformed mapping file line: " + line);
+        throw new SvAnnaRuntimeException("Malformed mapping file line: " + line);
       }
       TermId tid = TermId.of(fields[0]);
       String label = fields[1];

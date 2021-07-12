@@ -1,7 +1,7 @@
 package org.jax.svanna.core.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.jax.svanna.core.exception.LogUtils;
+import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.CodingTranscript;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static org.jax.svanna.core.overlap.OverlapType.*;
 
-public class IntervalArrayGeneOverlapper implements GeneOverlapper {
+class IntervalArrayGeneOverlapper implements GeneOverlapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalArrayGeneOverlapper.class);
 
@@ -24,7 +24,7 @@ public class IntervalArrayGeneOverlapper implements GeneOverlapper {
      */
     private final Map<Integer, IntervalArray<Gene>> geneIntervalArrays;
 
-    public IntervalArrayGeneOverlapper(Map<Integer, IntervalArray<Gene>> geneIntervalArrays) {
+    IntervalArrayGeneOverlapper(Map<Integer, IntervalArray<Gene>> geneIntervalArrays) {
         this.geneIntervalArrays = geneIntervalArrays;
     }
 

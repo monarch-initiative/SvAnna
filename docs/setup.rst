@@ -42,7 +42,7 @@ SvAnna database files are available for download from:
 After the download, unzip the archive(s) content into a folder and note the folder path.
 
 .. tip::
-  Keeping the files on a high-performance hard drive will improve the runtime performance.
+  Keeping the files on fast hard drive will improve the runtime performance.
 
 Jannovar transcript databases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

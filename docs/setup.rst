@@ -148,3 +148,4 @@ Open the file in your favorite text editor and provide the following three bits 
 .. tip::
   The YAML syntax requires to include a white space between key, value pairs (e.g. ``dataDirectory: /project/joe/svanna_resources``.
 
+.. _Jannovar: https://pubmed.ncbi.nlm.nih.gov/24677618

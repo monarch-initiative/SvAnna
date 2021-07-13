@@ -1,0 +1,33 @@
+{
+  "id": "example",
+  "subject": {
+    "id": "example",
+    "ageAtCollection": {
+      "age": "P2Y"
+    }
+  },
+  "phenotypicFeatures": [{
+    "type": {
+      "id": "HP:0008330",
+      "label": "Reduced von Willebrand factor activity"
+    }
+  }],
+  "htsFiles": [{
+    "uri": "file:///***/***/example.vcf",
+    "htsFormat": "VCF",
+    "genomeAssembly": "hg38"
+  }],
+  "metaData": {
+    "created": "2021-07-13T15:08:53.846Z",
+    "createdBy": "ExampleOrg:ExampleCurator",
+    "resources": [{
+      "id": "hp",
+      "name": "human phenotype ontology",
+      "url": "http://purl.obolibrary.org/obo/hp.owl",
+      "version": "unknown HPO version",
+      "namespacePrefix": "HP",
+      "iriPrefix": "http://purl.obolibrary.org/obo/HP_"
+    }],
+    "phenopacketSchemaVersion": "1.0.0"
+  }
+}

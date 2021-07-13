@@ -116,6 +116,10 @@ The following is a minimal Phenopacket (note this is version 1; version 2 is als
 To run this on your system, replace the path for the VCF file (`file:///***/***/example.vcf`). For instance, if you
 have the VCF file at `/home/myname/data/example.vcf`, the line should read `"uri": "file:////home/myname/data/example.vcf"`.
 
+
+This phenopacket file can be downloaded here: `svanna-cli/src/examples/example-phenopacket.json <https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example-phenopacket.json>`_.
+Note however, that you will need to adjust the path to the VCF file as described just above.
+
 This command will prioritize the SVs according to phenotypic relevance. We entered a single HPO term,
 `Reduced von Willebrand factor activity <https://hpo.jax.org/app/browse/term/HP:0008330>`_. The term and a summary of
 the analysis parameters is shown near the top of the SvAnna HTML page.

@@ -10,13 +10,13 @@ Structural variation (SV) is generally defined as a region of DNA approximately 
 inversions and balanced translocations or genomic imbalances (insertions and deletions),
 often referred to as copy number variants (CNVs).
 
-svanna is intended to be used to annotate and interpret VCF files representing the results of
+SvAnna is intended to be used to annotate and interpret VCF files representing the results of
 long-read genome sequencing using approaches for calling SVs. SvAnna was specifically designed
 for VCF files produced by long-read sequencing variant callers such as `pbsv <https://github.com/PacificBiosciences/pbsv>`_ or
 `sniffles <https://github.com/fritzsedlazeck/Sniffles>`_.
 
 This tutorial intends to be a start-to-finish example. Before you begin the tutorial, follow the instructions in
-:ref:`rstsetup` to setup SvAnna on your system. Make sure you have downloaded or created the SvAnna database files and set the mandatory entries in the `svanna-config.yml` file.
+:ref:`rstsetup` to setup SvAnna on your system. Make sure you have downloaded or created the SvAnna database files and set the mandatory entries in the ``svanna-config.yml`` file.
 
 
 Input (1): A structural variant VCF file
@@ -39,7 +39,7 @@ It is possible to run SvAnna without phenotype data, i.e., using just a VCF file
 
 .. code-block:: console
 
-    java -jar SvAnna.jar prioritize --vcf example.vcf -c svanna-config.yml
+    java -jar svanna-cli.jar prioritize --vcf example.vcf -c svanna-config.yml
 
 This will output an HTML file called `example.SVANNA.html` in the same directory as the input VCF file.
 SvAnna outputs information about each of the SVs in the VCF file. Two main sections are generated for each SV. The top section
@@ -113,8 +113,8 @@ The following is a minimal Phenopacket (note this is version 1; version 2 is als
         }
     }
 
-To run this on your system, replace the path for the VCF file (`file:///***/***/example.vcf`). For instance, if you
-have the VCF file at `/home/myname/data/example.vcf`, the line should read `"uri": "file:////home/myname/data/example.vcf"`.
+To run this on your system, replace the path for the VCF file (``file:///***/***/example.vcf``). For instance, if you
+have the VCF file at ``/home/myname/data/example.vcf``, the line should read ``"uri": "file:///home/myname/data/example.vcf"``.
 
 
 This phenopacket file can be downloaded here: `svanna-cli/src/examples/example-phenopacket.json <https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example-phenopacket.json>`_.
@@ -135,7 +135,7 @@ the analysis parameters is shown near the top of the SvAnna HTML page.
 
 Phenotype prioritization against the `Reduced von Willebrand factor activity <https://hpo.jax.org/app/browse/term/HP:0008330>`_. causes
 the SV affecting the *VWF* gene to be most highly prioritized variant. It is a 13 bp deletion that is located between the
-*VWEF and *CD9* genes. It is scored as a promoter variant by SvAnna because the deletion is only 30 bp upstream of a VWF transcript,
+*VWF* and *CD9* genes. It is scored as a promoter variant by SvAnna because the deletion is only 30 bp upstream of a VWF transcript,
 while it is about 75.60 kb downstream of *CD9*.
 
 .. image:: img/vwf-transcripts.png

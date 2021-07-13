@@ -8,4 +8,4 @@ Efficient and accurate pathogenicity prediction for coding and regulatory struct
 Most users should download the latest SvAnna distribution ZIP file from
 the [Releases page](https://github.com/TheJacksonLaboratory/SvAnna/releases).
 
-Please consult the Read the docs site for [detailed documentation](https://svanna.readthedocs.io/en/latest).
+Please consult the Read the docs site for [detailed documentation](https://svanna.readthedocs.io).

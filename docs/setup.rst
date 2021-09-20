@@ -54,7 +54,11 @@ tested to work with SvAnna.
 For your convenience, the files containing *UCSC*, *RefSeq*, or *ENSEMBL* transcripts
 for *hg19* or *hg38* genome assemblies are available for download (~330 MB for download, ~330 MB unpacked).
 
-`Download Jannovar files from here <https://squirls.s3.amazonaws.com/jannovar_v0.35.zip>`_.
+Download Jannovar files from ftp://squirls.ielis.xyz/jannovar_v0.35.zip::
+
+  $ wget ftp://squirls.ielis.xyz/jannovar_v0.35.zip
+  or
+  $ curl --output jannovar_v0.35.zip ftp://squirls.ielis.xyz/jannovar_v0.35.zip
 
 
 Build SvAnna from source
@@ -71,11 +75,11 @@ Run the following commands to download SvAnna source code from GitHub repository
 .. note::
   To build SvAnna from sources, JDK 11 or better must be available in the environment
 
-After the successful build, the JAR file is located at ``svanna-cli/target/svanna-cli-1.0.0-RC1.jar``.
+After the successful build, the JAR file is located at ``svanna-cli/target/svanna-cli-${project.version}.jar``.
 
 To verify that the building process went well, run::
 
-  $ java -jar svanna-cli/target/svanna-cli-1.0.0-RC1.jar --help
+  $ java -jar svanna-cli/target/svanna-cli-${project.version}.jar --help
 
 You should see a message describing how to run the individual commands.
 

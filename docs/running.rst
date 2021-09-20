@@ -22,7 +22,7 @@ stored in one or more :ref:`rstoutputformats`.
 
 To prioritize variants in the `example.vcf`_ file (an example VCF file with 8 variants stored in SvAnna repository), run::
 
-  java -jar svanna-cli.jar prioritize --config svanna-config.yaml --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147 --prefix /path/to/output
+  $ java -jar svanna-cli.jar prioritize --config svanna-config.yaml --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147 --prefix /path/to/output
 
 After the annotation, the results are stored at ``/path/to/output.html``.
 

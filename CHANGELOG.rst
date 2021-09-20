@@ -2,6 +2,14 @@
 Changelog
 =========
 
+----------
+v1.0.0-RC3
+----------
+
+- Bug fixes
+  - fix null pointer that was thrown when processing translocation that involved non-primary contig (alt, unplaced, etc.)
+  - fix incorrect generation of SVGs for translocation
+
 
 ----------
 v1.0.0-RC2

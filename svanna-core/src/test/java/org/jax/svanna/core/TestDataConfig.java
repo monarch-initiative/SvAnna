@@ -40,6 +40,8 @@ public class TestDataConfig {
      *     <li><em>HNF4A</em></li>
      *     <li><em>GCK</em></li>
      *     <li><em>BRCA2</em></li>
+     *     <li><em>MEIOB</em></li>
+     *     <li><em>FAHD1</em></li>
      *     <li><em>COL4A5</em></li> (on <code>chrX</code>)
      *     <li><em>SRY</em></li> (on <code>chrY</code>)
      * </ul>

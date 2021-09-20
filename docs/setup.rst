@@ -148,13 +148,4 @@ Open the file in your favorite text editor and provide the following three bits 
 .. tip::
   The YAML syntax requires to include a white space between key, value pairs (e.g. ``dataDirectory: /project/joe/svanna_resources``.
 
-
-Optional parameters
-~~~~~~~~~~~~~~~~~~~
-
-The optional parameters do not necessarily need to be touched unless you know what you're doing. We will provide the
-details later.
-
-.. TODO - describe the optional parameters.
-
 .. _Jannovar: https://pubmed.ncbi.nlm.nih.gov/24677618

@@ -16,6 +16,11 @@ import static org.jax.svanna.core.overlap.OverlapType.*;
 
 class IntervalArrayGeneOverlapper implements GeneOverlapper {
 
+    /*
+    Note: Always check presence of contigId in the gene interval array before working with the corresponding IntervalArray<Gene>.
+    The array can be null!
+     */
+
     private static final Logger LOGGER = LoggerFactory.getLogger(IntervalArrayGeneOverlapper.class);
 
     /**
@@ -77,12 +82,19 @@ class IntervalArrayGeneOverlapper implements GeneOverlapper {
     }
 
     private List<GeneOverlap> translocationOverlaps(BreakendVariant breakendVariant) {
-        List<GeneOverlap> overlaps = new ArrayList<>();
+        List<GeneOverlap> overlaps = new LinkedList<>();
 
-        for (Breakend breakend : new Breakend[]{breakendVariant.left(), breakendVariant.right()}) {
-            // breakends are empty regions, as defined in Svart
-            IntervalArray<Gene>.QueryResult result = emptyRegionResults(breakend);
-            overlaps.addAll(parseIntrachromosomalEventQueryResult(breakend, result));
+        // the loop is unrolled as we only have 2 breakends here
+        Breakend left = breakendVariant.left();
+        if (geneIntervalArrays.containsKey(left.contigId())) {
+            IntervalArray<Gene>.QueryResult result = emptyRegionResults(left);
+            overlaps.addAll(parseIntrachromosomalEventQueryResult(left, result));
+        }
+
+        Breakend right = breakendVariant.right();
+        if (geneIntervalArrays.containsKey(right.contigId())) {
+            IntervalArray<Gene>.QueryResult result = emptyRegionResults(right);
+            overlaps.addAll(parseIntrachromosomalEventQueryResult(right, result));
         }
 
         return overlaps;

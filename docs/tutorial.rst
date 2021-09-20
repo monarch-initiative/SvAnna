@@ -39,7 +39,7 @@ It is possible to run SvAnna without phenotype data, i.e., using just a VCF file
 
 .. code-block:: console
 
-    java -jar svanna-cli.jar prioritize --vcf example.vcf -c svanna-config.yml
+    $ java -jar svanna-cli.jar prioritize --vcf example.vcf -c svanna-config.yml
 
 This will output an HTML file called `example.SVANNA.html` in the same directory as the input VCF file.
 SvAnna outputs information about each of the SVs in the VCF file. Two main sections are generated for each SV. The top section

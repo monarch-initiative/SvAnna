@@ -18,7 +18,7 @@
         <module>svanna-benchmark</module>
     </modules>
     <groupId>org.jax.svanna</groupId>
-    <version>1.0.0-RC3-SNAPSHOT</version>
+    <version>1.0.0-RC3</version>
     <name>SvAnna</name>
 
     <parent>

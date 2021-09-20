@@ -1,6 +1,5 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.Gene;
@@ -9,6 +8,7 @@ import org.monarchinitiative.svart.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 /**
@@ -17,37 +17,12 @@ import java.util.stream.Collectors;
  */
 public class TranslocationSvgGenerator extends SvSvgGenerator {
 
+    private static final CoordinateSystem COORDINATE_SYSTEM = CoordinateSystem.oneBased();
 
     private final static int YSTART = 50;
+
     private final int separationLineY;
     private final int ystartB;
-
-    /**
-     * transcripts on contig A
-     */
-    private final List<Gene> genesA;
-    /**
-     * transcripts on contig B
-     */
-    private final List<Gene> genesB;
-
-    /**
-     * enhancers on contig A
-     */
-    private final List<Enhancer> enhancersA;
-    /**
-     * enhancers on contig B
-     */
-    private final List<Enhancer> enhancersB;
-
-    private final List<RepetitiveRegion> repeatsA;
-    private final List<RepetitiveRegion> repeatsB;
-
-    /**
-     * Flag to denote a value is not relevant. This may happen for instance if we have no enhancers.
-     */
-    private final static int UNINITIALIZED = -42;
-
 
     private final TranslocationComponentSvgGenerator componentA;
     private final TranslocationComponentSvgGenerator componentB;
@@ -68,65 +43,71 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         super(variant, genes, enhancers, repeats);
         Breakend left = breakended.left();
         Breakend right = breakended.right();
-        this.genesA = genes.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
-        this.genesB = genes.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());
-        this.enhancersA = enhancers.stream().filter(e -> e.contigId() == left.contigId()).collect(Collectors.toList());
-        this.enhancersB = enhancers.stream().filter(e -> e.contigId() == right.contigId()).collect(Collectors.toList());
-        this.repeatsA = repeats.stream().filter(r -> r.contigId() == left.contigId()).collect(Collectors.toList());
-        this.repeatsB = repeats.stream().filter(r -> r.contigId() == right.contigId()).collect(Collectors.toList());
+
+        List<Gene> genesA = genes.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
+        List<Gene> genesB = genes.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());
+
+        List<Enhancer> enhancersA = enhancers.stream().filter(e -> e.contigId() == left.contigId()).collect(Collectors.toList());
+        List<Enhancer> enhancersB = enhancers.stream().filter(e -> e.contigId() == right.contigId()).collect(Collectors.toList());
+
+        List<RepetitiveRegion> repeatsA = repeats.stream().filter(r -> r.contigId() == left.contigId()).collect(Collectors.toList());
+        List<RepetitiveRegion> repeatsB = repeats.stream().filter(r -> r.contigId() == right.contigId()).collect(Collectors.toList());
+
         int nTranscripts = genesA.stream()
                 .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
                 .sum();
         int displayElementsA = nTranscripts + enhancersA.size(); // number of display elements for translocation A
+
         this.separationLineY = displayElementsA*Constants.HEIGHT_PER_DISPLAY_ITEM + YSTART + 100;
         this.ystartB = this.separationLineY + 50;
 
-        CoordinateSystem cs = CoordinateSystem.oneBased();
         this.componentA = new TranslocationComponentSvgGenerator(
-                getMin(genesA, enhancersA, left.startWithCoordinateSystem(cs)),
-                getMax(genesA, enhancersA, left.endWithCoordinateSystem(cs)),
+                getMin(genesA, enhancersA, left.startOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM)),
+                getMax(genesA, enhancersA, left.endOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM), left.contig().length()),
                 genesA, enhancersA, repeatsA, variant, left, YSTART);
         this.componentB = new TranslocationComponentSvgGenerator(
-                getMin(genesB, enhancersB, right.startWithCoordinateSystem(cs)),
-                getMax(genesB, enhancersB, right.endWithCoordinateSystem(cs)),
+                getMin(genesB, enhancersB, right.startOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM)),
+                getMax(genesB, enhancersB, right.endOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM), right.contig().length()),
                 genesB, enhancersB, repeatsB, variant, right, ystartB);
     }
 
-    private static int getMin(List<Gene> genes, List<Enhancer> enhancers, int contigPos) {
-        contigPos = Math.max(0, contigPos - 1000); // add 1000 bp padding
-        int minGenePos = genes.stream().
+    static int getMin(List<Gene> genes, List<Enhancer> enhancers, int contigPos) {
+        contigPos = Math.max(1, contigPos - 1000); // add 1000 bp padding
+        OptionalInt minGenePos = genes.stream().
                 mapToInt(tx -> tx.startOnStrand(Strand.POSITIVE)).
-                min().orElse(UNINITIALIZED);
-        int minEnhancerPos = enhancers.stream()
+                min();
+        OptionalInt minEnhancerPos = enhancers.stream()
                 .mapToInt(e -> e.startOnStrand(Strand.POSITIVE))
-                .min().orElse(UNINITIALIZED);
-        if (minGenePos == UNINITIALIZED && minEnhancerPos == UNINITIALIZED) {
-            throw new SvAnnaRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
-        } else if (minEnhancerPos == UNINITIALIZED) {
-            return Math.min(minGenePos, contigPos);
-        } else if (minGenePos == UNINITIALIZED) {
-            return Math.min(minEnhancerPos, contigPos);
+                .min();
+
+        if (minGenePos.isEmpty() && minEnhancerPos.isEmpty()) {
+            return contigPos;
+        } else if (minEnhancerPos.isEmpty()) {
+            return Math.min(minGenePos.getAsInt(), contigPos);
+        } else if (minGenePos.isEmpty()) {
+            return Math.min(minEnhancerPos.getAsInt(), contigPos);
         } else {
-            return Math.min(contigPos, Math.min(minEnhancerPos, minGenePos));
+            return Math.min(contigPos, Math.min(minEnhancerPos.getAsInt(), minGenePos.getAsInt()));
         }
     }
 
-    private static int getMax(List<Gene> genes, List<Enhancer> enhancers, int contigPos) {
-        contigPos =  contigPos + 1000; // add 1000 bp padding
-        int maxTranscriptPos = genes.stream().
+   private static int getMax(List<Gene> genes, List<Enhancer> enhancers, int contigPos, int contigLength) {
+        contigPos =  Math.min(contigPos + 1000, contigLength); // add 1000 bp padding
+        OptionalInt maxTranscriptPos = genes.stream().
                 mapToInt(g -> g.endOnStrand(Strand.POSITIVE)).
-                max().orElse(UNINITIALIZED);
-        int maxEnhancerPos = enhancers.stream()
+                max();
+
+        OptionalInt maxEnhancerPos = enhancers.stream()
                 .mapToInt(e -> e.endOnStrand(Strand.POSITIVE))
-                .max().orElse(UNINITIALIZED);
-        if (maxTranscriptPos == UNINITIALIZED && maxEnhancerPos == UNINITIALIZED) {
-            throw new SvAnnaRuntimeException("Cannot draw translocation with no transcripts and no enhancers!");
-        } else if (maxEnhancerPos == UNINITIALIZED) {
-            return Math.max(maxTranscriptPos, contigPos);
-        } else if (maxTranscriptPos == UNINITIALIZED) {
-            return Math.max(maxEnhancerPos, contigPos);
+                .max();
+        if (maxTranscriptPos.isEmpty() && maxEnhancerPos.isEmpty()) {
+            return contigPos;
+        } else if (maxEnhancerPos.isEmpty()) {
+            return Math.max(maxTranscriptPos.getAsInt(), contigPos);
+        } else if (maxTranscriptPos.isEmpty()) {
+            return Math.max(maxEnhancerPos.getAsInt(), contigPos);
         } else {
-            return Math.max(contigPos, Math.min(maxEnhancerPos, maxTranscriptPos));
+            return Math.max(contigPos, Math.min(maxEnhancerPos.getAsInt(), maxTranscriptPos.getAsInt()));
         }
     }
 

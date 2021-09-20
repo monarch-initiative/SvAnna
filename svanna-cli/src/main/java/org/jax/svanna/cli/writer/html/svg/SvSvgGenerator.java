@@ -123,8 +123,8 @@ public abstract class SvSvgGenerator {
             case INS:
             default:
                 // get min/max for SVs with one region
-                this.genomicMinPos= getGenomicMinPos(this.variant.startWithCoordinateSystem(CoordinateSystem.zeroBased()), genes, enhancers, repeats);
-                this.genomicMaxPos = getGenomicMaxPos(this.variant.endWithCoordinateSystem(CoordinateSystem.zeroBased()), genes, enhancers, repeats);
+                this.genomicMinPos= getGenomicMinPos(this.variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), genes, enhancers, repeats);
+                this.genomicMaxPos = getGenomicMaxPos(this.variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), genes, enhancers, repeats);
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
                 int extraSpaceOnSide = (int)(0.1*(this.genomicSpan));
                 this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;

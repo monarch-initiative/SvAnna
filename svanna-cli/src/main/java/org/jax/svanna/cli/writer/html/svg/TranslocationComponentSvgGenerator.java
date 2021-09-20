@@ -16,20 +16,11 @@ import java.util.List;
  * This class is used to create each of the two rows of the final display of the translocation.
  */
 public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
-    /** Flag to denote a value is not relevant. This may happen for instance if we have no enhancers. */
-    private final static int UNINITIALIZED = -42;
-
 
     /** This class will display one of the breakpoints of the translocation. This variable stores the position of the
      * breakpoint.
      */
     private final int positionOnContig;
-    private final int minTranscriptPos;
-    private final int maxTranscriptPos;
-    private final int minEnhancerPos;
-    private final int maxEnhancerPos;
-    private final int minPos;
-    private final int maxPos;
 
     private final Contig contig;
 
@@ -51,25 +42,9 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
                                               int ystart) {
         super(minPos, maxPos, variant, genes, enhancers, repeats);
         this.contig = breakend.contig();
-        this.positionOnContig = breakend.startWithCoordinateSystem(CoordinateSystem.oneBased());
+        this.positionOnContig = breakend.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
         this.ystart = ystart;
-        this.minTranscriptPos = genes.stream().
-                mapToInt(tx -> tx.startOnStrand(Strand.POSITIVE)).
-                min().orElse(UNINITIALIZED);
-        this.maxTranscriptPos = genes.stream().
-                mapToInt(tx -> tx.endOnStrand(Strand.POSITIVE)).
-                max().orElse(UNINITIALIZED);
-        this.minEnhancerPos = enhancers.stream()
-                .mapToInt(e -> e.startOnStrand(Strand.POSITIVE))
-                .min().orElse(UNINITIALIZED);
-        this.maxEnhancerPos = enhancers.stream()
-                .mapToInt(e -> e.endOnStrand(Strand.POSITIVE))
-                .max().orElse(UNINITIALIZED);
-        this.minPos = minPos;
-        this.maxPos = maxPos;
     }
-
-
 
 
     @Override

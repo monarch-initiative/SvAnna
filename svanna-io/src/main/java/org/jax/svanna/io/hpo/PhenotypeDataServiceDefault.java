@@ -2,7 +2,11 @@ package org.jax.svanna.io.hpo;
 
 import com.google.common.collect.Multimap;
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.hpo.*;
+import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
+import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.ModeOfInheritance;
+import org.jax.svanna.model.gene.GeneIdentifier;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategoryMap;
@@ -38,20 +42,20 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
      */
     private final Map<TermId, HpoDisease> diseaseIdToDisease;
 
-    private final Set<GeneWithId> geneWithIds;
+    private final Set<GeneIdentifier> geneIdentifiers;
 
     private final SimilarityScoreCalculator similarityScoreCalculator;
 
     public PhenotypeDataServiceDefault(Ontology ontology,
                                        Multimap<TermId, TermId> diseaseToGeneMultiMap,
                                        Map<TermId, HpoDisease> diseaseIdToDisease,
-                                       Set<GeneWithId> geneWithIds,
+                                       Set<GeneIdentifier> geneIdentifiers,
                                        SimilarityScoreCalculator similarityScoreCalculator) {
         this.ontology = ontology;
         this.diseaseToGeneMultiMap = diseaseToGeneMultiMap;
         this.diseaseIdToDisease = diseaseIdToDisease;
         this.geneToDiseaseIdMap = prepareGeneToDiseaseMap(diseaseToGeneMultiMap);
-        this.geneWithIds = geneWithIds;
+        this.geneIdentifiers = geneIdentifiers;
         this.similarityScoreCalculator = similarityScoreCalculator;
     }
 
@@ -74,8 +78,8 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     }
 
     @Override
-    public Set<GeneWithId> geneWithIds() {
-        return geneWithIds;
+    public Set<GeneIdentifier> geneWithIds() {
+        return geneIdentifiers;
     }
 
 

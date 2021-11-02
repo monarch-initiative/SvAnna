@@ -1,8 +1,8 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.gene.Gene;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Collection;

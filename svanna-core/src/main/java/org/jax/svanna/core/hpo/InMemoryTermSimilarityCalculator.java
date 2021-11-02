@@ -23,8 +23,8 @@ public class InMemoryTermSimilarityCalculator implements TermSimilarityCalculato
      */
     @Override
     public double calculate(TermId a, TermId b) {
-        TermPair tpair = TermPair.symmetric(a, b);
-        return similarityMap.getOrDefault(tpair, 0.0);
+        TermPair pair = TermPair.symmetric(a, b);
+        return similarityMap.getOrDefault(pair, 0.0);
     }
 
 }

@@ -2,9 +2,9 @@ package org.jax.svanna.ingest.parse.tad;
 
 import htsjdk.samtools.liftover.LiftOver;
 import htsjdk.samtools.util.Interval;
-import org.jax.svanna.core.landscape.TadBoundary;
-import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
+import org.jax.svanna.model.landscape.TadBoundary;
+import org.jax.svanna.model.landscape.TadBoundaryDefault;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssembly;

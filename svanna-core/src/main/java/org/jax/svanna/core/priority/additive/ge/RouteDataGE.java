@@ -1,10 +1,10 @@
 package org.jax.svanna.core.priority.additive.ge;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.priority.additive.RouteData;
 import org.jax.svanna.core.priority.additive.Routes;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.TadBoundary;
 
 import java.util.*;
 

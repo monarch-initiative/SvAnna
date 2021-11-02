@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.model.landscape.Enhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Set;

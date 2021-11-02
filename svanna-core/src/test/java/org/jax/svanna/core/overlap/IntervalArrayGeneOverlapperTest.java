@@ -2,7 +2,7 @@ package org.jax.svanna.core.overlap;
 
 
 import org.jax.svanna.core.TestDataConfig;
-import org.jax.svanna.core.reference.GeneService;
+import org.jax.svanna.core.service.GeneService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.svart.*;

@@ -1,6 +1,6 @@
 package org.jax.svanna.core;
 
-import org.jax.svanna.core.reference.CodingTranscript;
+import org.jax.svanna.model.gene.CodingTranscript;
 import org.monarchinitiative.svart.*;
 
 import java.util.ArrayList;

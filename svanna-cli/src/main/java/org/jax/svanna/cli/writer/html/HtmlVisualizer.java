@@ -3,14 +3,14 @@ package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.cli.writer.html.svg.*;
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.TranscriptOverlap;
-import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.VariantType;

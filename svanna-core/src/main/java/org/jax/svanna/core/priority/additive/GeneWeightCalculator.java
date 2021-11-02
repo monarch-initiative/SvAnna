@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.gene.Gene;
 
 /**
  * Assess the relevance of a potential change to the gene for an individual with given phenotype.

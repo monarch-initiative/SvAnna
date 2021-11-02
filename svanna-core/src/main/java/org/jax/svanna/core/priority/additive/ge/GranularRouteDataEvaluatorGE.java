@@ -1,11 +1,11 @@
 package org.jax.svanna.core.priority.additive.ge;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.TadBoundary;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;

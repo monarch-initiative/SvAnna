@@ -1,8 +1,8 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.RepetitiveRegion;
 import org.monarchinitiative.svart.Variant;
 
 import java.io.IOException;

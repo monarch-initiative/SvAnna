@@ -1,6 +1,7 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.*;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.model.landscape.*;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicRegion;
 

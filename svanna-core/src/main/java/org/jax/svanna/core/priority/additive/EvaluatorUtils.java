@@ -1,8 +1,8 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.TadBoundary;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.TadBoundary;
 import org.monarchinitiative.svart.*;
 
 import java.util.*;

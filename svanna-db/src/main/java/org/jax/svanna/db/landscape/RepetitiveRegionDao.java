@@ -1,8 +1,8 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.RepeatFamily;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.model.landscape.RepeatFamily;
+import org.jax.svanna.model.landscape.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

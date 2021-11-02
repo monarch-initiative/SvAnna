@@ -2,10 +2,10 @@ package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.TestDataConfig;
 import org.jax.svanna.core.TestGene;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.hpo.ModeOfInheritance;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.ModeOfInheritance;
+import org.jax.svanna.model.gene.Gene;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;

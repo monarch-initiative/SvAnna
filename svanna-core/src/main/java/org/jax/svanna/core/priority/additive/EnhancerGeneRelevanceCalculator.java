@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.model.landscape.Enhancer;
 
 /**
  * Assess the relevance of a potential change to the enhancer - gene interaction for an individual with given phenotype.

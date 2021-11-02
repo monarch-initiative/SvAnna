@@ -1,13 +1,13 @@
 package org.jax.svanna.db.additive;
 
-import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.priority.additive.RouteDataService;
 import org.jax.svanna.core.priority.additive.Routes;
 import org.jax.svanna.core.priority.additive.ge.RouteDataGE;
-import org.jax.svanna.core.reference.Gene;
-import org.jax.svanna.core.reference.GeneService;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.TadBoundary;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

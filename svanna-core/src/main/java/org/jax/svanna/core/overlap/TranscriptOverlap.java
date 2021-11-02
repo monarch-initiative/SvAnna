@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.model.gene.Transcript;
 
 /**
  * An object that represents the type and degree of overlap of a structural variant and

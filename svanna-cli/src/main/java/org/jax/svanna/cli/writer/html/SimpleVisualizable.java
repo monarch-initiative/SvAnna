@@ -1,10 +1,10 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

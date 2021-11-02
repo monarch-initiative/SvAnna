@@ -1,9 +1,9 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.GeneOverlap;
-import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.Enhancer;
 
 import java.util.List;
 import java.util.stream.Collectors;

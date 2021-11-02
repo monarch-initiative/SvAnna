@@ -1,14 +1,14 @@
 package org.jax.svanna.ingest.cmd;
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.Main;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.ingest.parse.enhancer.fantom.FantomEnhancerParser;
 import org.jax.svanna.ingest.parse.enhancer.vista.VistaEnhancerParser;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssemblies;

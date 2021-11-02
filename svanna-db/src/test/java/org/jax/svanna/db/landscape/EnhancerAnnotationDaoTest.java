@@ -1,6 +1,6 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.model.landscape.Enhancer;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;
 

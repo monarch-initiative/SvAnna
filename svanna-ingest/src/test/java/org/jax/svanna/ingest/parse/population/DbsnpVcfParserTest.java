@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.parse.population;
 
-import org.jax.svanna.core.landscape.PopulationVariant;
+import org.jax.svanna.model.landscape.PopulationVariant;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
 

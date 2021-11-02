@@ -2,9 +2,9 @@ package org.jax.svanna.core;
 
 import de.charite.compbio.jannovar.data.JannovarData;
 import de.charite.compbio.jannovar.data.JannovarDataSerializer;
-import org.jax.svanna.core.hpo.GeneWithId;
-import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
+import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.core.service.transcripts.JannovarGeneService;
+import org.jax.svanna.model.gene.GeneIdentifier;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
@@ -62,17 +62,17 @@ public class TestDataConfig {
     }
 
     @Bean
-    public Map<String, GeneWithId> geneWithIdMap() {
-        GeneWithId surf1 = GeneWithId.of("SURF1", TermId.of("NCBIGene:6834"));
-        GeneWithId surf2 = GeneWithId.of("SURF2", TermId.of("NCBIGene:6835"));
-        GeneWithId fbn1 = GeneWithId.of("FBN1", TermId.of("NCBIGene:2200"));
-        GeneWithId znf436 =  GeneWithId.of("ZNF436", TermId.of("NCBIGene:80818"));
-        GeneWithId zbtb48 =  GeneWithId.of("ZBTB48", TermId.of("NCBIGene:3104"));
-        GeneWithId hnf4a =  GeneWithId.of("HNF4A", TermId.of("NCBIGene:3172"));
-        GeneWithId gck =  GeneWithId.of("GCK", TermId.of("NCBIGene:2645"));
-        GeneWithId brca2 =  GeneWithId.of("BRCA2", TermId.of("NCBIGene:675"));
-        GeneWithId col4a5 = GeneWithId.of("COL4A5", TermId.of("NCBIGene:1287"));
-        GeneWithId sry = GeneWithId.of("SRY", TermId.of("NCBIGene:6736"));
+    public Map<String, GeneIdentifier> geneWithIdMap() {
+        GeneIdentifier surf1 = GeneIdentifier.of("SURF1", TermId.of("NCBIGene:6834"));
+        GeneIdentifier surf2 = GeneIdentifier.of("SURF2", TermId.of("NCBIGene:6835"));
+        GeneIdentifier fbn1 = GeneIdentifier.of("FBN1", TermId.of("NCBIGene:2200"));
+        GeneIdentifier znf436 =  GeneIdentifier.of("ZNF436", TermId.of("NCBIGene:80818"));
+        GeneIdentifier zbtb48 =  GeneIdentifier.of("ZBTB48", TermId.of("NCBIGene:3104"));
+        GeneIdentifier hnf4a =  GeneIdentifier.of("HNF4A", TermId.of("NCBIGene:3172"));
+        GeneIdentifier gck =  GeneIdentifier.of("GCK", TermId.of("NCBIGene:2645"));
+        GeneIdentifier brca2 =  GeneIdentifier.of("BRCA2", TermId.of("NCBIGene:675"));
+        GeneIdentifier col4a5 = GeneIdentifier.of("COL4A5", TermId.of("NCBIGene:1287"));
+        GeneIdentifier sry = GeneIdentifier.of("SRY", TermId.of("NCBIGene:6736"));
 
         return Stream.of(
                 new AbstractMap.SimpleImmutableEntry<>("SURF1", surf1),

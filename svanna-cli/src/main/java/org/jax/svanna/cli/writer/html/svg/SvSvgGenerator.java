@@ -1,12 +1,12 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
-import org.jax.svanna.core.reference.CodingTranscript;
-import org.jax.svanna.core.reference.Gene;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.model.gene.CodingTranscript;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.gene.Transcript;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.EnhancerTissueSpecificity;
+import org.jax.svanna.model.landscape.RepetitiveRegion;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
 

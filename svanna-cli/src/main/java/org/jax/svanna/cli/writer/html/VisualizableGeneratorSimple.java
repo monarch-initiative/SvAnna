@@ -1,16 +1,16 @@
 package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.hpo.GeneWithId;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.gene.GeneIdentifier;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.RepetitiveRegion;
 import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     private final PhenotypeDataService phenotypeDataService;
 
-    private final Map<String, GeneWithId> geneMap;
+    private final Map<String, GeneIdentifier> geneMap;
 
     public VisualizableGeneratorSimple(GeneOverlapper overlapper,
                                        AnnotationDataService annotationDataService,
@@ -39,7 +39,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         this.annotationDataService = annotationDataService;
         this.phenotypeDataService = phenotypeDataService;
         this.geneMap = phenotypeDataService.geneWithIds().stream()
-                .collect(Collectors.toMap(GeneWithId::getSymbol, Function.identity()));
+                .collect(Collectors.toMap(GeneIdentifier::symbol, Function.identity()));
     }
 
     @Override
@@ -59,7 +59,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
                 .map(geneOverlap -> geneOverlap.gene().geneSymbol())
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
-                .map(id -> phenotypeDataService.getDiseasesForGene(id.getGeneId()))
+                .map(id -> phenotypeDataService.getDiseasesForGene(id.accessionId()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 

@@ -9,14 +9,16 @@ import org.jax.svanna.autoconfigure.exception.MissingResourceException;
 import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.*;
-import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
-import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.core.service.transcripts.JannovarGeneService;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.db.phenotype.ResnikSimilarityDao;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
+import org.jax.svanna.model.gene.GeneIdentifier;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -149,7 +151,7 @@ public class SvannaAutoConfiguration {
                 mim2geneMedgenPath.toFile(), null,
                 svannaDataResolver.phenotypeHpoaPath().toFile(), ontology);
         Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoaPath.toString(), ontology);
-        Set<GeneWithId> geneWithIds = hap.getGeneIdToSymbolMap().entrySet().stream().map(e -> GeneWithId.of(e.getValue(), e.getKey())).collect(Collectors.toSet());
+        Set<GeneIdentifier> geneIdentifiers = hap.getGeneIdToSymbolMap().entrySet().stream().map(e -> GeneIdentifier.of(e.getValue(), e.getKey())).collect(Collectors.toSet());
 
         SimilarityScoreCalculator similarityScoreCalculator;
         SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.prioritizationParameters().termSimilarityMeasure();
@@ -166,7 +168,7 @@ public class SvannaAutoConfiguration {
 
         LogUtils.logDebug(LOGGER, "Done");
 
-        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneWithIds, similarityScoreCalculator);
+        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneIdentifiers, similarityScoreCalculator);
     }
 
     @Bean

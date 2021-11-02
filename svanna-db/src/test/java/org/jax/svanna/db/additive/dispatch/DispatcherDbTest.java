@@ -1,13 +1,13 @@
 package org.jax.svanna.db.additive.dispatch;
 
-import org.jax.svanna.core.landscape.TadBoundary;
-import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.core.priority.additive.Routes;
-import org.jax.svanna.core.reference.Gene;
-import org.jax.svanna.core.reference.GeneService;
+import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.db.TestContig;
 import org.jax.svanna.db.TestGene;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.landscape.TadBoundary;
+import org.jax.svanna.model.landscape.TadBoundaryDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

@@ -8,7 +8,7 @@ import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.filter.Filterable;
-import org.jax.svanna.core.reference.Prioritized;
+import org.jax.svanna.core.priority.Prioritized;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;

@@ -1,8 +1,8 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.TadBoundary;
-import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.model.landscape.TadBoundary;
+import org.jax.svanna.model.landscape.TadBoundaryDefault;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
 package org.jax.svanna.ingest.parse;
 
-import org.jax.svanna.core.landscape.RepeatFamily;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
+import org.jax.svanna.model.landscape.RepeatFamily;
+import org.jax.svanna.model.landscape.RepetitiveRegion;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssembly;

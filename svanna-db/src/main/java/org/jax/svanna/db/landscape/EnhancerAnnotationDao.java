@@ -1,10 +1,10 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerSource;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.EnhancerSource;
+import org.jax.svanna.model.landscape.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;

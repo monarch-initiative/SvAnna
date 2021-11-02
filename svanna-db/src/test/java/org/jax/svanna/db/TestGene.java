@@ -1,8 +1,8 @@
 package org.jax.svanna.db;
 
-import org.jax.svanna.core.reference.CodingTranscript;
-import org.jax.svanna.core.reference.Gene;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.model.gene.CodingTranscript;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.gene.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 

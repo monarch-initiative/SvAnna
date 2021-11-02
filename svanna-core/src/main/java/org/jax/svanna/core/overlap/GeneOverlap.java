@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.gene.Gene;
 
 import java.util.*;
 

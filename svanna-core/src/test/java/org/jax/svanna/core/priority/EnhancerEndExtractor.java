@@ -1,7 +1,7 @@
 package org.jax.svanna.core.priority;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
-import org.jax.svanna.core.landscape.Enhancer;
+import org.jax.svanna.model.landscape.Enhancer;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
 

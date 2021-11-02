@@ -2,9 +2,9 @@ package org.jax.svanna.core.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.reference.CodingTranscript;
-import org.jax.svanna.core.reference.Gene;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.model.gene.CodingTranscript;
+import org.jax.svanna.model.gene.Gene;
+import org.jax.svanna.model.gene.Transcript;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

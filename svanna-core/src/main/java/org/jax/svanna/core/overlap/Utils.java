@@ -1,7 +1,7 @@
 package org.jax.svanna.core.overlap;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.reference.Transcript;
+import org.jax.svanna.model.gene.Transcript;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.GenomicRegion;

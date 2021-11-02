@@ -1,6 +1,6 @@
 package org.jax.svanna.core;
 
-import org.jax.svanna.core.landscape.TadBoundary;
+import org.jax.svanna.model.landscape.TadBoundary;
 import org.monarchinitiative.svart.*;
 
 import java.util.Objects;

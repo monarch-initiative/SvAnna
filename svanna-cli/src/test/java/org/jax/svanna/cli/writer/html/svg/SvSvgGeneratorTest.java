@@ -1,7 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.cli.TestDataConfig;
-import org.jax.svanna.core.reference.GeneService;
+import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

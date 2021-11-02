@@ -1,11 +1,11 @@
 package org.jax.svanna.ingest.parse.enhancer.vista;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerSource;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.db.landscape.BaseEnhancer;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.EnhancerSource;
+import org.jax.svanna.model.landscape.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Contig;

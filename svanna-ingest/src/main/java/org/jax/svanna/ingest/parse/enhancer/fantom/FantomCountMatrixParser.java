@@ -1,9 +1,9 @@
 package org.jax.svanna.ingest.parse.enhancer.fantom;
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.parse.enhancer.AnnotatedTissue;
+import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.Contig;

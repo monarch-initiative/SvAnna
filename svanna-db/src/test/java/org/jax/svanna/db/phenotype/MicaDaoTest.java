@@ -1,11 +1,7 @@
 package org.jax.svanna.db.phenotype;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.db.TestDataConfig;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -15,20 +11,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 
 import javax.sql.DataSource;
-import java.io.BufferedWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(classes = TestDataConfig.class)
-public class ResnikSimilarityDaoTest {
+public class MicaDaoTest {
 
     private static final double ERROR = 5e-6;
     @Autowired
@@ -42,8 +31,8 @@ public class ResnikSimilarityDaoTest {
     })
     @Sql({"resnik_similarity_create_table.sql", "resnik_similarity_insert_data.sql"})
     public void getSimilarity(String left, String right, double expected) {
-        ResnikSimilarityDao dao = new ResnikSimilarityDao(dataSource);
-        double similarity = dao.getSimilarity(TermPair.symmetric(TermId.of(left), TermId.of(right)));
+        MicaDao dao = new MicaDao(dataSource);
+        double similarity = dao.getMica(TermPair.symmetric(TermId.of(left), TermId.of(right)));
 
         assertThat(similarity, closeTo(expected, ERROR));
     }
@@ -51,8 +40,8 @@ public class ResnikSimilarityDaoTest {
     @Test
     @Sql({"resnik_similarity_create_table.sql", "resnik_similarity_insert_data.sql"})
     public void getAllSimilarities() {
-        ResnikSimilarityDao dao = new ResnikSimilarityDao(dataSource);
-        Map<TermPair, Double> similarities = dao.getAllSimilarities();
+        MicaDao dao = new MicaDao(dataSource);
+        Map<TermPair, Double> similarities = dao.getAllMicaValues();
 
         assertThat(similarities.size(), equalTo(2));
         assertThat(similarities.keySet(), containsInAnyOrder(
@@ -69,7 +58,7 @@ public class ResnikSimilarityDaoTest {
     })
     @Sql({"resnik_similarity_create_table.sql"})
     public void insertItem(String left, String right, double similarity, int expected) {
-        ResnikSimilarityDao dao = new ResnikSimilarityDao(dataSource);
+        MicaDao dao = new MicaDao(dataSource);
         int inserted = dao.insertItem(TermPair.symmetric(TermId.of(left), TermId.of(right)), similarity);
 
         assertThat(inserted, equalTo(expected));
@@ -78,7 +67,7 @@ public class ResnikSimilarityDaoTest {
     @Test
     @Sql({"resnik_similarity_create_table.sql"})
     public void insertDuplicateItem() {
-        ResnikSimilarityDao dao = new ResnikSimilarityDao(dataSource);
+        MicaDao dao = new MicaDao(dataSource);
         TermPair pair = TermPair.symmetric(TermId.of("HP:0000123"), TermId.of("HP:0000456"));
         int first = dao.insertItem(pair, .5);
         assertThat(first, equalTo(1));

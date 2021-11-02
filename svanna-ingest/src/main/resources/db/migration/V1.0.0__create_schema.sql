@@ -76,6 +76,7 @@ create index SVANNA.TAD_BOUNDARY__CONTIG_START_END_IDX
 create index SVANNA.TAD_BOUNDARY__CONTIG_MIDPOINT_IDX
 on SVANNA.TAD_BOUNDARY (CONTIG, MIDPOINT);
 
+-- TODO - these are not similarities but mere IC_{MICA} values
 drop table if exists SVANNA.RESNIK_SIMILARITY;
 create table SVANNA.RESNIK_SIMILARITY
 (

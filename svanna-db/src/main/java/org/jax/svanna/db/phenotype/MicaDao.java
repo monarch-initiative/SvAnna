@@ -15,15 +15,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResnikSimilarityDao {
+public class MicaDao {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResnikSimilarityDao.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MicaDao.class);
 
     private static final double TOLERANCE = 5E-9;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public ResnikSimilarityDao(DataSource dataSource) {
+    public MicaDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -56,7 +56,7 @@ public class ResnikSimilarityDao {
         int leftId = parseTermId(pair.left().getId());
         int rightId = parseTermId(pair.right().getId());
 
-        double existing = getSimilarity(leftId, rightId);
+        double existing = getMica(leftId, rightId);
         if (!Double.isNaN(existing))
             // similarity for the term pair is already in the database
             return 0;
@@ -67,11 +67,11 @@ public class ResnikSimilarityDao {
         return jdbcTemplate.update(sql, leftId, rightId, similarity);
     }
 
-    public double getSimilarity(TermPair pair) {
+    public double getMica(TermPair pair) {
         int leftId = parseTermId(pair.left().getId());
         int rightId = parseTermId(pair.right().getId());
         try {
-            double similarity = getSimilarity(leftId, rightId);
+            double similarity = getMica(leftId, rightId);
             return Double.isNaN(similarity)
                     ? 0. // missing term pair is assumed to be non-related, hence 0.
                     : similarity;
@@ -81,7 +81,7 @@ public class ResnikSimilarityDao {
         }
     }
 
-    public Map<TermPair, Double> getAllSimilarities() {
+    public Map<TermPair, Double> getAllMicaValues() {
         String sql = "select LEFT_ID, RIGHT_ID, SIMILARITY from SVANNA.RESNIK_SIMILARITY";
         return jdbcTemplate.query(sql, rs -> {
             Map<TermPair, Double> similarityMap = new HashMap<>();
@@ -102,7 +102,7 @@ public class ResnikSimilarityDao {
         });
     }
 
-    private Double getSimilarity(int left, int right) {
+    private Double getMica(int left, int right) {
         String sql = "select SIMILARITY from SVANNA.RESNIK_SIMILARITY " +
                 "where LEFT_ID = ? and RIGHT_ID = ? " +
                 "limit 1";

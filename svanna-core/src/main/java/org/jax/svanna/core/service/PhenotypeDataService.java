@@ -19,7 +19,7 @@ public interface PhenotypeDataService {
     Set<GeneIdentifier> geneWithIds();
 
     default Map<String, GeneIdentifier> geneBySymbol() {
-        return geneWithIds().stream().collect(Collectors.toMap(GeneIdentifier::symbol, Function.identity()));
+        return geneWithIds().stream().collect(Collectors.toUnmodifiableMap(GeneIdentifier::symbol, Function.identity()));
     }
 
     /**

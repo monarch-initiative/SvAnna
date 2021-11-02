@@ -15,7 +15,7 @@ import org.jax.svanna.db.landscape.DbPopulationVariantDao;
 import org.jax.svanna.db.landscape.EnhancerAnnotationDao;
 import org.jax.svanna.db.landscape.RepetitiveRegionDao;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
-import org.jax.svanna.db.phenotype.ResnikSimilarityDao;
+import org.jax.svanna.db.phenotype.MicaDao;
 import org.jax.svanna.ingest.Main;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
@@ -251,7 +251,7 @@ public class BuildDb implements Callable<Integer> {
         Path hpoaPath = buildDir.resolve("phenotype.hpoa");
         Map<TermPair, Double> similarityMap = ResnikSimilarity.precomputeResnikSimilarity(ontologyPath, hpoaPath);
 
-        ResnikSimilarityDao dao = new ResnikSimilarityDao(dataSource);
+        MicaDao dao = new MicaDao(dataSource);
         similarityMap.forEach(dao::insertItem);
     }
 

@@ -16,7 +16,7 @@ import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.core.service.transcripts.JannovarGeneService;
 import org.jax.svanna.db.landscape.*;
-import org.jax.svanna.db.phenotype.ResnikSimilarityDao;
+import org.jax.svanna.db.phenotype.MicaDao;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
 import org.jax.svanna.model.gene.GeneIdentifier;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
@@ -60,18 +60,18 @@ public class SvannaAutoConfiguration {
         NF.setMaximumFractionDigits(2);
     }
 
-    private static TermSimilarityCalculator prepareSimilarityCalculator(DataSource svannaDatasource,
-                                                                        SvannaProperties.IcMicaMode icMicaMode) {
-        ResnikSimilarityDao dao = new ResnikSimilarityDao(svannaDatasource);
+    private static MicaCalculator prepareMicaCalculator(DataSource svannaDatasource,
+                                                        SvannaProperties.IcMicaMode icMicaMode) {
+        MicaDao dao = new MicaDao(svannaDatasource);
         switch (icMicaMode) {
             case IN_MEMORY:
                 LogUtils.logDebug(LOGGER, "Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
-                return new InMemoryTermSimilarityCalculator(dao.getAllSimilarities());
+                return new InMemoryMicaCalculator(dao.getAllMicaValues());
             default:
                 LogUtils.logWarn(LOGGER, "Unknown value `{}` for getting IC of the most informative common ancestor for HPO terms. Falling back to DATABASE", icMicaMode);
             case DATABASE:
                 LogUtils.logDebug(LOGGER, "Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
-                return (a, b) -> dao.getSimilarity(TermPair.symmetric(a, b));
+                return (a, b) -> dao.getMica(TermPair.symmetric(a, b));
         }
     }
 
@@ -157,7 +157,7 @@ public class SvannaAutoConfiguration {
         SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.prioritizationParameters().termSimilarityMeasure();
         LogUtils.logDebug(LOGGER, "Initializing phenotype term similarity calculator `{}`", similarityMeasure);
 
-        TermSimilarityCalculator similarityCalculator = prepareSimilarityCalculator(svannaDatasource, properties.prioritizationParameters().icMicaMode());
+        MicaCalculator similarityCalculator = prepareMicaCalculator(svannaDatasource, properties.prioritizationParameters().icMicaMode());
         if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {
             similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, true);
         } else if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_ASYMMETRIC) {

@@ -5,7 +5,7 @@ import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.landscape.TadBoundary;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

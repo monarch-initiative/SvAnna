@@ -1,7 +1,11 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.core.service.AnnotationDataService;
-import org.jax.svanna.model.landscape.*;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicRegion;
 

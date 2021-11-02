@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.model.landscape.PopulationVariantOrigin;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 
 import java.util.Collection;
 import java.util.HashSet;

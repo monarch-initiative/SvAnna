@@ -4,7 +4,7 @@ package org.jax.svanna.cli.writer.html.template;
 import org.jax.svanna.cli.writer.html.VariantLandscape;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svart.VariantType;
 
 import java.util.*;

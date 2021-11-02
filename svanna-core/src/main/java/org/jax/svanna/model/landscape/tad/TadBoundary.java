@@ -1,4 +1,4 @@
-package org.jax.svanna.model.landscape;
+package org.jax.svanna.model.landscape.tad;
 
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;

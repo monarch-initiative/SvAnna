@@ -1,4 +1,4 @@
-package org.jax.svanna.model.landscape;
+package org.jax.svanna.model.landscape.variant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

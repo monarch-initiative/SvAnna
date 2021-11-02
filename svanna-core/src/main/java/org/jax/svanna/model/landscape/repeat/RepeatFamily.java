@@ -1,4 +1,4 @@
-package org.jax.svanna.model.landscape;
+package org.jax.svanna.model.landscape.repeat;
 
 public enum RepeatFamily {
 

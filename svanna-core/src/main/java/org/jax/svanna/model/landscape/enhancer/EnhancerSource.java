@@ -1,4 +1,4 @@
-package org.jax.svanna.model.landscape;
+package org.jax.svanna.model.landscape.enhancer;
 
 public enum EnhancerSource {
 

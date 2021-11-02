@@ -1,9 +1,10 @@
-package org.jax.svanna.model.landscape;
+package org.jax.svanna.model.landscape.tad;
 
 import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 
+// TODO - this should not be public
 public class TadBoundaryDefault extends BaseGenomicRegion<TadBoundaryDefault> implements TadBoundary {
 
     private final String id;

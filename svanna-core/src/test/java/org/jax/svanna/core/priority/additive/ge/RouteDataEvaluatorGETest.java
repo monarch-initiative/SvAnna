@@ -8,7 +8,7 @@ import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
 import org.jax.svanna.core.priority.additive.impact.SimpleSequenceImpactCalculator;
 import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;

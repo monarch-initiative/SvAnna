@@ -4,7 +4,7 @@ import org.jax.svanna.cli.TestDataConfig;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.Variant;

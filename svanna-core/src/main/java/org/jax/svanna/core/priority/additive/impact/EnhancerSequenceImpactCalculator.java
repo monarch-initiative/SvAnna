@@ -4,7 +4,7 @@ import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
-import org.jax.svanna.model.landscape.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

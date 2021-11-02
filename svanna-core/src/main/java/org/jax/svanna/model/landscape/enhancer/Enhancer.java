@@ -1,4 +1,4 @@
-package org.jax.svanna.model.landscape;
+package org.jax.svanna.model.landscape.enhancer;
 
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;

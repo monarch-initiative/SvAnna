@@ -1,9 +1,9 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.db.IngestDao;
-import org.jax.svanna.model.landscape.BasePopulationVariant;
-import org.jax.svanna.model.landscape.PopulationVariant;
-import org.jax.svanna.model.landscape.PopulationVariantOrigin;
+import org.jax.svanna.model.landscape.variant.BasePopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

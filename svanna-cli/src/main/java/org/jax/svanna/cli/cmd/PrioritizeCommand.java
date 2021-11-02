@@ -20,7 +20,7 @@ import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.jax.svanna.model.HpoDiseaseSummary;
 import org.jax.svanna.model.ModeOfInheritance;
-import org.jax.svanna.model.landscape.PopulationVariantOrigin;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssembly;

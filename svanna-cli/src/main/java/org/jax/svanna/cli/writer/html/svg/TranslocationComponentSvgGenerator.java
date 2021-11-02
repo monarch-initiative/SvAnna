@@ -3,8 +3,8 @@ package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.landscape.Enhancer;
-import org.jax.svanna.model.landscape.RepetitiveRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
 
 import java.io.IOException;

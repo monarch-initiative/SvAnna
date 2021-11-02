@@ -1,4 +1,4 @@
-package org.jax.svanna.model.landscape;
+package org.jax.svanna.model.landscape.variant;
 
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.VariantType;

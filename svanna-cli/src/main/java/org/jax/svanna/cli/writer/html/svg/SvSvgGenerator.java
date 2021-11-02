@@ -4,9 +4,9 @@ import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.model.gene.CodingTranscript;
 import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.gene.Transcript;
-import org.jax.svanna.model.landscape.Enhancer;
-import org.jax.svanna.model.landscape.EnhancerTissueSpecificity;
-import org.jax.svanna.model.landscape.RepetitiveRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
 

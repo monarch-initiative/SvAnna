@@ -1,6 +1,9 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.BaseGenomicRegion;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.Coordinates;
+import org.monarchinitiative.svart.Strand;
 
 import java.text.NumberFormat;
 import java.util.Objects;
@@ -13,12 +16,12 @@ class SegmentSimple extends BaseGenomicRegion<SegmentSimple> implements Segment 
     protected final Event event;
     protected final int copies;
 
-    static SegmentSimple of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String id, Event event, int copies) {
-        return new SegmentSimple(contig, strand, coordinateSystem, startPosition, endPosition, id, event, copies);
+    static SegmentSimple of(Contig contig, Strand strand, Coordinates coordinates, String id, Event event, int copies) {
+        return new SegmentSimple(contig, strand, coordinates, id, event, copies);
     }
 
-    protected SegmentSimple(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String id, Event event, int copies) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+    protected SegmentSimple(Contig contig, Strand strand, Coordinates coordinates, String id, Event event, int copies) {
+        super(contig, strand, coordinates);
         this.id = id;
         this.event = event;
         this.copies = copies;
@@ -40,8 +43,8 @@ class SegmentSimple extends BaseGenomicRegion<SegmentSimple> implements Segment 
     }
 
     @Override
-    protected SegmentSimple newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new SegmentSimple(contig, strand, coordinateSystem, startPosition, endPosition, id, event, copies);
+    protected SegmentSimple newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new SegmentSimple(contig, strand, coordinates, id, event, copies);
     }
 
     @Override

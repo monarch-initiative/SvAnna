@@ -19,13 +19,18 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
     private final Set<CodingTranscript> codingTranscripts;
     private final Set<Transcript> noncodingTranscripts;
 
-    protected GeneDefault(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+    protected GeneDefault(Contig contig, Strand strand, Coordinates coordinates,
                           TermId accessionId, String geneSymbol, Set<CodingTranscript> codingTranscripts, Set<Transcript> noncodingTranscripts) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+        super(contig, strand, coordinates);
         this.accessionId = Objects.requireNonNull(accessionId);
         this.geneSymbol = Objects.requireNonNull(geneSymbol);
         this.codingTranscripts = Objects.requireNonNull(codingTranscripts);
         this.noncodingTranscripts = Objects.requireNonNull(noncodingTranscripts);
+    }
+
+    protected GeneDefault(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int startPosition, int endPosition,
+                          TermId accessionId, String geneSymbol, Set<CodingTranscript> codingTranscripts, Set<Transcript> noncodingTranscripts) {
+        this(contig, strand, Coordinates.of(coordinateSystem, startPosition, endPosition), accessionId, geneSymbol, codingTranscripts, noncodingTranscripts);
     }
 
     public static Builder builder() {
@@ -53,10 +58,11 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
     }
 
     @Override
-    protected Gene newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
+    protected Gene newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
         Set<CodingTranscript> codingTranscripts;
         Set<Transcript> noncodingTranscripts;
         // if we get here we're flipping either strand or changing the coordinate system
+        CoordinateSystem coordinateSystem = coordinates.coordinateSystem();
         if (strand != strand()) {
             codingTranscripts = this.codingTranscripts.stream()
                     .map(tx -> tx.withStrand(strand))
@@ -74,7 +80,7 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
         } else
             throw new IllegalArgumentException("We're changing neither strand nor coordinate system. This should not have happened!");
 
-        return new GeneDefault(contig, strand, coordinateSystem, startPosition, endPosition, accessionId, geneSymbol, codingTranscripts, noncodingTranscripts);
+        return new GeneDefault(contig, strand, coordinates, accessionId, geneSymbol, codingTranscripts, noncodingTranscripts);
     }
 
     @Override
@@ -193,7 +199,7 @@ public class GeneDefault extends BaseGenomicRegion<Gene> implements Gene {
                 if (txEnd > end) end = txEnd;
             }
 
-            return new GeneDefault(contig, strand, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end), accessionId, geneSymbol, Set.copyOf(codingTxs), Set.copyOf(noncodingTxs));
+            return new GeneDefault(contig, strand, CoordinateSystem.zeroBased(), start, end, accessionId, geneSymbol, Set.copyOf(codingTxs), Set.copyOf(noncodingTxs));
         }
 
     }

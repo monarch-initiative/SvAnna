@@ -1,9 +1,6 @@
 package org.jax.svanna.core.reference;
 
-import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.*;
 
 import java.util.List;
 
@@ -11,7 +8,7 @@ public interface Transcript extends GenomicRegion {
 
     static Transcript noncoding(Contig contig, Strand strand, CoordinateSystem coordinateSystem,
                                 int start, int end,
-                                String accessionId, List<Exon> exons) {
+                                String accessionId, List<Coordinates> exons) {
         return NonCodingTranscript.of(contig, strand, coordinateSystem, start, end, accessionId, exons);
     }
 
@@ -19,7 +16,7 @@ public interface Transcript extends GenomicRegion {
 
     boolean isCoding();
 
-    List<Exon> exons();
+    List<Coordinates> exons();
 
     @Override
     Transcript withCoordinateSystem(CoordinateSystem coordinateSystem);

@@ -5,7 +5,6 @@ import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.reference.CodingTranscript;
-import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -350,10 +349,10 @@ public abstract class SvSvgGenerator {
 
     protected void writeNoncodingTranscript(String geneSymbol, Transcript tmod, int ypos, Writer writer) throws IOException {
         Transcript transcript = tmod.withStrand(Strand.POSITIVE);
-        List<Exon> exons = transcript.exons();
+        List<Coordinates> exons = transcript.exons();
         double minX = translateGenomicToSvg(transcript.start());
         // All exons are untranslated
-        for (Exon exon : exons) {
+        for (Coordinates exon : exons) {
             double exonStart = translateGenomicToSvg(exon.start());
             double exonEnd = translateGenomicToSvg(exon.end());
             writeUtrExon(exonStart, exonEnd, ypos, writer);
@@ -387,10 +386,10 @@ public abstract class SvSvgGenerator {
         CodingTranscript ctx = (CodingTranscript) transcript;
         double cdsStart = translateGenomicToSvg(ctx.codingStart());
         double cdsEnd = translateGenomicToSvg(ctx.codingEnd());
-        List<Exon> exons = transcript.exons();
+        List<Coordinates> exons = transcript.exons();
         double minX = Double.MAX_VALUE;
         // write a line for UTR, otherwise write a box
-        for (Exon exon : exons) {
+        for (Coordinates exon : exons) {
             double exonStart = translateGenomicToSvg(exon.start());
             double exonEnd = translateGenomicToSvg(exon.end());
             if (exonStart < minX) minX = exonStart;
@@ -419,15 +418,15 @@ public abstract class SvSvgGenerator {
      * @param ypos  vertical midline
      * @throws IOException if we cannot write
      */
-    private void writeIntrons(List<Exon> exons, int ypos, Writer writer) throws IOException {
+    private void writeIntrons(List<Coordinates> exons, int ypos, Writer writer) throws IOException {
         // if the gene does not have an intron, we are done
         if (exons.size() == 1)
             return;
         List<Integer> intronStarts = new ArrayList<>();
         List<Integer> intronEnds = new ArrayList<>();
         for (int i = 1; i < exons.size(); i++) {
-            Exon previous = exons.get(i - 1);
-            Exon current = exons.get(i);
+            Coordinates previous = exons.get(i - 1);
+            Coordinates current = exons.get(i);
             intronStarts.add(previous.end());
             intronEnds.add(current.start());
         }

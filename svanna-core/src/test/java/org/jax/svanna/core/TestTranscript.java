@@ -1,7 +1,6 @@
 package org.jax.svanna.core;
 
 import org.jax.svanna.core.reference.CodingTranscript;
-import org.jax.svanna.core.reference.Exon;
 import org.monarchinitiative.svart.*;
 
 import java.util.ArrayList;
@@ -11,23 +10,23 @@ import java.util.Objects;
 public class TestTranscript extends BaseGenomicRegion<TestTranscript> implements CodingTranscript {
 
     private final GenomicRegion cdsRegion;
-    private final List<Exon> exons;
+    private final List<Coordinates> exons;
 
     public static TestTranscript of(Contig contig, Strand strand, int startPosition, int endPosition, List<Integer> exonCoordinates) {
-        List<Exon> exons = new ArrayList<>();
+        List<Coordinates> exons = new ArrayList<>();
         for (int i = 0; i < exonCoordinates.size(); i += 2) {
-            Position start = Position.of(exonCoordinates.get(i));
-            Position end = Position.of(exonCoordinates.get(i + 1));
-            exons.add(Exon.of(CoordinateSystem.zeroBased(), start, end));
+            int start = exonCoordinates.get(i);
+            int end = exonCoordinates.get(i + 1);
+            exons.add(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
         }
 
         GenomicRegion cds = GenomicRegion.of(contig, strand, CoordinateSystem.zeroBased(), startPosition + 10, endPosition - 10);
 
-        return new TestTranscript(contig, strand, CoordinateSystem.zeroBased(), Position.of(startPosition), Position.of(endPosition), cds, exons);
+        return new TestTranscript(contig, strand, Coordinates.of(CoordinateSystem.zeroBased(), startPosition, endPosition), cds, exons);
     }
 
-    protected TestTranscript(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, GenomicRegion cdsRegion, List<Exon> exons) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+    protected TestTranscript(Contig contig, Strand strand, Coordinates coordinates, GenomicRegion cdsRegion, List<Coordinates> exons) {
+        super(contig, strand, coordinates);
         this.cdsRegion = cdsRegion;
         this.exons = exons;
     }
@@ -43,44 +42,43 @@ public class TestTranscript extends BaseGenomicRegion<TestTranscript> implements
     }
 
     @Override
-    public Position codingStartPosition() {
-        return cdsRegion.startPosition();
+    public int codingStart() {
+        return cdsRegion.start();
     }
 
     @Override
-    public Position codingEndPosition() {
-        return cdsRegion.endPosition();
+    public int codingEnd() {
+        return cdsRegion.end();
     }
 
     @Override
-    public List<Exon> exons() {
+    public List<Coordinates> exons() {
         return exons;
     }
 
     @Override
-    protected TestTranscript newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
+    protected TestTranscript newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
         GenomicRegion cds = cdsRegion;
+        CoordinateSystem coordinateSystem = coordinates.coordinateSystem();
         if (cds != null)
             cds = cds.withStrand(strand).withCoordinateSystem(coordinateSystem);
 
-        List<Exon> exons;
+        List<Coordinates> exons;
         if (strand() != strand) {
             exons = new ArrayList<>(exons().size());
             for (int i = exons().size() - 1; i >= 0; i--) {
-                Exon current = exons().get(i);
-                Position eStart = current.startPosition().invert(coordinateSystem, contig());
-                Position eEnd = current.endPosition().invert(coordinateSystem, contig());
-                exons.add(Exon.of(coordinateSystem, eEnd, eStart)); // intentional
+                Coordinates current = exons().get(i);
+                exons.add(current.invert(contig)); // intentional
             }
         } else if (coordinateSystem() != coordinateSystem) {
             exons = new ArrayList<>(exons().size());
-            for (Exon exon : exons()) {
+            for (Coordinates exon : exons()) {
                 exons.add(exon.withCoordinateSystem(coordinateSystem));
             }
         } else {
             exons = exons();
         }
-        return new TestTranscript(contig, strand, coordinateSystem, startPosition, endPosition, cds, exons);
+        return new TestTranscript(contig, strand, coordinates, cds, exons);
     }
 
     @Override

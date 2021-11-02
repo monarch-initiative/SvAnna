@@ -6,7 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
+import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
 
 import java.util.List;
@@ -21,10 +21,10 @@ public class CodingTranscriptTest {
 
     @Test
     public void properties() {
-        List<Exon> txExons = List.of(
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200)));
+        List<Coordinates> txExons = List.of(
+                Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                Coordinates.of(CoordinateSystem.zeroBased(), 180, 200));
         CodingTranscript tx = CodingTranscript.of(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3", txExons,  115, 182);
 
@@ -38,10 +38,10 @@ public class CodingTranscriptTest {
 
         assertThat(tx.accessionId(), equalTo("NM_123456.3"));
 
-        List<Exon> exons = tx.exons();
-        assertThat(exons.get(0), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130))));
-        assertThat(exons.get(1), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170))));
-        assertThat(exons.get(2), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200))));
+        List<Coordinates> exons = tx.exons();
+        assertThat(exons.get(0), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 100, 130)));
+        assertThat(exons.get(1), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 150, 170)));
+        assertThat(exons.get(2), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 180, 200)));
 
         assertThat(tx.fivePrimeUtrLength(), equalTo(15));
         assertThat(tx.threePrimeUtrLength(), equalTo(18));
@@ -49,10 +49,10 @@ public class CodingTranscriptTest {
 
     @Test
     public void withStrand() {
-        List<Exon> txExons = List.of(
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200)));
+        List<Coordinates> txExons = List.of(
+                Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                Coordinates.of(CoordinateSystem.zeroBased(), 180, 200));
         CodingTranscript instance = CodingTranscript.of(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3", txExons, 110, 190);
         assertThat(instance.withStrand(Strand.POSITIVE), sameInstance(instance));
@@ -61,6 +61,8 @@ public class CodingTranscriptTest {
 
         assertThat(tx.start(), equalTo(300));
         assertThat(tx.end(), equalTo(400));
+        assertThat(tx.strand(), equalTo(Strand.NEGATIVE));
+        assertThat(tx.coordinateSystem(), equalTo(CoordinateSystem.zeroBased()));
         assertThat(tx.length(), equalTo(100));
 
         assertThat(tx.accessionId(), equalTo("NM_123456.3"));
@@ -68,19 +70,20 @@ public class CodingTranscriptTest {
         assertThat(tx.codingStart(), equalTo(310));
         assertThat(tx.codingEnd(), equalTo(390));
 
-        List<Exon> exons = tx.exons();
-        assertThat(exons.get(0), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
-        assertThat(exons.get(1), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
-        assertThat(exons.get(2), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+
+        List<Coordinates> exons = tx.exons();
+        assertThat(exons.get(0), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 300, 320)));
+        assertThat(exons.get(1), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 330, 350)));
+        assertThat(exons.get(2), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 370, 400)));
     }
 
 
     @Test
     public void withCoordinateSystem() {
-        List<Exon> txExons = List.of(
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200)));
+        List<Coordinates> txExons = List.of(
+                Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                Coordinates.of(CoordinateSystem.zeroBased(), 180, 200));
         CodingTranscript instance = CodingTranscript.of(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3", txExons, 110, 190);
         assertThat(instance.withCoordinateSystem(CoordinateSystem.zeroBased()), sameInstance(instance));
@@ -97,10 +100,10 @@ public class CodingTranscriptTest {
         assertThat(tx.isCoding(), equalTo(true));
         assertThat(tx.length(), equalTo(100));
 
-        List<Exon> exons = tx.exons();
-        assertThat(exons.get(0), equalTo(Exon.of(CoordinateSystem.oneBased(), Position.of(101), Position.of(130))));
-        assertThat(exons.get(1), equalTo(Exon.of(CoordinateSystem.oneBased(), Position.of(151), Position.of(170))));
-        assertThat(exons.get(2), equalTo(Exon.of(CoordinateSystem.oneBased(), Position.of(181), Position.of(200))));
+        List<Coordinates> exons = tx.exons();
+        assertThat(exons.get(1), equalTo(Coordinates.of(CoordinateSystem.oneBased(), 151, 170)));
+        assertThat(exons.get(0), equalTo(Coordinates.of(CoordinateSystem.oneBased(), 101, 130)));
+        assertThat(exons.get(2), equalTo(Coordinates.of(CoordinateSystem.oneBased(), 181, 200)));
     }
 
     @ParameterizedTest
@@ -111,10 +114,10 @@ public class CodingTranscriptTest {
             "180, 190,   50",
     })
     public void fiveUtrLength(int cdsStart, int cdsEnd, int length) {
-        List<Exon> txExons = List.of(
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200)));
+        List<Coordinates> txExons = List.of(
+                Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                Coordinates.of(CoordinateSystem.zeroBased(), 180, 200));
         CodingTranscript tx = CodingTranscript.of(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3", txExons,  cdsStart, cdsEnd);
 
@@ -128,10 +131,10 @@ public class CodingTranscriptTest {
             "105, 130,    40",
     })
     public void threeUtrLength(int cdsStart, int cdsEnd, int length) {
-        List<Exon> txExons = List.of(
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200)));
+        List<Coordinates> txExons = List.of(
+                Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                Coordinates.of(CoordinateSystem.zeroBased(), 180, 200));
         CodingTranscript tx = CodingTranscript.of(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3", txExons,  cdsStart, cdsEnd);
 

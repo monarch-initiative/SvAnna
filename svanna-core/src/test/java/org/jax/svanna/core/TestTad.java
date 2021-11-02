@@ -9,12 +9,12 @@ public class TestTad extends BaseGenomicRegion<TestTad> implements TadBoundary {
 
     private final String id;
 
-    public static TestTad of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int startPosition, int endPosition) {
-        return new TestTad(contig, strand, coordinateSystem, Position.of(startPosition), Position.of(endPosition), id);
+    public static TestTad of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end) {
+        return new TestTad(contig, strand, Coordinates.of(coordinateSystem, start, end), id);
     }
 
-    protected TestTad(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String id) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+    protected TestTad(Contig contig, Strand strand, Coordinates coordinates, String id) {
+        super(contig, strand, coordinates);
         this.id = id;
     }
 
@@ -30,8 +30,8 @@ public class TestTad extends BaseGenomicRegion<TestTad> implements TadBoundary {
     }
 
     @Override
-    protected TestTad newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new TestTad(contig, strand, coordinateSystem, startPosition, endPosition, id);
+    protected TestTad newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new TestTad(contig, strand, coordinates, id);
     }
 
     @Override

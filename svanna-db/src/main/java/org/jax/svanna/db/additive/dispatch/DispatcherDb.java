@@ -77,35 +77,35 @@ public class DispatcherDb implements Dispatcher {
         // ALT segments : left
         List<Segment> leftSegments = new LinkedList<>();
         leftSegments.add(Segment.of(left.contig(), left.strand(), CS,
-                leftReference.startPositionWithCoordinateSystem(CS), left.startPositionWithCoordinateSystem(CS),
+                leftReference.startWithCoordinateSystem(CS), left.startWithCoordinateSystem(CS),
                 "left-upstream", Event.GAP, 1));
         Segment leftBndSegment = Segment.of(left.contig(), left.strand(), CS,
-                left.startPositionWithCoordinateSystem(CS), left.endPositionWithCoordinateSystem(CS),
+                left.startWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS),
                 left.id(), Event.BREAKEND, 1);
         leftSegments.add(leftBndSegment);
 
         if (bv.changeLength() != 0)
             // there is an inserted sequence within breakend
             leftSegments.add(Segment.insertion(left.contig(), left.strand(), CS,
-                    left.endPositionWithCoordinateSystem(CS), left.endPositionWithCoordinateSystem(CS),
+                    left.endWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS),
                     "ins" + bv.id(), bv.changeLength()));
 
         Segment rightBndSegment = Segment.of(right.contig(), right.strand(), CS,
-                right.startPositionWithCoordinateSystem(CS), right.endPositionWithCoordinateSystem(CS),
+                right.startWithCoordinateSystem(CS), right.endWithCoordinateSystem(CS),
                 right.id(), Event.BREAKEND, 1);
         leftSegments.add(rightBndSegment);
         leftSegments.add(Segment.of(right.contig(), right.strand(), CS,
-                right.endPositionWithCoordinateSystem(CS), rightReference.endPositionWithCoordinateSystem(CS),
+                right.endWithCoordinateSystem(CS), rightReference.endWithCoordinateSystem(CS),
                 "right-downstream", Event.GAP, 1));
 
         // ALT segments : right
         List<Segment> rightSegments = new LinkedList<>();
         rightSegments.add(Segment.of(right.contig(), right.strand(), CS,
-                rightReference.startPositionWithCoordinateSystem(CS), right.startPositionWithCoordinateSystem(CS),
+                rightReference.startWithCoordinateSystem(CS), right.startWithCoordinateSystem(CS),
                 "right-upstream", Event.GAP, 1));
         rightSegments.add(rightBndSegment);
         rightSegments.add(leftBndSegment);
-        rightSegments.add(Segment.of(left.contig(), left.strand(), CS, left.endPositionWithCoordinateSystem(CS), leftReference.endPositionWithCoordinateSystem(CS), "left-downstream", Event.GAP, 1));
+        rightSegments.add(Segment.of(left.contig(), left.strand(), CS, left.endWithCoordinateSystem(CS), leftReference.endWithCoordinateSystem(CS), "left-downstream", Event.GAP, 1));
 
         return Routes.of(Set.of(leftReference, rightReference), Set.of(Route.of(leftSegments), Route.of(rightSegments)));
     }
@@ -181,7 +181,7 @@ public class DispatcherDb implements Dispatcher {
         Optional<TadBoundary> upstreamTad = tadBoundaryDao.upstreamOf(query);
         if (upstreamTad.isPresent()) {
             TadBoundary tadBoundary = upstreamTad.get();
-            return tadBoundary.asPosition().pos() + tadBoundary.coordinateSystem().startDelta(query.coordinateSystem());
+            return tadBoundary.midpoint().start() + tadBoundary.coordinateSystem().startDelta(query.coordinateSystem());
         } else
             // empty position of the contig start in query's coordinate system
             return CoordinateSystem.zeroBased().startDelta(query.coordinateSystem());
@@ -194,7 +194,7 @@ public class DispatcherDb implements Dispatcher {
             // Subtract one to not include the TAD as a relevant genomic element for evaluation. Otherwise, using the
             // upstream & downstream bounds to query overlapping TADs will fetch the TAD used to delimit the downstream
             // bound. This is because 0-based coordinate system includes the end position.
-            return tadBoundary.asPosition().pos() + tadBoundary.coordinateSystem().endDelta(query.coordinateSystem()) - 1;
+            return tadBoundary.midpoint().end() + tadBoundary.coordinateSystem().endDelta(query.coordinateSystem()) - 1;
         } else
             // empty coordinate of the contig end in query's coordinate system
             return query.contig().length() + CoordinateSystem.zeroBased().endDelta(query.coordinateSystem());

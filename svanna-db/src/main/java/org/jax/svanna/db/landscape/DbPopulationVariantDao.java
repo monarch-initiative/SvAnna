@@ -64,7 +64,7 @@ public class DbPopulationVariantDao implements PopulationVariantDao, IngestDao<P
                 }
                 regions.add(BasePopulationVariant.of(contig,
                         Strand.POSITIVE, CoordinateSystem.zeroBased(),
-                        Position.of(rs.getInt("START")), Position.of(rs.getInt("END")),
+                        rs.getInt("START"), rs.getInt("END"),
                         rs.getString("ID"), VariantType.valueOf(rs.getString("VARIANT_TYPE")),
                         rs.getFloat("ALLELE_FREQUENCY"), origin));
             }

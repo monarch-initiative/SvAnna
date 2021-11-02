@@ -2,7 +2,7 @@ package org.jax.svanna.core.reference;
 
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
+import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
 
 import java.text.NumberFormat;
@@ -16,21 +16,18 @@ class NonCodingTranscript extends BaseTranscript<NonCodingTranscript> {
     static NonCodingTranscript of(Contig contig, Strand strand, CoordinateSystem coordinateSystem,
                                   int start, int end,
                                   String accessionId,
-                                  List<Exon> exons) {
+                                  List<Coordinates> exons) {
 
-        return new NonCodingTranscript(contig, strand, coordinateSystem, Position.of(start), Position.of(end),
-                accessionId, exons);
+        return new NonCodingTranscript(contig, strand, Coordinates.of(coordinateSystem, start, end), accessionId, exons);
     }
 
     protected NonCodingTranscript(Contig contig,
                                   Strand strand,
-                                  CoordinateSystem coordinateSystem,
-                                  Position start,
-                                  Position end,
+                                  Coordinates coordinates,
 
                                   String accessionId,
-                                  List<Exon> exons) {
-        super(contig, strand, coordinateSystem, start, end, accessionId, exons);
+                                  List<Coordinates> exons) {
+        super(contig, strand, coordinates, accessionId, exons);
     }
 
     @Override
@@ -39,26 +36,25 @@ class NonCodingTranscript extends BaseTranscript<NonCodingTranscript> {
     }
 
     @Override
-    protected NonCodingTranscript newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position start, Position end) {
-        List<Exon> exons;
+    protected NonCodingTranscript newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        List<Coordinates> exons;
+        CoordinateSystem coordinateSystem = coordinates.coordinateSystem();
         if (strand() != strand) {
             exons = new ArrayList<>(exons().size());
             for (int i = exons().size() - 1; i >= 0; i--) {
-                Exon current = exons().get(i);
-                Position eStart = current.startPosition().invert(coordinateSystem, contig());
-                Position eEnd = current.endPosition().invert(coordinateSystem, contig());
-                exons.add(Exon.of(coordinateSystem, eEnd, eStart)); // intentional
+                Coordinates current = exons().get(i);
+                exons.add(current.invert(contig));
             }
         } else if (coordinateSystem() != coordinateSystem) {
             exons = new ArrayList<>(exons().size());
-            for (Exon exon : exons()) {
+            for (Coordinates exon : exons()) {
                 exons.add(exon.withCoordinateSystem(coordinateSystem));
             }
         } else {
             exons = exons();
         }
 
-        return new NonCodingTranscript(contig, strand, coordinateSystem, start, end, accessionId(), exons);
+        return new NonCodingTranscript(contig, strand, coordinates, accessionId(), exons);
     }
 
     @Override

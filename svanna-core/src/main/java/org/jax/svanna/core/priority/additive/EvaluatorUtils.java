@@ -22,12 +22,12 @@ public class EvaluatorUtils {
 
     private EvaluatorUtils() {}
 
-    public static Map<Contig, List<GenomicRegion>> prepareEvaluationRegions(Map<Contig, GenomicRegion> references,
+    public static Map<Contig, List<GenomicRegion>> prepareEvaluationRegions(Map<Contig, GenomicRegion> referenceRegions,
                                                                             Map<Contig, List<TadBoundary>> tadBoundaries) {
-        Map<Contig, List<GenomicRegion>> result = new HashMap<>(references.size());
+        Map<Contig, List<GenomicRegion>> result = new HashMap<>(referenceRegions.size());
 
-        for (Contig contig : references.keySet()) {
-            GenomicRegion reference = references.get(contig);
+        for (Contig contig : referenceRegions.keySet()) {
+            GenomicRegion reference = referenceRegions.get(contig);
             List<TadBoundary> boundaries = tadBoundaries.getOrDefault(contig, List.of());
             result.put(contig, prepareEvaluationRegions(reference, boundaries));
         }
@@ -39,35 +39,38 @@ public class EvaluatorUtils {
         if (tadBoundaries.isEmpty())
             return List.of(reference);
         else if (tadBoundaries.size() == 1) {
-            Position tadPosition = tadBoundaries.get(0).withStrand(reference.strand()).asPosition();
+            Coordinates tadMidpoint = tadBoundaries.get(0).withStrand(reference.strand()).midpoint();
             return List.of(
-                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.startPosition(), tadPosition),
-                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), tadPosition, reference.endPosition())
+                    // TODO - double check the correctness
+                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.start(), tadMidpoint.start()),
+                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), tadMidpoint.end(), reference.end())
             );
         } else {
             List<TadBoundary> sortedTads = tadBoundaries.stream()
-                    .sorted(Comparator.comparingInt(tb -> tb.withStrand(reference.strand()).asPosition().pos()))
+                    .sorted(Comparator.comparingInt(tb -> tb.withStrand(reference.strand()).midpoint().start()))
                     .collect(Collectors.toList());
 
             LinkedList<GenomicRegion> regions = new LinkedList<>();
-            Position previous = sortedTads.get(0).withStrand(reference.strand()).asPosition();
+            Coordinates previousTadMidpoint = sortedTads.get(0).withStrand(reference.strand()).midpoint();
             for (int i = 1; i < sortedTads.size(); i++) {
-                Position current = sortedTads.get(i).withStrand(reference.strand()).asPosition();
-                regions.add(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), previous, current));
-                previous = current;
+                Coordinates currentTadMidpoint = sortedTads.get(i).withStrand(reference.strand()).midpoint();
+                regions.add(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), previousTadMidpoint.end(), currentTadMidpoint.start()));
+                previousTadMidpoint = currentTadMidpoint;
             }
 
             GenomicRegion first = regions.removeFirst();
             int firstStart = first.startOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem());
             if (firstStart > reference.start())
-                regions.addFirst(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.startPosition(), first.endPosition()));
+                // TODO - double check
+                regions.addFirst(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.start(), first.start()));
             else
                 regions.addFirst(first);
 
             GenomicRegion last = regions.removeLast();
             int lastEnd = last.endOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem());
             if (lastEnd < reference.end())
-                regions.addLast(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), last.startPosition(), reference.endPosition()));
+                // TODO - double check
+                regions.addLast(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), last.end(), reference.end()));
             else
                 regions.addLast(last);
 

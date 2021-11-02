@@ -21,18 +21,18 @@ public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enh
     private final Set<EnhancerTissueSpecificity> specificities;
 
     public static TestEnhancer of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end) {
-        return of(id, contig, strand, coordinateSystem, start, end, EnhancerSource.UNKNOWN, false, 0.5, Set.of());
+        return of(id, contig, strand, Coordinates.of(coordinateSystem, start, end), EnhancerSource.UNKNOWN, false, 0.5, Set.of());
     }
 
-    public static TestEnhancer of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end,
+    public static TestEnhancer of(String id, Contig contig, Strand strand, Coordinates coordinates,
                                   EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        return new TestEnhancer(id, contig, strand, coordinateSystem, Position.of(start), Position.of(end),
+        return new TestEnhancer(id, contig, strand, coordinates,
                 enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
     }
 
-    protected TestEnhancer(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+    protected TestEnhancer(String id, Contig contig, Strand strand, Coordinates coordinates,
                            EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+        super(contig, strand, coordinates);
         this.id = id;
         this.enhancerSource = enhancerSource;
         this.isDevelopmental = isDevelopmental;
@@ -66,9 +66,8 @@ public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enh
     }
 
     @Override
-    protected TestEnhancer newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new TestEnhancer(id, contig, strand, coordinateSystem, startPosition, endPosition,
-                enhancerSource, isDevelopmental, tau, specificities);
+    protected TestEnhancer newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new TestEnhancer(id, contig, strand, coordinates, enhancerSource, isDevelopmental, tau, specificities);
     }
 
     @Override

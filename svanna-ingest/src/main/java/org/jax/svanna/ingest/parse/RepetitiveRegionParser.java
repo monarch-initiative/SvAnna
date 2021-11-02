@@ -2,7 +2,10 @@ package org.jax.svanna.ingest.parse;
 
 import org.jax.svanna.core.landscape.RepeatFamily;
 import org.jax.svanna.core.landscape.RepetitiveRegion;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,10 +57,10 @@ public class RepetitiveRegionParser implements IngestRecordParser<RepetitiveRegi
                 return Optional.empty();
             }
 
-            Position start, end;
+            int start, end;
             try {
-                start = Position.of(Integer.parseInt(column[5]));
-                end = Position.of(Integer.parseInt(column[6]));
+                start = Integer.parseInt(column[5]);
+                end = Integer.parseInt(column[6]);
             } catch (NumberFormatException e) {
                 if (LOGGER.isWarnEnabled()) LOGGER.warn("Invalid start/end coordinate in line `{}`", line);
                 return Optional.empty();

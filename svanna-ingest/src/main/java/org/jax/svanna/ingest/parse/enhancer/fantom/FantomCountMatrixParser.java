@@ -6,7 +6,10 @@ import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.ingest.parse.enhancer.AnnotatedTissue;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -294,8 +297,8 @@ public class FantomCountMatrixParser {
             return Optional.empty();
         }
 
-        Position start = Position.of(Integer.parseInt(matcher.group("start")));
-        Position end = Position.of(Integer.parseInt(matcher.group("end")));
+        int start = Integer.parseInt(matcher.group("start"));
+        int end = Integer.parseInt(matcher.group("end"));
 
         // Normalize to counts per million for this library
         double totalCpmCount = countsPerMillion.stream()

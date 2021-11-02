@@ -15,11 +15,11 @@ public class TestGene extends BaseGenomicRegion<TestGene> implements Gene {
     private final String geneName;
 
     public static TestGene of(TermId accessionId, String geneName, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end) {
-        return new TestGene(accessionId, geneName, contig, strand, coordinateSystem, Position.of(start), Position.of(end));
+        return new TestGene(accessionId, geneName, contig, strand, Coordinates.of(coordinateSystem, start, end));
     }
 
-    protected TestGene(TermId accessionId, String geneName, Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+    protected TestGene(TermId accessionId, String geneName, Contig contig, Strand strand, Coordinates coordinates) {
+        super(contig, strand, coordinates);
         this.accessionId = accessionId;
         this.geneName = geneName;
     }
@@ -45,8 +45,8 @@ public class TestGene extends BaseGenomicRegion<TestGene> implements Gene {
     }
 
     @Override
-    protected TestGene newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new TestGene(accessionId, geneName, contig, strand, coordinateSystem, startPosition, endPosition);
+    protected TestGene newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new TestGene(accessionId, geneName, contig, strand, coordinates);
     }
 
     @Override

@@ -10,15 +10,19 @@ public class TadBoundaryDefault extends BaseGenomicRegion<TadBoundaryDefault> im
 
     private final float stability;
 
-    protected TadBoundaryDefault(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String id, float stability) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+    private TadBoundaryDefault(Contig contig, Strand strand, Coordinates coordinates, String id, float stability) {
+        super(contig, strand, coordinates);
         this.id = id;
         this.stability = stability;
     }
 
-    public static TadBoundaryDefault of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+    public static TadBoundaryDefault of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end,
                                         String id, float stability) {
-        return new TadBoundaryDefault(contig, strand, coordinateSystem, startPosition, endPosition, id, stability);
+        return of(contig, strand, Coordinates.of(coordinateSystem, start, end), id, stability);
+    }
+
+    public static TadBoundaryDefault of(Contig contig, Strand strand, Coordinates coordinates, String id, float stability) {
+        return new TadBoundaryDefault(contig, strand, coordinates, id, stability);
     }
 
     @Override
@@ -32,8 +36,8 @@ public class TadBoundaryDefault extends BaseGenomicRegion<TadBoundaryDefault> im
     }
 
     @Override
-    protected TadBoundaryDefault newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new TadBoundaryDefault(contig, strand, coordinateSystem, startPosition, endPosition, id, stability);
+    protected TadBoundaryDefault newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new TadBoundaryDefault(contig, strand, coordinates, id, stability);
     }
 
     @Override

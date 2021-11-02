@@ -8,7 +8,10 @@ import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,8 +75,8 @@ public class VistaEnhancerParser implements IngestRecordParser<Enhancer> {
                 return Optional.empty();
             }
 
-            Position start = Position.of(Integer.parseInt(fields[2]));
-            Position end = Position.of(Integer.parseInt(fields[3]));
+            int start = Integer.parseInt(fields[2]);
+            int end = Integer.parseInt(fields[3]);
 
             // fields[4] is like neural tube[UBERON:0001049];presumptive hindbrain[UBERON:0007277];...
             String[] tissueList = fields[4].split(";");

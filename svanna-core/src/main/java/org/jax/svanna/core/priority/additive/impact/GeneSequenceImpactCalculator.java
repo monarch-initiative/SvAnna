@@ -5,7 +5,6 @@ import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
 import org.jax.svanna.core.reference.CodingTranscript;
-import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.CoordinateSystem;
@@ -299,7 +298,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         int cdsEnd = tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
 
         if (tx.exons().size() == 1) {
-            Exon first = tx.exons().get(0);
+            Coordinates first = tx.exons().get(0);
             int start = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
             int end = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
 
@@ -310,7 +309,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
         List<PaddedExon> exons = new ArrayList<>(tx.exons().size());
 
-        Exon first = tx.exons().get(0);
+        Coordinates first = tx.exons().get(0);
         int firstExonStart = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
         int firstExonEnd = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
         int firstExonPaddedEnd = firstExonEnd + INTRONIC_DONOR_PADDING;
@@ -321,7 +320,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         exons.add(PaddedExon.of(firstExonStart, firstExonStart, firstExonEnd, firstExonPaddedEnd, nCoding));
 
         // internal exons
-        for (Exon exon : tx.exons().subList(1, tx.exons().size() - 1)) {
+        for (Coordinates exon : tx.exons().subList(1, tx.exons().size() - 1)) {
             int exonStart = exon.startWithCoordinateSystem(CoordinateSystem.zeroBased());
             int paddedExonStart = exonStart - INTRONIC_ACCEPTOR_PADDING;
             int exonEnd = exon.endWithCoordinateSystem(CoordinateSystem.zeroBased());
@@ -333,7 +332,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
             exons.add(PaddedExon.of(paddedExonStart, exonStart, exonEnd, paddedExonEnd, nCodingInternal));
         }
 
-        Exon last = tx.exons().get(tx.exons().size() - 1);
+        Coordinates last = tx.exons().get(tx.exons().size() - 1);
         int lastExonStart = last.startWithCoordinateSystem(CoordinateSystem.zeroBased());
         int lastExonPaddedStart = lastExonStart - INTRONIC_ACCEPTOR_PADDING;
         int lastExonEnd = last.endWithCoordinateSystem(CoordinateSystem.zeroBased());

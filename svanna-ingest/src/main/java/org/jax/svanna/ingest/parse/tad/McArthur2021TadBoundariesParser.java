@@ -5,7 +5,10 @@ import htsjdk.samtools.util.Interval;
 import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,8 +80,8 @@ public class McArthur2021TadBoundariesParser implements IngestRecordParser<TadBo
                 if (LOGGER.isWarnEnabled()) LOGGER.warn("Unknown contig `{}` after lifting over record `{}`", lifted.getContig(), line);
                 return Optional.empty();
             }
-            Position liftedStart = Position.of(lifted.getStart() - halfLength);
-            Position liftedEnd = Position.of(lifted.getEnd() + halfLength);
+            int liftedStart = lifted.getStart() - halfLength;
+            int liftedEnd = lifted.getEnd() + halfLength;
             return Optional.of(TadBoundaryDefault.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), liftedStart, liftedEnd, id, Float.parseFloat(column[4])));
         };
     }

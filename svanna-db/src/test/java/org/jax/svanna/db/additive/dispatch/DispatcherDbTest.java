@@ -32,10 +32,10 @@ public class DispatcherDbTest {
     );
 
     private static final List<TadBoundary> TADS = List.of(
-            TadBoundaryDefault.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(10), Position.of(10), "one", .95f),
-            TadBoundaryDefault.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(50), "two", .96f),
-            TadBoundaryDefault.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(20), "three", .97f),
-            TadBoundaryDefault.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(70), Position.of(70), "two", .98f)
+            TadBoundaryDefault.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 10, 10, "one", .95f),
+            TadBoundaryDefault.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 50, "two", .96f),
+            TadBoundaryDefault.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 20, "three", .97f),
+            TadBoundaryDefault.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 70, 70, "two", .98f)
     );
 
     private GeneService geneService;
@@ -50,8 +50,8 @@ public class DispatcherDbTest {
 
     @Test
     public void assembleRoutes() {
-        Breakend left = Breakend.of(ctg1, "left", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(300));
-        Breakend right = Breakend.of(ctg2, "right", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(500), Position.of(500));
+        Breakend left = Breakend.of(ctg1, "left", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 300, 300));
+        Breakend right = Breakend.of(ctg2, "right", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 500, 500));
         BreakendVariant bv = BreakendVariant.of("BLA", left, right, "N", "ACGT");
 
         when(geneService.overlappingGenes(left))

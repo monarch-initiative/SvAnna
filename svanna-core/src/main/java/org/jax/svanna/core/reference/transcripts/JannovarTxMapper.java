@@ -3,15 +3,14 @@ package org.jax.svanna.core.reference.transcripts;
 import de.charite.compbio.jannovar.reference.GenomeInterval;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svanna.core.reference.CodingTranscript;
-import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Class for remapping Jannovar {@link TranscriptModel} to our domain model.
@@ -43,18 +42,18 @@ class JannovarTxMapper {
                 : Strand.NEGATIVE;
 
         // process exons
-        List<Exon> exons = new ArrayList<>();
-        for (GenomeInterval exon : tm.getExonRegions()) {
-            exons.add(Exon.of(CS, Position.of(exon.getBeginPos()), Position.of(exon.getEndPos())));
-        }
+        List<Coordinates> exons = tm.getExonRegions().stream()
+                .sequential()
+                .map(exon -> Coordinates.of(CS, exon.getBeginPos(), exon.getEndPos()))
+                .collect(Collectors.toUnmodifiableList());
 
         // these coordinates are already adjusted to the appropriate strand
         Transcript tx;
         if (tm.isCoding()) {
             GenomeInterval cdsRegion = tm.getCDSRegion();
             tx = CodingTranscript.of(contig, strand, CS,
-                    Position.of(txRegion.getBeginPos()), Position.of(txRegion.getEndPos()),
-                    tm.getAccession(), exons, Position.of(cdsRegion.getBeginPos()), Position.of(cdsRegion.getEndPos()));
+                    txRegion.getBeginPos(), txRegion.getEndPos(),
+                    tm.getAccession(), exons, cdsRegion.getBeginPos(), cdsRegion.getEndPos());
         } else {
             tx = Transcript.noncoding(contig, strand, CS, txRegion.getBeginPos(), txRegion.getEndPos(),
                     tm.getAccession(), exons);

@@ -20,9 +20,9 @@ public class RouteAssemblyTest {
         public void multipleVariantsOnSingleChromosome() {
             TestContig contig = TestContig.of(1, 100);
             List<Variant> variants = List.of(
-                    Variant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "C", "G"),
-                    Variant.of(contig, "three", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(30), "CCC", "C"),
-                    Variant.of(contig, "two", Strand.NEGATIVE, CoordinateSystem.oneBased(), Position.of(80), "TTT", "C")
+                    Variant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
+                    Variant.of(contig, "three", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
+                    Variant.of(contig, "two", Strand.NEGATIVE, CoordinateSystem.oneBased(), 80, "TTT", "C")
             );
 
             VariantArrangement assembled = RouteAssembly.assemble(variants);
@@ -43,13 +43,13 @@ public class RouteAssemblyTest {
             TestContig ctg2 = TestContig.of(1, 100);
             List<Variant> variants = List.of(
                     Variant.of( "three",
-                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(40)),
-                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(30)),
+                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
                             "", "C"),
-                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(30), "CCC", "C"),
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "C", "G"),
-                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(20), "AAA", "C"),
-                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), Position.of(40), "C", "G")
+                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
+                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
+                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
+                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
             );
 
             VariantArrangement assembled = RouteAssembly.assemble(variants);
@@ -68,15 +68,15 @@ public class RouteAssemblyTest {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
             List<Variant> variants = List.of(
-                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(50), "CCC", "C"), // culprit
+                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 50, "CCC", "C"), // culprit
 
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "C", "G"),
+                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
                     Variant.of( "three",
-                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(40)),
-                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(30)),
+                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
                             "", "C"),
-                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(20), "AAA", "C"),
-                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), Position.of(40), "C", "G")
+                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
+                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
@@ -88,14 +88,14 @@ public class RouteAssemblyTest {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
             List<Variant> variants = List.of(
-                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(30), "CCC", "C"),
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "C", "G"),
+                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
+                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
                     Variant.of( "three",
-                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(40)),
-                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(30)),
+                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
                             "", "C"),
-                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(20), "AAA", "C"),
-                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), Position.of(25), "C", "G")  // culprit
+                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
+                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 25, "C", "G")  // culprit
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
@@ -113,10 +113,10 @@ public class RouteAssemblyTest {
             TestContig ctg2 = TestContig.of(1, 100);
             List<Variant> variants = List.of(
                     Variant.of( "one",
-                            Breakend.of(ctg1, "oneLeft", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(5), Position.of(5)),
-                            Breakend.of(ctg2, "oneRight", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(30)), "", "C"),Variant.of( "one",
-                            Breakend.of(ctg2, "twoLeft", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(40)),
-                            Breakend.of(ctg1, "twoRight", Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(60), Position.of(60)), "", "")
+                            Breakend.of(ctg1, "oneLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 5, 5)),
+                            Breakend.of(ctg2, "oneRight", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)), "", "C"),Variant.of( "one",
+                            Breakend.of(ctg2, "twoLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            Breakend.of(ctg1, "twoRight", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 60, 60)), "", "")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
@@ -128,8 +128,8 @@ public class RouteAssemblyTest {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
             List<Variant> variants = List.of(
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "CCCC", "C"),
-                    Variant.of(ctg2, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(6), "CCC", "C")
+                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "CCCC", "C"),
+                    Variant.of(ctg2, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
@@ -140,8 +140,8 @@ public class RouteAssemblyTest {
         public void failOnAssemblyOfOverlappingVariants() {
             TestContig contig = TestContig.of(1, 100);
             List<Variant> variants = List.of(
-                    Variant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "CCCC", "C"),
-                    Variant.of(contig, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(6), "CCC", "C")
+                    Variant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "CCCC", "C"),
+                    Variant.of(contig, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
@@ -151,7 +151,7 @@ public class RouteAssemblyTest {
         @Test
         public void singleVariantIsAlreadyAssembled() {
             TestContig contig = TestContig.of(1, 10);
-            List<Variant> variants = List.of(Variant.of(contig, "rs123", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(5), "C", "G"));
+            List<Variant> variants = List.of(Variant.of(contig, "rs123", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"));
 
             VariantArrangement assembled = RouteAssembly.assemble(variants);
 

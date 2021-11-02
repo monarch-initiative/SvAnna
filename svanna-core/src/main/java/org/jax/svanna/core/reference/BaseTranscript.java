@@ -1,6 +1,9 @@
 package org.jax.svanna.core.reference;
 
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.BaseGenomicRegion;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.Coordinates;
+import org.monarchinitiative.svart.Strand;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,10 +11,10 @@ import java.util.Objects;
 abstract class BaseTranscript<T extends BaseTranscript<?>> extends BaseGenomicRegion<T> implements Transcript {
 
     private final String accessionId;
-    private final List<Exon> exons;
+    private final List<Coordinates> exons;
 
-    protected BaseTranscript(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String accessionId, List<Exon> exons) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+    protected BaseTranscript(Contig contig, Strand strand, Coordinates coordinates, String accessionId, List<Coordinates> exons) {
+        super(contig, strand, coordinates);
         this.accessionId = accessionId;
         this.exons = exons;
     }
@@ -23,7 +26,7 @@ abstract class BaseTranscript<T extends BaseTranscript<?>> extends BaseGenomicRe
     }
 
     @Override
-    public List<Exon> exons() {
+    public List<Coordinates> exons() {
         return exons;
     }
 

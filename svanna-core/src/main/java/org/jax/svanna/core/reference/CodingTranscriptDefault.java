@@ -2,7 +2,7 @@ package org.jax.svanna.core.reference;
 
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
+import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
 
 import java.text.NumberFormat;
@@ -14,31 +14,29 @@ class CodingTranscriptDefault extends BaseTranscript<CodingTranscriptDefault> im
 
     private static final NumberFormat NF = NumberFormat.getInstance();
 
-    private final Position codingStartPosition;
-    private final Position codingEndPosition;
+    private final int codingStartPosition;
+    private final int codingEndPosition;
 
-    static CodingTranscriptDefault of(Contig contig, Strand strand, CoordinateSystem coordinateSystem,
-                                      Position start, Position end,
-                                      String accessionId, List<Exon> exons,
-                                      Position codingStartPosition, Position codingEndPosition) {
-        return new CodingTranscriptDefault(contig, strand, coordinateSystem, start, end, accessionId, exons, codingStartPosition, codingEndPosition);
+    static CodingTranscriptDefault of(Contig contig, Strand strand, Coordinates coordinates,
+                                      String accessionId, List<Coordinates> exons,
+                                      int codingStartPosition, int codingEndPosition) {
+        return new CodingTranscriptDefault(contig, strand, coordinates, accessionId, exons, codingStartPosition, codingEndPosition);
     }
 
-    private CodingTranscriptDefault(Contig contig, Strand strand, CoordinateSystem coordinateSystem,
-                                    Position startPosition, Position endPosition,
-                                    String accessionId, List<Exon> exons,
-                                    Position codingStartPosition, Position codingEndPosition) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition, accessionId, exons);
-        this.codingStartPosition = Objects.requireNonNull(codingStartPosition);
-        this.codingEndPosition = Objects.requireNonNull(codingEndPosition);
+    private CodingTranscriptDefault(Contig contig, Strand strand, Coordinates coordinates,
+                                    String accessionId, List<Coordinates> exons,
+                                    int codingStartPosition, int codingEndPosition) {
+        super(contig, strand, coordinates, accessionId, exons);
+        this.codingStartPosition = codingStartPosition;
+        this.codingEndPosition = codingEndPosition;
         checkCdsCoordinates();
     }
 
     private void checkCdsCoordinates() {
         boolean cdsStartIsExonic = false;
-        int cdsStart = codingStartPosition.pos() + coordinateSystem().startDelta(CoordinateSystem.zeroBased());
-        List<Exon> exons = exons();
-        for (Exon exon : exons) {
+        int cdsStart = codingStartPosition + coordinateSystem().startDelta(CoordinateSystem.zeroBased());
+        List<Coordinates> exons = exons();
+        for (Coordinates exon : exons) {
             if (exon.startWithCoordinateSystem(CoordinateSystem.zeroBased()) <= cdsStart
                     && cdsStart <= exon.endWithCoordinateSystem(CoordinateSystem.zeroBased())) {
                 cdsStartIsExonic = true;
@@ -46,12 +44,12 @@ class CodingTranscriptDefault extends BaseTranscript<CodingTranscriptDefault> im
             }
         }
         if (!cdsStartIsExonic)
-            throw new IllegalArgumentException("CDS start " + codingStartPosition.pos() + " does not seem to be located in exonic region");
+            throw new IllegalArgumentException("CDS start " + codingStartPosition + " does not seem to be located in exonic region");
 
         boolean cdsEndIsExonic = false;
-        int cdsEnd = codingEndPosition.pos() + coordinateSystem().endDelta(CoordinateSystem.zeroBased());
+        int cdsEnd = codingEndPosition + coordinateSystem().endDelta(CoordinateSystem.zeroBased());
         for (int i = exons.size() - 1; i >= 0; i--) {
-            Exon exon = exons.get(i);
+            Coordinates exon = exons.get(i);
             if (exon.startWithCoordinateSystem(CoordinateSystem.zeroBased()) <= cdsEnd
                     && cdsEnd <= exon.endWithCoordinateSystem(CoordinateSystem.zeroBased())) {
                 cdsEndIsExonic = true;
@@ -59,16 +57,16 @@ class CodingTranscriptDefault extends BaseTranscript<CodingTranscriptDefault> im
             }
         }
         if (!cdsEndIsExonic)
-            throw new IllegalArgumentException("CDS end " + codingEndPosition.pos() + " does not seem to be located in exonic region");
+            throw new IllegalArgumentException("CDS end " + codingEndPosition + " does not seem to be located in exonic region");
     }
 
     @Override
-    public Position codingStartPosition() {
+    public int codingStart() {
         return codingStartPosition;
     }
 
     @Override
-    public Position codingEndPosition() {
+    public int codingEnd() {
         return codingEndPosition;
     }
 
@@ -78,36 +76,39 @@ class CodingTranscriptDefault extends BaseTranscript<CodingTranscriptDefault> im
     }
 
     @Override
-    protected CodingTranscriptDefault newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        Position cdsStart, cdsEnd;
-        List<Exon> exons;
+    protected CodingTranscriptDefault newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        int cdsStart, cdsEnd;
+        List<Coordinates> exons;
+        CoordinateSystem coordinateSystem = coordinates.coordinateSystem();
         if (strand() != strand) {
+            // Changing Strand
             exons = new ArrayList<>(exons().size());
             for (int i = exons().size() - 1; i >= 0; i--) {
-                Exon current = exons().get(i);
-                Position eStart = current.startPosition().invert(coordinateSystem, contig());
-                Position eEnd = current.endPosition().invert(coordinateSystem, contig());
-                exons.add(Exon.of(coordinateSystem, eEnd, eStart)); // intent
+                Coordinates current = exons().get(i);
+                exons.add(current.invert(contig)); // intent
             }
 
-            cdsEnd = codingStartPosition.invert(coordinateSystem, contig); // intent
-            cdsStart = codingEndPosition.invert(coordinateSystem, contig); // intent
+            cdsEnd = Coordinates.invertPosition(coordinateSystem, contig, codingStartPosition); // intent
+            cdsStart = Coordinates.invertPosition(coordinateSystem, contig, codingEndPosition); // intent
         } else if (coordinateSystem() != coordinateSystem) {
+            // Changing CoordinateSystem
             exons = new ArrayList<>(exons().size());
-            for (Exon exon : exons()) {
+            for (Coordinates exon : exons()) {
                 exons.add(exon.withCoordinateSystem(coordinateSystem));
             }
 
-            cdsStart = codingStartPosition.shift(coordinateSystem().startDelta(coordinateSystem));
-            cdsEnd = codingEndPosition.shift(coordinateSystem().endDelta(coordinateSystem));
+            cdsStart = codingStartPosition + coordinateSystem().startDelta(coordinateSystem);
+            cdsEnd = codingEndPosition + coordinateSystem().endDelta(coordinateSystem);
         } else {
+            // No-op - should not really happen as either Strand or CoordinateSystem is being changed
+            // when `newRegionInstance` is called.
             exons = exons();
 
             cdsStart = codingStartPosition;
             cdsEnd = codingEndPosition;
         }
 
-        return new CodingTranscriptDefault(contig, strand, coordinateSystem, startPosition, endPosition, accessionId(), exons, cdsStart, cdsEnd);
+        return new CodingTranscriptDefault(contig, strand, coordinates, accessionId(), exons, cdsStart, cdsEnd);
     }
 
     @Override

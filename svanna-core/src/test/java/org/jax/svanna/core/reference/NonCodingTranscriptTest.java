@@ -4,7 +4,7 @@ import org.jax.svanna.core.TestContig;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
+import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
 
 import java.util.List;
@@ -19,10 +19,10 @@ public class NonCodingTranscriptTest {
 
     @Test
     public void properties() {
-        List<Exon> txExons = List.of(
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200)));
+        List<Coordinates> txExons = List.of(
+                Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                Coordinates.of(CoordinateSystem.zeroBased(), 180, 200));
         Transcript tx = Transcript.noncoding(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3",  txExons);
 
@@ -34,19 +34,19 @@ public class NonCodingTranscriptTest {
 
         assertThat(tx.accessionId(), equalTo("NM_123456.3"));
 
-        List<Exon> exons = tx.exons();
-        assertThat(exons.get(0), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130))));
-        assertThat(exons.get(1), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170))));
-        assertThat(exons.get(2), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200))));
+        List<Coordinates> exons = tx.exons();
+        assertThat(exons.get(0), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 100, 130)));
+        assertThat(exons.get(1), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 150, 170)));
+        assertThat(exons.get(2), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 180, 200)));
     }
 
     @Test
     public void withStrand_noncodingTx() {
         Transcript instance = NonCodingTranscript.of(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3", List.of(
-                        Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                        Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                        Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200))));
+                        Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                        Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                        Coordinates.of(CoordinateSystem.zeroBased(), 180, 200)));
 
         assertThat(instance.withStrand(Strand.POSITIVE), sameInstance(instance));
 
@@ -59,19 +59,19 @@ public class NonCodingTranscriptTest {
         assertThat(tx.accessionId(), equalTo("NM_123456.3"));
         assertThat(tx.isCoding(), equalTo(false));
 
-        List<Exon> exons = tx.exons();
-        assertThat(exons.get(0), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(300), Position.of(320))));
-        assertThat(exons.get(1), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(330), Position.of(350))));
-        assertThat(exons.get(2), equalTo(Exon.of(CoordinateSystem.zeroBased(), Position.of(370), Position.of(400))));
+        List<Coordinates> exons = tx.exons();
+        assertThat(exons.get(0), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 300, 320)));
+        assertThat(exons.get(1), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 330, 350)));
+        assertThat(exons.get(2), equalTo(Coordinates.of(CoordinateSystem.zeroBased(), 370, 400)));
     }
 
     @Test
     public void withCoordinateSystem_noncodingTx() {
         Transcript instance = NonCodingTranscript.of(CONTIG, Strand.POSITIVE, CoordinateSystem.zeroBased(), 100, 200,
                 "NM_123456.3", List.of(
-                        Exon.of(CoordinateSystem.zeroBased(), Position.of(100), Position.of(130)),
-                        Exon.of(CoordinateSystem.zeroBased(), Position.of(150), Position.of(170)),
-                        Exon.of(CoordinateSystem.zeroBased(), Position.of(180), Position.of(200))));
+                        Coordinates.of(CoordinateSystem.zeroBased(), 100, 130),
+                        Coordinates.of(CoordinateSystem.zeroBased(), 150, 170),
+                        Coordinates.of(CoordinateSystem.zeroBased(), 180, 200)));
 
         assertThat(instance.withCoordinateSystem(CoordinateSystem.zeroBased()), sameInstance(instance));
 
@@ -84,9 +84,9 @@ public class NonCodingTranscriptTest {
         assertThat(tx.accessionId(), equalTo("NM_123456.3"));
         assertThat(tx.isCoding(), equalTo(false));
 
-        List<Exon> exons = tx.exons();
-        assertThat(exons.get(0), equalTo(Exon.of(CoordinateSystem.oneBased(), Position.of(101), Position.of(130))));
-        assertThat(exons.get(1), equalTo(Exon.of(CoordinateSystem.oneBased(), Position.of(151), Position.of(170))));
-        assertThat(exons.get(2), equalTo(Exon.of(CoordinateSystem.oneBased(), Position.of(181), Position.of(200))));
+        List<Coordinates> exons = tx.exons();
+        assertThat(exons.get(0), equalTo(Coordinates.of(CoordinateSystem.oneBased(), 101, 130)));
+        assertThat(exons.get(1), equalTo(Coordinates.of(CoordinateSystem.oneBased(), 151, 170)));
+        assertThat(exons.get(2), equalTo(Coordinates.of(CoordinateSystem.oneBased(), 181, 200)));
     }
 }

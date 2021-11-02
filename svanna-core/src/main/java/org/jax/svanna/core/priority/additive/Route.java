@@ -1,6 +1,9 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Strand;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,18 +48,18 @@ public class Route {
         List<GenomicRegion> metaSegments = new ArrayList<>(segmentContigs.size());
         Segment previous = segments.get(0);
         Strand strand = previous.strand();
-        Position start = previous.startPosition();
+        int start = previous.start();
         for (int i = 1; i < segments.size(); i++) {
             Segment current = segments.get(i);
             if (!current.contig().equals(previous.contig())) {
-                GenomicRegion metaSegment = GenomicRegion.of(previous.contig(), strand, previous.coordinateSystem(), start, previous.endPosition());
+                GenomicRegion metaSegment = GenomicRegion.of(previous.contig(), strand, previous.coordinateSystem(), start, previous.end());
                 metaSegments.add(metaSegment);
-                start = current.startPosition();
+                start = current.start();
                 strand = current.strand();
             }
             previous = current;
         }
-        GenomicRegion metaSegment = GenomicRegion.of(previous.contig(), strand, previous.coordinateSystem(), start, previous.endPosition());
+        GenomicRegion metaSegment = GenomicRegion.of(previous.contig(), strand, previous.coordinateSystem(), start, previous.end());
         metaSegments.add(metaSegment);
         return metaSegments;
     }

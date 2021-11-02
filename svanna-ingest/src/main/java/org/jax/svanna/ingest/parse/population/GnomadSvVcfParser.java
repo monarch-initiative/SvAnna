@@ -97,7 +97,7 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
             int start = lifted.getStart() + 1;
 
             return Optional.of(BasePopulationVariant.of(contig, Strand.POSITIVE, CoordinateSystem.oneBased(),
-                    Position.of(start), Position.of(lifted.getEnd()),
+                    start, lifted.getEnd(),
                     vc.getID(), variantType, popmaxAf, PopulationVariantOrigin.GNOMAD_SV));
         };
     }

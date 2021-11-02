@@ -86,7 +86,7 @@ public class HgSvc2VcfParser extends AbstractVcfIngestRecordParser {
             Variant variant = vcfConverter.convert(contig, id, vc.getStart(), vc.getReference().getDisplayString(), alt.getDisplayString());
 
             return Optional.of(BasePopulationVariant.of(variant.contig(), variant.strand(), variant.coordinateSystem(),
-                    variant.startPosition(), variant.endPosition(),
+                    variant.start(), variant.end(),
                     variant.id(), variant.variantType(),
                     alleleFrequency, PopulationVariantOrigin.HGSVC2));
         };

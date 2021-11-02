@@ -14,7 +14,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Strand;
 
 import java.util.List;
 import java.util.Set;
@@ -215,10 +218,10 @@ public class RouteDataEvaluatorGETest {
     }
 
     private static Segment positiveSegment(String id, Contig contig, int start, int end, Event event, int copies) {
-        return Segment.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end), id, event, copies);
+        return Segment.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end, id, event, copies);
     }
 
     private static Segment negativeSegment(String id, Contig contig, int start, int end, Event event, int copies) {
-        return Segment.of(contig, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end), id, event, copies);
+        return Segment.of(contig, Strand.NEGATIVE, CoordinateSystem.zeroBased(), start, end, id, event, copies);
     }
 }

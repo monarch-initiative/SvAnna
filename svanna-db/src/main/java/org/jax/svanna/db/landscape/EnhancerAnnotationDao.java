@@ -210,8 +210,8 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
 
                 if (!builders.containsKey(enhancerId)) {
                     BaseEnhancer.Builder builder = BaseEnhancer.builder().with(contig,
-                            Strand.POSITIVE, CoordinateSystem.zeroBased(), // database invariant
-                            Position.of(rs.getInt("START")), Position.of(rs.getInt("END")))
+                            Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), // database invariant
+                            rs.getInt("START"), rs.getInt("END")))
                             .enhancerSource(EnhancerSource.valueOf(rs.getString("ENHANCER_SOURCE")))
                             .id(enhancerName)
                             .isDevelopmental(rs.getBoolean("IS_DEVELOPMENTAL"))

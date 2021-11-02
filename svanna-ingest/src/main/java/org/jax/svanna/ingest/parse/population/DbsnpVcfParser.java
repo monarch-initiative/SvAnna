@@ -86,7 +86,7 @@ public class DbsnpVcfParser extends AbstractVcfIngestRecordParser {
                 float alleleFrequency = frequency.equals(".") ? DEFAULT_FREQ : 100 * Float.parseFloat(frequency);
 
                 BasePopulationVariant populationVariant = BasePopulationVariant.of(variant.contig(), variant.strand(), variant.coordinateSystem(),
-                        variant.startPosition(), variant.endPosition(), variant.id(), variant.variantType(),
+                        variant.start(), variant.end(), variant.id(), variant.variantType(),
                         alleleFrequency, PopulationVariantOrigin.DBSNP);
 
                 variants.add(populationVariant);

@@ -1,9 +1,9 @@
 package org.jax.svanna.core.overlap;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.reference.Exon;
 import org.jax.svanna.core.reference.Transcript;
 import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +25,11 @@ class Utils {
      */
     static ExonPair getAffectedExons(GenomicRegion event, Transcript tx) {
         event = event.withStrand(tx.strand());
-        List<Exon> exons = tx.exons();
+        List<Coordinates> exons = tx.exons();
         boolean[] affected = new boolean[exons.size()]; // initializes to false
         for (int i = 0; i < exons.size(); i++) {
-            Exon exon = exons.get(i);
-            if (exon.overlapsWith(event)) {
+            Coordinates exon = exons.get(i);
+            if (exon.overlaps(event.coordinates())) {
                 affected[i] = true;
             }
         }
@@ -63,7 +63,7 @@ class Utils {
         // we use zero based coordinates for calculations
         int variantStart = region.startOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
         int variantEnd = region.endOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
-        List<Exon> exons = tx.exons();
+        List<Coordinates> exons = tx.exons();
 
         for (int i = 0; i < exons.size() - 1; i++) {
             // current exon end

@@ -35,7 +35,7 @@ public class IntervalArrayGeneOverlapperTest {
     })
     public void getOverlaps_tss_deletion(int pos, String ref, String alt, boolean expected) {
         Contig chr9 = genomicAssembly.contigByName("9");
-        Variant variant = Variant.of(chr9, "TSS_DEL", Strand.POSITIVE, CoordinateSystem.oneBased(), Position.of(pos), ref, alt);
+        Variant variant = Variant.of(chr9, "TSS_DEL", Strand.POSITIVE, CoordinateSystem.oneBased(), pos, ref, alt);
 
         IntervalArrayGeneOverlapper overlapper = new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
         List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
@@ -55,7 +55,7 @@ public class IntervalArrayGeneOverlapperTest {
         VcfBreakendResolver breakendResolver = new VcfBreakendResolver(genomicAssembly);
         BreakendVariant variant = breakendResolver.resolve(
                 "EVENT", id, mateId,
-                genomicAssembly.contigByName(contigName), Position.of(pos, ciPosStart, ciPosEnd), ConfidenceInterval.precise(),
+                genomicAssembly.contigByName(contigName), pos, ConfidenceInterval.of(ciPosStart, ciPosEnd), ConfidenceInterval.precise(),
                 ref, alt);
 
         IntervalArrayGeneOverlapper overlapper = new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());

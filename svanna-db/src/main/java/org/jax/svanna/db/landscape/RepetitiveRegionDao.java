@@ -71,7 +71,7 @@ public class RepetitiveRegionDao implements AnnotationDao<RepetitiveRegion>, Ing
                 }
                 regions.add(RepetitiveRegion.of(contig,
                         Strand.POSITIVE, CoordinateSystem.zeroBased(), // database invariant
-                        Position.of(rs.getInt("START")), Position.of(rs.getInt("END")),
+                        rs.getInt("START"), rs.getInt("END"),
                         RepeatFamily.valueOf(rs.getString("REPEAT_FAMILY"))));
             }
         }

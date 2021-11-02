@@ -21,18 +21,23 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
 
     private final Set<EnhancerTissueSpecificity> specificities;
 
-    public static BaseEnhancer of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+    public static BaseEnhancer of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end,
+                                  String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
+        return of(contig, strand, Coordinates.of(coordinateSystem, start, end), id, enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
+    }
+
+    public static BaseEnhancer of(Contig contig, Strand strand, Coordinates coordinates,
                            String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
+        return new BaseEnhancer(contig, strand, coordinates, id, enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
     }
 
     public static Builder builder() {
         return new Builder();
     }
 
-    protected BaseEnhancer(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+    protected BaseEnhancer(Contig contig, Strand strand, Coordinates coordinates,
                            String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+        super(contig, strand, coordinates);
         this.id = Objects.requireNonNull(id);
         this.enhancerSource = enhancerSource;
         this.isDevelopmental = isDevelopmental;
@@ -75,8 +80,8 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
     }
 
     @Override
-    protected BaseEnhancer newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, enhancerSource, isDevelopmental, tau, specificities);
+    protected BaseEnhancer newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new BaseEnhancer(contig, strand, coordinates, id, enhancerSource, isDevelopmental, tau, specificities);
     }
 
     @Override

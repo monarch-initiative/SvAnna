@@ -10,7 +10,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
 import org.monarchinitiative.svart.Strand;
 
 import java.util.List;
@@ -46,9 +45,9 @@ public class GeneSequenceImpactCalculatorTest {
         TestContig ctg1 = TestContig.of(0, 1000);
         Route route = Route.of(
                 List.of(
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(200), "upstream", Event.GAP, 1),
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(300), "deletion", Event.DELETION, 0),
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(500), "downstream", Event.GAP, 1)
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 200, "upstream", Event.GAP, 1),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 200, 300, "deletion", Event.DELETION, 0),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 300, 500, "downstream", Event.GAP, 1)
                 ));
 
         Gene gene = GeneDefault.builder()
@@ -77,9 +76,9 @@ public class GeneSequenceImpactCalculatorTest {
         TestContig ctg1 = TestContig.of(0, 1000);
         Route route = Route.of(
                 List.of(
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(200), "upstream", Event.GAP, 1),
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(300), "inversion", Event.INVERSION, 1),
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(300), Position.of(500), "downstream", Event.GAP, 1)
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 200, "upstream", Event.GAP, 1),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 200, 300, "inversion", Event.INVERSION, 1),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 300, 500, "downstream", Event.GAP, 1)
                 ));
 
         Gene gene = GeneDefault.builder()
@@ -111,9 +110,9 @@ public class GeneSequenceImpactCalculatorTest {
         TestContig ctg1 = TestContig.of(0, 1000);
         Route route = Route.of(
                 List.of(
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(200), "upstream", Event.GAP, 1),
-                        Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(200), "insertion", insertionLength),
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(200), Position.of(400), "downstream", Event.GAP, 1)
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 200, "upstream", Event.GAP, 1),
+                        Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 200, 200, "insertion", insertionLength),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 200, 400, "downstream", Event.GAP, 1)
                 ));
 
         Gene gene = GeneDefault.builder()

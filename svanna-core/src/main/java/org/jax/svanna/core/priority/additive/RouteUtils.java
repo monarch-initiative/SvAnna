@@ -14,10 +14,9 @@ public class RouteUtils {
     private RouteUtils(){}
 
     /**
-     *
-     * @param upstreamBound zero based start coordinate of the upstream region
+     * @param upstreamBound   zero based start coordinate of the upstream region
      * @param downstreamBound zero based end coordinate of the downstream region
-     * @param variants list of variants to build the route from
+     * @param variants        list of variants to build the route from
      * @return route
      */
     public static Route buildRoute(int upstreamBound, int downstreamBound, List<? extends Variant> variants) {
@@ -26,8 +25,7 @@ public class RouteUtils {
 
         List<Segment> segments = new LinkedList<>();
 
-        Segment firstSegment = Segment.of(first.contig(), first.strand(), CS,
-                Position.of(upstreamBound), Position.of(firstStart),
+        Segment firstSegment = Segment.of(first.contig(), first.strand(), Coordinates.of(CS, upstreamBound, firstStart),
                 "upstream", Event.GAP, 1);
 
         segments.add(firstSegment);
@@ -43,7 +41,7 @@ public class RouteUtils {
 
             int gapStart = previous.endOnStrandWithCoordinateSystem(previous.strand(), CS);
             int gapEnd = current.startOnStrandWithCoordinateSystem(previous.strand(), CS);
-            Segment gap = Segment.of(previous.contig(), previous.strand(), CS, Position.of(gapStart), Position.of(gapEnd), "gap-" + i, Event.GAP, 1);
+            Segment gap = Segment.of(previous.contig(), previous.strand(), Coordinates.of(CS, gapStart, gapEnd), "gap-" + i, Event.GAP, 1);
             segments.add(gap);
 
             segments.addAll(makeVariantSegment(current, previous.strand()));
@@ -57,13 +55,12 @@ public class RouteUtils {
             Breakend right = ((BreakendVariant) last).right();
             lastStrand = right.strand();
             lastEnd = right.endWithCoordinateSystem(CS);
-        } else{
+        } else {
             lastStrand = last.strand();
             lastEnd = last.endWithCoordinateSystem(CS);
         }
 
-        segments.add(Segment.of(last.contig(), lastStrand, CS,
-                Position.of(lastEnd), Position.of(downstreamBound),
+        segments.add(Segment.of(last.contig(), lastStrand, Coordinates.of(CS, lastEnd, downstreamBound),
                 "downstream", Event.GAP, 1));
 
 
@@ -77,24 +74,23 @@ public class RouteUtils {
         int end = variant.endOnStrandWithCoordinateSystem(previous, CS);
         switch (variant.variantType().baseType()) {
             case SNV:
-                segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
+                segments = List.of(Segment.of(variant.contig(), previous, Coordinates.of(CS, start, end),
                         variant.id(), Event.SNV, 1));
                 break;
             case INV:
-                segments = List.of(Segment.of(variant.contig(), previous, CS,
-                        Position.of(start), Position.of(end),
+                segments = List.of(Segment.of(variant.contig(), previous, Coordinates.of(CS, start, end),
                         variant.id(), Event.INVERSION, 1));
                 break;
             case DEL:
-                segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
+                segments = List.of(Segment.of(variant.contig(), previous, Coordinates.of(CS, start, end),
                         variant.id(), Event.DELETION, 0));
                 break;
             case DUP:
-                segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
+                segments = List.of(Segment.of(variant.contig(), previous, Coordinates.of(CS, start, end),
                         variant.id(), Event.DUPLICATION, 2));
                 break;
             case INS:
-                segments = List.of(Segment.insertion(variant.contig(), previous, CS, Position.of(start), Position.of(end),
+                segments = List.of(Segment.insertion(variant.contig(), previous, Coordinates.of(CS, start, end),
                         variant.id(), variant.changeLength()));
                 break;
             case BND:
@@ -103,11 +99,9 @@ public class RouteUtils {
                     Breakend left = bnd.left();
                     Breakend right = bnd.right();
                     segments = List.of(
-                            Segment.of(left.contig(), left.strand(), CS,
-                                    left.startPositionWithCoordinateSystem(CS), left.endPositionWithCoordinateSystem(CS),
+                            Segment.of(left.contig(), left.strand(), Coordinates.of(CS, left.startWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS)),
                                     left.id(), Event.BREAKEND, 1),
-                            Segment.of(right.contig(), right.strand(), CS,
-                                    right.startPositionWithCoordinateSystem(CS), right.endPositionWithCoordinateSystem(CS),
+                            Segment.of(right.contig(), right.strand(), Coordinates.of(CS, right.startWithCoordinateSystem(CS), right.endWithCoordinateSystem(CS)),
                                     right.id(), Event.BREAKEND, 1));
                     break;
                 } catch (ClassCastException e) {
@@ -120,7 +114,7 @@ public class RouteUtils {
                     if (copyNumber < 1 || copyNumber == 2)
                         throw new DispatchException("Copy number was `" + copyNumber + "`");
 
-                    segments = List.of(Segment.of(variant.contig(), previous, CS, Position.of(start), Position.of(end),
+                    segments = List.of(Segment.of(variant.contig(), previous, Coordinates.of(CS, start, end),
                             variant.id(), Event.DELETION, copyNumber - 1));
                     break;
                 }

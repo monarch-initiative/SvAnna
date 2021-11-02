@@ -5,7 +5,7 @@ import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.db.landscape.BaseEnhancer;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
+import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
 
 import java.util.Objects;
@@ -20,27 +20,26 @@ class FEnhancer extends BaseEnhancer {
     static FEnhancer of(Contig contig,
                         Strand strand,
                         CoordinateSystem coordinateSystem,
-                        Position startPosition,
-                        Position endPosition,
+                        int start,
+                        int end,
                         String id,
                         boolean isDevelopmental,
                         double tau,
                         Set<EnhancerTissueSpecificity> specificities,
                         double totalReadCounts) {
-        return new FEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, isDevelopmental, tau, specificities, totalReadCounts);
+        Coordinates coordinates = Coordinates.of(coordinateSystem, start, end);
+        return new FEnhancer(contig, strand, coordinates, id, isDevelopmental, tau, specificities, totalReadCounts);
     }
 
-    protected FEnhancer(Contig contig,
-                        Strand strand,
-                        CoordinateSystem coordinateSystem,
-                        Position startPosition,
-                        Position endPosition,
-                        String id,
-                        boolean isDevelopmental,
-                        double tau,
-                        Set<EnhancerTissueSpecificity> specificities,
-                        double totalReadCpm) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition, id, FANTOM_ENHANCER, isDevelopmental, tau, specificities);
+    private FEnhancer(Contig contig,
+                      Strand strand,
+                      Coordinates coordinates,
+                      String id,
+                      boolean isDevelopmental,
+                      double tau,
+                      Set<EnhancerTissueSpecificity> specificities,
+                      double totalReadCpm) {
+        super(contig, strand, coordinates, id, FANTOM_ENHANCER, isDevelopmental, tau, specificities);
         this.totalReadCpm = totalReadCpm;
     }
 

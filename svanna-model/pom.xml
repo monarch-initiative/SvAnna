@@ -9,13 +9,29 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>svanna-test</artifactId>
-    <description>Module with data (e.g. variants) usable for testing</description>
+    <artifactId>svanna-model</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>org.monarchinitiative.svart</groupId>
             <artifactId>svart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-core</artifactId>
+        </dependency>
+
+        <!--    TESTS    -->
+        <dependency>
+            <groupId>org.jax.svanna</groupId>
+            <artifactId>svanna-test</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-annotations</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

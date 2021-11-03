@@ -1,6 +1,6 @@
 package org.jax.svanna.model.gene;
 
-import org.jax.svanna.core.TestContig;
+import org.jax.svanna.test.TestContig;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;

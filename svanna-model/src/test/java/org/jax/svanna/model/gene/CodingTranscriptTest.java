@@ -1,6 +1,6 @@
 package org.jax.svanna.model.gene;
 
-import org.jax.svanna.core.TestContig;
+import org.jax.svanna.test.TestContig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

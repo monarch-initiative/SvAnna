@@ -37,3 +37,7 @@ data/
 # Sphinx documentation
 docs/_build/
 /dependency-reduced-pom.xml
+
+### The empty SvAnna database meant to be used with IDE to provide autocompletion etc.
+1710_svanna_empty.mv.db
+1710_svanna_empty.trace.db

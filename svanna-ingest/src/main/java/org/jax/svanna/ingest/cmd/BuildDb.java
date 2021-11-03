@@ -138,7 +138,7 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static DataSource initializeDataSource(Path dbPath) {
+    public static DataSource initializeDataSource(Path dbPath) {
         DataSource dataSource = makeDataSourceAt(dbPath);
 
         int migrations = applyMigrations(dataSource);

@@ -31,7 +31,7 @@ public interface Enhancer extends GenomicRegion {
         return tissueSpecificity().stream()
                 .map(EnhancerTissueSpecificity::hpoTerm)
                 .map(Term::getId)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
 }

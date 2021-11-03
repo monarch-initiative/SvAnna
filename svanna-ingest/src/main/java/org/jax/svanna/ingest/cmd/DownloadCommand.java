@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
 public class DownloadCommand implements Callable<Integer> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IngestCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadCommand.class);
 
     @CommandLine.Option(names ={"-d"}, description = "download directory")
     private String downloadPath = "data";

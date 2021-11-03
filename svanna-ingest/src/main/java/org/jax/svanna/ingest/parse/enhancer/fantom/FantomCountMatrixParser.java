@@ -172,6 +172,7 @@ public class FantomCountMatrixParser {
         double [][] cpm = new double[n_rows][n_columns];
         double []column_totals = new double[n_columns];
         for (int j=0;j<n_columns;j++) {
+            //noinspection ForLoopReplaceableByForEach
             for (int i = 0; i < n_rows; i++) {
                 column_totals[j] += unnormalizedMatrix[i][j];
             }
@@ -196,14 +197,15 @@ public class FantomCountMatrixParser {
      * @return array of enhancer names
      * @throws IOException if we cannot read the counts file
      */
-    String [] getEnhancerNames() throws IOException {
+    String[] getEnhancerNames() throws IOException {
         String [] enhancerIds = new String[n_enhancers];
         InputStream fileStream = Files.newInputStream(fantomCountsPath);
         InputStream gzipStream = new GZIPInputStream(fileStream);
         Reader decoder = new InputStreamReader(gzipStream, StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(decoder);
 
-        String line = br.readLine(); // discard header, enhancers names begin on next line
+        br.readLine(); // discard header, enhancers names begin on next line
+        String line;
         int i = 0;
         while ((line = br.readLine()) != null) {
             String [] fields = line.split("\t");
@@ -227,7 +229,8 @@ public class FantomCountMatrixParser {
         Reader decoder = new InputStreamReader(gzipStream, StandardCharsets.UTF_8);
         BufferedReader br = new BufferedReader(decoder);
         int enhancer_idx = 0;
-        String line = br.readLine(); // discard header, enhancers names begin on next line
+        br.readLine(); // discard header, enhancers names begin on next line
+        String line;
         while((line = br.readLine()) != null) {
             String [] fields = line.split("\t");
             // fields[0]; contains the name and is not needed here

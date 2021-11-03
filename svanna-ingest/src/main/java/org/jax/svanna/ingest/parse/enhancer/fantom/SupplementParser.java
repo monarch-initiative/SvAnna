@@ -28,7 +28,7 @@ public class SupplementParser {
 
     public SupplementParser(Map<TermId, HpoMapping> hpoMappingMap) {
         fantomSampleToHpoMappingMap = new HashMap<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s10.csv")))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s10.tsv")))) {
             String line;
             br.readLine(); // discard header
             while ((line=br.readLine()) != null) {
@@ -46,7 +46,7 @@ public class SupplementParser {
             e.printStackTrace();
         }
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s11.csv")))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s11.tsv")))) {
             String line;
             br.readLine(); // discard header
             while ((line=br.readLine()) != null) {

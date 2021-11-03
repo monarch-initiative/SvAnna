@@ -61,7 +61,7 @@ public class MicaDao {
             // similarity for the term pair is already in the database
             return 0;
 
-        String sql = "insert into SVANNA.RESNIK_SIMILARITY(LEFT_ID, RIGHT_ID, SIMILARITY) " +
+        String sql = "insert into SVANNA.HP_TERM_MICA(LEFT_VALUE, RIGHT_VALUE, IC_MICA) " +
                 "values ( ?, ?, ? )";
 
         return jdbcTemplate.update(sql, leftId, rightId, similarity);
@@ -82,7 +82,7 @@ public class MicaDao {
     }
 
     public Map<TermPair, Double> getAllMicaValues() {
-        String sql = "select LEFT_ID, RIGHT_ID, SIMILARITY from SVANNA.RESNIK_SIMILARITY";
+        String sql = "select LEFT_VALUE, RIGHT_VALUE, IC_MICA from SVANNA.HP_TERM_MICA";
         return jdbcTemplate.query(sql, rs -> {
             Map<TermPair, Double> similarityMap = new HashMap<>();
             while (rs.next()) {
@@ -103,8 +103,8 @@ public class MicaDao {
     }
 
     private Double getMica(int left, int right) {
-        String sql = "select SIMILARITY from SVANNA.RESNIK_SIMILARITY " +
-                "where LEFT_ID = ? and RIGHT_ID = ? " +
+        String sql = "select IC_MICA from SVANNA.HP_TERM_MICA " +
+                "where LEFT_VALUE = ? and RIGHT_VALUE = ? " +
                 "limit 1";
         return jdbcTemplate.query(sql, processResults(), left, right);
     }

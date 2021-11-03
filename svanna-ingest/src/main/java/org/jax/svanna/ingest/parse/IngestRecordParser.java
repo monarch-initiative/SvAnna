@@ -13,7 +13,7 @@ public interface IngestRecordParser<T extends GenomicRegion> {
 
     default List<? extends T> parseToList() throws IOException {
         try (Stream<? extends T> parse = parse()) {
-            return parse.collect(Collectors.toList());
+            return parse.collect(Collectors.toUnmodifiableList());
         }
     }
 }

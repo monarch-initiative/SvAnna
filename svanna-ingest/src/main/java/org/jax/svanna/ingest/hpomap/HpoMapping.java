@@ -11,11 +11,11 @@ public class HpoMapping {
   private final TermId hpoTermId;
   private final String hpoLabel;
 
-  public static HpoMapping of(TermId tid, String label, TermId hpoId, String hpoLabel) {
-    return new HpoMapping(tid, label, hpoId, hpoLabel);
+  public static HpoMapping of(TermId otherTermId, String otherLabel, TermId hpoId, String hpoLabel) {
+    return new HpoMapping(otherTermId, otherLabel, hpoId, hpoLabel);
   }
 
-  public HpoMapping(TermId tid, String label, TermId hpoId, String hpoLabel){
+  private HpoMapping(TermId tid, String label, TermId hpoId, String hpoLabel){
     this.otherOntologyTermId = tid;
     this.otherOntologyLabel = label;
     this.hpoTermId = hpoId;

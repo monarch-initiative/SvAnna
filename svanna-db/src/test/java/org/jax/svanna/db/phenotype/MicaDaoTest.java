@@ -29,7 +29,7 @@ public class MicaDaoTest {
             "HP:0000003, HP:0000004, .2",
             "HP:9999999, HP:8888888, 0.",
     })
-    @Sql({"resnik_similarity_create_table.sql", "resnik_similarity_insert_data.sql"})
+    @Sql({"hp_term_mica_create_table.sql", "hp_term_mica_insert_data.sql"})
     public void getSimilarity(String left, String right, double expected) {
         MicaDao dao = new MicaDao(dataSource);
         double similarity = dao.getMica(TermPair.symmetric(TermId.of(left), TermId.of(right)));
@@ -38,7 +38,7 @@ public class MicaDaoTest {
     }
 
     @Test
-    @Sql({"resnik_similarity_create_table.sql", "resnik_similarity_insert_data.sql"})
+    @Sql({"hp_term_mica_create_table.sql", "hp_term_mica_insert_data.sql"})
     public void getAllSimilarities() {
         MicaDao dao = new MicaDao(dataSource);
         Map<TermPair, Double> similarities = dao.getAllMicaValues();
@@ -56,7 +56,7 @@ public class MicaDaoTest {
             "HP:0000003, HP:0000004, .2, 1",
             "HP:9999999, HP:8888888, 0., 0",
     })
-    @Sql({"resnik_similarity_create_table.sql"})
+    @Sql({"hp_term_mica_create_table.sql"})
     public void insertItem(String left, String right, double similarity, int expected) {
         MicaDao dao = new MicaDao(dataSource);
         int inserted = dao.insertItem(TermPair.symmetric(TermId.of(left), TermId.of(right)), similarity);
@@ -65,7 +65,7 @@ public class MicaDaoTest {
     }
 
     @Test
-    @Sql({"resnik_similarity_create_table.sql"})
+    @Sql({"hp_term_mica_create_table.sql"})
     public void insertDuplicateItem() {
         MicaDao dao = new MicaDao(dataSource);
         TermPair pair = TermPair.symmetric(TermId.of("HP:0000123"), TermId.of("HP:0000456"));

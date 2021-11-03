@@ -17,6 +17,7 @@ import org.jax.svanna.db.landscape.RepetitiveRegionDao;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.jax.svanna.db.phenotype.MicaDao;
 import org.jax.svanna.ingest.Main;
+import org.jax.svanna.ingest.config.*;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
@@ -28,7 +29,7 @@ import org.jax.svanna.ingest.parse.population.DgvFileParser;
 import org.jax.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.jax.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.jax.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
-import org.jax.svanna.ingest.similarity.ResnikSimilarity;
+import org.jax.svanna.ingest.similarity.IcMicaCalculator;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
@@ -65,10 +66,10 @@ import java.util.concurrent.Callable;
 @EnableAutoConfiguration
 @EnableConfigurationProperties(value = {
         IngestDbProperties.class,
-        IngestDbProperties.EnhancerProperties.class,
-        IngestDbProperties.VariantProperties.class,
-        IngestDbProperties.PhenotypeProperties.class,
-        IngestDbProperties.TadProperties.class
+        EnhancerProperties.class,
+        VariantProperties.class,
+        PhenotypeProperties.class,
+        TadProperties.class
 })
 public class BuildDb implements Callable<Integer> {
 
@@ -122,15 +123,15 @@ public class BuildDb implements Callable<Integer> {
             DataSource dataSource = initializeDataSource(dbPath);
 
             downloadPhenotypeFiles(buildDir, properties);
-            ingestEnhancers(properties, assembly, dataSource);
+            ingestEnhancers(properties.enhancers(), assembly, dataSource);
 
             Path tmpDir = buildDir.resolve("build");
             URL chainUrl = new URL(properties.hg19toHg38ChainUrl()); // download hg19 to hg38 liftover chain
             Path hg19ToHg38Chain = downloadUrl(chainUrl, tmpDir);
-            ingestPopulationVariants(tmpDir, properties, assembly, dataSource, hg19ToHg38Chain);
-            ingestRepeats(tmpDir, properties, assembly, dataSource);
-            ingestTads(tmpDir, properties, assembly, dataSource, hg19ToHg38Chain);
-            precomputeResnikSimilarity(buildDir, dataSource);
+            ingestPopulationVariants(properties.variants(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
+            ingestRepeats(properties, assembly, dataSource, tmpDir);
+            ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
+            precomputeIcMica(buildDir, dataSource);
 
             LOGGER.info("The ingest is complete");
             return 0;
@@ -169,26 +170,29 @@ public class BuildDb implements Callable<Integer> {
         return migrate.migrationsExecuted;
     }
 
-    private static void ingestEnhancers(IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource) throws IOException {
+    private static void ingestEnhancers(EnhancerProperties properties,
+                                        GenomicAssembly assembly,
+                                        DataSource dataSource) throws IOException {
         Map<TermId, HpoMapping> uberonToHpoMap;
-        try (InputStream is = BuildDb.class.getResourceAsStream("/hpo_enhancer_map.csv")) {
+        try (InputStream is = BuildDb.class.getResourceAsStream("/uberon_tissue_to_hpo_top_level.csv")) {
             HpoTissueMapParser hpoTissueMapParser = new HpoTissueMapParser(is);
             uberonToHpoMap = hpoTissueMapParser.getOtherToHpoMap();
         }
 
-        IngestRecordParser<? extends Enhancer> vistaParser = new VistaEnhancerParser(assembly, Path.of(properties.enhancers().vista()), uberonToHpoMap);
+        IngestRecordParser<? extends Enhancer> vistaParser = new VistaEnhancerParser(assembly, Path.of(properties.vista()), uberonToHpoMap);
         IngestDao<Enhancer> ingestDao = new EnhancerAnnotationDao(dataSource, assembly);
         int updated = ingestTrack(vistaParser, ingestDao);
         LOGGER.info("Ingest of Vista enhancers affected {} rows", updated);
 
-        IngestRecordParser<? extends Enhancer> fantomParser = new FantomEnhancerParser(assembly, Path.of(properties.enhancers().fantomMatrix()), Path.of(properties.enhancers().fantomSample()), uberonToHpoMap);
+        IngestRecordParser<? extends Enhancer> fantomParser = new FantomEnhancerParser(assembly, Path.of(properties.fantomMatrix()), Path.of(properties.fantomSample()), uberonToHpoMap);
         updated = ingestTrack(fantomParser, ingestDao);
         LOGGER.info("Ingest of FANTOM5 enhancers affected {} rows", updated);
     }
 
-    private static void ingestPopulationVariants(Path tmpDir, IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource, Path hg19Hg38chainPath) throws IOException {
+    private static void ingestPopulationVariants(VariantProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir,
+                                                 Path hg19Hg38chainPath) throws IOException {
         // DGV
-        URL dgvUrl = new URL(properties.variants().dgvUrl());
+        URL dgvUrl = new URL(properties.dgvUrl());
         Path dgvLocalPath = downloadUrl(dgvUrl, tmpDir);
         LOGGER.info("Ingesting DGV data");
         DbPopulationVariantDao ingestDao = new DbPopulationVariantDao(dataSource, assembly);
@@ -196,7 +200,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("DGV ingest updated {} rows", dgvUpdated);
 
         // GNOMAD SV
-        URL gnomadUrl = new URL(properties.variants().gnomadSvVcfUrl());
+        URL gnomadUrl = new URL(properties.gnomadSvVcfUrl());
         Path gnomadLocalPath = downloadUrl(gnomadUrl, tmpDir);
         LOGGER.info("Ingesting GnomadSV data");
         IngestRecordParser<PopulationVariant> gnomadParser = new GnomadSvVcfParser(assembly, gnomadLocalPath, hg19Hg38chainPath);
@@ -204,7 +208,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("GnomadSV ingest updated {} rows", gnomadUpdated);
 
         // HGSVC2
-        URL hgsvc2 = new URL(properties.variants().hgsvc2VcfUrl());
+        URL hgsvc2 = new URL(properties.hgsvc2VcfUrl());
         Path hgsvc2Path = downloadUrl(hgsvc2, tmpDir);
         LOGGER.info("Ingesting HGSVC2 data");
         IngestRecordParser<PopulationVariant> hgSvc2VcfParser = new HgSvc2VcfParser(assembly, hgsvc2Path);
@@ -212,7 +216,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("HGSVC2 ingest updated {} rows", hgsvc2Updated);
 
         // dbSNP
-        URL dbsnp = new URL(properties.variants().dbsnpVcfUrl());
+        URL dbsnp = new URL(properties.dbsnpVcfUrl());
         Path dbSnpPath = downloadUrl(dbsnp, tmpDir);
         LOGGER.info("Ingesting dbSNP data");
         IngestRecordParser<PopulationVariant> dbsnpVcfParser = new DbsnpVcfParser(assembly, dbSnpPath);
@@ -220,7 +224,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("dbSNP ingest updated {} rows", dbsnpUpdated);
     }
 
-    private static void ingestRepeats(Path tmpDir, IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource) throws IOException {
+    private static void ingestRepeats(IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir) throws IOException {
         URL repeatsUrl = new URL(properties.getRepetitiveRegionsUrl());
         Path repeatsLocalPath = downloadUrl(repeatsUrl, tmpDir);
 
@@ -229,9 +233,9 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("Repeats ingest updated {} rows", repetitiveUpdated);
     }
 
-    private static void ingestTads(Path tmpDir, IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource, Path chain) throws IOException {
+    private static void ingestTads(TadProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir, Path chain) throws IOException {
         // McArthur2021 supplement
-        URL mcArthurSupplement = new URL(properties.tad().mcArthur2021Supplement());
+        URL mcArthurSupplement = new URL(properties.mcArthur2021Supplement());
         Path localPath = downloadUrl(mcArthurSupplement, tmpDir);
 
         try (ZipFile zipFile = new ZipFile(localPath.toFile())) {
@@ -246,10 +250,10 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static void precomputeResnikSimilarity(Path buildDir, DataSource dataSource) {
+    private static void precomputeIcMica(Path buildDir, DataSource dataSource) {
         Path ontologyPath = buildDir.resolve("hp.obo");
         Path hpoaPath = buildDir.resolve("phenotype.hpoa");
-        Map<TermPair, Double> similarityMap = ResnikSimilarity.precomputeResnikSimilarity(ontologyPath, hpoaPath);
+        Map<TermPair, Double> similarityMap = IcMicaCalculator.precomputeIcMicaValues(ontologyPath, hpoaPath);
 
         MicaDao dao = new MicaDao(dataSource);
         similarityMap.forEach(dao::insertItem);
@@ -305,7 +309,7 @@ public class BuildDb implements Callable<Integer> {
     }
 
     private static void downloadPhenotypeFiles(Path buildDir, IngestDbProperties properties) throws IOException {
-        IngestDbProperties.PhenotypeProperties phenotype = properties.phenotype();
+        PhenotypeProperties phenotype = properties.phenotype();
         List<String> fieldsToDownload = List.of(phenotype.hpoOboUrl(), phenotype.hpoAnnotationsUrl(),
                 phenotype.mim2geneMedgenUrl(), phenotype.geneInfoUrl());
         for (String field : fieldsToDownload) {

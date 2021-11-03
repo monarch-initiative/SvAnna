@@ -76,12 +76,14 @@ create index SVANNA.TAD_BOUNDARY__CONTIG_START_END_IDX
 create index SVANNA.TAD_BOUNDARY__CONTIG_MIDPOINT_IDX
 on SVANNA.TAD_BOUNDARY (CONTIG, MIDPOINT);
 
--- TODO - these are not similarities but mere IC_{MICA} values
-drop table if exists SVANNA.RESNIK_SIMILARITY;
-create table SVANNA.RESNIK_SIMILARITY
+---------------------------------- IC MICA -----------------------------------------------------------------------------
+
+drop table if exists SVANNA.HP_TERM_MICA;
+create table SVANNA.HP_TERM_MICA
 (
-    LEFT_ID    INT   not null, -- left term ID. The id for `HP:0001234` is 1234
-    RIGHT_ID   INT   not null, -- right term ID
-    SIMILARITY FLOAT not null  -- Resnik similarity value
+    LEFT_VALUE  INT   not null, -- left term value. The value for `HP:0001234` is 1234
+    RIGHT_VALUE INT   not null, -- right term value
+    IC_MICA     FLOAT not null  -- information content of the most common informative ancestor
 );
-create unique index SVANNA.RESNIK_SIMILARITY__IDX on SVANNA.RESNIK_SIMILARITY (LEFT_ID, RIGHT_ID);
+drop index if exists SVANNA.HP_TERM_MICA;
+create unique index SVANNA.HP_TERM_MICA on SVANNA.HP_TERM_MICA (LEFT_VALUE, RIGHT_VALUE);

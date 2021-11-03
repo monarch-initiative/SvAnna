@@ -15,13 +15,19 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Path;
 import java.util.*;
 
-public class ResnikSimilarity {
+/**
+ * Precompute information content (IC) of most informative common ancestors (MICA) for term pairs.
+ */
+public class IcMicaCalculator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResnikSimilarity.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IcMicaCalculator.class);
 
-    private ResnikSimilarity() {}
+    private static final TermId[] TOP_LEVEL_TERMS = toplevelTerms();
 
-    public static Map<TermPair, Double> precomputeResnikSimilarity(Path ontologyPath, Path hpoAnnotationsPath) {
+    private IcMicaCalculator() {
+    }
+
+    public static Map<TermPair, Double> precomputeIcMicaValues(Path ontologyPath, Path hpoAnnotationsPath) {
         LogUtils.logInfo(LOGGER, "Reading ontology file at `{}`", ontologyPath.toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(ontologyPath.toFile());
 
@@ -29,7 +35,7 @@ public class ResnikSimilarity {
         List<String> databases = List.of("OMIM"); // restrict ourselves to OMIM entries
         Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoAnnotationsPath.toString(), ontology, databases);
 
-        LogUtils.logInfo(LOGGER, "Computing Resnik term similarities");
+        LogUtils.logInfo(LOGGER, "Computing information contents of most informative common ancestor terms");
         Map<TermId, Collection<TermId>> diseaseIdToTermIds = new HashMap<>();
         Map<TermId, Collection<TermId>> termIdToDiseaseIds = new HashMap<>();
         for (TermId diseaseId : diseaseMap.keySet()) {
@@ -55,32 +61,31 @@ public class ResnikSimilarity {
             termToIc.put(tid, ic);
         }
 
-        Map<TermPair, Double> termPairResnikSimilarityMap = new HashMap<>();
+        Map<TermPair, Double> termPairIcMicaMap = new HashMap<>();
 
         // Compute for relevant sub-ontologies in HPO
-        for (TermId topTerm : toplevelTerms()) {
-            if (! ontology.containsTerm(topTerm)) {
+        for (TermId topTerm : TOP_LEVEL_TERMS) {
+            if (!ontology.containsTerm(topTerm)) {
                 continue; // should never happen, but avoid crash in testing.
             }
-            Ontology subontology = ontology.subOntology(topTerm);
-            final Set<TermId> terms = subontology.getNonObsoleteTermIds();
-            List<TermId> list = new ArrayList<>(terms);
-            for (int i = 0; i < list .size(); i++) {
+            Ontology subOntology = ontology.subOntology(topTerm);
+            List<TermId> list = List.copyOf(subOntology.getNonObsoleteTermIds());
+            for (int i = 0; i < list.size(); i++) {
                 // start the second interaction at i to get self-similarity
                 for (int j = i; j < list.size(); j++) {
                     TermId a = list.get(i);
                     TermId b = list.get(j);
-                    double similarity = computeResnikSimilarity(a, b, termToIc, subontology);
-                    TermPair tpair = TermPair.symmetric(a, b);
+                    double informationContent = computeIcMica(a, b, termToIc, subOntology);
+                    TermPair termPair = TermPair.symmetric(a, b);
                     // a few terms belong to multiple sub-ontologies. This will take the maximum similarity.
-                    double d = termPairResnikSimilarityMap.getOrDefault(tpair, 0.0);
-                    if (similarity > d) {
-                        termPairResnikSimilarityMap.put(tpair, similarity);
+                    double d = termPairIcMicaMap.getOrDefault(termPair, 0.0);
+                    if (informationContent > d) {
+                        termPairIcMicaMap.put(termPair, informationContent);
                     }
                 }
             }
         }
-        return termPairResnikSimilarityMap;
+        return termPairIcMicaMap;
     }
 
 
@@ -116,7 +121,7 @@ public class ResnikSimilarity {
                 VOICE_ID, GROWTH_ID, CONSTITUTIONAL_ID, NEOPLASM_ID};
     }
 
-    private static double computeResnikSimilarity(TermId a, TermId b, Map<TermId, Double> termToIc, Ontology ontology) {
+    private static double computeIcMica(TermId a, TermId b, Map<TermId, Double> termToIc, Ontology ontology) {
         final Set<TermId> commonAncestors = ontology.getCommonAncestors(a, b);
         double maxValue = 0.0;
         for (TermId termId : commonAncestors) {

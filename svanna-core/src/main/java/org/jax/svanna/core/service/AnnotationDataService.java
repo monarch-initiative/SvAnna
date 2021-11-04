@@ -1,5 +1,6 @@
 package org.jax.svanna.core.service;
 
+import org.jax.svanna.model.landscape.dosage.DosageElement;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
@@ -31,4 +32,6 @@ public interface AnnotationDataService {
     }
 
     List<TadBoundary> overlappingTadBoundaries(GenomicRegion query);
+
+    List<DosageElement> dosageElements(GenomicRegion query);
 }

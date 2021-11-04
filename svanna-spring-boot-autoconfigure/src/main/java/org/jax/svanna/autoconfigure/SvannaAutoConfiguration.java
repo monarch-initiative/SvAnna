@@ -133,7 +133,8 @@ public class SvannaAutoConfiguration {
                 new EnhancerAnnotationDao(dataSource, genomicAssembly, enhancerParameters),
                 new RepetitiveRegionDao(dataSource, genomicAssembly),
                 new DbPopulationVariantDao(dataSource, genomicAssembly),
-                new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction()));
+                new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction()),
+                new DosageElementDao(dataSource, genomicAssembly));
     }
 
     @Bean

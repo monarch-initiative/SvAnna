@@ -1,0 +1,15 @@
+#ClinGen Region Curation Results
+#03 Nov,2021
+#Genomic Locations are reported on GRCh38 (hg38): GCF_000001405.36
+#https://www.ncbi.nlm.nih.gov/projects/dbvar/clingen
+#to create link: https://www.ncbi.nlm.nih.gov/projects/dbvar/clingen/clingen_region.cgi?id=key
+#ISCA ID	ISCA Region Name	cytoBand	Genomic Location	Haploinsufficiency Score	Haploinsufficiency Description	Haploinsufficiency PMID1	Haploinsufficiency PMID2	Haploinsufficiency PMID3	Haploinsufficiency PMID4	Haploinsufficiency PMID5	Haploinsufficiency PMID6	Triplosensitivity Score	Triplosensitivity Description	Triplosensitivity PMID1	Triplosensitivity PMID2	Triplosensitivity PMID3	Triplosensitivity PMID4	Triplosensitivity PMID5	Triplosensitivity PMID6	Date Last Evaluated	Loss phenotype OMIM ID	Triplosensitive phenotype OMIM ID
+ISCA-46739	Yq11.223 population region (DGV_Gold_Standard_June_2021_gssvL138428)	Yq11.223	chrY:23707042-24000812	30	Gene associated with autosomal recessive phenotype							0	No evidence available							2021-08-03		
+ISCA-46738	Yq11.223 population region (DGV_Gold_Standard_June_2021_gssvL138419)	Yq11.223	chrY:22215719-22319024	40	Dosage sensitivity unlikely							0	No evidence available							2021-08-03		
+ISCA-46737	Xq27.3 population region (DGV_Gold_Standard_June_2021_gssvL137799)	Xq27.3	chrX:143513946-143712498	40	Dosage sensitivity unlikely							0	No evidence available							2021-08-03		
+ISCA-46736	Xq21.1 population region (DGV_Gold_Standard_June_2021_gssvL136501)	Xq21.1	chrX:76917203-76920597	40	Dosage sensitivity unlikely							0	No evidence available							2021-08-03		
+ISCA-46735	Xp11.23 population region (DGV_Gold_Standard_June_2021_gssvL136075)	Xp11.23	chrX:48020900-48092718	40	Dosage sensitivity unlikely							0	No evidence available							2021-08-03		
+ISCA-46734	Xq28 population region (DGV_Gold_Standard_June_2021_gssvG41365)	Xq28	chrX:154144372-154195156	3	Sufficient evidence for dosage pathogenicity							2	Some evidence for dosage pathogenicity							2021-08-03		
+ISCA-46733	Xq24 population region (DGV_Gold_Standard_June_2021_gssvG41158)	Xq24	chrX:120872658-120990043	0	No evidence available							40	Dosage sensitivity unlikely							2021-08-03		
+ISCA-46732	22q11.23 population region (DGV_Gold_Standard_June_2021_gssvG24415)	22q11.23	chr22:25307292-25389268	0	No evidence available							40	Dosage sensitivity unlikely							2021-08-03		
+ISCA-46731	22q11.21 population region (DGV_Gold_Standard_June_2021_gssvL77050)	22q11.21	chr22:21512587-21554998	3	Sufficient evidence for dosage pathogenicity							0	No evidence available							2021-08-03		

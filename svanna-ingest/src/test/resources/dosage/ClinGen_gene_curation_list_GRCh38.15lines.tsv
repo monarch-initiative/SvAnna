@@ -1,0 +1,15 @@
+#ClinGen Gene Curation Results
+#03 Nov,2021
+#Genomic Locations are reported on GRCh38 (hg38): GCF_000001405.36
+#https://www.ncbi.nlm.nih.gov/projects/dbvar/clingen
+#to create link: https://www.ncbi.nlm.nih.gov/projects/dbvar/clingen/clingen_gene.cgi?sym=Gene Symbol
+#Gene Symbol	Gene ID	cytoBand	Genomic Location	Haploinsufficiency Score	Haploinsufficiency Description	Haploinsufficiency PMID1	Haploinsufficiency PMID2	Haploinsufficiency PMID3	Haploinsufficiency PMID4	Haploinsufficiency PMID5	Haploinsufficiency PMID6	Triplosensitivity Score	Triplosensitivity Description	Triplosensitivity PMID1	Triplosensitivity PMID2	Triplosensitivity PMID3	Triplosensitivity PMID4	Triplosensitivity PMID5	Triplosensitivity PMID6	Date Last Evaluated	Loss phenotype OMIM ID	Triplosensitive phenotype OMIM ID
+A4GALT	53947	22q13.2	chr22:42692115-42721301	2	Some evidence for dosage pathogenicity							0	No evidence available							2014-12-11	111400	
+AAGAB	79719	15q23	chr15:67200667-67255198	3	Sufficient evidence for dosage pathogenicity	23064416	23000146					0	No evidence available							2013-02-28	148600	
+AARS1	16	16q22.1	chr16:70252295-70289552	0	No evidence available							3	Sufficient evidence for dosage pathogenicity							2018-01-11		
+AARS2	57505	6p21.1	chr6:44297850-44313358	1	Little evidence for dosage pathogenicity							Not yet evaluated	Not yet evaluated							2016-08-22	615889	
+AASS	10157	7q31.32	chr7:122073544-122144269	30	Gene associated with autosomal recessive phenotype							Not yet evaluated	Not yet evaluated							2016-08-22	238700	
+ABAT	18	16p13.2	chr16:8674617-8784575	30	Gene associated with autosomal recessive phenotype							Not yet evaluated	Not yet evaluated							2016-08-22	613163	
+ABCB11	8647	2q31.1	chr2:168915468-169031396	30	Gene associated with autosomal recessive phenotype							0	No evidence available							2020-07-08	601847	
+ABCC8	6833	11p15.1	chr11:17392498-17476849	30	Gene associated with autosomal recessive phenotype							0	No evidence available							2012-02-24	256450	
+ABCD1	215	Xq28	chrX:153724851-153744755	3	Sufficient evidence for dosage pathogenicity	8040304	23835273	25835712	7825602			0	No evidence available							2020-12-02	300100	

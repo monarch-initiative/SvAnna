@@ -11,10 +11,7 @@ import org.flywaydb.core.api.output.MigrateResult;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.db.IngestDao;
-import org.jax.svanna.db.landscape.DbPopulationVariantDao;
-import org.jax.svanna.db.landscape.EnhancerAnnotationDao;
-import org.jax.svanna.db.landscape.RepetitiveRegionDao;
-import org.jax.svanna.db.landscape.TadBoundaryDao;
+import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.db.phenotype.MicaDao;
 import org.jax.svanna.ingest.Main;
 import org.jax.svanna.ingest.config.*;
@@ -22,6 +19,8 @@ import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.ingest.parse.RepetitiveRegionParser;
+import org.jax.svanna.ingest.parse.dosage.ClingenGeneCurationParser;
+import org.jax.svanna.ingest.parse.dosage.ClingenRegionCurationParser;
 import org.jax.svanna.ingest.parse.enhancer.fantom.FantomEnhancerParser;
 import org.jax.svanna.ingest.parse.enhancer.vista.VistaEnhancerParser;
 import org.jax.svanna.ingest.parse.population.DbsnpVcfParser;
@@ -30,6 +29,7 @@ import org.jax.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.jax.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.jax.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
 import org.jax.svanna.ingest.similarity.IcMicaCalculator;
+import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
@@ -69,7 +69,8 @@ import java.util.concurrent.Callable;
         EnhancerProperties.class,
         VariantProperties.class,
         PhenotypeProperties.class,
-        TadProperties.class
+        TadProperties.class,
+        GeneDosageProperties.class
 })
 public class BuildDb implements Callable<Integer> {
 
@@ -132,6 +133,8 @@ public class BuildDb implements Callable<Integer> {
             ingestRepeats(properties, assembly, dataSource, tmpDir);
             ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
             precomputeIcMica(buildDir, dataSource);
+            Map<TermId, GenomicRegion> geneMap = Map.of(); // TODO: 11/3/21 implement
+            ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap);
 
             LOGGER.info("The ingest is complete");
             return 0;
@@ -257,6 +260,32 @@ public class BuildDb implements Callable<Integer> {
 
         MicaDao dao = new MicaDao(dataSource);
         similarityMap.forEach(dao::insertItem);
+    }
+
+    private static void ingestGeneDosage(GeneDosageProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir, Map<TermId, ? extends GenomicRegion> geneRegions) throws IOException {
+        DosageElementDao dosageElementDao = new DosageElementDao(dataSource, assembly);
+
+        // dosage sensitive genes
+        URL geneUrl = new URL(properties.getGeneUrl());
+        Path geneLocalPath = downloadUrl(geneUrl, tmpDir);
+        ClingenGeneCurationParser geneParser = new ClingenGeneCurationParser(geneLocalPath, geneRegions);
+        int geneUpdated = geneParser.parse()
+                // only store the dosage sensitive genes and not necessarily all genes
+                .filter(dosageElement -> !DosageSensitivity.NONE.equals(dosageElement.dosageSensitivity()))
+                .mapToInt(dosageElementDao::insertItem)
+                .sum();
+        LOGGER.info("Ingest of dosage sensitive genes affected {} rows", geneUpdated);
+
+        // dosage sensitive regions
+        URL regionUrl = new URL(properties.getRegionUrl());
+        Path regionLocalPath = downloadUrl(regionUrl, tmpDir);
+        ClingenRegionCurationParser regionParser = new ClingenRegionCurationParser(regionLocalPath, assembly);
+        int regionsUpdated = regionParser.parse()
+                // only store the dosage sensitive genes and not necessarily all genes
+                .filter(dosageElement -> !DosageSensitivity.NONE.equals(dosageElement.dosageSensitivity()))
+                .mapToInt(dosageElementDao::insertItem)
+                .sum();
+        LOGGER.info("Ingest of dosage sensitive regions affected {} rows", regionsUpdated);
     }
 
     private static <T extends GenomicRegion> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {

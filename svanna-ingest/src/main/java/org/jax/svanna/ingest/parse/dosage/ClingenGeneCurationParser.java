@@ -23,7 +23,7 @@ import static org.jax.svanna.ingest.parse.dosage.DosageElementsUtil.makeDosageEl
 /**
  * Clingen gene list is a TSV file with several header lines that start with <code>#</code>.
  * <p>
- * The rows represent genes. See the
+ * The rows represent genes.
  */
 public class ClingenGeneCurationParser implements IngestRecordParser<DosageElement> {
 

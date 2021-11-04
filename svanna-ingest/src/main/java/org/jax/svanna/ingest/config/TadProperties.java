@@ -2,7 +2,7 @@ package org.jax.svanna.ingest.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties(prefix = "svanna.tad.phenotype")
+@ConfigurationProperties(prefix = "svanna.ingest.tad")
 public class TadProperties {
 
     private String mcArthur2021Supplement;

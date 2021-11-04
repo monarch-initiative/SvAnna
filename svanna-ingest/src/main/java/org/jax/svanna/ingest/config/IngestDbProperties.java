@@ -16,6 +16,8 @@ public class IngestDbProperties {
     private PhenotypeProperties phenotype;
     @NestedConfigurationProperty
     private TadProperties tad;
+    @NestedConfigurationProperty
+    private GeneDosageProperties dosage;
 
     public String repetitiveRegionsUrl() {
         return repetitiveRegionsUrl;
@@ -29,12 +31,28 @@ public class IngestDbProperties {
         this.hg19toHg38ChainUrl = hg19toHg38ChainUrl;
     }
 
-    public TadProperties tad() {
-        return tad;
+    public String getRepetitiveRegionsUrl() {
+        return repetitiveRegionsUrl;
     }
 
-    public void setTad(TadProperties tad) {
-        this.tad = tad;
+    public void setRepetitiveRegionsUrl(String repetitiveRegionsUrl) {
+        this.repetitiveRegionsUrl = repetitiveRegionsUrl;
+    }
+
+    public EnhancerProperties enhancers() {
+        return enhancers;
+    }
+
+    public void setEnhancers(EnhancerProperties enhancers) {
+        this.enhancers = enhancers;
+    }
+    
+    public VariantProperties variants() {
+        return variants;
+    }
+
+    public void setVariants(VariantProperties variants) {
+        this.variants = variants;
     }
 
     public PhenotypeProperties phenotype() {
@@ -45,28 +63,20 @@ public class IngestDbProperties {
         this.phenotype = phenotype;
     }
 
-    public String getRepetitiveRegionsUrl() {
-        return repetitiveRegionsUrl;
+
+    public TadProperties tad() {
+        return tad;
     }
 
-    public void setRepetitiveRegionsUrl(String repetitiveRegionsUrl) {
-        this.repetitiveRegionsUrl = repetitiveRegionsUrl;
+    public void setTad(TadProperties tad) {
+        this.tad = tad;
     }
 
-    public VariantProperties variants() {
-        return variants;
+    public GeneDosageProperties getDosage() {
+        return dosage;
     }
 
-    public void setVariants(VariantProperties variants) {
-        this.variants = variants;
+    public void setDosage(GeneDosageProperties dosage) {
+        this.dosage = dosage;
     }
-
-    public EnhancerProperties enhancers() {
-        return enhancers;
-    }
-
-    public void setEnhancers(EnhancerProperties enhancers) {
-        this.enhancers = enhancers;
-    }
-
 }

@@ -39,6 +39,13 @@ svanna.ingest:
     # McArthur2021 supplement - https://pubmed.ncbi.nlm.nih.gov/33545030/
     mcArthur2021Supplement: https://zenodo.org/record/4156731/files/emcarthur/TAD-stability-heritability-v1.0.1.zip
 
+  ### Gene dosage sensitivity
+  dosage:
+    # table with a gene per row
+    geneUrl: ftp://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv
+    # table with a dosage sensitive region per row
+    regionUrl: ftp://ftp.clinicalgenome.org/ClinGen_region_curation_list_GRCh38.tsv
+
 ##############################
 # Do not edit anything below
 ##############################

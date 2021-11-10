@@ -18,6 +18,8 @@ public class IngestDbProperties {
     private TadProperties tad;
     @NestedConfigurationProperty
     private GeneDosageProperties dosage;
+    @NestedConfigurationProperty
+    private GeneProperties genes;
 
     public String repetitiveRegionsUrl() {
         return repetitiveRegionsUrl;
@@ -79,4 +81,13 @@ public class IngestDbProperties {
     public void setDosage(GeneDosageProperties dosage) {
         this.dosage = dosage;
     }
+
+    public GeneProperties getGenes() {
+        return genes;
+    }
+
+    public void setGenes(GeneProperties genes) {
+        this.genes = genes;
+    }
+
 }

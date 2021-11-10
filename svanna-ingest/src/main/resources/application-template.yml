@@ -45,6 +45,13 @@ svanna.ingest:
     geneUrl: ftp://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv
     # table with a dosage sensitive region per row
     regionUrl: ftp://ftp.clinicalgenome.org/ClinGen_region_curation_list_GRCh38.tsv
+    # TSV containing among others `HGNC ID` and `NCBI gene ID` columns.
+    # The TSV can be downloaded from https://biomart.genenames.org/martform/#!/default/HGNC?datasets=hgnc_gene_mart
+    # Make sure you check `HGNC ID` and `NCBI gene ID` attributes
+    ncbiGeneToHgnc:
+
+  genes:
+    gencodeGtfUrl: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.chr_patch_hapl_scaff.annotation.gtf.gz
 
 ##############################
 # Do not edit anything below

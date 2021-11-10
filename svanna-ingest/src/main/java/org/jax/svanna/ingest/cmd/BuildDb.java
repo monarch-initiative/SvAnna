@@ -5,6 +5,11 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
@@ -29,10 +34,12 @@ import org.jax.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.jax.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.jax.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
 import org.jax.svanna.ingest.similarity.IcMicaCalculator;
+import org.jax.svanna.model.landscape.dosage.DosageElement;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -44,6 +51,12 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import picocli.CommandLine;
+import xyz.ielis.silent.genes.gencode.io.GencodeParser;
+import xyz.ielis.silent.genes.gencode.model.GencodeGene;
+import xyz.ielis.silent.genes.io.GeneParser;
+import xyz.ielis.silent.genes.io.GeneParserFactory;
+import xyz.ielis.silent.genes.io.SerializationFormat;
+import xyz.ielis.silent.genes.model.Gene;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -52,9 +65,15 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @CommandLine.Command(name = "build-db",
         aliases = "B",
@@ -70,7 +89,8 @@ import java.util.concurrent.Callable;
         VariantProperties.class,
         PhenotypeProperties.class,
         TadProperties.class,
-        GeneDosageProperties.class
+        GeneDosageProperties.class,
+        GeneProperties.class
 })
 public class BuildDb implements Callable<Integer> {
 
@@ -90,56 +110,6 @@ public class BuildDb implements Callable<Integer> {
     @CommandLine.Parameters(index = "1",
             description = "path to directory where the database will be built (default: ${DEFAULT-VALUE})")
     public Path buildDir = Path.of("data");
-
-    @Override
-    public Integer call() throws Exception {
-        try (ConfigurableApplicationContext context = getContext()) {
-            IngestDbProperties properties = context.getBean(IngestDbProperties.class);
-
-            GenomicAssembly assembly = GenomicAssemblies.GRCh38p13();
-            if (buildDir.toFile().exists()) {
-                if (!buildDir.toFile().isDirectory()) {
-                    if (LOGGER.isErrorEnabled()) LOGGER.error("Not a directory: `{}`", buildDir);
-                    return 1;
-                }
-            } else {
-                if (!buildDir.toFile().mkdirs()) {
-                    if (LOGGER.isErrorEnabled()) LOGGER.error("Unable to create build directory");
-                    return 1;
-                }
-            }
-
-            Path dbPath = buildDir.resolve("svanna_db.mv.db");
-            if (dbPath.toFile().isFile()) {
-                if (overwrite) {
-                    if (LOGGER.isInfoEnabled()) LOGGER.info("Removing the old database");
-                    Files.delete(dbPath);
-                } else {
-                    LOGGER.info("Abort since the database already exists at `{}`. ", dbPath);
-                    return 0;
-                }
-            }
-
-            LOGGER.info("Creating database at `{}`", dbPath);
-            DataSource dataSource = initializeDataSource(dbPath);
-
-            downloadPhenotypeFiles(buildDir, properties);
-            ingestEnhancers(properties.enhancers(), assembly, dataSource);
-
-            Path tmpDir = buildDir.resolve("build");
-            URL chainUrl = new URL(properties.hg19toHg38ChainUrl()); // download hg19 to hg38 liftover chain
-            Path hg19ToHg38Chain = downloadUrl(chainUrl, tmpDir);
-            ingestPopulationVariants(properties.variants(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
-            ingestRepeats(properties, assembly, dataSource, tmpDir);
-            ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
-            precomputeIcMica(buildDir, dataSource);
-            Map<TermId, GenomicRegion> geneMap = Map.of(); // TODO: 11/3/21 implement
-            ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap);
-
-            LOGGER.info("The ingest is complete");
-            return 0;
-        }
-    }
 
     public static DataSource initializeDataSource(Path dbPath) {
         DataSource dataSource = makeDataSourceAt(dbPath);
@@ -171,6 +141,44 @@ public class BuildDb implements Callable<Integer> {
                 .load();
         MigrateResult migrate = flyway.migrate();
         return migrate.migrationsExecuted;
+    }
+
+    private static void downloadPhenotypeFiles(PhenotypeProperties properties, Path buildDir) throws IOException {
+        List<String> fieldsToDownload = List.of(properties.hpoOboUrl(), properties.hpoAnnotationsUrl(),
+                properties.mim2geneMedgenUrl(), properties.geneInfoUrl());
+        for (String field : fieldsToDownload) {
+            URL url = new URL(field);
+            downloadUrl(url, buildDir);
+        }
+    }
+
+    private static Path downloadAndPreprocessGenes(GeneProperties properties, GenomicAssembly assembly, Path buildDir, Path tmpDir) throws IOException {
+        // download Gencode GTF
+        URL url = new URL(properties.getGencodeGtfUrl());
+        Path localGencodeGtfPath = downloadUrl(url, tmpDir);
+
+        // transform the genes to silent gene format
+        LOGGER.info("Reading Gencode GTF file at `{}`", localGencodeGtfPath.toAbsolutePath());
+        GencodeParser parser = new GencodeParser(localGencodeGtfPath, assembly);
+        List<GencodeGene> genes = parser.stream()
+                .collect(Collectors.toUnmodifiableList());
+        LOGGER.info("Read {} genes", genes.size());
+
+        // dump the transformed genes to compressed JSON file in the build directory
+        GeneParserFactory parserFactory = GeneParserFactory.of(assembly);
+        GeneParser jsonParser = parserFactory.forFormat(SerializationFormat.JSON);
+        Path destination = buildDir.resolve("gencode.v38.genes.json.gz");
+        LOGGER.info("Serializing the genes to `{}`", destination.toAbsolutePath());
+        try (OutputStream os = new BufferedOutputStream(new GzipCompressorOutputStream(Files.newOutputStream(destination)))) {
+            jsonParser.write(genes, os);
+        }
+
+        return destination;
+    }
+
+    private static Path downloadLiftoverChain(IngestDbProperties properties, Path tmpDir) throws IOException {
+        URL chainUrl = new URL(properties.hg19toHg38ChainUrl()); // download hg19 to hg38 liftover chain
+        return downloadUrl(chainUrl, tmpDir);
     }
 
     private static void ingestEnhancers(EnhancerProperties properties,
@@ -262,30 +270,111 @@ public class BuildDb implements Callable<Integer> {
         similarityMap.forEach(dao::insertItem);
     }
 
-    private static void ingestGeneDosage(GeneDosageProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir, Map<TermId, ? extends GenomicRegion> geneRegions) throws IOException {
+    private static Map<TermId, GenomicRegion> readGeneRegions(Path gencodeJsonPath, GenomicAssembly assembly) throws IOException {
+        GeneParserFactory factory = GeneParserFactory.of(assembly);
+        GeneParser geneParser = factory.forFormat(SerializationFormat.JSON);
+
+        LOGGER.info("Reading genes from `{}`", gencodeJsonPath);
+        List<? extends Gene> genes;
+        try (InputStream is = new BufferedInputStream(new GzipCompressorInputStream(Files.newInputStream(gencodeJsonPath)))) {
+            genes = geneParser.read(is);
+        }
+        LOGGER.info("Read {} genes", genes.size());
+
+        Map<TermId, GenomicRegion> regionsByHgncId = new HashMap<>(genes.size());
+        for (Gene gene : genes) {
+            Optional<String> hgncIdOptional = gene.id().hgncId();
+            if (hgncIdOptional.isEmpty())
+                continue;
+
+            try {
+                TermId hgncId = TermId.of(hgncIdOptional.get());
+                regionsByHgncId.put(hgncId, gene.location());
+            } catch (PhenolRuntimeException e) {
+                LOGGER.warn("Invalid HGNC id `{}` in gene {}", hgncIdOptional.get(), gene);
+            }
+        }
+
+        return regionsByHgncId;
+    }
+
+    private static void ingestGeneDosage(GeneDosageProperties properties,
+                                         GenomicAssembly assembly,
+                                         DataSource dataSource,
+                                         Path tmpDir,
+                                         Map<TermId, ? extends GenomicRegion> geneRegions) throws IOException {
         DosageElementDao dosageElementDao = new DosageElementDao(dataSource, assembly);
+
+        // read NCBIGene to HGNC table
+        Map<Integer, Integer> ncbiGeneToHgnc = parseNcbiToHgncTable(properties.getNcbiGeneToHgnc());
 
         // dosage sensitive genes
         URL geneUrl = new URL(properties.getGeneUrl());
         Path geneLocalPath = downloadUrl(geneUrl, tmpDir);
-        ClingenGeneCurationParser geneParser = new ClingenGeneCurationParser(geneLocalPath, geneRegions);
-        int geneUpdated = geneParser.parse()
-                // only store the dosage sensitive genes and not necessarily all genes
-                .filter(dosageElement -> !DosageSensitivity.NONE.equals(dosageElement.dosageSensitivity()))
-                .mapToInt(dosageElementDao::insertItem)
-                .sum();
-        LOGGER.info("Ingest of dosage sensitive genes affected {} rows", geneUpdated);
+        ClingenGeneCurationParser geneParser = new ClingenGeneCurationParser(geneLocalPath, assembly, geneRegions, ncbiGeneToHgnc);
+        try (Stream<? extends DosageElement> geneStream = geneParser.parse()) {
+            int geneUpdated = geneStream
+                    // only store the dosage sensitive genes and not necessarily all genes
+                    .filter(dosageElement -> !DosageSensitivity.NONE.equals(dosageElement.dosageSensitivity()))
+                    .mapToInt(dosageElementDao::insertItem)
+                    .sum();
+            LOGGER.info("Ingest of dosage sensitive genes affected {} rows", geneUpdated);
+        }
 
         // dosage sensitive regions
         URL regionUrl = new URL(properties.getRegionUrl());
         Path regionLocalPath = downloadUrl(regionUrl, tmpDir);
         ClingenRegionCurationParser regionParser = new ClingenRegionCurationParser(regionLocalPath, assembly);
-        int regionsUpdated = regionParser.parse()
-                // only store the dosage sensitive genes and not necessarily all genes
-                .filter(dosageElement -> !DosageSensitivity.NONE.equals(dosageElement.dosageSensitivity()))
-                .mapToInt(dosageElementDao::insertItem)
-                .sum();
-        LOGGER.info("Ingest of dosage sensitive regions affected {} rows", regionsUpdated);
+        try (Stream<? extends DosageElement> regionStream = regionParser.parse()) {
+            int regionsUpdated = regionStream
+                    // only store the dosage sensitive genes and not necessarily all genes
+                    .filter(dosageElement -> !DosageSensitivity.NONE.equals(dosageElement.dosageSensitivity()))
+                    .mapToInt(dosageElementDao::insertItem)
+                    .sum();
+            LOGGER.info("Ingest of dosage sensitive regions affected {} rows", regionsUpdated);
+        }
+    }
+
+    private static Map<Integer, Integer> parseNcbiToHgncTable(String ncbiGeneToHgnc) throws IOException {
+        Path tablePath = Path.of(ncbiGeneToHgnc);
+        if (Files.notExists(tablePath)) {
+            throw new IOException("Table for mapping NCBIGene to HGNC does not exist at `" + tablePath.toAbsolutePath() + "`");
+        }
+
+        Map<Integer, Integer> results = new HashMap<>();
+        try (BufferedReader reader = Files.newBufferedReader(tablePath);
+             CSVParser parser = CSVFormat.TDF.withFirstRecordAsHeader().parse(reader)) {
+            Pattern hgncPattern = Pattern.compile("HGNC:(?<payload>\\d+)");
+            // HGNC ID	NCBI gene ID	Approved symbol
+            // HGNC:13666	8086	AAAS
+            for (CSVRecord record : parser) {
+                // parse NCBIGene. Should be a number, but may be missing.
+                String ncbiGene = record.get("NCBI gene ID");
+                if (ncbiGene.isBlank())
+                    // missing NCBI gene ID for this gene
+                    continue;
+
+                int ncbiGeneId;
+                try {
+                    ncbiGeneId = Integer.parseInt(ncbiGene);
+                } catch (NumberFormatException e) {
+                    LOGGER.warn("Skipping non-numeric NCBIGene id `{}` on line #{}: `{}`", ncbiGene, record.getRecordNumber(), record);
+                    continue;
+                }
+
+                // parse HGNC id
+                Matcher hgncMatcher = hgncPattern.matcher(record.get("HGNC ID"));
+                if (!hgncMatcher.matches()) {
+                    LOGGER.warn("Skipping HGNC id `{}` on line #{}: `{}`", record.get("HGNC ID"), record.getRecordNumber(), record);
+                    continue;
+                }
+                Integer hgncId = Integer.parseInt(hgncMatcher.group("payload"));
+
+                // store the results
+                results.put(ncbiGeneId, hgncId);
+            }
+        }
+        return results;
     }
 
     private static <T extends GenomicRegion> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {
@@ -337,13 +426,53 @@ public class BuildDb implements Callable<Integer> {
         return connection;
     }
 
-    private static void downloadPhenotypeFiles(Path buildDir, IngestDbProperties properties) throws IOException {
-        PhenotypeProperties phenotype = properties.phenotype();
-        List<String> fieldsToDownload = List.of(phenotype.hpoOboUrl(), phenotype.hpoAnnotationsUrl(),
-                phenotype.mim2geneMedgenUrl(), phenotype.geneInfoUrl());
-        for (String field : fieldsToDownload) {
-            URL url = new URL(field);
-            downloadUrl(url, buildDir);
+    @Override
+    public Integer call() throws Exception {
+        try (ConfigurableApplicationContext context = getContext()) {
+            IngestDbProperties properties = context.getBean(IngestDbProperties.class);
+
+            GenomicAssembly assembly = GenomicAssemblies.GRCh38p13();
+            if (buildDir.toFile().exists()) {
+                if (!buildDir.toFile().isDirectory()) {
+                    if (LOGGER.isErrorEnabled()) LOGGER.error("Not a directory: `{}`", buildDir);
+                    return 1;
+                }
+            } else {
+                if (!buildDir.toFile().mkdirs()) {
+                    if (LOGGER.isErrorEnabled()) LOGGER.error("Unable to create build directory");
+                    return 1;
+                }
+            }
+
+            Path dbPath = buildDir.resolve("svanna_db.mv.db");
+            if (dbPath.toFile().isFile()) {
+                if (overwrite) {
+                    if (LOGGER.isInfoEnabled()) LOGGER.info("Removing the old database");
+                    Files.delete(dbPath);
+                } else {
+                    LOGGER.info("Abort since the database already exists at `{}`. ", dbPath);
+                    return 0;
+                }
+            }
+
+            LOGGER.info("Creating database at `{}`", dbPath);
+            DataSource dataSource = initializeDataSource(dbPath);
+
+            Path tmpDir = buildDir.resolve("build");
+            downloadPhenotypeFiles(properties.phenotype(), buildDir);
+            Path gencodeJsonPath = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
+            ingestEnhancers(properties.enhancers(), assembly, dataSource);
+
+            Path hg19ToHg38Chain = downloadLiftoverChain(properties, tmpDir);
+            ingestPopulationVariants(properties.variants(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
+            ingestRepeats(properties, assembly, dataSource, tmpDir);
+            ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
+            precomputeIcMica(buildDir, dataSource);
+            Map<TermId, GenomicRegion> geneMap = readGeneRegions(gencodeJsonPath, assembly);
+            ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap);
+
+            LOGGER.info("The ingest is complete");
+            return 0;
         }
     }
 

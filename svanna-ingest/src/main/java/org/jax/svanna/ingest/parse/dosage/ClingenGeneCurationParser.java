@@ -4,7 +4,7 @@ import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.model.landscape.dosage.DosageElement;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,15 +30,20 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageEleme
     private static final Logger LOGGER = LoggerFactory.getLogger(ClingenGeneCurationParser.class);
 
     private static final Pattern NUMBER = Pattern.compile("\\d+");
+    private static final Pattern GENOMIC_LOCATION = Pattern.compile("(?<contig>(chr)?(\\d+|[XYZ])):(?<start>\\d+)-(?<end>\\d+)");
 
     private final Path clingenGeneListPath;
-
+    private final GenomicAssembly assembly;
     private final Map<TermId, ? extends GenomicRegion> geneRegions;
+    private final Map<Integer, Integer> ncbiGeneToHgnc;
 
     public ClingenGeneCurationParser(Path clingenGeneListPath,
-                                     Map<TermId, ? extends GenomicRegion> geneRegions) {
+                                     GenomicAssembly assembly, Map<TermId, ? extends GenomicRegion> geneRegions,
+                                     Map<Integer, Integer> ncbiGeneToHgnc) {
         this.clingenGeneListPath = clingenGeneListPath;
+        this.assembly = assembly;
         this.geneRegions = geneRegions;
+        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
     }
 
     @Override
@@ -63,36 +68,88 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageEleme
             String[] tokens = line.split("\t", 23);
             if (tokens.length != 23) {
                 LOGGER.warn("Expected {} columns and found {}. Skipping the line `{}`", 23, tokens.length, line);
-                return Collections.emptyList();
+                return List.of();
             }
 
             // ID - we use gene symbol as the ID, assuming that there is only one line per gene
             String id = tokens[0];
             if (id.isBlank()) {
                 LOGGER.warn("Skipping line with no ID: `{}`", line);
-                return Collections.emptyList();
+                return List.of();
             }
 
-
-            String geneId = tokens[1];
-            Matcher geneIdMatcher = NUMBER.matcher(geneId);
+            // parse Gene ID - numeric part of NCBIGene
+            String ncbiGeneId = tokens[1];
+            Matcher geneIdMatcher = NUMBER.matcher(ncbiGeneId);
             if (!geneIdMatcher.matches()) {
-                LOGGER.warn("Invalid gene ID {} (not numeric)", geneId);
-                return Collections.emptyList();
+                LOGGER.warn("Invalid gene ID {} (not numeric)", ncbiGeneId);
+                return List.of();
             }
 
-            TermId geneTermId = TermId.of("NCBIGene:" + geneId);
-            GenomicRegion geneRegion = geneRegions.get(geneTermId);
-            if (geneRegion == null) {
-                LOGGER.warn("Skipping unknown gene {} ({}) in line `{}`", tokens[0], geneTermId, line);
-                return Collections.emptyList();
+            // We must extract gene region for the gene, either:
+            // - using HGNC ID that corresponds to the NCBIGene and then the corresponding gene region, or
+            // - by parsing the `Genomic Location` (token[3])
+            GenomicRegion geneRegion = null;
+
+            // Try to get the
+            Optional<TermId> hgncId = getHgncId(tokens[1]);
+            if (hgncId.isPresent()) {
+                geneRegion = geneRegions.get(hgncId.get());
             }
+
+
+            if (geneRegion == null) {
+                Optional<GenomicRegion> region = getRegion(tokens[3]);
+                if (region.isEmpty())
+                    return List.of();
+                else
+                    geneRegion = region.get();
+            }
+
 
             String haploinsufficiency = tokens[4];
             String triplosensitivity = tokens[12];
 
             return makeDosageElements(geneRegion.contig(), geneRegion.strand(), geneRegion.coordinates(), id, haploinsufficiency, triplosensitivity);
         };
+    }
+
+    private Optional<GenomicRegion> getRegion(String payload) {
+        // parse `Genomic Location`
+        Matcher genomicLocation = GENOMIC_LOCATION.matcher(payload);
+        if (!genomicLocation.matches()) {
+            LOGGER.warn("Invalid genomic location `{}`", payload);
+            return Optional.empty();
+        }
+
+        Contig contig = assembly.contigByName(genomicLocation.group("contig"));
+        if (contig.isUnknown()) {
+            LOGGER.warn("Unknown contig `{}`", genomicLocation.group("contig"));
+            return Optional.empty();
+        }
+
+        int start = Integer.parseInt(genomicLocation.group("start"));
+        int end = Integer.parseInt(genomicLocation.group("end"));
+        return Optional.of(GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.oneBased(), start, end));
+    }
+
+    private Optional<TermId> getHgncId(String ncbiGeneId) {
+        // parse Gene ID - numeric part of NCBIGene
+        Matcher geneIdMatcher = NUMBER.matcher(ncbiGeneId);
+        if (!geneIdMatcher.matches()) {
+            LOGGER.warn("Invalid gene ID {} (not numeric)", ncbiGeneId);
+            return Optional.empty();
+        }
+
+        // get HGNC ID that corresponds to the NCBIGene
+        int ncbiGeneNumber = Integer.parseInt(ncbiGeneId);
+        Integer hgncIdNumber = ncbiGeneToHgnc.get(ncbiGeneNumber);
+        if (hgncIdNumber == null) {
+            // there is no HGNC ID for the NCBIGene
+            return Optional.empty();
+        }
+
+        return Optional.of(TermId.of(String.format("HGNC:%s", hgncIdNumber)));
     }
 
 }

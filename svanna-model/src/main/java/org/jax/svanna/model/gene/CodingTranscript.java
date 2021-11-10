@@ -7,6 +7,7 @@ import org.monarchinitiative.svart.Strand;
 
 import java.util.List;
 
+@Deprecated
 public interface CodingTranscript extends Transcript {
 
     static CodingTranscript of(Contig contig, Strand strand, CoordinateSystem coordinateSystem,

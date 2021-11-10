@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 // Gene is a collection of transcripts with a unique accession ID and a name.
 // Gene consists of >=1 transcript(s), all the transcripts must be on the same contig, strand, and coordinate system.
+@Deprecated
 public interface Gene extends GenomicRegion {
 
     // TODO - evaluate usefulness of the `TermId`s

@@ -4,6 +4,7 @@ import org.monarchinitiative.svart.*;
 
 import java.util.List;
 
+@Deprecated
 public interface Transcript extends GenomicRegion {
 
     static Transcript noncoding(Contig contig, Strand strand, CoordinateSystem coordinateSystem,

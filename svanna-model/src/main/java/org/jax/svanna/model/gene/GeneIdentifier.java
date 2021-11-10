@@ -4,6 +4,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 
 import java.util.Objects;
 
+@Deprecated
 public class GeneIdentifier {
     private final TermId accessionId;
     private final String symbol;

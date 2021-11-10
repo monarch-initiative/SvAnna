@@ -17,6 +17,10 @@
             <artifactId>svart</artifactId>
         </dependency>
         <dependency>
+            <groupId>xyz.ielis.silent.genes</groupId>
+            <artifactId>silent-genes-model</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>
             <artifactId>phenol-core</artifactId>
         </dependency>

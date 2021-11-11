@@ -1,30 +1,26 @@
 package org.jax.svanna.model.landscape.variant;
 
+import org.jax.svanna.model.landscape.BaseLocated;
 import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 
-public class BasePopulationVariant extends BaseGenomicRegion<BasePopulationVariant> implements PopulationVariant {
+public class BasePopulationVariant extends BaseLocated implements PopulationVariant {
 
     private final String id;
     private final VariantType variantType;
     private final float alleleFrequency;
     private final PopulationVariantOrigin populationVariantOrigin;
 
-    public static BasePopulationVariant of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end,
+    public static BasePopulationVariant of(GenomicRegion location,
                                            String id, VariantType variantType, float alleleFrequency, PopulationVariantOrigin populationVariantOrigin) {
-        return of(contig, strand, Coordinates.of(coordinateSystem, start, end), id, variantType, alleleFrequency, populationVariantOrigin);
-    }
-
-    public static BasePopulationVariant of(Contig contig, Strand strand, Coordinates coordinates,
-                                           String id, VariantType variantType, float alleleFrequency, PopulationVariantOrigin populationVariantOrigin) {
-        return new BasePopulationVariant(contig, strand, coordinates, id, variantType, alleleFrequency, populationVariantOrigin);
+        return new BasePopulationVariant(location, id, variantType, alleleFrequency, populationVariantOrigin);
     }
 
 
-    protected BasePopulationVariant(Contig contig, Strand strand, Coordinates coordinates,
+    protected BasePopulationVariant(GenomicRegion location,
                                     String id, VariantType variantType, float alleleFrequency, PopulationVariantOrigin populationVariantOrigin) {
-        super(contig, strand, coordinates);
+        super(location);
         this.id = id;
         this.variantType = variantType;
         this.alleleFrequency = alleleFrequency;
@@ -51,11 +47,6 @@ public class BasePopulationVariant extends BaseGenomicRegion<BasePopulationVaria
     }
 
     @Override
-    protected BasePopulationVariant newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
-        return new BasePopulationVariant(contig, strand, coordinates, id, variantType, alleleFrequency, populationVariantOrigin);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -72,11 +63,10 @@ public class BasePopulationVariant extends BaseGenomicRegion<BasePopulationVaria
     @Override
     public String toString() {
         return "BasePopulationVariant{" +
-                "region=" + super.toString() +
-                ", id=" + id +
+                "id='" + id + '\'' +
                 ", variantType=" + variantType +
                 ", alleleFrequency=" + alleleFrequency +
-                ", popvarSource=" + populationVariantOrigin +
-                '}';
+                ", populationVariantOrigin=" + populationVariantOrigin +
+                "} " + super.toString();
     }
 }

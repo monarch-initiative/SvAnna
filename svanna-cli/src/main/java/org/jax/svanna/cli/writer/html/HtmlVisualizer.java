@@ -8,7 +8,6 @@ import org.jax.svanna.core.overlap.TranscriptOverlap;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.model.HpoDiseaseSummary;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -16,6 +15,7 @@ import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -287,7 +287,7 @@ public class HtmlVisualizer implements Visualizer {
 
     private String affectedSymbols(Visualizable visualizable) {
         List<String> genes = visualizable.genes().stream()
-                .map(Gene::geneSymbol)
+                .map(Gene::symbol)
                 .distinct()
                 .collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
@@ -303,7 +303,7 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     private String numerousAffectedSymbols(Visualizable visualizable) {
-        List<String> genes = visualizable.genes().stream().map(Gene::geneSymbol).distinct().collect(toList());
+        List<String> genes = visualizable.genes().stream().map(Gene::symbol).distinct().collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
         Collections.sort(genes);
         List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
@@ -554,7 +554,7 @@ public class HtmlVisualizer implements Visualizer {
             for (TranscriptOverlap txOverlap : olap.transcriptOverlaps()) {
                 String cat = txOverlap.getOverlapType().getName();
                 String description = txOverlap.getDescription();
-                sb.append(threeItemRow(gene.geneSymbol(), cat, description));
+                sb.append(threeItemRow(gene.symbol(), cat, description));
             }
         }
 

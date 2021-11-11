@@ -4,11 +4,12 @@ import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.*;
 
@@ -209,16 +210,16 @@ public class DispatcherDb implements Dispatcher {
             Gene current = genes.get(i);
             List<Gene> remaining = genes.subList(i + 1, nGenes);
             for (Gene other : remaining) {
-                if (!current.overlapsWith(other))
+                if (!current.location().overlapsWith(other.location()))
                     return false;
             }
         }
         return true;
     }
 
-    private static Pair<Integer> findStartAndEnd(Collection<? extends GenomicRegion> regions, Strand strand, CoordinateSystem coordinateSystem) {
+    private static Pair<Integer> findStartAndEnd(Collection<? extends Located> regions, Strand strand, CoordinateSystem coordinateSystem) {
         int startPos = -1, endPos = -1;
-        for (GenomicRegion region : regions) {
+        for (Located region : regions) {
             int regionStart, regionEnd;
             if (region.strand().equals(strand)) {
                 regionStart = region.startWithCoordinateSystem(coordinateSystem);

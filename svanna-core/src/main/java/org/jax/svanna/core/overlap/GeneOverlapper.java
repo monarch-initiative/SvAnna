@@ -1,8 +1,8 @@
 package org.jax.svanna.core.overlap;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.jax.svanna.model.gene.Gene;
 import org.monarchinitiative.svart.Variant;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
 import java.util.Map;

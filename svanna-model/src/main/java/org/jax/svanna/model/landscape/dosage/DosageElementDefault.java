@@ -1,22 +1,21 @@
 package org.jax.svanna.model.landscape.dosage;
 
+import org.jax.svanna.model.landscape.BaseLocated;
 import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 
-class DosageElementDefault extends BaseGenomicRegion<DosageElement> implements DosageElement {
+class DosageElementDefault extends BaseLocated implements DosageElement {
 
     private final String id;
     private final DosageSensitivity dosageSensitivity;
     private final DosageSensitivityEvidence evidence;
 
-    DosageElementDefault(Contig contig,
-                         Strand strand,
-                         Coordinates coordinates,
+    DosageElementDefault(GenomicRegion location,
                          String id,
                          DosageSensitivity dosageSensitivity,
                          DosageSensitivityEvidence evidence) {
-        super(contig, strand, coordinates);
+        super(location);
         this.id = id;
         this.dosageSensitivity = dosageSensitivity;
         this.evidence = evidence;
@@ -35,11 +34,6 @@ class DosageElementDefault extends BaseGenomicRegion<DosageElement> implements D
     @Override
     public DosageSensitivityEvidence dosageSensitivityEvidence() {
         return evidence;
-    }
-
-    @Override
-    protected DosageElement newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
-        return new DosageElementDefault(contig, strand, coordinates, id, dosageSensitivity, evidence);
     }
 
     @Override

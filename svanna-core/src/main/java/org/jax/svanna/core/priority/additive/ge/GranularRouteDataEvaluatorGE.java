@@ -3,13 +3,15 @@ package org.jax.svanna.core.priority.additive.ge;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.Identified;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,7 +44,7 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
         Map<String, Double> alternateScores = evaluateAlternate(routes.alternates(), routeData.genes(), routeData.enhancers(), routeData.tadBoundaries());
 
         Set<String> geneAccessions = routeData.genes().stream()
-                .map(g -> g.accessionId().getValue())
+                .map(Identified::accession)
                 .collect(Collectors.toUnmodifiableSet());
 
         Map<String, Double> scoreMap = GranularEvaluatorUtils.calculateDeltas(geneAccessions, referenceScores, alternateScores);
@@ -65,11 +67,11 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
         // Group TAD boundaries, genes, and enhancers by contig
         Map<Contig, List<TadBoundary>> tadsByContig = tadBoundaries.stream()
                 .distinct()
-                .collect(Collectors.groupingBy(GenomicRegion::contig, Collectors.toUnmodifiableList()));
+                .collect(Collectors.groupingBy(Located::contig, Collectors.toUnmodifiableList()));
         Map<Contig, Set<Gene>> genesByContig = genes.stream()
-                .collect(Collectors.groupingBy(GenomicRegion::contig, Collectors.toUnmodifiableSet()));
+                .collect(Collectors.groupingBy(Located::contig, Collectors.toUnmodifiableSet()));
         Map<Contig, Set<Enhancer>> enhancersByContig = enhancers.stream()
-                .collect(Collectors.groupingBy(GenomicRegion::contig, Collectors.toUnmodifiableSet()));
+                .collect(Collectors.groupingBy(Located::contig, Collectors.toUnmodifiableSet()));
 
         // Prepare TAD regions
         Map<Contig, List<GenomicRegion>> evaluationRegionsByContig = EvaluatorUtils.prepareEvaluationRegions(referenceByContig, tadsByContig);
@@ -100,7 +102,7 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
                     }
                     double score = geneImpact * geneRelevance + enhancerRelevance;
                     // a score for a gene might already be in the results map if the event duplicates the entire gene
-                    results.merge(gene.accessionId().getValue(), score, Double::sum);
+                    results.merge(gene.accession(), score, Double::sum);
                 }
             }
         }
@@ -116,7 +118,7 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
         Map<String, Double> results = new HashMap<>(genes.size());
 
         for (Route route : routes) {
-            LinkedList<Projection<? extends GenomicRegion>> projections = EvaluatorUtils.projectGenesEnhancersTads(route, genes, enhancers, tadBoundaries);
+            LinkedList<Projection<? extends Located>> projections = EvaluatorUtils.projectGenesEnhancersTads(route, genes, enhancers, tadBoundaries);
 
             if (projections.isEmpty())
                 continue;
@@ -143,10 +145,10 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
 
 
             while (true) {
-                List<Projection<? extends GenomicRegion>> intraTadProjections = projections.subList(tadStart, tadEnd);
+                List<Projection<? extends Located>> intraTadProjections = projections.subList(tadStart, tadEnd);
 
                 // prepare TAD elements
-                for (Projection<? extends GenomicRegion> projection : intraTadProjections) {
+                for (Projection<? extends Located> projection : intraTadProjections) {
                     if (projection.source() instanceof Gene)
                         intraTadGenes.add((Projection<Gene>) projection);
                     else if (projection.source() instanceof Enhancer)
@@ -170,7 +172,7 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
 
                     double score = geneImpact * geneRelevance + enhancerRelevance;
                     // a score for a gene might already be in the results map if the event duplicates the entire gene
-                    results.merge(gene.source().accessionId().getValue(), score, Double::sum);
+                    results.merge(gene.source().accession(), score, Double::sum);
                 }
 
                 intraTadGenes.clear();

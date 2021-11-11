@@ -5,12 +5,13 @@ import org.jax.svanna.core.priority.additive.Routes;
 import org.jax.svanna.core.priority.additive.ge.RouteDataGE;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.GeneService;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +35,7 @@ public class DbRouteDataServiceGE implements RouteDataService<RouteDataGE> {
         RouteDataGE.Builder builder = RouteDataGE.builder(route);
 
         for (GenomicRegion reference : route.references()) {
-            Predicate<? super GenomicRegion> isContainedInRoute = reference::contains;
+            Predicate<? super Located> isContainedInRoute = r -> reference.contains(r.location());
             List<Gene> genes = geneService.overlappingGenes(reference).stream()
                     .filter(isContainedInRoute)
                     .collect(Collectors.toList());
@@ -57,7 +58,7 @@ public class DbRouteDataServiceGE implements RouteDataService<RouteDataGE> {
     }
 
     private static Predicate<? super TadBoundary> notOverlappingWithGene(Collection<Gene> genes) {
-        return tad -> genes.stream().noneMatch(g -> g.overlapsWith(tad));
+        return tad -> genes.stream().noneMatch(g -> g.location().overlapsWith(tad.location()));
     }
 
 }

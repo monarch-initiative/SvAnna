@@ -1,33 +1,26 @@
 package org.jax.svanna.model.landscape.repeat;
 
+import org.jax.svanna.model.landscape.BaseLocated;
 import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 
-public class RepetitiveRegion extends BaseGenomicRegion<RepetitiveRegion> {
+public class RepetitiveRegion extends BaseLocated {
 
     private final RepeatFamily repeatFamily;
 
     public static RepetitiveRegion of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int startPosition, int endPosition, RepeatFamily repeatFamily) {
-        return new RepetitiveRegion(contig, strand, Coordinates.of(coordinateSystem, startPosition, endPosition), repeatFamily);
+        GenomicRegion location = GenomicRegion.of(contig, strand, coordinateSystem, startPosition, endPosition);
+        return new RepetitiveRegion(location, repeatFamily);
     }
 
-    public static RepetitiveRegion of(Contig contig, Strand strand, Coordinates coordinates, RepeatFamily repeatFamily) {
-        return new RepetitiveRegion(contig, strand, coordinates, repeatFamily);
-    }
-
-    private RepetitiveRegion(Contig contig, Strand strand, Coordinates coordinates, RepeatFamily repeatFamily) {
-        super(contig, strand, coordinates);
+    private RepetitiveRegion(GenomicRegion location, RepeatFamily repeatFamily) {
+        super(location);
         this.repeatFamily = repeatFamily;
     }
 
     public RepeatFamily repeatFamily() {
         return repeatFamily;
-    }
-
-    @Override
-    protected RepetitiveRegion newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
-        return new RepetitiveRegion(contig, strand, coordinates, repeatFamily);
     }
 
     @Override
@@ -47,8 +40,7 @@ public class RepetitiveRegion extends BaseGenomicRegion<RepetitiveRegion> {
     @Override
     public String toString() {
         return "RepetitiveRegion{" +
-                "region=" + super.toString() +
-                ", repeatFamily=" + repeatFamily +
-                '}';
+                "repeatFamily=" + repeatFamily +
+                "} " + super.toString();
     }
 }

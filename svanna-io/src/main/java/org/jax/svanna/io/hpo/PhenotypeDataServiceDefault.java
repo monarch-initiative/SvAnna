@@ -6,7 +6,6 @@ import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
 import org.jax.svanna.model.ModeOfInheritance;
-import org.jax.svanna.model.gene.GeneIdentifier;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategoryMap;
@@ -16,6 +15,7 @@ import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import java.util.*;
 import java.util.function.Function;

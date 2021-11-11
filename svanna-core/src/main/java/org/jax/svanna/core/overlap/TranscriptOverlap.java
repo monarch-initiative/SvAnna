@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.model.gene.Transcript;
+import xyz.ielis.silent.genes.model.Transcript;
 
 /**
  * An object that represents the type and degree of overlap of a structural variant and
@@ -17,11 +17,6 @@ public class TranscriptOverlap {
     private final String accessionId;
 
     private final String description;
-
-    @Deprecated
-    public static TranscriptOverlap of(OverlapType type, Transcript tx, String hgvsSymbol, OverlapDistance odist, String desc) {
-        return of(type, tx.accessionId(), odist, desc);
-    }
 
     public static TranscriptOverlap of(OverlapType type, String accessionId, OverlapDistance odist, String desc) {
         return new TranscriptOverlap(type, accessionId, odist, desc);

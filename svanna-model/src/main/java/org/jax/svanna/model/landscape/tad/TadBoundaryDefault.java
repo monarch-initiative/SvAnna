@@ -1,29 +1,25 @@
 package org.jax.svanna.model.landscape.tad;
 
-import org.monarchinitiative.svart.*;
+import org.jax.svanna.model.landscape.BaseLocated;
+import org.monarchinitiative.svart.GenomicRegion;
 
 import java.util.Objects;
 
 // TODO - this should not be public
-public class TadBoundaryDefault extends BaseGenomicRegion<TadBoundaryDefault> implements TadBoundary {
+public class TadBoundaryDefault extends BaseLocated implements TadBoundary {
 
     private final String id;
 
     private final float stability;
 
-    private TadBoundaryDefault(Contig contig, Strand strand, Coordinates coordinates, String id, float stability) {
-        super(contig, strand, coordinates);
+    private TadBoundaryDefault(GenomicRegion location, String id, float stability) {
+        super(location);
         this.id = id;
         this.stability = stability;
     }
 
-    public static TadBoundaryDefault of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end,
-                                        String id, float stability) {
-        return of(contig, strand, Coordinates.of(coordinateSystem, start, end), id, stability);
-    }
-
-    public static TadBoundaryDefault of(Contig contig, Strand strand, Coordinates coordinates, String id, float stability) {
-        return new TadBoundaryDefault(contig, strand, coordinates, id, stability);
+    public static TadBoundaryDefault of(GenomicRegion location, String id, float stability) {
+        return new TadBoundaryDefault(location, id, stability);
     }
 
     @Override
@@ -34,11 +30,6 @@ public class TadBoundaryDefault extends BaseGenomicRegion<TadBoundaryDefault> im
     @Override
     public float stability() {
         return stability;
-    }
-
-    @Override
-    protected TadBoundaryDefault newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
-        return new TadBoundaryDefault(contig, strand, coordinates, id, stability);
     }
 
     @Override
@@ -58,9 +49,8 @@ public class TadBoundaryDefault extends BaseGenomicRegion<TadBoundaryDefault> im
     @Override
     public String toString() {
         return "TadBoundaryDefault{" +
-                "id=" + id +
-                ", region=" + super.toString() +
+                "id='" + id + '\'' +
                 ", stability=" + stability +
-                '}';
+                "} " + super.toString();
     }
 }

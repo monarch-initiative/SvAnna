@@ -2,22 +2,20 @@ package org.jax.svanna.core.priority.additive.ge;
 
 import org.jax.svanna.core.TestContig;
 import org.jax.svanna.core.TestEnhancer;
-import org.jax.svanna.core.TestGene;
 import org.jax.svanna.core.TestTad;
 import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.priority.additive.impact.SequenceImpactCalculator;
 import org.jax.svanna.core.priority.additive.impact.SimpleSequenceImpactCalculator;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.*;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
+import xyz.ielis.silent.genes.model.Transcript;
+import xyz.ielis.silent.genes.model.TranscriptIdentifier;
 
 import java.util.List;
 import java.util.Set;
@@ -30,12 +28,57 @@ public class RouteDataEvaluatorGETest {
     private static final double ERROR = 1E-6;
 
     private final SequenceImpactCalculator<Gene> geneImpact = new SimpleSequenceImpactCalculator<>(10.);
-    private final GeneWeightCalculator geneWeightCalculator  = GeneWeightCalculator.defaultGeneRelevanceCalculator();
+    private final GeneWeightCalculator geneWeightCalculator = GeneWeightCalculator.defaultGeneRelevanceCalculator();
 
     private final SequenceImpactCalculator<Enhancer> enhancerImpact = new SimpleSequenceImpactCalculator<>(1.);
     private final EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = EnhancerGeneRelevanceCalculator.defaultCalculator();
 
     private RouteDataEvaluator<RouteDataGE, ? extends RouteResult> evaluator;
+
+    private static Gene makeGene(String id, String symbol, Contig contig, int start, int end) {
+        GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
+
+        TranscriptIdentifier txId = TranscriptIdentifier.of(id + "_tx", symbol + "_tx", null);
+        List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
+        Coordinates startCodon = Coordinates.of(CoordinateSystem.zeroBased(), start, start + 3);
+        Coordinates stopCodon = Coordinates.of(CoordinateSystem.zeroBased(), end - 3, end);
+        Transcript tx = Transcript.coding(txId, location, exons, startCodon, stopCodon);
+
+        GeneIdentifier geneId = GeneIdentifier.of(id, symbol, null, null);
+        return Gene.of(geneId, location, Set.of(tx));
+    }
+
+    private static Routes makeRoutes(GenomicRegion reference, Segment... segments) {
+        return Routes.of(Set.of(reference), Set.of(Route.of(List.of(segments))));
+    }
+
+    private static Segment positiveDeletion(Contig contig, int start, int end) {
+        return positiveSegment("del", contig, start, end, Event.DELETION, 0);
+    }
+
+    private static Segment positiveDuplication(Contig contig, int start, int end) {
+        return positiveSegment("del", contig, start, end, Event.DUPLICATION, 2);
+    }
+
+    private static Segment positiveInversion(Contig contig, int start, int end) {
+        return positiveSegment("inv", contig, start, end, Event.INVERSION, 1);
+    }
+
+    private static Segment positiveGap(Contig contig, int start, int end) {
+        return positiveSegment("gap", contig, start, end, Event.GAP, 1);
+    }
+
+    private static Segment positiveBreakend(Contig contig, int pos) {
+        return positiveSegment("bnd", contig, pos, pos, Event.BREAKEND, 1);
+    }
+
+    private static Segment positiveSegment(String id, Contig contig, int start, int end, Event event, int copies) {
+        return Segment.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end, id, event, copies);
+    }
+
+    private static Segment negativeSegment(String id, Contig contig, int start, int end, Event event, int copies) {
+        return Segment.of(contig, Strand.NEGATIVE, CoordinateSystem.zeroBased(), start, end, id, event, copies);
+    }
 
     @BeforeEach
     public void setUp() {
@@ -58,10 +101,10 @@ public class RouteDataEvaluatorGETest {
                 positiveDeletion(ctg1, delStart, delEnd),
                 positiveGap(ctg1, delEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
-                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
+                .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55, "b"))
+                .addGene(makeGene("NCBIGene:B", "B", ctg1, 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -85,11 +128,11 @@ public class RouteDataEvaluatorGETest {
                 positiveDeletion(ctg1, delStart, delEnd),
                 positiveGap(ctg1, delEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
+                .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55, "b"))
+                .addGene(makeGene("NCBIGene:B", "B", ctg1, 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -116,11 +159,11 @@ public class RouteDataEvaluatorGETest {
                 positiveDuplication(ctg1, dupStart, dupEnd),
                 positiveGap(ctg1, dupEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
+                .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55, "b"))
+                .addGene(makeGene("NCBIGene:B", "B", ctg1, 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -149,11 +192,11 @@ public class RouteDataEvaluatorGETest {
                 positiveInversion(ctg1, invStart, invEnd),
                 positiveGap(ctg1, invEnd, end));
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
+                .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55, "b"))
+                .addGene(makeGene("NCBIGene:B", "B", ctg1, 60, 70))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
@@ -179,49 +222,16 @@ public class RouteDataEvaluatorGETest {
         );
         // TODO - fix the route setup
         RouteDataGE routeData = RouteDataGE.builder(routes)
-                .addEnhancer(TestEnhancer.of("a", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10))
-                .addGene(TestGene.of(TermId.of("NCBIGene:A"), "A", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
+                .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
-                .addEnhancer(TestEnhancer.of("b", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55))
-                .addGene(TestGene.of(TermId.of("NCBIGene:B"), "B", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 60, 70))
-                .addEnhancer(TestEnhancer.of("c", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 105, 110))
-                .addGene(TestGene.of(TermId.of("NCBIGene:C"), "C", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 120, 140))
+                .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55, "b"))
+                .addGene(makeGene("NCBIGene:B", "B", ctg1, 60, 70))
+                .addEnhancer(TestEnhancer.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 105, 110, "c"))
+                .addGene(makeGene("NCBIGene:C", "C", ctg2, 120, 140))
                 .build();
 
         double score = evaluator.evaluate(routeData).priority();
         assertThat(score, closeTo(expected, ERROR));
-    }
-
-    private static Routes makeRoutes(GenomicRegion reference, Segment... segments) {
-        return Routes.of(Set.of(reference), Set.of(Route.of(List.of(segments))));
-    }
-
-    private static Segment positiveDeletion(Contig contig, int start, int end) {
-        return positiveSegment("del", contig, start, end, Event.DELETION, 0);
-    }
-
-
-    private static Segment positiveDuplication(Contig contig, int start, int end) {
-        return positiveSegment("del", contig, start, end, Event.DUPLICATION, 2);
-    }
-
-    private static Segment positiveInversion(Contig contig, int start, int end) {
-        return positiveSegment("inv", contig, start, end, Event.INVERSION, 1);
-    }
-
-    private static Segment positiveGap(Contig contig, int start, int end) {
-        return positiveSegment("gap", contig, start, end, Event.GAP, 1);
-    }
-
-    private static Segment positiveBreakend(Contig contig, int pos) {
-        return positiveSegment("bnd", contig, pos, pos, Event.BREAKEND, 1);
-    }
-
-    private static Segment positiveSegment(String id, Contig contig, int start, int end, Event event, int copies) {
-        return Segment.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end, id, event, copies);
-    }
-
-    private static Segment negativeSegment(String id, Contig contig, int start, int end, Event event, int copies) {
-        return Segment.of(contig, Strand.NEGATIVE, CoordinateSystem.zeroBased(), start, end, id, event, copies);
     }
 }

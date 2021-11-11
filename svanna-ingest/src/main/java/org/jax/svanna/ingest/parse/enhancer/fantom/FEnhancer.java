@@ -3,10 +3,7 @@ package org.jax.svanna.ingest.parse.enhancer.fantom;
 import org.jax.svanna.db.landscape.BaseEnhancer;
 import org.jax.svanna.model.landscape.enhancer.EnhancerSource;
 import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
-import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Coordinates;
-import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 import java.util.Set;
@@ -27,19 +24,17 @@ class FEnhancer extends BaseEnhancer {
                         double tau,
                         Set<EnhancerTissueSpecificity> specificities,
                         double totalReadCounts) {
-        Coordinates coordinates = Coordinates.of(coordinateSystem, start, end);
-        return new FEnhancer(contig, strand, coordinates, id, isDevelopmental, tau, specificities, totalReadCounts);
+        GenomicRegion location = GenomicRegion.of(contig, strand, Coordinates.of(coordinateSystem, start, end));
+        return new FEnhancer(location, id, isDevelopmental, tau, specificities, totalReadCounts);
     }
 
-    private FEnhancer(Contig contig,
-                      Strand strand,
-                      Coordinates coordinates,
+    private FEnhancer(GenomicRegion location,
                       String id,
                       boolean isDevelopmental,
                       double tau,
                       Set<EnhancerTissueSpecificity> specificities,
                       double totalReadCpm) {
-        super(contig, strand, coordinates, id, FANTOM_ENHANCER, isDevelopmental, tau, specificities);
+        super(location, id, FANTOM_ENHANCER, isDevelopmental, tau, specificities);
         this.totalReadCpm = totalReadCpm;
     }
 

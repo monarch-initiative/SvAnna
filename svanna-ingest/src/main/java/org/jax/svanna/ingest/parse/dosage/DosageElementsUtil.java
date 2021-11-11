@@ -5,6 +5,7 @@ import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.Coordinates;
+import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,18 +29,14 @@ class DosageElementsUtil {
                                                         String triplosensitivity) {
         DosageSensitivity haploinsufficiencySensitivity = parseHaploinsufficiency(haploinsufficiency);
         DosageSensitivityEvidence haploinsufficiencyEvidence = parseEvidence(haploinsufficiency);
-        DosageElement haploDosage = DosageElement.of(contig,
-                strand,
-                coordinates,
+        DosageElement haploDosage = DosageElement.of(GenomicRegion.of(contig, strand, coordinates),
                 id,
                 haploinsufficiencySensitivity,
                 haploinsufficiencyEvidence);
 
         DosageSensitivity triplosensitivitySensitivity = parseTriplosensitivity(triplosensitivity);
         DosageSensitivityEvidence triplosensitivityEvidence = parseEvidence(triplosensitivity);
-        DosageElement triploDosage = DosageElement.of(contig,
-                strand,
-                coordinates,
+        DosageElement triploDosage = DosageElement.of(GenomicRegion.of(contig, strand, coordinates),
                 id,
                 triplosensitivitySensitivity,
                 triplosensitivityEvidence);

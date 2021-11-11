@@ -60,6 +60,6 @@ public class IntervalArrayGeneOverlapperTest {
 
         IntervalArrayGeneOverlapper overlapper = new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
         List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
-        assertThat(overlaps.stream().map(overlap -> overlap.gene().geneSymbol()).collect(Collectors.joining("|")), equalTo(geneSymbols));
+        assertThat(overlaps.stream().map(overlap -> overlap.gene().symbol()).collect(Collectors.joining("|")), equalTo(geneSymbols));
     }
 }

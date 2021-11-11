@@ -3,9 +3,9 @@ package org.jax.svanna.cli.writer.html.template;
 
 import org.jax.svanna.cli.writer.html.VariantLandscape;
 import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svart.VariantType;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,7 +57,7 @@ public class FilterAndCount {
                     unknown++;
             }
             Set<String> symbols = variantLandscape.genes().stream()
-                    .map(Gene::geneSymbol)
+                    .map(Gene::symbol)
                     .collect(Collectors.toSet());
             affectedGenes.addAll(symbols);
             affectedEnhancers.addAll(variantLandscape.enhancers());

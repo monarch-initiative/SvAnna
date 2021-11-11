@@ -1,10 +1,7 @@
 package org.jax.svanna.core.priority.additive.impact;
 
-//import org.jax.svanna.core.priority.additive.Projection;
-//import org.jax.svanna.model.gene.Gene;
-
 import org.jax.svanna.core.priority.additive.Projection;
-import org.jax.svanna.model.gene.Gene;
+import xyz.ielis.silent.genes.model.Gene;
 
 public class GeneDosageAwareSequenceImpactCalculator implements SequenceImpactCalculator<Gene> {
 
@@ -20,7 +17,7 @@ public class GeneDosageAwareSequenceImpactCalculator implements SequenceImpactCa
 
         We need to be extra cautious
          */
-
-        return 0;
+        // TODO - implement
+        throw new RuntimeException("Not yet implemented");
     }
 }

@@ -1,10 +1,7 @@
 package org.jax.svanna.cli;
 
-import de.charite.compbio.jannovar.data.JannovarData;
-import de.charite.compbio.jannovar.data.JannovarDataSerializer;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.service.GeneService;
-import org.jax.svanna.core.service.transcripts.JannovarGeneService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -16,19 +13,6 @@ import java.nio.file.Paths;
 
 @Configuration
 public class TestDataConfig {
-
-    private static final Path JANNOVAR_DATA = Paths.get("src/test/resources/hg38_refseq_small.ser");
-
-
-    @Bean
-    public GenomicAssembly genomicAssembly() {
-        return GenomicAssemblies.GRCh38p13();
-    }
-
-    @Bean
-    public TestVariants testVariants(GenomicAssembly genomicAssembly) {
-        return new TestVariants(genomicAssembly);
-    }
 
     /**
      * Small Jannovar cache that contains RefSeq transcripts of the following genes:
@@ -45,14 +29,22 @@ public class TestDataConfig {
      *     <li><em>SRY</em></li> (on <code>chrY</code>)
      * </ul>
      */
+    private static final Path JANNOVAR_DATA = Paths.get("src/test/resources/hg38_refseq_small.ser");
+
+
     @Bean
-    public JannovarData jannovarData() throws Exception {
-        return new JannovarDataSerializer(JANNOVAR_DATA.toString()).load();
+    public GenomicAssembly genomicAssembly() {
+        return GenomicAssemblies.GRCh38p13();
     }
 
     @Bean
-    public GeneService geneService(GenomicAssembly assembly, JannovarData jannovarData) {
-        return JannovarGeneService.of(assembly, jannovarData);
+    public TestVariants testVariants(GenomicAssembly genomicAssembly) {
+        return new TestVariants(genomicAssembly);
+    }
+
+    @Bean
+    public GeneService geneService(GenomicAssembly assembly) {
+        return JannovarGeneService.of(assembly, JANNOVAR_DATA);
     }
 
     @Bean

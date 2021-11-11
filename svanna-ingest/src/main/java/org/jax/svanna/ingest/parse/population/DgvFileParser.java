@@ -120,8 +120,8 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
             float lossesFreq = 100 * observedLosses / sampleSize;
             if (arr[5].equals("gain+loss")) {
                 return List.of(
-                        BasePopulationVariant.of(contig, Strand.POSITIVE, coordinates, variantAccession, VariantType.DUP, gainsFreq, PopulationVariantOrigin.DGV),
-                        BasePopulationVariant.of(contig, Strand.POSITIVE, coordinates, variantAccession, VariantType.DEL, lossesFreq, PopulationVariantOrigin.DGV));
+                        BasePopulationVariant.of(GenomicRegion.of(contig, Strand.POSITIVE, coordinates), variantAccession, VariantType.DUP, gainsFreq, PopulationVariantOrigin.DGV),
+                        BasePopulationVariant.of(GenomicRegion.of(contig, Strand.POSITIVE, coordinates), variantAccession, VariantType.DEL, lossesFreq, PopulationVariantOrigin.DGV));
             } else {
                 float frequency = Float.NaN;
                 switch (type.baseType()) {
@@ -136,7 +136,7 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
                         // fall through
                         break;
                 }
-                return List.of(BasePopulationVariant.of(contig, Strand.POSITIVE, coordinates, variantAccession, type, frequency, PopulationVariantOrigin.DGV));
+                return List.of(BasePopulationVariant.of(GenomicRegion.of(contig, Strand.POSITIVE, coordinates), variantAccession, type, frequency, PopulationVariantOrigin.DGV));
             }
         };
     }

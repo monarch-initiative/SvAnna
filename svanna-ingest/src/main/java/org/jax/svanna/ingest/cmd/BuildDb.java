@@ -57,6 +57,7 @@ import xyz.ielis.silent.genes.io.GeneParser;
 import xyz.ielis.silent.genes.io.GeneParserFactory;
 import xyz.ielis.silent.genes.io.SerializationFormat;
 import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.Located;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -377,7 +378,7 @@ public class BuildDb implements Callable<Integer> {
         return results;
     }
 
-    private static <T extends GenomicRegion> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {
+    private static <T extends Located> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {
         return ingestRecordParser.parse()
                 .mapToInt(ingestDao::insertItem)
                 .sum();

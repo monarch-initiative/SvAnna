@@ -43,21 +43,48 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
         this.liftOver = new LiftOver(hg19ToHg38Chain.toFile());
     }
 
+    /**
+     * @return Predicate for removing variants containing one of
+     * <ul>
+     * <li><code>MULTIALLELIC</code>,</li>
+     * <li><code>PCRPLUS_ENRICHED</code>, or</li>
+     * <li><code>PREDICTED_GENOTYPING_ARTIFACT</code></li>
+     * </ul>
+     * fields.
+     */
+    private static Predicate<? super VariantContext> insufficientQualityRecord() {
+        // GnomadSV VCF should have these fields:
+        // PASS, LOW_CALL_RATE, PCRPLUS_ENRICHED, UNSTABLE_AF_PCRMINUS, MULTIALLELIC, UNRESOLVED
+        return vc -> !(
+                vc.getFilters().contains("LOW_CALL_RATE")
+                        || vc.getFilters().contains("PCRPLUS_ENRICHED")
+                        || vc.getFilters().contains("UNSTABLE_AF_PCRMINUS")
+                        || vc.getFilters().contains("MULTIALLELIC")
+                        || vc.getFilters().contains("PREDICTED_GENOTYPING_ARTIFACT"));
+    }
+
+    /**
+     * @return Predicate for removing variants marked with <code>UNRESOLVED</code> filter, and having <code>SVTYPE=BND</code>
+     */
+    static Predicate<? super VariantContext> unresolvedBreakends() {
+        return vc -> !(vc.getFilters().contains("UNRESOLVED")
+                && vc.getAttributeAsString("SVTYPE", "NA").equals("BND"));
+    }
+
     @Override
     public Stream<? extends PopulationVariant> parse() throws IOException {
         VCFFileReader reader = new VCFFileReader(gnomadSvVcfPath, false);
         CloseableIterator<VariantContext> variantIterator = reader.iterator();
         return variantIterator.stream()
                 .onClose(IOUtils.close(reader, variantIterator))
-                    .filter(insufficientQualityRecord())
-                    .filter(unresolvedBreakends())
-                    .map(toPopulationVariant())
-                    .filter(Optional::isPresent)
-                    .map(Optional::get);
+                .filter(insufficientQualityRecord())
+                .filter(unresolvedBreakends())
+                .map(toPopulationVariant())
+                .filter(Optional::isPresent)
+                .map(Optional::get);
     }
 
     /**
-     *
      * @return Function for mapping {@link VariantContext} to {@link Optional} of {@link PopulationVariant}.
      * The <code>vc</code> must not represent multi-allelic SV
      */
@@ -96,37 +123,10 @@ public class GnomadSvVcfParser implements IngestRecordParser<PopulationVariant> 
             // right trimming symbolic variant and removing the common base
             int start = lifted.getStart() + 1;
 
-            return Optional.of(BasePopulationVariant.of(contig, Strand.POSITIVE, CoordinateSystem.oneBased(),
-                    start, lifted.getEnd(),
-                    vc.getID(), variantType, popmaxAf, PopulationVariantOrigin.GNOMAD_SV));
+            return Optional.of(
+                    BasePopulationVariant.of(
+                            GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.oneBased(), start, lifted.getEnd()),
+                            vc.getID(), variantType, popmaxAf, PopulationVariantOrigin.GNOMAD_SV));
         };
-    }
-
-    /**
-     * @return Predicate for removing variants containing one of
-     * <ul>
-     * <li><code>MULTIALLELIC</code>,</li>
-     * <li><code>PCRPLUS_ENRICHED</code>, or</li>
-     * <li><code>PREDICTED_GENOTYPING_ARTIFACT</code></li>
-     * </ul>
-     * fields.
-     */
-    private static Predicate<? super VariantContext> insufficientQualityRecord() {
-        // GnomadSV VCF should have these fields:
-        // PASS, LOW_CALL_RATE, PCRPLUS_ENRICHED, UNSTABLE_AF_PCRMINUS, MULTIALLELIC, UNRESOLVED
-        return vc -> !(
-                vc.getFilters().contains("LOW_CALL_RATE")
-                || vc.getFilters().contains("PCRPLUS_ENRICHED")
-                || vc.getFilters().contains("UNSTABLE_AF_PCRMINUS")
-                || vc.getFilters().contains("MULTIALLELIC")
-                || vc.getFilters().contains("PREDICTED_GENOTYPING_ARTIFACT"));
-    }
-
-    /**
-     * @return Predicate for removing variants marked with <code>UNRESOLVED</code> filter, and having <code>SVTYPE=BND</code>
-     */
-    static Predicate<? super VariantContext> unresolvedBreakends() {
-        return vc -> !(vc.getFilters().contains("UNRESOLVED")
-                && vc.getAttributeAsString("SVTYPE", "NA").equals("BND"));
     }
 }

@@ -4,13 +4,13 @@ import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
-import org.jax.svanna.model.gene.CodingTranscript;
-import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.gene.Transcript;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Coding;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.Transcript;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,13 +53,86 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         );
     }
 
+    private static double defaultUtrFitness(int segmentLength, int utrLength) {
+        // min fitness is attained if >=50% of the UTR length is affected
+        double seqImpact = 2. * segmentLength / utrLength;
+        return Math.max(1 - seqImpact, 0.);
+    }
+
+    private static double insertionUtrFitness(int segmentLength, int utrLength) {
+        double impact = (double) segmentLength / utrLength;
+        return 1 - Math.min(impact, 1.);
+    }
+
+    private static List<PaddedExon> mapToPaddedExons(Transcript tx, int cdsStart, int cdsEnd) {
+        if (tx.exons().isEmpty())
+            throw new IllegalArgumentException("Transcript with no exons: " + tx.accession());
+
+        if (tx.exons().size() == 1) {
+            Coordinates first = tx.exons().get(0);
+            int start = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
+            int end = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
+
+            int nCoding = cdsEnd - cdsStart;
+            return List.of(PaddedExon.of(start, start, end, end, nCoding));
+        }
+
+
+        List<PaddedExon> exons = new ArrayList<>(tx.exons().size());
+
+        Coordinates first = tx.exons().get(0);
+        int firstExonStart = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
+        int firstExonEnd = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
+        int firstExonPaddedEnd = firstExonEnd + INTRONIC_DONOR_PADDING;
+
+        int nCoding = Coordinates.overlapLength(CoordinateSystem.zeroBased(), cdsStart, cdsEnd,
+                first.coordinateSystem(), first.start(), first.end());
+
+        exons.add(PaddedExon.of(firstExonStart, firstExonStart, firstExonEnd, firstExonPaddedEnd, nCoding));
+
+        // internal exons
+        for (Coordinates exon : tx.exons().subList(1, tx.exons().size() - 1)) {
+            int exonStart = exon.startWithCoordinateSystem(CoordinateSystem.zeroBased());
+            int paddedExonStart = exonStart - INTRONIC_ACCEPTOR_PADDING;
+            int exonEnd = exon.endWithCoordinateSystem(CoordinateSystem.zeroBased());
+            int paddedExonEnd = exonEnd + INTRONIC_DONOR_PADDING;
+
+            int nCodingInternal = Coordinates.overlapLength(CoordinateSystem.zeroBased(), cdsStart, cdsEnd,
+                    exon.coordinateSystem(), exon.start(), exon.end());
+
+            exons.add(PaddedExon.of(paddedExonStart, exonStart, exonEnd, paddedExonEnd, nCodingInternal));
+        }
+
+        Coordinates last = tx.exons().get(tx.exons().size() - 1);
+        int lastExonStart = last.startWithCoordinateSystem(CoordinateSystem.zeroBased());
+        int lastExonPaddedStart = lastExonStart - INTRONIC_ACCEPTOR_PADDING;
+        int lastExonEnd = last.endWithCoordinateSystem(CoordinateSystem.zeroBased());
+
+        int nCodingLast = Coordinates.overlapLength(CoordinateSystem.zeroBased(), cdsStart, cdsEnd,
+                last.coordinateSystem(), last.start(), last.end());
+
+        exons.add(PaddedExon.of(lastExonPaddedStart, lastExonStart, lastExonEnd, lastExonEnd, nCodingLast));
+
+        return exons;
+    }
+
+    private static int fiveUtrLength(int txStart, int cdsStart) {
+        return cdsStart - txStart;
+    }
+
+    private static int threeUtrLength(int cdsEnd, int txEnd) {
+        return txEnd - cdsEnd;
+    }
+
     @Override
     public double projectImpact(Projection<Gene> projection) {
-        double promoterImpact = checkPromoter(projection.route().segments(), projection.source().transcripts());
+        Set<Transcript> transcripts = projection.source().transcripts()
+                .collect(Collectors.toUnmodifiableSet());
+        double promoterImpact = checkPromoter(projection.route().segments(), transcripts);
 
         double geneImpact = projection.isIntraSegment()
                 ? processIntraSegmentProjection(projection)
-                : processInterSegmentProjection(projection);
+                : processInterSegmentProjection(projection, transcripts);
 
         return Double.isNaN(promoterImpact)
                 ? geneImpact
@@ -126,13 +199,13 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         }
     }
 
-    private double processInterSegmentProjection(Projection<Gene> projection) {
+    private double processInterSegmentProjection(Projection<Gene> projection, Set<Transcript> transcripts) {
         Set<Segment> causalSegments = projection.spannedSegments().stream()
                 .filter(s -> !s.event().equals(Event.GAP))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
 
         double score = noImpact();
-        for (Transcript tx : projection.source().transcripts()) {
+        for (Transcript tx : transcripts) {
             double txScore = evaluateSegmentsWrtTranscript(causalSegments, tx);
             score = Math.min(score, txScore);
         }
@@ -142,20 +215,22 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     private double evaluateSegmentsWrtTranscript(Set<Segment> segments, Transcript tx) {
         double score = noImpact();
 
-        if (!(tx instanceof CodingTranscript))
+        if (!(tx instanceof Coding))
             // heuristics shortcut for noncoding transcript
             return score;
 
-        CodingTranscript ctx = (CodingTranscript) tx;
+        Coding ctx = (Coding) tx;
+        int cdsStart = ctx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased());
+        int cdsEnd = ctx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
         for (Segment segment : segments) {
             double segmentScore;
             //noinspection SwitchStatementWithTooFewBranches
             switch (segment.event()) {
                 case INSERTION:
-                    segmentScore = scoreInsertionSegment(segment, ctx);
+                    segmentScore = scoreInsertionSegment(segment, tx, cdsStart, cdsEnd);
                     break;
                 default:
-                    segmentScore = scoreDefaultSegment(segment, ctx);
+                    segmentScore = scoreDefaultSegment(segment, tx, cdsStart, cdsEnd);
                     break;
             }
             score = Math.min(segmentScore, score);
@@ -164,22 +239,22 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         return score;
     }
 
-    double scoreInsertionSegment(Segment segment, CodingTranscript tx) {
+    double scoreInsertionSegment(Segment segment, Transcript tx, int cdsStart, int cdsEnd) {
         int insLengthOnContig = segment.endWithCoordinateSystem(CoordinateSystem.zeroBased()) - segment.startWithCoordinateSystem(CoordinateSystem.zeroBased());
         if (insLengthOnContig != 0) {
             LogUtils.logWarn(LOGGER, "Bad insertion with nonzero length {}", insLengthOnContig);
             return Double.NaN;
         }
 
-        int cdsStart = tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased());
-        int cdsEnd = tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
-
         // segment start and end of an empty region are the same numbers in both half-open coordinate systems
         int segmentPos = segment.startOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
 
         double score = noImpact();
 
-        List<PaddedExon> paddedExons = mapToPaddedExons(tx);
+        List<PaddedExon> paddedExons = mapToPaddedExons(tx, cdsStart, cdsEnd);
+        int fivePrimeUtrLength = fiveUtrLength(tx.startWithCoordinateSystem(CoordinateSystem.zeroBased()), cdsStart);
+        int threePrimeUtrLength = threeUtrLength(cdsEnd, tx.endWithCoordinateSystem(CoordinateSystem.zeroBased()));
+
 
         int nCodingBasesInPreviousExons = 0;
         for (PaddedExon exon : paddedExons) {
@@ -188,10 +263,10 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                 // is the insertion in UTR?
                 if (segmentPos <= cdsStart) {
                     // 5'UTR
-                    score = Math.min(insertionUtrFitness(segment.length(), tx.fivePrimeUtrLength()), score);
+                    score = Math.min(insertionUtrFitness(segment.length(), fivePrimeUtrLength), score);
                 } else if (cdsEnd < segmentPos) {
                     // 3'UTR
-                    score = Math.min(insertionUtrFitness(segment.length(), tx.threePrimeUtrLength()), score);
+                    score = Math.min(insertionUtrFitness(segment.length(), threePrimeUtrLength), score);
                 } else {
                     // coding region
                     int nCurrentCodingBases = segmentPos - Math.max(cdsStart, exon.start());
@@ -214,7 +289,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         return score;
     }
 
-    double scoreDefaultSegment(Segment segment, CodingTranscript tx) {
+    double scoreDefaultSegment(Segment segment, Transcript tx, int cdsStart, int cdsEnd) {
         double score = noImpact();
         if (segment.event().equals(Event.GAP))
             return score;
@@ -222,12 +297,12 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         int segmentStart = segment.startOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
         int segmentEnd = segment.endOnStrandWithCoordinateSystem(tx.strand(), CoordinateSystem.zeroBased());
 
-        UtrData utrData = new UtrData(tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased()),
-                tx.fivePrimeUtrLength(),
-                tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased()),
-                tx.threePrimeUtrLength());
+        UtrData utrData = new UtrData(tx.startWithCoordinateSystem(CoordinateSystem.zeroBased()),
+                cdsStart,
+                tx.endWithCoordinateSystem(CoordinateSystem.zeroBased()),
+                cdsEnd);
 
-        List<PaddedExon> paddedExons = mapToPaddedExons(tx);
+        List<PaddedExon> paddedExons = mapToPaddedExons(tx, cdsStart, cdsEnd);
         boolean isFirstExonOfTranscript = true;
         for (PaddedExon paddedExon : paddedExons) {
             double exonScore = evaluateExon(segmentStart, segmentEnd, segment.event(), paddedExon, utrData, isFirstExonOfTranscript);
@@ -258,18 +333,18 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
         if (!affectsCds) {
             if (segmentEnd <= utrData.cdsStart) { // 5UTR
-                if (utrData.fiveUtrLength == 0) {
+                if (utrData.fiveUtrLength() == 0) {
                     LogUtils.logWarn(LOGGER, "5'UTR was 0bp long!");
                     return score;
                 }
-                return defaultUtrFitness(segmentEnd - segmentStart, utrData.fiveUtrLength);
+                return defaultUtrFitness(segmentEnd - segmentStart, utrData.fiveUtrLength());
             } else if (utrData.cdsEnd <= segmentStart) { // 3UTR
                 // get 3'UTR
-                if (utrData.threeUtrLength == 0) {
+                if (utrData.threeUtrLength() == 0) {
                     LogUtils.logWarn(LOGGER, "3'UTR was 0bp long!");
                     return score;
                 }
-                return defaultUtrFitness(segmentEnd - segmentStart, utrData.threeUtrLength);
+                return defaultUtrFitness(segmentEnd - segmentStart, utrData.threeUtrLength());
             } else {
                 // something fishy! Complain!
                 throw new IllegalArgumentException("Segment " + segmentStart + '-' + segmentEnd + " should overlap with 5UTR or 3UTR, but it does not!");
@@ -279,81 +354,24 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         return fitnessWithEvent.getOrDefault(event, score);
     }
 
-    private static double defaultUtrFitness(int segmentLength, int utrLength) {
-        // min fitness is attained if >=50% of the UTR length is affected
-        double seqImpact = 2. * segmentLength / utrLength;
-        return Math.max(1 - seqImpact, 0.);
-    }
-
-    private static double insertionUtrFitness(int segmentLength, int utrLength) {
-        double impact = (double) segmentLength / utrLength;
-        return 1 - Math.min(impact, 1.);
-    }
-
-    private static List<PaddedExon> mapToPaddedExons(CodingTranscript tx) {
-        if (tx.exons().isEmpty())
-            throw new IllegalArgumentException("Transcript with no exons: " + tx.accessionId());
-
-        int cdsStart = tx.codingStartWithCoordinateSystem(CoordinateSystem.zeroBased());
-        int cdsEnd = tx.codingEndWithCoordinateSystem(CoordinateSystem.zeroBased());
-
-        if (tx.exons().size() == 1) {
-            Coordinates first = tx.exons().get(0);
-            int start = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
-            int end = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
-
-            int nCoding = cdsEnd - cdsStart;
-            return List.of(PaddedExon.of(start, start, end, end, nCoding));
-        }
-
-
-        List<PaddedExon> exons = new ArrayList<>(tx.exons().size());
-
-        Coordinates first = tx.exons().get(0);
-        int firstExonStart = first.startWithCoordinateSystem(CoordinateSystem.zeroBased());
-        int firstExonEnd = first.endWithCoordinateSystem(CoordinateSystem.zeroBased());
-        int firstExonPaddedEnd = firstExonEnd + INTRONIC_DONOR_PADDING;
-
-        int nCoding = Coordinates.overlapLength(CoordinateSystem.zeroBased(), cdsStart, cdsEnd,
-                first.coordinateSystem(), first.start(), first.end());
-
-        exons.add(PaddedExon.of(firstExonStart, firstExonStart, firstExonEnd, firstExonPaddedEnd, nCoding));
-
-        // internal exons
-        for (Coordinates exon : tx.exons().subList(1, tx.exons().size() - 1)) {
-            int exonStart = exon.startWithCoordinateSystem(CoordinateSystem.zeroBased());
-            int paddedExonStart = exonStart - INTRONIC_ACCEPTOR_PADDING;
-            int exonEnd = exon.endWithCoordinateSystem(CoordinateSystem.zeroBased());
-            int paddedExonEnd = exonEnd + INTRONIC_DONOR_PADDING;
-
-            int nCodingInternal = Coordinates.overlapLength(CoordinateSystem.zeroBased(), cdsStart, cdsEnd,
-                    exon.coordinateSystem(), exon.start(), exon.end());
-
-            exons.add(PaddedExon.of(paddedExonStart, exonStart, exonEnd, paddedExonEnd, nCodingInternal));
-        }
-
-        Coordinates last = tx.exons().get(tx.exons().size() - 1);
-        int lastExonStart = last.startWithCoordinateSystem(CoordinateSystem.zeroBased());
-        int lastExonPaddedStart = lastExonStart - INTRONIC_ACCEPTOR_PADDING;
-        int lastExonEnd = last.endWithCoordinateSystem(CoordinateSystem.zeroBased());
-
-        int nCodingLast = Coordinates.overlapLength(CoordinateSystem.zeroBased(), cdsStart, cdsEnd,
-                last.coordinateSystem(), last.start(), last.end());
-
-        exons.add(PaddedExon.of(lastExonPaddedStart, lastExonStart, lastExonEnd, lastExonEnd, nCodingLast));
-
-        return exons;
-    }
-
     private static class UtrData {
 
-        private final int cdsStart, fiveUtrLength, cdsEnd, threeUtrLength;
+        private final int txStart, cdsStart, txEnd, cdsEnd;
 
-        private UtrData(int cdsStart, int fiveUtrLength, int cdsEnd, int threeUtrLength) {
+        // MAKE SURE THESE ARE IN THE SAME COORDINATE SYSTEM!
+        private UtrData(int txStart, int cdsStart, int txEnd, int cdsEnd) {
+            this.txStart = txStart;
             this.cdsStart = cdsStart;
-            this.fiveUtrLength = fiveUtrLength;
+            this.txEnd = txEnd;
             this.cdsEnd = cdsEnd;
-            this.threeUtrLength = threeUtrLength;
+        }
+
+        int fiveUtrLength() {
+            return GeneSequenceImpactCalculator.fiveUtrLength(txStart, cdsStart);
+        }
+
+        int threeUtrLength() {
+            return GeneSequenceImpactCalculator.threeUtrLength(cdsEnd, txEnd);
         }
     }
 

@@ -1,18 +1,21 @@
 package org.jax.svanna.core.priority.additive.impact;
 
 import org.jax.svanna.core.TestContig;
-import org.jax.svanna.core.TestTranscript;
 import org.jax.svanna.core.priority.additive.*;
-import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.gene.GeneDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.Coordinates;
+import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
+import xyz.ielis.silent.genes.model.Transcript;
+import xyz.ielis.silent.genes.model.TranscriptIdentifier;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
@@ -20,9 +23,31 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class GeneSequenceImpactCalculatorTest {
 
-    private static final double ERROR = 1E-15;
+    private static final double ERROR = 1E-12;
 
     private GeneSequenceImpactCalculator instance;
+
+    private static Gene makeGene(TestContig contig, int start, int end, int oneStart, int oneEnd, int twoStart, int twoEnd, int threeStart, int threeEnd) {
+        GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
+
+        // make transcript
+        TranscriptIdentifier txId = TranscriptIdentifier.of("TX1", "TX1_SYMBOL", null);
+        List<Coordinates> exons = makeExons(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd);
+        Coordinates startCodon = Coordinates.of(CoordinateSystem.zeroBased(), start + 10, start + 13);
+        Coordinates stopCodon = Coordinates.of(CoordinateSystem.zeroBased(), end - 13, end - 10);
+        Transcript tx = Transcript.coding(txId, location, exons, startCodon, stopCodon);
+
+        // make gene
+        GeneIdentifier gId = GeneIdentifier.of("NCBIGene:123", "A", null, null);
+        return Gene.of(gId, location, Set.of(tx));
+    }
+
+    private static List<Coordinates> makeExons(int oneStart, int oneEnd, int twoStart, int twoEnd, int threeStart, int threeEnd) {
+        return List.of(
+                Coordinates.of(CoordinateSystem.zeroBased(), oneStart, oneEnd),
+                Coordinates.of(CoordinateSystem.zeroBased(), twoStart, twoEnd),
+                Coordinates.of(CoordinateSystem.zeroBased(), threeStart, threeEnd));
+    }
 
     @BeforeEach
     public void setUp() {
@@ -50,11 +75,7 @@ public class GeneSequenceImpactCalculatorTest {
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 300, 500, "downstream", Event.GAP, 1)
                 ));
 
-        Gene gene = GeneDefault.builder()
-                .geneSymbol("A")
-                .accessionId(TermId.of("NCBIGene:123"))
-                .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
-                .build();
+        Gene gene = makeGene(ctg1, start, end, oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd);
 
         List<Projection<Gene>> projections = Projections.project(gene, route);
         if (projections.isEmpty()) fail();
@@ -62,7 +83,6 @@ public class GeneSequenceImpactCalculatorTest {
 
         assertThat(instance.projectImpact(projections.get(0)), closeTo(expected, ERROR));
     }
-
 
     @ParameterizedTest
     @CsvSource({
@@ -80,12 +100,7 @@ public class GeneSequenceImpactCalculatorTest {
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 200, 300, "inversion", Event.INVERSION, 1),
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 300, 500, "downstream", Event.GAP, 1)
                 ));
-
-        Gene gene = GeneDefault.builder()
-                .geneSymbol("A")
-                .accessionId(TermId.of("NCBIGene:123"))
-                .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
-                .build();
+        Gene gene = makeGene(ctg1, start, end, oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd);
 
         List<Projection<Gene>> projections = Projections.project(gene, route);
         if (projections.isEmpty()) fail();
@@ -100,7 +115,7 @@ public class GeneSequenceImpactCalculatorTest {
             "187, 400,          187,220, 250,270, 380,400,  5,           .5", // in frame insertion that disrupts the reading frame
             "186, 400,          186,220, 250,270, 380,400,  3,           .1", // out of frame insertion
             "195, 400,          195,220, 250,270, 380,400,  3,           .7", // 5'UTR insertion
-            "10,  205,           10, 30, 150,170, 190,205,  3,           .7", // 3'UTR insertion
+            "10,  205,           10, 30, 150,170, 190,205,  3,           .769230769231", // 3'UTR insertion (crazy number since TER is part of 3'UTR)
     })
     public void insertion(int start, int end,
                           int oneStart, int oneEnd, int twoStart, int twoEnd, int threeStart, int threeEnd,
@@ -115,11 +130,7 @@ public class GeneSequenceImpactCalculatorTest {
                         Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 200, 400, "downstream", Event.GAP, 1)
                 ));
 
-        Gene gene = GeneDefault.builder()
-                .geneSymbol("A")
-                .accessionId(TermId.of("NCBIGene:123"))
-                .addTranscript(TestTranscript.of(ctg1, Strand.POSITIVE, start, end, List.of(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd)))
-                .build();
+        Gene gene = makeGene(ctg1, start, end, oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd);
 
         List<Projection<Gene>> projections = Projections.project(gene, route);
         if (projections.isEmpty()) fail();

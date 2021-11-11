@@ -12,6 +12,7 @@ import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,10 +86,11 @@ public class HgSvc2VcfParser extends AbstractVcfIngestRecordParser {
             String id = vc.getAttributeAsString("ID", vc.getID());
             Variant variant = vcfConverter.convert(contig, id, vc.getStart(), vc.getReference().getDisplayString(), alt.getDisplayString());
 
-            return Optional.of(BasePopulationVariant.of(variant.contig(), variant.strand(), variant.coordinateSystem(),
-                    variant.start(), variant.end(),
-                    variant.id(), variant.variantType(),
-                    alleleFrequency, PopulationVariantOrigin.HGSVC2));
+            return Optional.of(
+                    BasePopulationVariant.of(
+                            GenomicRegion.of(variant.contig(), variant.strand(), variant.coordinateSystem(), variant.start(), variant.end()),
+                            variant.id(), variant.variantType(),
+                            alleleFrequency, PopulationVariantOrigin.HGSVC2));
         };
     }
 }

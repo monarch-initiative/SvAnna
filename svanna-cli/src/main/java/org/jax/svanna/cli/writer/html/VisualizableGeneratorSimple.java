@@ -7,14 +7,14 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
-import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.gene.GeneIdentifier;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import java.util.*;
 import java.util.function.Function;
@@ -56,10 +56,10 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         List<RepetitiveRegion> repetitiveRegions = prepareRepetitiveRegions(variant, overlaps);
 
         Set<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
-                .map(geneOverlap -> geneOverlap.gene().geneSymbol())
+                .map(geneOverlap -> geneOverlap.gene().symbol())
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
-                .map(id -> phenotypeDataService.getDiseasesForGene(id.accessionId()))
+                .map(id -> phenotypeDataService.getDiseasesForGene(id.accession()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 

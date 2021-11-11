@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import org.jax.svanna.model.gene.Gene;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.*;
 
@@ -56,7 +56,7 @@ public class GeneOverlap {
     @Override
     public String toString() {
         return "GeneOverlap{" +
-                "hgvsSymbol='" + gene.geneSymbol() + '\'' +
+                "symbol='" + gene.symbol() + '\'' +
                 ", transcriptOverlaps=" + txOverlapByAccessionId +
                 '}';
     }

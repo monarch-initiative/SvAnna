@@ -8,7 +8,9 @@ import org.monarchinitiative.svart.*;
 import java.util.Objects;
 import java.util.Set;
 
-public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enhancer {
+public class TestEnhancer implements Enhancer {
+
+    private final GenomicRegion location;
 
     private final String id;
 
@@ -20,24 +22,29 @@ public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enh
 
     private final Set<EnhancerTissueSpecificity> specificities;
 
-    public static TestEnhancer of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end) {
-        return of(id, contig, strand, Coordinates.of(coordinateSystem, start, end), EnhancerSource.UNKNOWN, false, 0.5, Set.of());
+    public static TestEnhancer of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end, String id) {
+        GenomicRegion location = GenomicRegion.of(contig, strand, Coordinates.of(coordinateSystem, start, end));
+        return new TestEnhancer(location, id, EnhancerSource.UNKNOWN, false, 0.5, Set.of());
     }
 
-    public static TestEnhancer of(String id, Contig contig, Strand strand, Coordinates coordinates,
-                                  EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        return new TestEnhancer(id, contig, strand, coordinates,
-                enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
-    }
 
-    protected TestEnhancer(String id, Contig contig, Strand strand, Coordinates coordinates,
-                           EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        super(contig, strand, coordinates);
+    protected TestEnhancer(GenomicRegion location,
+                           String id,
+                           EnhancerSource enhancerSource,
+                           boolean isDevelopmental,
+                           double tau,
+                           Set<EnhancerTissueSpecificity> specificities) {
+        this.location = location;
         this.id = id;
         this.enhancerSource = enhancerSource;
         this.isDevelopmental = isDevelopmental;
         this.tau = tau;
         this.specificities = specificities;
+    }
+
+    @Override
+    public GenomicRegion location() {
+        return location;
     }
 
     @Override
@@ -66,28 +73,23 @@ public class TestEnhancer extends BaseGenomicRegion<TestEnhancer> implements Enh
     }
 
     @Override
-    protected TestEnhancer newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
-        return new TestEnhancer(id, contig, strand, coordinates, enhancerSource, isDevelopmental, tau, specificities);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         TestEnhancer that = (TestEnhancer) o;
-        return isDevelopmental == that.isDevelopmental && Double.compare(that.tau, tau) == 0 && Objects.equals(id, that.id) && enhancerSource == that.enhancerSource && Objects.equals(specificities, that.specificities);
+        return isDevelopmental == that.isDevelopmental && Double.compare(that.tau, tau) == 0 && Objects.equals(location, that.location) && Objects.equals(id, that.id) && enhancerSource == that.enhancerSource && Objects.equals(specificities, that.specificities);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id, enhancerSource, isDevelopmental, tau, specificities);
+        return Objects.hash(location, id, enhancerSource, isDevelopmental, tau, specificities);
     }
 
     @Override
     public String toString() {
         return "TestEnhancer{" +
-                "id='" + id + '\'' +
+                "location=" + location +
+                ", id='" + id + '\'' +
                 ", enhancerSource=" + enhancerSource +
                 ", isDevelopmental=" + isDevelopmental +
                 ", tau=" + tau +

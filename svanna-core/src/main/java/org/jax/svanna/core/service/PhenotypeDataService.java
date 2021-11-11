@@ -1,10 +1,10 @@
 package org.jax.svanna.core.service;
 
 import org.jax.svanna.model.HpoDiseaseSummary;
-import org.jax.svanna.model.gene.GeneIdentifier;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import java.util.Collection;
 import java.util.Map;

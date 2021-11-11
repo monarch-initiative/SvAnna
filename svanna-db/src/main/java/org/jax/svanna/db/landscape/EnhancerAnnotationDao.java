@@ -209,9 +209,11 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
                 }
 
                 if (!builders.containsKey(enhancerId)) {
-                    BaseEnhancer.Builder builder = BaseEnhancer.builder().with(contig,
-                            Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), // database invariant
-                            rs.getInt("START"), rs.getInt("END")))
+                    // database invariant
+                    Coordinates coordinates = Coordinates.of(CoordinateSystem.zeroBased(), rs.getInt("START"), rs.getInt("END"));
+                    GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, coordinates);
+                    BaseEnhancer.Builder builder = BaseEnhancer.builder()
+                            .location(location)
                             .enhancerSource(EnhancerSource.valueOf(rs.getString("ENHANCER_SOURCE")))
                             .id(enhancerName)
                             .isDevelopmental(rs.getBoolean("IS_DEVELOPMENTAL"))

@@ -1,6 +1,7 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.monarchinitiative.svart.*;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Projection<T>> {
+public class Projection<T extends Located> extends BaseGenomicRegion<Projection<T>> {
 
     private final T source;
 
@@ -123,11 +124,11 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
         return new Projection<>(contig, strand, coordinates, source, route, startLocation, endLocation, spannedLocations);
     }
 
-    static <T extends GenomicRegion> Builder<T> builder(Route route, T source, Contig contig, Strand strand, CoordinateSystem coordinateSystem) {
+    static <T extends Located> Builder<T> builder(Route route, T source, Contig contig, Strand strand, CoordinateSystem coordinateSystem) {
         return new Builder<>(source, route, contig, strand, coordinateSystem);
     }
 
-    static class Builder<T extends GenomicRegion> {
+    static class Builder<T extends Located> {
 
         private final T source;
 

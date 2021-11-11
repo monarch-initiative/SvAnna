@@ -1,9 +1,9 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.Variant;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -42,7 +42,7 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         }
         for (var gene : this.affectedGenes) {
             writeGene(gene, y, writer);
-            y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            y += gene.transcriptCount() * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);
     }

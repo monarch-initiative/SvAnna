@@ -57,7 +57,7 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, item.contigId());
                 int start = item.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CS);
-                int midpoint = start + item.length() / 2;
+                int midpoint = start + item.location().length() / 2;
                 preparedStatement.setInt(2, start);
                 preparedStatement.setInt(3, item.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CS));
                 preparedStatement.setInt(4, midpoint);
@@ -171,9 +171,8 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         int pos = strand.isPositive()
                 ? midpoint
                 : Coordinates.invertPosition(CS, contig, midpoint);
-        return TadBoundaryDefault.of(contig,
-                Strand.POSITIVE, CS,
-                pos, pos,
+        GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CS, pos, pos);
+        return TadBoundaryDefault.of(location,
                 rs.getString("ID"),
                 rs.getFloat("STABILITY"));
     }

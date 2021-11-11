@@ -1,13 +1,13 @@
 package org.jax.svanna.ingest.parse;
 
-import org.monarchinitiative.svart.GenomicRegion;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface IngestRecordParser<T extends GenomicRegion> {
+public interface IngestRecordParser<T extends Located> {
 
     Stream<? extends T> parse() throws IOException;
 

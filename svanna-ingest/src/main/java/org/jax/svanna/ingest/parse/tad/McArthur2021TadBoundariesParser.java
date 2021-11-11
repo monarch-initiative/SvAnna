@@ -5,10 +5,7 @@ import htsjdk.samtools.util.Interval;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.tad.TadBoundaryDefault;
-import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.GenomicAssembly;
-import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +79,8 @@ public class McArthur2021TadBoundariesParser implements IngestRecordParser<TadBo
             }
             int liftedStart = lifted.getStart() - halfLength;
             int liftedEnd = lifted.getEnd() + halfLength;
-            return Optional.of(TadBoundaryDefault.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), liftedStart, liftedEnd, id, Float.parseFloat(column[4])));
+            GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), liftedStart, liftedEnd);
+            return Optional.of(TadBoundaryDefault.of(location, id, Float.parseFloat(column[4])));
         };
     }
 }

@@ -8,15 +8,13 @@ import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
 import de.charite.compbio.jannovar.reference.TranscriptModel;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.service.GeneService;
-import org.jax.svanna.model.gene.Gene;
-import org.jax.svanna.model.gene.GeneDefault;
-import org.jax.svanna.model.gene.Transcript;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssembly;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +31,7 @@ import java.util.stream.Collectors;
  * assembly, it is the user's responsibility to provide suitable inputs.
  */
 // TODO - the class might be moved outside of svanna-core
+@Deprecated // use `silent-genes-io`
 public class JannovarGeneService implements GeneService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JannovarGeneService.class);
@@ -49,60 +48,60 @@ public class JannovarGeneService implements GeneService {
      * @return Jannovar transcript service
      */
     public static JannovarGeneService of(GenomicAssembly assembly, JannovarData... databases) {
-        JannovarTxMapper remapper = new JannovarTxMapper(assembly);
-        Map<String, GeneDefault.Builder> geneBuilder = new HashMap<>();
-
-        // remap all the transcripts into SvAnna's coordinate system
-        for (JannovarData database : databases) {
-            ImmutableMap<String, TranscriptModel> tmByAccession = database.getTmByAccession();
-            for (String accessionId : tmByAccession.keySet()) {
-                TranscriptModel tm = tmByAccession.get(accessionId);
-                Optional<Transcript> txOpt = remapper.remap(tm);
-                txOpt.ifPresent(tx -> {
-                    geneBuilder.putIfAbsent(tm.getGeneSymbol(), GeneDefault.builder());
-
-                    GeneDefault.Builder builder = geneBuilder.get(tm.getGeneSymbol());
-
-                    ImmutableSortedMap<String, String> altIds = tm.getAltGeneIDs();
-                    if (!altIds.containsKey("ENTREZ_ID")) {
-                        LogUtils.logDebug(LOGGER, "Missing entrez id for gene {}", tm.getGeneSymbol());
-                        return;
-                    }
-                    TermId geneAccessionId = TermId.of("NCBIGene", altIds.get("ENTREZ_ID"));
-                    builder.accessionId(geneAccessionId);
-
-                    if (altIds.containsKey("HGNC_SYMBOL")) {
-                        builder.geneSymbol(altIds.get("HGNC_SYMBOL"));
-                    } else {
-                        builder.geneSymbol(tm.getGeneSymbol());
-                    }
-
-                    builder.addTranscript(tx);
-                });
-            }
-        }
-
-        Map<String, Gene> geneBySymbol = geneBuilder.entrySet().stream()
-                .map(buildGeneIfPossible())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(gene -> !gene.codingTranscripts().isEmpty())
-                .collect(Collectors.toMap(Gene::geneSymbol, Function.identity()));
-
-        Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()
-                .collect(Collectors.groupingBy(Gene::contigId, Collectors.toSet()));
-
-        // build interval arrays
-        GeneEndExtractor endExtractor = new GeneEndExtractor();
-        Map<Integer, IntervalArray<Gene>> intervalArrayMap = new HashMap<>();
-        for (int contig : geneByContig.keySet()) {
-            Set<Gene> genesOnContig = geneByContig.get(contig);
-            IntervalArray<Gene> intervalArray = new IntervalArray<>(genesOnContig, endExtractor);
-            intervalArrayMap.put(contig, intervalArray);
-        }
-
-        return new JannovarGeneService(intervalArrayMap, geneBySymbol);
-
+//        JannovarTxMapper remapper = new JannovarTxMapper(assembly);
+//        Map<String, GeneDefault.Builder> geneBuilder = new HashMap<>();
+//
+//        // remap all the transcripts into SvAnna's coordinate system
+//        for (JannovarData database : databases) {
+//            ImmutableMap<String, TranscriptModel> tmByAccession = database.getTmByAccession();
+//            for (String accessionId : tmByAccession.keySet()) {
+//                TranscriptModel tm = tmByAccession.get(accessionId);
+//                Optional<Transcript> txOpt = remapper.remap(tm);
+//                txOpt.ifPresent(tx -> {
+//                    geneBuilder.putIfAbsent(tm.getGeneSymbol(), GeneDefault.builder());
+//
+//                    GeneDefault.Builder builder = geneBuilder.get(tm.getGeneSymbol());
+//
+//                    ImmutableSortedMap<String, String> altIds = tm.getAltGeneIDs();
+//                    if (!altIds.containsKey("ENTREZ_ID")) {
+//                        LogUtils.logDebug(LOGGER, "Missing entrez id for gene {}", tm.getGeneSymbol());
+//                        return;
+//                    }
+//                    TermId geneAccessionId = TermId.of("NCBIGene", altIds.get("ENTREZ_ID"));
+//                    builder.accessionId(geneAccessionId);
+//
+//                    if (altIds.containsKey("HGNC_SYMBOL")) {
+//                        builder.geneSymbol(altIds.get("HGNC_SYMBOL"));
+//                    } else {
+//                        builder.geneSymbol(tm.getGeneSymbol());
+//                    }
+//
+//                    builder.addTranscript(tx);
+//                });
+//            }
+//        }
+//
+//        Map<String, Gene> geneBySymbol = geneBuilder.entrySet().stream()
+//                .map(buildGeneIfPossible())
+//                .filter(Optional::isPresent)
+//                .map(Optional::get)
+//                .filter(gene -> !gene.codingTranscripts().isEmpty())
+//                .collect(Collectors.toMap(Gene::geneSymbol, Function.identity()));
+//
+//        Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()
+//                .collect(Collectors.groupingBy(Gene::contigId, Collectors.toSet()));
+//
+//        // build interval arrays
+//        GeneEndExtractor endExtractor = new GeneEndExtractor();
+//        Map<Integer, IntervalArray<Gene>> intervalArrayMap = new HashMap<>();
+//        for (int contig : geneByContig.keySet()) {
+//            Set<Gene> genesOnContig = geneByContig.get(contig);
+//            IntervalArray<Gene> intervalArray = new IntervalArray<>(genesOnContig, endExtractor);
+//            intervalArrayMap.put(contig, intervalArray);
+//        }
+//
+//        return new JannovarGeneService(intervalArrayMap, geneBySymbol);
+        return null;
     }
 
     private JannovarGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap,
@@ -121,6 +120,7 @@ public class JannovarGeneService implements GeneService {
         return geneBySymbol.get(symbol);
     }
 
+    /*
     private static Function<Map.Entry<String, GeneDefault.Builder>, Optional<Gene>> buildGeneIfPossible() {
         return entry -> {
             try {
@@ -146,6 +146,6 @@ public class JannovarGeneService implements GeneService {
             return gene.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         }
     }
-
+    */
 
 }

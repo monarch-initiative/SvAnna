@@ -1,20 +1,19 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.TestDataConfig;
-import org.jax.svanna.core.TestGene;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
 import org.jax.svanna.model.ModeOfInheritance;
-import org.jax.svanna.model.gene.Gene;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
-import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.*;
 import org.springframework.boot.test.context.SpringBootTest;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
+import xyz.ielis.silent.genes.model.Transcript;
+import xyz.ielis.silent.genes.model.TranscriptIdentifier;
 
 import java.util.Collection;
 import java.util.List;
@@ -59,19 +58,25 @@ public class TermSimilarityGeneWeightCalculatorTest {
                 TermId.of("HP:0008132"), // Medial rotation of the medial malleolus
                 TermId.of("HP:0000517")  // Abnormality of the lens
         );
-        Map<TermId, Collection<TermId>> diseaseIdToTermIds = Map.of(TermId.of("OMIM:154700"),marfanSampleFeatures);
+        Map<TermId, Collection<TermId>> diseaseIdToTermIds = Map.of(TermId.of("OMIM:154700"), marfanSampleFeatures);
         when(phenotypeDataService.computeSimilarityScore(patientFeatures, marfanSampleFeatures))
                 .thenReturn(3.5);
 
 
         TermSimilarityGeneWeightCalculator calculator = new TermSimilarityGeneWeightCalculator(phenotypeDataService, patientFeatures, diseaseIdToTermIds);
 
-        TermId accessionId = TermId.of("NCBIGene:2200");
-        Gene gene = TestGene.of(accessionId, "FBN1",
-                ASSEMBLY.contigByName("9"), Strand.POSITIVE, CoordinateSystem.oneBased(),
-                48_408_313, 48_645_721);
+        String geneAccessionId = "NCBIGene:2200";
+        GeneIdentifier id = GeneIdentifier.of(geneAccessionId, "FBN1", "HGNC:3603", "NCBIGene:2200");
+        GenomicRegion location = GenomicRegion.of(ASSEMBLY.contigByName("9"), Strand.POSITIVE, CoordinateSystem.oneBased(), 48_408_313, 48_645_721);
+        TranscriptIdentifier txId = TranscriptIdentifier.of("TX_ACCESSION", "FBN1", null);
+        List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721));
+        Coordinates startCodong = Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_408_315);
+        Coordinates stopCodon  = Coordinates.of(CoordinateSystem.oneBased(), 48_645_719, 48_645_721);
+        Set<Transcript> transcripts = Set.of(Transcript.coding(txId, location, exons, startCodong, stopCodon));
+        Gene gene = Gene.of(id, location, transcripts);
 
-        when(phenotypeDataService.getDiseasesForGene(accessionId))
+
+        when(phenotypeDataService.getDiseasesForGene(geneAccessionId))
                 .thenReturn(Set.of(HpoDiseaseSummary.of("OMIM:154700", "Marfan Syndrome",
                         Set.of(ModeOfInheritance.AUTOSOMAL_DOMINANT))));
 

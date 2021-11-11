@@ -18,7 +18,6 @@ import org.jax.svanna.core.service.transcripts.JannovarGeneService;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.db.phenotype.MicaDao;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
-import org.jax.svanna.model.gene.GeneIdentifier;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -33,6 +32,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -152,7 +152,9 @@ public class SvannaAutoConfiguration {
                 mim2geneMedgenPath.toFile(), null,
                 svannaDataResolver.phenotypeHpoaPath().toFile(), ontology);
         Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoaPath.toString(), ontology);
-        Set<GeneIdentifier> geneIdentifiers = hap.getGeneIdToSymbolMap().entrySet().stream().map(e -> GeneIdentifier.of(e.getValue(), e.getKey())).collect(Collectors.toSet());
+        Set<GeneIdentifier> geneIdentifiers = hap.getGeneIdToSymbolMap().entrySet().stream()
+                .map(e -> GeneIdentifier.of(e.getValue(), e.getKey().getValue(), null, null)) // TODO - check values
+                .collect(Collectors.toUnmodifiableSet());
 
         SimilarityScoreCalculator similarityScoreCalculator;
         SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.prioritizationParameters().termSimilarityMeasure();

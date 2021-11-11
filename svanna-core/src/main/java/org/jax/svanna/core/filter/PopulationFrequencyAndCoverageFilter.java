@@ -116,7 +116,7 @@ public class PopulationFrequencyAndCoverageFilter {
             for (PopulationVariant populationVariant : populationVariants) {
                 if (populationVariant.variantType().baseType() == item.variantType().baseType()
                         && populationVariant.alleleFrequency() >= frequencyThreshold
-                        && FilterUtils.reciprocalOverlap(populationVariant, item) * 100.F > similarityThreshold) {
+                        && FilterUtils.reciprocalOverlap(populationVariant.location(), item) * 100.F > similarityThreshold) {
                     freqFilterResult = FF_FAIL;
                     break;
                 }

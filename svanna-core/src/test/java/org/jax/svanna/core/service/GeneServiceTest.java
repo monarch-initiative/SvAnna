@@ -2,13 +2,13 @@ package org.jax.svanna.core.service;
 
 import org.jax.svanna.core.TestContig;
 import org.jax.svanna.core.TestDataConfig;
-import org.jax.svanna.model.gene.Gene;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.svart.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
 import java.util.Set;
@@ -39,8 +39,8 @@ public class GeneServiceTest {
     public void bySymbol(String symbol, int length) {
         Gene gene = geneService.bySymbol(symbol);
 
-        assertThat(gene.geneSymbol(), equalTo(symbol));
-        assertThat(gene.length(), equalTo(length));
+        assertThat(gene.symbol(), equalTo(symbol));
+        assertThat(gene.location().length(), equalTo(length));
     }
 
     @ParameterizedTest
@@ -57,7 +57,7 @@ public class GeneServiceTest {
         GenomicRegion region = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
         List<Gene> genes = geneService.overlappingGenes(region);
 
-        Set<String> actual = genes.stream().map(Gene::geneSymbol).collect(Collectors.toUnmodifiableSet());
+        Set<String> actual = genes.stream().map(Gene::symbol).collect(Collectors.toUnmodifiableSet());
         String[] expected = names.split(",");
         if (expected.length == 1 && expected[0].equals(""))
             assertThat(actual, hasSize(0));

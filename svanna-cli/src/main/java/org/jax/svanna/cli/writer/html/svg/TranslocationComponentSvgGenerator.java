@@ -2,10 +2,10 @@ package org.jax.svanna.cli.writer.html.svg;
 
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -111,7 +111,7 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
         }
         for (var gene : affectedGenes) {
             writeGene(gene, ypos, writer);
-            ypos += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            ypos += gene.transcriptCount() * Constants.HEIGHT_PER_DISPLAY_ITEM;
             offset += Constants.HEIGHT_PER_DISPLAY_ITEM;
             n_display_items++;
         }

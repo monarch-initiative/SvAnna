@@ -19,7 +19,6 @@ import org.jax.svanna.db.additive.DbRouteDataServiceGE;
 import org.jax.svanna.db.additive.dispatch.DispatchOptions;
 import org.jax.svanna.db.additive.dispatch.DispatcherDb;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -27,6 +26,7 @@ import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
 import org.monarchinitiative.svart.GenomicAssembly;
+import xyz.ielis.silent.genes.model.Gene;
 
 import javax.sql.DataSource;
 import java.util.*;

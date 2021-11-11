@@ -93,8 +93,8 @@ public class DosageElementDao implements AnnotationDao<DosageElement>, IngestDao
                 }
                 Coordinates coordinates = Coordinates.of(CoordinateSystem.zeroBased(), // database invariant
                         rs.getInt("START"), rs.getInt("END"));
-                regions.add(DosageElement.of(contig,
-                        Strand.POSITIVE, coordinates,
+                GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, coordinates);
+                regions.add(DosageElement.of(location,
                         rs.getString("ID"),
                         DosageSensitivity.valueOf(rs.getString("DOSAGE_SENSITIVITY")),
                         DosageSensitivityEvidence.valueOf(rs.getString("DOSAGE_EVIDENCE"))

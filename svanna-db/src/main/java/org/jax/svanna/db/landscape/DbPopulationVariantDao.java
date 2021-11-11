@@ -62,11 +62,11 @@ public class DbPopulationVariantDao implements PopulationVariantDao, IngestDao<P
                     if (LOGGER.isWarnEnabled()) LOGGER.warn("Unknown contig id `{}`", rs.getInt("CONTIG"));
                     continue;
                 }
-                regions.add(BasePopulationVariant.of(contig,
-                        Strand.POSITIVE, CoordinateSystem.zeroBased(),
-                        rs.getInt("START"), rs.getInt("END"),
-                        rs.getString("ID"), VariantType.valueOf(rs.getString("VARIANT_TYPE")),
-                        rs.getFloat("ALLELE_FREQUENCY"), origin));
+                regions.add(
+                        BasePopulationVariant.of(
+                                GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), rs.getInt("START"), rs.getInt("END")),
+                                rs.getString("ID"), VariantType.valueOf(rs.getString("VARIANT_TYPE")),
+                                rs.getFloat("ALLELE_FREQUENCY"), origin));
             }
         }
         return regions;

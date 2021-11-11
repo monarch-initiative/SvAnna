@@ -3,19 +3,21 @@ package org.jax.svanna.db.additive.dispatch;
 import org.jax.svanna.core.priority.additive.Routes;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.db.TestContig;
-import org.jax.svanna.db.TestGene;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
-import org.jax.svanna.model.gene.Gene;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.tad.TadBoundaryDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
+import xyz.ielis.silent.genes.model.Transcript;
+import xyz.ielis.silent.genes.model.TranscriptIdentifier;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,20 +29,31 @@ public class DispatcherDbTest {
     private static final Contig ctg2 = TestContig.of(2, 2000);
 
     private static final List<Gene> GENES = List.of(
-            TestGene.of(TermId.of("NCBIGene:A"), "ONE", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 200, 400),
-            TestGene.of(TermId.of("NCBIGene:B"), "TWO", ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 600, 1000)
+            makeGene("NCBIGene:A", "ONE", ctg1, 200, 400),
+            makeGene("NCBIGene:B", "TWO", ctg2, 600, 1000)
     );
 
     private static final List<TadBoundary> TADS = List.of(
-            TadBoundaryDefault.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 10, 10, "one", .95f),
-            TadBoundaryDefault.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 50, "two", .96f),
-            TadBoundaryDefault.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 20, "three", .97f),
-            TadBoundaryDefault.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 70, 70, "two", .98f)
+            TadBoundaryDefault.of(GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 10, 10), "one", .95f),
+            TadBoundaryDefault.of(GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 50), "two", .96f),
+            TadBoundaryDefault.of(GenomicRegion.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 20), "three", .97f),
+            TadBoundaryDefault.of(GenomicRegion.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 70, 70), "two", .98f)
     );
-
     private GeneService geneService;
     private TadBoundaryDao tadBoundaryDao;
 
+    private static Gene makeGene(String id, String symbol, Contig contig, int start, int end) {
+        GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
+
+        TranscriptIdentifier txId = TranscriptIdentifier.of(id + "_tx", symbol + "_tx", null);
+        List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
+        Coordinates startCodon = Coordinates.of(CoordinateSystem.zeroBased(), start, start + 3);
+        Coordinates stopCodon = Coordinates.of(CoordinateSystem.zeroBased(), end - 3, end);
+        Transcript tx = Transcript.coding(txId, location, exons, startCodon, stopCodon);
+
+        GeneIdentifier geneId = GeneIdentifier.of(id, symbol, null, null);
+        return Gene.of(geneId, location, Set.of(tx));
+    }
 
     @BeforeEach
     public void setUp() {

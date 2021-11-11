@@ -1,9 +1,9 @@
 package org.jax.svanna.model.landscape.variant;
 
-import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.VariantType;
+import xyz.ielis.silent.genes.model.Located;
 
-public interface PopulationVariant extends GenomicRegion {
+public interface PopulationVariant extends Located {
 
     String id();
 

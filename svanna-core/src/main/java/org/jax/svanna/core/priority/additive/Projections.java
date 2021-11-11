@@ -3,10 +3,10 @@ package org.jax.svanna.core.priority.additive;
 import org.jax.svanna.core.LogUtils;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
-import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class Projections {
     private Projections() {
     }
 
-    public static <T extends GenomicRegion> List<Projection<T>> project(T query, Route route) {
+    public static <T extends Located> List<Projection<T>> project(T query, Route route) {
         if (!route.segmentContigs().contains(query.contig()))
             return List.of();
 
@@ -54,7 +54,7 @@ public class Projections {
             return List.of();
         }
 
-        if (query.length() == 0) {
+        if (query.location().length() == 0) {
             if (startSegmentIdx == endSegmentIdx - 1)
                 startSegmentIdx++; // TODO - is this dirty hack working?
             else if (startSegmentIdx - 1 == endSegmentIdx)
@@ -68,9 +68,9 @@ public class Projections {
         }
     }
 
-    private static <T extends GenomicRegion> List<Projection<T>> processIntraSegmentEvent(T query,
-                                                                                          int segmentIdx,
-                                                                                          Route route) {
+    private static <T extends Located> List<Projection<T>> processIntraSegmentEvent(T query,
+                                                                                    int segmentIdx,
+                                                                                    Route route) {
         List<Segment> segments = route.segments();
         Segment segment = segments.get(segmentIdx);
         if (segment.event() == Event.DELETION)
@@ -117,10 +117,10 @@ public class Projections {
         return List.of();
     }
 
-    private static <T extends GenomicRegion> List<Projection<T>> processInterSegmentEvent(T query,
-                                                                                          int startSegmentIdx,
-                                                                                          int endSegmentIdx,
-                                                                                          Route route) {
+    private static <T extends Located> List<Projection<T>> processInterSegmentEvent(T query,
+                                                                                    int startSegmentIdx,
+                                                                                    int endSegmentIdx,
+                                                                                    Route route) {
         List<Segment> segments = route.segments();
         Segment startSegment = segments.get(startSegmentIdx);
         Segment endSegment = segments.get(endSegmentIdx);

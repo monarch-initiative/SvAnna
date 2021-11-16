@@ -44,6 +44,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
 import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.SequenceRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -181,9 +182,9 @@ public class BuildDb implements Callable<Integer> {
     }
 
     private static Predicate<? super GencodeGene> geneIsCodingOrAtLeastOneTranscriptIsCoding() {
-        // We want protein-coding genes or genes where at least one transcript is protein-coding
-        return gene -> gene.biotype() == Biotype.protein_coding
-                || gene.transcripts().anyMatch(tx -> tx.biotype() == Biotype.protein_coding);
+        // Gene is located on assembled molecule of the genomic assembly and gene is coding or at least one transcript is coding
+        return gene -> gene.contig().sequenceRole() == SequenceRole.ASSEMBLED_MOLECULE
+                && (gene.biotype() == Biotype.protein_coding || gene.transcripts().anyMatch(tx -> tx.biotype() == Biotype.protein_coding));
     }
 
     private static Path downloadLiftoverChain(IngestDbProperties properties, Path tmpDir) throws IOException {

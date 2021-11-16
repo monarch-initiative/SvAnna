@@ -2,12 +2,14 @@ package org.jax.svanna.cli;
 
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.io.service.SilentGenesGeneService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -15,7 +17,7 @@ import java.nio.file.Paths;
 public class TestDataConfig {
 
     /**
-     * Small Jannovar cache that contains RefSeq transcripts of the following genes:
+     * Small transcript file that contains GENCODE transcripts of the following genes:
      * <ul>
      *     <li><em>SURF1</em></li>
      *     <li><em>SURF2</em></li>
@@ -29,8 +31,7 @@ public class TestDataConfig {
      *     <li><em>SRY</em></li> (on <code>chrY</code>)
      * </ul>
      */
-    private static final Path JANNOVAR_DATA = Paths.get("src/test/resources/hg38_refseq_small.ser");
-
+    private static final Path SILENT_GENE_DATA = Paths.get("src/test/resources/gencode.10genes.v38.basic.annotation.json.gz");
 
     @Bean
     public GenomicAssembly genomicAssembly() {
@@ -43,8 +44,8 @@ public class TestDataConfig {
     }
 
     @Bean
-    public GeneService geneService(GenomicAssembly assembly) {
-        return JannovarGeneService.of(assembly, JANNOVAR_DATA);
+    public GeneService geneService(GenomicAssembly assembly) throws IOException {
+        return SilentGenesGeneService.of(assembly, SILENT_GENE_DATA);
     }
 
     @Bean

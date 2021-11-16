@@ -1,7 +1,6 @@
-package org.jax.svanna.io.service;
+package org.jax.svanna.core;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.jax.svanna.core.service.GeneService;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -18,18 +17,19 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
-public class SilentGenesGeneService implements GeneService {
+class SilentGenesGeneService implements GeneService {
 
     private final Map<Integer, IntervalArray<Gene>> chromosomeMap;
 
-    private final Map<TermId, Gene> geneByTermId;
+    private final Map<TermId, Gene> genesByTermId;
 
-    public static SilentGenesGeneService of(GenomicAssembly assembly, Path silentGenesJsonPath) throws IOException {
+    static SilentGenesGeneService of(GenomicAssembly assembly, Path silentGenesJsonPath) throws IOException {
         GeneParserFactory factory = GeneParserFactory.of(assembly);
         GeneParser geneParser = factory.forFormat(SerializationFormat.JSON);
         List<? extends Gene> genes;
-        try (InputStream is = openForReading(silentGenesJsonPath)) {
+        try (InputStream is = new BufferedInputStream(new GZIPInputStream(Files.newInputStream(silentGenesJsonPath)))) {
             genes = geneParser.read(is);
         }
         // We check for HGNC ID presence in the filter clause
@@ -51,18 +51,9 @@ public class SilentGenesGeneService implements GeneService {
         return new SilentGenesGeneService(Map.copyOf(intervalArrayMap), geneBySymbol);
     }
 
-    private static InputStream openForReading(Path silentGenesJsonPath) throws IOException {
-        if (silentGenesJsonPath.toFile().getName().endsWith(".gz")) {
-            LOGGER.debug("Assuming the file is gzipped");
-            return new BufferedInputStream(new GzipCompressorInputStream(Files.newInputStream(silentGenesJsonPath)));
-        } else {
-            return new BufferedInputStream(Files.newInputStream(silentGenesJsonPath));
-        }
-    }
-
-    private SilentGenesGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap, Map<TermId, Gene> geneByTermId) {
+    private SilentGenesGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap, Map<TermId, Gene> genesByTermId) {
         this.chromosomeMap = chromosomeMap;
-        this.geneByTermId = geneByTermId;
+        this.genesByTermId = genesByTermId;
     }
 
     @Override
@@ -72,7 +63,7 @@ public class SilentGenesGeneService implements GeneService {
 
     @Override
     public Optional<Gene> byHgncId(TermId hgncId) {
-        return Optional.ofNullable(geneByTermId.get(hgncId));
+        return Optional.ofNullable(genesByTermId.get(hgncId));
     }
 
 }

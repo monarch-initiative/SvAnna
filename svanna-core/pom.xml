@@ -37,7 +37,7 @@
         </dependency>
         <dependency>
             <groupId>xyz.ielis.silent.genes</groupId>
-            <artifactId>silent-genes-jannovar</artifactId>
+            <artifactId>silent-genes-io</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

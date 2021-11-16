@@ -6,9 +6,13 @@ import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import xyz.ielis.silent.genes.io.GeneParser;
+import xyz.ielis.silent.genes.io.GeneParserFactory;
+import xyz.ielis.silent.genes.io.SerializationFormat;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
 import xyz.ielis.silent.genes.model.Identifier;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -20,7 +24,7 @@ import java.util.stream.Stream;
 public class TestDataConfig {
 
     /**
-     * Small Jannovar cache that contains RefSeq transcripts of the following genes:
+     * Small transcript file that contains GENCODE transcripts of the following genes:
      * <ul>
      *     <li><em>SURF1</em></li>
      *     <li><em>SURF2</em></li>
@@ -30,13 +34,11 @@ public class TestDataConfig {
      *     <li><em>HNF4A</em></li>
      *     <li><em>GCK</em></li>
      *     <li><em>BRCA2</em></li>
-     *     <li><em>MEIOB</em></li>
-     *     <li><em>FAHD1</em></li>
      *     <li><em>COL4A5</em></li> (on <code>chrX</code>)
      *     <li><em>SRY</em></li> (on <code>chrY</code>)
      * </ul>
      */
-    private static final Path JANNOVAR_DATA = Paths.get("src/test/resources/hg38_refseq_small.ser");
+    private static final Path SILENT_GENE_DATA = Paths.get("src/test/resources/gencode.10genes.v38.basic.annotation.json.gz");
 
     @Bean
     public GenomicAssembly genomicAssembly() {
@@ -49,8 +51,8 @@ public class TestDataConfig {
     }
 
     @Bean
-    public GeneService geneService(GenomicAssembly assembly) {
-        return JannovarGeneService.of(assembly, JANNOVAR_DATA);
+    public GeneService geneService(GenomicAssembly assembly) throws IOException {
+        return SilentGenesGeneService.of(assembly, SILENT_GENE_DATA);
     }
 
     @Bean

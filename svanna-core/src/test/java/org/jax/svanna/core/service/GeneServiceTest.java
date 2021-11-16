@@ -5,12 +5,14 @@ import org.jax.svanna.core.TestDataConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,11 +35,15 @@ public class GeneServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "SURF1, 4681",
-            "HNF4A, 77045",
+            "HGNC:11474, SURF1,  4919",
+            "HGNC:11475, SURF2,  4609",
+            "HGNC:5024,  HNF4A, 78897",
     })
-    public void bySymbol(String symbol, int length) {
-        Gene gene = geneService.bySymbol(symbol);
+    public void bySymbol(String termId, String symbol, int length) {
+        Optional<Gene> geneOpt = geneService.byHgncId(TermId.of(termId));
+        assertThat(geneOpt.isPresent(), equalTo(true));
+
+        Gene gene = geneOpt.get();
 
         assertThat(gene.symbol(), equalTo(symbol));
         assertThat(gene.location().length(), equalTo(length));
@@ -45,11 +51,11 @@ public class GeneServiceTest {
 
     @ParameterizedTest
     @CsvSource({
-            "9,  133356485, 133356544, ''", // right between the SURF1 and SURF2 genes
-            "9,  133356484, 133356544, SURF1",
-            "9,  133356485, 133356545, SURF2",
-            "9,  133356484, 133356545, 'SURF1,SURF2'",
-            "9,  133356480, 133356480, SURF1", // interval with length 0
+            "1,  23290000, 23291000, ''", // between ZBTB48 and ZNF436 genes
+            "9,  133356484, 133356548, SURF1",
+            "9,  133357000, 133358000, SURF2",
+            "9,  133356550, 133356551, 'SURF1,SURF2'",
+            "9,  133356540, 133356540, SURF1", // interval with length 0
             "15,  48550000,  48550100,  FBN1",
     })
     public void overlappingGenes(String contigName, int start, int end, String names) {

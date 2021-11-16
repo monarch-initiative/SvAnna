@@ -2,6 +2,7 @@ package org.jax.svanna.core.service;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.LogUtils;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
@@ -11,6 +12,7 @@ import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface GeneService {
 
@@ -18,7 +20,7 @@ public interface GeneService {
 
     Map<Integer, IntervalArray<Gene>> getChromosomeMap();
 
-    Gene bySymbol(String symbol);
+    Optional<Gene> byHgncId(TermId hgncId);
 
     default List<Gene> overlappingGenes(GenomicRegion query) {
         IntervalArray<Gene> array = getChromosomeMap().get(query.contigId());

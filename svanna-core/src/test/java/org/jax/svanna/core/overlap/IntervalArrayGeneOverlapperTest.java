@@ -21,31 +21,36 @@ public class IntervalArrayGeneOverlapperTest {
 
 
     @Autowired
-    private GenomicAssembly genomicAssembly;
-
-
-    @Autowired
     public GeneService geneService;
+    @Autowired
+    private GenomicAssembly genomicAssembly;
 
     @ParameterizedTest
     @CsvSource({
-            "133356544, C,  '', false",
-            "133356545, A,  '', true",
-            "133356546, G,  '', false",
+            "133356549, T,  '', false",
+            "133356550, C,  '', true",
+            "133356551, T,  '', false",
     })
     public void getOverlaps_tss_deletion(int pos, String ref, String alt, boolean expected) {
         Contig chr9 = genomicAssembly.contigByName("9");
         Variant variant = Variant.of(chr9, "TSS_DEL", Strand.POSITIVE, CoordinateSystem.oneBased(), pos, ref, alt);
 
         IntervalArrayGeneOverlapper overlapper = new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
-        List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
-        assertThat(overlaps.stream().map(GeneOverlap::overlapType).allMatch(ot -> ot.equals(OverlapType.AFFECTS_CODING_TRANSCRIPT_TSS)), equalTo(expected));
+        List<GeneOverlap> surf2Overlaps = overlapper.getOverlaps(variant).stream()
+                .filter(go -> "SURF2".equals(go.gene().symbol()))
+                .collect(Collectors.toUnmodifiableList());
+        boolean match = !surf2Overlaps.isEmpty()
+                && surf2Overlaps.stream()
+                .map(GeneOverlap::overlapType)
+                .allMatch(ot -> ot.equals(OverlapType.AFFECTS_CODING_TRANSCRIPT_TSS));
+
+        assertThat(match, equalTo(expected));
     }
 
     @ParameterizedTest
     @CsvSource({
-            "chr16,                left, right, 1871875, -56, 20, C, C[chr16_KI270856v1_alt:58[, 'MEIOB'",
-            "chr16_KI270856v1_alt, left, right,      58, -57, 16, T, ]chr16:1871875]T,           'MEIOB'",
+            "chrY,                 left, right, 2787000, -56, 20, C, C[chr16_KI270856v1_alt:58[, 'SRY'",
+            "chr16_KI270856v1_alt, left, right,      58, -57, 16, T, ]chrY:2787000]T,            'SRY'",
     })
     public void getOverlaps_breakendVariantWithMateOnAltContig(String contigName, String id, String mateId, int pos, int ciPosStart, int ciPosEnd, String ref, String alt, String geneSymbols) {
         /*

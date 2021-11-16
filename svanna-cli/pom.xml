@@ -55,11 +55,6 @@
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>xyz.ielis.silent.genes</groupId>
-            <artifactId>silent-genes-jannovar</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>

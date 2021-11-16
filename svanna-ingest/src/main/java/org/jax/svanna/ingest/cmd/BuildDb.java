@@ -52,6 +52,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ConfigurableApplicationContext;
 import picocli.CommandLine;
 import xyz.ielis.silent.genes.gencode.io.GencodeParser;
+import xyz.ielis.silent.genes.gencode.model.Biotype;
 import xyz.ielis.silent.genes.gencode.model.GencodeGene;
 import xyz.ielis.silent.genes.io.GeneParser;
 import xyz.ielis.silent.genes.io.GeneParserFactory;
@@ -71,6 +72,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -162,6 +164,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("Reading Gencode GTF file at `{}`", localGencodeGtfPath.toAbsolutePath());
         GencodeParser parser = new GencodeParser(localGencodeGtfPath, assembly);
         List<GencodeGene> genes = parser.stream()
+                .filter(geneIsCodingOrAtLeastOneTranscriptIsCoding())
                 .collect(Collectors.toUnmodifiableList());
         LOGGER.info("Read {} genes", genes.size());
 
@@ -175,6 +178,12 @@ public class BuildDb implements Callable<Integer> {
         }
 
         return destination;
+    }
+
+    private static Predicate<? super GencodeGene> geneIsCodingOrAtLeastOneTranscriptIsCoding() {
+        // We want protein-coding genes or genes where at least one transcript is protein-coding
+        return gene -> gene.biotype() == Biotype.protein_coding
+                || gene.transcripts().anyMatch(tx -> tx.biotype() == Biotype.protein_coding);
     }
 
     private static Path downloadLiftoverChain(IngestDbProperties properties, Path tmpDir) throws IOException {

@@ -14,10 +14,14 @@ public interface QueryResult<T extends Located> {
     }
 
     static <T extends Located> QueryResult<T> of(Collection<T> overlapping, T upstream, T downstream) {
-        Objects.requireNonNull(overlapping, "Overlapping items collection must not be empty");
-        return (overlapping.isEmpty() && upstream == null && downstream == null)
-                ? empty()
-                : QueryResultDefault.of(List.copyOf(overlapping), upstream, downstream);
+        Objects.requireNonNull(overlapping, "Overlapping items collection must not be null");
+        if (overlapping.isEmpty()) {
+            return (upstream == null && downstream == null)
+                    ? empty()
+                    : new QueryResultUpstreamDownstream<>(upstream, downstream);
+        } else {
+            return new QueryResultDefault<>(List.copyOf(overlapping), upstream, downstream);
+        }
     }
 
     static <T extends Located> QueryResult<T> empty() {

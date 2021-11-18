@@ -126,7 +126,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     @Override
     public double projectImpact(Projection<Gene> projection) {
-        Set<Transcript> transcripts = projection.source().transcripts()
+        Set<Transcript> transcripts = projection.source().transcriptStream()
                 .collect(Collectors.toUnmodifiableSet());
         double promoterImpact = checkPromoter(projection.route().segments(), transcripts);
 

@@ -16,29 +16,31 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SilentGenesGeneService implements GeneService {
 
     private final Map<Integer, IntervalArray<Gene>> chromosomeMap;
 
-    private final Map<TermId, Gene> geneByTermId;
+    private final Map<TermId, List<Gene>> geneByTermId;
 
     public static SilentGenesGeneService of(GenomicAssembly assembly, Path silentGenesJsonPath) throws IOException {
         GeneParserFactory factory = GeneParserFactory.of(assembly);
         GeneParser geneParser = factory.forFormat(SerializationFormat.JSON);
-        List<? extends Gene> genes;
+        List<Gene> genes;
         try (InputStream is = openForReading(silentGenesJsonPath)) {
-            genes = geneParser.read(is);
+            genes = List.copyOf(geneParser.read(is));
         }
-        // We check for HGNC ID presence in the filter clause
+        // We group into a list of genes, because genes in pseudo-autosomal regions can be on 2 contigs,
+        // hence two genes for a single HGNC id.
+        // We get optional without checking because HGNC ID presence is checked in the stream filter.
         //noinspection OptionalGetWithoutIsPresent
-        Map<TermId, Gene> geneBySymbol = genes.stream()
+        Map<TermId, List<Gene>> geneBySymbol = genes.stream()
                 .filter(g -> g.id().hgncId().isPresent())
-                .collect(Collectors.toUnmodifiableMap(gene -> TermId.of(gene.id().hgncId().get()), Function.identity()));
+                .collect(Collectors.groupingBy(gene -> TermId.of(gene.id().hgncId().get()), Collectors.toUnmodifiableList()));
 
         Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()
+                .flatMap(List::stream)
                 .collect(Collectors.groupingBy(Gene::contigId, Collectors.toUnmodifiableSet()));
 
         Map<Integer, IntervalArray<Gene>> intervalArrayMap = new HashMap<>();
@@ -60,7 +62,7 @@ public class SilentGenesGeneService implements GeneService {
         }
     }
 
-    private SilentGenesGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap, Map<TermId, Gene> geneByTermId) {
+    private SilentGenesGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap, Map<TermId, List<Gene>> geneByTermId) {
         this.chromosomeMap = chromosomeMap;
         this.geneByTermId = geneByTermId;
     }
@@ -71,8 +73,8 @@ public class SilentGenesGeneService implements GeneService {
     }
 
     @Override
-    public Optional<Gene> byHgncId(TermId hgncId) {
-        return Optional.ofNullable(geneByTermId.get(hgncId));
+    public List<Gene> byHgncId(TermId hgncId) {
+        return geneByTermId.get(hgncId);
     }
 
 }

@@ -27,8 +27,7 @@ public class SvSvgGeneratorTest {
 
     @Test
     public void testWriteSvg() {
-        //noinspection OptionalGetWithoutIsPresent
-        List<Gene> genes = List.of(geneService.byHgncId(TermId.of("HGNC:4195")).get());
+        List<Gene> genes = geneService.byHgncId(TermId.of("HGNC:4195"));
         SvSvgGenerator generator = new DeletionSvgGenerator(testVariants.deletions().gckUpstreamIntergenic_affectingEnhancer(), genes,
                 List.of(), List.of());
         String svg = generator.getSvg();

@@ -16,8 +16,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -231,7 +230,8 @@ public abstract class SvSvgGenerator {
      */
     int getGenomicMinPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
         int geneMin = genes.stream()
-                .mapToInt(gene -> gene.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .map(gene -> gene.transcriptStream().mapToInt(tx -> tx.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).min())
+                .flatMapToInt(OptionalInt::stream)
                 .min()
                 .orElse(Integer.MAX_VALUE);
         int enhancerMin = enhancers.stream()
@@ -257,7 +257,8 @@ public abstract class SvSvgGenerator {
      */
     int getGenomicMaxPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
         int geneMax = genes.stream()
-                .mapToInt(g -> g.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .map(g -> g.transcriptStream().mapToInt(tx -> tx.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).max())
+                .flatMapToInt(OptionalInt::stream)
                 .max()
                 .orElse(Integer.MIN_VALUE);
         int enhancerMax = enhancers.stream()
@@ -383,25 +384,10 @@ public abstract class SvSvgGenerator {
         writer.write(txt);
     }
 
-    protected void writeNoncodingTranscript(String geneSymbol, Transcript tx, int ypos, Writer writer) throws IOException {
-        List<Coordinates> exons = tx.strand().isPositive()
-                ? tx.exons()
-                : flipExonsToPositiveStrand(tx.contig(), tx.exons());
-
-        double minX = translateGenomicToSvg(tx.startOnStrand(Strand.POSITIVE));
-        // All exons are untranslated
-        for (Coordinates exon : exons) {
-            double exonStart = translateGenomicToSvg(exon.invertStart(tx.contig()));
-            double exonEnd = translateGenomicToSvg(exon.invertEnd(tx.contig()));
-            writeUtrExon(exonStart, exonEnd, ypos, writer);
-        }
-        writeIntrons(tx.exons(), ypos, writer);
-        writeTranscriptName(geneSymbol, tx, minX, ypos, writer);
-    }
-
     protected void writeGene(Gene gene, int ypos, Writer writer) throws IOException {
-        List<? extends Transcript> txs = gene.transcripts().collect(Collectors.toUnmodifiableList());
-        for (Transcript tx : txs) {
+        Iterator<? extends Transcript> transcripts = gene.transcripts();
+        while (transcripts.hasNext()) {
+            Transcript tx = transcripts.next();
             writeTranscript(gene.symbol(), tx, ypos, writer);
             ypos += Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
@@ -417,13 +403,24 @@ public abstract class SvSvgGenerator {
      * @throws IOException if we cannot write.
      */
     protected void writeTranscript(String geneSymbol, Transcript tx, int ypos, Writer writer) throws IOException {
-        if (!(tx instanceof Coding)) {
+        if (tx instanceof Coding) {
+            writeCodingTranscript(geneSymbol, tx, ypos, writer);
+        } else {
             writeNoncodingTranscript(geneSymbol, tx, ypos, writer);
-            return;
         }
+    }
+
+    private void writeCodingTranscript(String geneSymbol, Transcript tx, int ypos, Writer writer) throws IOException {
         Coding coding = (Coding) tx;
-        double cdsStart = translateGenomicToSvg(coding.codingStart());
-        double cdsEnd = translateGenomicToSvg(coding.codingEnd());
+
+        int cdsStart = tx.strand().isPositive()
+                ? coding.codingStart()
+                : Coordinates.invertPosition(tx.coordinateSystem(), tx.contig(), coding.codingStart());
+        double cdsStartSvg = translateGenomicToSvg(cdsStart);
+        int cdsEnd = tx.strand().isPositive()
+                ? coding.codingEnd()
+                : Coordinates.invertPosition(tx.coordinateSystem(), tx.contig(), coding.codingEnd());
+        double cdsEndSvg = translateGenomicToSvg(cdsEnd);
         List<Coordinates> exons = tx.strand().isPositive()
                 ? tx.exons()
                 : flipExonsToPositiveStrand(tx.contig(), tx.exons());
@@ -433,18 +430,34 @@ public abstract class SvSvgGenerator {
             double exonStart = translateGenomicToSvg(exon.start());
             double exonEnd = translateGenomicToSvg(exon.end());
             if (exonStart < minX) minX = exonStart;
-            if (exonStart >= cdsStart && exonEnd <= cdsEnd) {
+            if (exonStart >= cdsStartSvg && exonEnd <= cdsEndSvg) {
                 writeCdsExon(exonStart, exonEnd, ypos, writer);
-            } else if (exonStart <= cdsEnd && exonEnd > cdsEnd) {
+            } else if (exonStart <= cdsEndSvg && exonEnd > cdsEndSvg) {
                 // in this case, the 3' portion of the exon is UTR and the 5' is CDS
-                writeCdsExon(exonStart, cdsEnd, ypos, writer);
-                writeUtrExon(cdsEnd, exonEnd, ypos, writer);
-            } else if (exonStart < cdsStart && exonEnd > cdsStart) {
-                writeUtrExon(exonStart, cdsStart, ypos, writer);
-                writeCdsExon(cdsStart, exonEnd, ypos, writer);
+                writeCdsExon(exonStart, cdsEndSvg, ypos, writer);
+                writeUtrExon(cdsEndSvg, exonEnd, ypos, writer);
+            } else if (exonStart < cdsStartSvg && exonEnd > cdsStartSvg) {
+                writeUtrExon(exonStart, cdsStartSvg, ypos, writer);
+                writeCdsExon(cdsStartSvg, exonEnd, ypos, writer);
             } else {
                 writeUtrExon(exonStart, exonEnd, ypos, writer);
             }
+        }
+        writeIntrons(exons, ypos, writer);
+        writeTranscriptName(geneSymbol, tx, minX, ypos, writer);
+    }
+
+    protected void writeNoncodingTranscript(String geneSymbol, Transcript tx, int ypos, Writer writer) throws IOException {
+        List<Coordinates> exons = tx.strand().isPositive()
+                ? tx.exons()
+                : flipExonsToPositiveStrand(tx.contig(), tx.exons());
+
+        double minX = translateGenomicToSvg(tx.startOnStrand(Strand.POSITIVE));
+        // All exons are untranslated
+        for (Coordinates exon : exons) {
+            double exonStart = translateGenomicToSvg(exon.start());
+            double exonEnd = translateGenomicToSvg(exon.end());
+            writeUtrExon(exonStart, exonEnd, ypos, writer);
         }
         writeIntrons(exons, ypos, writer);
         writeTranscriptName(geneSymbol, tx, minX, ypos, writer);
@@ -462,8 +475,8 @@ public abstract class SvSvgGenerator {
         // if the gene does not have an intron, we are done
         if (exons.size() == 1)
             return;
-        List<Integer> intronStarts = new ArrayList<>();
-        List<Integer> intronEnds = new ArrayList<>();
+        List<Integer> intronStarts = new ArrayList<>(exons.size() - 1);
+        List<Integer> intronEnds = new ArrayList<>(exons.size() - 1);
         for (int i = 1; i < exons.size(); i++) {
             Coordinates previous = exons.get(i - 1);
             Coordinates current = exons.get(i);

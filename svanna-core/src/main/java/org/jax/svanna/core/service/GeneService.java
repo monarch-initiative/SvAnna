@@ -12,7 +12,6 @@ import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public interface GeneService {
 
@@ -20,7 +19,11 @@ public interface GeneService {
 
     Map<Integer, IntervalArray<Gene>> getChromosomeMap();
 
-    Optional<Gene> byHgncId(TermId hgncId);
+    /**
+     * Most of the time, the list will have zero or one genes inside.
+     * However, because of pseudo-autosomal regions, some genes can actually be on >1 contig, and the list will contain >1 genes.
+     */
+    List<Gene> byHgncId(TermId hgncId);
 
     default List<Gene> overlappingGenes(GenomicRegion query) {
         IntervalArray<Gene> array = getChromosomeMap().get(query.contigId());

@@ -22,6 +22,7 @@ import org.jax.svanna.ingest.Main;
 import org.jax.svanna.ingest.config.*;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
+import org.jax.svanna.ingest.parse.GencodeGeneProcessor;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.ingest.parse.RepetitiveRegionParser;
 import org.jax.svanna.ingest.parse.dosage.ClingenGeneCurationParser;
@@ -161,12 +162,10 @@ public class BuildDb implements Callable<Integer> {
         URL url = new URL(properties.getGencodeGtfUrl());
         Path localGencodeGtfPath = downloadUrl(url, tmpDir);
 
-        // transform the genes to silent gene format
+        // Load the Gencode GTF into the "silent gene" format
         LOGGER.info("Reading Gencode GTF file at `{}`", localGencodeGtfPath.toAbsolutePath());
-        GencodeParser parser = new GencodeParser(localGencodeGtfPath, assembly);
-        List<GencodeGene> genes = parser.stream()
-                .filter(geneIsCodingOrAtLeastOneTranscriptIsCoding())
-                .collect(Collectors.toUnmodifiableList());
+        GencodeGeneProcessor gencodeGeneProcessor = new GencodeGeneProcessor(localGencodeGtfPath, assembly);
+        List<? extends GencodeGene> genes = gencodeGeneProcessor.process();
         LOGGER.info("Read {} genes", genes.size());
 
         // dump the transformed genes to compressed JSON file in the build directory
@@ -179,12 +178,6 @@ public class BuildDb implements Callable<Integer> {
         }
 
         return destination;
-    }
-
-    private static Predicate<? super GencodeGene> geneIsCodingOrAtLeastOneTranscriptIsCoding() {
-        // Gene is located on assembled molecule of the genomic assembly and gene is coding or at least one transcript is coding
-        return gene -> gene.contig().sequenceRole() == SequenceRole.ASSEMBLED_MOLECULE
-                && (gene.biotype() == Biotype.protein_coding || gene.transcripts().anyMatch(tx -> tx.biotype() == Biotype.protein_coding));
     }
 
     private static Path downloadLiftoverChain(IngestDbProperties properties, Path tmpDir) throws IOException {

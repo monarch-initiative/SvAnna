@@ -60,7 +60,7 @@ class IntervalArrayGeneOverlapper implements GeneOverlapper {
         Map<String, TranscriptOverlap> overlaps = new HashMap<>(gene.transcriptCount());
 
         gene.transcripts()
-                .forEach(transcript -> overlaps.put(transcript.accession(), processOverlapForTranscript(region, transcript)));
+                .forEachRemaining(transcript -> overlaps.put(transcript.accession(), processOverlapForTranscript(region, transcript)));
 
         return GeneOverlap.of(gene, overlaps);
     }

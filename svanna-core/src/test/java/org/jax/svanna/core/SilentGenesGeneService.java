@@ -62,8 +62,9 @@ class SilentGenesGeneService implements GeneService {
     }
 
     @Override
-    public Optional<Gene> byHgncId(TermId hgncId) {
-        return Optional.ofNullable(genesByTermId.get(hgncId));
+    public List<Gene> byHgncId(TermId hgncId) {
+        // this is a mock/test service, we always have only one gene per HGNC ID
+        return List.of(genesByTermId.get(hgncId));
     }
 
 }

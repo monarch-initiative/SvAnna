@@ -40,10 +40,10 @@ public class GeneServiceTest {
             "HGNC:5024,  HNF4A, 78897",
     })
     public void bySymbol(String termId, String symbol, int length) {
-        Optional<Gene> geneOpt = geneService.byHgncId(TermId.of(termId));
-        assertThat(geneOpt.isPresent(), equalTo(true));
+        List<Gene> genes = geneService.byHgncId(TermId.of(termId));
+        assertThat(genes.isEmpty(), equalTo(false));
 
-        Gene gene = geneOpt.get();
+        Gene gene = genes.get(0);
 
         assertThat(gene.symbol(), equalTo(symbol));
         assertThat(gene.location().length(), equalTo(length));

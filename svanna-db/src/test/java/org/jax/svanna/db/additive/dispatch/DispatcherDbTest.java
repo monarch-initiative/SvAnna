@@ -2,6 +2,7 @@ package org.jax.svanna.db.additive.dispatch;
 
 import org.jax.svanna.core.priority.additive.Routes;
 import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.core.service.QueryResult;
 import org.jax.svanna.db.TestContig;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
@@ -68,9 +69,9 @@ public class DispatcherDbTest {
         BreakendVariant bv = BreakendVariant.of("BLA", left, right, "N", "ACGT");
 
         when(geneService.overlappingGenes(left))
-                .thenReturn(List.of(GENES.get(0)));
+                .thenReturn(QueryResult.of(List.of(GENES.get(0))));
         when(geneService.overlappingGenes(right))
-                .thenReturn(List.of());
+                .thenReturn(QueryResult.empty());
 
         when(tadBoundaryDao.upstreamOf(left))
                 .thenReturn(Optional.of(TADS.get(0)));

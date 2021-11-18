@@ -65,9 +65,9 @@ public class DispatcherDb implements Dispatcher {
     private Routes interchromosomalArrangement(BreakendVariant bv) throws DispatchException {
         // reference regions
         Breakend left = bv.left();
-        List<Gene> leftGenes = geneService.overlappingGenes(left);
+        List<Gene> leftGenes = geneService.overlappingGenes(left).overlapping();
         Breakend right = bv.right();
-        List<Gene> rightGenes = geneService.overlappingGenes(right);
+        List<Gene> rightGenes = geneService.overlappingGenes(right).overlapping();
         Pair<GenomicRegion> pair = (!leftGenes.isEmpty() || !rightGenes.isEmpty())
                 ? calculateGeneBoundsForBreakends(left, leftGenes, right, rightGenes) // dispatch for the genes only
                 : calculateBoundsBasedOnBreakendsOnly(left, right);     // dispatch using variant data only for intergenic events
@@ -117,7 +117,7 @@ public class DispatcherDb implements Dispatcher {
 
         int upstreamBound = -1, downstreamBound = -1;
         if (!dispatchOptions.forceEvaluateTad() && variants.size() == 1) {
-            List<Gene> genes = geneService.overlappingGenes(first);
+            List<Gene> genes = geneService.overlappingGenes(first).overlapping();
 
             // Let's make this simple if the variant overlaps with a single gene
             // or with a group of genes that overlap each other

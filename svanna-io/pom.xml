@@ -22,6 +22,10 @@
             <artifactId>silent-genes-io</artifactId>
         </dependency>
         <dependency>
+            <groupId>de.charite.compbio</groupId>
+            <artifactId>jannovar-core</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.samtools</groupId>
             <artifactId>htsjdk</artifactId>
         </dependency>

@@ -174,7 +174,7 @@ public class SvannaAutoConfiguration {
 
     @Bean
     public GeneOverlapper geneOverlapper(GeneService geneService) {
-        return GeneOverlapper.intervalArrayOverlapper(geneService.getChromosomeMap());
+        return GeneOverlapper.of(geneService);
     }
 
     @Bean

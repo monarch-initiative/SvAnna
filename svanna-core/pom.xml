@@ -17,11 +17,6 @@
             <artifactId>svanna-model</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <!-- TODO - remove -->
-        <dependency>
-            <groupId>de.charite.compbio</groupId>
-            <artifactId>jannovar-core</artifactId>
-        </dependency>
 
         <!--    TESTS    -->
         <dependency>
@@ -31,13 +26,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>xyz.ielis.silent.genes</groupId>
+            <artifactId>silent-genes-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>
             <artifactId>phenol-annotations</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>xyz.ielis.silent.genes</groupId>
-            <artifactId>silent-genes-io</artifactId>
+            <groupId>de.charite.compbio</groupId>
+            <artifactId>jannovar-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

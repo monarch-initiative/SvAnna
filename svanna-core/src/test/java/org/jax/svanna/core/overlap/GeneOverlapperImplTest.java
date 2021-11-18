@@ -17,7 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 @SpringBootTest(classes = TestDataConfig.class)
-public class IntervalArrayGeneOverlapperTest {
+public class GeneOverlapperImplTest {
 
 
     @Autowired
@@ -35,7 +35,7 @@ public class IntervalArrayGeneOverlapperTest {
         Contig chr9 = genomicAssembly.contigByName("9");
         Variant variant = Variant.of(chr9, "TSS_DEL", Strand.POSITIVE, CoordinateSystem.oneBased(), pos, ref, alt);
 
-        IntervalArrayGeneOverlapper overlapper = new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
+        GeneOverlapperImpl overlapper = new GeneOverlapperImpl(geneService);
         List<GeneOverlap> surf2Overlaps = overlapper.getOverlaps(variant).stream()
                 .filter(go -> "SURF2".equals(go.gene().symbol()))
                 .collect(Collectors.toUnmodifiableList());
@@ -63,7 +63,7 @@ public class IntervalArrayGeneOverlapperTest {
                 genomicAssembly.contigByName(contigName), pos, ConfidenceInterval.of(ciPosStart, ciPosEnd), ConfidenceInterval.precise(),
                 ref, alt);
 
-        IntervalArrayGeneOverlapper overlapper = new IntervalArrayGeneOverlapper(geneService.getChromosomeMap());
+        GeneOverlapperImpl overlapper = new GeneOverlapperImpl(geneService);
         List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
         assertThat(overlaps.stream().map(overlap -> overlap.gene().symbol()).collect(Collectors.joining("|")), equalTo(geneSymbols));
     }

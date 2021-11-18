@@ -36,7 +36,7 @@ public class DbRouteDataServiceGE implements RouteDataService<RouteDataGE> {
 
         for (GenomicRegion reference : route.references()) {
             Predicate<? super Located> isContainedInRoute = r -> reference.contains(r.location());
-            List<Gene> genes = geneService.overlappingGenes(reference).stream()
+            List<Gene> genes = geneService.overlappingGenes(reference).overlapping().stream()
                     .filter(isContainedInRoute)
                     .collect(Collectors.toList());
 

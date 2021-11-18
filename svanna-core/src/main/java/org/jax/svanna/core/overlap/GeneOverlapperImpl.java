@@ -1,7 +1,8 @@
 package org.jax.svanna.core.overlap;
 
-import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.LogUtils;
+import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.core.service.QueryResult;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,38 +15,38 @@ import java.util.stream.Collectors;
 
 import static org.jax.svanna.core.overlap.OverlapType.*;
 
-class IntervalArrayGeneOverlapper implements GeneOverlapper {
+class GeneOverlapperImpl implements GeneOverlapper {
 
     /*
     Note: Always check presence of contigId in the gene interval array before working with the corresponding IntervalArray<Gene>.
     The array can be null!
      */
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(IntervalArrayGeneOverlapper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeneOverlapperImpl.class);
 
     /**
      * Map where key corresponds to {@link Contig#id()} and the value contains interval array with the
      * genes.
      */
-    private final Map<Integer, IntervalArray<Gene>> geneIntervalArrays;
+    private final GeneService geneService;
 
-    IntervalArrayGeneOverlapper(Map<Integer, IntervalArray<Gene>> geneIntervalArrays) {
-        this.geneIntervalArrays = geneIntervalArrays;
+    GeneOverlapperImpl(GeneService geneService) {
+        this.geneService = Objects.requireNonNull(geneService, "Gene service must not be null");
     }
 
-    private static List<GeneOverlap> parseIntrachromosomalEventQueryResult(GenomicRegion region, IntervalArray<Gene>.QueryResult result) {
-        return result.getEntries().isEmpty()
-                ? intergenic(region, result.getLeft(), result.getRight())
-                : parseEventThatOverlapsWithAGene(region, result.getEntries());
+    private static List<GeneOverlap> parseIntrachromosomalEventQueryResult(GenomicRegion region, QueryResult<Gene> result) {
+        return result.hasOverlapping()
+                ? parseEventThatOverlapsWithAGene(region, result.overlapping())
+                : intergenic(region, result);
     }
 
-    private static List<GeneOverlap> intergenic(GenomicRegion region, Gene left, Gene right) {
+    private static List<GeneOverlap> intergenic(GenomicRegion region, QueryResult<Gene> result) {
         List<GeneOverlap> overlaps = new ArrayList<>(2);
 
-        if (left != null)
-            overlaps.add(processOverlapForGene(region, left));
-        if (right != null)
-            overlaps.add(processOverlapForGene(region, right));
+        if (result.upstream().isPresent())
+            overlaps.add(processOverlapForGene(region, result.upstream().get()));
+        if (result.downstream().isPresent())
+            overlaps.add(processOverlapForGene(region, result.downstream().get()));
 
         return overlaps;
     }
@@ -187,25 +188,14 @@ class IntervalArrayGeneOverlapper implements GeneOverlapper {
     }
 
     private List<GeneOverlap> intrachromosomalEventOverlaps(GenomicRegion region) {
-        if (!geneIntervalArrays.containsKey(region.contigId())) {
-            LogUtils.logDebug(LOGGER, "Unknown contig {}({})", region.contigId(), region.contigName());
-            return List.of();
-        }
-
-        IntervalArray<Gene> array = geneIntervalArrays.get(region.contigId());
-        int start = region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-        int end = region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-        return parseIntrachromosomalEventQueryResult(region, array.findOverlappingWithInterval(start, end));
+        QueryResult<Gene> results = geneService.overlappingGenes(region);
+        return parseIntrachromosomalEventQueryResult(region, results);
 
     }
 
     private List<GeneOverlap> emptyRegionOverlap(GenomicRegion region) {
-        if (!geneIntervalArrays.containsKey(region.contigId())) {
-            LogUtils.logDebug(LOGGER, "Unknown contig {}({})", region.contigId(), region.contigName());
-            return List.of();
-        }
-
-        return parseIntrachromosomalEventQueryResult(region, emptyRegionResults(region));
+        QueryResult<Gene> results = geneService.overlappingGenes(region);
+        return parseIntrachromosomalEventQueryResult(region, results);
     }
 
     private List<GeneOverlap> translocationOverlaps(BreakendVariant breakendVariant) {
@@ -213,25 +203,14 @@ class IntervalArrayGeneOverlapper implements GeneOverlapper {
 
         // the loop is unrolled as we only have 2 breakends here
         Breakend left = breakendVariant.left();
-        if (geneIntervalArrays.containsKey(left.contigId())) {
-            IntervalArray<Gene>.QueryResult result = emptyRegionResults(left);
-            overlaps.addAll(parseIntrachromosomalEventQueryResult(left, result));
-        }
+        QueryResult<Gene> leftResult = geneService.overlappingGenes(left);
+        overlaps.addAll(parseIntrachromosomalEventQueryResult(left, leftResult));
 
         Breakend right = breakendVariant.right();
-        if (geneIntervalArrays.containsKey(right.contigId())) {
-            IntervalArray<Gene>.QueryResult result = emptyRegionResults(right);
-            overlaps.addAll(parseIntrachromosomalEventQueryResult(right, result));
-        }
+        QueryResult<Gene> rightResult = geneService.overlappingGenes(right);
+        overlaps.addAll(parseIntrachromosomalEventQueryResult(right, rightResult));
 
         return overlaps;
     }
 
-    private IntervalArray<Gene>.QueryResult emptyRegionResults(GenomicRegion region) {
-        IntervalArray<Gene> intervalArray = geneIntervalArrays.get(region.contigId());
-        int start = region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-        return start == 0
-                ? intervalArray.findOverlappingWithPoint(start + 1)
-                : intervalArray.findOverlappingWithPoint(start);
-    }
 }

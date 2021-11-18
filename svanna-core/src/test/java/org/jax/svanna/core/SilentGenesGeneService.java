@@ -2,8 +2,12 @@ package org.jax.svanna.core;
 
 import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.core.service.QueryResult;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Strand;
 import xyz.ielis.silent.genes.io.GeneParser;
 import xyz.ielis.silent.genes.io.GeneParserFactory;
 import xyz.ielis.silent.genes.io.SerializationFormat;
@@ -57,14 +61,22 @@ class SilentGenesGeneService implements GeneService {
     }
 
     @Override
-    public Map<Integer, IntervalArray<Gene>> getChromosomeMap() {
-        return chromosomeMap;
-    }
-
-    @Override
     public List<Gene> byHgncId(TermId hgncId) {
         // this is a mock/test service, we always have only one gene per HGNC ID
         return List.of(genesByTermId.get(hgncId));
+    }
+
+    @Override
+    public QueryResult<Gene> overlappingGenes(GenomicRegion query) {
+        IntervalArray<Gene> array = chromosomeMap.get(query.contigId());
+        if (array == null)
+            return QueryResult.empty();
+
+        IntervalArray<Gene>.QueryResult result = query.length() == 0
+                ? array.findOverlappingWithPoint(query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                : array.findOverlappingWithInterval(query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+
+        return QueryResult.of(result.getEntries(), result.getLeft(), result.getRight());
     }
 
 }

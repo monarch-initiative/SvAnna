@@ -46,6 +46,7 @@
         <commons-io.version>2.8.0</commons-io.version>
         <commons-csv.version>1.7</commons-csv.version>
         <commons-compress.version>1.21</commons-compress.version>
+        <commons-net.version>3.8.0</commons-net.version>
     </properties>
 
     <developers>
@@ -109,12 +110,6 @@
                 <groupId>org.monarchinitiative.phenol</groupId>
                 <artifactId>phenol-core</artifactId>
                 <version>${phenol.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.monarchinitiative.phenol</groupId>
@@ -193,6 +188,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

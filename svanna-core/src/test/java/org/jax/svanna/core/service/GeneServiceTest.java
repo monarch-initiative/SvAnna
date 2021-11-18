@@ -12,7 +12,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,11 +26,6 @@ public class GeneServiceTest {
     public GeneService geneService;
     @Autowired
     private GenomicAssembly genomicAssembly;
-
-    @Test
-    public void getChromosomeMap() {
-        assertThat(geneService.getChromosomeMap().keySet(), hasItems(1, 7, 9, 13, 15, 20, 23, 24));
-    }
 
     @ParameterizedTest
     @CsvSource({
@@ -61,9 +55,9 @@ public class GeneServiceTest {
     public void overlappingGenes(String contigName, int start, int end, String names) {
         Contig contig = genomicAssembly.contigByName(contigName);
         GenomicRegion region = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
-        List<Gene> genes = geneService.overlappingGenes(region);
+        QueryResult<Gene> genes = geneService.overlappingGenes(region);
 
-        Set<String> actual = genes.stream().map(Gene::symbol).collect(Collectors.toUnmodifiableSet());
+        Set<String> actual = genes.overlapping().stream().map(Gene::symbol).collect(Collectors.toUnmodifiableSet());
         String[] expected = names.split(",");
         if (expected.length == 1 && expected[0].equals(""))
             assertThat(actual, hasSize(0));
@@ -74,6 +68,6 @@ public class GeneServiceTest {
     @Test
     public void overlappingGenes_unknownContig() {
         GenomicRegion region = GenomicRegion.of(TestContig.of(200, 100), Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 60);
-        assertThat(geneService.overlappingGenes(region), is(empty()));
+        assertThat(geneService.overlappingGenes(region).isEmpty(), is(true));
     }
 }

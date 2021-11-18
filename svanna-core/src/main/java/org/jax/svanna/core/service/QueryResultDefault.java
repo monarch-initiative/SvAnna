@@ -1,41 +1,42 @@
-package org.jax.svanna.core.reference;
+package org.jax.svanna.core.service;
 
-import org.monarchinitiative.svart.GenomicRegion;
+import xyz.ielis.silent.genes.model.Located;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.Optional;
 
-class QueryResultDefault<T extends GenomicRegion> implements QueryResult<T> {
+class QueryResultDefault<T extends Located> implements QueryResult<T> {
 
-    private final Set<T> overlapping;
+    private final List<T> overlapping;
 
     private final T upstream;
 
     private final T downstream;
 
-    static <T extends GenomicRegion> QueryResultDefault<T> of(Set<T> overlapping, T upstream, T downstream) {
+    static <T extends Located> QueryResultDefault<T> of(List<T> overlapping, T upstream, T downstream) {
         return new QueryResultDefault<>(overlapping, upstream, downstream);
     }
 
-    private QueryResultDefault(Set<T> overlapping, T upstream, T downstream) {
+    private QueryResultDefault(List<T> overlapping, T upstream, T downstream) {
         this.overlapping = overlapping;
         this.upstream = upstream;
         this.downstream = downstream;
     }
 
     @Override
-    public Set<T> overlapping() {
+    public List<T> overlapping() {
         return overlapping;
     }
 
     @Override
-    public T upstream() {
-        return null;
+    public Optional<T> upstream() {
+        return Optional.ofNullable(upstream);
     }
 
     @Override
-    public T downstream() {
-        return null;
+    public Optional<T> downstream() {
+        return Optional.ofNullable(downstream);
     }
 
     @Override

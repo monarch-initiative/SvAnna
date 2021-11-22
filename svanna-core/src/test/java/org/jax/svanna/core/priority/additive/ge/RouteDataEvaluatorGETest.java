@@ -49,7 +49,7 @@ public class RouteDataEvaluatorGETest {
     }
 
     private static Routes makeRoutes(GenomicRegion reference, Segment... segments) {
-        return Routes.of(Set.of(reference), Set.of(Route.of(List.of(segments))));
+        return Routes.of(List.of(reference), List.of(Route.of(List.of(segments))));
     }
 
     private static Segment positiveDeletion(Contig contig, int start, int end) {

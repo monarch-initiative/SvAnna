@@ -52,7 +52,7 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
         return GranularRouteResult.of(scoreMap);
     }
 
-    private Map<String, Double> evaluateReference(Set<GenomicRegion> references,
+    private Map<String, Double> evaluateReference(List<GenomicRegion> references,
                                                   Set<Gene> genes,
                                                   Set<Enhancer> enhancers,
                                                   List<TadBoundary> tadBoundaries) {
@@ -111,7 +111,7 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Double> evaluateAlternate(Set<Route> routes,
+    private Map<String, Double> evaluateAlternate(List<Route> routes,
                                                   Set<Gene> genes,
                                                   Set<Enhancer> enhancers,
                                                   List<TadBoundary> tadBoundaries) {

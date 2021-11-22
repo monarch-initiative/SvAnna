@@ -1,15 +1,21 @@
 package org.jax.svanna.db.additive.dispatch;
 
 import org.jax.svanna.core.LogUtils;
+import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.IntrachromosomalBreakendException;
+import org.jax.svanna.core.priority.additive.Route;
+import org.jax.svanna.core.priority.additive.Segment;
 import org.monarchinitiative.svart.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class RouteAssembly {
+class RouteAssemblyUtils {
+
+    private static final CoordinateSystem CS = CoordinateSystem.zeroBased();
 
     /**
      * Sort variants located in a single contig and adjust variant strands to the same strand. If there is a breakend
@@ -22,13 +28,14 @@ class RouteAssembly {
     static VariantArrangement assemble(List<Variant> variants) throws RouteAssemblyException {
         if (variants.isEmpty()) throw new RouteAssemblyException("Variant list must not be empty");
 
-        List<Variant> breakends = variants.stream()
-                .filter(v -> v instanceof BreakendVariant)
-                .collect(Collectors.toList());
+        LinkedList<Variant> breakends = variants.stream()
+                .filter(Variant::isBreakend)
+                .collect(Collectors.toCollection(LinkedList::new));
+
         if (breakends.isEmpty())
             return assembleIntrachromosomal(variants);
         else if (breakends.size() == 1)
-            return assembleInterchromosomal(variants, breakends.get(0));
+            return assembleInterchromosomal(variants, breakends.getFirst());
         else
             throw new RouteAssemblyException("Unable to assemble a list of " + breakends.size() + "(>1) breakend variants");
     }
@@ -40,13 +47,13 @@ class RouteAssembly {
         if (variants.size() == 1)
             return VariantArrangement.intrachromosomal(variants);
 
-        List<Variant> startSorted = variants.stream()
-                .map(v -> v.withStrand(Strand.POSITIVE)) // this might fail if V does not override `withStrand`
+        List<Variant> sortedByStart = variants.stream()
+                .map(v -> v.withStrand(Strand.POSITIVE)) // this can fail if V does not override `withStrand`
                 .sorted(Comparator.comparingInt(v -> v.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())))
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
 
-        Variant previous = startSorted.get(0);
-        for (Variant current : startSorted) {
+        Variant previous = sortedByStart.get(0);
+        for (Variant current : sortedByStart) {
             if (previous == current) continue;
             if (previous.overlapsWith(current))
                 throw new RouteAssemblyException("Unable to assemble overlapping variants: "
@@ -54,7 +61,7 @@ class RouteAssembly {
             previous = current;
         }
 
-        return VariantArrangement.intrachromosomal(startSorted);
+        return VariantArrangement.intrachromosomal(sortedByStart);
     }
 
     private static VariantArrangement assembleInterchromosomal(List<? extends Variant> variants, Variant breakendVariant) {
@@ -70,7 +77,7 @@ class RouteAssembly {
                 .filter(v -> v.contig().equals(left.contig()) && !v.equals(breakend))
                 .sorted(Comparator.comparingInt(left::distanceTo))
                 .map(v -> (Variant) v.withStrand(left.strand())) // this might fail if V does not override `withStrand`
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
         for (Variant variant : leftSorted) {
             if (left.distanceTo(variant) > 0)
                 throw new RouteAssemblyException("Variant " + LogUtils.variantSummary(variant) + " is not upstream of the breakend " + LogUtils.breakendSummary(left));
@@ -81,7 +88,7 @@ class RouteAssembly {
                 .filter(v -> v.contig().equals(right.contig()) && !v.equals(breakend))
                 .sorted(Comparator.comparing(v -> right.distanceTo((Region<?>) v)).reversed())
                 .map(v -> (Variant) v.withStrand(right.strand()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toUnmodifiableList());
         for (Variant variant : rightSorted) {
             if (right.distanceTo(variant) < 0)
                 throw new RouteAssemblyException("Variant " + LogUtils.variantSummary(variant) + " is not downstream of the breakend " + LogUtils.breakendSummary(right));
@@ -96,4 +103,52 @@ class RouteAssembly {
         return VariantArrangement.interchromosomal(sortedVariants, leftSorted.size());
     }
 
+
+    static List<Route> makeAltRouteForBreakendVariant(BreakendVariant bv, GenomicRegion leftGeneRegion, GenomicRegion rightGeneRegion) {
+        Breakend left = bv.left();
+        Breakend right = bv.right();
+
+        // ------------------------------------ The LEFT segments ------------------------------------------------------
+        List<Segment> leftSegments = new LinkedList<>();
+        // upstream
+        leftSegments.add(Segment.of(left.contig(), left.strand(), CS,
+                leftGeneRegion.startOnStrandWithCoordinateSystem(left.strand(), CS), left.startWithCoordinateSystem(CS),
+                "left-upstream", Event.GAP, 1));
+        // left breakend
+        Segment leftBndSegment = Segment.of(left.contig(), left.strand(), CS,
+                left.startWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS),
+                left.id(), Event.BREAKEND, 1);
+        leftSegments.add(leftBndSegment);
+
+        if (bv.changeLength() != 0) { // there is an inserted sequence within breakend
+            leftSegments.add(Segment.insertion(left.contig(), left.strand(), CS,
+                    left.endWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS), "ins" + bv.eventId(), bv.changeLength()));
+        }
+
+        // right breakend
+        Segment rightBndSegment = Segment.of(right.contig(), right.strand(), CS,
+                right.startWithCoordinateSystem(CS), right.endWithCoordinateSystem(CS), right.id(), Event.BREAKEND, 1);
+        leftSegments.add(rightBndSegment);
+
+        // downstream
+        leftSegments.add(Segment.of(right.contig(), right.strand(), CS,
+                right.endWithCoordinateSystem(CS), rightGeneRegion.endOnStrandWithCoordinateSystem(right.strand(), CS), "right-downstream", Event.GAP, 1));
+
+
+        // ------------------------------------ The RIGHT segments -----------------------------------------------------
+        List<Segment> rightSegments = new LinkedList<>();
+        // upstream
+        rightSegments.add(Segment.of(right.contig(), right.strand(), CS,
+                rightGeneRegion.startOnStrandWithCoordinateSystem(right.strand(), CS), right.startWithCoordinateSystem(CS),
+                "right-upstream", Event.GAP, 1));
+        // right breakend
+        rightSegments.add(rightBndSegment);
+        // left breakend
+        rightSegments.add(leftBndSegment);
+        // downstream
+        rightSegments.add(Segment.of(left.contig(), left.strand(), CS,
+                left.endWithCoordinateSystem(CS), leftGeneRegion.endOnStrandWithCoordinateSystem(left.strand(), CS), "left-downstream", Event.GAP, 1));
+
+        return List.of(Route.of(leftSegments), Route.of(rightSegments));
+    }
 }

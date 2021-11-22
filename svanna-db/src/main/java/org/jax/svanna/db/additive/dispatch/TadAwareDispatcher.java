@@ -13,16 +13,16 @@ import xyz.ielis.silent.genes.model.Located;
 
 import java.util.*;
 
-public class DispatcherDb implements Dispatcher {
+public class TadAwareDispatcher implements Dispatcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DispatcherDb.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TadAwareDispatcher.class);
     private static final CoordinateSystem CS = CoordinateSystem.zeroBased();
 
     private final GeneService geneService;
     private final TadBoundaryDao tadBoundaryDao;
     private final DispatchOptions dispatchOptions;
 
-    public DispatcherDb(GeneService geneService, TadBoundaryDao tadBoundaryDao, DispatchOptions dispatchOptions) {
+    public TadAwareDispatcher(GeneService geneService, TadBoundaryDao tadBoundaryDao, DispatchOptions dispatchOptions) {
         this.geneService = geneService;
         this.tadBoundaryDao = tadBoundaryDao;
         this.dispatchOptions = dispatchOptions;
@@ -31,7 +31,7 @@ public class DispatcherDb implements Dispatcher {
     @Override
     public Routes assembleRoutes(List<Variant> variants) throws DispatchException {
         // variants are sorted and put to the same strand - either POSITIVE or NEGATIVE
-        VariantArrangement arrangement = RouteAssembly.assemble(variants);
+        VariantArrangement arrangement = RouteAssemblyUtils.assemble(variants);
 
 
         if (arrangement.hasBreakend()) {
@@ -49,14 +49,12 @@ public class DispatcherDb implements Dispatcher {
              - define alternate routes using left upstream and right downstream
              */
             Variant v = arrangement.variants().get(arrangement.breakendIndex());
-            BreakendVariant bv;
             try {
-                bv = (BreakendVariant) v;
+                return interchromosomalArrangement((BreakendVariant) v);
             } catch (ClassCastException e) {
                 LogUtils.logWarn(LOGGER, "Expected to get BreakendVariant, got `{}`. {}", v.getClass().getSimpleName(), e.getMessage());
                 throw new DispatchException(e);
             }
-            return interchromosomalArrangement(bv);
         } else {
             return intrachromosomalArrangement(arrangement);
         }
@@ -75,40 +73,9 @@ public class DispatcherDb implements Dispatcher {
         GenomicRegion leftReference = pair.left();
         GenomicRegion rightReference = pair.right();
 
-        // ALT segments : left
-        List<Segment> leftSegments = new LinkedList<>();
-        leftSegments.add(Segment.of(left.contig(), left.strand(), CS,
-                leftReference.startWithCoordinateSystem(CS), left.startWithCoordinateSystem(CS),
-                "left-upstream", Event.GAP, 1));
-        Segment leftBndSegment = Segment.of(left.contig(), left.strand(), CS,
-                left.startWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS),
-                left.id(), Event.BREAKEND, 1);
-        leftSegments.add(leftBndSegment);
+        List<Route> alternates = RouteAssemblyUtils.makeAltRouteForBreakendVariant(bv, leftReference, rightReference);
 
-        if (bv.changeLength() != 0)
-            // there is an inserted sequence within breakend
-            leftSegments.add(Segment.insertion(left.contig(), left.strand(), CS,
-                    left.endWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS),
-                    "ins" + bv.id(), bv.changeLength()));
-
-        Segment rightBndSegment = Segment.of(right.contig(), right.strand(), CS,
-                right.startWithCoordinateSystem(CS), right.endWithCoordinateSystem(CS),
-                right.id(), Event.BREAKEND, 1);
-        leftSegments.add(rightBndSegment);
-        leftSegments.add(Segment.of(right.contig(), right.strand(), CS,
-                right.endWithCoordinateSystem(CS), rightReference.endWithCoordinateSystem(CS),
-                "right-downstream", Event.GAP, 1));
-
-        // ALT segments : right
-        List<Segment> rightSegments = new LinkedList<>();
-        rightSegments.add(Segment.of(right.contig(), right.strand(), CS,
-                rightReference.startWithCoordinateSystem(CS), right.startWithCoordinateSystem(CS),
-                "right-upstream", Event.GAP, 1));
-        rightSegments.add(rightBndSegment);
-        rightSegments.add(leftBndSegment);
-        rightSegments.add(Segment.of(left.contig(), left.strand(), CS, left.endWithCoordinateSystem(CS), leftReference.endWithCoordinateSystem(CS), "left-downstream", Event.GAP, 1));
-
-        return Routes.of(Set.of(leftReference, rightReference), Set.of(Route.of(leftSegments), Route.of(rightSegments)));
+        return Routes.of(List.of(leftReference, rightReference), alternates);
     }
 
     private Routes intrachromosomalArrangement(VariantArrangement arrangement) {
@@ -140,7 +107,7 @@ public class DispatcherDb implements Dispatcher {
         GenomicRegion reference = GenomicRegion.of(first.contig(), first.strand(), CS, upstreamBound, downstreamBound);
         Route altRoute = RouteUtils.buildRoute(upstreamBound, downstreamBound, variants);
 
-        return Routes.of(Set.of(reference), Set.of(altRoute));
+        return Routes.of(List.of(reference), List.of(altRoute));
     }
 
     private static Pair<GenomicRegion> calculateGeneBoundsForBreakends(Breakend left, List<Gene> leftGenes, Breakend right, List<Gene> rightGenes) {

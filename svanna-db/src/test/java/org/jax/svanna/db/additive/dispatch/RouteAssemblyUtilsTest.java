@@ -11,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class RouteAssemblyTest {
+public class RouteAssemblyUtilsTest {
 
     @Nested
     public class Intrachromosomal {
@@ -25,7 +25,7 @@ public class RouteAssemblyTest {
                     Variant.of(contig, "two", Strand.NEGATIVE, CoordinateSystem.oneBased(), 80, "TTT", "C")
             );
 
-            VariantArrangement assembled = RouteAssembly.assemble(variants);
+            VariantArrangement assembled = RouteAssemblyUtils.assemble(variants);
 
             assertThat(assembled.variants(), hasSize(3));
             assertThat(assembled.variants().get(0), equalTo(variants.get(0).withStrand(Strand.POSITIVE)));
@@ -52,7 +52,7 @@ public class RouteAssemblyTest {
                     Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
             );
 
-            VariantArrangement assembled = RouteAssembly.assemble(variants);
+            VariantArrangement assembled = RouteAssemblyUtils.assemble(variants);
 
             assertThat(assembled.variants(), hasSize(5));
             assertThat(assembled.variants().get(0), equalTo(variants.get(2)));
@@ -79,7 +79,7 @@ public class RouteAssemblyTest {
                     Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
             );
 
-            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
+            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
             assertThat(e.getMessage(), containsString("Variant two 1:50-52 CCC>C is not upstream of the breakend threeLeft 1:40-40"));
         }
 
@@ -98,7 +98,7 @@ public class RouteAssemblyTest {
                     Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 25, "C", "G")  // culprit
             );
 
-            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
+            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
             assertThat(e.getMessage(), containsString("Variant four 1:76-76 C>G is not downstream of the breakend threeRight 1:70-70"));
         }
     }
@@ -119,7 +119,7 @@ public class RouteAssemblyTest {
                             Breakend.of(ctg1, "twoRight", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 60, 60)), "", "")
             );
 
-            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
+            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
             assertThat(e.getMessage(), containsString("Unable to assemble a list of 2(>1) breakend variants"));
         }
 
@@ -132,7 +132,7 @@ public class RouteAssemblyTest {
                     Variant.of(ctg2, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
             );
 
-            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
+            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
             assertThat(e.getMessage(), containsString("Unable to assemble variants on 2(>1) contigs without knowing the breakend"));
         }
 
@@ -144,7 +144,7 @@ public class RouteAssemblyTest {
                     Variant.of(contig, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
             );
 
-            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(variants));
+            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
             assertThat(e.getMessage(), containsString("Unable to assemble overlapping variants: one 1:5-8 CCCC>C two 1:6-8 CCC>C"));
         }
 
@@ -153,7 +153,7 @@ public class RouteAssemblyTest {
             TestContig contig = TestContig.of(1, 10);
             List<Variant> variants = List.of(Variant.of(contig, "rs123", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"));
 
-            VariantArrangement assembled = RouteAssembly.assemble(variants);
+            VariantArrangement assembled = RouteAssemblyUtils.assemble(variants);
 
             assertThat(assembled.variants(), hasSize(1));
             assertThat(assembled.variants(), hasItem(variants.get(0)));
@@ -161,7 +161,7 @@ public class RouteAssemblyTest {
 
         @Test
         public void emptyThrowsException() {
-            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssembly.assemble(List.of()));
+            RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(List.of()));
             assertThat(e.getMessage(), containsString("Variant list must not be empty"));
         }
     }

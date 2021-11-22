@@ -24,7 +24,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Disabled // TODO - implement
-public class DispatcherDbTest {
+public class TadAwareDispatcherTest {
 
     private static final Contig ctg1 = TestContig.of(1, 1000);
     private static final Contig ctg2 = TestContig.of(2, 2000);
@@ -83,9 +83,9 @@ public class DispatcherDbTest {
                 .thenReturn(Optional.of(TADS.get(3)));
 
         DispatchOptions dispatchOptions = DispatchOptions.of(false);
-        DispatcherDb polyDispatcherDb = new DispatcherDb(geneService, tadBoundaryDao, dispatchOptions);
+        TadAwareDispatcher dispatcher = new TadAwareDispatcher(geneService, tadBoundaryDao, dispatchOptions);
 
-        Routes routes = polyDispatcherDb.assembleRoutes(List.of(bv));
+        Routes routes = dispatcher.assembleRoutes(List.of(bv));
 
         routes.references().forEach(System.err::println);
         routes.alternates().forEach(System.err::println);

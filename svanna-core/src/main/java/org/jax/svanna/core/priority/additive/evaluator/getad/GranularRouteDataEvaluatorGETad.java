@@ -1,4 +1,4 @@
-package org.jax.svanna.core.priority.additive.ge;
+package org.jax.svanna.core.priority.additive.evaluator.getad;
 
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.additive.*;
@@ -16,9 +16,12 @@ import xyz.ielis.silent.genes.model.Located;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDataGE, GranularRouteResult> {
+/**
+ * The <em>pre-review</em> evaluator that uses TADs.
+ */
+public class GranularRouteDataEvaluatorGETad implements RouteDataEvaluator<RouteDataGETad, GranularRouteResult> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GranularRouteDataEvaluatorGE.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GranularRouteDataEvaluatorGETad.class);
 
     private final SequenceImpactCalculator<Gene> geneImpactCalculator;
     private final GeneWeightCalculator geneWeightCalculator;
@@ -26,10 +29,10 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
     private final SequenceImpactCalculator<Enhancer> enhancerImpactCalculator;
     private final EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator;
 
-    public GranularRouteDataEvaluatorGE(SequenceImpactCalculator<Gene> geneImpactCalculator,
-                                        GeneWeightCalculator geneWeightCalculator,
-                                        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator,
-                                        EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator) {
+    public GranularRouteDataEvaluatorGETad(SequenceImpactCalculator<Gene> geneImpactCalculator,
+                                           GeneWeightCalculator geneWeightCalculator,
+                                           SequenceImpactCalculator<Enhancer> enhancerImpactCalculator,
+                                           EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator) {
         this.geneImpactCalculator = geneImpactCalculator;
         this.geneWeightCalculator = geneWeightCalculator;
         this.enhancerImpactCalculator = enhancerImpactCalculator;
@@ -37,7 +40,7 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
     }
 
     @Override
-    public GranularRouteResult evaluate(RouteDataGE routeData) {
+    public GranularRouteResult evaluate(RouteDataGETad routeData) {
         Routes routes = routeData.route();
 
         Map<String, Double> referenceScores = evaluateReference(routes.references(), routeData.genes(), routeData.enhancers(), routeData.tadBoundaries());

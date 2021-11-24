@@ -299,8 +299,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
 
             // Prioritize
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
-            SvPrioritizerType svPrioritizerType = SvPrioritizerType.ADDITIVE;
-            SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(svPrioritizerType, patientTerms);
+            SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(patientTerms);
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");
             ProgressReporter priorityProgress = new ProgressReporter(5_000);

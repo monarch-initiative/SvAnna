@@ -2,7 +2,10 @@ package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Strand;
 import xyz.ielis.silent.genes.model.Gene;
 import xyz.ielis.silent.genes.model.Located;
 
@@ -95,6 +98,22 @@ public class EvaluatorUtils {
         }
 
         return map;
+    }
+
+    public static List<Projection<? extends Located>> projectGenesEnhancers(Route alternate,
+                                                                            Collection<Gene> genes,
+                                                                            Collection<Enhancer> enhancers) {
+        List<Projection<? extends Located>> projections = new ArrayList<>(genes.size() + enhancers.size());
+
+        for (Gene gene : genes) {
+            projections.addAll(Projections.project(gene, alternate));
+        }
+
+        for (Enhancer enhancer : enhancers) {
+            projections.addAll(Projections.project(enhancer, alternate));
+        }
+
+        return projections;
     }
 
     public static LinkedList<Projection<? extends Located>> projectGenesEnhancersTads(Route alternate,

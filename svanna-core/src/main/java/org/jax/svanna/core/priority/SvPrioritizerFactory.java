@@ -10,7 +10,7 @@ public interface SvPrioritizerFactory {
 
      Logger LOGGER = LoggerFactory.getLogger(SvPrioritizerFactory.class);
 
-    SvPrioritizer<SvPriority> getPrioritizer(SvPrioritizerType type, Collection<TermId> patientTerms);
+    SvPrioritizer<SvPriority> getPrioritizer(Collection<TermId> patientTerms);
 
 
 }

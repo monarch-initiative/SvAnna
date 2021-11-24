@@ -1,12 +1,14 @@
-package org.jax.svanna.core.priority.additive.ge;
+package org.jax.svanna.core.priority.additive.evaluator.ge;
 
 import org.jax.svanna.core.priority.additive.RouteData;
 import org.jax.svanna.core.priority.additive.Routes;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
-import org.jax.svanna.model.landscape.tad.TadBoundary;
 import xyz.ielis.silent.genes.model.Gene;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Data holder for variant evaluation.
@@ -15,14 +17,15 @@ public class RouteDataGE extends RouteData {
 
     private final Set<Gene> genes;
     private final Set<Enhancer> enhancers;
-    private final List<TadBoundary> tadBoundaries;
-
 
     protected RouteDataGE(Builder builder) {
-        super(builder.route);
+        super(builder.routes);
         this.genes = builder.genes;
         this.enhancers = builder.enhancers;
-        this.tadBoundaries = builder.boundaries;
+    }
+
+    public static Builder builder(Routes route) {
+        return new Builder(route);
     }
 
     public Set<Gene> genes() {
@@ -33,22 +36,18 @@ public class RouteDataGE extends RouteData {
         return enhancers;
     }
 
-    public List<TadBoundary> tadBoundaries() {
-        return tadBoundaries;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         RouteDataGE that = (RouteDataGE) o;
-        return Objects.equals(genes, that.genes) && Objects.equals(enhancers, that.enhancers) && Objects.equals(tadBoundaries, that.tadBoundaries);
+        return Objects.equals(genes, that.genes) && Objects.equals(enhancers, that.enhancers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), genes, enhancers, tadBoundaries);
+        return Objects.hash(super.hashCode(), genes, enhancers);
     }
 
     @Override
@@ -56,28 +55,20 @@ public class RouteDataGE extends RouteData {
         return "RouteDataGE{" +
                 "genes=" + genes +
                 ", enhancers=" + enhancers +
-                ", tadBoundaries=" + tadBoundaries +
-                '}';
-    }
-
-    public static Builder builder(Routes route) {
-        return new Builder(route);
+                "} " + super.toString();
     }
 
     public static class Builder {
 
-        private final Routes route;
+        private final Routes routes;
 
         private final Set<Gene> genes;
         private final Set<Enhancer> enhancers;
-        private final List<TadBoundary> boundaries;
 
-        private Builder(Routes route) {
-            this.route = Objects.requireNonNull(route);
+        private Builder(Routes routes) {
+            this.routes = Objects.requireNonNull(routes);
             this.genes = new HashSet<>();
             this.enhancers = new HashSet<>();
-            this.boundaries = new LinkedList<>();
-
         }
 
         public Builder addGene(Gene gene) {
@@ -97,16 +88,6 @@ public class RouteDataGE extends RouteData {
 
         public Builder addEnhancer(Enhancer enhancer) {
             this.enhancers.add(enhancer);
-            return this;
-        }
-
-        public Builder addTadBoundary(TadBoundary boundary) {
-            this.boundaries.add(boundary);
-            return this;
-        }
-
-        public Builder addTadBoundaries(List<TadBoundary> boundaries) {
-            this.boundaries.addAll(boundaries);
             return this;
         }
 

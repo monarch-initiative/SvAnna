@@ -1,4 +1,4 @@
-package org.jax.svanna.core.priority.additive.ge;
+package org.jax.svanna.core.priority.additive.evaluator.getad;
 
 import org.jax.svanna.core.TestContig;
 import org.jax.svanna.core.TestEnhancer;
@@ -23,7 +23,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 
-public class RouteDataEvaluatorGETest {
+public class RouteDataEvaluatorGETadTest {
 
     private static final double ERROR = 1E-6;
 
@@ -33,7 +33,7 @@ public class RouteDataEvaluatorGETest {
     private final SequenceImpactCalculator<Enhancer> enhancerImpact = new SimpleSequenceImpactCalculator<>(1.);
     private final EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = EnhancerGeneRelevanceCalculator.defaultCalculator();
 
-    private RouteDataEvaluator<RouteDataGE, ? extends RouteResult> evaluator;
+    private RouteDataEvaluator<RouteDataGETad, ? extends RouteResult> evaluator;
 
     private static Gene makeGene(String id, String symbol, Contig contig, int start, int end) {
         GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
@@ -82,7 +82,7 @@ public class RouteDataEvaluatorGETest {
 
     @BeforeEach
     public void setUp() {
-        evaluator = new GranularRouteDataEvaluatorGE(geneImpact, geneWeightCalculator, enhancerImpact, enhancerGeneRelevanceCalculator);
+        evaluator = new GranularRouteDataEvaluatorGETad(geneImpact, geneWeightCalculator, enhancerImpact, enhancerGeneRelevanceCalculator);
     }
 
     @ParameterizedTest
@@ -100,7 +100,7 @@ public class RouteDataEvaluatorGETest {
                 positiveGap(ctg1, start, delStart),
                 positiveDeletion(ctg1, delStart, delEnd),
                 positiveGap(ctg1, delEnd, end));
-        RouteDataGE routeData = RouteDataGE.builder(routes)
+        RouteDataGETad routeData = RouteDataGETad.builder(routes)
                 .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
                 .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 55, "b"))
@@ -127,7 +127,7 @@ public class RouteDataEvaluatorGETest {
                 positiveGap(ctg1, start, delStart),
                 positiveDeletion(ctg1, delStart, delEnd),
                 positiveGap(ctg1, delEnd, end));
-        RouteDataGE routeData = RouteDataGE.builder(routes)
+        RouteDataGETad routeData = RouteDataGETad.builder(routes)
                 .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
                 .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
@@ -158,7 +158,7 @@ public class RouteDataEvaluatorGETest {
                 positiveGap(ctg1, start, dupStart),
                 positiveDuplication(ctg1, dupStart, dupEnd),
                 positiveGap(ctg1, dupEnd, end));
-        RouteDataGE routeData = RouteDataGE.builder(routes)
+        RouteDataGETad routeData = RouteDataGETad.builder(routes)
                 .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
                 .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
@@ -191,7 +191,7 @@ public class RouteDataEvaluatorGETest {
                 positiveGap(ctg1, start, invStart),
                 positiveInversion(ctg1, invStart, invEnd),
                 positiveGap(ctg1, invEnd, end));
-        RouteDataGE routeData = RouteDataGE.builder(routes)
+        RouteDataGETad routeData = RouteDataGETad.builder(routes)
                 .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
                 .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))
@@ -221,7 +221,7 @@ public class RouteDataEvaluatorGETest {
                 positiveGap(ctg2, right, 200)
         );
         // TODO - fix the route setup
-        RouteDataGE routeData = RouteDataGE.builder(routes)
+        RouteDataGETad routeData = RouteDataGETad.builder(routes)
                 .addEnhancer(TestEnhancer.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 5, 10, "a"))
                 .addGene(makeGene("NCBIGene:A", "A", ctg1, 20, 40))
                 .addTadBoundary(TestTad.of("X", ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 45, 47))

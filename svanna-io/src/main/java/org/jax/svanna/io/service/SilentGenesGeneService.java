@@ -30,7 +30,7 @@ public class SilentGenesGeneService implements GeneService {
 
     private final Map<Integer, IntervalArray<Gene>> chromosomeMap;
 
-    private final Map<TermId, List<Gene>> geneByTermId;
+    private final Map<TermId, List<Gene>> geneByHgncId;
 
     public static SilentGenesGeneService of(GenomicAssembly assembly, Path silentGenesJsonPath) throws IOException {
         GeneParserFactory factory = GeneParserFactory.of(assembly);
@@ -43,11 +43,11 @@ public class SilentGenesGeneService implements GeneService {
         // hence two genes for a single HGNC id.
         // We get optional without checking because HGNC ID presence is checked in the stream filter.
         //noinspection OptionalGetWithoutIsPresent
-        Map<TermId, List<Gene>> geneBySymbol = genes.stream()
+        Map<TermId, List<Gene>> geneByHgncId = genes.stream()
                 .filter(g -> g.id().hgncId().isPresent())
                 .collect(Collectors.groupingBy(gene -> TermId.of(gene.id().hgncId().get()), Collectors.toUnmodifiableList()));
 
-        Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()
+        Map<Integer, Set<Gene>> geneByContig = geneByHgncId.values().stream()
                 .flatMap(List::stream)
                 .collect(Collectors.groupingBy(Gene::contigId, Collectors.toUnmodifiableSet()));
 
@@ -58,7 +58,7 @@ public class SilentGenesGeneService implements GeneService {
             intervalArrayMap.put(contig, intervalArray);
         }
 
-        return new SilentGenesGeneService(Map.copyOf(intervalArrayMap), geneBySymbol);
+        return new SilentGenesGeneService(Map.copyOf(intervalArrayMap), geneByHgncId);
     }
 
     private static InputStream openForReading(Path silentGenesJsonPath) throws IOException {
@@ -70,14 +70,14 @@ public class SilentGenesGeneService implements GeneService {
         }
     }
 
-    private SilentGenesGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap, Map<TermId, List<Gene>> geneByTermId) {
+    private SilentGenesGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap, Map<TermId, List<Gene>> geneByHgncId) {
         this.chromosomeMap = chromosomeMap;
-        this.geneByTermId = geneByTermId;
+        this.geneByHgncId = geneByHgncId;
     }
 
     @Override
     public List<Gene> byHgncId(TermId hgncId) {
-        return geneByTermId.get(hgncId);
+        return geneByHgncId.get(hgncId);
     }
 
     @Override

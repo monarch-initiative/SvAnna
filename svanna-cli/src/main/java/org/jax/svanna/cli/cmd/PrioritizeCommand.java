@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.cmd;
 
-import org.jax.svanna.autoconfigure.SvannaProperties;
+import org.jax.svanna.autoconfigure.configuration.SvannaProperties;
 import org.jax.svanna.cli.Main;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
@@ -349,7 +349,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
         analysisParameters.setTadStabilityThreshold(properties.dataParameters().tadStabilityThresholdAsPercentage());
         analysisParameters.setUseVistaEnhancers(properties.dataParameters().enhancers().useVista());
         analysisParameters.setUseFantom5Enhancers(properties.dataParameters().enhancers().useFantom5());
-        analysisParameters.setPhenotypeTermSimilarityMeasure(properties.prioritizationParameters().termSimilarityMeasure().toString());
+        analysisParameters.setPhenotypeTermSimilarityMeasure(properties.prioritization().termSimilarityMeasure().toString());
 
         return analysisParameters;
     }

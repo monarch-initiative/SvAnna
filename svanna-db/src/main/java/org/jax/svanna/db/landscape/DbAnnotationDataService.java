@@ -1,7 +1,9 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.core.service.AnnotationDataService;
-import org.jax.svanna.model.landscape.dosage.DosageElement;
+import org.jax.svanna.core.service.GeneDosageDataService;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.dosage.GeneDosageData;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
@@ -19,18 +21,18 @@ public class DbAnnotationDataService implements AnnotationDataService {
     private final AnnotationDao<RepetitiveRegion> repetitiveRegionDao;
     private final PopulationVariantDao populationVariantDao;
     private final AnnotationDao<TadBoundary> tadBoundaryDao;
-    private final AnnotationDao<DosageElement> dosageElementDao;
+    private final GeneDosageDataService geneDosageDataService;
 
     public DbAnnotationDataService(EnhancerAnnotationDao enhancerAnnotationDao,
                                    AnnotationDao<RepetitiveRegion> repetitiveRegionDao,
                                    PopulationVariantDao populationVariantDao,
                                    AnnotationDao<TadBoundary> tadBoundaryDao,
-                                   AnnotationDao<DosageElement> dosageElementDao) {
+                                   GeneDosageDataService geneDosageDataService) {
         this.enhancerAnnotationDao = enhancerAnnotationDao;
         this.repetitiveRegionDao = repetitiveRegionDao;
         this.populationVariantDao = populationVariantDao;
         this.tadBoundaryDao = tadBoundaryDao;
-        this.dosageElementDao = dosageElementDao;
+        this.geneDosageDataService = geneDosageDataService;
     }
 
     @Override
@@ -64,7 +66,17 @@ public class DbAnnotationDataService implements AnnotationDataService {
     }
 
     @Override
-    public List<DosageElement> dosageElements(GenomicRegion query) {
-        return dosageElementDao.getOverlapping(query);
+    public List<DosageRegion> dosageElements(GenomicRegion query) {
+        return geneDosageDataService.dosageElements(query);
+    }
+
+    @Override
+    public GeneDosageData geneDosageDataForHgncId(String hgncId) {
+        return geneDosageDataService.geneDosageDataForHgncId(hgncId);
+    }
+
+    @Override
+    public GeneDosageData geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
+        return geneDosageDataService.geneDosageDataForHgncIdAndRegion(hgncId, query);
     }
 }

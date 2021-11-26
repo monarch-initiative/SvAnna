@@ -2,7 +2,7 @@ package org.jax.svanna.ingest.parse.dosage;
 
 import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
-import org.jax.svanna.model.landscape.dosage.DosageElement;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +19,7 @@ import java.util.stream.Stream;
 
 import static org.jax.svanna.ingest.parse.dosage.DosageElementsUtil.makeDosageElements;
 
-public class ClingenRegionCurationParser implements IngestRecordParser<DosageElement> {
+public class ClingenRegionCurationParser implements IngestRecordParser<DosageRegion> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClingenRegionCurationParser.class);
 
@@ -37,16 +36,16 @@ public class ClingenRegionCurationParser implements IngestRecordParser<DosageEle
 
 
     @Override
-    public Stream<? extends DosageElement> parse() throws IOException {
+    public Stream<? extends DosageRegion> parse() throws IOException {
         BufferedReader reader = Files.newBufferedReader(clingenRegionPath);
         return reader.lines()
                 .onClose(IOUtils.close(reader))
                 .filter(line -> !line.startsWith("#")) // header
                 .map(toDosageElements())
-                .flatMap(Collection::stream);
+                .flatMap(Optional::stream);
     }
 
-    private Function<String, Collection<DosageElement>> toDosageElements() {
+    private Function<String, Optional<DosageRegion>> toDosageElements() {
         return line -> {
             /*
             A line like:
@@ -58,14 +57,14 @@ public class ClingenRegionCurationParser implements IngestRecordParser<DosageEle
             String[] tokens = line.split("\t", 23);
             if (tokens.length != 23) {
                 LOGGER.warn("Expected {} columns and found {}. Skipping the line `{}`", 23, tokens.length, line);
-                return Collections.emptyList();
+                return Optional.empty();
             }
 
             // ID
             String id = tokens[0];
             if (id.isBlank()) {
                 LOGGER.warn("Skipping line with no ID: `{}`", line);
-                return Collections.emptyList();
+                return Optional.empty();
             }
 
             // some regions have an extra space, e.g. `chrX:30176883 -30336883`, or `chrX: 48447780-52444264`
@@ -73,12 +72,12 @@ public class ClingenRegionCurationParser implements IngestRecordParser<DosageEle
             Matcher matcher = GENOMIC_LOCATION_PATTERN.matcher(regionString);
             if (!matcher.matches()) {
                 LOGGER.warn("Invalid genomic location `{}`, skipping the line `{}`", regionString, line);
-                return Collections.emptyList();
+                return Optional.empty();
             }
             Contig contig = genomicAssembly.contigByName(matcher.group("contig"));
             if (contig.isUnknown()) {
                 LOGGER.warn("Unknown contig `{}` in line `{}`", matcher.group("contig"), line);
-                return Collections.emptyList();
+                return Optional.empty();
             }
             int start = Integer.parseInt(matcher.group("start"));
             int end = Integer.parseInt(matcher.group("end"));

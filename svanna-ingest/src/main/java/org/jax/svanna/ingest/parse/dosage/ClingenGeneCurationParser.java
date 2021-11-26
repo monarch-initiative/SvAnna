@@ -2,7 +2,7 @@ package org.jax.svanna.ingest.parse.dosage;
 
 import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
-import org.jax.svanna.model.landscape.dosage.DosageElement;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import static org.jax.svanna.ingest.parse.dosage.DosageElementsUtil.makeDosageEl
  * <p>
  * The rows represent genes.
  */
-public class ClingenGeneCurationParser implements IngestRecordParser<DosageElement> {
+public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegion> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClingenGeneCurationParser.class);
 
@@ -47,16 +47,16 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageEleme
     }
 
     @Override
-    public Stream<? extends DosageElement> parse() throws IOException {
+    public Stream<? extends DosageRegion> parse() throws IOException {
         BufferedReader reader = Files.newBufferedReader(clingenGeneListPath);
         return reader.lines()
                 .onClose(IOUtils.close(reader))
                 .filter(line -> !line.startsWith("#")) // header
                 .map(toDosageElements())
-                .flatMap(Collection::stream);
+                .flatMap(Optional::stream);
     }
 
-    private Function<String, Collection<DosageElement>> toDosageElements() {
+    private Function<String, Optional<DosageRegion>> toDosageElements() {
         return line -> {
             /*
             A line like:
@@ -68,14 +68,14 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageEleme
             String[] tokens = line.split("\t", 23);
             if (tokens.length != 23) {
                 LOGGER.warn("Expected {} columns and found {}. Skipping the line `{}`", 23, tokens.length, line);
-                return List.of();
+                return Optional.empty();
             }
 
             // ID - we use gene symbol as the ID, assuming that there is only one line per gene
             String id = tokens[0];
             if (id.isBlank()) {
                 LOGGER.warn("Skipping line with no ID: `{}`", line);
-                return List.of();
+                return Optional.empty();
             }
 
             // parse Gene ID - numeric part of NCBIGene
@@ -83,7 +83,7 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageEleme
             Matcher geneIdMatcher = NUMBER.matcher(ncbiGeneId);
             if (!geneIdMatcher.matches()) {
                 LOGGER.warn("Invalid gene ID {} (not numeric)", ncbiGeneId);
-                return List.of();
+                return Optional.empty();
             }
 
             // We must extract gene region for the gene, either:
@@ -101,7 +101,7 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageEleme
             if (geneRegion == null) {
                 Optional<GenomicRegion> region = getRegion(tokens[3]);
                 if (region.isEmpty())
-                    return List.of();
+                    return Optional.empty();
                 else
                     geneRegion = region.get();
             }

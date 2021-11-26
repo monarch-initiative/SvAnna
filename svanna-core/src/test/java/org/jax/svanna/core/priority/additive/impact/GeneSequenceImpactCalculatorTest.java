@@ -1,7 +1,9 @@
 package org.jax.svanna.core.priority.additive.impact;
 
 import org.jax.svanna.core.TestContig;
+import org.jax.svanna.core.TestDataConfig;
 import org.jax.svanna.core.priority.additive.*;
+import org.jax.svanna.core.service.GeneDosageDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -9,6 +11,8 @@ import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import xyz.ielis.silent.genes.model.Gene;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
 import xyz.ielis.silent.genes.model.Transcript;
@@ -21,9 +25,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@SpringBootTest(classes = TestDataConfig.class)
 public class GeneSequenceImpactCalculatorTest {
 
     private static final double ERROR = 1E-12;
+
+    @Autowired
+    public GeneDosageDataService geneDosageDataService;
 
     private GeneSequenceImpactCalculator instance;
 
@@ -51,7 +59,7 @@ public class GeneSequenceImpactCalculatorTest {
 
     @BeforeEach
     public void setUp() {
-        instance = new GeneSequenceImpactCalculator(1., 50, .6);
+        instance = new GeneSequenceImpactCalculator(geneDosageDataService, 1., 50, .6);
     }
 
     @ParameterizedTest

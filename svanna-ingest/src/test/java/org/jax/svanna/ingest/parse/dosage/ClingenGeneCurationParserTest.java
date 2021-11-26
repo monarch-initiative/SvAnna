@@ -1,6 +1,7 @@
 package org.jax.svanna.ingest.parse.dosage;
 
-import org.jax.svanna.model.landscape.dosage.DosageElement;
+import org.jax.svanna.model.landscape.dosage.Dosage;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.junit.jupiter.api.Test;
@@ -12,8 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.*;
 
 public class ClingenGeneCurationParserTest {
 
@@ -55,34 +55,25 @@ public class ClingenGeneCurationParserTest {
 
         ClingenGeneCurationParser parser = new ClingenGeneCurationParser(geneListPath, ASSEMBLY, geneById, ncbiGeneToHgnc);
 
-        List<? extends DosageElement> elements = parser.parseToList();
+        List<? extends DosageRegion> elements = parser.parseToList();
         assertThat(elements, hasSize(9));
 
-        DosageElement first = elements.get(0);
-        assertThat(first.id(), equalTo("A4GALT"));
-        assertThat(first.dosageSensitivity(), equalTo(DosageSensitivity.HAPLOINSUFFICIENCY));
-        assertThat(first.dosageSensitivityEvidence(), equalTo(DosageSensitivityEvidence.SOME_EVIDENCE));
+        DosageRegion first = elements.get(0);
+        assertThat(first.geneDosageData().dosages(), hasItem(Dosage.of("A4GALT", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SOME_EVIDENCE)));
 
-        DosageElement second = elements.get(1);
-        assertThat(second.id(), equalTo("AAGAB"));
-        assertThat(second.dosageSensitivity(), equalTo(DosageSensitivity.HAPLOINSUFFICIENCY));
-        assertThat(second.dosageSensitivityEvidence(), equalTo(DosageSensitivityEvidence.SUFFICIENT_EVIDENCE));
+        DosageRegion second = elements.get(1);
+        assertThat(second.geneDosageData().dosages(), hasItem(Dosage.of("AAGAB", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
         assertThat(second.contigName(), equalTo("15"));
         assertThat(second.strand(), equalTo(Strand.POSITIVE));
         assertThat(second.coordinateSystem(), equalTo(CoordinateSystem.oneBased()));
         assertThat(second.start(), equalTo(67200667));
         assertThat(second.end(), equalTo(67255200)); // parsed from the ClinGen gene curation list file
 
+        DosageRegion third = elements.get(2);
+        assertThat(third.geneDosageData().dosages(), hasItem(Dosage.of("AARS1", DosageSensitivity.TRIPLOSENSITIVITY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
 
-        DosageElement third = elements.get(2);
-        assertThat(third.id(), equalTo("AARS1"));
-        assertThat(third.dosageSensitivity(), equalTo(DosageSensitivity.TRIPLOSENSITIVITY));
-        assertThat(third.dosageSensitivityEvidence(), equalTo(DosageSensitivityEvidence.SUFFICIENT_EVIDENCE));
-
-        DosageElement fourth = elements.get(3);
-        assertThat(fourth.id(), equalTo("AARS2"));
-        assertThat(fourth.dosageSensitivity(), equalTo(DosageSensitivity.HAPLOINSUFFICIENCY));
-        assertThat(fourth.dosageSensitivityEvidence(), equalTo(DosageSensitivityEvidence.LITTLE_EVIDENCE));
+        DosageRegion fourth = elements.get(3);
+        assertThat(fourth.geneDosageData().dosages(), hasItem(Dosage.of("AARS2", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.LITTLE_EVIDENCE)));
     }
 
 }

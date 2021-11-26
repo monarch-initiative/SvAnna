@@ -1,8 +1,6 @@
 package org.jax.svanna.ingest.parse.dosage;
 
-import org.jax.svanna.model.landscape.dosage.DosageElement;
-import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
-import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
+import org.jax.svanna.model.landscape.dosage.*;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.GenomicRegion;
@@ -10,8 +8,9 @@ import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 class DosageElementsUtil {
 
@@ -21,36 +20,34 @@ class DosageElementsUtil {
     }
 
 
-    static Collection<DosageElement> makeDosageElements(Contig contig,
-                                                        Strand strand,
-                                                        Coordinates coordinates,
-                                                        String id,
-                                                        String haploinsufficiency,
-                                                        String triplosensitivity) {
-        DosageSensitivity haploinsufficiencySensitivity = parseHaploinsufficiency(haploinsufficiency);
+    static Optional<DosageRegion> makeDosageElements(Contig contig,
+                                                     Strand strand,
+                                                     Coordinates coordinates,
+                                                     String id,
+                                                     String haploinsufficiency,
+                                                     String triplosensitivity) {
+
+        DosageSensitivity haploDosageSensitivity = parseHaploinsufficiency(haploinsufficiency);
         DosageSensitivityEvidence haploinsufficiencyEvidence = parseEvidence(haploinsufficiency);
-        DosageElement haploDosage = DosageElement.of(GenomicRegion.of(contig, strand, coordinates),
-                id,
-                haploinsufficiencySensitivity,
-                haploinsufficiencyEvidence);
+        Dosage haploinsufficiencyDosage = Dosage.of(id, haploDosageSensitivity, haploinsufficiencyEvidence);
 
-        DosageSensitivity triplosensitivitySensitivity = parseTriplosensitivity(triplosensitivity);
+        DosageSensitivity triploDosageSensitivity = parseTriplosensitivity(triplosensitivity);
         DosageSensitivityEvidence triplosensitivityEvidence = parseEvidence(triplosensitivity);
-        DosageElement triploDosage = DosageElement.of(GenomicRegion.of(contig, strand, coordinates),
-                id,
-                triplosensitivitySensitivity,
-                triplosensitivityEvidence);
+        Dosage triplosensitivityDosage = Dosage.of(id, triploDosageSensitivity, triplosensitivityEvidence);
 
-        if (DosageSensitivity.HAPLOINSUFFICIENCY.equals(haploinsufficiencySensitivity)) {
-            if (DosageSensitivity.TRIPLOSENSITIVITY.equals(triplosensitivitySensitivity)) {
-                return List.of(haploDosage, triploDosage);
-            }
-            return List.of(haploDosage);
+        List<Dosage> dosages = new ArrayList<>(2);
+        if (DosageSensitivity.HAPLOINSUFFICIENCY.equals(haploDosageSensitivity)) {
+            dosages.add(haploinsufficiencyDosage);
+        }
+        if (DosageSensitivity.TRIPLOSENSITIVITY.equals(triploDosageSensitivity)) {
+            dosages.add(triplosensitivityDosage);
+        }
+
+        if (dosages.isEmpty()) {
+            return Optional.empty();
         } else {
-            if (DosageSensitivity.TRIPLOSENSITIVITY.equals(triplosensitivitySensitivity)) {
-                return List.of(triploDosage);
-            }
-            return List.of();
+            GenomicRegion location = GenomicRegion.of(contig, strand, coordinates);
+            return Optional.of(DosageRegion.of(location, GeneDosageData.of(dosages)));
         }
     }
 

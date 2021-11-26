@@ -90,7 +90,8 @@ create table SVANNA.HP_TERM_MICA
 drop index if exists SVANNA.HP_TERM_MICA__LEFT_VALUE_RIGHT_VALUE_IDX;
 create unique index SVANNA.HP_TERM_MICA__LEFT_VALUE_RIGHT_VALUE_IDX on SVANNA.HP_TERM_MICA (LEFT_VALUE, RIGHT_VALUE);
 
----------------------------------- DOSAGE ELEMENT ----------------------------------------------------------------------
+---------------------------------- CLINGEN DOSAGE ELEMENT --------------------------------------------------------------
+-- TODO - rename to `CLINGEN_DOSAGE_ELEMENT`
 drop table if exists SVANNA.DOSAGE_ELEMENT;
 create table SVANNA.DOSAGE_ELEMENT
 (
@@ -98,10 +99,13 @@ create table SVANNA.DOSAGE_ELEMENT
     START              INT          not null, -- zero-based start on POSITIVE strand
     END                INT          not null, -- zero-based end on POSITIVE strand
 
-    ID                 VARCHAR(200) not null,
+    ID                 VARCHAR(200) not null, -- HGNC ID or other ID if available
     DOSAGE_SENSITIVITY VARCHAR(20)  not null,
     DOSAGE_EVIDENCE    VARCHAR(20)  not null
 );
 drop index if exists SVANNA.DOSAGE_ELEMENT__CONTIG_START_END_IDX;
 create index SVANNA.DOSAGE_ELEMENT__CONTIG_START_END_IDX on SVANNA.DOSAGE_ELEMENT (CONTIG, START, END);
 
+-- TODO - we should update DA layer to use numeric IDs, where available
+drop index if exists SVANNA.DOSAGE_ELEMENT__ID;
+create index SVANNA.DOSAGE_ELEMENT__ID on SVANNA.DOSAGE_ELEMENT (ID);

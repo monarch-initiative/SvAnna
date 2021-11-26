@@ -1,6 +1,8 @@
 package org.jax.svanna.autoconfigure;
 
 import com.google.common.collect.Sets;
+import org.jax.svanna.autoconfigure.configuration.PrioritizationProperties;
+import org.jax.svanna.autoconfigure.configuration.SvannaProperties;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.SvPrioritizer;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
@@ -70,7 +72,7 @@ class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
     private Dispatcher getTadDispatcher() {
         TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
-        DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritizationParameters().forceTadEvaluation());
+        DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritization().forceTadEvaluation());
         LogUtils.logDebug(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
         return new TadAwareDispatcher(geneService, tadBoundaryDao, dispatchOptions);
     }
@@ -86,11 +88,11 @@ class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 //        RouteDataService<RouteDataGETad> dbRouteDataService = fct.getService(RouteDataGETad.class);
         RouteDataService<RouteDataGE> dbRouteDataService = fct.getService(RouteDataGE.class);
 
-        SvannaProperties.PrioritizationParameters prioritizationParameters = svannaProperties.prioritizationParameters();
-        SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(prioritizationParameters.geneFactor(), prioritizationParameters.promoterLength(), prioritizationParameters.promoterFitnessGain());
+        PrioritizationProperties prioritizationProperties = svannaProperties.prioritization();
+        SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(annotationDataService, prioritizationProperties.geneFactor(), prioritizationProperties.promoterLength(), prioritizationProperties.promoterFitnessGain());
         GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeTerms, phenotypeDataService, svannaDataResolver);
 
-        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationParameters.enhancerFactor());
+        SequenceImpactCalculator<Enhancer> enhancerImpactCalculator = new EnhancerSequenceImpactCalculator(prioritizationProperties.enhancerFactor());
         EnhancerGeneRelevanceCalculator enhancerGeneRelevanceCalculator = PhenotypeEnhancerGeneRelevanceCalculator.of(enhancerRelevantAncestors);
 
 //        RouteDataEvaluator<RouteDataGETad, GranularRouteResult> granularEvaluator = new GranularRouteDataEvaluatorGETad(geneImpactCalculator, geneWeightCalculator, enhancerImpactCalculator, enhancerGeneRelevanceCalculator);

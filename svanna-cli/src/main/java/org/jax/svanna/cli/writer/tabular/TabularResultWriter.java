@@ -59,7 +59,7 @@ public class TabularResultWriter implements ResultWriter {
     private BufferedWriter openWriter(String prefix) throws IOException {
         String pathString = prefix + suffix + (compress ? ".gz" : "");
         Path outPath = Paths.get(pathString);
-        LogUtils.logInfo(LOGGER, "Writing tabular results into `{}`", outPath.toAbsolutePath());
+        LogUtils.logInfo(LOGGER, "Writing tabular results into {}", outPath.toAbsolutePath());
         return compress
                 ? new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(outPath.toFile()))))
                 : Files.newBufferedWriter(outPath);

@@ -1,14 +1,13 @@
 package org.jax.svanna.core;
 
+import org.jax.svanna.core.service.ConstantGeneDosageDataService;
+import org.jax.svanna.core.service.GeneDosageDataService;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.test.TestVariants;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import xyz.ielis.silent.genes.io.GeneParser;
-import xyz.ielis.silent.genes.io.GeneParserFactory;
-import xyz.ielis.silent.genes.io.SerializationFormat;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
 import xyz.ielis.silent.genes.model.Identifier;
 
@@ -53,6 +52,11 @@ public class TestDataConfig {
     @Bean
     public GeneService geneService(GenomicAssembly assembly) throws IOException {
         return SilentGenesGeneService.of(assembly, SILENT_GENE_DATA);
+    }
+
+    @Bean
+    public GeneDosageDataService geneDosageDataService(GeneService geneService) {
+        return new ConstantGeneDosageDataService(geneService);
     }
 
     @Bean

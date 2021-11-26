@@ -4,6 +4,8 @@ import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
+import org.jax.svanna.core.service.GeneDosageDataService;
+import org.jax.svanna.model.landscape.dosage.GeneDosageData;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
@@ -12,13 +14,9 @@ import xyz.ielis.silent.genes.model.Coding;
 import xyz.ielis.silent.genes.model.Gene;
 import xyz.ielis.silent.genes.model.Transcript;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-@SuppressWarnings("DuplicatedCode") // TODO - revise
 public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Gene> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneSequenceImpactCalculator.class);
@@ -30,17 +28,22 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;
 
+    private final GeneDosageDataService geneDosageDataService;
     private final double geneFactor;
     private final int promoterLength;
     private final double promoterFitnessGain;
 
     private final Map<Event, Double> fitnessWithEvent;
 
-    public GeneSequenceImpactCalculator(double geneFactor, int promoterLength, double promoterFitnessGain) {
+    public GeneSequenceImpactCalculator(GeneDosageDataService geneDosageDataService,
+                                        double geneFactor,
+                                        int promoterLength,
+                                        double promoterFitnessGain) {
+        this.geneDosageDataService = geneDosageDataService;
         this.promoterLength = promoterLength;
         this.geneFactor = geneFactor;
         if (promoterFitnessGain > 1.)
-            LogUtils.logWarn(LOGGER, "Promoter fitness gain {} cannot be greater than 1. Clipping to 1", promoterFitnessGain);
+            LOGGER.warn("Promoter fitness gain {} cannot be greater than 1. Clipping to 1", promoterFitnessGain);
         this.promoterFitnessGain = Math.min(promoterFitnessGain, 1.);
         this.fitnessWithEvent = Map.of(
                 Event.GAP, geneFactor,
@@ -174,25 +177,37 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     }
 
     private double processIntraSegmentProjection(Projection<Gene> projection) {
-        // the entire gene is spanned by an event (DELETION, INVERSION, DUPLICATION...
+        Gene gene = projection.source();
+        // we need all available gene dosage data, both for genes and for regions other than genes
+        Optional<GeneDosageData> geneDosageData = gene.id().hgncId()
+                .map(hgncId -> geneDosageDataService.geneDosageDataForHgncIdAndRegion(hgncId, gene.location()));
+
+        // the entire gene is spanned by an event (DELETION, INVERSION, DUPLICATION...)
         switch (projection.startEvent()) {
-            // TODO - plug in haploinsufficiency
             case DELETION:
                 // the entire gene is deleted
-                return 0.;
+                return geneDosageData.isPresent() && geneDosageData.get().isHaploinsufficient()
+                        // the dosage data indicates the deletion IS an issue
+                        ? 0.
+                        // the dosage data indicates the deletion is NOT an issue or there is NO dosage data
+                        : noImpact();
             case DUPLICATION:
-                // TODO - plug in triplosensitivity
                 // the entire gene is duplicated
-                return 2 * noImpact();
+                return geneDosageData.isPresent() && geneDosageData.get().isTriplosensitive()
+                        // the dosage data indicates the duplication IS an issue
+                        ? 2 * noImpact()
+                        // the dosage data indicates the duplication is NOT an issue or there is NO dosage data
+                        : noImpact();
             case BREAKEND:
             case SNV:
             case INSERTION:
                 // should not happen since these are events with length 0
-                LogUtils.logWarn(LOGGER, "Gene is unexpectedly located within a {}. " +
-                        "This should not have happened since length of {} on reference contig should be too small to encompass a gene", projection.startEvent(), projection.startEvent());
+                LOGGER.warn("Gene is unexpectedly located within a {}. " +
+                        "This should not have happened since length of {} on reference contig should be too small to encompass a gene",
+                        projection.startEvent(), projection.startEvent());
                 return noImpact();
             default:
-                LogUtils.logWarn(LOGGER, "Unable to process unknown impact");
+                LOGGER.warn("Unable to process unknown impact");
             case GAP: // no impact
             case INVERSION: // the entire gene is inverted, this should not be an issue
                 return noImpact();
@@ -242,7 +257,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     double scoreInsertionSegment(Segment segment, Transcript tx, int cdsStart, int cdsEnd) {
         int insLengthOnContig = segment.endWithCoordinateSystem(CoordinateSystem.zeroBased()) - segment.startWithCoordinateSystem(CoordinateSystem.zeroBased());
         if (insLengthOnContig != 0) {
-            LogUtils.logWarn(LOGGER, "Bad insertion with nonzero length {}", insLengthOnContig);
+            LOGGER.warn("Bad insertion with nonzero length {}", insLengthOnContig);
             return Double.NaN;
         }
 
@@ -334,14 +349,14 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         if (!affectsCds) {
             if (segmentEnd <= utrData.cdsStart) { // 5UTR
                 if (utrData.fiveUtrLength() == 0) {
-                    LogUtils.logWarn(LOGGER, "5'UTR was 0bp long!");
+                    LOGGER.warn("5'UTR was 0bp long!");
                     return score;
                 }
                 return defaultUtrFitness(segmentEnd - segmentStart, utrData.fiveUtrLength());
             } else if (utrData.cdsEnd <= segmentStart) { // 3UTR
                 // get 3'UTR
                 if (utrData.threeUtrLength() == 0) {
-                    LogUtils.logWarn(LOGGER, "3'UTR was 0bp long!");
+                    LOGGER.warn("3'UTR was 0bp long!");
                     return score;
                 }
                 return defaultUtrFitness(segmentEnd - segmentStart, utrData.threeUtrLength());

@@ -47,7 +47,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
 
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            String sql = "insert into SVANNA.DOSAGE_ELEMENT(" +
+            String sql = "insert into SVANNA.CLINGEN_DOSAGE_ELEMENT(" +
                     " CONTIG, START, END, " +
                     " ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE) " +
                     " VALUES ( ?, ?, ?, ?, ?, ? )";
@@ -83,7 +83,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
     @Override
     public List<DosageRegion> getOverlapping(GenomicRegion query) {
         String sql = "select CONTIG, START, END, ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
-                " from SVANNA.DOSAGE_ELEMENT " +
+                " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where CONTIG = ? " +
                 "    and ? < END " +
                 "    and START < ?";
@@ -101,7 +101,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
 
     public GeneDosageData geneDosageDataForHgncId(String hgncId) {
         String sql = "select ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
-                " from SVANNA.DOSAGE_ELEMENT " +
+                " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where ID = ?";
 
         try (Connection connection = dataSource.getConnection();
@@ -116,7 +116,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
 
     public GeneDosageData geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
         String sql = "select ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
-                " from SVANNA.DOSAGE_ELEMENT " +
+                " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where (CONTIG = ? " +
                 "      and ? < END " +
                 "      and START < ?) " +

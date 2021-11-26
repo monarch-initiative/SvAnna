@@ -115,7 +115,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
     }
 
     public GeneDosageData geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
-        String sql = "select ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
+        String sql = "select distinct ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
                 " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where (CONTIG = ? " +
                 "      and ? < END " +

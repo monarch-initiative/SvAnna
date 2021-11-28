@@ -120,7 +120,7 @@ public class GeneSequenceImpactCalculatorTest {
     @ParameterizedTest
     @CsvSource({
             "187, 400,          187,220, 250,270, 380,400,  3,           .8", // in frame insertion that does not disrupt the reading frame
-            "187, 400,          187,220, 250,270, 380,400,  5,           .5", // in frame insertion that disrupts the reading frame
+            "187, 400,          187,220, 250,270, 380,400,  5,           .1", // in frame insertion that disrupts the reading frame
             "186, 400,          186,220, 250,270, 380,400,  3,           .1", // out of frame insertion
             "195, 400,          195,220, 250,270, 380,400,  3,           .7", // 5'UTR insertion
             "10,  205,           10, 30, 150,170, 190,205,  3,           .769230769231", // 3'UTR insertion (crazy number since TER is part of 3'UTR)

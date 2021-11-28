@@ -1,6 +1,5 @@
 package org.jax.svanna.core.priority.additive.impact;
 
-import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
@@ -22,8 +21,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     private static final Logger LOGGER = LoggerFactory.getLogger(GeneSequenceImpactCalculator.class);
 
     // These are fitnesses!
-    private static final double INS_DOES_NOT_FIT_INTO_CODING_FRAME = .1;
-    private static final double INS_FITS_INTO_CODING_FRAME_IS_OUT_OF_FRAME = .5;
+    private static final double INS_SHIFTS_CODING_FRAME = .1;
     private static final double INS_FITS_INTO_CODING_FRAME_IS_INFRAME = .8;
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;
@@ -286,14 +284,14 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                     // coding region
                     int nCurrentCodingBases = segmentPos - Math.max(cdsStart, exon.start());
                     int nTotalCodingBases = nCodingBasesInPreviousExons + nCurrentCodingBases;
+
                     boolean fitsIntoCodingFrame = nTotalCodingBases % 3 == 0;
-                    if (fitsIntoCodingFrame) {
-                        boolean isInFrame = segment.length() % 3 == 0;
-                        score = isInFrame
-                                ? Math.min(INS_FITS_INTO_CODING_FRAME_IS_INFRAME, score)
-                                : Math.min(INS_FITS_INTO_CODING_FRAME_IS_OUT_OF_FRAME, score);
-                    } else
-                        score = Math.min(INS_DOES_NOT_FIT_INTO_CODING_FRAME, score);
+                    boolean insertionIsInFrame = segment.length() % 3 == 0;
+
+                    if (fitsIntoCodingFrame && insertionIsInFrame)
+                        score = Math.min(INS_FITS_INTO_CODING_FRAME_IS_INFRAME, score);
+                    else
+                        score = Math.min(INS_SHIFTS_CODING_FRAME, score);
                 }
                 break; // insertion has length 0 and does not overlap with multiple exons
             } else {

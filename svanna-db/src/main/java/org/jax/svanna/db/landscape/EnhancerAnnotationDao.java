@@ -1,10 +1,10 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerSource;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.EnhancerSource;
+import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
@@ -209,9 +209,11 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
                 }
 
                 if (!builders.containsKey(enhancerId)) {
-                    BaseEnhancer.Builder builder = BaseEnhancer.builder().with(contig,
-                            Strand.POSITIVE, CoordinateSystem.zeroBased(), // database invariant
-                            Position.of(rs.getInt("START")), Position.of(rs.getInt("END")))
+                    // database invariant
+                    Coordinates coordinates = Coordinates.of(CoordinateSystem.zeroBased(), rs.getInt("START"), rs.getInt("END"));
+                    GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, coordinates);
+                    BaseEnhancer.Builder builder = BaseEnhancer.builder()
+                            .location(location)
                             .enhancerSource(EnhancerSource.valueOf(rs.getString("ENHANCER_SOURCE")))
                             .id(enhancerName)
                             .isDevelopmental(rs.getBoolean("IS_DEVELOPMENTAL"))

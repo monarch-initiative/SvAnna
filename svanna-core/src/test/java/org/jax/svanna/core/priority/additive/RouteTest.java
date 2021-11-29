@@ -4,7 +4,6 @@ import org.jax.svanna.core.TestContig;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Position;
 import org.monarchinitiative.svart.Strand;
 
 import java.util.List;
@@ -22,15 +21,15 @@ public class RouteTest {
         TestContig ctg3 = TestContig.of(2, 300);
         Route route = Route.of(
                 List.of(
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "gap-11", Event.GAP, 1),
-                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "gap-12", Event.GAP, 1),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40, "gap-11", Event.GAP, 1),
+                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 40, 50, "gap-12", Event.GAP, 1),
 
-                        Segment.of(ctg2, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(120), Position.of(145), "gap-21", Event.GAP, 1),
-                        Segment.of(ctg2, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(145), Position.of(160), "gap-22", Event.GAP, 1),
-                        Segment.of(ctg2, Strand.NEGATIVE, CoordinateSystem.zeroBased(), Position.of(160), Position.of(170), "gap-23", Event.GAP, 1),
+                        Segment.of(ctg2, Strand.NEGATIVE, CoordinateSystem.zeroBased(), 120, 145, "gap-21", Event.GAP, 1),
+                        Segment.of(ctg2, Strand.NEGATIVE, CoordinateSystem.zeroBased(), 145, 160, "gap-22", Event.GAP, 1),
+                        Segment.of(ctg2, Strand.NEGATIVE, CoordinateSystem.zeroBased(), 160, 170, "gap-23", Event.GAP, 1),
 
-                        Segment.of(ctg3, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(40), "gap-31", Event.GAP, 1),
-                        Segment.of(ctg3, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(60), "gap-32", Event.GAP, 1)
+                        Segment.of(ctg3, Strand.POSITIVE, CoordinateSystem.zeroBased(), 30, 40, "gap-31", Event.GAP, 1),
+                        Segment.of(ctg3, Strand.POSITIVE, CoordinateSystem.zeroBased(), 40, 60, "gap-32", Event.GAP, 1)
                 ));
 
         List<GenomicRegion> metaSegments = route.metaSegments();

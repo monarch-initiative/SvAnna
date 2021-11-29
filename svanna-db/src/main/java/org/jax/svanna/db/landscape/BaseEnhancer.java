@@ -1,15 +1,17 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerSource;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.EnhancerSource;
+import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.monarchinitiative.svart.*;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enhancer {
+public class BaseEnhancer implements Enhancer {
+
+    private final GenomicRegion location;
 
     private final String id;
 
@@ -21,18 +23,16 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
 
     private final Set<EnhancerTissueSpecificity> specificities;
 
-    public static BaseEnhancer of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
-                           String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
+    public static BaseEnhancer of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end,
+                                  String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
+        return new BaseEnhancer(
+                GenomicRegion.of(contig, strand, Coordinates.of(coordinateSystem, start, end)),
+                id, enhancerSource, isDevelopmental, tau, Set.copyOf(specificities));
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    protected BaseEnhancer(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+    protected BaseEnhancer(GenomicRegion location,
                            String id, EnhancerSource enhancerSource, boolean isDevelopmental, double tau, Set<EnhancerTissueSpecificity> specificities) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+        this.location = Objects.requireNonNull(location, "Location must not be null");
         this.id = Objects.requireNonNull(id);
         this.enhancerSource = enhancerSource;
         this.isDevelopmental = isDevelopmental;
@@ -41,12 +41,16 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
     }
 
     protected BaseEnhancer(Builder builder) {
-        super(builder);
-        this.id = Objects.requireNonNull(builder.id);
-        this.enhancerSource = builder.enhancerSource;
-        this.isDevelopmental = builder.isDevelopmental;
-        this.tau = builder.tau;
-        this.specificities = Set.copyOf(builder.specificities);
+        this(builder.location, builder.id, builder.enhancerSource, builder.isDevelopmental, builder.tau, builder.specificities);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    @Override
+    public GenomicRegion location() {
+        return location;
     }
 
     @Override
@@ -75,11 +79,6 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
     }
 
     @Override
-    protected BaseEnhancer newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new BaseEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, enhancerSource, isDevelopmental, tau, specificities);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -103,7 +102,9 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
                 "} " + super.toString();
     }
 
-    public static class Builder extends BaseGenomicRegion.Builder<Builder> {
+    public static class Builder {
+
+        private GenomicRegion location;
 
         private String id;
 
@@ -115,6 +116,10 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
 
         private final Set<EnhancerTissueSpecificity> specificities = new HashSet<>();
 
+        public Builder location(GenomicRegion location) {
+            this.location = location;
+            return self();
+        }
 
         public Builder id(String id) {
             this.id = id;
@@ -140,12 +145,10 @@ public class BaseEnhancer extends BaseGenomicRegion<BaseEnhancer> implements Enh
             return self();
         }
 
-        @Override
         public BaseEnhancer build() {
             return new BaseEnhancer(self());
         }
 
-        @Override
         protected Builder self() {
             return this;
         }

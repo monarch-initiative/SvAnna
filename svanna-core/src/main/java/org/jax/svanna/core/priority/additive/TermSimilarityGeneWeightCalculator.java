@@ -1,9 +1,9 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.Collection;
 import java.util.Map;
@@ -30,7 +30,8 @@ public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator 
     @Override
     public double calculateRelevance(Gene gene) {
         // gene -> associated diseases -> disease IDs -> max similarity
-        Set<HpoDiseaseSummary> associatedDiseases = phenotypeDataService.getDiseasesForGene(gene.accessionId());
+        // TODO - check we use correct gene ID for querying
+        Set<HpoDiseaseSummary> associatedDiseases = phenotypeDataService.getDiseasesForGene(gene.accession());
 
         Set<TermId> diseaseIds = associatedDiseases.stream()
                 .map(HpoDiseaseSummary::getDiseaseId)

@@ -1,6 +1,6 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.RepetitiveRegion;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

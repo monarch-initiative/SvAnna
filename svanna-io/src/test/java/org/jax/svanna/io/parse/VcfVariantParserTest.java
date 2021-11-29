@@ -299,8 +299,10 @@ public class VcfVariantParserTest {
 
             SvannaVariant variant = vo.get();
             assertThat(variant.contigName(), equalTo("1"));
-            assertThat(variant.startPosition(), equalTo(Position.of(3, -1, 2)));
-            assertThat(variant.endPosition(), equalTo(Position.of(7, -2, 1)));
+            assertThat(variant.start(), equalTo(3));
+            assertThat(variant.coordinates().startConfidenceInterval(), equalTo(ConfidenceInterval.of(-1, 2)));
+            assertThat(variant.end(), equalTo(7));
+            assertThat(variant.coordinates().endConfidenceInterval(), equalTo(ConfidenceInterval.of(-2, 1)));
 
             assertThat(variant.id(), equalTo("del0"));
             assertThat(variant.strand(), equalTo(Strand.POSITIVE));
@@ -332,8 +334,8 @@ public class VcfVariantParserTest {
 
             SvannaVariant variant = vo.get();
             assertThat(variant.contig(), equalTo(assembly.contigByName("1")));
-            assertThat(variant.startPosition(), equalTo(Position.of(4)));
-            assertThat(variant.endPosition(), equalTo(Position.of(4)));
+            assertThat(variant.start(), equalTo(4));
+            assertThat(variant.end(), equalTo(4));
 
             assertThat(variant.id(), equalTo("del1"));
             assertThat(variant.strand(), equalTo(Strand.POSITIVE));
@@ -366,8 +368,10 @@ public class VcfVariantParserTest {
 
             SvannaVariant variant = vo.get();
             assertThat(variant.contig(), equalTo(assembly.contigByName("1")));
-            assertThat(variant.startPosition(), equalTo(Position.of(7, -2, 1)));
-            assertThat(variant.endPosition(), equalTo(Position.of(7, -2, 1)));
+            assertThat(variant.start(), equalTo(7));
+            assertThat(variant.coordinates().startConfidenceInterval(), equalTo(ConfidenceInterval.of(-2, 1)));
+            assertThat(variant.end(), equalTo(7));
+            assertThat(variant.coordinates().endConfidenceInterval(), equalTo(ConfidenceInterval.of(-2, 1)));
 
             assertThat(variant.id(), equalTo("bnd_V"));
             assertThat(variant.strand(), equalTo(Strand.NEGATIVE));
@@ -393,16 +397,20 @@ public class VcfVariantParserTest {
             assertThat(left.contig(), equalTo(assembly.contigByName("1")));
             assertThat(left.strand(), equalTo(Strand.NEGATIVE));
             assertThat(left.coordinateSystem(), equalTo(CoordinateSystem.FULLY_CLOSED));
-            assertThat(left.startPosition(), equalTo(Position.of(8, -2, 1)));
-            assertThat(left.endPosition(), equalTo(Position.of(7, -2, 1)));
+            assertThat(left.start(), equalTo(8));
+            assertThat(left.coordinates().startConfidenceInterval(), equalTo(ConfidenceInterval.of( -2, 1)));
+            assertThat(left.end(), equalTo(7));
+            assertThat(left.coordinates().endConfidenceInterval(), equalTo(ConfidenceInterval.of( -2, 1)));
 
             Breakend right = bnd.right();
             assertThat(right.id(), equalTo("bnd_U"));
             assertThat(right.contig(), equalTo(assembly.contigByName("2")));
             assertThat(left.strand(), equalTo(Strand.NEGATIVE));
             assertThat(left.coordinateSystem(), equalTo(CoordinateSystem.FULLY_CLOSED));
-            assertThat(right.startPosition(), equalTo(Position.of(6, -1, 2)));
-            assertThat(right.endPosition(), equalTo(Position.of(5, -1, 2)));
+            assertThat(right.start(), equalTo(6));
+            assertThat(right.coordinates().startConfidenceInterval(), equalTo(ConfidenceInterval.of(-1, 2)));
+            assertThat(right.end(), equalTo(5));
+            assertThat(right.coordinates().endConfidenceInterval(), equalTo(ConfidenceInterval.of( -1, 2)));
         }
     }
 

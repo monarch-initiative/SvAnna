@@ -1,10 +1,10 @@
 package org.jax.svanna.ingest.parse.population;
 
-import org.jax.svanna.core.landscape.BasePopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
+import org.jax.svanna.model.landscape.variant.BasePopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,12 +68,11 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
                 return List.of();
             }
 
-            Position start, end;
+            Coordinates coordinates;
             CoordinateSystem coordinateSystem = CoordinateSystem.oneBased();
             try {
                 // coordinates are 1-based, inclusive
-                start = Position.of(Integer.parseInt(arr[2]));
-                end = Position.of(Integer.parseInt(arr[3]));
+                coordinates = Coordinates.of(coordinateSystem, Integer.parseInt(arr[2]), Integer.parseInt(arr[3]));
             } catch (NumberFormatException e) {
                 LOGGER.warn("Unable to parse coordinates of line '{}'", line);
                 return List.of();
@@ -121,8 +120,8 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
             float lossesFreq = 100 * observedLosses / sampleSize;
             if (arr[5].equals("gain+loss")) {
                 return List.of(
-                        BasePopulationVariant.of(contig, Strand.POSITIVE, coordinateSystem, start, end, variantAccession, VariantType.DUP, gainsFreq, PopulationVariantOrigin.DGV),
-                        BasePopulationVariant.of(contig, Strand.POSITIVE, coordinateSystem, start, end, variantAccession, VariantType.DEL, lossesFreq, PopulationVariantOrigin.DGV));
+                        BasePopulationVariant.of(GenomicRegion.of(contig, Strand.POSITIVE, coordinates), variantAccession, VariantType.DUP, gainsFreq, PopulationVariantOrigin.DGV),
+                        BasePopulationVariant.of(GenomicRegion.of(contig, Strand.POSITIVE, coordinates), variantAccession, VariantType.DEL, lossesFreq, PopulationVariantOrigin.DGV));
             } else {
                 float frequency = Float.NaN;
                 switch (type.baseType()) {
@@ -137,7 +136,7 @@ public class DgvFileParser implements IngestRecordParser<PopulationVariant> {
                         // fall through
                         break;
                 }
-                return List.of(BasePopulationVariant.of(contig, Strand.POSITIVE, coordinateSystem, start, end, variantAccession, type, frequency, PopulationVariantOrigin.DGV));
+                return List.of(BasePopulationVariant.of(GenomicRegion.of(contig, Strand.POSITIVE, coordinates), variantAccession, type, frequency, PopulationVariantOrigin.DGV));
             }
         };
     }

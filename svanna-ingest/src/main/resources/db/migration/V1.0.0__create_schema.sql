@@ -31,6 +31,7 @@ create table SVANNA.ENHANCER_TISSUE_SPECIFICITY
 create index SVANNA.ENHANCER_TISSUE_SPECIFICITY__ENHANCER_ID
     on SVANNA.ENHANCER_TISSUE_SPECIFICITY (ENHANCER_ID);
 
+---------------------------------- REPETITIVE REGIONS ------------------------------------------------------------------
 drop table if exists SVANNA.REPETITIVE_REGIONS;
 create table SVANNA.REPETITIVE_REGIONS
 (
@@ -40,9 +41,10 @@ create table SVANNA.REPETITIVE_REGIONS
     REPEAT_FAMILY VARCHAR(50) not null
 );
 create
-index SVANNA.REPETITIVE_REGIONS__CONTIG_START_END_IDX
+    index SVANNA.REPETITIVE_REGIONS__CONTIG_START_END_IDX
     on SVANNA.REPETITIVE_REGIONS (CONTIG, START, END);
 
+---------------------------------- POPULATION VARIANTS -----------------------------------------------------------------
 drop table if exists SVANNA.POPULATION_VARIANTS;
 create table SVANNA.POPULATION_VARIANTS
 (
@@ -56,9 +58,10 @@ create table SVANNA.POPULATION_VARIANTS
     ALLELE_FREQUENCY FLOAT        not null
 );
 create
-index SVANNA.POPULATION_VARIANTS__CONTIG_START_END_IDX
+    index SVANNA.POPULATION_VARIANTS__CONTIG_START_END_IDX
     on SVANNA.POPULATION_VARIANTS (CONTIG, START, END);
 
+---------------------------------- TAD BOUNDARY ------------------------------------------------------------------------
 drop table if exists SVANNA.TAD_BOUNDARY;
 create table SVANNA.TAD_BOUNDARY
 (
@@ -71,16 +74,37 @@ create table SVANNA.TAD_BOUNDARY
 );
 
 create index SVANNA.TAD_BOUNDARY__CONTIG_START_END_IDX
-	on SVANNA.TAD_BOUNDARY (CONTIG, START, END);
+    on SVANNA.TAD_BOUNDARY (CONTIG, START, END);
 
 create index SVANNA.TAD_BOUNDARY__CONTIG_MIDPOINT_IDX
-on SVANNA.TAD_BOUNDARY (CONTIG, MIDPOINT);
+    on SVANNA.TAD_BOUNDARY (CONTIG, MIDPOINT);
 
-drop table if exists SVANNA.RESNIK_SIMILARITY;
-create table SVANNA.RESNIK_SIMILARITY
+---------------------------------- IC MICA -----------------------------------------------------------------------------
+drop table if exists SVANNA.HP_TERM_MICA;
+create table SVANNA.HP_TERM_MICA
 (
-    LEFT_ID    INT   not null, -- left term ID. The id for `HP:0001234` is 1234
-    RIGHT_ID   INT   not null, -- right term ID
-    SIMILARITY FLOAT not null  -- Resnik similarity value
+    LEFT_VALUE  INT   not null, -- left term value. The value for `HP:0001234` is 1234
+    RIGHT_VALUE INT   not null, -- right term value
+    IC_MICA     FLOAT not null  -- information content of the most common informative ancestor
 );
-create unique index SVANNA.RESNIK_SIMILARITY__IDX on SVANNA.RESNIK_SIMILARITY (LEFT_ID, RIGHT_ID);
+drop index if exists SVANNA.HP_TERM_MICA__LEFT_VALUE_RIGHT_VALUE_IDX;
+create unique index SVANNA.HP_TERM_MICA__LEFT_VALUE_RIGHT_VALUE_IDX on SVANNA.HP_TERM_MICA (LEFT_VALUE, RIGHT_VALUE);
+
+---------------------------------- CLINGEN DOSAGE ELEMENT --------------------------------------------------------------
+drop table if exists SVANNA.CLINGEN_DOSAGE_ELEMENT;
+create table SVANNA.CLINGEN_DOSAGE_ELEMENT
+(
+    CONTIG             INT          not null,
+    START              INT          not null, -- zero-based start on POSITIVE strand
+    END                INT          not null, -- zero-based end on POSITIVE strand
+
+    ID                 VARCHAR(200) not null, -- HGNC ID or other ID if available
+    DOSAGE_SENSITIVITY VARCHAR(20)  not null,
+    DOSAGE_EVIDENCE    VARCHAR(20)  not null
+);
+drop index if exists SVANNA.CLINGEN_DOSAGE_ELEMENT__CONTIG_START_END_IDX;
+create index SVANNA.CLINGEN_DOSAGE_ELEMENT__CONTIG_START_END_IDX on SVANNA.CLINGEN_DOSAGE_ELEMENT (CONTIG, START, END);
+
+-- TODO - we should update DA layer to use numeric IDs, where available
+drop index if exists SVANNA.CLINGEN_DOSAGE_ELEMENT__ID;
+create index SVANNA.CLINGEN_DOSAGE_ELEMENT__ID on SVANNA.CLINGEN_DOSAGE_ELEMENT (ID);

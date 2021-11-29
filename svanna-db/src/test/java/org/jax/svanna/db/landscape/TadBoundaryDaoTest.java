@@ -1,6 +1,6 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.TadBoundary;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.svart.CoordinateSystem;

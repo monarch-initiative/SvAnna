@@ -1,5 +1,7 @@
 package org.jax.svanna.core.hpo;
 
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.ModeOfInheritance;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

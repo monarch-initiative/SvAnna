@@ -176,7 +176,7 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
                 LOGGER.warn("Invalid CIPOS field `{}` in variant `{}`", vc.getAttributeAsString("CIPOS", ""), makeVariantRepresentation(vc));
             return Optional.empty();
         }
-        Position start = Position.of(vc.getStart(), cipos);
+        int start = vc.getStart();
 
         // parse end pos and CIEND
         ConfidenceInterval ciend;
@@ -196,7 +196,8 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
                 LOGGER.warn("Invalid CIEND field `{}` in variant `{}`", vc.getAttributeAsString("CIEND", ""), makeVariantRepresentation(vc));
             return Optional.empty();
         }
-        Position end = Position.of(endPos, ciend);
+
+        int end = endPos;
 
         // we only support calls with 1 genotype
         GenotypesContext gts = vc.getGenotypes();
@@ -219,13 +220,13 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
             svlen = 0;
         }
 
-        if (ref.equals("N") && alt.equals("<INS>") && start.pos() == end.pos() - 1) { // happens in Sniffles input
+        if (ref.equals("N") && alt.equals("<INS>") && start == end - 1) { // happens in Sniffles input
             LogUtils.logInfo(LOGGER, "Correcting INS coordinates which are inconsistent with VCF specification for `{}`", makeVariantRepresentation(vc));
-            end = end.shift(-1);
+            end = end -1 ;
         }
 
         VariantCallAttributes variantCallAttributes = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
-        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), contig, vc.getID(), start, end, ref, alt, svlen);
+        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), contig, vc.getID(), start, cipos, end, ciend, ref, alt, svlen);
 
         // we assume that `PASS` is not added in between variant context's filters by HtsJDK,
         // and all the other values denote low quality variants
@@ -265,14 +266,14 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
             return Optional.empty();
         }
 
-        Position pos = Position.of(vc.getStart(), ciPos);
+        int pos = vc.getStart();
 
         String mateId = vc.getAttributeAsString("MATEID", "");
         String eventId = vc.getAttributeAsString("EVENT", "");
 
         VariantCallAttributes attrs = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(), contig, vc.getID(), pos,
+        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(), contig, vc.getID(), pos, ciPos,
                 vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString(),
                 ciEnd, mateId, eventId);
 

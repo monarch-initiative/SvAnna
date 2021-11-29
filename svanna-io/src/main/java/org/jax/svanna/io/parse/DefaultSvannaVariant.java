@@ -25,9 +25,7 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
     private DefaultSvannaVariant(Contig contig,
                                  String id,
                                  Strand strand,
-                                 CoordinateSystem coordinateSystem,
-                                 Position startPosition,
-                                 Position endPosition,
+                                 Coordinates coordinates,
                                  String ref,
                                  String alt,
                                  int changeLength,
@@ -37,7 +35,7 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                                  AtomicReference<SvPriority> priority,
                                  VariantContext variantContext) {
         // for creating a novel instance from an existing instance in `newVariantInstance`
-        super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
+        super(contig, id, strand, coordinates, ref, alt, changeLength);
         this.variantCallAttributes = Objects.requireNonNull(variantCallAttributes);
         this.passedFilterTypes = passedFilterTypes;
         this.failedFilterTypes = failedFilterTypes;
@@ -62,8 +60,8 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                                           String id,
                                           Strand strand,
                                           CoordinateSystem coordinateSystem,
-                                          Position startPosition,
-                                          Position endPosition,
+                                          int start,
+                                          int end,
                                           String ref,
                                           String alt,
                                           int changeLength,
@@ -71,7 +69,7 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                                           SvPriority svPriority,
                                           VariantContext variantContext) {
         return new DefaultSvannaVariant(
-                contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength,
+                contig, id, strand, Coordinates.of(coordinateSystem, start, end), ref, alt, changeLength,
                 variantCallAttributes, new HashSet<>(), new HashSet<>(), new AtomicReference<>(svPriority), variantContext);
     }
 
@@ -79,18 +77,14 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
     protected DefaultSvannaVariant newVariantInstance(Contig contig,
                                                       String id,
                                                       Strand strand,
-                                                      CoordinateSystem coordinateSystem,
-                                                      Position startPosition,
-                                                      Position endPosition,
+                                                      Coordinates coordinates,
                                                       String ref,
                                                       String alt,
                                                       int changeLength) {
         return new DefaultSvannaVariant(contig,
                 id,
                 strand,
-                coordinateSystem,
-                startPosition,
-                endPosition,
+                coordinates,
                 ref,
                 alt,
                 changeLength,

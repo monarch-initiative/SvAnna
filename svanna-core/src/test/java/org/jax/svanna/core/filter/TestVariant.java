@@ -16,12 +16,12 @@ public class TestVariant extends BaseVariant<TestVariant> implements SvannaVaria
     private final Set<FilterType> failedFilterTypes;
     private final AtomicReference<SvPriority> priority = new AtomicReference<>();
 
-    public static TestVariant of(Contig contig, String id, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String ref, String alt, int changeLength) {
-        return new TestVariant(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength, new HashSet<>(), new HashSet<>());
+    public static TestVariant of(Contig contig, String id, Strand strand, CoordinateSystem coordinateSystem, int start, int end, String ref, String alt, int changeLength) {
+        return new TestVariant(contig, id, strand, Coordinates.of(coordinateSystem, start, end), ref, alt, changeLength, new HashSet<>(), new HashSet<>());
     }
 
-    protected TestVariant(Contig contig, String id, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String ref, String alt, int changeLength, Set<FilterType> passedFilterTypes, Set<FilterType> failedFilterTypes) {
-        super(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength);
+    protected TestVariant(Contig contig, String id, Strand strand, Coordinates coordinates, String ref, String alt, int changeLength, Set<FilterType> passedFilterTypes, Set<FilterType> failedFilterTypes) {
+        super(contig, id, strand, coordinates, ref, alt, changeLength);
         this.passedFilterTypes = passedFilterTypes;
         this.failedFilterTypes = failedFilterTypes;
     }
@@ -84,8 +84,8 @@ public class TestVariant extends BaseVariant<TestVariant> implements SvannaVaria
     }
 
     @Override
-    protected TestVariant newVariantInstance(Contig contig, String id, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String ref, String alt, int changeLength) {
-        return new TestVariant(contig, id, strand, coordinateSystem, startPosition, endPosition, ref, alt, changeLength, passedFilterTypes, failedFilterTypes);
+    protected TestVariant newVariantInstance(Contig contig, String id, Strand strand, Coordinates coordinates, String ref, String alt, int changeLength) {
+        return new TestVariant(contig, id, strand, coordinates, ref, alt, changeLength, passedFilterTypes, failedFilterTypes);
     }
 
     @Override

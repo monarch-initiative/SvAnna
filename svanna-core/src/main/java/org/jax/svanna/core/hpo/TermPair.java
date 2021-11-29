@@ -9,25 +9,25 @@ public class TermPair {
     private final TermId left;
     private final TermId right;
 
+    private TermPair(TermId left, TermId right) {
+        this.left = left;
+        this.right = right;
+    }
+
     public static TermPair of(TermId left, TermId right) {
         return new TermPair(left, right);
     }
 
     public static TermPair symmetric(TermId a, TermId b) {
-        if (a.getId().compareTo(b.getId())>0) {
-            return new TermPair(a,b);
+        if (a.getId().compareTo(b.getId()) > 0) {
+            return new TermPair(a, b);
         } else {
-            return new TermPair(b,a);
+            return new TermPair(b, a);
         }
     }
 
     public static TermPair asymmetric(TermId a, TermId b) {
-        return new TermPair(a,b);
-    }
-
-    private TermPair(TermId left, TermId right) {
-        this.left = left;
-        this.right = right;
+        return new TermPair(a, b);
     }
 
     public TermId left() {

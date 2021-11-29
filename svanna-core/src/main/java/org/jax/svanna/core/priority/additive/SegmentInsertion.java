@@ -1,8 +1,7 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
+import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
 
 import java.util.Objects;
@@ -21,18 +20,18 @@ class SegmentInsertion extends SegmentSimple {
 
     private final int length;
 
-    static SegmentInsertion of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String id, int length) {
-        return new SegmentInsertion(contig, strand, coordinateSystem, startPosition, endPosition, id, length);
+    static SegmentInsertion of(Contig contig, Strand strand, Coordinates coordinates, String id, int length) {
+        return new SegmentInsertion(contig, strand, coordinates, id, length);
     }
 
-    protected SegmentInsertion(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String id, int length) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition, id, INSERTION_EVENT, N_COPIES);
+    protected SegmentInsertion(Contig contig, Strand strand, Coordinates coordinates, String id, int length) {
+        super(contig, strand, coordinates, id, INSERTION_EVENT, N_COPIES);
         this.length = length;
     }
 
     @Override
-    protected SegmentInsertion newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new SegmentInsertion(contig, strand, coordinateSystem, startPosition, endPosition, id, length);
+    protected SegmentInsertion newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new SegmentInsertion(contig, strand, coordinates, id, length);
     }
 
     @Override

@@ -1,9 +1,12 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.LogUtils;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.Coordinates;
+import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +21,7 @@ public class Projections {
     private Projections() {
     }
 
-    public static <T extends GenomicRegion> List<Projection<T>> project(T query, Route route) {
+    public static <T extends Located> List<Projection<T>> project(T query, Route route) {
         if (!route.segmentContigs().contains(query.contig()))
             return List.of();
 
@@ -51,7 +54,7 @@ public class Projections {
             return List.of();
         }
 
-        if (query.length() == 0) {
+        if (query.location().length() == 0) {
             if (startSegmentIdx == endSegmentIdx - 1)
                 startSegmentIdx++; // TODO - is this dirty hack working?
             else if (startSegmentIdx - 1 == endSegmentIdx)
@@ -65,9 +68,9 @@ public class Projections {
         }
     }
 
-    private static <T extends GenomicRegion> List<Projection<T>> processIntraSegmentEvent(T query,
-                                                                                          int segmentIdx,
-                                                                                          Route route) {
+    private static <T extends Located> List<Projection<T>> processIntraSegmentEvent(T query,
+                                                                                    int segmentIdx,
+                                                                                    Route route) {
         List<Segment> segments = route.segments();
         Segment segment = segments.get(segmentIdx);
         if (segment.event() == Event.DELETION)
@@ -79,12 +82,12 @@ public class Projections {
             int firstEnd = query.endOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start() + nBasesInPreviousSegments;
 
             Projection<T> first = Projection.builder(route, query, route.neoContig(), STRAND, CS)
-                    .start(Position.of(firstStart)).setStartEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
-                    .end(Position.of(firstEnd)).setEndEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
+                    .start(firstStart).setStartEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
+                    .end(firstEnd).setEndEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
                     .build();
             Projection<T> second = Projection.builder(route, query, route.neoContig(), STRAND, CS)
-                    .start(Position.of(firstStart + segment.length())).setStartEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
-                    .end(Position.of(firstEnd + segment.length())).setEndEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
+                    .start(firstStart + segment.length()).setStartEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
+                    .end(firstEnd + segment.length()).setEndEvent(Projection.Location.of(segmentIdx, Event.DUPLICATION))
                     .build();
             return List.of(first, second);
 
@@ -96,8 +99,8 @@ public class Projections {
             int invertedStart = Coordinates.invertPosition(CS, route.neoContig(), nBasesInPreviousSegments + end);
 
             return List.of(Projection.builder(route, query, route.neoContig(), STRAND.opposite(), CS)
-                    .start(Position.of(invertedStart)).setStartEvent(Projection.Location.of(segmentIdx, Event.INVERSION))
-                    .end(Position.of(invertedEnd)).setEndEvent(Projection.Location.of(segmentIdx, Event.INVERSION))
+                    .start(invertedStart).setStartEvent(Projection.Location.of(segmentIdx, Event.INVERSION))
+                    .end(invertedEnd).setEndEvent(Projection.Location.of(segmentIdx, Event.INVERSION))
                     .build());
 
         } else if (segment.event() == Event.GAP) {
@@ -105,8 +108,8 @@ public class Projections {
             int start = query.startOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start() + nBasesInPreviousSegments;
             int end = query.endOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start() + nBasesInPreviousSegments;
             return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
-                    .start(Position.of(start)).setStartEvent(Projection.Location.of(segmentIdx, Event.GAP))
-                    .end(Position.of(end)).setEndEvent(Projection.Location.of(segmentIdx, Event.GAP))
+                    .start(start).setStartEvent(Projection.Location.of(segmentIdx, Event.GAP))
+                    .end(end).setEndEvent(Projection.Location.of(segmentIdx, Event.GAP))
                     .build());
         }
 
@@ -114,10 +117,10 @@ public class Projections {
         return List.of();
     }
 
-    private static <T extends GenomicRegion> List<Projection<T>> processInterSegmentEvent(T query,
-                                                                                          int startSegmentIdx,
-                                                                                          int endSegmentIdx,
-                                                                                          Route route) {
+    private static <T extends Located> List<Projection<T>> processInterSegmentEvent(T query,
+                                                                                    int startSegmentIdx,
+                                                                                    int endSegmentIdx,
+                                                                                    Route route) {
         List<Segment> segments = route.segments();
         Segment startSegment = segments.get(startSegmentIdx);
         Segment endSegment = segments.get(endSegmentIdx);
@@ -136,8 +139,8 @@ public class Projections {
             int endPrevious = countBasesInPreviousSegments(segments, endSegmentIdx);
             int end = query.endOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - endSegment.start() + endPrevious;
             return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
-                    .start(Position.of(start)).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
-                    .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
+                    .start(start).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
+                    .end(end).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                     .addAllSpannedEvents(spannedLocations)
                     .build());
         }
@@ -152,8 +155,8 @@ public class Projections {
                     int endPrevious = countBasesInPreviousSegments(segments, endSegmentIdx);
                     int end = query.endOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - endSegment.start() + endPrevious;
                     return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
-                            .start(Position.of(start)).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
-                            .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
+                            .start(start).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
+                            .end(end).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                             .addAllSpannedEvents(spannedLocations)
                             .build());
                 case INSERTION:
@@ -175,8 +178,8 @@ public class Projections {
                     int endPrevious = countBasesInPreviousSegments(segments, endSegmentIdx);
                     int end = query.endOnStrandWithCoordinateSystem(startSegment.strand(), startSegment.coordinateSystem()) - endSegment.start() + endPrevious;
                     return List.of(Projection.builder(route, query, route.neoContig(), STRAND, CS)
-                            .start(Position.of(start)).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
-                            .end(Position.of(end)).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
+                            .start(start).setStartEvent(Projection.Location.of(startSegmentIdx, startEvent))
+                            .end(end).setEndEvent(Projection.Location.of(endSegmentIdx, endEvent))
                             .addAllSpannedEvents(spannedLocations)
                             .build());
                 case INSERTION:

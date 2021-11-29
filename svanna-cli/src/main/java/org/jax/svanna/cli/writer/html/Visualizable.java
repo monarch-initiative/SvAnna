@@ -1,9 +1,9 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
 import java.util.Set;
@@ -25,7 +25,7 @@ public interface Visualizable extends VariantLandscape {
     default int getGeneCount() {
         return (int) overlaps().stream()
                 .map(GeneOverlap::gene)
-                .map(Gene::geneSymbol)
+                .map(Gene::symbol)
                 .distinct()
                 .count();
     }

@@ -2,21 +2,27 @@ package org.jax.svanna.autoconfigure;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import de.charite.compbio.jannovar.data.JannovarData;
-import de.charite.compbio.jannovar.data.JannovarDataSerializer;
-import de.charite.compbio.jannovar.data.SerializationException;
+import org.jax.svanna.autoconfigure.configuration.DataProperties;
+import org.jax.svanna.autoconfigure.configuration.EnhancerProperties;
+import org.jax.svanna.autoconfigure.configuration.PrioritizationProperties;
+import org.jax.svanna.autoconfigure.configuration.SvannaProperties;
+import org.jax.svanna.autoconfigure.exception.InvalidResourceException;
 import org.jax.svanna.autoconfigure.exception.MissingResourceException;
 import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.*;
-import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
-import org.jax.svanna.core.reference.GeneService;
-import org.jax.svanna.core.reference.transcripts.JannovarGeneService;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.GeneDosageDataService;
+import org.jax.svanna.core.service.GeneService;
+import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.db.landscape.*;
-import org.jax.svanna.db.phenotype.ResnikSimilarityDao;
+import org.jax.svanna.db.phenotype.MicaDao;
+import org.jax.svanna.core.service.ConstantGeneDosageDataService;
+import org.jax.svanna.db.service.ClinGenGeneDosageDataService;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
+import org.jax.svanna.io.service.SilentGenesGeneService;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
@@ -31,6 +37,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -39,13 +46,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Configuration
-@EnableConfigurationProperties(SvannaProperties.class)
+@EnableConfigurationProperties({
+        SvannaProperties.class,
+        DataProperties.class,
+        EnhancerProperties.class,
+        PrioritizationProperties.class
+})
 public class SvannaAutoConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SvannaAutoConfiguration.class);
@@ -58,18 +68,18 @@ public class SvannaAutoConfiguration {
         NF.setMaximumFractionDigits(2);
     }
 
-    private static TermSimilarityCalculator prepareSimilarityCalculator(DataSource svannaDatasource,
-                                                                        SvannaProperties.IcMicaMode icMicaMode) {
-        ResnikSimilarityDao dao = new ResnikSimilarityDao(svannaDatasource);
+    private static MicaCalculator prepareMicaCalculator(DataSource svannaDatasource,
+                                                        PrioritizationProperties.IcMicaMode icMicaMode) {
+        MicaDao dao = new MicaDao(svannaDatasource);
         switch (icMicaMode) {
             case IN_MEMORY:
-                LogUtils.logDebug(LOGGER, "Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
-                return new InMemoryTermSimilarityCalculator(dao.getAllSimilarities());
+                LOGGER.debug("Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
+                return new InMemoryMicaCalculator(dao.getAllMicaValues());
             default:
-                LogUtils.logWarn(LOGGER, "Unknown value `{}` for getting IC of the most informative common ancestor for HPO terms. Falling back to DATABASE", icMicaMode);
+                LOGGER.warn("Unknown value `{}` for getting IC of the most informative common ancestor for HPO terms. Falling back to DATABASE", icMicaMode);
             case DATABASE:
-                LogUtils.logDebug(LOGGER, "Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
-                return (a, b) -> dao.getSimilarity(TermPair.symmetric(a, b));
+                LOGGER.debug("Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
+                return (a, b) -> dao.getMica(TermPair.symmetric(a, b));
         }
     }
 
@@ -79,7 +89,7 @@ public class SvannaAutoConfiguration {
         try (InputStream is = SvannaAutoConfiguration.class.getResourceAsStream("/svanna.properties")) {
             properties.load(is);
         } catch (IOException e) {
-            LogUtils.logWarn(LOGGER, "Error loading properties: {}", e.getMessage());
+            LOGGER.warn( "Error loading properties: {}", e.getMessage());
         }
         return properties;
     }
@@ -95,7 +105,7 @@ public class SvannaAutoConfiguration {
         if (!Files.isDirectory(dataDirPath)) {
             throw new UndefinedResourceException(String.format("Path to SvAnna data directory '%s' does not point to real directory", dataDirPath));
         }
-        LogUtils.logInfo(LOGGER, "Spooling up SvAnna v{} using resources in `{}`", SVANNA_VERSION, dataDirPath.toAbsolutePath());
+        LOGGER.info( "Spooling up SvAnna v{} using resources in `{}`", SVANNA_VERSION, dataDirPath.toAbsolutePath());
         return dataDirPath;
     }
 
@@ -116,14 +126,37 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public AnnotationDataService annotationDataService(DataSource dataSource, GenomicAssembly genomicAssembly, SvannaProperties svannaProperties) {
-        LogUtils.logDebug(LOGGER, "Including TAD boundaries with stability >{}%", NF.format(svannaProperties.dataParameters().tadStabilityThresholdAsPercentage()));
+    public GeneDosageDataService geneDosageDataService(DataSource dataSource,
+                                                       GenomicAssembly genomicAssembly,
+                                                       GeneService geneService,
+                                                       SvannaProperties svannaProperties) throws UndefinedResourceException {
 
-        SvannaProperties.EnhancerParameters enhancers = svannaProperties.dataParameters().enhancers();
+        switch (svannaProperties.prioritization().geneDosageSource()) {
+            case "constant":
+                LOGGER.debug("Using `constant` gene dosage source");
+                return new ConstantGeneDosageDataService(geneService);
+            case "clingen":
+                LOGGER.debug("Using `clingen` gene dosage source");
+                ClingenDosageElementDao clingenDosageElementDao = new ClingenDosageElementDao(dataSource, genomicAssembly);
+                return new ClinGenGeneDosageDataService(clingenDosageElementDao);
+            default:
+                LOGGER.error("Unknown gene dosage source: `{}`", svannaProperties.prioritization().geneDosageSource());
+                throw new UndefinedResourceException(String.format("Unknown gene dosage source: `%s`", svannaProperties.prioritization().geneDosageSource()));
+        }
+    }
+
+    @Bean
+    public AnnotationDataService annotationDataService(DataSource dataSource,
+                                                       GenomicAssembly genomicAssembly,
+                                                       SvannaProperties svannaProperties,
+                                                       GeneDosageDataService geneDosageDataService) {
+        LOGGER.debug( "Including TAD boundaries with stability >{}%", NF.format(svannaProperties.dataParameters().tadStabilityThresholdAsPercentage()));
+
+        EnhancerProperties enhancers = svannaProperties.dataParameters().enhancers();
         if (enhancers.useVista())
-            LogUtils.logDebug(LOGGER, "Including VISTA enhancers");
+            LOGGER.debug( "Including VISTA enhancers");
         if (enhancers.useFantom5())
-            LogUtils.logDebug(LOGGER, "Including FANTOM5 enhancers with tissue specificity >{}", enhancers.fantom5TissueSpecificity());
+            LOGGER.debug( "Including FANTOM5 enhancers with tissue specificity >{}", enhancers.fantom5TissueSpecificity());
 
         EnhancerAnnotationDao.EnhancerParameters enhancerParameters = EnhancerAnnotationDao.EnhancerParameters.of(enhancers.useVista(), enhancers.useFantom5(), enhancers.fantom5TissueSpecificity());
 
@@ -131,58 +164,60 @@ public class SvannaAutoConfiguration {
                 new EnhancerAnnotationDao(dataSource, genomicAssembly, enhancerParameters),
                 new RepetitiveRegionDao(dataSource, genomicAssembly),
                 new DbPopulationVariantDao(dataSource, genomicAssembly),
-                new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction()));
+                new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction()),
+                geneDosageDataService);
     }
 
     @Bean
     public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver, DataSource svannaDatasource, SvannaProperties properties) throws UndefinedResourceException, IOException {
-        LogUtils.logDebug(LOGGER, "Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
+        LOGGER.debug("Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
         Path hpoaPath = svannaDataResolver.phenotypeHpoaPath().toAbsolutePath();
-        LogUtils.logDebug(LOGGER, "Parsing HPO disease associations at `{}`", hpoaPath);
+        LOGGER.debug("Parsing HPO disease associations at `{}`", hpoaPath);
         Path geneInfoPath = svannaDataResolver.geneInfoPath();
-        LogUtils.logDebug(LOGGER, "Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
+        LOGGER.debug("Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
         Path mim2geneMedgenPath = svannaDataResolver.mim2geneMedgenPath();
-        LogUtils.logDebug(LOGGER, "Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
+        LOGGER.debug("Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
 
         HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(),
                 mim2geneMedgenPath.toFile(), null,
                 svannaDataResolver.phenotypeHpoaPath().toFile(), ontology);
         Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoaPath.toString(), ontology);
-        Set<GeneWithId> geneWithIds = hap.getGeneIdToSymbolMap().entrySet().stream().map(e -> GeneWithId.of(e.getValue(), e.getKey())).collect(Collectors.toSet());
+        Set<GeneIdentifier> geneIdentifiers = hap.getGeneIdToSymbolMap().entrySet().stream()
+                .map(e -> GeneIdentifier.of(e.getValue(), e.getKey().getValue(), null, null)) // TODO - check values
+                .collect(Collectors.toUnmodifiableSet());
 
         SimilarityScoreCalculator similarityScoreCalculator;
-        SvannaProperties.TermSimilarityMeasure similarityMeasure = properties.prioritizationParameters().termSimilarityMeasure();
-        LogUtils.logDebug(LOGGER, "Initializing phenotype term similarity calculator `{}`", similarityMeasure);
+        PrioritizationProperties.TermSimilarityMeasure similarityMeasure = properties.prioritization().termSimilarityMeasure();
+        LOGGER.debug("Initializing phenotype term similarity calculator `{}`", similarityMeasure);
 
-        TermSimilarityCalculator similarityCalculator = prepareSimilarityCalculator(svannaDatasource, properties.prioritizationParameters().icMicaMode());
-        if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {
+        MicaCalculator similarityCalculator = prepareMicaCalculator(svannaDatasource, properties.prioritization().icMicaMode());
+        if (similarityMeasure == PrioritizationProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {
             similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, true);
-        } else if (similarityMeasure == SvannaProperties.TermSimilarityMeasure.RESNIK_ASYMMETRIC) {
+        } else if (similarityMeasure == PrioritizationProperties.TermSimilarityMeasure.RESNIK_ASYMMETRIC) {
             similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, false);
         } else {
             throw new UndefinedResourceException("Unknown term similarity measure " + similarityMeasure);
         }
 
-        LogUtils.logDebug(LOGGER, "Done");
+        LOGGER.debug("Done");
 
-        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneWithIds, similarityScoreCalculator);
+        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneIdentifiers, similarityScoreCalculator);
     }
 
     @Bean
     public GeneOverlapper geneOverlapper(GeneService geneService) {
-        return GeneOverlapper.intervalArrayOverlapper(geneService.getChromosomeMap());
+        return GeneOverlapper.of(geneService);
     }
 
     @Bean
-    public GeneService geneService(GenomicAssembly genomicAssembly, JannovarData jannovarData) {
-        return JannovarGeneService.of(genomicAssembly, jannovarData);
-    }
-
-    @Bean
-    public JannovarData jannovarData(SvannaProperties svannaProperties) throws SerializationException {
-        LogUtils.logInfo(LOGGER, "Reading transcript definitions from `{}`", svannaProperties.jannovarCachePath());
-        return new JannovarDataSerializer(svannaProperties.jannovarCachePath()).load();
+    public GeneService geneService(GenomicAssembly genomicAssembly, SvannaDataResolver svannaDataResolver) throws InvalidResourceException {
+        LOGGER.debug("Reading genes from `{}`", svannaDataResolver.genesJsonPath());
+        try {
+            return SilentGenesGeneService.of(genomicAssembly, svannaDataResolver.genesJsonPath());
+        } catch (IOException e) {
+            throw new InvalidResourceException("Error reading genes from `" + svannaDataResolver.genesJsonPath().toAbsolutePath() + "`", e);
+        }
     }
 
     @Bean

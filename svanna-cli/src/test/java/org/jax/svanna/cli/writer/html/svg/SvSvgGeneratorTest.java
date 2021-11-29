@@ -1,11 +1,13 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.cli.TestDataConfig;
-import org.jax.svanna.core.reference.GeneService;
+import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Test;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -25,9 +27,9 @@ public class SvSvgGeneratorTest {
 
     @Test
     public void testWriteSvg() {
-        SvSvgGenerator generator = new DeletionSvgGenerator(testVariants.deletions().gckUpstreamIntergenic_affectingEnhancer(), List.of(geneService.bySymbol("GCK")),
-                List.of(), List.of()
-        );
+        List<Gene> genes = geneService.byHgncId(TermId.of("HGNC:4195"));
+        SvSvgGenerator generator = new DeletionSvgGenerator(testVariants.deletions().gckUpstreamIntergenic_affectingEnhancer(), genes,
+                List.of(), List.of());
         String svg = generator.getSvg();
         assertNotNull(svg);
         try {

@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>svanna-core</module>
+        <module>svanna-model</module>
         <module>svanna-test</module>
         <module>svanna-io</module>
         <module>svanna-ingest</module>
@@ -38,12 +39,14 @@
         <phenopacket.version>1.0.0</phenopacket.version>
         <protobuf.version>3.8.0</protobuf.version>
         <jannovar.version>0.35</jannovar.version>
+        <silent.genes.version>0.0.1-SNAPSHOT</silent.genes.version>
         <htsjdk.version>2.23.0</htsjdk.version>
         <spring-boot-starter.version>2.5.1</spring-boot-starter.version>
-        <svart.version>1.0.0</svart.version>
+        <svart.version>2.0.0-SNAPSHOT</svart.version>
         <commons-io.version>2.8.0</commons-io.version>
         <commons-csv.version>1.7</commons-csv.version>
         <commons-compress.version>1.21</commons-compress.version>
+        <commons-net.version>3.8.0</commons-net.version>
     </properties>
 
     <developers>
@@ -107,12 +110,6 @@
                 <groupId>org.monarchinitiative.phenol</groupId>
                 <artifactId>phenol-core</artifactId>
                 <version>${phenol.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.monarchinitiative.phenol</groupId>
@@ -123,6 +120,26 @@
                 <groupId>org.monarchinitiative.phenol</groupId>
                 <artifactId>phenol-annotations</artifactId>
                 <version>${phenol.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-model</artifactId>
+                <version>${silent.genes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-gencode</artifactId>
+                <version>${silent.genes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-jannovar</artifactId>
+                <version>${silent.genes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-io</artifactId>
+                <version>${silent.genes.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.samtools</groupId>
@@ -171,6 +188,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

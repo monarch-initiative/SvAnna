@@ -1,12 +1,9 @@
 package org.jax.svanna.ingest.parse.enhancer.fantom;
 
-import org.jax.svanna.core.landscape.EnhancerSource;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.db.landscape.BaseEnhancer;
-import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Position;
-import org.monarchinitiative.svart.Strand;
+import org.jax.svanna.model.landscape.enhancer.EnhancerSource;
+import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
+import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 import java.util.Set;
@@ -20,27 +17,24 @@ class FEnhancer extends BaseEnhancer {
     static FEnhancer of(Contig contig,
                         Strand strand,
                         CoordinateSystem coordinateSystem,
-                        Position startPosition,
-                        Position endPosition,
+                        int start,
+                        int end,
                         String id,
                         boolean isDevelopmental,
                         double tau,
                         Set<EnhancerTissueSpecificity> specificities,
                         double totalReadCounts) {
-        return new FEnhancer(contig, strand, coordinateSystem, startPosition, endPosition, id, isDevelopmental, tau, specificities, totalReadCounts);
+        GenomicRegion location = GenomicRegion.of(contig, strand, Coordinates.of(coordinateSystem, start, end));
+        return new FEnhancer(location, id, isDevelopmental, tau, specificities, totalReadCounts);
     }
 
-    protected FEnhancer(Contig contig,
-                        Strand strand,
-                        CoordinateSystem coordinateSystem,
-                        Position startPosition,
-                        Position endPosition,
-                        String id,
-                        boolean isDevelopmental,
-                        double tau,
-                        Set<EnhancerTissueSpecificity> specificities,
-                        double totalReadCpm) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition, id, FANTOM_ENHANCER, isDevelopmental, tau, specificities);
+    private FEnhancer(GenomicRegion location,
+                      String id,
+                      boolean isDevelopmental,
+                      double tau,
+                      Set<EnhancerTissueSpecificity> specificities,
+                      double totalReadCpm) {
+        super(location, id, FANTOM_ENHANCER, isDevelopmental, tau, specificities);
         this.totalReadCpm = totalReadCpm;
     }
 

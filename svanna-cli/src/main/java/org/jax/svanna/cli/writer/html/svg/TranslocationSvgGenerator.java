@@ -1,9 +1,10 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.Spliced;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -54,7 +55,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         List<RepetitiveRegion> repeatsB = repeats.stream().filter(r -> r.contigId() == right.contigId()).collect(Collectors.toList());
 
         int nTranscripts = genesA.stream()
-                .mapToInt(g -> g.codingTranscripts().size() + g.nonCodingTranscripts().size())
+                .mapToInt(Spliced::transcriptCount)
                 .sum();
         int displayElementsA = nTranscripts + enhancersA.size(); // number of display elements for translocation A
 

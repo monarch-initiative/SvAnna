@@ -1,12 +1,11 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.priority.additive.ge.RouteDataGE;
 
-public class AdditiveGranularSvPrioritizer extends BaseAdditiveSvPrioritizer<RouteDataGE, GranularRouteResult> {
+public class AdditiveGranularSvPrioritizer<DATA extends RouteData> extends BaseAdditiveSvPrioritizer<DATA, GranularRouteResult> {
 
 
-    protected AdditiveGranularSvPrioritizer(Builder builder) {
+    protected AdditiveGranularSvPrioritizer(Builder<DATA> builder) {
         super(builder);
     }
 
@@ -15,21 +14,21 @@ public class AdditiveGranularSvPrioritizer extends BaseAdditiveSvPrioritizer<Rou
         return routeResult;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static <T extends RouteData> Builder<T> builder() {
+        return new Builder<>();
     }
 
-    public static class Builder extends BaseAdditiveSvPrioritizer.Builder<Builder, RouteDataGE, GranularRouteResult> {
+    public static class Builder<DATA extends RouteData> extends BaseAdditiveSvPrioritizer.Builder<Builder<DATA>, DATA, GranularRouteResult> {
 
         private Builder() {}
 
         @Override
-        public BaseAdditiveSvPrioritizer<RouteDataGE, GranularRouteResult> build() {
-            return new AdditiveGranularSvPrioritizer(self());
+        public BaseAdditiveSvPrioritizer<DATA, GranularRouteResult> build() {
+            return new AdditiveGranularSvPrioritizer<>(self());
         }
 
         @Override
-        protected Builder self() {
+        protected Builder<DATA> self() {
             return this;
         }
     }

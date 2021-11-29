@@ -13,16 +13,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.monarchinitiative.svart</groupId>
-            <artifactId>svart</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.monarchinitiative.phenol</groupId>
-            <artifactId>phenol-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>de.charite.compbio</groupId>
-            <artifactId>jannovar-core</artifactId>
+            <groupId>org.jax.svanna</groupId>
+            <artifactId>svanna-model</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <!--    TESTS    -->
@@ -33,8 +26,18 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>xyz.ielis.silent.genes</groupId>
+            <artifactId>silent-genes-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>
             <artifactId>phenol-annotations</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.charite.compbio</groupId>
+            <artifactId>jannovar-core</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

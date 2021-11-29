@@ -1,20 +1,21 @@
 package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.hpo.GeneWithId;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import java.util.*;
 import java.util.function.Function;
@@ -30,7 +31,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     private final PhenotypeDataService phenotypeDataService;
 
-    private final Map<String, GeneWithId> geneMap;
+    private final Map<String, GeneIdentifier> geneMap;
 
     public VisualizableGeneratorSimple(GeneOverlapper overlapper,
                                        AnnotationDataService annotationDataService,
@@ -39,14 +40,15 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         this.annotationDataService = annotationDataService;
         this.phenotypeDataService = phenotypeDataService;
         this.geneMap = phenotypeDataService.geneWithIds().stream()
-                .collect(Collectors.toMap(GeneWithId::getSymbol, Function.identity()));
+                .collect(Collectors.toMap(GeneIdentifier::symbol, Function.identity()));
     }
 
     @Override
     public VariantLandscape prepareLandscape(SvannaVariant variant) {
         List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
-        return SimpleVariantLandscape.of(variant, overlaps, enhancers);
+        List<DosageRegion> dosageRegions = annotationDataService.dosageElements(variant);
+        return SimpleVariantLandscape.of(variant, overlaps, enhancers, dosageRegions);
     }
 
     @Override
@@ -56,14 +58,14 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         List<RepetitiveRegion> repetitiveRegions = prepareRepetitiveRegions(variant, overlaps);
 
         Set<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
-                .map(geneOverlap -> geneOverlap.gene().geneSymbol())
+                .map(geneOverlap -> geneOverlap.gene().symbol())
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
-                .map(id -> phenotypeDataService.getDiseasesForGene(id.getGeneId()))
+                .map(id -> phenotypeDataService.getDiseasesForGene(id.accession()))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
-        return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions);
+        return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions, variantLandscape.dosageRegions());
     }
 
     private List<RepetitiveRegion> prepareRepetitiveRegions(SvannaVariant variant, List<GeneOverlap> overlaps) {

@@ -1,9 +1,11 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.GeneOverlap;
-import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.monarchinitiative.svart.VariantType;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,16 +17,20 @@ public interface VariantLandscape {
 
     SvannaVariant variant();
 
-    default String getType() {
-        return variant().variantType().toString();
+    default VariantType variantType() {
+        return variant().variantType();
     }
 
     List<GeneOverlap> overlaps();
 
     default List<Gene> genes() {
-        return overlaps().stream().map(GeneOverlap::gene).collect(Collectors.toList());
+        return overlaps().stream()
+                .map(GeneOverlap::gene)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     List<Enhancer> enhancers();
+
+    List<DosageRegion> dosageRegions();
 
 }

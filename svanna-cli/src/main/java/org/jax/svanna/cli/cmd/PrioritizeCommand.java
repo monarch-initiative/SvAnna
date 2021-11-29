@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.cmd;
 
-import org.jax.svanna.autoconfigure.SvannaProperties;
+import org.jax.svanna.autoconfigure.configuration.SvannaProperties;
 import org.jax.svanna.cli.Main;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
@@ -10,17 +10,17 @@ import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.hpo.ModeOfInheritance;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.priority.*;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.ModeOfInheritance;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -299,8 +299,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
 
             // Prioritize
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
-            SvPrioritizerType svPrioritizerType = SvPrioritizerType.ADDITIVE;
-            SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(svPrioritizerType, patientTerms);
+            SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(patientTerms);
 
             LogUtils.logInfo(LOGGER, "Prioritizing variants");
             ProgressReporter priorityProgress = new ProgressReporter(5_000);
@@ -350,7 +349,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
         analysisParameters.setTadStabilityThreshold(properties.dataParameters().tadStabilityThresholdAsPercentage());
         analysisParameters.setUseVistaEnhancers(properties.dataParameters().enhancers().useVista());
         analysisParameters.setUseFantom5Enhancers(properties.dataParameters().enhancers().useFantom5());
-        analysisParameters.setPhenotypeTermSimilarityMeasure(properties.prioritizationParameters().termSimilarityMeasure().toString());
+        analysisParameters.setPhenotypeTermSimilarityMeasure(properties.prioritization().termSimilarityMeasure().toString());
 
         return analysisParameters;
     }

@@ -1,8 +1,8 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.RepeatFamily;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.model.landscape.repeat.RepeatFamily;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +71,7 @@ public class RepetitiveRegionDao implements AnnotationDao<RepetitiveRegion>, Ing
                 }
                 regions.add(RepetitiveRegion.of(contig,
                         Strand.POSITIVE, CoordinateSystem.zeroBased(), // database invariant
-                        Position.of(rs.getInt("START")), Position.of(rs.getInt("END")),
+                        rs.getInt("START"), rs.getInt("END"),
                         RepeatFamily.valueOf(rs.getString("REPEAT_FAMILY"))));
             }
         }

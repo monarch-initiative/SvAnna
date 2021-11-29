@@ -1,9 +1,13 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.TadBoundary;
-import org.jax.svanna.core.reference.Gene;
-import org.monarchinitiative.svart.*;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Strand;
+import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -14,20 +18,21 @@ public class EvaluatorUtils {
 
     private static final Comparator<? super Projection<?>> COMPARATOR = prepareComparator();
 
+    private EvaluatorUtils() {
+    }
+
     private static Comparator<? super Projection<?>> prepareComparator() {
         return Comparator.comparingInt(GenomicRegion::contigId)
                 .thenComparingInt(p -> p.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .thenComparingInt(p -> p.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
     }
 
-    private EvaluatorUtils() {}
-
-    public static Map<Contig, List<GenomicRegion>> prepareEvaluationRegions(Map<Contig, GenomicRegion> references,
+    public static Map<Contig, List<GenomicRegion>> prepareEvaluationRegions(Map<Contig, GenomicRegion> referenceRegions,
                                                                             Map<Contig, List<TadBoundary>> tadBoundaries) {
-        Map<Contig, List<GenomicRegion>> result = new HashMap<>(references.size());
+        Map<Contig, List<GenomicRegion>> result = new HashMap<>(referenceRegions.size());
 
-        for (Contig contig : references.keySet()) {
-            GenomicRegion reference = references.get(contig);
+        for (Contig contig : referenceRegions.keySet()) {
+            GenomicRegion reference = referenceRegions.get(contig);
             List<TadBoundary> boundaries = tadBoundaries.getOrDefault(contig, List.of());
             result.put(contig, prepareEvaluationRegions(reference, boundaries));
         }
@@ -39,35 +44,43 @@ public class EvaluatorUtils {
         if (tadBoundaries.isEmpty())
             return List.of(reference);
         else if (tadBoundaries.size() == 1) {
-            Position tadPosition = tadBoundaries.get(0).withStrand(reference.strand()).asPosition();
+            GenomicRegion region = tadBoundaries.get(0).location();
+            int mid = region.endOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem()) - (region.length() / 2);
             return List.of(
-                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.startPosition(), tadPosition),
-                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), tadPosition, reference.endPosition())
+                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.start(), mid),
+                    GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), mid, reference.end())
             );
         } else {
             List<TadBoundary> sortedTads = tadBoundaries.stream()
-                    .sorted(Comparator.comparingInt(tb -> tb.withStrand(reference.strand()).asPosition().pos()))
+                    .sorted(Comparator.comparingInt(tb -> {
+                        GenomicRegion region = tb.location();
+                        return region.endOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem()) - (region.length() / 2);
+                    }))
                     .collect(Collectors.toList());
 
             LinkedList<GenomicRegion> regions = new LinkedList<>();
-            Position previous = sortedTads.get(0).withStrand(reference.strand()).asPosition();
+            GenomicRegion tadRegion = sortedTads.get(0).location();
+            int previousTadMidpoint = tadRegion.endOnStrandWithCoordinateSystem(reference.strand(), CoordinateSystem.zeroBased()) - (tadRegion.length() / 2);
             for (int i = 1; i < sortedTads.size(); i++) {
-                Position current = sortedTads.get(i).withStrand(reference.strand()).asPosition();
-                regions.add(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), previous, current));
-                previous = current;
+                GenomicRegion currentRegion = sortedTads.get(i).location();
+                int currentTadMidpoint = currentRegion.endOnStrandWithCoordinateSystem(reference.strand(), CoordinateSystem.zeroBased()) - (currentRegion.length() / 2);
+                regions.add(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), previousTadMidpoint, currentTadMidpoint));
+                previousTadMidpoint = currentTadMidpoint;
             }
 
             GenomicRegion first = regions.removeFirst();
             int firstStart = first.startOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem());
             if (firstStart > reference.start())
-                regions.addFirst(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.startPosition(), first.endPosition()));
+                // TODO - double check
+                regions.addFirst(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), reference.start(), first.start()));
             else
                 regions.addFirst(first);
 
             GenomicRegion last = regions.removeLast();
             int lastEnd = last.endOnStrandWithCoordinateSystem(reference.strand(), reference.coordinateSystem());
             if (lastEnd < reference.end())
-                regions.addLast(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), last.startPosition(), reference.endPosition()));
+                // TODO - double check
+                regions.addLast(GenomicRegion.of(reference.contig(), reference.strand(), reference.coordinateSystem(), last.end(), reference.end()));
             else
                 regions.addLast(last);
 
@@ -75,23 +88,39 @@ public class EvaluatorUtils {
         }
     }
 
-    public static <T extends GenomicRegion> Map<GenomicRegion, List<T>> groupItemsByRegion(List<GenomicRegion> regions, Collection<T> items) {
-        Map<GenomicRegion, List<T>> map = new HashMap<>();
+    public static <T extends Located> Map<GenomicRegion, List<T>> groupItemsByRegion(List<GenomicRegion> regions, Collection<T> items) {
+        Map<GenomicRegion, List<T>> map = new HashMap<>(regions.size());
         for (GenomicRegion region : regions) {
             List<T> partition = items.stream()
-                    .filter(t -> t.overlapsWith(region))
-                    .collect(Collectors.toList());
+                    .filter(t -> t.location().overlapsWith(region))
+                    .collect(Collectors.toUnmodifiableList());
             map.put(region, partition);
         }
 
         return map;
     }
 
-    public static LinkedList<Projection<? extends GenomicRegion>> projectGenesEnhancersTads(Route alternate,
-                                                                                            Collection<Gene> genes,
-                                                                                            Collection<Enhancer> enhancers,
-                                                                                            Collection<TadBoundary> tadBoundaries) {
-        LinkedList<Projection<? extends GenomicRegion>> projections = new LinkedList<>();
+    public static List<Projection<? extends Located>> projectGenesEnhancers(Route alternate,
+                                                                            Collection<Gene> genes,
+                                                                            Collection<Enhancer> enhancers) {
+        List<Projection<? extends Located>> projections = new ArrayList<>(genes.size() + enhancers.size());
+
+        for (Gene gene : genes) {
+            projections.addAll(Projections.project(gene, alternate));
+        }
+
+        for (Enhancer enhancer : enhancers) {
+            projections.addAll(Projections.project(enhancer, alternate));
+        }
+
+        return projections;
+    }
+
+    public static LinkedList<Projection<? extends Located>> projectGenesEnhancersTads(Route alternate,
+                                                                                      Collection<Gene> genes,
+                                                                                      Collection<Enhancer> enhancers,
+                                                                                      Collection<TadBoundary> tadBoundaries) {
+        LinkedList<Projection<? extends Located>> projections = new LinkedList<>();
 
         for (TadBoundary boundary : tadBoundaries) {
             projections.addAll(Projections.project(boundary, alternate));
@@ -110,10 +139,10 @@ public class EvaluatorUtils {
         return projections;
     }
 
-    public static List<Integer> computeTadBoundaryIndices(List<Projection<? extends GenomicRegion>> projections) {
+    public static List<Integer> computeTadBoundaryIndices(List<Projection<? extends Located>> projections) {
         List<Integer> tadIndices = new LinkedList<>();
         int i = 0;
-        for (Projection<? extends GenomicRegion> projection : projections) {
+        for (Projection<? extends Located> projection : projections) {
             if (projection.source() instanceof TadBoundary)
                 tadIndices.add(i);
             i++;

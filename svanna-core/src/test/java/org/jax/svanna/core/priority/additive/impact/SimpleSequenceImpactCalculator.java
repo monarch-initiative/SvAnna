@@ -2,11 +2,11 @@ package org.jax.svanna.core.priority.additive.impact;
 
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
-import org.monarchinitiative.svart.GenomicRegion;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.Set;
 
-public class SimpleSequenceImpactCalculator<T extends GenomicRegion> implements SequenceImpactCalculator<T> {
+public class SimpleSequenceImpactCalculator<T extends Located> implements SequenceImpactCalculator<T> {
 
     private final double factor;
 

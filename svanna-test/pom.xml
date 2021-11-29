@@ -12,11 +12,6 @@
     <artifactId>svanna-test</artifactId>
     <description>Module with data (e.g. variants) usable for testing</description>
 
-    <properties>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.monarchinitiative.svart</groupId>

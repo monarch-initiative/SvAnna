@@ -47,7 +47,7 @@ class DosageElementsUtil {
             return Optional.empty();
         } else {
             GenomicRegion location = GenomicRegion.of(contig, strand, coordinates);
-            return Optional.of(DosageRegion.of(location, GeneDosageData.of(dosages)));
+            return Optional.of(DosageRegion.of(location, dosages));
         }
     }
 

@@ -13,10 +13,9 @@ import java.util.stream.Collectors;
  */
 public class ConstantGeneDosageDataService implements GeneDosageDataService {
 
-    private static final GeneDosageData DEFAULT = GeneDosageData.of(
-            List.of(
-                    Dosage.of("constant-triplosensitivity", DosageSensitivity.TRIPLOSENSITIVITY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE),
-                    Dosage.of("constant-haploinsufficiency", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
+    private static final List<Dosage> DEFAULT = List.of(
+            Dosage.of("constant-triplosensitivity", DosageSensitivity.TRIPLOSENSITIVITY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE),
+            Dosage.of("constant-haploinsufficiency", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE));
 
     private final GeneService geneService;
 
@@ -36,12 +35,12 @@ public class ConstantGeneDosageDataService implements GeneDosageDataService {
     }
 
     @Override
-    public GeneDosageData geneDosageDataForHgncId(String hgncId) {
+    public List<Dosage> geneDosageDataForHgncId(String hgncId) {
         return DEFAULT;
     }
 
     @Override
-    public GeneDosageData geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
+    public List<Dosage> geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
         return DEFAULT;
     }
 }

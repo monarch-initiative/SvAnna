@@ -7,6 +7,7 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.BreakendVariant;
@@ -46,7 +47,8 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
     public VariantLandscape prepareLandscape(SvannaVariant variant) {
         List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
         List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
-        return SimpleVariantLandscape.of(variant, overlaps, enhancers);
+        List<DosageRegion> dosageRegions = annotationDataService.dosageElements(variant);
+        return SimpleVariantLandscape.of(variant, overlaps, enhancers, dosageRegions);
     }
 
     @Override
@@ -63,7 +65,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
 
-        return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions);
+        return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions, variantLandscape.dosageRegions());
     }
 
     private List<RepetitiveRegion> prepareRepetitiveRegions(SvannaVariant variant, List<GeneOverlap> overlaps) {

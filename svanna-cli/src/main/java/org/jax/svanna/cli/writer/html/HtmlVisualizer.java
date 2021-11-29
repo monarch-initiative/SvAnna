@@ -378,7 +378,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<table class=\"vartab\">\n");
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
-        sb.append(itemValueRow("type", visualizable.getType()));
+        sb.append(itemValueRow("type", visualizable.variantType().toString()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
@@ -436,7 +436,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<table class=\"vartab\">\n");
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
-        sb.append(itemValueRow("type", visualizable.getType()));
+        sb.append(itemValueRow("type", visualizable.variantType().toString()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");

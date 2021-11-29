@@ -26,7 +26,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
         this.genomicAssembly = genomicAssembly;
     }
 
-    private static GeneDosageData processDosageDataStatement(PreparedStatement preparedStatement) throws SQLException {
+    private static List<Dosage> processDosageDataStatement(PreparedStatement preparedStatement) throws SQLException {
         List<Dosage> regions = new LinkedList<>();
         try (ResultSet rs = preparedStatement.executeQuery()) {
             while (rs.next()) {
@@ -38,7 +38,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
             }
         }
 
-        return GeneDosageData.of(regions);
+        return regions;
     }
 
     @Override
@@ -56,7 +56,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
                 preparedStatement.setInt(2, item.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
                 preparedStatement.setInt(3, item.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
 
-                for (Dosage dosage : item.geneDosageData().dosages()) {
+                for (Dosage dosage : item.dosages()) {
                     preparedStatement.setString(4, dosage.id());
                     preparedStatement.setString(5, dosage.dosageSensitivity().name());
                     preparedStatement.setString(6, dosage.dosageSensitivityEvidence().name());
@@ -99,7 +99,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
         }
     }
 
-    public GeneDosageData geneDosageDataForHgncId(String hgncId) {
+    public List<Dosage> geneDosageDataForHgncId(String hgncId) {
         String sql = "select ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
                 " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where ID = ?";
@@ -110,11 +110,11 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
             return processDosageDataStatement(preparedStatement);
         } catch (SQLException e) {
             if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());
-            return GeneDosageData.empty();
+            return List.of();
         }
     }
 
-    public GeneDosageData geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
+    public List<Dosage> geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
         String sql = "select distinct ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
                 " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where (CONTIG = ? " +
@@ -130,7 +130,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
             return processDosageDataStatement(preparedStatement);
         } catch (SQLException e) {
             if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());
-            return GeneDosageData.empty();
+            return List.of();
         }
     }
 
@@ -155,8 +155,8 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
             }
 
             return dosageMap.entrySet().stream()
-                    .map(e -> DosageRegion.of(e.getKey(), GeneDosageData.of(e.getValue())))
-                    .collect(Collectors.toList());
+                    .map(e -> DosageRegion.of(e.getKey(), e.getValue()))
+                    .collect(Collectors.toUnmodifiableList());
         }
     }
 

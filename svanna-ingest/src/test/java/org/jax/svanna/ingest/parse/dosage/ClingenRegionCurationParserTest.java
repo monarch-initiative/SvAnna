@@ -24,15 +24,15 @@ public class ClingenRegionCurationParserTest {
         assertThat(elements, hasSize(3));
 
         DosageRegion first = elements.get(0);
-        assertThat(first.geneDosageData().dosages(), hasItem(Dosage.of("ISCA-46739", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
+        assertThat(first.dosages(), hasItem(Dosage.of("ISCA-46739", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
 
         DosageRegion second = elements.get(1);
-        assertThat(second.geneDosageData().dosages(), hasItems(
+        assertThat(second.dosages(), hasItems(
                 Dosage.of("ISCA-46734", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE),
                 Dosage.of("ISCA-46734", DosageSensitivity.TRIPLOSENSITIVITY, DosageSensitivityEvidence.SOME_EVIDENCE)
         ));
 
         DosageRegion third = elements.get(2);
-        assertThat(third.geneDosageData().dosages(), hasItem(Dosage.of("ISCA-46731", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
+        assertThat(third.dosages(), hasItem(Dosage.of("ISCA-46731", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
     }
 }

@@ -2,8 +2,8 @@ package org.jax.svanna.db.service;
 
 import org.jax.svanna.core.service.GeneDosageDataService;
 import org.jax.svanna.db.landscape.ClingenDosageElementDao;
+import org.jax.svanna.model.landscape.dosage.Dosage;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
-import org.jax.svanna.model.landscape.dosage.GeneDosageData;
 import org.monarchinitiative.svart.GenomicRegion;
 
 import java.util.List;
@@ -25,12 +25,12 @@ public class ClinGenGeneDosageDataService implements GeneDosageDataService {
     }
 
     @Override
-    public GeneDosageData geneDosageDataForHgncId(String hgncId) {
+    public List<Dosage> geneDosageDataForHgncId(String hgncId) {
         return clingenDosageElementDao.geneDosageDataForHgncId(hgncId);
     }
 
     @Override
-    public GeneDosageData geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
+    public List<Dosage> geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
         return clingenDosageElementDao.geneDosageDataForHgncIdAndRegion(hgncId, query);
     }
 }

@@ -4,7 +4,6 @@ import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
 import org.jax.svanna.core.service.GeneDosageDataService;
-import org.jax.svanna.model.landscape.dosage.GeneDosageData;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
@@ -175,27 +174,14 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     }
 
     private double processIntraSegmentProjection(Projection<Gene> projection) {
-        Gene gene = projection.source();
-        // we need all available gene dosage data, both for genes and for regions other than genes
-        Optional<GeneDosageData> geneDosageData = gene.id().hgncId()
-                .map(hgncId -> geneDosageDataService.geneDosageDataForHgncIdAndRegion(hgncId, gene.location()));
-
         // the entire gene is spanned by an event (DELETION, INVERSION, DUPLICATION...)
         switch (projection.startEvent()) {
             case DELETION:
                 // the entire gene is deleted
-                return geneDosageData.isPresent() && geneDosageData.get().isHaploinsufficient()
-                        // the dosage data indicates the deletion IS an issue
-                        ? 0.
-                        // the dosage data indicates the deletion is NOT an issue or there is NO dosage data
-                        : noImpact();
+                return 0.;
             case DUPLICATION:
                 // the entire gene is duplicated
-                return geneDosageData.isPresent() && geneDosageData.get().isTriplosensitive()
-                        // the dosage data indicates the duplication IS an issue
-                        ? 2 * noImpact()
-                        // the dosage data indicates the duplication is NOT an issue or there is NO dosage data
-                        : noImpact();
+                return 2 * noImpact();
             case BREAKEND:
             case SNV:
             case INSERTION:

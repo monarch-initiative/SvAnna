@@ -3,7 +3,6 @@ package org.jax.svanna.core.priority.additive.impact;
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
-import org.jax.svanna.core.service.GeneDosageDataService;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
@@ -25,18 +24,15 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     private static final int INTRONIC_ACCEPTOR_PADDING = 25;
     private static final int INTRONIC_DONOR_PADDING = 6;
 
-    private final GeneDosageDataService geneDosageDataService;
     private final double geneFactor;
     private final int promoterLength;
     private final double promoterFitnessGain;
 
     private final Map<Event, Double> fitnessWithEvent;
 
-    public GeneSequenceImpactCalculator(GeneDosageDataService geneDosageDataService,
-                                        double geneFactor,
+    public GeneSequenceImpactCalculator(double geneFactor,
                                         int promoterLength,
                                         double promoterFitnessGain) {
-        this.geneDosageDataService = geneDosageDataService;
         this.promoterLength = promoterLength;
         this.geneFactor = geneFactor;
         if (promoterFitnessGain > 1.)

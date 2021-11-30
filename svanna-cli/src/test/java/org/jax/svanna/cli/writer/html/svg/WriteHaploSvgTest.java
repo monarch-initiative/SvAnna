@@ -47,8 +47,8 @@ public class WriteHaploSvgTest {
         List<Gene> genes = geneOverlapper.getOverlaps(singeExonDel).stream()
                 .map(GeneOverlap::gene)
                 .collect(Collectors.toUnmodifiableList());
-        int min = genes.stream().mapToInt(g -> g.startOnStrand(Strand.POSITIVE)).min().orElse(0);
-        int max= genes.stream().mapToInt(g -> g.endOnStrand(Strand.POSITIVE)).max().orElse(min+2);
+        int min = genes.stream().mapToInt(g -> g.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).min().orElse(0);
+        int max = genes.stream().mapToInt(g -> g.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).max().orElse(min+2);
         Dosage dosage = Dosage.of("id1", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE);
         List<Dosage> dosages = List.of(dosage);
         GenomicRegion region = GenomicRegion.of(singeExonDel.contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), min, max);

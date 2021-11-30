@@ -143,20 +143,6 @@ public abstract class SvSvgGenerator {
 
 
     /**
-     * Constructor used for SV types for which we do not want to display dosage (triple/haplo)-sensitivity
-     * @param variant a structural variant (SV)
-     * @param genes gene or genes that overlap with the SV
-     * @param enhancers enhancers that overlap with the SV
-     * @param repeats repeat regions that overlap with the SV
-     */
-    public SvSvgGenerator(Variant variant,
-                          List<Gene> genes,
-                          List<Enhancer> enhancers,
-                          List<RepetitiveRegion> repeats) {
-        this(variant, genes, enhancers, repeats, List.of());
-    }
-
-    /**
      * The constructor calculates the left and right boundaries for display
      * @param genes genes affected by the structural variant we are displaying
      * @param enhancers enhancers  affected by the structural variant we are displaying
@@ -194,8 +180,7 @@ public abstract class SvSvgGenerator {
         }
         int svgheight = 0;
         svgheight += dosages.isEmpty() ? 0 : SVG_HEIGHT_DOSAGE_TRACK;
-        this.dosageWriter = new SvgDosageWriter(dosageRegions, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
-                this.genomicMinPos, this.genomicMaxPos);
+        this.dosageWriter = new SvgDosageWriter(dosageRegions, this.paddedGenomicMinPos, this.paddedGenomicMaxPos);
         this.repeatWriter = new SvgRepeatWriter(repeats, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
                 this.genomicMinPos, this.genomicMaxPos);
         if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
@@ -238,8 +223,7 @@ public abstract class SvSvgGenerator {
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
         this.dosageRegions = List.of(); // TODO also adapt this constructor family
-        this.dosageWriter = new SvgDosageWriter(dosageRegions, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
-                this.genomicMinPos, this.genomicMaxPos);
+        this.dosageWriter = new SvgDosageWriter(dosageRegions, this.paddedGenomicMinPos, this.paddedGenomicMaxPos);
         this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicMaxPos, this.genomicMinPos, this.genomicMaxPos);
     }
 

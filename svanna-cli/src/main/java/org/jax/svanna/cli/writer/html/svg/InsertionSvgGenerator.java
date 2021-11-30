@@ -14,20 +14,6 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
 
 
     /**
-     * Use this constructor if we do not want to display triplo/haplosensitive regions
-     * @param variant a structural variant (SV)
-     * @param genes gene or genes that overlap with the SV
-     * @param enhancers enhancers that overlap with the SV
-     * @param repeats repeat regions that overlap with the SV
-     */
-    public InsertionSvgGenerator(Variant variant,
-                                 List<Gene> genes,
-                                 List<Enhancer> enhancers,
-                                 List<RepetitiveRegion> repeats) {
-        super(variant, genes, enhancers, repeats, List.of());
-    }
-
-    /**
      * @param variant a structural variant (SV)
      * @param genes gene or genes that overlap with the SV
      * @param enhancers enhancers that overlap with the SV

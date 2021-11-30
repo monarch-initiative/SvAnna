@@ -1,5 +1,6 @@
 package org.jax.svanna.cli.writer.html.svg;
 
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.Variant;
@@ -18,9 +19,9 @@ public class InversionSvgGenerator extends SvSvgGenerator {
     public InversionSvgGenerator(Variant variant,
                                  List<Gene> genes,
                                  List<Enhancer> enhancers,
-                                 List<RepetitiveRegion> repeats) {
-        super(variant, genes, enhancers, repeats);
-        // TODO - check
+                                 List<RepetitiveRegion> repeats,
+                                 List<DosageRegion> dosageRegions) {
+        super(variant, genes, enhancers, repeats, dosageRegions);
         int pos1 = variant.start();
         int pos2 = variant.end();
         this.inversionGenomicStart = Math.min(pos1, pos2);

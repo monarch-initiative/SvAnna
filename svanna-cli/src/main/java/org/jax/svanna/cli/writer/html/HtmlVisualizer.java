@@ -8,8 +8,10 @@ import org.jax.svanna.core.overlap.TranscriptOverlap;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.VariantType;
@@ -173,24 +175,27 @@ public class HtmlVisualizer implements Visualizer {
         }
         try {
             SvSvgGenerator gen;
-            //visualizable.repetitiveRegions()
+            List<Gene> genes = visualizable.genes();
+            List<Enhancer> enhancers = visualizable.enhancers();
+            List<RepetitiveRegion> repetitiveRegions = visualizable.repetitiveRegions();
+            List<DosageRegion> dosages = visualizable.dosageRegions();
             switch (variant.variantType().baseType()) {
                 case DEL:
-                    gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new DeletionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INS:
-                    gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new InsertionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INV:
-                    gen = new InversionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new InversionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case DUP:
-                    gen = new DuplicationSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new DuplicationSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case TRA:
                 case BND:
                     if (variant instanceof BreakendVariant) {
-                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, genes, enhancers, repetitiveRegions);
                         break;
                     }
                     // fall through to default

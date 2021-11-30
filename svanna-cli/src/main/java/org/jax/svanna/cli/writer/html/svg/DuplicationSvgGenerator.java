@@ -1,5 +1,6 @@
 package org.jax.svanna.cli.writer.html.svg;
 
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.Variant;
@@ -15,12 +16,19 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
     private final int duplicationEnd;
     private final int duplicationLength;
 
-
+    /**
+     * @param variant a structural variant (SV)
+     * @param genes gene or genes that overlap with the SV
+     * @param enhancers enhancers that overlap with the SV
+     * @param repeats repeat regions that overlap with the SV
+     * @param dosageRegions triplo/haplosensitive regions that overlap with the SV
+     */
     public DuplicationSvgGenerator(Variant variant,
                                    List<Gene> genes,
                                    List<Enhancer> enhancers,
-                                   List<RepetitiveRegion> repeats) {
-        super(variant, genes, enhancers, repeats);
+                                   List<RepetitiveRegion> repeats,
+                                   List<DosageRegion> dosageRegions) {
+        super(variant, genes, enhancers, repeats, dosageRegions);
 
         duplicationStart = Math.min(variant.start(), variant.end());
         duplicationEnd = Math.max(variant.start(), variant.end());
@@ -41,6 +49,7 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s duplication", deletionLength);
         writeDuplication(starty, deletionDescription, writer);
         y += 100;
+        y = writeDosage(writer, y);
         y = writeRepeats(writer, y);
         for (var gene : affectedGenes) {
             writeGene(gene, y, writer);

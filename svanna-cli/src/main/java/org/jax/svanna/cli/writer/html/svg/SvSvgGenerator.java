@@ -1,6 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
@@ -36,6 +37,7 @@ public abstract class SvSvgGenerator {
     public final static String BROWN = "#7e6148";
     public final static String DARKBLUE = "#3c5488";
     public final static String DarkGrey = "#A9A9A9";
+    public final static String LIGHT_GREY = "#DCDCDC";
     public final static String VIOLET = "#8333ff";
     public final static String ORANGE = "#ff9900";
     public final static String BRIGHT_GREEN = "#00a087";
@@ -54,6 +56,10 @@ public abstract class SvSvgGenerator {
      * List of enhancers that are affected by the SV and that are to be shown in the SVG.
      */
     protected final List<Enhancer> affectedEnhancers;
+    /**
+     * List of triplo/haplosensitivity regions
+     */
+    protected final List<DosageRegion> dosageRegions;
     /**
      * Variant on {@link Strand#POSITIVE}
      */
@@ -79,6 +85,8 @@ public abstract class SvSvgGenerator {
      * Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}
      */
     protected final double Y_SKIP_BENEATH_TRANSCRIPTS = 30;
+
+    protected final double SVG_HEIGHT_DOSAGE_TRACK = 40;
     /**
      * Height of the symbol that represents the structural variant.
      */
@@ -92,6 +100,10 @@ public abstract class SvSvgGenerator {
      * Object to write tracks for repetitive regions in the field of view.
      */
     private final SvgRepeatWriter repeatWriter;
+    /**
+     * Object to write tracks for triplo/haplosensitive regions in the field of view.
+     */
+    private final SvgDosageWriter dosageWriter;
     /**
      * Boundaries of SVG we do not write to.
      */
@@ -138,11 +150,12 @@ public abstract class SvSvgGenerator {
     public SvSvgGenerator(Variant variant,
                           List<Gene> genes,
                           List<Enhancer> enhancers,
-                          List<RepetitiveRegion> repeats) {
+                          List<RepetitiveRegion> repeats,
+                          List<DosageRegion> dosages) {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-
+        this.dosageRegions = dosages;
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(Spliced::transcriptCount)
@@ -153,8 +166,8 @@ public abstract class SvSvgGenerator {
             case INS:
             default:
                 // get min/max for SVs with one region
-                this.genomicMinPos = getGenomicMinPos(this.variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), genes, enhancers, repeats);
-                this.genomicMaxPos = getGenomicMaxPos(this.variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), genes, enhancers, repeats);
+                this.genomicMinPos = getGenomicMinPos(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), genes, enhancers, repeats, dosages);
+                this.genomicMaxPos = getGenomicMaxPos(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), genes, enhancers, repeats, dosages);
                 this.genomicSpan = this.genomicMaxPos - this.genomicMinPos;
                 int extraSpaceOnSide = (int) (0.1 * (this.genomicSpan));
                 this.paddedGenomicMinPos = genomicMinPos - extraSpaceOnSide;
@@ -165,12 +178,14 @@ public abstract class SvSvgGenerator {
                 this.svgMaxPos = translateGenomicToSvg(genomicMaxPos);
                 this.svgSpan = svgMaxPos - svgMinPos;
         }
-        this.repeatWriter = new SvgRepeatWriter(repeats, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
-                this.genomicMinPos, this.genomicMaxPos);
+        int svgheight = 0;
+        svgheight += dosages.isEmpty() ? 0 : SVG_HEIGHT_DOSAGE_TRACK;
+        this.dosageWriter = new SvgDosageWriter(dosageRegions, paddedGenomicMinPos, paddedGenomicMaxPos);
+        this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicMaxPos, genomicMinPos, genomicMaxPos);
         if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
-            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = svgheight + 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
-            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
+            this.SVG_HEIGHT = svgheight + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
                     + (int) this.repeatWriter.verticalSpace();
         }
     }
@@ -184,7 +199,6 @@ public abstract class SvSvgGenerator {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(Spliced::transcriptCount)
@@ -207,6 +221,8 @@ public abstract class SvSvgGenerator {
         this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
+        this.dosageRegions = List.of(); // TODO also adapt this constructor family
+        this.dosageWriter = new SvgDosageWriter(dosageRegions, this.paddedGenomicMinPos, this.paddedGenomicMaxPos);
         this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicMaxPos, this.genomicMinPos, this.genomicMaxPos);
     }
 
@@ -226,9 +242,10 @@ public abstract class SvSvgGenerator {
      *
      * @param genes     Genes on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @param enhancers Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param dosages   Dosage sensitive regions
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMinPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
+    int getGenomicMinPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats, List<DosageRegion> dosages) {
         int geneMin = genes.stream()
                 .map(gene -> gene.transcriptStream().mapToInt(tx -> tx.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).min())
                 .flatMapToInt(OptionalInt::stream)
@@ -242,7 +259,12 @@ public abstract class SvSvgGenerator {
                 .mapToInt(rr -> rr.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .min()
                 .orElse(Integer.MAX_VALUE);
-        return Math.min(Math.min(geneMin, repeatMin), Math.min(enhancerMin, pos));
+        int dosageMin = dosages.stream()
+                .mapToInt(rr -> rr.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .min()
+                .orElse(Integer.MAX_VALUE);
+        return Math.min(Math.min(geneMin, repeatMin),
+                Math.min(Math.min(enhancerMin, pos), dosageMin));
     }
 
     /**
@@ -253,9 +275,10 @@ public abstract class SvSvgGenerator {
      * @param pos       variant position
      * @param genes     Genes on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
      * @param enhancers Enhancers on the same chromosome as cpair that overlap with the entire or in some cases a component of the SV
+     * @param dosages   Dosage sensitive regions
      * @return minimum coordinate (i.e., most 5' coordinate)
      */
-    int getGenomicMaxPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats) {
+    int getGenomicMaxPos(int pos, List<Gene> genes, List<Enhancer> enhancers, List<RepetitiveRegion> repeats, List<DosageRegion> dosages) {
         int geneMax = genes.stream()
                 .map(g -> g.transcriptStream().mapToInt(tx -> tx.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).max())
                 .flatMapToInt(OptionalInt::stream)
@@ -269,7 +292,12 @@ public abstract class SvSvgGenerator {
                 .mapToInt(rr -> rr.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                 .max()
                 .orElse(Integer.MIN_VALUE);
-        return Math.max(Math.max(geneMax, repeatMax), Math.max(enhancerMax, pos));
+        int dosageMax = dosages.stream()
+                .mapToInt(rr -> rr.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .max()
+                .orElse(Integer.MIN_VALUE);
+        return Math.max(Math.max(geneMax, repeatMax),
+                Math.max(Math.max(enhancerMax, pos), dosageMax));
     }
 
     /**
@@ -583,6 +611,14 @@ public abstract class SvSvgGenerator {
         this.repeatWriter.write(writer, ypos);
         YPOS += this.repeatWriter.verticalSpace();
         return YPOS;
+    }
+
+    protected int writeDosage(Writer writer, int ypos) throws IOException {
+        if (dosageRegions.isEmpty())
+            return ypos; // no sensitivity information
+        this.dosageWriter.write(writer, ypos);
+        ypos += dosageWriter.verticalSpace();
+        return ypos;
     }
 
 

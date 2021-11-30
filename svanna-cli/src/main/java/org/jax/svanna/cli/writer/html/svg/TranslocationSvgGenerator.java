@@ -41,7 +41,7 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
                                      List<Gene> genes,
                                      List<Enhancer> enhancers,
                                      List<RepetitiveRegion> repeats) {
-        super(variant, genes, enhancers, repeats);
+        super(variant, genes, enhancers, repeats, List.of());
         Breakend left = breakended.left();
         Breakend right = breakended.right();
 

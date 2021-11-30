@@ -1,5 +1,6 @@
 package org.jax.svanna.autoconfigure;
 
+import com.google.common.collect.Multimap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jax.svanna.autoconfigure.configuration.DataProperties;
@@ -9,17 +10,12 @@ import org.jax.svanna.autoconfigure.configuration.SvannaProperties;
 import org.jax.svanna.autoconfigure.exception.InvalidResourceException;
 import org.jax.svanna.autoconfigure.exception.MissingResourceException;
 import org.jax.svanna.autoconfigure.exception.UndefinedResourceException;
-import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
-import org.jax.svanna.core.service.AnnotationDataService;
-import org.jax.svanna.core.service.GeneDosageDataService;
-import org.jax.svanna.core.service.GeneService;
-import org.jax.svanna.core.service.PhenotypeDataService;
+import org.jax.svanna.core.service.*;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.db.phenotype.MicaDao;
-import org.jax.svanna.core.service.ConstantGeneDosageDataService;
 import org.jax.svanna.db.service.ClinGenGeneDosageDataService;
 import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
 import org.jax.svanna.io.service.SilentGenesGeneService;
@@ -89,9 +85,18 @@ public class SvannaAutoConfiguration {
         try (InputStream is = SvannaAutoConfiguration.class.getResourceAsStream("/svanna.properties")) {
             properties.load(is);
         } catch (IOException e) {
-            LOGGER.warn( "Error loading properties: {}", e.getMessage());
+            LOGGER.warn("Error loading properties: {}", e.getMessage());
         }
         return properties;
+    }
+
+    private static Map<TermId, Set<TermId>> prepareDiseaseToGeneIdMap(Multimap<TermId, TermId> diseaseToGeneIdMap) {
+        Map<TermId, Set<TermId>> dtgIdMap = new HashMap<>(diseaseToGeneIdMap.size());
+        for (TermId termId : diseaseToGeneIdMap.keySet()) {
+            Collection<TermId> termIds = diseaseToGeneIdMap.get(termId);
+            dtgIdMap.put(termId, Set.copyOf(termIds));
+        }
+        return dtgIdMap;
     }
 
     @Bean
@@ -105,7 +110,7 @@ public class SvannaAutoConfiguration {
         if (!Files.isDirectory(dataDirPath)) {
             throw new UndefinedResourceException(String.format("Path to SvAnna data directory '%s' does not point to real directory", dataDirPath));
         }
-        LOGGER.info( "Spooling up SvAnna v{} using resources in `{}`", SVANNA_VERSION, dataDirPath.toAbsolutePath());
+        LOGGER.info("Spooling up SvAnna v{} using resources in `{}`", SVANNA_VERSION, dataDirPath.toAbsolutePath());
         return dataDirPath;
     }
 
@@ -150,13 +155,13 @@ public class SvannaAutoConfiguration {
                                                        GenomicAssembly genomicAssembly,
                                                        SvannaProperties svannaProperties,
                                                        GeneDosageDataService geneDosageDataService) {
-        LOGGER.debug( "Including TAD boundaries with stability >{}%", NF.format(svannaProperties.dataParameters().tadStabilityThresholdAsPercentage()));
+        LOGGER.debug("Including TAD boundaries with stability >{}%", NF.format(svannaProperties.dataParameters().tadStabilityThresholdAsPercentage()));
 
         EnhancerProperties enhancers = svannaProperties.dataParameters().enhancers();
         if (enhancers.useVista())
-            LOGGER.debug( "Including VISTA enhancers");
+            LOGGER.debug("Including VISTA enhancers");
         if (enhancers.useFantom5())
-            LOGGER.debug( "Including FANTOM5 enhancers with tissue specificity >{}", enhancers.fantom5TissueSpecificity());
+            LOGGER.debug("Including FANTOM5 enhancers with tissue specificity >{}", enhancers.fantom5TissueSpecificity());
 
         EnhancerAnnotationDao.EnhancerParameters enhancerParameters = EnhancerAnnotationDao.EnhancerParameters.of(enhancers.useVista(), enhancers.useFantom5(), enhancers.fantom5TissueSpecificity());
 
@@ -199,10 +204,11 @@ public class SvannaAutoConfiguration {
         } else {
             throw new UndefinedResourceException("Unknown term similarity measure " + similarityMeasure);
         }
-
         LOGGER.debug("Done");
 
-        return new PhenotypeDataServiceDefault(ontology, hap.getDiseaseToGeneIdMap(), diseaseMap, geneIdentifiers, similarityScoreCalculator);
+        Map<TermId, Set<TermId>> diseaseToGeneIdMap = prepareDiseaseToGeneIdMap(hap.getDiseaseToGeneIdMap());
+
+        return new PhenotypeDataServiceDefault(ontology, diseaseToGeneIdMap, diseaseMap, geneIdentifiers, similarityScoreCalculator);
     }
 
     @Bean

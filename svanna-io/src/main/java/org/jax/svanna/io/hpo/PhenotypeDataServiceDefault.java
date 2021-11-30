@@ -1,6 +1,5 @@
 package org.jax.svanna.io.hpo;
 
-import com.google.common.collect.Multimap;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
 import org.jax.svanna.core.service.PhenotypeDataService;
@@ -33,7 +32,7 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
      * Multimap from a gene id, e.g., NCBIGene:2200 for FBN1, and corresponding disease ids. In the case of
      * FBN1, this includes Marfan syndrome (OMIM:154700), Acromicric dysplasia (OMIM:102370), and others.
      */
-    private final Multimap<TermId, TermId> diseaseToGeneMultiMap;
+    private final Map<TermId, Set<TermId>> diseaseToGeneMultiMap;
 
     private final Map<String, Set<TermId>> geneToDiseaseIdMap;
 
@@ -47,7 +46,7 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     private final SimilarityScoreCalculator similarityScoreCalculator;
 
     public PhenotypeDataServiceDefault(Ontology ontology,
-                                       Multimap<TermId, TermId> diseaseToGeneMultiMap,
+                                       Map<TermId, Set<TermId>> diseaseToGeneMultiMap,
                                        Map<TermId, HpoDisease> diseaseIdToDisease,
                                        Set<GeneIdentifier> geneIdentifiers,
                                        SimilarityScoreCalculator similarityScoreCalculator) {
@@ -59,16 +58,22 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
         this.similarityScoreCalculator = similarityScoreCalculator;
     }
 
-    private Map<String, Set<TermId>> prepareGeneToDiseaseMap(Multimap<TermId, TermId> diseaseToGeneMultiMap) {
-        Map<String, Set<TermId>> geneToDiseaseMap = new HashMap<>();
-
-        for (Map.Entry<TermId, TermId> entry : diseaseToGeneMultiMap.entries()) {
-            String geneAccessionId = entry.getValue().getValue();
-            geneToDiseaseMap.putIfAbsent(geneAccessionId, new HashSet<>());
-            geneToDiseaseMap.get(geneAccessionId).add(entry.getKey());
+    private Map<String, Set<TermId>> prepareGeneToDiseaseMap(Map<TermId, Set<TermId>> diseaseToGeneMultiMap) {
+        Map<String, Set<TermId>> builder = new HashMap<>(diseaseToGeneMultiMap.keySet().size());
+        for (Map.Entry<TermId, Set<TermId>> entry : diseaseToGeneMultiMap.entrySet()) {
+            for (TermId geneId : entry.getValue()) {
+                String geneAccessionId = geneId.getValue();
+                builder.putIfAbsent(geneAccessionId, new HashSet<>());
+                builder.get(geneAccessionId).add(entry.getKey());
+            }
         }
 
-        return geneToDiseaseMap;
+        Map<String, Set<TermId>> geneToDiseaseMap = new HashMap<>(builder.size());
+        for (Map.Entry<String, Set<TermId>> entry : builder.entrySet()) {
+            geneToDiseaseMap.put(entry.getKey(), Set.copyOf(entry.getValue()));
+        }
+
+        return Collections.unmodifiableMap(geneToDiseaseMap);
     }
 
 

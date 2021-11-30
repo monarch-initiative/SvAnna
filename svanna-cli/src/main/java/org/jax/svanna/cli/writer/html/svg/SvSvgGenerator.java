@@ -614,11 +614,11 @@ public abstract class SvSvgGenerator {
     }
 
     protected int writeDosage(Writer writer, int ypos) throws IOException {
-        int YPOS = ypos;
-        if (dosageRegions.isEmpty()) return 0; // no sensitivity information
+        if (dosageRegions.isEmpty())
+            return ypos; // no sensitivity information
         this.dosageWriter.write(writer, ypos);
-        YPOS += this.dosageWriter.verticalSpace();
-        return YPOS;
+        ypos += dosageWriter.verticalSpace();
+        return ypos;
     }
 
 

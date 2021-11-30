@@ -8,6 +8,7 @@ import org.jax.svanna.core.overlap.TranscriptOverlap;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -174,9 +175,10 @@ public class HtmlVisualizer implements Visualizer {
         try {
             SvSvgGenerator gen;
             //visualizable.repetitiveRegions()
+            List<DosageRegion> dosages = visualizable.dosageRegions();
             switch (variant.variantType().baseType()) {
                 case DEL:
-                    gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions(), dosages);
                     break;
                 case INS:
                     gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());

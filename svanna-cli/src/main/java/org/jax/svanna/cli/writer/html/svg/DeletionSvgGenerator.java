@@ -1,5 +1,6 @@
 package org.jax.svanna.cli.writer.html.svg;
 
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.Variant;
@@ -11,11 +12,14 @@ import java.util.List;
 
 public class DeletionSvgGenerator extends SvSvgGenerator {
 
+
+
     public DeletionSvgGenerator(Variant variant,
                                 List<Gene> genes,
                                 List<Enhancer> enhancers,
-                                List<RepetitiveRegion> repeats) {
-        super(variant, genes, enhancers, repeats);
+                                List<RepetitiveRegion> repeats,
+                                List<DosageRegion> dosageRegions) {
+        super(variant, genes, enhancers, repeats, dosageRegions);
     }
 
 
@@ -32,6 +36,7 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s deletion", deletionLength);
         writeDeletion(starty, deletionDescription, writer);
         y += 100;
+        y = writeDosage(writer, y);
         y = writeRepeats(writer, y);
         for (var e : affectedEnhancers) {
             writeEnhancer(e, y, writer);

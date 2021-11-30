@@ -38,7 +38,6 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
     }
 
     /**
-     * PROTOTYPE -- THIS MAYBE NOT BE THE BEST WAY TO REPRESENT OTHER TUPES OF SV
      * @param ypos  The y position where we will write the cartoon
      * @param msg A String describing the SV
      * @param writer a file handle

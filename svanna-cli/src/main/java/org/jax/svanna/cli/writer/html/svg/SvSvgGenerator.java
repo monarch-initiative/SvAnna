@@ -1,6 +1,7 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
@@ -36,6 +37,7 @@ public abstract class SvSvgGenerator {
     public final static String BROWN = "#7e6148";
     public final static String DARKBLUE = "#3c5488";
     public final static String DarkGrey = "#A9A9A9";
+    public final static String LIGHT_GREY = "#DCDCDC";
     public final static String VIOLET = "#8333ff";
     public final static String ORANGE = "#ff9900";
     public final static String BRIGHT_GREEN = "#00a087";
@@ -54,6 +56,10 @@ public abstract class SvSvgGenerator {
      * List of enhancers that are affected by the SV and that are to be shown in the SVG.
      */
     protected final List<Enhancer> affectedEnhancers;
+    /**
+     * List of triplo/haplosensitivity regions
+     */
+    protected final List<DosageRegion> dosageRegions;
     /**
      * Variant on {@link Strand#POSITIVE}
      */
@@ -79,6 +85,8 @@ public abstract class SvSvgGenerator {
      * Y skip to put text underneath transcripts. Works with {@link #writeTranscriptName}
      */
     protected final double Y_SKIP_BENEATH_TRANSCRIPTS = 30;
+
+    protected final double SVG_HEIGHT_DOSAGE_TRACK = 40;
     /**
      * Height of the symbol that represents the structural variant.
      */
@@ -92,6 +100,10 @@ public abstract class SvSvgGenerator {
      * Object to write tracks for repetitive regions in the field of view.
      */
     private final SvgRepeatWriter repeatWriter;
+    /**
+     * Object to write tracks for triplo/haplosensitive regions in the field of view.
+     */
+    private final SvgDosageWriter dosageWriter;
     /**
      * Boundaries of SVG we do not write to.
      */
@@ -131,6 +143,20 @@ public abstract class SvSvgGenerator {
 
 
     /**
+     * Constructor used for SV types for which we do not want to display dosage (triple/haplo)-sensitivity
+     * @param variant a structural variant (SV)
+     * @param genes gene or genes that overlap with the SV
+     * @param enhancers enhancers that overlap with the SV
+     * @param repeats repeat regions that overlap with the SV
+     */
+    public SvSvgGenerator(Variant variant,
+                          List<Gene> genes,
+                          List<Enhancer> enhancers,
+                          List<RepetitiveRegion> repeats) {
+        this(variant, genes, enhancers, repeats, List.of());
+    }
+
+    /**
      * The constructor calculates the left and right boundaries for display
      * @param genes genes affected by the structural variant we are displaying
      * @param enhancers enhancers  affected by the structural variant we are displaying
@@ -138,11 +164,12 @@ public abstract class SvSvgGenerator {
     public SvSvgGenerator(Variant variant,
                           List<Gene> genes,
                           List<Enhancer> enhancers,
-                          List<RepetitiveRegion> repeats) {
+                          List<RepetitiveRegion> repeats,
+                          List<DosageRegion> dosages) {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-
+        this.dosageRegions = dosages;
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(Spliced::transcriptCount)
@@ -165,12 +192,16 @@ public abstract class SvSvgGenerator {
                 this.svgMaxPos = translateGenomicToSvg(genomicMaxPos);
                 this.svgSpan = svgMaxPos - svgMinPos;
         }
+        int svgheight = 0;
+        svgheight += dosages.isEmpty() ? 0 : SVG_HEIGHT_DOSAGE_TRACK;
+        this.dosageWriter = new SvgDosageWriter(dosageRegions, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
+                this.genomicMinPos, this.genomicMaxPos);
         this.repeatWriter = new SvgRepeatWriter(repeats, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
                 this.genomicMinPos, this.genomicMaxPos);
         if (variantType.baseType() == VariantType.TRA || variantType.baseType() == VariantType.BND) {
-            this.SVG_HEIGHT = 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            this.SVG_HEIGHT = svgheight + 100 + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM;
         } else {
-            this.SVG_HEIGHT = Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
+            this.SVG_HEIGHT = svgheight + Constants.HEIGHT_FOR_SV_DISPLAY + (enhancers.size() + nTranscripts) * Constants.HEIGHT_PER_DISPLAY_ITEM
                     + (int) this.repeatWriter.verticalSpace();
         }
     }
@@ -184,7 +215,6 @@ public abstract class SvSvgGenerator {
         this.variantType = variant.variantType();
         this.affectedGenes = genes;
         this.affectedEnhancers = enhancers;
-
         this.variant = variant.withStrand(Strand.POSITIVE);
         int nTranscripts = affectedGenes.stream()
                 .mapToInt(Spliced::transcriptCount)
@@ -207,6 +237,9 @@ public abstract class SvSvgGenerator {
         this.svgMinPos = translateGenomicToSvg(this.genomicMinPos);
         this.svgMaxPos = translateGenomicToSvg(this.genomicMaxPos);
         this.svgSpan = svgMaxPos - svgMinPos;
+        this.dosageRegions = List.of(); // TODO also adapt this constructor family
+        this.dosageWriter = new SvgDosageWriter(dosageRegions, this.paddedGenomicMinPos, this.paddedGenomicMaxPos,
+                this.genomicMinPos, this.genomicMaxPos);
         this.repeatWriter = new SvgRepeatWriter(repeats, paddedGenomicMinPos, paddedGenomicMaxPos, this.genomicMinPos, this.genomicMaxPos);
     }
 
@@ -582,6 +615,14 @@ public abstract class SvSvgGenerator {
         int YPOS = ypos;
         this.repeatWriter.write(writer, ypos);
         YPOS += this.repeatWriter.verticalSpace();
+        return YPOS;
+    }
+
+    protected int writeDosage(Writer writer, int ypos) throws IOException {
+        int YPOS = ypos;
+        if (dosageRegions.isEmpty()) return 0; // no sensitivity information
+        this.dosageWriter.write(writer, ypos);
+        YPOS += this.dosageWriter.verticalSpace();
         return YPOS;
     }
 

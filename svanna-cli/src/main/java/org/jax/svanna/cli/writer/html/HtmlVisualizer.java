@@ -181,13 +181,13 @@ public class HtmlVisualizer implements Visualizer {
                     gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions(), dosages);
                     break;
                 case INS:
-                    gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions(), dosages);
                     break;
                 case INV:
                     gen = new InversionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
                     break;
                 case DUP:
-                    gen = new DuplicationSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new DuplicationSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions(), dosages);
                     break;
                 case TRA:
                 case BND:

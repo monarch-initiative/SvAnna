@@ -13,7 +13,13 @@ import java.util.List;
 public class DeletionSvgGenerator extends SvSvgGenerator {
 
 
-
+    /**
+     * @param variant a structural variant (SV)
+     * @param genes gene or genes that overlap with the SV
+     * @param enhancers enhancers that overlap with the SV
+     * @param repeats repeat regions that overlap with the SV
+     * @param dosageRegions triplo/haplosensitive regions that overlap with the SV
+     */
     public DeletionSvgGenerator(Variant variant,
                                 List<Gene> genes,
                                 List<Enhancer> enhancers,

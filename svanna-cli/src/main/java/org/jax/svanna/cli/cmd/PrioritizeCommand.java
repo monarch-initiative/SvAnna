@@ -331,7 +331,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
 
             AnalysisResults results = new AnalysisResults(vcfFile.toAbsolutePath().toString(), validatedPatientTerms, topLevelHpoTerms, filteredPrioritizedVariants);
 
-
+            LOGGER.info("Writing out the results");
             ResultWriterFactory resultWriterFactory = context.getBean(ResultWriterFactory.class);
             String prefix = resolveOutPrefix(vcfFile);
             for (OutputFormat outputFormat : outputFormats) {

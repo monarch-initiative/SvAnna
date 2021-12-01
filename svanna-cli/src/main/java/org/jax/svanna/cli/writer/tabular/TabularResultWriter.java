@@ -31,6 +31,8 @@ public class TabularResultWriter implements ResultWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TabularResultWriter.class);
 
+    private static final String[] HEADER = new String[]{"contig", "start", "end", "id", "vtype", "failed_filters", "psv"};
+
     private final String suffix;
 
     private final char columnSeparator;
@@ -47,7 +49,7 @@ public class TabularResultWriter implements ResultWriter {
     public void write(AnalysisResults analysisResults, String prefix) throws IOException {
         try (BufferedWriter writer = openWriter(prefix)) {
             CSVPrinter printer = CSVFormat.DEFAULT.withDelimiter(columnSeparator)
-                    .withHeader("contig", "start", "end", "id", "vtype", "failed_filters", "tadsv")
+                    .withHeader(HEADER)
                     .print(writer);
             analysisResults.variants().stream()
                     .filter(sv -> !Double.isNaN(sv.svPriority().getPriority()))

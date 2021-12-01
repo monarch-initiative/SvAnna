@@ -36,6 +36,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.UnaryOperator;
@@ -51,6 +53,11 @@ import java.util.stream.Collectors;
 public class PrioritizeCommand extends SvAnnaCommand {
 
     protected static final NumberFormat NF = NumberFormat.getNumberInstance();
+
+    static {
+        NF.setMaximumFractionDigits(2);
+    }
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PrioritizeCommand.class);
     /**
      * Gene contribution is multiplied by this factor if variant is heterozygous and the gene is not associated with
@@ -301,7 +308,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
             SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(patientTerms);
 
-            LogUtils.logInfo(LOGGER, "Prioritizing variants");
+            LOGGER.info("Prioritizing {} variants on {} threads", NF.format(filteredVariants.size()), parallelism);
             ProgressReporter priorityProgress = new ProgressReporter(5_000);
             UnaryOperator<FullSvannaVariant> prioritizationFunction = v -> {
                 priorityProgress.logItem(v);
@@ -309,8 +316,15 @@ public class PrioritizeCommand extends SvAnnaCommand {
                 v.setSvPriority(priority);
                 return v;
             };
-
+            Instant start = Instant.now();
             List<FullSvannaVariant> filteredPrioritizedVariants = TaskUtils.executeBlocking(filteredVariants, prioritizationFunction, parallelism);
+
+            long totalMilliseconds = Duration.between(start, Instant.now()).toMillis();
+            String elapsedSeconds = NF.format((totalMilliseconds / 1000) / 60 % 60);
+            String elapsedMilliseconds = NF.format(totalMilliseconds / 1000 % 60);
+            String averageItemsPerSecond = NF.format(((double) filteredVariants.size() / totalMilliseconds) * 1000.);
+            LOGGER.info("Prioritization finished in {}m {}s ({} ms) processing on average {} items/s",
+                    elapsedSeconds, elapsedMilliseconds, NF.format(totalMilliseconds), averageItemsPerSecond);
 
             if (modeOfInheritance)
                 performModeOfInheritanceReassignment(filteredPrioritizedVariants, phenotypeDataService);

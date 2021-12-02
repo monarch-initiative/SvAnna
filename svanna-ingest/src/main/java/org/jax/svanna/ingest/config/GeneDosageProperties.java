@@ -7,7 +7,6 @@ public class GeneDosageProperties {
 
     private String geneUrl;
     private String regionUrl;
-    private String ncbiGeneToHgnc;
 
     public String getGeneUrl() {
         return geneUrl;
@@ -25,11 +24,4 @@ public class GeneDosageProperties {
         this.regionUrl = regionUrl;
     }
 
-    public String getNcbiGeneToHgnc() {
-        return ncbiGeneToHgnc;
-    }
-
-    public void setNcbiGeneToHgnc(String ncbiGeneToHgnc) {
-        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
-    }
 }

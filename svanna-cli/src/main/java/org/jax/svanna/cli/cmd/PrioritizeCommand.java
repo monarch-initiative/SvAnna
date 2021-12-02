@@ -11,15 +11,11 @@ import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.priority.*;
-import org.jax.svanna.core.reference.SvannaVariant;
-import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
-import org.jax.svanna.model.HpoDiseaseSummary;
-import org.jax.svanna.model.ModeOfInheritance;
 import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -104,10 +100,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
             description = "Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE})")
     public int minAltReadSupport = 3;
 
-    @CommandLine.Option(names = {"--mode-of-inheritance"},
-            description = "Reassign priority of heterozygous variants if at least one affected gene is not associated with AD disease (default: ${DEFAULT-VALUE})")
-    public boolean modeOfInheritance = false;
-
     @CommandLine.Option(names = {"--overlap-threshold"},
             description = "Percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE})")
     public float overlapThreshold = 80.F;
@@ -156,43 +148,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
         } catch (URISyntaxException e) {
             LogUtils.logWarn(LOGGER, "Invalid URI `{}`: {}", vcf.getUri(), e.getMessage());
             return Optional.empty();
-        }
-    }
-
-    private static void performModeOfInheritanceReassignment(List<? extends SvannaVariant> filteredPrioritizedVariants, PhenotypeDataService phenotypeDataService) {
-        // TODO - find a better place for this code
-        LogUtils.logInfo(LOGGER, "Reassigning priorities");
-        for (SvannaVariant variant : filteredPrioritizedVariants) {
-            if (variant.svPriority() instanceof GeneAwareSvPriority) {
-                Zygosity zygosity = variant.zygosity();
-                if (zygosity.equals(Zygosity.UNKNOWN))
-                    continue;
-
-                GeneAwareSvPriority priority = (GeneAwareSvPriority) variant.svPriority();
-                Map<String, Double> map = new HashMap<>();
-                for (String geneId : priority.geneIds()) {
-                    double geneContribution = priority.geneContribution(geneId);
-                    if (geneContribution < 1E-8)
-                        continue; // no contribution, the gene is not affected by the variant
-
-                    Set<HpoDiseaseSummary> diseases = phenotypeDataService.getDiseasesForGene(geneId);
-                    if (zygosity.equals(Zygosity.HETEROZYGOUS)) {
-                        boolean noDominantDisease = true;
-                        for (HpoDiseaseSummary disease : diseases) {
-                            if (disease.isCompatibleWithInheritance(ModeOfInheritance.AUTOSOMAL_DOMINANT)
-                                    || disease.isCompatibleWithInheritance(ModeOfInheritance.X_DOMINANT)) {
-                                noDominantDisease = false;
-                                break;
-                            }
-                        }
-
-                        if (noDominantDisease && !diseases.isEmpty())
-                            geneContribution *= MODE_OF_INHERITANCE_FACTOR;
-                    }
-                    map.put(geneId, geneContribution);
-                }
-                variant.setSvPriority(GeneAwareSvPriority.of(map));
-            }
         }
     }
 
@@ -325,9 +280,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
             String averageItemsPerSecond = NF.format(((double) filteredVariants.size() / totalMilliseconds) * 1000.);
             LOGGER.info("Prioritization finished in {}m {}s ({} ms) processing on average {} items/s",
                     elapsedSeconds, elapsedMilliseconds, NF.format(totalMilliseconds), averageItemsPerSecond);
-
-            if (modeOfInheritance)
-                performModeOfInheritanceReassignment(filteredPrioritizedVariants, phenotypeDataService);
 
             AnalysisResults results = new AnalysisResults(vcfFile.toAbsolutePath().toString(), validatedPatientTerms, topLevelHpoTerms, filteredPrioritizedVariants);
 

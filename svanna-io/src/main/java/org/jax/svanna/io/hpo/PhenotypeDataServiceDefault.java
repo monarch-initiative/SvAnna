@@ -1,61 +1,43 @@
 package org.jax.svanna.io.hpo;
 
-import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
-import org.jax.svanna.model.ModeOfInheritance;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory;
 import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategoryMap;
-import org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.monarchinitiative.phenol.ontology.data.TermIds;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Deprecated
 public class PhenotypeDataServiceDefault implements PhenotypeDataService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PhenotypeDataServiceDefault.class);
 
     // HPO
     private final Ontology ontology;
-
-    /**
-     * Multimap from a gene id, e.g., NCBIGene:2200 for FBN1, and corresponding disease ids. In the case of
-     * FBN1, this includes Marfan syndrome (OMIM:154700), Acromicric dysplasia (OMIM:102370), and others.
-     */
-    private final Map<TermId, Set<TermId>> diseaseToGeneMultiMap;
 
     private final Map<String, Set<TermId>> geneToDiseaseIdMap;
 
     /**
      * Map from disease IDs, e.g., OMIM:154700, to the corresponding HpoDisease object.
      */
-    private final Map<TermId, HpoDisease> diseaseIdToDisease;
+    private final Map<String, HpoDisease> diseaseIdToDisease;
 
     private final Set<GeneIdentifier> geneIdentifiers;
 
-    private final SimilarityScoreCalculator similarityScoreCalculator;
-
     public PhenotypeDataServiceDefault(Ontology ontology,
                                        Map<TermId, Set<TermId>> diseaseToGeneMultiMap,
-                                       Map<TermId, HpoDisease> diseaseIdToDisease,
-                                       Set<GeneIdentifier> geneIdentifiers,
-                                       SimilarityScoreCalculator similarityScoreCalculator) {
+                                       Map<String, HpoDisease> diseaseIdToDisease,
+                                       Set<GeneIdentifier> geneIdentifiers) {
         this.ontology = ontology;
-        this.diseaseToGeneMultiMap = diseaseToGeneMultiMap;
         this.diseaseIdToDisease = diseaseIdToDisease;
         this.geneToDiseaseIdMap = prepareGeneToDiseaseMap(diseaseToGeneMultiMap);
         this.geneIdentifiers = geneIdentifiers;
-        this.similarityScoreCalculator = similarityScoreCalculator;
     }
 
     private Map<String, Set<TermId>> prepareGeneToDiseaseMap(Map<TermId, Set<TermId>> diseaseToGeneMultiMap) {
@@ -83,50 +65,35 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     }
 
     @Override
-    public Set<GeneIdentifier> geneWithIds() {
-        return geneIdentifiers;
+    public Stream<GeneIdentifier> geneWithIds() {
+        return geneIdentifiers.stream();
     }
 
 
     @Override
-    public Map<TermId, Set<HpoDiseaseSummary>> getRelevantGenesAndDiseases(Collection<TermId> hpoTermIds) {
-        Map<TermId, Set<HpoDiseaseSummary>> builder = new HashMap<>();
-        for (HpoDisease disease : diseaseIdToDisease.values()) {
-            Collection<TermId> associatedGenes = this.diseaseToGeneMultiMap.get(disease.getDiseaseDatabaseId());
-            if (associatedGenes.isEmpty()) {
-                continue; // we are not interested in diseases with no associated genes for this prioritization
-            }
-            Set<TermId> totalAnnotations = OntologyAlgorithm.getAncestorTerms(ontology, Set.copyOf(disease.getPhenotypicAbnormalityTermIdList()), true);
-            for (TermId tid : hpoTermIds) {
-                if (totalAnnotations.contains(tid)) {
-                    for (TermId geneId : associatedGenes) {
-                        builder.putIfAbsent(geneId, new HashSet<>());
-                        builder.get(geneId).add(
-                                HpoDiseaseSummary.of(
-                                        disease.getDiseaseDatabaseId().getValue(),
-                                        disease.getName(),
-                                        parseModeOfInheritance(disease.getModesOfInheritance())
-                                ));
-                    }
-                }
-            }
-        }
-        return Map.copyOf(builder);
-    }
-
-    @Override
-    public Set<HpoDiseaseSummary> getDiseasesForGene(String accession) {
+    public List<HpoDiseaseSummary> getDiseasesForGene(String accession) {
         if (!geneToDiseaseIdMap.containsKey(accession))
-            return Set.of();
+            return List.of();
         return geneToDiseaseIdMap.get(accession).stream()
                 .map(diseaseIdToDisease::get)
                 .filter(Objects::nonNull)
                 .filter(hpoDisease -> hpoDisease.getDiseaseDatabaseId() != null)
                 .map(disease -> HpoDiseaseSummary.of(
                         disease.getDiseaseDatabaseId().getValue(),
-                        disease.getName(),
-                        parseModeOfInheritance(disease.getModesOfInheritance())))
-                .collect(Collectors.toSet());
+                        disease.getName()))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
+    public List<TermId> phenotypicAbnormalitiesForDiseaseId(String diseaseId) {
+        HpoDisease disease = diseaseIdToDisease.get(diseaseId);
+        if (disease == null)
+            return List.of();
+
+        // add term ancestors
+        return List.copyOf(TermIds.augmentWithAncestors(ontology,
+                Set.copyOf(disease.getPhenotypicAbnormalityTermIdList()),
+                true));
     }
 
     @Override
@@ -137,46 +104,15 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
                 .map(HpoCategory::getTid)
                 .filter(termId -> ontology.getTermMap().containsKey(termId))
                 .map(termId -> ontology.getTermMap().get(termId))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableSet());
     }
 
-    @Override
-    public Set<Term> validateTerms(Collection<TermId> hpoTermIds) {
-        return hpoTermIds.stream()
-                .filter(validateTerm())
-                .map(termId -> ontology.getTermMap().get(termId))
-                .collect(Collectors.toSet());
-    }
-
-    private Predicate<? super TermId> validateTerm() {
-        return termId -> {
-            if (!ontology.getTermMap().containsKey(termId)) {
-                LogUtils.logWarn(LOGGER, "Term ID `{}` is not present in the used ontology", termId);
-                return false;
-            }
-            return true;
-        };
-    }
-
-    @Override
-    public Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> ancestorTerms) {
-        Set<TermId> candidateAncestors = OntologyAlgorithm.getAncestorTerms(ontology, Set.copyOf(candidates), true);
-        return candidateAncestors.stream()
-                .filter(ancestorTerms::contains)
-                .collect(Collectors.toSet());
-    }
-
-    @Override
-    public double computeSimilarityScore(Collection<TermId> query, Collection<TermId> target) {
-        return similarityScoreCalculator.computeSimilarityScore(query, target);
-    }
-
-    private static Set<ModeOfInheritance> parseModeOfInheritance(List<TermId> modesOfInheritance) {
+    /*
+    private static List<ModeOfInheritance> parseModeOfInheritance(List<TermId> modesOfInheritance) {
         return modesOfInheritance.stream()
                 .map(toModeOfInheritance())
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+                .flatMap(Optional::stream)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private static Function<TermId, Optional<ModeOfInheritance>> toModeOfInheritance() {
@@ -222,5 +158,5 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
             }
         };
     }
-
+    */
 }

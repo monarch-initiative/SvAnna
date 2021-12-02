@@ -1,9 +1,9 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.TestDataConfig;
+import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
-import org.jax.svanna.model.ModeOfInheritance;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -15,9 +15,7 @@ import xyz.ielis.silent.genes.model.GeneIdentifier;
 import xyz.ielis.silent.genes.model.Transcript;
 import xyz.ielis.silent.genes.model.TranscriptIdentifier;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -32,7 +30,10 @@ public class TermSimilarityGeneWeightCalculatorTest {
     private static final double ERROR = 1e-12;
 
     @Mock
-    private PhenotypeDataService phenotypeDataService;
+    public PhenotypeDataService phenotypeDataService;
+
+    @Mock
+    public SimilarityScoreCalculator similarityScoreCalculator;
 
 
     private static List<TermId> configurePatientFeatures() {
@@ -58,15 +59,15 @@ public class TermSimilarityGeneWeightCalculatorTest {
                 TermId.of("HP:0008132"), // Medial rotation of the medial malleolus
                 TermId.of("HP:0000517")  // Abnormality of the lens
         );
-        Map<TermId, Collection<TermId>> diseaseIdToTermIds = Map.of(TermId.of("OMIM:154700"), marfanSampleFeatures);
-        when(phenotypeDataService.computeSimilarityScore(patientFeatures, marfanSampleFeatures))
+        when(similarityScoreCalculator.computeSimilarityScore(patientFeatures, marfanSampleFeatures))
                 .thenReturn(3.5);
 
 
-        TermSimilarityGeneWeightCalculator calculator = new TermSimilarityGeneWeightCalculator(phenotypeDataService, patientFeatures, diseaseIdToTermIds);
+        TermSimilarityGeneWeightCalculator calculator = new TermSimilarityGeneWeightCalculator(phenotypeDataService, similarityScoreCalculator, patientFeatures);
 
         String geneAccessionId = "NCBIGene:2200";
-        GeneIdentifier id = GeneIdentifier.of(geneAccessionId, "FBN1", "HGNC:3603", "NCBIGene:2200");
+        String hgncId = "HGNC:3603";
+        GeneIdentifier id = GeneIdentifier.of(geneAccessionId, "FBN1", hgncId, geneAccessionId);
         GenomicRegion location = GenomicRegion.of(ASSEMBLY.contigByName("9"), Strand.POSITIVE, CoordinateSystem.oneBased(), 48_408_313, 48_645_721);
         TranscriptIdentifier txId = TranscriptIdentifier.of("TX_ACCESSION", "FBN1", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721));
@@ -76,9 +77,10 @@ public class TermSimilarityGeneWeightCalculatorTest {
         Gene gene = Gene.of(id, location, transcripts);
 
 
-        when(phenotypeDataService.getDiseasesForGene(geneAccessionId))
-                .thenReturn(Set.of(HpoDiseaseSummary.of("OMIM:154700", "Marfan Syndrome",
-                        Set.of(ModeOfInheritance.AUTOSOMAL_DOMINANT))));
+        when(phenotypeDataService.getDiseasesForGene(hgncId))
+                .thenReturn(List.of(HpoDiseaseSummary.of("OMIM:154700", "Marfan Syndrome")));
+        when(phenotypeDataService.phenotypicAbnormalitiesForDiseaseId("OMIM:154700"))
+                .thenReturn(marfanSampleFeatures);
 
 
         assertThat(calculator.calculateRelevance(gene), is(closeTo(3.5, ERROR)));

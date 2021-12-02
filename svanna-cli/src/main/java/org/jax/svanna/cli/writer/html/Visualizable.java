@@ -15,7 +15,7 @@ public interface Visualizable extends VariantLandscape {
 
     List<HtmlLocation> locations();
 
-    Set<HpoDiseaseSummary> diseaseSummaries();
+    List<HpoDiseaseSummary> diseaseSummaries();
 
     List<RepetitiveRegion> repetitiveRegions();
 

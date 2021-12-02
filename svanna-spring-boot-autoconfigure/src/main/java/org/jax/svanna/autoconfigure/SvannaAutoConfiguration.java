@@ -1,6 +1,5 @@
 package org.jax.svanna.autoconfigure;
 
-import com.google.common.collect.Multimap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.jax.svanna.autoconfigure.configuration.DataProperties;
@@ -14,14 +13,13 @@ import org.jax.svanna.core.hpo.*;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.service.*;
+import org.jax.svanna.db.gene.GeneDiseaseDao;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.db.phenotype.MicaDao;
 import org.jax.svanna.db.service.ClinGenGeneDosageDataService;
-import org.jax.svanna.io.hpo.PhenotypeDataServiceDefault;
+import org.jax.svanna.io.hpo.DbPhenotypeDataService;
 import org.jax.svanna.io.service.SilentGenesGeneService;
-import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
+import org.jax.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -36,14 +34,12 @@ import org.springframework.context.annotation.Configuration;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Configuration
 @EnableConfigurationProperties({
@@ -90,15 +86,6 @@ public class SvannaAutoConfiguration {
         return properties;
     }
 
-    private static Map<TermId, Set<TermId>> prepareDiseaseToGeneIdMap(Multimap<TermId, TermId> diseaseToGeneIdMap) {
-        Map<TermId, Set<TermId>> dtgIdMap = new HashMap<>(diseaseToGeneIdMap.size());
-        for (TermId termId : diseaseToGeneIdMap.keySet()) {
-            Collection<TermId> termIds = diseaseToGeneIdMap.get(termId);
-            dtgIdMap.put(termId, Set.copyOf(termIds));
-        }
-        return dtgIdMap;
-    }
-
     @Bean
     @ConditionalOnMissingBean(name = "svannaDataDirectory")
     public Path svannaDataDirectory(SvannaProperties properties) throws UndefinedResourceException {
@@ -123,11 +110,11 @@ public class SvannaAutoConfiguration {
     public SvPrioritizerFactory svPriorityFactory(GenomicAssembly genomicAssembly,
                                                   DataSource dataSource,
                                                   SvannaProperties svannaProperties,
-                                                  SvannaDataResolver svannaDataResolver,
                                                   AnnotationDataService annotationDataService,
                                                   GeneService geneService,
-                                                  PhenotypeDataService phenotypeDataService) {
-        return new SvPrioritizerFactoryImpl(genomicAssembly, dataSource, svannaProperties, svannaDataResolver, annotationDataService, geneService, phenotypeDataService);
+                                                  PhenotypeDataService phenotypeDataService,
+                                                  SimilarityScoreCalculator similarityScoreCalculator) {
+        return new SvPrioritizerFactoryImpl(genomicAssembly, dataSource, svannaProperties, annotationDataService, geneService, phenotypeDataService, similarityScoreCalculator);
     }
 
     @Bean
@@ -174,24 +161,21 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver, DataSource svannaDatasource, SvannaProperties properties) throws UndefinedResourceException, IOException {
+    public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver,
+                                                     DataSource svannaDatasource) throws UndefinedResourceException, IOException {
         LOGGER.debug("Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
-        Path hpoaPath = svannaDataResolver.phenotypeHpoaPath().toAbsolutePath();
-        LOGGER.debug("Parsing HPO disease associations at `{}`", hpoaPath);
-        Path geneInfoPath = svannaDataResolver.geneInfoPath();
-        LOGGER.debug("Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
-        Path mim2geneMedgenPath = svannaDataResolver.mim2geneMedgenPath();
-        LOGGER.debug("Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
 
-        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(),
-                mim2geneMedgenPath.toFile(), null,
-                svannaDataResolver.phenotypeHpoaPath().toFile(), ontology);
-        Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoaPath.toString(), ontology);
-        Set<GeneIdentifier> geneIdentifiers = hap.getGeneIdToSymbolMap().entrySet().stream()
-                .map(e -> GeneIdentifier.of(e.getValue(), e.getKey().getValue(), null, null)) // TODO - check values
-                .collect(Collectors.toUnmodifiableSet());
+        GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(svannaDatasource);
+        List<GeneIdentifier> geneIdentifiers = geneDiseaseDao.geneIdentifiers();
+        Map<String, List<HpoDiseaseSummary>> geneToDiseases = geneDiseaseDao.geneToDiseases();
+        Map<String, List<TermId>> phenotypicAbnormalitiesForDiseaseId = geneDiseaseDao.diseaseToPhenotypes();
+        return new DbPhenotypeDataService(ontology, geneIdentifiers, geneToDiseases, phenotypicAbnormalitiesForDiseaseId);
+    }
 
+    @Bean
+    public SimilarityScoreCalculator similarityScoreCalculator(DataSource svannaDatasource,
+                                                               SvannaProperties properties) throws UndefinedResourceException {
         SimilarityScoreCalculator similarityScoreCalculator;
         PrioritizationProperties.TermSimilarityMeasure similarityMeasure = properties.prioritization().termSimilarityMeasure();
         LOGGER.debug("Initializing phenotype term similarity calculator `{}`", similarityMeasure);
@@ -204,11 +188,7 @@ public class SvannaAutoConfiguration {
         } else {
             throw new UndefinedResourceException("Unknown term similarity measure " + similarityMeasure);
         }
-        LOGGER.debug("Done");
-
-        Map<TermId, Set<TermId>> diseaseToGeneIdMap = prepareDiseaseToGeneIdMap(hap.getDiseaseToGeneIdMap());
-
-        return new PhenotypeDataServiceDefault(ontology, diseaseToGeneIdMap, diseaseMap, geneIdentifiers, similarityScoreCalculator);
+        return similarityScoreCalculator;
     }
 
     @Bean

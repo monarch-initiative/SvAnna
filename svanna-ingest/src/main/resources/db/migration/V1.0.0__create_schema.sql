@@ -108,3 +108,53 @@ create index SVANNA.CLINGEN_DOSAGE_ELEMENT__CONTIG_START_END_IDX on SVANNA.CLING
 -- TODO - we should update DA layer to use numeric IDs, where available
 drop index if exists SVANNA.CLINGEN_DOSAGE_ELEMENT__ID;
 create index SVANNA.CLINGEN_DOSAGE_ELEMENT__ID on SVANNA.CLINGEN_DOSAGE_ELEMENT (ID);
+
+---------------------------------- PHENOTYPE DATA ----------------------------------------------------------------------
+
+drop table if exists SVANNA.GENE_IDENTIFIER;
+create table SVANNA.GENE_IDENTIFIER
+(
+    ACCESSION VARCHAR(50) not null, -- primary gene accession
+    SYMBOL    VARCHAR(50) not null, -- HGVS gene symbol
+    HGNC_ID   INT,                  -- integral part of HGNC gene id
+    NCBI_GENE INT                   -- integral part of NCBIGene/Entrez gene ID
+);
+drop index if exists SVANNA.GENE_IDENTIFIER__ACCESSION;
+create index SVANNA.GENE_IDENTIFIER__ACCESSION on SVANNA.GENE_IDENTIFIER (ACCESSION);
+drop index if exists SVANNA.GENE_IDENTIFIER__HGNC_ID;
+create index SVANNA.GENE_IDENTIFIER__HGNC_ID on SVANNA.GENE_IDENTIFIER (HGNC_ID);
+
+
+
+drop table if exists SVANNA.GENE_TO_DISEASE;
+create table SVANNA.GENE_TO_DISEASE
+(
+    HGNC_ID    INT         not null, -- integral part of HGNC gene id
+    DISEASE_ID VARCHAR(50) not null  -- e.g. OMIM:123456
+);
+drop index if exists SVANNA.GENE_TO_DISEASE__DISEASE_ID;
+create index SVANNA.GENE_TO_DISEASE__DISEASE_ID on SVANNA.GENE_TO_DISEASE (DISEASE_ID);
+drop index if exists SVANNA.GENE_TO_DISEASE__HGNC_ID;
+create index SVANNA.GENE_TO_DISEASE__HGNC_ID on SVANNA.GENE_TO_DISEASE (HGNC_ID);
+
+
+
+drop table if exists SVANNA.HPO_DISEASE_SUMMARY;
+create table SVANNA.HPO_DISEASE_SUMMARY
+(
+    DISEASE_ID   VARCHAR(50)  not null, -- e.g. OMIM:123456
+    DISEASE_NAME VARCHAR(200) not null
+);
+drop index if exists SVANNA.HPO_DISEASE_SUMMARY__DISEASE_ID;
+create unique index SVANNA.HPO_DISEASE_SUMMARY__DISEASE_ID on SVANNA.HPO_DISEASE_SUMMARY (DISEASE_ID);
+
+
+
+drop table if exists SVANNA.DISEASE_TO_PHENOTYPE;
+create table SVANNA.DISEASE_TO_PHENOTYPE
+(
+    DISEASE_ID VARCHAR(50) not null, -- e.g. OMIM:123456, maps to SVANNA.HPO_DISEASE_SUMMARY.DISEASE_ID
+    TERM_ID    CHAR(10)    not null -- `HP`, `:`, and exactly 7 digits
+);
+drop index if exists SVANNA.DISEASE_TO_PHENOTYPE__DISEASE_ID;
+create index SVANNA.DISEASE_TO_PHENOTYPE__DISEASE_ID on SVANNA.DISEASE_TO_PHENOTYPE (DISEASE_ID);

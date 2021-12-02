@@ -518,7 +518,7 @@ public class HtmlVisualizer implements Visualizer {
      * @return HTML code that displays associated diseases
      */
     private String getDiseaseGenePrioritizationHtml(Visualizable visualizable) {
-        Set<HpoDiseaseSummary> diseases = visualizable.diseaseSummaries();
+        List<HpoDiseaseSummary> diseases = visualizable.diseaseSummaries();
         if (diseases.isEmpty()) {
             return "n/a";
         } else if (visualizable.getGeneCount() > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {

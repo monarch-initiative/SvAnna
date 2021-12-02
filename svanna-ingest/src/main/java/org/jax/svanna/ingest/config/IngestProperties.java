@@ -4,10 +4,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @ConfigurationProperties(prefix = "svanna.ingest")
-public class IngestDbProperties {
+public class IngestProperties {
 
     private String repetitiveRegionsUrl;
     private String hg19toHg38ChainUrl;
+    private String ncbiGeneToHgnc;
     @NestedConfigurationProperty
     private EnhancerProperties enhancers;
     @NestedConfigurationProperty
@@ -39,6 +40,14 @@ public class IngestDbProperties {
 
     public void setRepetitiveRegionsUrl(String repetitiveRegionsUrl) {
         this.repetitiveRegionsUrl = repetitiveRegionsUrl;
+    }
+
+    public String ncbiGeneToHgnc() {
+        return ncbiGeneToHgnc;
+    }
+
+    public void setNcbiGeneToHgnc(String ncbiGeneToHgnc) {
+        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
     }
 
     public EnhancerProperties enhancers() {

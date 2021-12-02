@@ -1,6 +1,7 @@
 package org.jax.svanna.ingest.cmd;
 
 
+import com.google.common.collect.Multimap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -16,6 +17,7 @@ import org.flywaydb.core.api.output.MigrateResult;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.db.gene.GeneDiseaseDao;
 import org.jax.svanna.db.landscape.*;
 import org.jax.svanna.db.phenotype.MicaDao;
 import org.jax.svanna.ingest.Main;
@@ -35,12 +37,17 @@ import org.jax.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.jax.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.jax.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
 import org.jax.svanna.ingest.similarity.IcMicaCalculator;
+import org.jax.svanna.model.HpoDiseaseSummary;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
-import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationParser;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
+import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicAssemblies;
 import org.monarchinitiative.svart.GenomicAssembly;
@@ -57,6 +64,7 @@ import xyz.ielis.silent.genes.io.GeneParser;
 import xyz.ielis.silent.genes.io.GeneParserFactory;
 import xyz.ielis.silent.genes.io.SerializationFormat;
 import xyz.ielis.silent.genes.model.Gene;
+import xyz.ielis.silent.genes.model.GeneIdentifier;
 import xyz.ielis.silent.genes.model.Located;
 
 import javax.sql.DataSource;
@@ -66,13 +74,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @CommandLine.Command(name = "build-db",
@@ -84,7 +90,7 @@ import java.util.stream.Stream;
         footer = Main.FOOTER)
 @EnableAutoConfiguration
 @EnableConfigurationProperties(value = {
-        IngestDbProperties.class,
+        IngestProperties.class,
         EnhancerProperties.class,
         VariantProperties.class,
         PhenotypeProperties.class,
@@ -95,6 +101,9 @@ import java.util.stream.Stream;
 public class BuildDb implements Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildDb.class);
+
+    private static final Pattern NCBI_GENE_PATTERN = Pattern.compile("NCBIGene:(?<value>\\d+)");
+    private static final Pattern HGNC_GENE_PATTERN = Pattern.compile("HGNC:(?<value>\\d+)");
 
     private static final String LOCATIONS = "classpath:db/migration";
 
@@ -143,18 +152,155 @@ public class BuildDb implements Callable<Integer> {
         return migrate.migrationsExecuted;
     }
 
-    private static void downloadPhenotypeFiles(PhenotypeProperties properties, Path buildDir) throws IOException {
-        List<String> fieldsToDownload = List.of(properties.hpoOboUrl(), properties.hpoAnnotationsUrl(),
-                properties.mim2geneMedgenUrl(), properties.geneInfoUrl());
-        for (String field : fieldsToDownload) {
-            URL url = new URL(field);
-            downloadUrl(url, buildDir);
-        }
+    private static void downloadPhenotypeFiles(PhenotypeProperties properties,
+                                               DataSource dataSource,
+                                               Path buildDir,
+                                               Path tmpDir,
+                                               List<? extends GencodeGene> genes,
+                                               Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
+        // OBO ontology belongs to the buildDir
+        URL hpoOboUrl = new URL(properties.hpoOboUrl());
+        Path hpoOboPath = downloadUrl(hpoOboUrl, buildDir);
+
+        // other files are temporary
+        // HPOA
+        URL hpoAnnotationsUrl = new URL(properties.hpoAnnotationsUrl());
+        Path hpoAnnotationsPath = downloadUrl(hpoAnnotationsUrl, tmpDir);
+        // mim2geneMedgen
+        URL mim2geneMedgenUrl = new URL(properties.mim2geneMedgenUrl());
+        Path mim2geneMedgenPath = downloadUrl(mim2geneMedgenUrl, tmpDir);
+        // geneInfoPath
+        URL geneInfoPathUrl = new URL(properties.geneInfoUrl());
+        Path geneInfoPath = downloadUrl(geneInfoPathUrl, tmpDir);
+        // Download is done
+
+        GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(dataSource);
+
+        // Ingest geneIdentifiers
+        int updatedGeneIdentifiers = insertGeneIdentifiers(genes, geneDiseaseDao, ncbiGeneToHgnc);
+        LOGGER.info("Ingest of gene identifiers updated {} rows", updatedGeneIdentifiers);
+
+
+        // Read phenotype data
+        LOGGER.debug("Reading HPO obo file from `{}`", hpoOboPath);
+        Ontology ontology = OntologyLoader.loadOntology(hpoOboPath.toFile());
+
+        // Ingest geneToDisease
+        int updatedGeneToDisease = ingestGeneToDiseaseMap(ontology, geneDiseaseDao, hpoAnnotationsPath, geneInfoPath, mim2geneMedgenPath, ncbiGeneToHgnc);
+        LOGGER.info("Ingest of gene to disease associations updated {} rows", updatedGeneToDisease);
+
+        // Ingest disease to phenotypes
+        int updatedDiseaseToPhenotypes = ingestDiseaseToPhenotypes(ontology, geneDiseaseDao, hpoAnnotationsPath);
+        LOGGER.info("Ingest of disease to phenotypes updated {} rows", updatedDiseaseToPhenotypes);
     }
 
-    private static Path downloadAndPreprocessGenes(GeneProperties properties, GenomicAssembly assembly, Path buildDir, Path tmpDir) throws IOException {
+    private static int insertGeneIdentifiers(List<? extends GencodeGene> genes, GeneDiseaseDao geneDiseaseDao, Map<Integer, Integer> ncbiGeneToHgnc) {
+        Map<Integer, Integer> hgncToNcbiGene = ncbiGeneToHgnc.entrySet().stream()
+                .collect(Collectors.toUnmodifiableMap(Map.Entry::getValue, Map.Entry::getKey));
+
+        List<GeneIdentifier> geneIdentifiers = new ArrayList<>(genes.size());
+        for (GencodeGene gene : genes) {
+            Optional<String> hgncIdOpt = gene.id().hgncId();
+            Optional<String> ncbiGeneOpt = gene.id().ncbiGeneId();
+
+            String hgncId = null, ncbiGeneId = null;
+
+            if (hgncIdOpt.isPresent()) {
+                // We have the ID, this was easy
+                hgncId = hgncIdOpt.get();
+            } else {
+                // Let's try to get the ID from the corresponding NCBIGene id
+                if (ncbiGeneOpt.isPresent()) {
+                    Matcher matcher = NCBI_GENE_PATTERN.matcher(ncbiGeneOpt.get());
+                    if (matcher.matches()) {
+                        int ncbiGeneInt = Integer.parseInt(matcher.group("value"));
+                        Integer hgncIdInt = ncbiGeneToHgnc.get(ncbiGeneInt);
+                        if (hgncIdInt != null)
+                            hgncId = "HGNC:" + hgncIdInt;
+                    }
+                }
+            }
+
+            if (ncbiGeneOpt.isPresent()) {
+                // We have the ID, this was easy
+                ncbiGeneId = ncbiGeneOpt.get();
+            } else {
+                // Let's try to get the ID from corresponding HGNC id
+                if (hgncIdOpt.isPresent()) {
+                    Matcher matcher = HGNC_GENE_PATTERN.matcher(hgncIdOpt.get());
+                    if (matcher.matches()) {
+                        int hgncIdInt = Integer.parseInt(matcher.group("value"));
+                        Integer ncbiGeneInt = hgncToNcbiGene.get(hgncIdInt);
+                        if (ncbiGeneInt != null)
+                            ncbiGeneId = "NCBIGene:" + ncbiGeneInt;
+                    }
+                }
+            }
+            geneIdentifiers.add(GeneIdentifier.of(gene.accession(), gene.symbol(), hgncId, ncbiGeneId));
+        }
+
+        return geneDiseaseDao.insertGeneIdentifiers(geneIdentifiers);
+    }
+
+    private static int ingestGeneToDiseaseMap(Ontology ontology,
+                                              GeneDiseaseDao geneDiseaseDao,
+                                              Path hpoAnnotationsPath,
+                                              Path geneInfoPath,
+                                              Path mim2geneMedgenPath,
+                                              Map<Integer, Integer> ncbiGeneToHgnc) {
+        LOGGER.debug("Parsing HPO disease associations at `{}`", hpoAnnotationsPath);
+        LOGGER.debug("Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
+        LOGGER.debug("Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
+
+        Map<Integer, List<HpoDiseaseSummary>> geneToDisease = new HashMap<>();
+        Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoAnnotationsPath.toString(), ontology);
+
+        HpoAssociationParser hap = new HpoAssociationParser(geneInfoPath.toFile(),
+                mim2geneMedgenPath.toFile(),
+                null,
+                hpoAnnotationsPath.toFile(),
+                ontology);
+        // extract relevant bits and pieces for diseases, and map NCBIGene to HGNC
+        Multimap<TermId, TermId> geneToDiseaseIdMap = hap.getGeneToDiseaseIdMap();
+
+        for (TermId ncbiGeneTermId : geneToDiseaseIdMap.keySet()) {
+            Matcher matcher = NCBI_GENE_PATTERN.matcher(ncbiGeneTermId.getValue());
+            if (matcher.matches()) {
+                int ncbiGeneId = Integer.parseInt(matcher.group("value"));
+                Integer hgncId = ncbiGeneToHgnc.get(ncbiGeneId);
+                if (hgncId != null) {
+                    for (TermId diseaseId : geneToDiseaseIdMap.get(ncbiGeneTermId)) {
+                        HpoDisease hpoDisease = diseaseMap.get(diseaseId);
+                        if (hpoDisease != null) {
+                            geneToDisease.computeIfAbsent(hgncId, k -> new LinkedList<>())
+                                    .add(HpoDiseaseSummary.of(diseaseId.getValue(), hpoDisease.getName()));
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return geneDiseaseDao.insertGeneToDisease(geneToDisease);
+    }
+
+    private static int ingestDiseaseToPhenotypes(Ontology ontology, GeneDiseaseDao geneDiseaseDao, Path hpoAnnotationsPath) {
+        Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoAnnotationsPath.toString(), ontology);
+
+        int updated = 0;
+        for (Map.Entry<TermId, HpoDisease> entry : diseaseMap.entrySet()) {
+            TermId diseaseId = entry.getKey();
+            updated += geneDiseaseDao.insertDiseaseToPhenotypes(diseaseId.getValue(), entry.getValue().getPhenotypicAbnormalityTermIdList());
+        }
+        return updated;
+    }
+
+    private static List<? extends GencodeGene> downloadAndPreprocessGenes(GeneProperties properties,
+                                                                          GenomicAssembly assembly,
+                                                                          Path buildDir,
+                                                                          Path tmpDir) throws IOException {
         // download Gencode GTF
-        URL url = new URL(properties.getGencodeGtfUrl());
+        URL url = new URL(properties.gencodeGtfUrl());
         Path localGencodeGtfPath = downloadUrl(url, tmpDir);
 
         // Load the Gencode GTF into the "silent gene" format
@@ -172,10 +318,10 @@ public class BuildDb implements Callable<Integer> {
             jsonParser.write(genes, os);
         }
 
-        return destination;
+        return genes;
     }
 
-    private static Path downloadLiftoverChain(IngestDbProperties properties, Path tmpDir) throws IOException {
+    private static Path downloadLiftoverChain(IngestProperties properties, Path tmpDir) throws IOException {
         URL chainUrl = new URL(properties.hg19toHg38ChainUrl()); // download hg19 to hg38 liftover chain
         return downloadUrl(chainUrl, tmpDir);
     }
@@ -234,7 +380,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("dbSNP ingest updated {} rows", dbsnpUpdated);
     }
 
-    private static void ingestRepeats(IngestDbProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir) throws IOException {
+    private static void ingestRepeats(IngestProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir) throws IOException {
         URL repeatsUrl = new URL(properties.getRepetitiveRegionsUrl());
         Path repeatsLocalPath = downloadUrl(repeatsUrl, tmpDir);
 
@@ -260,26 +406,14 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static void precomputeIcMica(Path buildDir, DataSource dataSource) {
-        Path ontologyPath = buildDir.resolve("hp.obo");
-        Path hpoaPath = buildDir.resolve("phenotype.hpoa");
+    private static void precomputeIcMica(DataSource dataSource, Path ontologyPath, Path hpoaPath) {
         Map<TermPair, Double> similarityMap = IcMicaCalculator.precomputeIcMicaValues(ontologyPath, hpoaPath);
 
         MicaDao dao = new MicaDao(dataSource);
         similarityMap.forEach(dao::insertItem);
     }
 
-    private static Map<TermId, GenomicRegion> readGeneRegions(Path gencodeJsonPath, GenomicAssembly assembly) throws IOException {
-        GeneParserFactory factory = GeneParserFactory.of(assembly);
-        GeneParser geneParser = factory.forFormat(SerializationFormat.JSON);
-
-        LOGGER.info("Reading genes from `{}`", gencodeJsonPath);
-        List<? extends Gene> genes;
-        try (InputStream is = new BufferedInputStream(new GzipCompressorInputStream(Files.newInputStream(gencodeJsonPath)))) {
-            genes = geneParser.read(is);
-        }
-        LOGGER.info("Read {} genes", genes.size());
-
+    private static Map<TermId, GenomicRegion> readGeneRegions(List<? extends GencodeGene> genes, GenomicAssembly assembly) {
         Map<TermId, GenomicRegion> regionsByHgncId = new HashMap<>(genes.size());
         for (Gene gene : genes) {
             Optional<String> hgncIdOptional = gene.id().hgncId();
@@ -301,11 +435,9 @@ public class BuildDb implements Callable<Integer> {
                                          GenomicAssembly assembly,
                                          DataSource dataSource,
                                          Path tmpDir,
-                                         Map<TermId, ? extends GenomicRegion> geneRegions) throws IOException {
+                                         Map<TermId, ? extends GenomicRegion> geneRegions,
+                                         Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
         ClingenDosageElementDao clingenDosageElementDao = new ClingenDosageElementDao(dataSource, assembly);
-
-        // read NCBIGene to HGNC table
-        Map<Integer, Integer> ncbiGeneToHgnc = parseNcbiToHgncTable(properties.getNcbiGeneToHgnc());
 
         // dosage sensitive genes
         URL geneUrl = new URL(properties.getGeneUrl());
@@ -337,7 +469,7 @@ public class BuildDb implements Callable<Integer> {
         }
 
         Map<Integer, Integer> results = new HashMap<>();
-        try (BufferedReader reader = Files.newBufferedReader(tablePath);
+        try (BufferedReader reader = openForReading(tablePath);
              CSVParser parser = CSVFormat.TDF.withFirstRecordAsHeader().parse(reader)) {
             Pattern hgncPattern = Pattern.compile("HGNC:(?<payload>\\d+)");
             // HGNC ID	NCBI gene ID	Approved symbol
@@ -370,6 +502,13 @@ public class BuildDb implements Callable<Integer> {
             }
         }
         return results;
+    }
+
+    private static BufferedReader openForReading(Path tablePath) throws IOException {
+        return (tablePath.toFile().getName().endsWith(".gz"))
+                ? new BufferedReader(new InputStreamReader(new GzipCompressorInputStream(Files.newInputStream(tablePath))))
+                : Files.newBufferedReader(tablePath);
+
     }
 
     private static <T extends Located> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {
@@ -424,7 +563,7 @@ public class BuildDb implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         try (ConfigurableApplicationContext context = getContext()) {
-            IngestDbProperties properties = context.getBean(IngestDbProperties.class);
+            IngestProperties properties = context.getBean(IngestProperties.class);
 
             GenomicAssembly assembly = GenomicAssemblies.GRCh38p13();
             if (buildDir.toFile().exists()) {
@@ -454,17 +593,18 @@ public class BuildDb implements Callable<Integer> {
             DataSource dataSource = initializeDataSource(dbPath);
 
             Path tmpDir = buildDir.resolve("build");
-            downloadPhenotypeFiles(properties.phenotype(), buildDir);
-            Path gencodeJsonPath = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
+            List<? extends GencodeGene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
+            Map<Integer, Integer> ncbiGeneToHgncId = parseNcbiToHgncTable(properties.ncbiGeneToHgnc());
+            downloadPhenotypeFiles(properties.phenotype(), dataSource, buildDir, tmpDir, genes, ncbiGeneToHgncId);
             ingestEnhancers(properties.enhancers(), assembly, dataSource);
 
             Path hg19ToHg38Chain = downloadLiftoverChain(properties, tmpDir);
             ingestPopulationVariants(properties.variants(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
             ingestRepeats(properties, assembly, dataSource, tmpDir);
             ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
-            precomputeIcMica(buildDir, dataSource);
-            Map<TermId, GenomicRegion> geneMap = readGeneRegions(gencodeJsonPath, assembly);
-            ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap);
+            precomputeIcMica(dataSource, buildDir.resolve("hp.obo"), tmpDir.resolve("phenotype.hpoa"));
+            Map<TermId, GenomicRegion> geneMap = readGeneRegions(genes, assembly);
+            ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap, ncbiGeneToHgncId);
 
             LOGGER.info("The ingest is complete");
             return 0;

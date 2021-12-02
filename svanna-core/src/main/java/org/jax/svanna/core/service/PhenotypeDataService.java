@@ -1,44 +1,46 @@
 package org.jax.svanna.core.service;
 
 import org.jax.svanna.model.HpoDiseaseSummary;
+import org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public interface PhenotypeDataService {
 
+    Logger LOGGER = LoggerFactory.getLogger(PhenotypeDataService.class);
+
     Ontology ontology();
 
-    Set<GeneIdentifier> geneWithIds();
+    Stream<GeneIdentifier> geneWithIds();
 
-    default Map<String, GeneIdentifier> geneBySymbol() {
-        return geneWithIds().stream().collect(Collectors.toUnmodifiableMap(GeneIdentifier::symbol, Function.identity()));
-    }
+    List<HpoDiseaseSummary> getDiseasesForGene(String accession);
 
-    /**
-     * Create a map with key=GeneId, value=Set of {@link HpoDiseaseSummary} objects corresponding to the gene.
-     * We create entries for diseases associated with the target term ids.
-     *
-     * @param hpoTermIds HPO ids describing proband's phenotype
-     * @return map with key=GeneId, value=Set of {@link HpoDiseaseSummary} objects
-     */
-    Map<TermId, Set<HpoDiseaseSummary>> getRelevantGenesAndDiseases(Collection<TermId> hpoTermIds);
-
-
-    Set<HpoDiseaseSummary> getDiseasesForGene(String accession);
-
-    default Set<HpoDiseaseSummary> getDiseasesForGene(TermId gene) {
-        return getDiseasesForGene(gene.getValue());
-    }
+    List<TermId> phenotypicAbnormalitiesForDiseaseId(String diseaseId);
 
     Set<Term> getTopLevelTerms(Collection<Term> hpoTermIds);
+
+    // --------------------------------- DERIVED METHODS ---------------------------------------------------------------
+
+    default Map<String, List<GeneIdentifier>> geneBySymbol() {
+        return geneWithIds()
+                .collect(Collectors.groupingBy(GeneIdentifier::symbol, Collectors.toUnmodifiableList()));
+    }
+
+    default List<HpoDiseaseSummary> getDiseasesForGene(TermId gene) {
+        return getDiseasesForGene(gene.getValue());
+    }
 
     /**
      * Validate the input hpo terms and return a subset with the valid terms.
@@ -46,7 +48,12 @@ public interface PhenotypeDataService {
      * @param hpoTermIds input HPO terms
      * @return subset with the valid terms
      */
-    Set<Term> validateTerms(Collection<TermId> hpoTermIds);
+    default Set<Term> validateTerms(Collection<TermId> hpoTermIds) {
+        return hpoTermIds.stream()
+                .filter(validateTerm())
+                .map(termId -> ontology().getTermMap().get(termId))
+                .collect(Collectors.toUnmodifiableSet());
+    }
 
     /**
      * Get set of ancestors of the {@code candidates} terms (including the candidate terms) and retain the intersection
@@ -56,7 +63,20 @@ public interface PhenotypeDataService {
      * @param ancestorTerms ancestor terms to be used to filter ancestors of {@code candidates}
      * @return set {@code candidates} ancestors that are in {#code ancestorTerms}
      */
-    Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> ancestorTerms);
+    default Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> ancestorTerms) {
+        Set<TermId> candidateAncestors = OntologyAlgorithm.getAncestorTerms(ontology(), Set.copyOf(candidates), true);
+        return candidateAncestors.stream()
+                .filter(ancestorTerms::contains)
+                .collect(Collectors.toSet());
+    }
 
-    double computeSimilarityScore(Collection<TermId> query, Collection<TermId> target);
+    private Predicate<? super TermId> validateTerm() {
+        return termId -> {
+            if (!ontology().getTermMap().containsKey(termId)) {
+                LOGGER.warn("Term ID `{}` is not present in the used ontology", termId);
+                return false;
+            }
+            return true;
+        };
+    }
 }

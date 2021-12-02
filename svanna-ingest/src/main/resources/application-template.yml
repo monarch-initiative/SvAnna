@@ -15,6 +15,11 @@ svanna.ingest:
   repetitiveRegionsUrl: https://hgdownload.cse.ucsc.edu/goldenPath/hg38/bigZips/hg38.fa.out.gz
   hg19toHg38ChainUrl: https://hgdownload.soe.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg38.over.chain.gz
 
+  # TSV containing among others `HGNC ID` and `NCBI gene ID` columns.
+  # The TSV can be downloaded from https://biomart.genenames.org/martform/#!/default/HGNC?datasets=hgnc_gene_mart
+  # Make sure you check `HGNC ID` and `NCBI gene ID` attributes
+  ncbiGeneToHgnc:
+
   variants:
     dgvUrl: http://dgv.tcag.ca/dgv/docs/GRCh38_hg38_variants_2020-02-25.txt
     gnomadSvVcfUrl: https://ftp.ncbi.nlm.nih.gov/pub/dbVar/data/Homo_sapiens/by_study/genotype/nstd166/gnomad_v2.1_sv.sites.vcf.gz
@@ -45,10 +50,6 @@ svanna.ingest:
     geneUrl: ftp://ftp.clinicalgenome.org/ClinGen_gene_curation_list_GRCh38.tsv
     # table with a dosage sensitive region per row
     regionUrl: ftp://ftp.clinicalgenome.org/ClinGen_region_curation_list_GRCh38.tsv
-    # TSV containing among others `HGNC ID` and `NCBI gene ID` columns.
-    # The TSV can be downloaded from https://biomart.genenames.org/martform/#!/default/HGNC?datasets=hgnc_gene_mart
-    # Make sure you check `HGNC ID` and `NCBI gene ID` attributes
-    ncbiGeneToHgnc:
 
   genes:
     gencodeGtfUrl: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.chr_patch_hapl_scaff.annotation.gtf.gz

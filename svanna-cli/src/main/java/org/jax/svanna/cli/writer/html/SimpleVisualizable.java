@@ -19,7 +19,7 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleVisualizable.class);
 
-    private final Set<HpoDiseaseSummary> diseaseSummaries;
+    private final List<HpoDiseaseSummary> diseaseSummaries;
 
     private final List<RepetitiveRegion> repetitiveRegions;
 
@@ -28,14 +28,14 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
     static SimpleVisualizable of(SvannaVariant variant,
                                  List<GeneOverlap> overlaps,
                                  List<Enhancer> affectedEnhancers,
-                                 Set<HpoDiseaseSummary> diseaseSummaries,
+                                 List<HpoDiseaseSummary> diseaseSummaries,
                                  List<RepetitiveRegion> repetitiveRegions,
                                  List<DosageRegion> dosageRegions) {
         return new SimpleVisualizable(variant, overlaps, affectedEnhancers, diseaseSummaries, repetitiveRegions, dosageRegions);
     }
 
     static SimpleVisualizable of(VariantLandscape variantLandscape,
-                                 Set<HpoDiseaseSummary> diseaseSummaries,
+                                 List<HpoDiseaseSummary> diseaseSummaries,
                                  List<RepetitiveRegion> repetitiveRegions,
                                  List<DosageRegion> dosageRegions) {
         return new SimpleVisualizable(variantLandscape.variant(), variantLandscape.overlaps(), variantLandscape.enhancers(), diseaseSummaries, repetitiveRegions, dosageRegions);
@@ -44,7 +44,7 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
     private SimpleVisualizable(SvannaVariant variant,
                                List<GeneOverlap> overlaps,
                                List<Enhancer> affectedEnhancers,
-                               Set<HpoDiseaseSummary> diseaseSummaries,
+                               List<HpoDiseaseSummary> diseaseSummaries,
                                List<RepetitiveRegion> repetitiveRegions,
                                List<DosageRegion> dosageRegions) {
         super(variant, overlaps, affectedEnhancers, dosageRegions);
@@ -76,7 +76,7 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
     }
 
     @Override
-    public Set<HpoDiseaseSummary> diseaseSummaries() {
+    public List<HpoDiseaseSummary> diseaseSummaries() {
         return diseaseSummaries;
     }
 

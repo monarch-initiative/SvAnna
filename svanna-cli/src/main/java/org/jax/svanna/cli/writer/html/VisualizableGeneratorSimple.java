@@ -18,7 +18,6 @@ import xyz.ielis.silent.genes.model.Gene;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class VisualizableGeneratorSimple implements VisualizableGenerator {
@@ -31,7 +30,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     private final PhenotypeDataService phenotypeDataService;
 
-    private final Map<String, GeneIdentifier> geneMap;
+    private final Map<String, List<GeneIdentifier>> geneMap;
 
     public VisualizableGeneratorSimple(GeneOverlapper overlapper,
                                        AnnotationDataService annotationDataService,
@@ -39,8 +38,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         this.overlapper = overlapper;
         this.annotationDataService = annotationDataService;
         this.phenotypeDataService = phenotypeDataService;
-        this.geneMap = phenotypeDataService.geneWithIds().stream()
-                .collect(Collectors.toMap(GeneIdentifier::symbol, Function.identity()));
+        this.geneMap = phenotypeDataService.geneBySymbol();
     }
 
     @Override
@@ -57,13 +55,14 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         List<GeneOverlap> overlaps = variantLandscape.overlaps();
         List<RepetitiveRegion> repetitiveRegions = prepareRepetitiveRegions(variant, overlaps);
 
-        Set<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
+        List<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
                 .map(geneOverlap -> geneOverlap.gene().symbol())
                 .filter(geneMap::containsKey)
                 .map(geneMap::get)
+                .flatMap(Collection::stream)
                 .map(id -> phenotypeDataService.getDiseasesForGene(id.accession()))
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toUnmodifiableList());
 
         return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions, variantLandscape.dosageRegions());
     }

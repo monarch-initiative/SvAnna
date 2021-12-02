@@ -6,8 +6,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class GeneProperties {
 
     private String gencodeGtfUrl;
+    private String hgncIdToNcbiGenePath;
 
-    public String getGencodeGtfUrl() {
+    public String gencodeGtfUrl() {
         return gencodeGtfUrl;
     }
 
@@ -15,4 +16,11 @@ public class GeneProperties {
         this.gencodeGtfUrl = gencodeGtfUrl;
     }
 
+    public String hgncIdToNcbiGenePath() {
+        return hgncIdToNcbiGenePath;
+    }
+
+    public void setHgncIdToNcbiGenePath(String hgncIdToNcbiGenePath) {
+        this.hgncIdToNcbiGenePath = hgncIdToNcbiGenePath;
+    }
 }

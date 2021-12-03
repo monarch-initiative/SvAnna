@@ -11,10 +11,7 @@ import xyz.ielis.silent.genes.model.Coding;
 import xyz.ielis.silent.genes.model.Gene;
 import xyz.ielis.silent.genes.model.Transcript;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Gene> {
@@ -119,8 +116,8 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
 
     @Override
     public double projectImpact(Projection<Gene> projection) {
-        Set<Transcript> transcripts = projection.source().transcriptStream()
-                .collect(Collectors.toUnmodifiableSet());
+        List<Transcript> transcripts = projection.source().transcriptStream()
+                .collect(Collectors.toUnmodifiableList());
         double promoterImpact = checkPromoter(projection.route().segments(), transcripts);
 
         double geneImpact = projection.isIntraSegment()
@@ -137,7 +134,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         return geneFactor;
     }
 
-    private double checkPromoter(List<Segment> segments, Set<Transcript> transcripts) {
+    private double checkPromoter(List<Segment> segments, Collection<Transcript> transcripts) {
         Set<Segment> nonGapSegments = segments.stream()
                 .filter(s -> s.event() != Event.GAP)
                 .collect(Collectors.toSet());
@@ -191,7 +188,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         }
     }
 
-    private double processInterSegmentProjection(Projection<Gene> projection, Set<Transcript> transcripts) {
+    private double processInterSegmentProjection(Projection<Gene> projection, Collection<Transcript> transcripts) {
         Set<Segment> causalSegments = projection.spannedSegments().stream()
                 .filter(s -> !s.event().equals(Event.GAP))
                 .collect(Collectors.toUnmodifiableSet());

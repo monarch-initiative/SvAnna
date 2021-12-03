@@ -97,7 +97,7 @@ public class SvannaAutoConfiguration {
         if (!Files.isDirectory(dataDirPath)) {
             throw new UndefinedResourceException(String.format("Path to SvAnna data directory '%s' does not point to real directory", dataDirPath));
         }
-        LOGGER.info("Spooling up SvAnna v{} using resources in `{}`", SVANNA_VERSION, dataDirPath.toAbsolutePath());
+        LOGGER.info("Spooling up SvAnna v{} using resources in {}", SVANNA_VERSION, dataDirPath.toAbsolutePath());
         return dataDirPath;
     }
 
@@ -122,7 +122,6 @@ public class SvannaAutoConfiguration {
                                                        GenomicAssembly genomicAssembly,
                                                        GeneService geneService,
                                                        SvannaProperties svannaProperties) throws UndefinedResourceException {
-
         switch (svannaProperties.prioritization().geneDosageSource()) {
             case "constant":
                 LOGGER.debug("Using `constant` gene dosage source");
@@ -163,7 +162,7 @@ public class SvannaAutoConfiguration {
     @Bean
     public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver,
                                                      DataSource svannaDatasource) throws UndefinedResourceException, IOException {
-        LOGGER.debug("Reading HPO obo file from `{}`", svannaDataResolver.hpOntologyPath().toAbsolutePath());
+        LOGGER.debug("Reading HPO obo file from {}", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
 
         GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(svannaDatasource);
@@ -178,7 +177,7 @@ public class SvannaAutoConfiguration {
                                                                SvannaProperties properties) throws UndefinedResourceException {
         SimilarityScoreCalculator similarityScoreCalculator;
         PrioritizationProperties.TermSimilarityMeasure similarityMeasure = properties.prioritization().termSimilarityMeasure();
-        LOGGER.debug("Initializing phenotype term similarity calculator `{}`", similarityMeasure);
+        LOGGER.debug("Initializing phenotype term similarity calculator {}", similarityMeasure);
 
         MicaCalculator similarityCalculator = prepareMicaCalculator(svannaDatasource, properties.prioritization().icMicaMode());
         if (similarityMeasure == PrioritizationProperties.TermSimilarityMeasure.RESNIK_SYMMETRIC) {
@@ -198,7 +197,7 @@ public class SvannaAutoConfiguration {
 
     @Bean
     public GeneService geneService(GenomicAssembly genomicAssembly, SvannaDataResolver svannaDataResolver) throws InvalidResourceException {
-        LOGGER.debug("Reading genes from `{}`", svannaDataResolver.genesJsonPath());
+        LOGGER.debug("Reading genes from {}", svannaDataResolver.genesJsonPath());
         try {
             return SilentGenesGeneService.of(genomicAssembly, svannaDataResolver.genesJsonPath());
         } catch (IOException e) {

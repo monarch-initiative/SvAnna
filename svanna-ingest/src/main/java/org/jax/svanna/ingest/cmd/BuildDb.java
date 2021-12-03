@@ -74,6 +74,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -101,6 +102,12 @@ import java.util.stream.Stream;
 public class BuildDb implements Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildDb.class);
+
+    private static final NumberFormat NF = NumberFormat.getNumberInstance();
+
+    static {
+        NF.setMaximumFractionDigits(2);
+    }
 
     private static final Pattern NCBI_GENE_PATTERN = Pattern.compile("NCBIGene:(?<value>\\d+)");
     private static final Pattern HGNC_GENE_PATTERN = Pattern.compile("HGNC:(?<value>\\d+)");
@@ -178,20 +185,20 @@ public class BuildDb implements Callable<Integer> {
 
         // Ingest geneIdentifiers
         int updatedGeneIdentifiers = insertGeneIdentifiers(genes, geneDiseaseDao, ncbiGeneToHgnc);
-        LOGGER.info("Ingest of gene identifiers updated {} rows", updatedGeneIdentifiers);
+        LOGGER.info("Ingest of gene identifiers updated {} rows", NF.format(updatedGeneIdentifiers));
 
 
         // Read phenotype data
-        LOGGER.debug("Reading HPO obo file from `{}`", hpoOboPath);
+        LOGGER.debug("Reading HPO obo file from {}", hpoOboPath);
         Ontology ontology = OntologyLoader.loadOntology(hpoOboPath.toFile());
 
         // Ingest geneToDisease
         int updatedGeneToDisease = ingestGeneToDiseaseMap(ontology, geneDiseaseDao, hpoAnnotationsPath, geneInfoPath, mim2geneMedgenPath, ncbiGeneToHgnc);
-        LOGGER.info("Ingest of gene to disease associations updated {} rows", updatedGeneToDisease);
+        LOGGER.info("Ingest of gene to disease associations updated {} rows", NF.format(updatedGeneToDisease));
 
         // Ingest disease to phenotypes
         int updatedDiseaseToPhenotypes = ingestDiseaseToPhenotypes(ontology, geneDiseaseDao, hpoAnnotationsPath);
-        LOGGER.info("Ingest of disease to phenotypes updated {} rows", updatedDiseaseToPhenotypes);
+        LOGGER.info("Ingest of disease to phenotypes updated {} rows", NF.format(updatedDiseaseToPhenotypes));
     }
 
     private static int insertGeneIdentifiers(List<? extends GencodeGene> genes, GeneDiseaseDao geneDiseaseDao, Map<Integer, Integer> ncbiGeneToHgnc) {
@@ -248,9 +255,9 @@ public class BuildDb implements Callable<Integer> {
                                               Path geneInfoPath,
                                               Path mim2geneMedgenPath,
                                               Map<Integer, Integer> ncbiGeneToHgnc) {
-        LOGGER.debug("Parsing HPO disease associations at `{}`", hpoAnnotationsPath);
-        LOGGER.debug("Parsing gene info file at `{}`", geneInfoPath.toAbsolutePath());
-        LOGGER.debug("Parsing MIM to gene medgen file at `{}`", mim2geneMedgenPath.toAbsolutePath());
+        LOGGER.debug("Parsing HPO disease associations at {}", hpoAnnotationsPath);
+        LOGGER.debug("Parsing gene info file at {}", geneInfoPath.toAbsolutePath());
+        LOGGER.debug("Parsing MIM to gene medgen file at {}", mim2geneMedgenPath.toAbsolutePath());
 
         Map<Integer, List<HpoDiseaseSummary>> geneToDisease = new HashMap<>();
         Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoAnnotationsPath.toString(), ontology);
@@ -304,16 +311,16 @@ public class BuildDb implements Callable<Integer> {
         Path localGencodeGtfPath = downloadUrl(url, tmpDir);
 
         // Load the Gencode GTF into the "silent gene" format
-        LOGGER.info("Reading Gencode GTF file at `{}`", localGencodeGtfPath.toAbsolutePath());
+        LOGGER.info("Reading Gencode GTF file at {}", localGencodeGtfPath.toAbsolutePath());
         GencodeGeneProcessor gencodeGeneProcessor = new GencodeGeneProcessor(localGencodeGtfPath, assembly);
         List<? extends GencodeGene> genes = gencodeGeneProcessor.process();
-        LOGGER.info("Read {} genes", genes.size());
+        LOGGER.info("Read {} genes", NF.format(genes.size()));
 
         // dump the transformed genes to compressed JSON file in the build directory
         GeneParserFactory parserFactory = GeneParserFactory.of(assembly);
         GeneParser jsonParser = parserFactory.forFormat(SerializationFormat.JSON);
         Path destination = buildDir.resolve("gencode.v38.genes.json.gz");
-        LOGGER.info("Serializing the genes to `{}`", destination.toAbsolutePath());
+        LOGGER.info("Serializing the genes to {}", destination.toAbsolutePath());
         try (OutputStream os = new BufferedOutputStream(new GzipCompressorOutputStream(Files.newOutputStream(destination)))) {
             jsonParser.write(genes, os);
         }
@@ -338,11 +345,11 @@ public class BuildDb implements Callable<Integer> {
         IngestRecordParser<? extends Enhancer> vistaParser = new VistaEnhancerParser(assembly, Path.of(properties.vista()), uberonToHpoMap);
         IngestDao<Enhancer> ingestDao = new EnhancerAnnotationDao(dataSource, assembly);
         int updated = ingestTrack(vistaParser, ingestDao);
-        LOGGER.info("Ingest of Vista enhancers affected {} rows", updated);
+        LOGGER.info("Ingest of Vista enhancers affected {} rows", NF.format(updated));
 
         IngestRecordParser<? extends Enhancer> fantomParser = new FantomEnhancerParser(assembly, Path.of(properties.fantomMatrix()), Path.of(properties.fantomSample()), uberonToHpoMap);
         updated = ingestTrack(fantomParser, ingestDao);
-        LOGGER.info("Ingest of FANTOM5 enhancers affected {} rows", updated);
+        LOGGER.info("Ingest of FANTOM5 enhancers affected {} rows", NF.format(updated));
     }
 
     private static void ingestPopulationVariants(VariantProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir,
@@ -353,7 +360,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("Ingesting DGV data");
         DbPopulationVariantDao ingestDao = new DbPopulationVariantDao(dataSource, assembly);
         int dgvUpdated = ingestTrack(new DgvFileParser(assembly, dgvLocalPath), ingestDao);
-        LOGGER.info("DGV ingest updated {} rows", dgvUpdated);
+        LOGGER.info("DGV ingest updated {} rows", NF.format(dgvUpdated));
 
         // GNOMAD SV
         URL gnomadUrl = new URL(properties.gnomadSvVcfUrl());
@@ -361,7 +368,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("Ingesting GnomadSV data");
         IngestRecordParser<PopulationVariant> gnomadParser = new GnomadSvVcfParser(assembly, gnomadLocalPath, hg19Hg38chainPath);
         int gnomadUpdated = ingestTrack(gnomadParser, ingestDao);
-        LOGGER.info("GnomadSV ingest updated {} rows", gnomadUpdated);
+        LOGGER.info("GnomadSV ingest updated {} rows", NF.format(gnomadUpdated));
 
         // HGSVC2
         URL hgsvc2 = new URL(properties.hgsvc2VcfUrl());
@@ -369,7 +376,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("Ingesting HGSVC2 data");
         IngestRecordParser<PopulationVariant> hgSvc2VcfParser = new HgSvc2VcfParser(assembly, hgsvc2Path);
         int hgsvc2Updated = ingestTrack(hgSvc2VcfParser, ingestDao);
-        LOGGER.info("HGSVC2 ingest updated {} rows", hgsvc2Updated);
+        LOGGER.info("HGSVC2 ingest updated {} rows", NF.format(hgsvc2Updated));
 
         // dbSNP
         URL dbsnp = new URL(properties.dbsnpVcfUrl());
@@ -377,7 +384,7 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.info("Ingesting dbSNP data");
         IngestRecordParser<PopulationVariant> dbsnpVcfParser = new DbsnpVcfParser(assembly, dbSnpPath);
         int dbsnpUpdated = ingestTrack(dbsnpVcfParser, ingestDao);
-        LOGGER.info("dbSNP ingest updated {} rows", dbsnpUpdated);
+        LOGGER.info("dbSNP ingest updated {} rows", NF.format(dbsnpUpdated));
     }
 
     private static void ingestRepeats(IngestProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir) throws IOException {
@@ -386,7 +393,7 @@ public class BuildDb implements Callable<Integer> {
 
         LOGGER.info("Ingesting repeats data");
         int repetitiveUpdated = ingestTrack(new RepetitiveRegionParser(assembly, repeatsLocalPath), new RepetitiveRegionDao(dataSource, assembly));
-        LOGGER.info("Repeats ingest updated {} rows", repetitiveUpdated);
+        LOGGER.info("Repeats ingest updated {} rows", NF.format(repetitiveUpdated));
     }
 
     private static void ingestTads(TadProperties properties, GenomicAssembly assembly, DataSource dataSource, Path tmpDir, Path chain) throws IOException {
@@ -402,7 +409,7 @@ public class BuildDb implements Callable<Integer> {
             IngestRecordParser<TadBoundary> parser = new McArthur2021TadBoundariesParser(assembly, is, chain);
             IngestDao<TadBoundary> dao = new TadBoundaryDao(dataSource, assembly);
             int updated = ingestTrack(parser, dao);
-            LOGGER.info("Ingest of TAD boundaries affected {} rows", updated);
+            LOGGER.info("Ingest of TAD boundaries affected {} rows", NF.format(updated));
         }
     }
 
@@ -447,7 +454,7 @@ public class BuildDb implements Callable<Integer> {
             int geneUpdated = geneStream
                     .mapToInt(clingenDosageElementDao::insertItem)
                     .sum();
-            LOGGER.info("Ingest of dosage sensitive genes affected {} rows", geneUpdated);
+            LOGGER.info("Ingest of dosage sensitive genes affected {} rows", NF.format(geneUpdated));
         }
 
         // dosage sensitive regions
@@ -458,14 +465,14 @@ public class BuildDb implements Callable<Integer> {
             int regionsUpdated = regionStream
                     .mapToInt(clingenDosageElementDao::insertItem)
                     .sum();
-            LOGGER.info("Ingest of dosage sensitive regions affected {} rows", regionsUpdated);
+            LOGGER.info("Ingest of dosage sensitive regions affected {} rows", NF.format(regionsUpdated));
         }
     }
 
     private static Map<Integer, Integer> parseNcbiToHgncTable(String ncbiGeneToHgnc) throws IOException {
         Path tablePath = Path.of(ncbiGeneToHgnc);
         if (Files.notExists(tablePath)) {
-            throw new IOException("Table for mapping NCBIGene to HGNC does not exist at `" + tablePath.toAbsolutePath() + "`");
+            throw new IOException("Table for mapping NCBIGene to HGNC does not exist at " + tablePath.toAbsolutePath());
         }
 
         Map<Integer, Integer> results = new HashMap<>();
@@ -521,7 +528,7 @@ public class BuildDb implements Callable<Integer> {
         String file = url.getFile();
         String urlFileName = file.substring(file.lastIndexOf('/') + 1);
         Path localPath = downloadDir.resolve(urlFileName);
-        LOGGER.info("Downloading data from `{}` to `{}`", url, localPath);
+        LOGGER.info("Downloading data from `{}` to {}", url, localPath);
         downloadFile(url, localPath.toFile());
         return localPath;
     }
@@ -530,7 +537,7 @@ public class BuildDb implements Callable<Integer> {
         if (target.isFile()) return;
         File parent = target.getParentFile();
         if (!parent.isDirectory() && !parent.mkdirs())
-            throw new IOException("Unable to create parent directory `" + parent.getAbsolutePath() + "` for downloading `" + target.getAbsolutePath() + '`');
+            throw new IOException("Unable to create parent directory " + parent.getAbsolutePath() + " for downloading " + target.getAbsolutePath());
 
         URLConnection connection;
         if ("http".equals(source.getProtocol()))
@@ -568,12 +575,12 @@ public class BuildDb implements Callable<Integer> {
             GenomicAssembly assembly = GenomicAssemblies.GRCh38p13();
             if (buildDir.toFile().exists()) {
                 if (!buildDir.toFile().isDirectory()) {
-                    if (LOGGER.isErrorEnabled()) LOGGER.error("Not a directory: `{}`", buildDir);
+                    LOGGER.error("Not a directory: {}", buildDir);
                     return 1;
                 }
             } else {
                 if (!buildDir.toFile().mkdirs()) {
-                    if (LOGGER.isErrorEnabled()) LOGGER.error("Unable to create build directory");
+                    LOGGER.error("Unable to create build directory");
                     return 1;
                 }
             }
@@ -581,15 +588,15 @@ public class BuildDb implements Callable<Integer> {
             Path dbPath = buildDir.resolve("svanna_db.mv.db");
             if (dbPath.toFile().isFile()) {
                 if (overwrite) {
-                    if (LOGGER.isInfoEnabled()) LOGGER.info("Removing the old database");
+                    LOGGER.info("Removing the old database");
                     Files.delete(dbPath);
                 } else {
-                    LOGGER.info("Abort since the database already exists at `{}`. ", dbPath);
+                    LOGGER.info("Abort since the database already exists at {}. ", dbPath);
                     return 0;
                 }
             }
 
-            LOGGER.info("Creating database at `{}`", dbPath);
+            LOGGER.info("Creating database at {}", dbPath);
             DataSource dataSource = initializeDataSource(dbPath);
 
             Path tmpDir = buildDir.resolve("build");

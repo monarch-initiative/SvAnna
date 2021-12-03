@@ -4,6 +4,8 @@ import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.parse.enhancer.AnnotatedTissue;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,6 +24,7 @@ import java.util.Map;
  * </pre>
  */
 public class FantomSampleParser {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FantomSampleParser.class);
     /**
      * Path to Human.sample_name2library_id.txt file.
      */
@@ -66,8 +69,8 @@ public class FantomSampleParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.err.printf("[INFO] We identified %d FANTOM samples and could not find an ontology term for %d.\n ", found, notfound);
-        System.out.printf("[INFO] We got %d FANTOM samples.\n", this.idToFantomSampleMap.size());
+        LOGGER.info("We identified {} FANTOM samples and could not find an ontology term for {}", found, notfound);
+        LOGGER.info("We got {} FANTOM samples", idToFantomSampleMap.size());
     }
 
     public Map<String, AnnotatedTissue> getIdToFantomSampleMap() {

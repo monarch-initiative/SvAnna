@@ -12,11 +12,11 @@ import java.util.List;
  */
 public interface DosageRegion extends Located {
 
-    static DosageRegion of(GenomicRegion location, List<Dosage> dosages) {
-        return DosageRegionDefault.of(location, dosages);
+    static DosageRegion of(GenomicRegion location, Dosage dosage) {
+        return DosageRegionDefault.of(location, dosage);
     }
 
-    List<Dosage> dosages();
+    Dosage dosage();
 
 
     /* ------------------------------------------- DERIVED METHODS -------------------------------------------------- */
@@ -33,9 +33,8 @@ public interface DosageRegion extends Located {
      * @return true if there is at least provided <code>evidence</code> for haploinsufficiency in this region.
      */
     default boolean isHaploinsufficient(DosageSensitivityEvidence evidence) {
-        return dosages().stream()
-                .filter(d -> d.dosageSensitivityEvidence().isAtLeast(evidence))
-                .anyMatch(d -> d.dosageSensitivity() == DosageSensitivity.HAPLOINSUFFICIENCY);
+        return dosage().dosageSensitivityEvidence().isAtLeast(evidence)
+                && dosage().dosageSensitivity() == DosageSensitivity.HAPLOINSUFFICIENCY;
     }
 
     /**
@@ -50,8 +49,7 @@ public interface DosageRegion extends Located {
      * @return true if there is at least provided <code>evidence</code> for haploinsufficiency in this region.
      */
     default boolean isTriplosensitive(DosageSensitivityEvidence evidence) {
-        return dosages().stream()
-                .filter(d -> d.dosageSensitivityEvidence().isAtLeast(evidence))
-                .anyMatch(d -> d.dosageSensitivity() == DosageSensitivity.TRIPLOSENSITIVITY);
+        return dosage().dosageSensitivity() == DosageSensitivity.TRIPLOSENSITIVITY
+                && dosage().dosageSensitivityEvidence().isAtLeast(evidence);
     }
 }

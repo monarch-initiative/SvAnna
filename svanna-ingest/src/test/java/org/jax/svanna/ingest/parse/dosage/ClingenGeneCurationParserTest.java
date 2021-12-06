@@ -59,10 +59,10 @@ public class ClingenGeneCurationParserTest {
         assertThat(elements, hasSize(9));
 
         DosageRegion first = elements.get(0);
-        assertThat(first.dosages(), hasItem(Dosage.of("A4GALT", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SOME_EVIDENCE)));
+        assertThat(first.dosage(), equalTo(Dosage.of("A4GALT", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SOME_EVIDENCE)));
 
         DosageRegion second = elements.get(1);
-        assertThat(second.dosages(), hasItem(Dosage.of("AAGAB", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
+        assertThat(second.dosage(), equalTo(Dosage.of("AAGAB", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
         assertThat(second.contigName(), equalTo("15"));
         assertThat(second.strand(), equalTo(Strand.POSITIVE));
         assertThat(second.coordinateSystem(), equalTo(CoordinateSystem.oneBased()));
@@ -70,10 +70,10 @@ public class ClingenGeneCurationParserTest {
         assertThat(second.end(), equalTo(67255200)); // parsed from the ClinGen gene curation list file
 
         DosageRegion third = elements.get(2);
-        assertThat(third.dosages(), hasItem(Dosage.of("AARS1", DosageSensitivity.TRIPLOSENSITIVITY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
+        assertThat(third.dosage(), equalTo(Dosage.of("AARS1", DosageSensitivity.TRIPLOSENSITIVITY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));
 
         DosageRegion fourth = elements.get(3);
-        assertThat(fourth.dosages(), hasItem(Dosage.of("AARS2", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.LITTLE_EVIDENCE)));
+        assertThat(fourth.dosage(), equalTo(Dosage.of("AARS2", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.LITTLE_EVIDENCE)));
     }
 
 }

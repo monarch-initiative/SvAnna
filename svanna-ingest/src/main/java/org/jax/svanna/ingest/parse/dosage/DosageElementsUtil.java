@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 class DosageElementsUtil {
 
@@ -20,7 +21,7 @@ class DosageElementsUtil {
     }
 
 
-    static Optional<DosageRegion> makeDosageElements(Contig contig,
+    static List<DosageRegion> makeDosageElements(Contig contig,
                                                      Strand strand,
                                                      Coordinates coordinates,
                                                      String id,
@@ -44,10 +45,12 @@ class DosageElementsUtil {
         }
 
         if (dosages.isEmpty()) {
-            return Optional.empty();
+            return List.of();
         } else {
             GenomicRegion location = GenomicRegion.of(contig, strand, coordinates);
-            return Optional.of(DosageRegion.of(location, dosages));
+            return dosages.stream()
+                    .map(d -> DosageRegion.of(location, d))
+                    .collect(Collectors.toUnmodifiableList());
         }
     }
 

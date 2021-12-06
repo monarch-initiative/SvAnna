@@ -11,7 +11,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,10 +43,10 @@ public class ClingenRegionCurationParser implements IngestRecordParser<DosageReg
                 .onClose(IOUtils.close(reader))
                 .filter(line -> !line.startsWith("#")) // header
                 .map(toDosageElements())
-                .flatMap(Optional::stream);
+                .flatMap(Collection::stream);
     }
 
-    private Function<String, Optional<DosageRegion>> toDosageElements() {
+    private Function<String, List<DosageRegion>> toDosageElements() {
         return line -> {
             /*
             A line like:
@@ -57,14 +58,14 @@ public class ClingenRegionCurationParser implements IngestRecordParser<DosageReg
             String[] tokens = line.split("\t", 23);
             if (tokens.length != 23) {
                 LOGGER.warn("Expected {} columns and found {}. Skipping the line `{}`", 23, tokens.length, line);
-                return Optional.empty();
+                return List.of();
             }
 
             // ID
             String id = tokens[0];
             if (id.isBlank()) {
                 LOGGER.warn("Skipping line with no ID: `{}`", line);
-                return Optional.empty();
+                return List.of();
             }
 
             // some regions have an extra space, e.g. `chrX:30176883 -30336883`, or `chrX: 48447780-52444264`
@@ -72,12 +73,12 @@ public class ClingenRegionCurationParser implements IngestRecordParser<DosageReg
             Matcher matcher = GENOMIC_LOCATION_PATTERN.matcher(regionString);
             if (!matcher.matches()) {
                 LOGGER.warn("Invalid genomic location `{}`, skipping the line `{}`", regionString, line);
-                return Optional.empty();
+                return List.of();
             }
             Contig contig = genomicAssembly.contigByName(matcher.group("contig"));
             if (contig.isUnknown()) {
                 LOGGER.warn("Unknown contig `{}` in line `{}`", matcher.group("contig"), line);
-                return Optional.empty();
+                return List.of();
             }
             int start = Integer.parseInt(matcher.group("start"));
             int end = Integer.parseInt(matcher.group("end"));

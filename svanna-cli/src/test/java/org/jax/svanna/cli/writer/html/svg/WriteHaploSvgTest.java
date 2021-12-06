@@ -50,9 +50,8 @@ public class WriteHaploSvgTest {
         int min = genes.stream().mapToInt(g -> g.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).min().orElse(0);
         int max = genes.stream().mapToInt(g -> g.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())).max().orElse(min+2);
         Dosage dosage = Dosage.of("id1", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE);
-        List<Dosage> dosages = List.of(dosage);
         GenomicRegion region = GenomicRegion.of(singeExonDel.contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), min, max);
-        DosageRegion dosageRegion = DosageRegion.of(region, dosages);
+        DosageRegion dosageRegion = DosageRegion.of(region, dosage);
 
         List<Enhancer> enhancerList = List.of();
         List<RepetitiveRegion> repetitives = List.of(); // empty

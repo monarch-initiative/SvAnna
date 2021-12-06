@@ -53,10 +53,10 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegio
                 .onClose(IOUtils.close(reader))
                 .filter(line -> !line.startsWith("#")) // header
                 .map(toDosageElements())
-                .flatMap(Optional::stream);
+                .flatMap(Collection::stream);
     }
 
-    private Function<String, Optional<DosageRegion>> toDosageElements() {
+    private Function<String, List<DosageRegion>> toDosageElements() {
         return line -> {
             /*
             A line like:
@@ -68,14 +68,14 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegio
             String[] tokens = line.split("\t", 23);
             if (tokens.length != 23) {
                 LOGGER.warn("Expected {} columns and found {}. Skipping the line `{}`", 23, tokens.length, line);
-                return Optional.empty();
+                return List.of();
             }
 
             // ID - we use gene symbol as the ID, assuming that there is only one line per gene
             String id = tokens[0];
             if (id.isBlank()) {
                 LOGGER.warn("Skipping line with no ID: `{}`", line);
-                return Optional.empty();
+                return List.of();
             }
 
             // parse Gene ID - numeric part of NCBIGene
@@ -83,7 +83,7 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegio
             Matcher geneIdMatcher = NUMBER.matcher(ncbiGeneId);
             if (!geneIdMatcher.matches()) {
                 LOGGER.warn("Invalid gene ID {} (not numeric)", ncbiGeneId);
-                return Optional.empty();
+                return List.of();
             }
 
             // We must extract gene region for the gene, either:
@@ -101,7 +101,7 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegio
             if (geneRegion == null) {
                 Optional<GenomicRegion> region = getRegion(tokens[3]);
                 if (region.isEmpty())
-                    return Optional.empty();
+                    return List.of();
                 else
                     geneRegion = region.get();
             }

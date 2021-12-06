@@ -3,25 +3,24 @@ package org.jax.svanna.model.landscape.dosage;
 import org.jax.svanna.model.landscape.BaseLocated;
 import org.monarchinitiative.svart.GenomicRegion;
 
-import java.util.List;
 import java.util.Objects;
 
 class DosageRegionDefault extends BaseLocated implements DosageRegion {
 
-    private final List<Dosage> dosages;
+    private final Dosage dosage;
 
-    static DosageRegionDefault of(GenomicRegion location, List<Dosage> dosages) {
-        return new DosageRegionDefault(location, dosages);
+    static DosageRegionDefault of(GenomicRegion location, Dosage dosage) {
+        return new DosageRegionDefault(location, dosage);
     }
 
-    private DosageRegionDefault(GenomicRegion location, List<Dosage> dosages) {
+    private DosageRegionDefault(GenomicRegion location, Dosage dosage) {
         super(location);
-        this.dosages = Objects.requireNonNull(dosages, "Dosage data must not be null");
+        this.dosage = Objects.requireNonNull(dosage, "Dosage data must not be null");
     }
 
     @Override
-    public List<Dosage> dosages() {
-        return dosages;
+    public Dosage dosage() {
+        return dosage;
     }
 
     @Override
@@ -30,18 +29,18 @@ class DosageRegionDefault extends BaseLocated implements DosageRegion {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         DosageRegionDefault that = (DosageRegionDefault) o;
-        return Objects.equals(dosages, that.dosages);
+        return Objects.equals(dosage, that.dosage);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), dosages);
+        return Objects.hash(super.hashCode(), dosage);
     }
 
     @Override
     public String toString() {
         return "DosageRegion{" +
-                "dosages=" + dosages +
+                "dosage=" + dosage +
                 "} " + super.toString();
     }
 }

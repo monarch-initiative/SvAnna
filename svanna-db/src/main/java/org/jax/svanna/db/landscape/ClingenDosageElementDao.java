@@ -56,13 +56,11 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
                 preparedStatement.setInt(2, item.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
                 preparedStatement.setInt(3, item.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
 
-                for (Dosage dosage : item.dosages()) {
-                    preparedStatement.setString(4, dosage.id());
-                    preparedStatement.setString(5, dosage.dosageSensitivity().name());
-                    preparedStatement.setString(6, dosage.dosageSensitivityEvidence().name());
+                preparedStatement.setString(4, item.dosage().id());
+                preparedStatement.setString(5, item.dosage().dosageSensitivity().name());
+                preparedStatement.setString(6, item.dosage().dosageSensitivityEvidence().name());
 
-                    updated += preparedStatement.executeUpdate();
-                }
+                updated += preparedStatement.executeUpdate();
 
                 connection.commit();
             } catch (SQLException e) {
@@ -136,7 +134,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
 
     private List<DosageRegion> processDosageRegionStatement(PreparedStatement preparedStatement) throws SQLException {
         try (ResultSet rs = preparedStatement.executeQuery()) {
-            Map<GenomicRegion, List<Dosage>> dosageMap = new HashMap<>();
+            List<DosageRegion> dosageRegions = new LinkedList<>();
 
             while (rs.next()) {
                 Contig contig = genomicAssembly.contigById(rs.getInt("CONTIG"));
@@ -151,12 +149,10 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
                         DosageSensitivity.valueOf(rs.getString("DOSAGE_SENSITIVITY")),
                         DosageSensitivityEvidence.valueOf(rs.getString("DOSAGE_EVIDENCE")));
 
-                dosageMap.computeIfAbsent(location, l -> new LinkedList<>()).add(dosage);
+                dosageRegions.add(DosageRegion.of(location, dosage));
             }
 
-            return dosageMap.entrySet().stream()
-                    .map(e -> DosageRegion.of(e.getKey(), e.getValue()))
-                    .collect(Collectors.toUnmodifiableList());
+            return dosageRegions;
         }
     }
 

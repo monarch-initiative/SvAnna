@@ -7,15 +7,21 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.dosage.Dosage;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
+import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.ielis.silent.genes.model.Gene;
 import xyz.ielis.silent.genes.model.GeneIdentifier;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +47,88 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         this.geneMap = phenotypeDataService.geneBySymbol();
     }
 
+    private static List<DosageRegion> mergeOverlappingDosageRegions(List<DosageRegion> dosageRegions) {
+        Map<Integer, List<DosageRegion>> regionsByContigId = dosageRegions.stream()
+                .collect(Collectors.groupingBy(Located::contigId, Collectors.toUnmodifiableList()));
+
+        List<DosageRegion> dosages = new ArrayList<>(dosageRegions.size());
+        LinkedList<DosageRegion> inProcess = new LinkedList<>();
+        for (Map.Entry<Integer, List<DosageRegion>> contigEntry : regionsByContigId.entrySet()) {
+
+            Map<DosageSensitivity, List<DosageRegion>> regionsByDosage = contigEntry.getValue().stream()
+                    .collect(Collectors.groupingBy(dr -> dr.dosage().dosageSensitivity(), Collectors.toUnmodifiableList()));
+
+            for (Map.Entry<DosageSensitivity, List<DosageRegion>> dosageEntry : regionsByDosage.entrySet()) {
+                List<DosageRegion> sorted = dosageEntry.getValue().stream()
+                        .sorted((l, r) -> GenomicRegion.compare(l.location(), r.location()))
+                        .collect(Collectors.toUnmodifiableList());
+
+                if (sorted.isEmpty()) continue;
+                inProcess.add(sorted.get(0));
+
+                for (int i = 1; i < sorted.size(); i++) {
+                    DosageRegion current = sorted.get(i);
+                    if (!current.location().overlapsWith(inProcess.getLast().location())) {
+                        // merge all regions that are inProcess
+                        DosageRegion merged = mergeDosageRegions(inProcess);
+                        dosages.add(merged);
+                        inProcess.clear();
+                    }
+                    inProcess.add(current);
+
+                }
+
+                if (!inProcess.isEmpty()) // process the last dosage region
+                    dosages.add(mergeDosageRegions(inProcess));
+
+            }
+        }
+
+        return dosages;
+    }
+
+    private static DosageRegion mergeDosageRegions(LinkedList<DosageRegion> dosageRegions) {
+        // the dosage regions are assumed to be overlapping and located on one contig.
+        DosageRegion first = dosageRegions.getFirst();
+        if (dosageRegions.size() == 1)
+            return first;
+
+        // find start/end bounds and the lower bound of the evidence
+        int start = Integer.MAX_VALUE, end = Integer.MIN_VALUE;
+        List<String> dosageIds = new ArrayList<>(dosageRegions.size());
+        DosageSensitivityEvidence evidence = DosageSensitivityEvidence.SUFFICIENT_EVIDENCE; // max evidence level, we only decrease here
+        for (DosageRegion region : dosageRegions) {
+            start = Math.min(start, region.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+            end = Math.max(end, region.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+            dosageIds.add(region.dosage().id());
+
+            DosageSensitivityEvidence currentDosageSensitivityEvidence = region.dosage().dosageSensitivityEvidence();
+            if (currentDosageSensitivityEvidence.ordinal() < evidence.ordinal())
+                evidence = currentDosageSensitivityEvidence;
+        }
+
+        // merge the region
+        GenomicRegion mergedRegion = GenomicRegion.of(first.contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
+        Dosage dosage = Dosage.of(String.join("; ", dosageIds), first.dosage().dosageSensitivity(), evidence);
+        return DosageRegion.of(mergedRegion, dosage);
+    }
+
+    private static GenomicRegion calculateUpperLowerBounds(GenomicRegion variant, List<GeneOverlap> overlaps) {
+        int start = variant.start();
+        int end = variant.end();
+
+        for (GeneOverlap overlap : overlaps) {
+            Gene gene = overlap.gene();
+            int s = gene.startOnStrandWithCoordinateSystem(variant.strand(), variant.coordinateSystem());
+            start = Math.min(s, start);
+
+            int e = gene.endOnStrandWithCoordinateSystem(variant.strand(), variant.coordinateSystem());
+            end = Math.max(e, end);
+        }
+
+        return GenomicRegion.of(variant.contig(), variant.strand(), variant.coordinateSystem(), start, end);
+    }
+
     @Override
     public VariantLandscape prepareLandscape(SvannaVariant variant) {
         List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
@@ -54,6 +142,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         SvannaVariant variant = variantLandscape.variant();
         List<GeneOverlap> overlaps = variantLandscape.overlaps();
         List<RepetitiveRegion> repetitiveRegions = prepareRepetitiveRegions(variant, overlaps);
+        List<DosageRegion> dosageRegions = mergeOverlappingDosageRegions(variantLandscape.dosageRegions());
 
         List<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
                 .map(geneOverlap -> geneOverlap.gene().symbol())
@@ -64,7 +153,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableList());
 
-        return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions, variantLandscape.dosageRegions());
+        return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions, dosageRegions);
     }
 
     private List<RepetitiveRegion> prepareRepetitiveRegions(SvannaVariant variant, List<GeneOverlap> overlaps) {
@@ -92,22 +181,6 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
             }
         }
         return repetitiveRegions;
-    }
-
-    private static GenomicRegion calculateUpperLowerBounds(GenomicRegion variant, List<GeneOverlap> overlaps) {
-        int start = variant.start();
-        int end = variant.end();
-
-        for (GeneOverlap overlap : overlaps) {
-            Gene gene = overlap.gene();
-            int s = gene.startOnStrandWithCoordinateSystem(variant.strand(), variant.coordinateSystem());
-            start = Math.min(s, start);
-
-            int e = gene.endOnStrandWithCoordinateSystem(variant.strand(), variant.coordinateSystem());
-            end = Math.max(e, end);
-        }
-
-        return GenomicRegion.of(variant.contig(), variant.strand(), variant.coordinateSystem(), start, end);
     }
 
 }

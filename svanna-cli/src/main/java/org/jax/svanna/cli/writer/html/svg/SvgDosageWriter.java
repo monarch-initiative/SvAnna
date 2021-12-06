@@ -73,7 +73,8 @@ public class SvgDosageWriter {
                         : DosageSensitivity.NONE;
             if (dosageType.equals(DosageSensitivity.NONE)) continue; // do not show "none" sensitivities
 
-            String sensitivity = dose.isHaploinsufficient() ? "haplosensitive" : "triplosensitive";
+            String sensitivity = dose.isHaploinsufficient() ? "haplosensitive (%s)" : "triplosensitive (%s)";
+            sensitivity = String.format(sensitivity, dose.dosage().id());
             int start = dose.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
             int end = dose.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
             double x_start_dosage = translateGenomicToSvg(start);

@@ -60,6 +60,7 @@ SvAnna allows to fine-tune the prioritization using the following *optional* opt
 * ``--uncompressed-output`` - the tabular and VCF output files are compressed by default. Use this flag if you want to disable compressing the output files (default: ``false``)
 
 
-See the next section to learn more about the SvAnna :ref:`rstoutputformats`.
+See the next section to learn more about the SvAnna :ref:`rstoutputformats`,
+and the :ref:`rstexamples` section to see how SvAnna prioritizes various SV classes.
 
 .. _example.vcf: https://github.com/TheJacksonLaboratory/Squirls/blob/development/squirls-cli/src/examples/example.vcf

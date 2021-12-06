@@ -6,4 +6,4 @@
  |____/  \_/_/   \_\_| |_|_| |_|\__,_|
 
  Structural Variant Annotation and Analysis
- v@project.version@
+ :: v@project.version@ ::

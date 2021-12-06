@@ -21,7 +21,7 @@ public class ClingenRegionCurationParserTest {
         ClingenRegionCurationParser parser = new ClingenRegionCurationParser(regionPath, GenomicAssemblies.GRCh38p13());
 
         List<? extends DosageRegion> elements = parser.parseToList();
-        assertThat(elements, hasSize(3));
+        assertThat(elements, hasSize(4));
 
         DosageRegion first = elements.get(0);
         assertThat(first.dosage(), equalTo(Dosage.of("ISCA-46739", DosageSensitivity.HAPLOINSUFFICIENCY, DosageSensitivityEvidence.SUFFICIENT_EVIDENCE)));

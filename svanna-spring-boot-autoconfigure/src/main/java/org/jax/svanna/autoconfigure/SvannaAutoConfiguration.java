@@ -118,22 +118,10 @@ public class SvannaAutoConfiguration {
     }
 
     @Bean
-    public GeneDosageDataService geneDosageDataService(DataSource dataSource,
-                                                       GenomicAssembly genomicAssembly,
-                                                       GeneService geneService,
-                                                       SvannaProperties svannaProperties) throws UndefinedResourceException {
-        switch (svannaProperties.prioritization().geneDosageSource()) {
-            case "constant":
-                LOGGER.debug("Using `constant` gene dosage source");
-                return new ConstantGeneDosageDataService(geneService);
-            case "clingen":
-                LOGGER.debug("Using `clingen` gene dosage source");
-                ClingenDosageElementDao clingenDosageElementDao = new ClingenDosageElementDao(dataSource, genomicAssembly);
-                return new ClinGenGeneDosageDataService(clingenDosageElementDao);
-            default:
-                LOGGER.error("Unknown gene dosage source: `{}`", svannaProperties.prioritization().geneDosageSource());
-                throw new UndefinedResourceException(String.format("Unknown gene dosage source: `%s`", svannaProperties.prioritization().geneDosageSource()));
-        }
+    public GeneDosageDataService geneDosageDataService(DataSource dataSource, GenomicAssembly genomicAssembly) {
+            LOGGER.debug("Using `clingen` gene dosage source");
+            ClingenDosageElementDao clingenDosageElementDao = new ClingenDosageElementDao(dataSource, genomicAssembly);
+            return new ClinGenGeneDosageDataService(clingenDosageElementDao);
     }
 
     @Bean

@@ -10,12 +10,10 @@ public class SvannaProperties {
      * Path to SvAnna data directory.
      */
     private String dataDirectory;
-    private String jannovarCachePath;
     @NestedConfigurationProperty
     private DataProperties data = new DataProperties();
     @NestedConfigurationProperty
     private PrioritizationProperties prioritization = new PrioritizationProperties();
-
 
     public String dataDirectory() {
         return dataDirectory;
@@ -23,14 +21,6 @@ public class SvannaProperties {
 
     public void setDataDirectory(String dataDirectory) {
         this.dataDirectory = dataDirectory;
-    }
-
-    public String jannovarCachePath() {
-        return jannovarCachePath;
-    }
-
-    public void setJannovarCachePath(String jannovarCachePath) {
-        this.jannovarCachePath = jannovarCachePath;
     }
 
     public DataProperties dataParameters() {

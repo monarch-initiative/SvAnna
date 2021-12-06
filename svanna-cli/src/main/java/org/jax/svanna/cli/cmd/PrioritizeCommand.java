@@ -304,7 +304,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
         AnalysisParameters analysisParameters = new AnalysisParameters();
 
         analysisParameters.setDataDirectory(properties.dataDirectory());
-        analysisParameters.setJannovarCachePath(properties.jannovarCachePath());
         analysisParameters.setPhenopacketPath(phenopacketPath == null ? null : phenopacketPath.toAbsolutePath().toString());
         analysisParameters.setVcfPath(vcfFile.toAbsolutePath().toString());
         analysisParameters.setSimilarityThreshold(overlapThreshold);

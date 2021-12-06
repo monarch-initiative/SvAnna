@@ -4,6 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @ConfigurationProperties(prefix = "svanna.data")
+@Deprecated
 public class DataProperties {
 
     private double tadStabilityThreshold = 80.;

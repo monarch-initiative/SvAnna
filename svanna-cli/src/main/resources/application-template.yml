@@ -1,21 +1,9 @@
-# Required properties template, the file follows YAML syntax.
+# SvAnna configuration template. The template follows YAML syntax.
 svanna:
-  # path to folder with SvAnna database and the other required files
+  # path to folder with SvAnna database and the other required files.
   dataDirectory:
-  # path to Jannovar transcript database
-  jannovarCachePath:
 
-  #data:
-    # TAD must be present in at least 90% of the tissues to be included in the analysis
-    #tadStabilityThreshold: 90
-    #enhancers:
-      # Include VISTA developmental enhancers in the analysis
-      #useVista: true
   #prioritization:
-    # Source of gene dosage data, choose from {clingen, constant}.
-    #geneDosageSource: clingen
-    # Evaluate effect of all variants (including single-gene events) in context of the TAD domain
-    #forceTadEvaluation: false
     # term similarity measure, choose from {RESNIK_SYMMETRIC, RESNIK_ASYMMETRIC}
     #termSimilarityMeasure: RESNIK_SYMMETRIC
     # The mode for getting information content of the most informative common ancestors for terms t1, and t2.
@@ -23,8 +11,6 @@ svanna:
     # IN_MEMORY is faster but uses more memory
     # DATABASE is slower but also more memory efficient
     #icMicaMode: DATABASE
-    # An event involving max N genes to be considered by the prioritizer
-    #maxGenes: 100
     # Number of bases prepended to a transcript and evaluated as a promoter region
     #promoterLength: 2000
     # Set to 0. to score promoter variants as strictly as coding variants, or to 1. to skip

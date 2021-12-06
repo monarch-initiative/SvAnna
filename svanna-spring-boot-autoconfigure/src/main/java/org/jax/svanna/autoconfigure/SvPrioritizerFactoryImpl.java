@@ -69,7 +69,8 @@ class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
     private Dispatcher getTadDispatcher() {
         TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
-        DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritization().forceTadEvaluation());
+//        DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritization().forceTadEvaluation());
+        DispatchOptions dispatchOptions = DispatchOptions.of(false);
         LogUtils.logDebug(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
         return new TadAwareDispatcher(geneService, tadBoundaryDao, dispatchOptions);
     }

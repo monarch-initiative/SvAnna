@@ -13,10 +13,6 @@ public class AnalysisParameters {
      */
     private String dataDirectory;
     /**
-     * Path to Jannovar transcript database used in this analysis.
-     */
-    private String jannovarCachePath;
-    /**
      * Path to phenopacket (null if not used).
      */
     private String phenopacketPath;
@@ -71,14 +67,6 @@ public class AnalysisParameters {
 
     public void setDataDirectory(String dataDirectory) {
         this.dataDirectory = dataDirectory;
-    }
-
-    public String jannovarCachePath() {
-        return jannovarCachePath;
-    }
-
-    public void setJannovarCachePath(String jannovarCachePath) {
-        this.jannovarCachePath = jannovarCachePath;
     }
 
     public String phenopacketPath() {

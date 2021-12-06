@@ -7,21 +7,10 @@ public class PrioritizationProperties {
 
     private TermSimilarityMeasure termSimilarityMeasure = TermSimilarityMeasure.RESNIK_SYMMETRIC;
     private IcMicaMode icMicaMode = IcMicaMode.DATABASE;
-    private int maxGenes = 100;
-    private double geneFactor = 1.;
-    private double enhancerFactor = .25;
     private int promoterLength = 2000;
     private double promoterFitnessGain = .6;
-    private boolean forceTadEvaluation = false;
-    private String geneDosageSource = "clingen";
-
-    public int maxGenes() {
-        return maxGenes;
-    }
-
-    public void setMaxGenes(int maxGenes) {
-        this.maxGenes = maxGenes;
-    }
+    private double geneFactor = 1.;
+    private double enhancerFactor = .25;
 
     public TermSimilarityMeasure termSimilarityMeasure() {
         return termSimilarityMeasure;
@@ -47,14 +36,6 @@ public class PrioritizationProperties {
         this.geneFactor = geneFactor;
     }
 
-    public double enhancerFactor() {
-        return enhancerFactor;
-    }
-
-    public void setEnhancerFactor(double enhancerFactor) {
-        this.enhancerFactor = enhancerFactor;
-    }
-
     public int promoterLength() {
         return promoterLength;
     }
@@ -63,28 +44,20 @@ public class PrioritizationProperties {
         this.promoterLength = promoterLength;
     }
 
+    public double enhancerFactor() {
+        return enhancerFactor;
+    }
+
+    public void setEnhancerFactor(double enhancerFactor) {
+        this.enhancerFactor = enhancerFactor;
+    }
+
     public double promoterFitnessGain() {
         return promoterFitnessGain;
     }
 
     public void setPromoterFitnessGain(double promoterFitnessGain) {
         this.promoterFitnessGain = promoterFitnessGain;
-    }
-
-    public boolean forceTadEvaluation() {
-        return forceTadEvaluation;
-    }
-
-    public void setForceTadEvaluation(boolean forceTadEvaluation) {
-        this.forceTadEvaluation = forceTadEvaluation;
-    }
-
-    public String geneDosageSource() {
-        return geneDosageSource;
-    }
-
-    public void setGeneDosageSource(String geneDosageSource) {
-        this.geneDosageSource = geneDosageSource;
     }
 
     public enum TermSimilarityMeasure {

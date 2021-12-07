@@ -184,7 +184,8 @@ public class PrioritizeCommand extends SvAnnaCommand {
         try {
             runAnalysis(phenotypeTermIds, vcfFile);
         } catch (InterruptedException | ExecutionException | IOException e) {
-            LogUtils.logError(LOGGER, "Error: {}", e.getMessage());
+            LOGGER.error("Error: {}", e.getMessage());
+            LOGGER.debug("Error: {}", e.getMessage(), e);
             return 1;
         }
 

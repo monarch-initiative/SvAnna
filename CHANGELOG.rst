@@ -11,7 +11,7 @@ latest
 v1.0.0-RC4
 ----------
 
-- Treat deletion and duplications that affect CDS but do not change the reading frame in a milder way. Daniel Danis 12/1/21, 3:37 PM
+- Treat deletion and duplications that affect CDS but do not change the reading frame in a milder way
 - Drop the TAD idea and only evaluate the variant with respect to the overlapping genomic elements
 - Externalize gene model and gene definition sources
 - Report a track with dosage sensitive regions in the HTML report

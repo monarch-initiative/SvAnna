@@ -61,7 +61,7 @@ Command
 Deletion of multiple genes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Deletion of 481.73 kb (``chr2:109,923,337-110,405,062del``) affecting *MTLN*, *MALL*, *MTLN*, and *NPHP1*
+Deletion of 481.73 kb (``chr2:109,923,337-110,405,062del``) affecting *MALL*, *NPHP1*, and *MTLN*
 that was assigned a *PSV* score of 17.60.
 
 Pathogenic variants in *NPHP1* are associated with Joubert syndrome 4 (``OMIM:609583``).

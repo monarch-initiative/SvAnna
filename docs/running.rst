@@ -33,12 +33,12 @@ All CLI arguments for the ``prioritize`` command are supplied as *options* (no p
 
 There is one *mandatory* option:
 
-* ``-c | --config`` - path to Squirls configuration file
+* ``-c | --config`` - path to SvAnna configuration file
 
 Then, input data is specified either as a path to VCF file along with one or more HPO terms, or as a *Phenopacket*:
 
 * ``--vcf`` - path to input VCF file
-* ``-t | --term`` - HPO term describing clinical condition of the proband, may be specified multiple times (e.g. ``--term HP:1234567 --term HP:9876543``
+* ``-t | --term`` - HPO term describing clinical condition of the proband, may be specified multiple times (e.g. ``--term HP:1234567 --term HP:9876543``)
 * ``-p | --phenopacket`` - path to Phenopacket in JSON format
 
 If both ``--vcf`` and ``--phenopacket`` options are specified, ``--vcf`` has a precedence and the phenopacket will *not*
@@ -51,8 +51,8 @@ SvAnna allows to fine-tune the prioritization using the following *optional* opt
 
 * ``--n-threads`` - prioritize variants using *n* threads to speed up the prioritization. More threads require more RAM (default ``2``)
 * ``--min-read-support`` - minimum number of reads that must support presence of the *alt* allele in order for variant to be included in the analysis (default `3``)
-* ``--overlap-threshold`` - threshold value to determine if the SV matches a variant from the population variant databases. The threshold is provided as a percentage (default ``80``)
-* ``--no-breakends`` - do not report breakend variants in HTML report
+* ``--overlap-threshold`` - threshold value to determine if a SV matches a variant from the population variant databases. The threshold is provided as a percentage (default ``80``)
+* ``--no-breakends`` - do not report breakends/translocations in the HTML report
 * ``--frequency-threshold`` - threshold for labeling SVs in population variant databases *pv* as common. If query SV *v* overlaps with *pv* that has frequency above the threshold, then *v* is considered to be *common*.
 * ``--output-format`` - comma separated list of output formats to use for writing the results. See :ref:`rstoutputformats` section for available output formats (default ``html``)
 * ``--prefix`` - prefix for output files (default: based on the input VCF name)

@@ -26,7 +26,7 @@ The report consists of several parts:
 .. note::
   Only the variants that passed all the filters are visualized in the *Prioritized SVs* section
 
-The ``--no-breakends`` excludes breakend/translocation variants from the report.
+The ``--no-breakends`` option excludes breakends/translocations from the report.
 
 VCF output format
 ^^^^^^^^^^^^^^^^^

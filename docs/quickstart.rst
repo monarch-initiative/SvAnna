@@ -53,11 +53,10 @@ After unzipping the distribution archive, run the following command to display t
 
 Download SvAnna data files by running::
 
-  $ wget https://svanna.s3.amazonaws.com/svanna.zip && unzip svanna.zip
-  $ wget ftp://squirls.ielis.xyz/jannovar_v0.35.zip && unzip jannovar_v0.35.zip
+  $ wget https://svanna.s3.amazonaws.com/2112_hg38_svanna.zip
 
 .. tip::
-  Use ``curl --output svanna.zip https://svanna.s3.amazonaws.com/svanna.zip`` if ``wget`` is not available in your environment
+  Use ``curl --output 2112_hg38_svanna.zip https://svanna.s3.amazonaws.com/2112_hg38_svanna.zip`` if ``wget`` is not available in your environment
 
 3. Generate & fill the configuration file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,10 +65,9 @@ Generate the configuration file::
 
   $ java -jar `pwd`/svanna/svanna-cli-${project.version}.jar generate-config svanna-config.yml
 
-Now open the generated file in your favorite text editor and provide absolute paths to the following two resources:
+Now open the generated file in your favorite text editor and provide absolute paths to the SvAnna database files:
 
 * ``dataDirectory:`` - the absolute path to the folder where SvAnna database files were extracted
-* ``jannovarCachePath`` - the absolute path to selected Jannovar ``*.ser`` file, e.g. ``/path/to/hg38_refseq.ser``
 
 .. tip::
   The YAML syntax requires a whitespace to be present between the *key*: *value* pairs.
@@ -101,7 +99,7 @@ Now, let's prioritize the variants::
 
 The variant with ID ``Othman-2010-20696945-VWF-index-FigS7`` that disrupts a promoter of the *von Willenbrand factor*
 (*VWF*) gene (`Othman et al., 2010 <https://pubmed.ncbi.nlm.nih.gov/20696945>`_)
-receives the highest :math:`TAD_{SV}` score of 25.61, and the variant is placed on rank 1.
+receives the highest :math:`PSV` score of 64.18, and the variant is ranked first.
 
 SvAnna stores prioritization results in *HTML*, *CSV*, and *VCF* output formats next to the input VCF file.
 

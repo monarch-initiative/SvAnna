@@ -39,12 +39,12 @@ SvAnna database files
 SvAnna database files are available for download from:
 
 **hg38/GRCh38**
-  Download `svanna.zip <https://svanna.s3.amazonaws.com/2112_hg38_svanna.zip>`_ (~675 MB for download,  2.4 GB unpacked)
+  Download `2112_hg38_svanna.zip <https://svanna.s3.amazonaws.com/2112_hg38_svanna.zip>`_ (~675 MB for download,  2.4 GB unpacked)
 
 After the download, unzip the archive(s) content into a folder and note the folder path.
 
 .. tip::
-  Keeping the files on fast hard drive will improve the runtime performance.
+  Keeping the files on a fast hard drive will improve the runtime performance.
 
 
 Build SvAnna from source
@@ -87,9 +87,9 @@ The command above generates an empty configuration file ``svanna-config.yml`` in
 
 The configuration file has the following content::
 
-  # Required properties template, the file follows YAML syntax.
+  # SvAnna configuration template. The template follows YAML syntax.
   svanna:
-    # path to the SvAnna data directory
+    # path to folder with SvAnna database and the other required files.
     dataDirectory:
 
     #prioritization:
@@ -100,7 +100,7 @@ The configuration file has the following content::
       # IN_MEMORY is faster but uses more memory
       # DATABASE is slower but also more memory efficient
       #icMicaMode: DATABASE
-      # The transcript promoter region is defined as n bases upstream of the transcription start site
+      # Number of bases prepended to a transcript and evaluated as a promoter region
       #promoterLength: 2000
       # Set to 0. to score promoter variants as strictly as coding variants, or to 1. to skip
       #promoterFitnessGain: .6
@@ -109,16 +109,15 @@ The configuration file has the following content::
 Mandatory parameters
 ~~~~~~~~~~~~~~~~~~~~
 
-Open the file in your favorite text editor and provide the following three bits of information:
-
-1. ``dataDirectory`` - location the the folder with SvAnna data. The directory is expected to have a structure like::
+Open the file in your favorite text editor and provide the path to the SvAnna data directory.
+The directory is expected to have a structure like::
 
     svanna_folder
       |- gencode.v38.genes.json.gz
       |- hp.obo
       \- svanna_db.mv.db
 
-  where ``svanna_folder`` corresponds to content of the ZIP files downloaded in the previous section
+where ``svanna_folder`` corresponds to content of the ZIP files downloaded in the previous section
 
 .. tip::
   The YAML syntax requires to include a white space between key, value pairs (e.g. ``dataDirectory: /project/joe/svanna_resources``.

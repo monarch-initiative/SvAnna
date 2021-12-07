@@ -19,7 +19,7 @@ This tutorial intends to be a start-to-finish example. Before you begin the tuto
 :ref:`rstsetup` to setup SvAnna on your system. Make sure you have downloaded or created the SvAnna database files and set the mandatory entries in the ``svanna-config.yml`` file.
 
 
-Input (1): A structural variant VCF file
+Input: (1) A structural variant VCF file
 ########################################
 
 SvAnna will work with any VCF file with structural variants. We note that in practice, SV callers designed for short-read
@@ -39,7 +39,7 @@ It is possible to run SvAnna without phenotype data, i.e., using just a VCF file
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize --vcf example.vcf -c svanna-config.yml
+    $ java -jar svanna-cli.jar prioritize -c svanna-config.yml --vcf example.vcf
 
 This will output an HTML file called `example.SVANNA.html` in the same directory as the input VCF file.
 SvAnna outputs information about each of the SVs in the VCF file. Two main sections are generated for each SV. The top section
@@ -50,8 +50,8 @@ has a summary of the variant, the affected gene(s) and disease(e), and lists the
   :alt: NF1 deletion
 
 The bottom section is a figure that is embedding as an SVG file directly into the HTML output. The figure shows the SV and its overlaps
-with repeating elements, enhancers, and transcripts. The genomic locations and strand of the transcripts as well as the total extent of the
-viewport are shown.
+with repeating elements, enhancers, dosage sensitive regions, and transcripts.
+The genomic locations and strand of the transcripts as well as the total extent of the viewport are shown.
 
 
 .. image:: img/NF1.png
@@ -60,7 +60,7 @@ viewport are shown.
 
 
 
-Input (2): Phenopacket
+Input: (2) Phenopacket
 ######################
 
 SvAnna can also be run in a phenotype-aware mode in which candidate SVs are assessed according to their clinical relevance. The
@@ -77,7 +77,7 @@ Importantly, to run SvAnna with a Phenopacket, the path of the VCF file needs to
 be done in a text editor but we recommend the `PhenopacketGenerator <https://github.com/TheJacksonLaboratory/PhenopacketGenerator>`_ for
 convenience -- enter the HPO terms and the path to the VCF file.
 
-The following is a minimal Phenopacket (note this is version 1; version 2 is also supported). ::
+The following is a minimal Phenopacket (note this is version 1, we will add support for the v2 in near future). ::
 
     {
     "id": "example",

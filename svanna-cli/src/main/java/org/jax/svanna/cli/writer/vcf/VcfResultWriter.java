@@ -12,8 +12,8 @@ import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.core.LogUtils;
+import org.jax.svanna.core.priority.Prioritized;
 import org.jax.svanna.core.priority.SvPriority;
-import org.jax.svanna.core.reference.Prioritized;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.slf4j.Logger;
@@ -32,12 +32,12 @@ public class VcfResultWriter implements ResultWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VcfResultWriter.class);
 
-    private static final String SVANNA_TAD_SV_FIELD_NAME = "TADSV";
-    private static final VCFInfoHeaderLine TADSV_LINE = new VCFInfoHeaderLine(
-            SVANNA_TAD_SV_FIELD_NAME,
+    private static final String SVANNA_PSV_FIELD_NAME = "PSV";
+    private static final VCFInfoHeaderLine PSV_LINE = new VCFInfoHeaderLine(
+            SVANNA_PSV_FIELD_NAME,
             VCFHeaderLineCount.A,
             VCFHeaderLineType.Float,
-            "SvAnna TAD-SV score for the variant");
+            "SvAnna PSV score for the variant");
 
     private final boolean compress;
 
@@ -63,7 +63,7 @@ public class VcfResultWriter implements ResultWriter {
         }
 
         // TADSV - float
-        header.addMetaDataLine(TADSV_LINE);
+        header.addMetaDataLine(PSV_LINE);
 
         return header;
     }
@@ -83,7 +83,7 @@ public class VcfResultWriter implements ResultWriter {
             if (svPriority == null || Double.isNaN(svPriority.getPriority()))
                 return Optional.of(builder.make());
 
-            return Optional.of(builder.attribute(SVANNA_TAD_SV_FIELD_NAME, svPriority.getPriority())
+            return Optional.of(builder.attribute(SVANNA_PSV_FIELD_NAME, svPriority.getPriority())
                     .make());
         };
     }

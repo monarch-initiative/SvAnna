@@ -7,13 +7,12 @@ import org.jax.svanna.benchmark.util.ProgressReporter;
 import org.jax.svanna.benchmark.util.TaskUtils;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.priority.SvPrioritizer;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
-import org.jax.svanna.core.priority.SvPrioritizerType;
 import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
@@ -127,7 +126,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::getId).collect(Collectors.toSet());
 
             // create the prioritizer seeded by the phenotype terms and prioritize the variants
-            SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(SvPrioritizerType.ADDITIVE, validatedPatientTermIds);
+            SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(validatedPatientTermIds);
 
             // prepare the variants
             List<Variant> caseVariants = new LinkedList<>(filteredVariants);

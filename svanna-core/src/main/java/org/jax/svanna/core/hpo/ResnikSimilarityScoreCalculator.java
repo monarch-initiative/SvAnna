@@ -6,12 +6,12 @@ import java.util.Collection;
 
 public class ResnikSimilarityScoreCalculator implements SimilarityScoreCalculator {
 
-    private final TermSimilarityCalculator similarityCalculator;
+    private final MicaCalculator micaCalculator;
 
     private final boolean symmetric;
 
-    public ResnikSimilarityScoreCalculator(TermSimilarityCalculator similarityCalculator, boolean symmetric) {
-        this.similarityCalculator = similarityCalculator;
+    public ResnikSimilarityScoreCalculator(MicaCalculator micaCalculator, boolean symmetric) {
+        this.micaCalculator = micaCalculator;
         this.symmetric = symmetric;
     }
 
@@ -43,7 +43,7 @@ public class ResnikSimilarityScoreCalculator implements SimilarityScoreCalculato
         for (TermId q : query) {
             double maxValue = 0.0;
             for (TermId t : target) {
-                maxValue = Math.max(maxValue, similarityCalculator.calculate(q, t));
+                maxValue = Math.max(maxValue, micaCalculator.calculate(q, t));
             }
             sum += maxValue;
         }

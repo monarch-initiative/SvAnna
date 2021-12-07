@@ -1,10 +1,11 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,30 +19,38 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleVisualizable.class);
 
-    private final Set<HpoDiseaseSummary> diseaseSummaries;
+    private final List<HpoDiseaseSummary> diseaseSummaries;
 
     private final List<RepetitiveRegion> repetitiveRegions;
+
+    private final List<DosageRegion> dosageRegions;
 
     static SimpleVisualizable of(SvannaVariant variant,
                                  List<GeneOverlap> overlaps,
                                  List<Enhancer> affectedEnhancers,
-                                 Set<HpoDiseaseSummary> diseaseSummaries,
-                                 List<RepetitiveRegion> repetitiveRegions) {
-        return new SimpleVisualizable(variant, overlaps, affectedEnhancers, diseaseSummaries, repetitiveRegions);
+                                 List<HpoDiseaseSummary> diseaseSummaries,
+                                 List<RepetitiveRegion> repetitiveRegions,
+                                 List<DosageRegion> dosageRegions) {
+        return new SimpleVisualizable(variant, overlaps, affectedEnhancers, diseaseSummaries, repetitiveRegions, dosageRegions);
     }
 
-    static SimpleVisualizable of(VariantLandscape variantLandscape, Set<HpoDiseaseSummary> diseaseSummaries, List<RepetitiveRegion> repetitiveRegions) {
-        return new SimpleVisualizable(variantLandscape.variant(), variantLandscape.overlaps(), variantLandscape.enhancers(), diseaseSummaries, repetitiveRegions);
+    static SimpleVisualizable of(VariantLandscape variantLandscape,
+                                 List<HpoDiseaseSummary> diseaseSummaries,
+                                 List<RepetitiveRegion> repetitiveRegions,
+                                 List<DosageRegion> dosageRegions) {
+        return new SimpleVisualizable(variantLandscape.variant(), variantLandscape.overlaps(), variantLandscape.enhancers(), diseaseSummaries, repetitiveRegions, dosageRegions);
     }
 
     private SimpleVisualizable(SvannaVariant variant,
                                List<GeneOverlap> overlaps,
                                List<Enhancer> affectedEnhancers,
-                               Set<HpoDiseaseSummary> diseaseSummaries,
-                               List<RepetitiveRegion> repetitiveRegions) {
-        super(variant, overlaps, affectedEnhancers);
+                               List<HpoDiseaseSummary> diseaseSummaries,
+                               List<RepetitiveRegion> repetitiveRegions,
+                               List<DosageRegion> dosageRegions) {
+        super(variant, overlaps, affectedEnhancers, dosageRegions);
         this.diseaseSummaries = diseaseSummaries;
         this.repetitiveRegions = repetitiveRegions;
+        this.dosageRegions = dosageRegions;
     }
 
     private HtmlLocation getSimpleLocation(Variant variant) {
@@ -67,7 +76,7 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
     }
 
     @Override
-    public Set<HpoDiseaseSummary> diseaseSummaries() {
+    public List<HpoDiseaseSummary> diseaseSummaries() {
         return diseaseSummaries;
     }
 
@@ -106,17 +115,22 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
     }
 
     @Override
+    public List<DosageRegion> dosageRegions() {
+        return dosageRegions;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         SimpleVisualizable that = (SimpleVisualizable) o;
-        return Objects.equals(diseaseSummaries, that.diseaseSummaries) && Objects.equals(repetitiveRegions, that.repetitiveRegions);
+        return Objects.equals(diseaseSummaries, that.diseaseSummaries) && Objects.equals(repetitiveRegions, that.repetitiveRegions) && Objects.equals(dosageRegions, that.dosageRegions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), diseaseSummaries, repetitiveRegions);
+        return Objects.hash(super.hashCode(), diseaseSummaries, repetitiveRegions, dosageRegions);
     }
 
     @Override
@@ -124,6 +138,7 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
         return "SimpleVisualizable{" +
                 "diseaseSummaries=" + diseaseSummaries +
                 ", repetitiveRegions=" + repetitiveRegions +
-                '}';
+                ", dosageRegions=" + dosageRegions +
+                "} " + super.toString();
     }
 }

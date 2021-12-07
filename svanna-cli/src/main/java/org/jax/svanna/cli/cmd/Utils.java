@@ -24,7 +24,7 @@ public class Utils {
             try {
                 formats.add(OutputFormat.valueOf(format.toUpperCase()));
             } catch (IllegalArgumentException e) {
-                LogUtils.logWarn(LOGGER, "Ignoring invalid output format `{}`", format);
+                LOGGER.warn("Ignoring invalid output format `{}`", format);
             }
         }
         return formats;

@@ -5,12 +5,13 @@ import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.landscape.BasePopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.ingest.parse.IOUtils;
+import org.jax.svanna.model.landscape.variant.BasePopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Variant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +86,9 @@ public class DbsnpVcfParser extends AbstractVcfIngestRecordParser {
                 String frequency = caf.get(i);
                 float alleleFrequency = frequency.equals(".") ? DEFAULT_FREQ : 100 * Float.parseFloat(frequency);
 
-                BasePopulationVariant populationVariant = BasePopulationVariant.of(variant.contig(), variant.strand(), variant.coordinateSystem(),
-                        variant.startPosition(), variant.endPosition(), variant.id(), variant.variantType(),
-                        alleleFrequency, PopulationVariantOrigin.DBSNP);
+                BasePopulationVariant populationVariant = BasePopulationVariant.of(
+                        GenomicRegion.of(variant.contig(), variant.strand(), variant.coordinateSystem(), variant.start(), variant.end()),
+                        variant.id(), variant.variantType(), alleleFrequency, PopulationVariantOrigin.DBSNP);
 
                 variants.add(populationVariant);
             }

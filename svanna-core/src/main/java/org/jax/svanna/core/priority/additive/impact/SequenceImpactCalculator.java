@@ -1,15 +1,17 @@
 package org.jax.svanna.core.priority.additive.impact;
 
 import org.jax.svanna.core.priority.additive.Projection;
-import org.monarchinitiative.svart.GenomicRegion;
+import xyz.ielis.silent.genes.model.Located;
 
 /**
- * This interface returns a number in range <code>[0,...]</code> to estimate gene's functional after the projection.
- * Here, <code>1</code> means that {@link T}'s function is un-affected by the projection,
- * <code>0</code> is for a projection that renders {@link T} to be dysfunctional, <code>2</code> is for double the
- * function.
+ * This interface returns a number in range <code>[0,...]</code> to estimate {@link T}'s function on the allele
+ * represented by the {@link Projection}.
+ * <p>
+ * The default function is <code>1</code>; this means that {@link T}'s function
+ * is the same as on the reference allele. The value of <code>0</code> is for an allele that renders {@link T}
+ * dysfunctional, <code>2</code> is for doubling of the function.
  */
-public interface SequenceImpactCalculator<T extends GenomicRegion> {
+public interface SequenceImpactCalculator<T extends Located> {
 
     double projectImpact(Projection<T> projection);
 

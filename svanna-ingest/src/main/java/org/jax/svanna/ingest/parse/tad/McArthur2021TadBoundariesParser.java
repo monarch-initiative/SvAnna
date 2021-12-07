@@ -2,9 +2,9 @@ package org.jax.svanna.ingest.parse.tad;
 
 import htsjdk.samtools.liftover.LiftOver;
 import htsjdk.samtools.util.Interval;
-import org.jax.svanna.core.landscape.TadBoundary;
-import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
+import org.jax.svanna.model.landscape.tad.TadBoundaryDefault;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,9 +77,10 @@ public class McArthur2021TadBoundariesParser implements IngestRecordParser<TadBo
                 if (LOGGER.isWarnEnabled()) LOGGER.warn("Unknown contig `{}` after lifting over record `{}`", lifted.getContig(), line);
                 return Optional.empty();
             }
-            Position liftedStart = Position.of(lifted.getStart() - halfLength);
-            Position liftedEnd = Position.of(lifted.getEnd() + halfLength);
-            return Optional.of(TadBoundaryDefault.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), liftedStart, liftedEnd, id, Float.parseFloat(column[4])));
+            int liftedStart = lifted.getStart() - halfLength;
+            int liftedEnd = lifted.getEnd() + halfLength;
+            GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), liftedStart, liftedEnd);
+            return Optional.of(TadBoundaryDefault.of(location, id, Float.parseFloat(column[4])));
         };
     }
 }

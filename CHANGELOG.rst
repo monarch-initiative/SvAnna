@@ -2,6 +2,22 @@
 Changelog
 =========
 
+------
+latest
+------
+
+
+----------
+v1.0.0-RC4
+----------
+
+- Treat deletion and duplications that affect CDS but do not change the reading frame in a milder way. Daniel Danis 12/1/21, 3:37 PM
+- Drop the TAD idea and only evaluate the variant with respect to the overlapping genomic elements
+- Externalize gene model and gene definition sources
+- Report a track with dosage sensitive regions in the HTML report
+- Store gene/disease/phenotype mapping in the database instead of the files in the data directory
+- Improve logging - create a log file in the current working directory and store ``DEBUG`` info in the file
+
 ----------
 v1.0.0-RC3
 ----------

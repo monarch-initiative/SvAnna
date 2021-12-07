@@ -8,7 +8,7 @@ import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.filter.Filterable;
-import org.jax.svanna.core.reference.Prioritized;
+import org.jax.svanna.core.priority.Prioritized;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
@@ -31,6 +31,8 @@ public class TabularResultWriter implements ResultWriter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TabularResultWriter.class);
 
+    private static final String[] HEADER = new String[]{"contig", "start", "end", "id", "vtype", "failed_filters", "psv"};
+
     private final String suffix;
 
     private final char columnSeparator;
@@ -47,7 +49,7 @@ public class TabularResultWriter implements ResultWriter {
     public void write(AnalysisResults analysisResults, String prefix) throws IOException {
         try (BufferedWriter writer = openWriter(prefix)) {
             CSVPrinter printer = CSVFormat.DEFAULT.withDelimiter(columnSeparator)
-                    .withHeader("contig", "start", "end", "id", "vtype", "failed_filters", "tadsv")
+                    .withHeader(HEADER)
                     .print(writer);
             analysisResults.variants().stream()
                     .filter(sv -> !Double.isNaN(sv.svPriority().getPriority()))
@@ -59,7 +61,7 @@ public class TabularResultWriter implements ResultWriter {
     private BufferedWriter openWriter(String prefix) throws IOException {
         String pathString = prefix + suffix + (compress ? ".gz" : "");
         Path outPath = Paths.get(pathString);
-        LogUtils.logInfo(LOGGER, "Writing tabular results into `{}`", outPath.toAbsolutePath());
+        LogUtils.logInfo(LOGGER, "Writing tabular results into {}", outPath.toAbsolutePath());
         return compress
                 ? new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(outPath.toFile()))))
                 : Files.newBufferedWriter(outPath);

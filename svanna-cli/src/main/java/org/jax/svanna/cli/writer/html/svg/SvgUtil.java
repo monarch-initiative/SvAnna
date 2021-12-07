@@ -41,6 +41,11 @@ public class SvgUtil {
                 xpos, ypos, color, message);
     }
 
+    public static String svgitalic(double xpos, double ypos, String color, String message) {
+        return String.format("<text x=\"%f\" y=\"%f\" fill=\"%s\" font-style=\"italic\">%s</text>\n",
+                xpos, ypos, color, message);
+    }
+
     public static String svgtext(double xpos, double ypos, String color, String message, int fontsize, int yoffset) {
         return String.format("<text x=\"%f\" y=\"%f\" style=\"sfill=:%s;font-size: %dpx\">%s</text>\n",
                 xpos, ypos+yoffset, color, fontsize, message);

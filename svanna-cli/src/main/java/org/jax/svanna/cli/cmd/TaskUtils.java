@@ -1,6 +1,5 @@
 package org.jax.svanna.cli.cmd;
 
-import org.jax.svanna.core.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ public class TaskUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskUtils.class);
     private static final Thread.UncaughtExceptionHandler HANDLER = (thread, throwable) ->
-            LogUtils.logError(LOGGER, "Error on thread {}: {}", thread.getName(), throwable.getMessage());
+            LOGGER.error("Error on thread {}: {}", thread.getName(), throwable.getMessage());
 
     private TaskUtils() {
     }

@@ -9,7 +9,10 @@ import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.io.parse.BreakendedSvannaVariant;
 import org.jax.svanna.io.parse.DefaultSvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.ConfidenceInterval;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.GenomicAssemblies;
+import org.monarchinitiative.svart.GenomicAssembly;
 import org.monarchinitiative.svart.util.VariantTrimmer;
 import org.monarchinitiative.svart.util.VcfConverter;
 import org.phenopackets.schema.v1.Phenopacket;
@@ -138,7 +141,6 @@ class CaseReportImporter {
                 if (infoFields.containsKey("SVTYPE")) {
                     String[] cipos = infoFields.getOrDefault("CIPOS", "0,0").split(",");
                     ConfidenceInterval ciPos = ConfidenceInterval.of(Integer.parseInt(cipos[0]), Integer.parseInt(cipos[1]));
-                    Position start = Position.of(vcfAllele.getPos(), ciPos);
 
                     String[] ciends = infoFields.getOrDefault("CIEND", "0,0").split(",");
                     ConfidenceInterval ciEnd = ConfidenceInterval.of(Integer.parseInt(ciends[0]), Integer.parseInt(ciends[1]));
@@ -149,7 +151,7 @@ class CaseReportImporter {
                         String mateId = infoFields.getOrDefault("MATEID", "");
                         String eventId = infoFields.getOrDefault("EVENTID", "");
                         BreakendedSvannaVariant.Builder builder = VCF_CONVERTER.convertBreakend(BreakendedSvannaVariant.builder(),
-                                contig, variantId, start,
+                                contig, variantId, vcfAllele.getPos(), ciPos,
                                 vcfAllele.getRef(), vcfAllele.getAlt(),
                                 ciEnd, mateId, eventId);
                         builder.variantCallAttributes(attrBuilder.build());
@@ -161,9 +163,9 @@ class CaseReportImporter {
                         continue;
                     }
 
-                    Position end = Position.of(Integer.parseInt(infoFields.get("END")), ciEnd);
+                    int end = Integer.parseInt(infoFields.get("END"));
 
-                    int changeLength = end.pos() - start.pos() + 1;
+                    int changeLength = end - vcfAllele.getPos() + 1;
                     switch (vcfAllele.getAlt().toLowerCase()) {
                         case "del":
                             changeLength = -changeLength;
@@ -176,7 +178,7 @@ class CaseReportImporter {
                     try {
                         // SYMBOLIC
                         DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convertSymbolic(DefaultSvannaVariant.builder(),
-                                contig, variantId, start, end,
+                                contig, variantId, vcfAllele.getPos(), ciPos, end, ciEnd,
                                 vcfAllele.getRef(), '<' + vcfAllele.getAlt() + '>', changeLength);
                         builder.variantCallAttributes(attrBuilder.build());
                         variants.add(builder.build());

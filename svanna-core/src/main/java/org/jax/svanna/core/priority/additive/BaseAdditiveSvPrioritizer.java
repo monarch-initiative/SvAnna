@@ -34,18 +34,14 @@ abstract class BaseAdditiveSvPrioritizer<DATA extends RouteData, RESULT extends 
             RESULT result = routeDataEvaluator.evaluate(data);
             return processRouteResult(result);
         } catch (IntrachromosomalBreakendException e) {
-            LogUtils.logTrace(LOGGER, "Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
+            LOGGER.trace("Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
             return SvPriority.unknown();
         } catch (DispatchException e) {
-            LogUtils.logWarn(LOGGER, "Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
+            LOGGER.debug("Unable to create the annotation route for variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
             return SvPriority.unknown();
         } catch (EvaluationException e) {
-            LogUtils.logWarn(LOGGER, "Error during evaluation of variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
+            LOGGER.warn("Error during evaluation of variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage());
             return SvPriority.unknown();
-        } catch (Exception e) {
-            // TODO - remove once stable
-            LogUtils.logError(LOGGER, "Error during evaluation of variant `{}`: {}", LogUtils.variantSummary(variant), e.getMessage(), e);
-            throw e;
         }
     }
 

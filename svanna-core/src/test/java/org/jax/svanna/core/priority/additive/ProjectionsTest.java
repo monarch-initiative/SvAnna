@@ -5,10 +5,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Position;
 import org.monarchinitiative.svart.Strand;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,28 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class ProjectionsTest {
+
+    private static class SimpleLocated implements Located {
+        private final GenomicRegion region;
+
+        private SimpleLocated(GenomicRegion region) {
+            this.region = region;
+        }
+
+        static SimpleLocated of(Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end) {
+            return of(GenomicRegion.of(contig, strand, coordinateSystem, start, end));
+        }
+
+        static SimpleLocated of(GenomicRegion region) {
+            return new SimpleLocated(region);
+        }
+
+        @Override
+        public GenomicRegion location() {
+            return region;
+        }
+
+    }
 
     @Nested
     public class SimpleAll {
@@ -39,18 +62,18 @@ public class ProjectionsTest {
             TestContig ctg1 = TestContig.of(0, 100);
             Route deletion = Route.of(
                     List.of(
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(20), "upstream", Event.GAP, 1),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(30), "deletion", Event.DELETION, 0),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(50), "downstream", Event.GAP, 1)
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 20, "upstream", Event.GAP, 1),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 30, "deletion", Event.DELETION, 0),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 30, 50, "downstream", Event.GAP, 1)
                     ));
 
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
+            Located query = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
 
-            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
+            List<Projection<Located>> projections = Projections.project(query, deletion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
-                Projection<GenomicRegion> projection = projections.get(0);
+                Projection<Located> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
                 assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
@@ -76,18 +99,18 @@ public class ProjectionsTest {
             TestContig ctg1 = TestContig.of(0, 100);
             Route deletion = Route.of(
                     List.of(
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(20), "upstream", Event.GAP, 1),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(30), "duplication", Event.DUPLICATION, 2),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(50), "downstream", Event.GAP, 1)
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 20, "upstream", Event.GAP, 1),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 30, "duplication", Event.DUPLICATION, 2),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 30, 50, "downstream", Event.GAP, 1)
                     ));
 
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
+            Located query = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
 
-            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
+            List<Projection<Located>> projections = Projections.project(query, deletion);
 
             assertThat(projections, hasSize(expectedSize));
             if (!projections.isEmpty()) {
-                Projection<GenomicRegion> projection = projections.get(0);
+                Projection<Located> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
                 assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
@@ -110,21 +133,21 @@ public class ProjectionsTest {
             TestContig ctg1 = TestContig.of(0, 100);
             Route deletion = Route.of(
                     List.of(
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(20), "upstream", Event.GAP, 1),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(30), "duplication", Event.DUPLICATION, 2),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(30), Position.of(50), "downstream", Event.GAP, 1)
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 20, "upstream", Event.GAP, 1),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 30, "duplication", Event.DUPLICATION, 2),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 30, 50, "downstream", Event.GAP, 1)
                     ));
 
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
+            Located query = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
 
-            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
+            List<Projection<Located>> projections = Projections.project(query, deletion);
 
             assertThat(projections, hasSize(expectedNumberOfItems));
             if (!projections.isEmpty()) {
                 int deletionSegmentIdx = 1; // the deletion segment is the 1th element of `deletion` list
-                Projection<GenomicRegion> projection = Projection.builder(deletion, query, deletion.neoContig(), Strand.POSITIVE, CoordinateSystem.zeroBased())
-                        .start(Position.of(expectedStart)).setStartEvent(Projection.Location.of(deletionSegmentIdx, startEvent))
-                        .end(Position.of(expectedEnd)).setEndEvent(Projection.Location.of(deletionSegmentIdx, endEvent))
+                Projection<Located> projection = Projection.builder(deletion, query, deletion.neoContig(), Strand.POSITIVE, CoordinateSystem.zeroBased())
+                        .start(expectedStart).setStartEvent(Projection.Location.of(deletionSegmentIdx, startEvent))
+                        .end(expectedEnd).setEndEvent(Projection.Location.of(deletionSegmentIdx, endEvent))
                         .build();
                 assertThat(projections, hasItem(projection));
             }
@@ -142,18 +165,18 @@ public class ProjectionsTest {
                                        Event startEvent, Event endEvent, String spannedEvents) {
             TestContig ctg1 = TestContig.of(0, 100);
             Route insertion = Route.of(List.of(
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(20), "upstream", Event.GAP, 1),
-                    Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(20), "insertion", 20),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "downstream", Event.GAP, 1)
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 20, "upstream", Event.GAP, 1),
+                    Segment.insertion(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 20, "insertion", 20),
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40, "downstream", Event.GAP, 1)
             ));
 
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
+            Located query = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
 
-            List<Projection<GenomicRegion>> projections = Projections.project(query, insertion);
+            List<Projection<Located>> projections = Projections.project(query, insertion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
-                Projection<GenomicRegion> projection = projections.get(0);
+                Projection<Located> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
                 assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
@@ -178,18 +201,18 @@ public class ProjectionsTest {
                                        Event startEvent, Event endEvent, String spannedEvents) {
             TestContig ctg1 = TestContig.of(0, 100);
             Route inversion = Route.of(List.of(
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(20), "upstream", Event.GAP, 1),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "inversion", Event.INVERSION, 1),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(70), "downstream", Event.GAP, 1)
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 20, "upstream", Event.GAP, 1),
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40, "inversion", Event.INVERSION, 1),
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 40, 70, "downstream", Event.GAP, 1)
             ));
 
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
+            Located query = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
 
-            List<Projection<GenomicRegion>> projections = Projections.project(query, inversion);
+            List<Projection<Located>> projections = Projections.project(query, inversion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
-                Projection<GenomicRegion> projection = projections.get(0);
+                Projection<Located> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
                 assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
@@ -206,26 +229,26 @@ public class ProjectionsTest {
         public void inv() {
             TestContig ctg1 = TestContig.of(0, 100);
             Route inversion = Route.of(List.of(
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(20), "upstream", Event.GAP, 1),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "inversion", Event.INVERSION, 1),
-                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(70), "downstream", Event.GAP, 1)
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 20, "upstream", Event.GAP, 1),
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40, "inversion", Event.INVERSION, 1),
+                    Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 40, 70, "downstream", Event.GAP, 1)
             ));
 
-            SortedSet<Projection<? extends GenomicRegion>> projections = new TreeSet<>(GenomicRegion::compare);
+            SortedSet<Projection<? extends Located>> projections = new TreeSet<>(GenomicRegion::compare);
 
-            GenomicRegion one = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(25), Position.of(30));
+            Located one = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 25, 30);
             projections.addAll(Projections.project(one, inversion));
-            GenomicRegion two = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(35), Position.of(40));
+            Located two = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 35, 40);
             projections.addAll(Projections.project(two, inversion));
 
             assertThat(projections, hasSize(2));
 
-            Projection<? extends GenomicRegion> first = projections.first();
+            Projection<? extends Located> first = projections.first();
             assertThat(first.start(), equalTo(30));
             assertThat(first.end(), equalTo(35));
             assertThat(first.spannedEvents(), is(empty()));
 
-            Projection<? extends GenomicRegion> last = projections.last();
+            Projection<? extends Located> last = projections.last();
             assertThat(last.start(), equalTo(40));
             assertThat(last.end(), equalTo(45));
             assertThat(last.spannedEvents(), is(empty()));
@@ -247,18 +270,18 @@ public class ProjectionsTest {
             TestContig ctg2 = TestContig.of(1, 200);
             Route breakend = Route.of(
                     List.of(
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(0), Position.of(20), "upstream", Event.GAP, 1),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(20), "bndA", Event.BREAKEND, 1),
-                            Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(120), Position.of(120), "bndB", Event.BREAKEND, 1),
-                            Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(120), Position.of(150), "downstream", Event.GAP, 1)
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 0, 20, "upstream", Event.GAP, 1),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 20, "bndA", Event.BREAKEND, 1),
+                            Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 120, 120, "bndB", Event.BREAKEND, 1),
+                            Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 120, 150, "downstream", Event.GAP, 1)
                     ));
 
-            GenomicRegion query = GenomicRegion.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-            List<Projection<GenomicRegion>> projections = Projections.project(query, breakend);
+            Located query = SimpleLocated.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
+            List<Projection<Located>> projections = Projections.project(query, breakend);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
             if (!projections.isEmpty()) {
-                Projection<GenomicRegion> projection = projections.get(0);
+                Projection<Located> projection = projections.get(0);
                 assertThat(projection.start(), equalTo(expectedStart));
                 assertThat(projection.startEvent(), equalTo(startEvent));
                 assertThat(projection.end(), equalTo(expectedEnd));
@@ -281,14 +304,14 @@ public class ProjectionsTest {
             TestContig ctg1 = TestContig.of(0, 100);
             Route deletion = Route.of(
                     List.of(
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "upstream", Event.GAP, 1),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "deletion", Event.DELETION, 0),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(60), "downstream", Event.GAP, 1)
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40, "upstream", Event.GAP, 1),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 40, 50, "deletion", Event.DELETION, 0),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 60, "downstream", Event.GAP, 1)
                     ));
 
-            GenomicRegion query = GenomicRegion.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
+            Located query = SimpleLocated.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), start, end);
 
-            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
+            List<Projection<Located>> projections = Projections.project(query, deletion);
 
             assertThat(!projections.isEmpty(), equalTo(expected));
         }
@@ -299,60 +322,16 @@ public class ProjectionsTest {
             TestContig ctg2 = TestContig.of(1, 200);
             Route deletion = Route.of(
                     List.of(
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "upstream", Event.GAP, 1),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "deletion", Event.DELETION, 0),
-                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(60), "downstream", Event.GAP, 1)
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 20, 40, "upstream", Event.GAP, 1),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 40, 50, "deletion", Event.DELETION, 0),
+                            Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), 50, 60, "downstream", Event.GAP, 1)
                     ));
 
-            GenomicRegion query = GenomicRegion.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(25), Position.of(35));
-            List<Projection<GenomicRegion>> projections = Projections.project(query, deletion);
+            Located query = SimpleLocated.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), 25, 35);
+            List<Projection<Located>> projections = Projections.project(query, deletion);
 
             assertThat(projections.isEmpty(), equalTo(true));
         }
 
-    }
-
-
-//    @ParameterizedTest
-//    @CsvSource({
-//            "one,  30,  55,   true, 10, 25",
-//            "two, 130, 160,   true, 30, 65",
-//
-//            // trimmed
-//            "one,  30,  45,   true, 10, 20",
-//    })
-//    @Disabled
-//    public void projectOnDelBndDup(String ctg, int start, int end, boolean expected, int expectedStart, int expectedEnd) {
-//        TestContig ctg1 = TestContig.of(0, 100);
-//        TestContig ctg2 = TestContig.of(1, 200);
-//        Route delBnd = Route.of(
-//                List.of(
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(20), Position.of(40), "upstream", Event.GAP, 1),      // 20 (20)
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(40), Position.of(50), "deletion", Event.DELETION, 0),      // 0  (20)
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(50), Position.of(55), "gap-1", Event.GAP, 1),         // 5  (25)
-//                        Segment.of(ctg1, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(55), Position.of(55), "bndA", Event.BREAKEND, 1),          // 0  (25)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(125), Position.of(125), "bndB", Event.BREAKEND, 1),        // 0  (25)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(125), Position.of(145), "gap-2", Event.GAP, 1),       // 20 (45)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(145), Position.of(150), "duplication", Event.DUPLICATION, 2), // 10 (55)
-//                        Segment.of(ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(150), Position.of(180), "downstream", Event.GAP, 1)   // 30 (85)
-//                ));
-//
-//        GenomicRegion query = GenomicRegion.of(ctg.equals("one") ? ctg1 : ctg2, Strand.POSITIVE, CoordinateSystem.zeroBased(), Position.of(start), Position.of(end));
-//
-//        List<Projection<GenomicRegion>> projectOpt = Projections.projectAll(query, delBnd);
-//
-//        assertThat(!projectOpt.isEmpty(), equalTo(expected));
-//        if (!projectOpt.isEmpty()) {
-//            Projection<GenomicRegion> projection = projectOpt.get(0);
-//            assertThat(projection.start(), equalTo(expectedStart));
-//            assertThat(projection.end(), equalTo(expectedEnd));
-//        }
-//    }
-
-    private static void printOutProjection(Projection<GenomicRegion> projection) {
-        System.err.println(projection.startLocation());
-        System.err.println(projection.endLocation());
-        System.err.println(projection.spannedLocations());
-        System.err.println(projection.source());
     }
 }

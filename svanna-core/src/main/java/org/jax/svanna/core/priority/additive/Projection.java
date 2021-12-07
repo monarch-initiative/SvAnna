@@ -1,6 +1,7 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.monarchinitiative.svart.*;
+import xyz.ielis.silent.genes.model.Located;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,27 +10,28 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Projection<T>> {
+public class Projection<T extends Located> extends BaseGenomicRegion<Projection<T>> {
 
     private final T source;
 
     private final Route route;
 
-    private Projection(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition,
+    private final Location startLocation;
+    private final Location endLocation;
+    private final Set<Location> spannedLocations;
+
+    private Projection(Contig contig, Strand strand, Coordinates coordinates,
                        T source, Route route, Location startLocation, Location endLocation, Set<Location> spannedLocations) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+        super(contig, strand, coordinates);
         this.source = source;
         this.route = route;
         this.startLocation = startLocation;
         this.endLocation = endLocation;
         this.spannedLocations = spannedLocations;
     }
-    private final Location startLocation;
-    private final Location endLocation;
-    private final Set<Location> spannedLocations;
 
     private Projection(Builder<T> builder) {
-        this(builder.contig, builder.strand, builder.coordinateSystem, builder.start, builder.end,
+        this(builder.contig, builder.strand, builder.coordinates,
                 Objects.requireNonNull(builder.source),
                 Objects.requireNonNull(builder.route),
                 Objects.requireNonNull(builder.startLocation),
@@ -118,15 +120,15 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
     }
 
     @Override
-    protected Projection<T> newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new Projection<>(contig, strand, coordinateSystem, startPosition, endPosition, source, route, startLocation, endLocation, spannedLocations);
+    protected Projection<T> newRegionInstance(Contig contig, Strand strand, Coordinates coordinates) {
+        return new Projection<>(contig, strand, coordinates, source, route, startLocation, endLocation, spannedLocations);
     }
 
-    static <T extends GenomicRegion> Builder<T> builder(Route route, T source, Contig contig, Strand strand, CoordinateSystem coordinateSystem) {
+    static <T extends Located> Builder<T> builder(Route route, T source, Contig contig, Strand strand, CoordinateSystem coordinateSystem) {
         return new Builder<>(source, route, contig, strand, coordinateSystem);
     }
 
-    static class Builder<T extends GenomicRegion> {
+    static class Builder<T extends Located> {
 
         private final T source;
 
@@ -140,7 +142,9 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
 
         private final Set<Location> spannedLocations = new HashSet<>(4);
 
-        private Position start, end;
+        private Coordinates coordinates;
+
+        private int start = -1, end = -1;
 
         private Location startLocation;
         private Location endLocation;
@@ -161,22 +165,22 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
             return endLocation;
         }
 
-        public Builder<T> start(Position start) {
+        public Builder<T> start(int start) {
             this.start = start;
             return self();
         }
 
         public boolean startFound() {
-            return start != null;
+            return start >= 0;
         }
 
-        public Builder<T> end(Position end) {
+        public Builder<T> end(int end) {
             this.end = end;
             return self();
         }
 
         public boolean endFound() {
-            return end != null;
+            return end >= 0;
         }
 
         public Builder<T> setStartEvent(Location startLocation) {
@@ -205,6 +209,7 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
         }
 
         public Projection<T> build() {
+            coordinates = Coordinates.of(coordinateSystem, start, end);
             return new Projection<>(self());
         }
 
@@ -214,6 +219,7 @@ public class Projection<T extends GenomicRegion> extends BaseGenomicRegion<Proje
         }
     }
 
+    // TODO make a proper class
     public static class Location {
         private final int segmentIdx;
         private final Event event;

@@ -21,7 +21,7 @@ public class Main implements Callable<Integer> {
 
     public static final int WIDTH = 120;
 
-    public static final String FOOTER = "See the full documentation at `https://github.com/TheJacksonLaboratory/svann`";
+    public static final String FOOTER = "See the full documentation at `https://svanna.readthedocs.io/en/latest`";
 
     private static final CommandLine.Help.ColorScheme COLOR_SCHEME = new CommandLine.Help.ColorScheme.Builder()
             .commands(bold, fg_blue, underline)
@@ -36,10 +36,9 @@ public class Main implements Callable<Integer> {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
+                .addSubcommand("generate-config", new GenerateConfigCommand())
                 .addSubcommand("download", new DownloadCommand())
-//                .addSubcommand("ingest", new IngestCommand())
-                .addSubcommand("build-db", new BuildDb())
-                .addSubcommand("generate-config", new GenerateConfigCommand());
+                .addSubcommand("build-db", new BuildDb());
 
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));

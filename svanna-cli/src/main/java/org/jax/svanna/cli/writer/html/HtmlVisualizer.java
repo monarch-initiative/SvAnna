@@ -3,19 +3,21 @@ package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.cli.writer.html.svg.*;
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.core.hpo.HpoDiseaseSummary;
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.EnhancerTissueSpecificity;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.TranscriptOverlap;
-import org.jax.svanna.core.reference.Gene;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.Zygosity;
+import org.jax.svanna.model.HpoDiseaseSummary;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -173,24 +175,27 @@ public class HtmlVisualizer implements Visualizer {
         }
         try {
             SvSvgGenerator gen;
-            //visualizable.repetitiveRegions()
+            List<Gene> genes = visualizable.genes();
+            List<Enhancer> enhancers = visualizable.enhancers();
+            List<RepetitiveRegion> repetitiveRegions = visualizable.repetitiveRegions();
+            List<DosageRegion> dosages = visualizable.dosageRegions();
             switch (variant.variantType().baseType()) {
                 case DEL:
-                    gen = new DeletionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new DeletionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INS:
-                    gen = new InsertionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new InsertionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INV:
-                    gen = new InversionSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new InversionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case DUP:
-                    gen = new DuplicationSvgGenerator(variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                    gen = new DuplicationSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case TRA:
                 case BND:
                     if (variant instanceof BreakendVariant) {
-                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, visualizable.genes(), visualizable.enhancers(), visualizable.repetitiveRegions());
+                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, genes, enhancers, repetitiveRegions);
                         break;
                     }
                     // fall through to default
@@ -287,7 +292,7 @@ public class HtmlVisualizer implements Visualizer {
 
     private String affectedSymbols(Visualizable visualizable) {
         List<String> genes = visualizable.genes().stream()
-                .map(Gene::geneSymbol)
+                .map(Gene::symbol)
                 .distinct()
                 .collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
@@ -303,7 +308,7 @@ public class HtmlVisualizer implements Visualizer {
     }
 
     private String numerousAffectedSymbols(Visualizable visualizable) {
-        List<String> genes = visualizable.genes().stream().map(Gene::geneSymbol).distinct().collect(toList());
+        List<String> genes = visualizable.genes().stream().map(Gene::symbol).distinct().collect(toList());
         if (genes.isEmpty()) { return "n/a"; }
         Collections.sort(genes);
         List<String> anchors = genes.stream().map(this::getGeneCardsLink).collect(toList());
@@ -378,7 +383,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<table class=\"vartab\">\n");
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
-        sb.append(itemValueRow("type", visualizable.getType()));
+        sb.append(itemValueRow("type", visualizable.variantType().toString()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
@@ -436,7 +441,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<table class=\"vartab\">\n");
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
-        sb.append(itemValueRow("type", visualizable.getType()));
+        sb.append(itemValueRow("type", visualizable.variantType().toString()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
@@ -513,7 +518,7 @@ public class HtmlVisualizer implements Visualizer {
      * @return HTML code that displays associated diseases
      */
     private String getDiseaseGenePrioritizationHtml(Visualizable visualizable) {
-        Set<HpoDiseaseSummary> diseases = visualizable.diseaseSummaries();
+        List<HpoDiseaseSummary> diseases = visualizable.diseaseSummaries();
         if (diseases.isEmpty()) {
             return "n/a";
         } else if (visualizable.getGeneCount() > THRESHOLD_GENE_COUNT_TO_SUPPRESS_DETAILS) {
@@ -554,7 +559,7 @@ public class HtmlVisualizer implements Visualizer {
             for (TranscriptOverlap txOverlap : olap.transcriptOverlaps()) {
                 String cat = txOverlap.getOverlapType().getName();
                 String description = txOverlap.getDescription();
-                sb.append(threeItemRow(gene.geneSymbol(), cat, description));
+                sb.append(threeItemRow(gene.symbol(), cat, description));
             }
         }
 

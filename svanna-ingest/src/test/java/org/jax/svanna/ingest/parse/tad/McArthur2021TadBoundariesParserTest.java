@@ -1,9 +1,12 @@
 package org.jax.svanna.ingest.parse.tad;
 
-import org.jax.svanna.core.landscape.TadBoundary;
 import org.jax.svanna.ingest.parse.population.GnomadSVFileParser;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicAssemblies;
+import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.Strand;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -30,13 +33,12 @@ public class McArthur2021TadBoundariesParserTest {
 
         TadBoundary first = records.get(0);
         assertThat(first.id(), equalTo("chr1:600000-700000"));
-        assertThat(first.asPosition(), equalTo(Position.of(714620, -50_000, 50_000)));
         assertThat((double) first.stability(), closeTo(0.65444404, 1E-8));
 
         assertThat(first.contig(), equalTo(genomicAssembly.contigByName("chr1")));
         assertThat(first.strand(), equalTo(Strand.POSITIVE));
         assertThat(first.coordinateSystem(), equalTo(CoordinateSystem.zeroBased()));
-        assertThat(first.start(), equalTo(664620));
-        assertThat(first.end(), equalTo(764620));
+        assertThat(first.start(), equalTo(664_620));
+        assertThat(first.end(), equalTo(764_620));
     }
 }

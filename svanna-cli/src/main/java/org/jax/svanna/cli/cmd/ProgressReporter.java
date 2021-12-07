@@ -1,6 +1,5 @@
 package org.jax.svanna.cli.cmd;
 
-import org.jax.svanna.core.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +43,7 @@ public class ProgressReporter {
             Instant begin = localBegin.getAndSet(end);
             Duration duration = Duration.between(begin, end);
             long ms = duration.toMillis();
-            LogUtils.logInfo(LOGGER, "Processed {} alleles at {} items/s", NUMBER_FORMAT.format(current), NUMBER_FORMAT.format(((double) tick * 1000) / ms));
+            LOGGER.info("Processed {} alleles at {} items/s", NUMBER_FORMAT.format(current), NUMBER_FORMAT.format(((double) tick * 1000) / ms));
         }
     }
 
@@ -56,7 +55,7 @@ public class ProgressReporter {
             double itemsPerSecond = (items * 1000) / totalMillis;
             long mins = (totalMillis / 1000) / 60 % 60;
             long seconds = totalMillis / 1000 % 60;
-            LogUtils.logInfo(LOGGER, "Processed {} alleles in {}m {}s ({} totalMillis) at {} items/s",
+            LOGGER.info("Processed {} alleles in {}m {}s ({} totalMillis) at {} items/s",
                     NUMBER_FORMAT.format(itemCount.get()), mins, seconds, totalMillis, NUMBER_FORMAT.format(itemsPerSecond));
         };
     }

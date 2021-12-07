@@ -1,8 +1,8 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.TadBoundary;
-import org.jax.svanna.core.landscape.TadBoundaryDefault;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
+import org.jax.svanna.model.landscape.tad.TadBoundaryDefault;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +57,7 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, item.contigId());
                 int start = item.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CS);
-                int midpoint = start + item.length() / 2;
+                int midpoint = start + item.location().length() / 2;
                 preparedStatement.setInt(2, start);
                 preparedStatement.setInt(3, item.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CS));
                 preparedStatement.setInt(4, midpoint);
@@ -168,12 +168,11 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
         Contig contig = genomicAssembly.contigById(rs.getInt("CONTIG"));
         int midpoint = rs.getInt("MIDPOINT");
 
-        Position pos = strand.isPositive()
-                ? Position.of(midpoint)
-                : Position.of(Coordinates.invertPosition(CS, contig, midpoint));
-        return TadBoundaryDefault.of(contig,
-                Strand.POSITIVE, CS,
-                pos, pos,
+        int pos = strand.isPositive()
+                ? midpoint
+                : Coordinates.invertPosition(CS, contig, midpoint);
+        GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CS, pos, pos);
+        return TadBoundaryDefault.of(location,
                 rs.getString("ID"),
                 rs.getFloat("STABILITY"));
     }

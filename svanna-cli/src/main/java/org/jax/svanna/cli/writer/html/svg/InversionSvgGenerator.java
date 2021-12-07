@@ -1,9 +1,10 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.Variant;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -18,9 +19,9 @@ public class InversionSvgGenerator extends SvSvgGenerator {
     public InversionSvgGenerator(Variant variant,
                                  List<Gene> genes,
                                  List<Enhancer> enhancers,
-                                 List<RepetitiveRegion> repeats) {
-        super(variant, genes, enhancers, repeats);
-        // TODO - check
+                                 List<RepetitiveRegion> repeats,
+                                 List<DosageRegion> dosageRegions) {
+        super(variant, genes, enhancers, repeats, dosageRegions);
         int pos1 = variant.start();
         int pos2 = variant.end();
         this.inversionGenomicStart = Math.min(pos1, pos2);
@@ -42,7 +43,7 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         }
         for (var gene : this.affectedGenes) {
             writeGene(gene, y, writer);
-            y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            y += gene.transcriptCount() * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);
     }

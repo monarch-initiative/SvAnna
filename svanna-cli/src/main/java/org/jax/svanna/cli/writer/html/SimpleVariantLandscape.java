@@ -1,8 +1,9 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,18 +15,27 @@ class SimpleVariantLandscape implements VariantLandscape {
      */
     private final SvannaVariant variant;
 
-    private final List<Enhancer> affectedEnhancers;
+    private final List<Enhancer> enhancers;
 
     private final List<GeneOverlap> overlaps;
 
-    static SimpleVariantLandscape of(SvannaVariant variant, List<GeneOverlap> overlaps, List<Enhancer> affectedEnhancers) {
-        return new SimpleVariantLandscape(variant, overlaps, affectedEnhancers);
+    private final List<DosageRegion> dosageRegions;
+
+    static SimpleVariantLandscape of(SvannaVariant variant,
+                                     List<GeneOverlap> overlaps,
+                                     List<Enhancer> enhancers,
+                                     List<DosageRegion> dosageRegions) {
+        return new SimpleVariantLandscape(variant, overlaps, enhancers, dosageRegions);
     }
 
-    protected SimpleVariantLandscape(SvannaVariant variant, List<GeneOverlap> overlaps, List<Enhancer> affectedEnhancers) {
+    protected SimpleVariantLandscape(SvannaVariant variant,
+                                     List<GeneOverlap> overlaps,
+                                     List<Enhancer> enhancers,
+                                     List<DosageRegion> dosageRegions) {
         this.variant = variant;
-        this.affectedEnhancers = affectedEnhancers;
+        this.enhancers = enhancers;
         this.overlaps = overlaps;
+        this.dosageRegions = dosageRegions;
     }
 
     @Override
@@ -40,7 +50,12 @@ class SimpleVariantLandscape implements VariantLandscape {
 
     @Override
     public List<Enhancer> enhancers() {
-        return affectedEnhancers;
+        return enhancers;
+    }
+
+    @Override
+    public List<DosageRegion> dosageRegions() {
+        return dosageRegions;
     }
 
     @Override
@@ -48,20 +63,21 @@ class SimpleVariantLandscape implements VariantLandscape {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SimpleVariantLandscape that = (SimpleVariantLandscape) o;
-        return Objects.equals(variant, that.variant) && Objects.equals(affectedEnhancers, that.affectedEnhancers) && Objects.equals(overlaps, that.overlaps);
+        return Objects.equals(variant, that.variant) && Objects.equals(enhancers, that.enhancers) && Objects.equals(overlaps, that.overlaps) && Objects.equals(dosageRegions, that.dosageRegions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(variant, affectedEnhancers, overlaps);
+        return Objects.hash(variant, enhancers, overlaps, dosageRegions);
     }
 
     @Override
     public String toString() {
         return "SimpleVariantLandscape{" +
                 "variant=" + variant +
-                ", affectedEnhancers=" + affectedEnhancers +
+                ", enhancers=" + enhancers +
                 ", overlaps=" + overlaps +
+                ", dosageRegions=" + dosageRegions +
                 '}';
     }
 }

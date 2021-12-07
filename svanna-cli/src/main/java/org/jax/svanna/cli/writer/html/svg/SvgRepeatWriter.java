@@ -2,7 +2,7 @@ package org.jax.svanna.cli.writer.html.svg;
 
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.Strand;
 
 import java.io.IOException;

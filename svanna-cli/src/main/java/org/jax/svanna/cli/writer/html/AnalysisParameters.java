@@ -1,6 +1,6 @@
 package org.jax.svanna.cli.writer.html;
 
-import org.jax.svanna.core.landscape.PopulationVariantOrigin;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,10 +12,6 @@ public class AnalysisParameters {
      * Path to SvAnna resource folder used in this analysis.
      */
     private String dataDirectory;
-    /**
-     * Path to Jannovar transcript database used in this analysis.
-     */
-    private String jannovarCachePath;
     /**
      * Path to phenopacket (null if not used).
      */
@@ -71,14 +67,6 @@ public class AnalysisParameters {
 
     public void setDataDirectory(String dataDirectory) {
         this.dataDirectory = dataDirectory;
-    }
-
-    public String jannovarCachePath() {
-        return jannovarCachePath;
-    }
-
-    public void setJannovarCachePath(String jannovarCachePath) {
-        this.jannovarCachePath = jannovarCachePath;
     }
 
     public String phenopacketPath() {

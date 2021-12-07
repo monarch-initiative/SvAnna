@@ -1,23 +1,29 @@
 package org.jax.svanna.core;
 
-import org.jax.svanna.core.landscape.TadBoundary;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svart.*;
 
 import java.util.Objects;
 
-public class TestTad extends BaseGenomicRegion<TestTad> implements TadBoundary {
+public class TestTad implements TadBoundary {
+
+    private final GenomicRegion location;
 
     private final String id;
 
-    public static TestTad of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int startPosition, int endPosition) {
-        return new TestTad(contig, strand, coordinateSystem, Position.of(startPosition), Position.of(endPosition), id);
-    }
-
-    protected TestTad(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition, String id) {
-        super(contig, strand, coordinateSystem, startPosition, endPosition);
+    protected TestTad(GenomicRegion location, String id) {
+        this.location = location;
         this.id = id;
     }
 
+    public static TestTad of(String id, Contig contig, Strand strand, CoordinateSystem coordinateSystem, int start, int end) {
+        return new TestTad(GenomicRegion.of(contig, strand, Coordinates.of(coordinateSystem, start, end)), id);
+    }
+
+    @Override
+    public GenomicRegion location() {
+        return location;
+    }
 
     @Override
     public String id() {
@@ -30,28 +36,23 @@ public class TestTad extends BaseGenomicRegion<TestTad> implements TadBoundary {
     }
 
     @Override
-    protected TestTad newRegionInstance(Contig contig, Strand strand, CoordinateSystem coordinateSystem, Position startPosition, Position endPosition) {
-        return new TestTad(contig, strand, coordinateSystem, startPosition, endPosition, id);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
         TestTad testTad = (TestTad) o;
-        return Objects.equals(id, testTad.id);
+        return Objects.equals(location, testTad.location) && Objects.equals(id, testTad.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), id);
+        return Objects.hash(location, id);
     }
 
     @Override
     public String toString() {
         return "TestTad{" +
-                "id='" + id + '\'' +
+                "location=" + location +
+                ", id='" + id + '\'' +
                 '}';
     }
 }

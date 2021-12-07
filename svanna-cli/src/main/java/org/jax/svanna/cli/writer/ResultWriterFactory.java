@@ -3,9 +3,9 @@ package org.jax.svanna.cli.writer;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.cli.writer.tabular.TabularResultWriter;
 import org.jax.svanna.cli.writer.vcf.VcfResultWriter;
-import org.jax.svanna.core.hpo.PhenotypeDataService;
-import org.jax.svanna.core.landscape.AnnotationDataService;
 import org.jax.svanna.core.overlap.GeneOverlapper;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.PhenotypeDataService;
 
 public class ResultWriterFactory {
 

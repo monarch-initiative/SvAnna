@@ -1,6 +1,14 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.*;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.core.service.GeneDosageDataService;
+import org.jax.svanna.model.landscape.dosage.Dosage;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
+import org.jax.svanna.model.landscape.tad.TadBoundary;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.GenomicRegion;
 
@@ -13,15 +21,18 @@ public class DbAnnotationDataService implements AnnotationDataService {
     private final AnnotationDao<RepetitiveRegion> repetitiveRegionDao;
     private final PopulationVariantDao populationVariantDao;
     private final AnnotationDao<TadBoundary> tadBoundaryDao;
+    private final GeneDosageDataService geneDosageDataService;
 
     public DbAnnotationDataService(EnhancerAnnotationDao enhancerAnnotationDao,
                                    AnnotationDao<RepetitiveRegion> repetitiveRegionDao,
                                    PopulationVariantDao populationVariantDao,
-                                   AnnotationDao<TadBoundary> tadBoundaryDao) {
+                                   AnnotationDao<TadBoundary> tadBoundaryDao,
+                                   GeneDosageDataService geneDosageDataService) {
         this.enhancerAnnotationDao = enhancerAnnotationDao;
         this.repetitiveRegionDao = repetitiveRegionDao;
         this.populationVariantDao = populationVariantDao;
         this.tadBoundaryDao = tadBoundaryDao;
+        this.geneDosageDataService = geneDosageDataService;
     }
 
     @Override
@@ -52,5 +63,20 @@ public class DbAnnotationDataService implements AnnotationDataService {
     @Override
     public List<TadBoundary> overlappingTadBoundaries(GenomicRegion query) {
         return tadBoundaryDao.getOverlapping(query);
+    }
+
+    @Override
+    public List<DosageRegion> dosageElements(GenomicRegion query) {
+        return geneDosageDataService.dosageElements(query);
+    }
+
+    @Override
+    public List<Dosage> geneDosageDataForHgncId(String hgncId) {
+        return geneDosageDataService.geneDosageDataForHgncId(hgncId);
+    }
+
+    @Override
+    public List<Dosage> geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
+        return geneDosageDataService.geneDosageDataForHgncIdAndRegion(hgncId, query);
     }
 }

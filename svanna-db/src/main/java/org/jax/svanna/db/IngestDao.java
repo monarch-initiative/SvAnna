@@ -1,8 +1,8 @@
 package org.jax.svanna.db;
 
-import org.monarchinitiative.svart.GenomicRegion;
+import xyz.ielis.silent.genes.model.Located;
 
-public interface IngestDao<T extends GenomicRegion> {
+public interface IngestDao<T extends Located> {
 
     int insertItem(T item);
 }

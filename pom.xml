@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>svanna-core</module>
+        <module>svanna-model</module>
         <module>svanna-test</module>
         <module>svanna-io</module>
         <module>svanna-ingest</module>
@@ -18,7 +19,7 @@
         <module>svanna-benchmark</module>
     </modules>
     <groupId>org.jax.svanna</groupId>
-    <version>1.0.0-RC3</version>
+    <version>1.0.0-RC4</version>
     <name>SvAnna</name>
 
     <parent>
@@ -38,12 +39,14 @@
         <phenopacket.version>1.0.0</phenopacket.version>
         <protobuf.version>3.8.0</protobuf.version>
         <jannovar.version>0.35</jannovar.version>
+        <silent.genes.version>0.0.1-SNAPSHOT</silent.genes.version>
         <htsjdk.version>2.23.0</htsjdk.version>
         <spring-boot-starter.version>2.5.1</spring-boot-starter.version>
-        <svart.version>1.0.0</svart.version>
+        <svart.version>2.0.0-SNAPSHOT</svart.version>
         <commons-io.version>2.8.0</commons-io.version>
         <commons-csv.version>1.7</commons-csv.version>
         <commons-compress.version>1.21</commons-compress.version>
+        <commons-net.version>3.8.0</commons-net.version>
     </properties>
 
     <developers>
@@ -107,12 +110,6 @@
                 <groupId>org.monarchinitiative.phenol</groupId>
                 <artifactId>phenol-core</artifactId>
                 <version>${phenol.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.monarchinitiative.phenol</groupId>
@@ -123,6 +120,26 @@
                 <groupId>org.monarchinitiative.phenol</groupId>
                 <artifactId>phenol-annotations</artifactId>
                 <version>${phenol.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-model</artifactId>
+                <version>${silent.genes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-gencode</artifactId>
+                <version>${silent.genes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-jannovar</artifactId>
+                <version>${silent.genes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>xyz.ielis.silent.genes</groupId>
+                <artifactId>silent-genes-io</artifactId>
+                <version>${silent.genes.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.samtools</groupId>
@@ -172,6 +189,11 @@
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>
             </dependency>
+            <dependency>
+                <groupId>commons-net</groupId>
+                <artifactId>commons-net</artifactId>
+                <version>${commons-net.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -187,5 +209,38 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>2.5.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.3.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

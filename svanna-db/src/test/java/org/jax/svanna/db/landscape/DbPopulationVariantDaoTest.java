@@ -1,6 +1,6 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;

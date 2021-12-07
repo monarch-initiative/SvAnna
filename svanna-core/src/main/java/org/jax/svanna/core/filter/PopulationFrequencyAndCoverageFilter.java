@@ -1,11 +1,11 @@
 package org.jax.svanna.core.filter;
 
 import org.jax.svanna.core.LogUtils;
-import org.jax.svanna.core.landscape.AnnotationDataService;
-import org.jax.svanna.core.landscape.PopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.VariantMetadata;
+import org.jax.svanna.core.service.AnnotationDataService;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class PopulationFrequencyAndCoverageFilter {
             for (PopulationVariant populationVariant : populationVariants) {
                 if (populationVariant.variantType().baseType() == item.variantType().baseType()
                         && populationVariant.alleleFrequency() >= frequencyThreshold
-                        && FilterUtils.reciprocalOverlap(populationVariant, item) * 100.F > similarityThreshold) {
+                        && FilterUtils.reciprocalOverlap(populationVariant.location(), item) * 100.F > similarityThreshold) {
                     freqFilterResult = FF_FAIL;
                     break;
                 }

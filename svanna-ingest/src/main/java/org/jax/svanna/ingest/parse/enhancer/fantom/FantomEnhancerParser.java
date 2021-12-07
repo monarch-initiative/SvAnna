@@ -22,7 +22,10 @@ public class FantomEnhancerParser implements IngestRecordParser<FEnhancer> {
     private final Path samplesPath;
     private final Map<TermId, HpoMapping> uberonToHpoMap;
 
-    public FantomEnhancerParser(GenomicAssembly assembly, Path countsPath, Path samplesPath, Map<TermId, HpoMapping> uberonToHpoMap) {
+    public FantomEnhancerParser(GenomicAssembly assembly,
+                                Path countsPath,
+                                Path samplesPath,
+                                Map<TermId, HpoMapping> uberonToHpoMap) {
         this.assembly = assembly;
         this.countsPath = countsPath;
         this.samplesPath = samplesPath;

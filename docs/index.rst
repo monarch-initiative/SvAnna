@@ -16,6 +16,7 @@ of germline variants.
    running
    outputformats
    tutorial
+   examples
 
 
 .. enhancers

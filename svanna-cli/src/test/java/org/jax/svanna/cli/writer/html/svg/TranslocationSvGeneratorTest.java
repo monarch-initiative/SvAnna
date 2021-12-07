@@ -1,10 +1,9 @@
 package org.jax.svanna.cli.writer.html.svg;
 
 import org.jax.svanna.cli.TestDataConfig;
-import org.jax.svanna.core.landscape.Enhancer;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.core.overlap.GeneOverlapper;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -12,6 +11,7 @@ import org.monarchinitiative.svart.BreakendVariant;
 import org.monarchinitiative.svart.Variant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

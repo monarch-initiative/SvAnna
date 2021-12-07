@@ -1,9 +1,9 @@
 package org.jax.svanna.db.landscape;
 
-import org.jax.svanna.core.landscape.BasePopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariant;
-import org.jax.svanna.core.landscape.PopulationVariantOrigin;
 import org.jax.svanna.db.IngestDao;
+import org.jax.svanna.model.landscape.variant.BasePopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariant;
+import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +62,11 @@ public class DbPopulationVariantDao implements PopulationVariantDao, IngestDao<P
                     if (LOGGER.isWarnEnabled()) LOGGER.warn("Unknown contig id `{}`", rs.getInt("CONTIG"));
                     continue;
                 }
-                regions.add(BasePopulationVariant.of(contig,
-                        Strand.POSITIVE, CoordinateSystem.zeroBased(),
-                        Position.of(rs.getInt("START")), Position.of(rs.getInt("END")),
-                        rs.getString("ID"), VariantType.valueOf(rs.getString("VARIANT_TYPE")),
-                        rs.getFloat("ALLELE_FREQUENCY"), origin));
+                regions.add(
+                        BasePopulationVariant.of(
+                                GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), rs.getInt("START"), rs.getInt("END")),
+                                rs.getString("ID"), VariantType.valueOf(rs.getString("VARIANT_TYPE")),
+                                rs.getFloat("ALLELE_FREQUENCY"), origin));
             }
         }
         return regions;

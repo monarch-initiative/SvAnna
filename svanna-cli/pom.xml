@@ -5,7 +5,7 @@
     <parent>
         <artifactId>SvAnna</artifactId>
         <groupId>org.jax.svanna</groupId>
-        <version>1.0.0-RC3</version>
+        <version>1.0.0-RC4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>svanna-cli</artifactId>
@@ -58,12 +58,19 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -81,6 +88,7 @@
                                     <includes>
                                         <include>example.csv</include>
                                         <include>example.vcf</include>
+                                        <include>run_examples.sh</include>
                                     </includes>
                                 </resource>
                             </resources>

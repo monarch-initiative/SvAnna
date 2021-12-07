@@ -2,28 +2,28 @@ package org.jax.svanna.core.priority.additive;
 
 import org.monarchinitiative.svart.GenomicRegion;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 public class Routes {
 
-    private final Set<GenomicRegion> references;
-    private final Set<Route> alternates;
+    private final List<GenomicRegion> references;
+    private final List<Route> alternates;
 
-    public static Routes of(Set<GenomicRegion> references, Set<Route> alternates) {
+    public static Routes of(List<GenomicRegion> references, List<Route> alternates) {
         return new Routes(references, alternates);
     }
 
-    private Routes(Set<GenomicRegion> references, Set<Route> alternates) {
+    private Routes(List<GenomicRegion> references, List<Route> alternates) {
         this.references = references;
         this.alternates = alternates;
     }
 
-    public Set<GenomicRegion> references() {
+    public List<GenomicRegion> references() {
         return references;
     }
 
-    public Set<Route> alternates() {
+    public List<Route> alternates() {
         return alternates;
     }
 

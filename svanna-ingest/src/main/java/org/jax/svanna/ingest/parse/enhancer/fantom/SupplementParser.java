@@ -2,6 +2,8 @@ package org.jax.svanna.ingest.parse.enhancer.fantom;
 
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,6 +21,9 @@ import java.util.Map;
  * @author Peter N Robinson
  */
 public class SupplementParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SupplementParser.class);
+
     /** Key is a sample id such as CNhs12597. Value is a term id such as CL:0000359. */
     Map<String, TermId> fantomSampleToTermIdMap;
     Map<String, TermId> fantomSampleToHpoIdMap;
@@ -28,7 +33,7 @@ public class SupplementParser {
 
     public SupplementParser(Map<TermId, HpoMapping> hpoMappingMap) {
         fantomSampleToHpoMappingMap = new HashMap<>();
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s10.csv")))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s10.tsv")))) {
             String line;
             br.readLine(); // discard header
             while ((line=br.readLine()) != null) {
@@ -46,7 +51,7 @@ public class SupplementParser {
             e.printStackTrace();
         }
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s11.csv")))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(SupplementParser.class.getResourceAsStream("/andersson-2014-table_s11.tsv")))) {
             String line;
             br.readLine(); // discard header
             while ((line=br.readLine()) != null) {
@@ -61,8 +66,7 @@ public class SupplementParser {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.printf("[INFO] Imported %d samples with CL/UBERON ids.\n",
-                fantomSampleToHpoMappingMap.size());
+        LOGGER.info("Imported {} samples with CL/UBERON ids.", fantomSampleToHpoMappingMap.size());
 
     }
 

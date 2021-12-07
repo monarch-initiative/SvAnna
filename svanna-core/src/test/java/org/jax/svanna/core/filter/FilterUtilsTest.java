@@ -3,7 +3,10 @@ package org.jax.svanna.core.filter;
 import org.jax.svanna.core.TestContig;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicRegion;
+import org.monarchinitiative.svart.Strand;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
@@ -32,8 +35,8 @@ public class FilterUtilsTest {
                                   float expected) {
         Contig contig = TestContig.of(1, 100);
 
-        GenomicRegion left = GenomicRegion.of(contig, leftStrand, CoordinateSystem.zeroBased(), Position.of(leftStart), Position.of(leftEnd));
-        GenomicRegion right = GenomicRegion.of(contig, rightStrand, CoordinateSystem.zeroBased(), Position.of(rightStart), Position.of(rightEnd));
+        GenomicRegion left = GenomicRegion.of(contig, leftStrand, CoordinateSystem.zeroBased(), leftStart, leftEnd);
+        GenomicRegion right = GenomicRegion.of(contig, rightStrand, CoordinateSystem.zeroBased(), rightStart, rightEnd);
 
         assertThat((double) FilterUtils.reciprocalOverlap(left, right), closeTo(expected, TOLERANCE));
         assertThat((double) FilterUtils.reciprocalOverlap(right, left), closeTo(expected, TOLERANCE));
@@ -55,8 +58,8 @@ public class FilterUtilsTest {
                                Strand targetStrand, int targetStart, int targetEnd,
                                double expected) {
         Contig contig = TestContig.of(1, 100);
-        GenomicRegion query = GenomicRegion.of(contig, queryStrand, CoordinateSystem.zeroBased(), Position.of(queryStart), Position.of(queryEnd));
-        GenomicRegion target = GenomicRegion.of(contig, targetStrand, CoordinateSystem.zeroBased(), Position.of(targetStart), Position.of(targetEnd));
+        GenomicRegion query = GenomicRegion.of(contig, queryStrand, CoordinateSystem.zeroBased(), queryStart, queryEnd);
+        GenomicRegion target = GenomicRegion.of(contig, targetStrand, CoordinateSystem.zeroBased(), targetStart, targetEnd);
 
         assertThat((double) FilterUtils.fractionShared(query, target), closeTo(expected, TOLERANCE));
     }

@@ -1,9 +1,10 @@
 package org.jax.svanna.cli.writer.html.svg;
 
-import org.jax.svanna.core.landscape.Enhancer;
-import org.jax.svanna.core.landscape.RepetitiveRegion;
-import org.jax.svanna.core.reference.Gene;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
+import org.jax.svanna.model.landscape.enhancer.Enhancer;
+import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.Variant;
+import xyz.ielis.silent.genes.model.Gene;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -11,11 +12,20 @@ import java.util.List;
 
 public class DeletionSvgGenerator extends SvSvgGenerator {
 
+
+    /**
+     * @param variant a structural variant (SV)
+     * @param genes gene or genes that overlap with the SV
+     * @param enhancers enhancers that overlap with the SV
+     * @param repeats repeat regions that overlap with the SV
+     * @param dosageRegions triplo/haplosensitive regions that overlap with the SV
+     */
     public DeletionSvgGenerator(Variant variant,
                                 List<Gene> genes,
                                 List<Enhancer> enhancers,
-                                List<RepetitiveRegion> repeats) {
-        super(variant, genes, enhancers, repeats);
+                                List<RepetitiveRegion> repeats,
+                                List<DosageRegion> dosageRegions) {
+        super(variant, genes, enhancers, repeats, dosageRegions);
     }
 
 
@@ -32,6 +42,7 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
         String deletionDescription = String.format("%s deletion", deletionLength);
         writeDeletion(starty, deletionDescription, writer);
         y += 100;
+        y = writeDosage(writer, y);
         y = writeRepeats(writer, y);
         for (var e : affectedEnhancers) {
             writeEnhancer(e, y, writer);
@@ -39,7 +50,7 @@ public class DeletionSvgGenerator extends SvSvgGenerator {
         }
         for (var gene : affectedGenes) {
             writeGene(gene, y, writer);
-            y += gene.transcripts().size() * Constants.HEIGHT_PER_DISPLAY_ITEM;
+            y += gene.transcriptCount() * Constants.HEIGHT_PER_DISPLAY_ITEM;
         }
         writeScale(writer, y);
     }

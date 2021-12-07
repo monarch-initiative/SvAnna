@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>SvAnna</artifactId>
+        <groupId>org.jax.svanna</groupId>
+        <version>1.0.0-RC4</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>svanna-model</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.monarchinitiative.svart</groupId>
+            <artifactId>svart</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>xyz.ielis.silent.genes</groupId>
+            <artifactId>silent-genes-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-core</artifactId>
+        </dependency>
+
+        <!--    TESTS    -->
+        <dependency>
+            <groupId>org.jax.svanna</groupId>
+            <artifactId>svanna-test</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-annotations</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

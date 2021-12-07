@@ -8,7 +8,6 @@ import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
-import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.PopulationFrequencyAndCoverageFilter;
 import org.jax.svanna.core.priority.*;
 import org.jax.svanna.core.service.AnnotationDataService;
@@ -136,7 +135,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
                 .distinct()
                 .collect(Collectors.toCollection(LinkedList::new));
         if (vcfFiles.size() != 1) {
-            LogUtils.logWarn(LOGGER, "Expected to find 1 VCF file, found {}", vcfFiles.size());
+            LOGGER.warn("Expected to find 1 VCF file, found {}", vcfFiles.size());
             return Optional.empty();
         }
 
@@ -146,7 +145,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             URI uri = new URI(vcf.getUri());
             return Optional.of(Path.of(uri));
         } catch (URISyntaxException e) {
-            LogUtils.logWarn(LOGGER, "Invalid URI `{}`: {}", vcf.getUri(), e.getMessage());
+            LOGGER.warn("Invalid URI `{}`: {}", vcf.getUri(), e.getMessage());
             return Optional.empty();
         }
     }
@@ -176,7 +175,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
 
                 vcfFile = vcfFilePathOptional.get();
             } catch (IOException e) {
-                LogUtils.logError(LOGGER, "Error reading phenopacket at `{}`: {}", phenopacketPath, e.getMessage());
+                LOGGER.error("Error reading phenopacket at `{}`: {}", phenopacketPath, e.getMessage());
                 return 1;
             }
         }
@@ -189,32 +188,32 @@ public class PrioritizeCommand extends SvAnnaCommand {
             return 1;
         }
 
-        LogUtils.logInfo(LOGGER, "The analysis has completed successfully. Bye");
+        LOGGER.info("The analysis has completed successfully. Bye");
         return 0;
     }
 
     protected int checkArguments() {
         if ((vcfFile == null) == (phenopacketPath == null)) {
-            LogUtils.logError(LOGGER, "Path to a VCF file or to a phenopacket must be supplied");
+            LOGGER.error("Path to a VCF file or to a phenopacket must be supplied");
             return 1;
         }
 
         if (phenopacketPath != null && !hpoTermIdList.isEmpty()) {
-            LogUtils.logError(LOGGER, "Passing HPO terms both through CLI and Phenopacket is not supported");
+            LOGGER.error("Passing HPO terms both through CLI and Phenopacket is not supported");
             return 1;
         }
 
         if (parallelism < 1) {
-            LogUtils.logError(LOGGER, "Thread number must be positive: {}", parallelism);
+            LOGGER.error("Thread number must be positive: {}", parallelism);
             return 1;
         }
         int processorsAvailable = Runtime.getRuntime().availableProcessors();
         if (parallelism > processorsAvailable) {
-            LogUtils.logWarn(LOGGER, "You asked for more threads ({}) than processors ({}) available on the system", parallelism, processorsAvailable);
+            LOGGER.warn("You asked for more threads ({}) than processors ({}) available on the system", parallelism, processorsAvailable);
         }
 
         if (outputFormats.isEmpty()) {
-            LogUtils.logError(LOGGER, "Aborting the analysis since no valid output format was provided");
+            LOGGER.error("Aborting the analysis since no valid output format was provided");
             return 1;
         }
         return 0;
@@ -243,19 +242,19 @@ public class PrioritizeCommand extends SvAnnaCommand {
             // check that the HPO terms entered by the user (if any) are valid
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
 
-            LogUtils.logDebug(LOGGER, "Validating the provided phenotype terms");
+            LOGGER.debug("Validating the provided phenotype terms");
             Set<Term> validatedPatientTerms = phenotypeDataService.validateTerms(patientTerms);
-            LogUtils.logDebug(LOGGER, "Preparing the top-level phenotype terms for the input terms");
+            LOGGER.debug("Preparing the top-level phenotype terms for the input terms");
             Set<Term> topLevelHpoTerms = phenotypeDataService.getTopLevelTerms(validatedPatientTerms);
 
-            LogUtils.logInfo(LOGGER, "Reading variants from `{}`", vcfFile);
+            LOGGER.info("Reading variants from `{}`", vcfFile);
             VariantParser<FullSvannaVariant> parser = new VcfVariantParser(genomicAssembly);
             List<FullSvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
-            LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
+            LOGGER.info("Read {} variants", NF.format(variants.size()));
 
             // Filter
-            LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", overlapThreshold, frequencyThreshold);
-            LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
+            LOGGER.info("Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", overlapThreshold, frequencyThreshold);
+            LOGGER.info("Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
             PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, overlapThreshold, frequencyThreshold, minAltReadSupport);
             List<FullSvannaVariant> filteredVariants = filter.filter(variants);

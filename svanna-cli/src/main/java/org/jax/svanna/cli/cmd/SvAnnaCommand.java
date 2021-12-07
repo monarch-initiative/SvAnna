@@ -1,7 +1,6 @@
 package org.jax.svanna.cli.cmd;
 
 import org.jax.svanna.cli.writer.ResultWriterFactory;
-import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
@@ -32,7 +31,7 @@ public abstract class SvAnnaCommand implements Callable<Integer> {
 
     protected ConfigurableApplicationContext getContext() {
         // bootstrap Spring application context
-        LogUtils.logDebug(LOGGER, "Using SvAnna configuration file at `{}`", configFile.toAbsolutePath());
+        LOGGER.debug("Using SvAnna configuration file at `{}`", configFile.toAbsolutePath());
         return new SpringApplicationBuilder(SvAnnaCommand.class)
                 .properties(Map.of("spring.config.location", configFile.toString()))
                 .run();

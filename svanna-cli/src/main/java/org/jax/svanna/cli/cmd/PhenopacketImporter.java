@@ -3,7 +3,6 @@ package org.jax.svanna.cli.cmd;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
-import org.jax.svanna.core.LogUtils;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -62,7 +61,7 @@ public class PhenopacketImporter {
     }
 
     public static Phenopacket readPhenopacket(Path phenopacketPath) throws IOException {
-        LogUtils.logInfo(logger, "Reading phenopacket from `{}`", phenopacketPath.toAbsolutePath());
+        logger.info("Reading phenopacket from `{}`", phenopacketPath.toAbsolutePath());
         try (BufferedReader reader = Files.newBufferedReader(phenopacketPath)) {
             String phenopacketJsonString = reader.lines().collect(Collectors.joining(System.lineSeparator()));
             Phenopacket.Builder phenoPacketBuilder = Phenopacket.newBuilder();

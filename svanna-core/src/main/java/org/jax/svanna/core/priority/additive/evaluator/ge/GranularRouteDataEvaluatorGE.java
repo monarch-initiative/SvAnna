@@ -35,9 +35,9 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
         this.enhancerGeneRelevanceCalculator = enhancerGeneRelevanceCalculator;
     }
 
-    private static <T, U extends Collection<T>> int countItemsInCollections(Map<Contig, U> genesByContig) {
+    private static <T, U extends Collection<T>> int countItemsInCollections(Map<?, U> items) {
         int count = 0;
-        for (U genes : genesByContig.values()) {
+        for (U genes : items.values()) {
             count += genes.size();
         }
         return count;
@@ -62,32 +62,32 @@ public class GranularRouteDataEvaluatorGE implements RouteDataEvaluator<RouteDat
     private Map<String, Double> evaluateReference(List<GenomicRegion> references,
                                                   Set<Gene> genes,
                                                   Set<Enhancer> enhancers) {
-        Map<Contig, GenomicRegion> referenceByContig = new HashMap<>(references.size());
+        Map<Integer, GenomicRegion> referenceByContig = new HashMap<>(references.size());
         for (GenomicRegion reference : references) {
-            if (referenceByContig.put(reference.contig(), reference) != null)
+            if (referenceByContig.put(reference.contigId(), reference) != null)
                 // Although there might be a legitimate situation for having two reference regions on the same contig,
                 // we do not support this at the moment
                 throw new EvaluationException("Saw two reference regions for the same contig " + reference.contigName());
         }
 
         // Group genes, and enhancers by contig
-        Map<Contig, List<Gene>> genesByContig = genes.stream()
-                .collect(Collectors.groupingBy(Located::contig, Collectors.toUnmodifiableList()));
-        Map<Contig, List<Enhancer>> enhancersByContig = enhancers.stream()
-                .collect(Collectors.groupingBy(Located::contig, Collectors.toUnmodifiableList()));
+        Map<Integer, List<Gene>> genesByContig = genes.stream()
+                .collect(Collectors.groupingBy(Located::contigId, Collectors.toUnmodifiableList()));
+        Map<Integer, List<Enhancer>> enhancersByContig = enhancers.stream()
+                .collect(Collectors.groupingBy(Located::contigId, Collectors.toUnmodifiableList()));
 
         int nGenes = countItemsInCollections(genesByContig);
         Map<String, Double> results = new HashMap<>(nGenes);
 
         // Process each reference
-        for (Contig contig : referenceByContig.keySet()) {
+        for (Integer contig : referenceByContig.keySet()) {
             // Score within reference
-            List<Enhancer> tadEnhancers = enhancersByContig.getOrDefault(contig, List.of());
+            List<Enhancer> enhancersOnContig = enhancersByContig.getOrDefault(contig, List.of());
             for (Gene gene : genesByContig.getOrDefault(contig, List.of())) {
                 double geneImpact = geneImpactCalculator.noImpact();
                 double geneRelevance = Math.exp(geneWeightCalculator.calculateRelevance(gene));
                 double enhancerRelevance = 0.;
-                for (Enhancer enhancer : tadEnhancers) {
+                for (Enhancer enhancer : enhancersOnContig) {
                     enhancerRelevance += enhancerImpactCalculator.noImpact() * enhancerGeneRelevanceCalculator.calculateRelevance(enhancer);
                 }
                 double score = geneImpact * geneRelevance + enhancerRelevance;

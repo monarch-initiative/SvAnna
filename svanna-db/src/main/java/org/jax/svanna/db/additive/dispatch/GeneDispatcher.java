@@ -118,7 +118,7 @@ public class GeneDispatcher implements Dispatcher {
                 upstreamBound = Math.min(upstreamBound, result.upstream().get().startOnStrandWithCoordinateSystem(STRAND, CS));
 
             if (result.downstream().isPresent())
-                downstreamBound = Math.min(downstreamBound, result.downstream().get().endOnStrandWithCoordinateSystem(STRAND, CS));
+                downstreamBound = Math.max(downstreamBound, result.downstream().get().endOnStrandWithCoordinateSystem(STRAND, CS));
         }
 
         return GenomicRegion.of(variantRegion.contig(), STRAND, CS, upstreamBound, downstreamBound);

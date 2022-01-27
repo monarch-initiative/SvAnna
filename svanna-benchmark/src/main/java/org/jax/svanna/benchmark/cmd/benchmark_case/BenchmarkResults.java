@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.cmd.benchmark_case;
 
 import java.util.List;
 import java.util.Objects;

@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.io;
 
 import java.util.Objects;
 
@@ -14,7 +14,7 @@ public class CaseSummary {
     private final String gene;
     private final String probandId;
 
-    static CaseSummary of(String phenopacketId, String firstAuthor, String pmid, String year, String gene, String probandId) {
+    public static CaseSummary of(String phenopacketId, String firstAuthor, String pmid, String year, String gene, String probandId) {
         return new CaseSummary(phenopacketId, firstAuthor, pmid, year, gene, probandId);
     }
 

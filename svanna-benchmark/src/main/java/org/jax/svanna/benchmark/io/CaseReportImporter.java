@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.io;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
@@ -30,7 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-class CaseReportImporter {
+public class CaseReportImporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CaseReportImporter.class);
 

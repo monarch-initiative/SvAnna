@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.cmd;
 
 import org.jax.svanna.core.LogUtils;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
 
 @Configuration
 @EnableAutoConfiguration
-abstract class BaseBenchmarkCommand implements Callable<Integer> {
+public abstract class BaseBenchmarkCommand implements Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseBenchmarkCommand.class);
 

@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.io;
 
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -6,7 +6,7 @@ import org.monarchinitiative.phenol.ontology.data.TermId;
 import java.util.Collection;
 import java.util.Objects;
 
-class CaseReport {
+public class CaseReport {
 
     private final CaseSummary caseSummary;
     private final Collection<TermId> patientTerms;

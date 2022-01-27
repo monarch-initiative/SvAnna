@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.cmd.benchmark_case;
 
 import org.jax.svanna.core.priority.SvPriority;
 import org.monarchinitiative.svart.Variant;

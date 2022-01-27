@@ -1,6 +1,6 @@
 package org.jax.svanna.io.service;
 
-import de.charite.compbio.jannovar.impl.intervals.IntervalEndExtractor;
+import org.jax.svanna.io.service.jannovar.IntervalEndExtractor;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
 import xyz.ielis.silent.genes.model.Gene;

@@ -1,13 +1,10 @@
 package org.jax.svanna.core;
 
-import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.core.service.QueryResult;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssembly;
 import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Strand;
 import xyz.ielis.silent.genes.io.GeneParser;
 import xyz.ielis.silent.genes.io.GeneParserFactory;
 import xyz.ielis.silent.genes.io.SerializationFormat;
@@ -25,7 +22,7 @@ import java.util.zip.GZIPInputStream;
 
 class SilentGenesGeneService implements GeneService {
 
-    private final Map<Integer, IntervalArray<Gene>> chromosomeMap;
+    private final Map<Integer, List<Gene>> chromosomeMap;
 
     private final Map<TermId, Gene> genesByTermId;
 
@@ -42,20 +39,13 @@ class SilentGenesGeneService implements GeneService {
                 .filter(g -> g.id().hgncId().isPresent())
                 .collect(Collectors.toUnmodifiableMap(gene -> TermId.of(gene.id().hgncId().get()), Function.identity()));
 
-        Map<Integer, Set<Gene>> geneByContig = geneBySymbol.values().stream()
-                .collect(Collectors.groupingBy(Gene::contigId, Collectors.toUnmodifiableSet()));
+        Map<Integer, List<Gene>> geneByContig = geneBySymbol.values().stream()
+                .collect(Collectors.groupingBy(Gene::contigId, Collectors.toUnmodifiableList()));
 
-        Map<Integer, IntervalArray<Gene>> intervalArrayMap = new HashMap<>();
-        for (int contig : geneByContig.keySet()) {
-            Set<Gene> genesOnContig = geneByContig.get(contig);
-            IntervalArray<Gene> intervalArray = new IntervalArray<>(genesOnContig, GeneEndExtractor.instance());
-            intervalArrayMap.put(contig, intervalArray);
-        }
-
-        return new SilentGenesGeneService(Map.copyOf(intervalArrayMap), geneBySymbol);
+        return new SilentGenesGeneService(geneByContig, geneBySymbol);
     }
 
-    private SilentGenesGeneService(Map<Integer, IntervalArray<Gene>> chromosomeMap, Map<TermId, Gene> genesByTermId) {
+    private SilentGenesGeneService(Map<Integer, List<Gene>> chromosomeMap, Map<TermId, Gene> genesByTermId) {
         this.chromosomeMap = chromosomeMap;
         this.genesByTermId = genesByTermId;
     }
@@ -68,15 +58,25 @@ class SilentGenesGeneService implements GeneService {
 
     @Override
     public QueryResult<Gene> overlappingGenes(GenomicRegion query) {
-        IntervalArray<Gene> array = chromosomeMap.get(query.contigId());
-        if (array == null)
+        List<Gene> genesOnContig = chromosomeMap.get(query.contigId());
+        if (genesOnContig == null)
             return QueryResult.empty();
 
-        IntervalArray<Gene>.QueryResult result = query.length() == 0
-                ? array.findOverlappingWithPoint(query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
-                : array.findOverlappingWithInterval(query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()), query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+        List<Gene> entries = genesOnContig.stream()
+                .filter(g -> g.location().overlapsWith(query))
+                .collect(Collectors.toList());
 
-        return QueryResult.of(result.getEntries(), result.getLeft(), result.getRight());
+        // this should be correct, but I'm not 100% sure
+        Gene upstream = genesOnContig.stream()
+                .filter(g -> query.distanceTo(g.location()) < 0)
+                .max((l, r) -> GenomicRegion.compare(l.location(), r.location()))
+                .orElse(null);
+        Gene downstream = genesOnContig.stream()
+                .filter(g -> query.distanceTo(g.location()) > 0)
+                .min((l, r) -> GenomicRegion.compare(l.location(), r.location()))
+                .orElse(null);
+
+        return QueryResult.of(entries, upstream, downstream);
     }
 
 }

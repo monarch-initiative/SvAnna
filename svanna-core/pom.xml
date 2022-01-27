@@ -35,11 +35,6 @@
             <artifactId>phenol-annotations</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>de.charite.compbio</groupId>
-            <artifactId>jannovar-core</artifactId>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
 </project>

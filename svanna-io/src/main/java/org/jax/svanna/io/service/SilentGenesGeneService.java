@@ -1,9 +1,9 @@
 package org.jax.svanna.io.service;
 
-import de.charite.compbio.jannovar.impl.intervals.IntervalArray;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.core.service.QueryResult;
+import org.jax.svanna.io.service.jannovar.IntervalArray;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicAssembly;

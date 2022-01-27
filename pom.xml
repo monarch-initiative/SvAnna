@@ -38,7 +38,6 @@
         <phenol.version>2.0.0-RC1</phenol.version>
         <phenopacket.version>1.0.0</phenopacket.version>
         <protobuf.version>3.8.0</protobuf.version>
-        <jannovar.version>0.35</jannovar.version>
         <silent.genes.version>0.0.1-SNAPSHOT</silent.genes.version>
         <htsjdk.version>2.23.0</htsjdk.version>
         <spring-boot-starter.version>2.5.1</spring-boot-starter.version>

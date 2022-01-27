@@ -22,7 +22,7 @@ public interface Enhancer extends Located {
     default Set<TermId> hpoTermAssociations() {
         return tissueSpecificity().stream()
                 .map(EnhancerTissueSpecificity::hpoTerm)
-                .map(Term::getId)
+                .map(Term::id)
                 .collect(Collectors.toUnmodifiableSet());
     }
 

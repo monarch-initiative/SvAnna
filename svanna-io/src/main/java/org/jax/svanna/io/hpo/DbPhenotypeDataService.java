@@ -34,9 +34,9 @@ public class DbPhenotypeDataService implements PhenotypeDataService {
     public Set<Term> getTopLevelTerms(Collection<Term> hpoTermIds) {
         HpoCategoryMap catmap = new HpoCategoryMap();
         Ontology ontology = ontology();
-        catmap.addAnnotatedTerms(hpoTermIds.stream().map(Term::getId).collect(Collectors.toList()), ontology);
+        catmap.addAnnotatedTerms(hpoTermIds.stream().map(Term::id).collect(Collectors.toList()), ontology);
         return catmap.getActiveCategoryList().stream()
-                .map(HpoCategory::getTid)
+                .map(HpoCategory::id)
                 .filter(termId -> ontology.getTermMap().containsKey(termId))
                 .map(termId -> ontology.getTermMap().get(termId))
                 .collect(Collectors.toUnmodifiableSet());

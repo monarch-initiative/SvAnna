@@ -36,7 +36,7 @@ public class VistaEnhancerParserTest extends AbstractEnhancerParserTest {
         assertThat(enhancer.id(), equalTo("element 1"));
         assertThat(enhancer.isDevelopmental(), equalTo(true));
         assertThat(enhancer.tissueSpecificity(), hasSize(2));
-        assertThat(enhancer.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::getId).collect(Collectors.toSet()),
+        assertThat(enhancer.tissueSpecificity().stream().map(EnhancerTissueSpecificity::tissueTerm).map(Term::id).collect(Collectors.toSet()),
                 hasItems(TermId.of("UBERON:0001049"), TermId.of("UBERON:0007277")));
         assertThat(enhancer.tissueSpecificity().stream().map(EnhancerTissueSpecificity::hpoTerm).map(Term::getName).collect(Collectors.toSet()),
                 hasItems("Morphological central nervous system abnormality", "Abnormality of hindbrain morphology"));

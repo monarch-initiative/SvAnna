@@ -80,7 +80,7 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
                 .filter(hpoDisease -> hpoDisease.getDiseaseDatabaseId() != null)
                 .map(disease -> HpoDiseaseSummary.of(
                         disease.getDiseaseDatabaseId().getValue(),
-                        disease.getName()))
+                        disease.getDiseaseName()))
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -99,9 +99,9 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
     @Override
     public Set<Term> getTopLevelTerms(Collection<Term> hpoTermIds) {
         HpoCategoryMap catmap = new HpoCategoryMap();
-        catmap.addAnnotatedTerms(hpoTermIds.stream().map(Term::getId).collect(Collectors.toList()), ontology);
+        catmap.addAnnotatedTerms(hpoTermIds.stream().map(Term::id).collect(Collectors.toList()), ontology);
         return catmap.getActiveCategoryList().stream()
-                .map(HpoCategory::getTid)
+                .map(HpoCategory::id)
                 .filter(termId -> ontology.getTermMap().containsKey(termId))
                 .map(termId -> ontology.getTermMap().get(termId))
                 .collect(Collectors.toUnmodifiableSet());

@@ -4,15 +4,12 @@ import com.google.common.collect.Sets;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.annotations.obo.hpo.HpoDiseaseAnnotationParser;
-import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -27,14 +24,8 @@ public class IcMicaCalculator {
     private IcMicaCalculator() {
     }
 
-    public static Map<TermPair, Double> precomputeIcMicaValues(Path ontologyPath, Path hpoAnnotationsPath) {
-        LogUtils.logInfo(LOGGER, "Reading ontology file at `{}`", ontologyPath.toAbsolutePath());
-        Ontology ontology = OntologyLoader.loadOntology(ontologyPath.toFile());
-
-        LogUtils.logInfo(LOGGER, "Reading phenotype annotations file at `{}`", hpoAnnotationsPath.toAbsolutePath());
-        List<String> databases = List.of("OMIM"); // restrict ourselves to OMIM entries
-        Map<TermId, HpoDisease> diseaseMap = HpoDiseaseAnnotationParser.loadDiseaseMap(hpoAnnotationsPath.toString(), ontology, databases);
-
+    public static Map<TermPair, Double> precomputeIcMicaValues(Ontology ontology,
+                                                               Map<TermId, HpoDisease> diseaseMap) {
         LogUtils.logInfo(LOGGER, "Computing information contents of most informative common ancestor terms");
         Map<TermId, Collection<TermId>> diseaseIdToTermIds = new HashMap<>();
         Map<TermId, Collection<TermId>> termIdToDiseaseIds = new HashMap<>();

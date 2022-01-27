@@ -38,7 +38,7 @@ public class HtmlTemplate {
                         Collection<Term> originalHpoTerms,
                         AnalysisParameters analysisParameters) {
         Map<TermId, String> originalTermMap = originalHpoTerms.stream()
-                .collect(Collectors.toMap(Term::getId, Term::getName));
+                .collect(Collectors.toMap(Term::id, Term::getName));
 
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_0)));
         cfg.setDefaultEncoding("UTF-8");

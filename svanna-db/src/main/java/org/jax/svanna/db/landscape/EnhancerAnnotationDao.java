@@ -88,9 +88,9 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
                 // insert tissue specificity
                 for (EnhancerTissueSpecificity ets : enhancer.tissueSpecificity()) {
                     tissueSpecPs.setInt(1, enhancerId);
-                    tissueSpecPs.setString(2, ets.tissueTerm().getId().getValue());
+                    tissueSpecPs.setString(2, ets.tissueTerm().id().getValue());
                     tissueSpecPs.setString(3, ets.tissueTerm().getName());
-                    tissueSpecPs.setString(4, ets.hpoTerm().getId().getValue());
+                    tissueSpecPs.setString(4, ets.hpoTerm().id().getValue());
                     tissueSpecPs.setString(5, ets.hpoTerm().getName());
                     tissueSpecPs.setDouble(6, ets.specificityValue());
                     updated += tissueSpecPs.executeUpdate();

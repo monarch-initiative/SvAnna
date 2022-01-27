@@ -89,11 +89,11 @@ public class VistaEnhancerParser implements IngestRecordParser<Enhancer> {
                 }
 
                 Term uberon = Term.of(matcher.group("termId"), matcher.group("termName"));
-                if (!uberonToHpoMap.containsKey(uberon.getId())) {
-                    if (LOGGER.isWarnEnabled()) LOGGER.warn("{} not found", uberon.getId().getValue());
+                if (!uberonToHpoMap.containsKey(uberon.id())) {
+                    if (LOGGER.isWarnEnabled()) LOGGER.warn("{} not found", uberon.id().getValue());
                     continue;
                 }
-                HpoMapping hpoMapping = uberonToHpoMap.get(uberon.getId());
+                HpoMapping hpoMapping = uberonToHpoMap.get(uberon.id());
                 Term hpo = Term.of(hpoMapping.getHpoTermId(), hpoMapping.getHpoLabel());
 
                 EnhancerTissueSpecificity specificity = EnhancerTissueSpecificity.of(uberon, hpo, VISTA_TISSUE_SCORE);

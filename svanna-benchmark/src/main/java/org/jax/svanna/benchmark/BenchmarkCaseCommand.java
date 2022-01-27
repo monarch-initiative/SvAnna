@@ -123,7 +123,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             // get and validate patient terms
             Collection<TermId> patientTerms = caseReport.patientTerms();
             Set<Term> validatedPatientTerms = phenotypeDataService.validateTerms(patientTerms);
-            Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::getId).collect(Collectors.toSet());
+            Set<TermId> validatedPatientTermIds = validatedPatientTerms.stream().map(Term::id).collect(Collectors.toSet());
 
             // create the prioritizer seeded by the phenotype terms and prioritize the variants
             SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(validatedPatientTermIds);

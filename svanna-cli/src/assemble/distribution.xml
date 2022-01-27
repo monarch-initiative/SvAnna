@@ -12,8 +12,9 @@
             <filtered>true</filtered>
             <includes>
                 <include>README.md</include>
-                <include>LICENSE.txt</include>
+                <include>LICENSE</include>
                 <include>CHANGELOG.rst</include>
+                <include>legal/*</include>
             </includes>
         </fileSet>
         <fileSet>

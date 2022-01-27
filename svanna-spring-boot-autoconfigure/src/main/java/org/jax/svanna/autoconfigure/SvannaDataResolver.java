@@ -31,7 +31,7 @@ public class SvannaDataResolver {
     }
 
     public Path hpOntologyPath() {
-        return svannaDataDirectory.resolve("hp.obo");
+        return svannaDataDirectory.resolve("hp.json");
     }
 
     public Path phenotypeHpoaPath() {

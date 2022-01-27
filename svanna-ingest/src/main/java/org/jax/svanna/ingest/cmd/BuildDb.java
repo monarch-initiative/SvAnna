@@ -170,9 +170,9 @@ public class BuildDb implements Callable<Integer> {
                                                         Path tmpDir,
                                                         List<? extends GencodeGene> genes,
                                                         Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
-        // OBO ontology belongs to the buildDir
-        URL hpoOboUrl = new URL(properties.hpoOboUrl());
-        Path hpoOboPath = downloadUrl(hpoOboUrl, buildDir);
+        // JSON ontology belongs to the buildDir
+        URL hpoJsonUrl = new URL(properties.hpoJsonUrl());
+        Path hpoOboPath = downloadUrl(hpoJsonUrl, buildDir);
 
         // other files are temporary
         // HPOA

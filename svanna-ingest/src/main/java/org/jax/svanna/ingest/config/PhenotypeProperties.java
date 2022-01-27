@@ -5,17 +5,17 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "svanna.ingest.phenotype")
 public class PhenotypeProperties {
 
-    private String hpoOboUrl;
+    private String hpoJsonUrl;
     private String hpoAnnotationsUrl;
     private String mim2geneMedgenUrl;
     private String geneInfoUrl;
 
-    public String hpoOboUrl() {
-        return hpoOboUrl;
+    public String hpoJsonUrl() {
+        return hpoJsonUrl;
     }
 
-    public void setHpoOboUrl(String hpoOboUrl) {
-        this.hpoOboUrl = hpoOboUrl;
+    public void setHpoJsonUrl(String hpoJsonUrl) {
+        this.hpoJsonUrl = hpoJsonUrl;
     }
 
     public String hpoAnnotationsUrl() {

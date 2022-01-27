@@ -56,7 +56,7 @@ public class HtmlResultWriter implements ResultWriter {
         Path outPath = Path.of(outString);
         LogUtils.logInfo(LOGGER, "Writing HTML results to {}", outPath.toAbsolutePath());
 
-        LogUtils.logDebug(LOGGER, "Reporting {} variants sorted by priority", analysisParameters.topNVariantsReported());
+        LogUtils.logDebug(LOGGER, "Reporting up to {} variants sorted by priority", analysisParameters.topNVariantsReported());
         // Add data required to create the header summary table in the HTML report (genes, enhancers, etc.)
         List<VariantLandscape> variantLandscapes = results.variants().stream()
                 .sorted(prioritizedVariantComparator())

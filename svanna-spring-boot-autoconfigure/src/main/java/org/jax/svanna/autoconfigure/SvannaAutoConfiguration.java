@@ -150,7 +150,7 @@ public class SvannaAutoConfiguration {
     @Bean
     public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver,
                                                      DataSource svannaDatasource) {
-        LOGGER.debug("Reading HPO obo file from {}", svannaDataResolver.hpOntologyPath().toAbsolutePath());
+        LOGGER.debug("Reading HPO file from {}", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
 
         GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(svannaDatasource);

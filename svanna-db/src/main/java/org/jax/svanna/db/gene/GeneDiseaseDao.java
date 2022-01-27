@@ -56,7 +56,7 @@ public class GeneDiseaseDao {
         return jdbcTemplate.query("select DISEASE_ID, TERM_ID from SVANNA.DISEASE_TO_PHENOTYPE", DISEASE_TO_PHENOTYPES_EXTRACTOR);
     }
 
-    public Map<String, List<HpoDiseaseSummary>> geneToDiseases() {
+    public Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDiseases() {
         return jdbcTemplate.query("select distinct gd.HGNC_ID, hd.DISEASE_ID, hd.DISEASE_NAME " +
                         " from SVANNA.GENE_TO_DISEASE gd " +
                         "   join SVANNA.HPO_DISEASE_SUMMARY hd " +

@@ -25,7 +25,7 @@ public interface PhenotypeDataService {
 
     Stream<GeneIdentifier> geneWithIds();
 
-    List<HpoDiseaseSummary> getDiseasesForGene(String accession);
+    List<HpoDiseaseSummary> getDiseasesForGene(String hgncId);
 
     List<TermId> phenotypicAbnormalitiesForDiseaseId(String diseaseId);
 
@@ -33,13 +33,9 @@ public interface PhenotypeDataService {
 
     // --------------------------------- DERIVED METHODS ---------------------------------------------------------------
 
-    default Map<String, List<GeneIdentifier>> geneBySymbol() {
+    default Map<String, List<GeneIdentifier>> geneByHgvsSymbol() {
         return geneWithIds()
                 .collect(Collectors.groupingBy(GeneIdentifier::symbol, Collectors.toUnmodifiableList()));
-    }
-
-    default List<HpoDiseaseSummary> getDiseasesForGene(TermId gene) {
-        return getDiseasesForGene(gene.getValue());
     }
 
     /**

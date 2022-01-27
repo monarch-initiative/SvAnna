@@ -71,10 +71,10 @@ public class PhenotypeDataServiceDefault implements PhenotypeDataService {
 
 
     @Override
-    public List<HpoDiseaseSummary> getDiseasesForGene(String accession) {
-        if (!geneToDiseaseIdMap.containsKey(accession))
+    public List<HpoDiseaseSummary> getDiseasesForGene(String hgncId) {
+        if (!geneToDiseaseIdMap.containsKey(hgncId))
             return List.of();
-        return geneToDiseaseIdMap.get(accession).stream()
+        return geneToDiseaseIdMap.get(hgncId).stream()
                 .map(diseaseIdToDisease::get)
                 .filter(Objects::nonNull)
                 .filter(hpoDisease -> hpoDisease.getDiseaseDatabaseId() != null)

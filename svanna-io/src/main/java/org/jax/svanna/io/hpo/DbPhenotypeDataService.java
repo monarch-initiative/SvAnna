@@ -17,16 +17,16 @@ public class DbPhenotypeDataService implements PhenotypeDataService {
 
     private final Ontology ontology;
     private final List<GeneIdentifier> geneIdentifiers;
-    private final Map<String, List<HpoDiseaseSummary>> geneToDiseases;
+    private final Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDisease;
     private final Map<String, List<TermId>> phenotypicAbnormalitiesForDiseaseId;
 
     public DbPhenotypeDataService(Ontology ontology,
                                   List<GeneIdentifier> geneIdentifiers,
-                                  Map<String, List<HpoDiseaseSummary>> geneToDiseases,
+                                  Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDisease,
                                   Map<String, List<TermId>> phenotypicAbnormalitiesForDiseaseId) {
         this.ontology = Objects.requireNonNull(ontology, "Ontology must not be null");
         this.geneIdentifiers = Objects.requireNonNull(geneIdentifiers, "Gene identifiers must not be null");
-        this.geneToDiseases = Objects.requireNonNull(geneToDiseases, "Gene to diseases must not be null");
+        this.hgncGeneIdToDisease = Objects.requireNonNull(hgncGeneIdToDisease, "HGNC gene ID to diseases must not be null");
         this.phenotypicAbnormalitiesForDiseaseId = Objects.requireNonNull(phenotypicAbnormalitiesForDiseaseId, "Phenotypic abnormalities for disease ID must not be null");
     }
 
@@ -53,8 +53,8 @@ public class DbPhenotypeDataService implements PhenotypeDataService {
     }
 
     @Override
-    public List<HpoDiseaseSummary> getDiseasesForGene(String accession) {
-        return geneToDiseases.getOrDefault(accession, List.of());
+    public List<HpoDiseaseSummary> getDiseasesForGene(String hgncId) {
+        return hgncGeneIdToDisease.getOrDefault(hgncId, List.of());
     }
 
     @Override

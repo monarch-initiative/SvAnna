@@ -36,7 +36,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     private final PhenotypeDataService phenotypeDataService;
 
-    private final Map<String, List<GeneIdentifier>> geneMap;
+    private final Map<String, List<GeneIdentifier>> hgvsSymbolToGeneIdentifier;
 
     public VisualizableGeneratorSimple(GeneOverlapper overlapper,
                                        AnnotationDataService annotationDataService,
@@ -44,7 +44,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         this.overlapper = overlapper;
         this.annotationDataService = annotationDataService;
         this.phenotypeDataService = phenotypeDataService;
-        this.geneMap = phenotypeDataService.geneBySymbol();
+        this.hgvsSymbolToGeneIdentifier = phenotypeDataService.geneByHgvsSymbol();
     }
 
     private static List<DosageRegion> mergeOverlappingDosageRegions(List<DosageRegion> dosageRegions) {
@@ -145,11 +145,15 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         List<DosageRegion> dosageRegions = mergeOverlappingDosageRegions(variantLandscape.dosageRegions());
 
         List<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
+                // get gene IDs from the overlaps
                 .map(geneOverlap -> geneOverlap.gene().symbol())
-                .filter(geneMap::containsKey)
-                .map(geneMap::get)
+                .map(key -> hgvsSymbolToGeneIdentifier.getOrDefault(key, List.of()))
                 .flatMap(Collection::stream)
-                .map(id -> phenotypeDataService.getDiseasesForGene(id.accession()))
+                // get HGNC IDs from gene IDs
+                .flatMap(id -> id.hgncId().stream()) // only work with gene IDs that have HGNC id
+                .distinct()
+                // get associated diseases for HGNC IDs
+                .map(phenotypeDataService::getDiseasesForGene)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableList());
 

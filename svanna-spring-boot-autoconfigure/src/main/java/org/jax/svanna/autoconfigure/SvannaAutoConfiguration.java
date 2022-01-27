@@ -149,15 +149,15 @@ public class SvannaAutoConfiguration {
 
     @Bean
     public PhenotypeDataService phenotypeDataService(SvannaDataResolver svannaDataResolver,
-                                                     DataSource svannaDatasource) throws UndefinedResourceException, IOException {
+                                                     DataSource svannaDatasource) {
         LOGGER.debug("Reading HPO obo file from {}", svannaDataResolver.hpOntologyPath().toAbsolutePath());
         Ontology ontology = OntologyLoader.loadOntology(svannaDataResolver.hpOntologyPath().toFile());
 
         GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(svannaDatasource);
         List<GeneIdentifier> geneIdentifiers = geneDiseaseDao.geneIdentifiers();
-        Map<String, List<HpoDiseaseSummary>> geneToDiseases = geneDiseaseDao.geneToDiseases();
+        Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDiseases = geneDiseaseDao.hgncGeneIdToDiseases();
         Map<String, List<TermId>> phenotypicAbnormalitiesForDiseaseId = geneDiseaseDao.diseaseToPhenotypes();
-        return new DbPhenotypeDataService(ontology, geneIdentifiers, geneToDiseases, phenotypicAbnormalitiesForDiseaseId);
+        return new DbPhenotypeDataService(ontology, geneIdentifiers, hgncGeneIdToDiseases, phenotypicAbnormalitiesForDiseaseId);
     }
 
     @Bean

@@ -1,6 +1,7 @@
 package org.jax.svanna.benchmark;
 
 import org.jax.svanna.benchmark.cmd.benchmark_case.BenchmarkCaseCommand;
+import org.jax.svanna.benchmark.cmd.remap.RemapVariantsCommand;
 import picocli.CommandLine;
 
 import java.util.Locale;
@@ -35,7 +36,8 @@ public class Main implements Callable<Integer>  {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
-                .addSubcommand("benchmark-case", new BenchmarkCaseCommand());
+                .addSubcommand("benchmark-case", new BenchmarkCaseCommand())
+                .addSubcommand("remap-variants", new RemapVariantsCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));
     }

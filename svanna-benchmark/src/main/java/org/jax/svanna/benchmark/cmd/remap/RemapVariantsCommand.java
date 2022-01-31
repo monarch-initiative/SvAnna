@@ -1,0 +1,134 @@
+package org.jax.svanna.benchmark.cmd.remap;
+
+import htsjdk.variant.vcf.VCFFileReader;
+import org.jax.svanna.benchmark.Main;
+import org.jax.svanna.benchmark.cmd.remap.lift.LiftFullSvannaVariant;
+import org.jax.svanna.benchmark.cmd.remap.write.BedWriter;
+import org.jax.svanna.benchmark.cmd.remap.write.FullSvannaVariantWriter;
+import org.jax.svanna.benchmark.cmd.remap.write.SvTool;
+import org.jax.svanna.benchmark.cmd.remap.write.VcfWriter;
+import org.jax.svanna.io.FullSvannaVariant;
+import org.jax.svanna.io.parse.VariantParser;
+import org.jax.svanna.io.parse.VcfVariantParser;
+import org.monarchinitiative.svart.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import picocli.CommandLine;
+
+import java.nio.file.Path;
+import java.text.NumberFormat;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@CommandLine.Command(name = "remap-variants",
+        aliases = {"RV"},
+        header = "Remap structural variants.",
+        mixinStandardHelpOptions = true,
+        version = Main.VERSION,
+        usageHelpWidth = Main.WIDTH,
+        footer = Main.FOOTER)
+public class RemapVariantsCommand implements Callable<Integer> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemapVariantsCommand.class);
+
+    private static final NumberFormat NF = NumberFormat.getNumberInstance();
+
+    static {
+        NF.setMaximumFractionDigits(2);
+    }
+
+    @CommandLine.Option(names = "--genomic-assembly",
+            description = "target genomic assembly [GRCh37, GRCh38] (default: ${DEFAULT-VALUE})")
+    public String genomicAssemblyVersion = "GRCh38";
+
+    @CommandLine.Option(names = "--output-format",
+            description = "output format [VCF, BED], (default: ${DEFAULT-VALUE})")
+    public String outputFormat = "VCF";
+
+    @CommandLine.Option(names = "--liftover-chain",
+            description = "path to Liftover chain for conversion from GRCh38 to GRCh37. Must be provided if `--genomic-assembly GRCh37`")
+    public Path liftoverChainPath;
+
+    @CommandLine.Option(names = "--bed-output-format",
+            type = SvTool.class,
+            description = "format BED output for the tool ([X_CNV, CLASSIFY_CNV])")
+    public SvTool tool;
+
+    @CommandLine.Parameters(
+            index = "0",
+            description = "path to VCF file with structural variants")
+    public Path inputVcfPath;
+
+    @CommandLine.Parameters(
+            index = "1",
+            description = "where to store the output file")
+    public Path outputPath;
+
+    private LiftFullSvannaVariant lift;
+
+    @Override
+    public Integer call() throws Exception {
+        // 1. read input variants
+        LOGGER.info("Reading variants from {}", inputVcfPath.toAbsolutePath());
+        VariantParser<? extends FullSvannaVariant> parser = new VcfVariantParser(GenomicAssemblies.GRCh38p13());
+        List<? extends FullSvannaVariant> variants = parser.createVariantAlleleList(inputVcfPath);
+        String sampleName = readSampleName(inputVcfPath);
+
+        LOGGER.info("Read {} variants", NF.format(variants.size()));
+
+        // 2. remap if necessary
+        boolean convertToGrch37 = "GRCh37".equals(genomicAssemblyVersion);
+        if (convertToGrch37) {
+            LOGGER.info("Remapping variants to GRCh37");
+            lift = new LiftFullSvannaVariant(GenomicAssemblies.GRCh37p13(), liftoverChainPath);
+        }
+
+        List<FullSvannaVariant> remappedVariants = variants.stream()
+                .map(convertCoordinates(convertToGrch37))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toList());
+        LOGGER.info("Remapped {} variants", NF.format(remappedVariants.size()));
+
+        // 3. format to VCF or BED & write
+        return writeVariants(sampleName, remappedVariants);
+    }
+
+    private Function<? super FullSvannaVariant, Optional<? extends FullSvannaVariant>> convertCoordinates(boolean convertToGrch37) {
+        return variant -> {
+            if (!convertToGrch37) {
+                // no-op
+                return Optional.of(variant);
+            } else {
+                return lift.lift(variant);
+            }
+        };
+    }
+
+    private int writeVariants(String sampleName, List<FullSvannaVariant> remappedVariants) {
+        boolean convertToBed = "BED".equals(outputFormat);
+        LOGGER.info("Storing variants in {} format into {} ", outputPath.toAbsolutePath(), outputFormat);
+        FullSvannaVariantWriter writer;
+        if (convertToBed) {
+            if (tool == null) {
+                LOGGER.error("`--bed-output-format` option must be set when writing output in BED format");
+                return 1;
+            }
+            writer = new BedWriter(outputPath, tool);
+        } else {
+            writer = new VcfWriter(sampleName, outputPath);
+        }
+
+        int writtenLines = writer.write(remappedVariants);
+        LOGGER.info("Stored {} variants", NF.format(writtenLines));
+        return 0;
+    }
+
+    private static String readSampleName(Path inputVcfPath) {
+        try (VCFFileReader reader = new VCFFileReader(inputVcfPath, false)) {
+            return reader.getFileHeader().getSampleNamesInOrder().get(0);
+        }
+    }
+}

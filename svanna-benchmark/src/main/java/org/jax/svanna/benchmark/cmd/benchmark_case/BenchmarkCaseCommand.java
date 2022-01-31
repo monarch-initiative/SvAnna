@@ -93,7 +93,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
         List<CaseReport> cases = CaseReportImporter.readCasesProvidedAsPositionalArguments(List.of(caseReport));
 
         if (cases.isEmpty()) {
-            LogUtils.logWarn(LOGGER, "Unable to continue with no cases `{}`");
+            LOGGER.warn("Unable to continue with no cases");
             return 1;
         }
 
@@ -102,13 +102,13 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
         try (ConfigurableApplicationContext context = getContext()) {
             GenomicAssembly genomicAssembly = context.getBean(GenomicAssembly.class);
 
-            LogUtils.logInfo(LOGGER, "Reading variants from `{}`", vcfFile);
+            LOGGER.info("Reading variants from `{}`", vcfFile);
             VariantParser<? extends SvannaVariant> parser = new VcfVariantParser(genomicAssembly);
             List<? extends SvannaVariant> variants = parser.createVariantAlleleList(vcfFile);
-            LogUtils.logInfo(LOGGER, "Read {} variants", NF.format(variants.size()));
+            LOGGER.info("Read {} variants", NF.format(variants.size()));
 
-            LogUtils.logInfo(LOGGER, "Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
-            LogUtils.logInfo(LOGGER, "Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
+            LOGGER.info("Filtering out the variants with reciprocal overlap >{}% occurring in more than {}% probands", similarityThreshold, frequencyThreshold);
+            LOGGER.info("Filtering out the variants where ALT allele is supported by less than {} reads", minAltReadSupport);
             AnnotationDataService annotationDataService = context.getBean(AnnotationDataService.class);
             PopulationFrequencyAndCoverageFilter filter = new PopulationFrequencyAndCoverageFilter(annotationDataService, similarityThreshold, frequencyThreshold, minAltReadSupport);
             List<? extends SvannaVariant> allVariants = filter.filter(variants);
@@ -117,7 +117,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
                     .filter(SvannaVariant::passedFilters)
                     .collect(Collectors.toList());
 
-            LogUtils.logInfo(LOGGER, "Removed {} variants that failed the filtering", variants.size() - filteredVariants.size());
+            LOGGER.info("Removed {} variants that failed the filtering", variants.size() - filteredVariants.size());
 
             PhenotypeDataService phenotypeDataService = context.getBean(PhenotypeDataService.class);
             SvPrioritizerFactory svPrioritizerFactory = context.getBean(SvPrioritizerFactory.class);
@@ -140,7 +140,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
                 if (filteredTargetVariant.passedFilters()) {
                     caseVariants.add(filteredTargetVariant);
                 } else {
-                    LogUtils.logWarn(LOGGER, "Variant {}-{} did not pass the filters! {}", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant), filteredTargetVariant);
+                    LOGGER.warn("Variant {}-{} did not pass the filters! {}", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant), filteredTargetVariant);
                 }
             }
 
@@ -166,7 +166,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
                         : Path.of(outPrefix + ".csv.gz");
                 writeOutResults(output.toFile(), results, causalIds);
             } catch (IOException e) {
-                LogUtils.logError(LOGGER, "Error: {}", e);
+                LOGGER.error("Error: {}", e.getMessage(), e);
                 return 1;
             }
 
@@ -181,14 +181,14 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
      * Write a CSV file that represent results of one simulation.
      */
     private void writeOutResults(File output, BenchmarkResults results, Set<String> causalVariantIds) throws IOException {
-        LogUtils.logDebug(LOGGER, "Ranking variants");
+        LOGGER.debug("Ranking variants");
         List<VariantPriority> prioritized = results.priorities().stream()
                 .filter(vp -> causalVariantIds.contains(vp.variant().id()) || reportAllVariants)
                 .sorted(Comparator.<VariantPriority>comparingDouble(p -> p.priority().getPriority()).reversed())
                 .collect(Collectors.toUnmodifiableList());
 
         // "case_name", "background_vcf", "variant_id", "rank", "vtype", "is_causal", "priority"
-        LogUtils.logInfo(LOGGER, "Writing the results for `{}`", results.caseName());
+        LOGGER.info("Writing the results for `{}`", results.caseName());
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(output))))) {
             CSVPrinter printer = CSVFormat.DEFAULT
                     .withHeader("case_name", "background_vcf", "variant_id", "rank", "vtype", "is_causal", "priority")

@@ -99,11 +99,9 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
         return reader.lines()
                 .onClose(() -> {try {reader.close();} catch (IOException ignored) {}})
                 .map(toVariantContext(codec))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .map(toVariants())
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(Optional::stream);
     }
 
     /**

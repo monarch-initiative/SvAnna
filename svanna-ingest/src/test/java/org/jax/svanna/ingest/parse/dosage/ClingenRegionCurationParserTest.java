@@ -5,7 +5,7 @@ import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.svart.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 
 import java.nio.file.Path;
 import java.util.List;

@@ -4,8 +4,8 @@ import org.jax.svanna.ingest.parse.population.GnomadSVFileParser;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.Strand;
 
 import java.io.InputStream;

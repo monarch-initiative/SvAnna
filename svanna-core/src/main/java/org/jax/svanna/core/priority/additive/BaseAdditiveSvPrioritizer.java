@@ -3,7 +3,7 @@ package org.jax.svanna.core.priority.additive;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.SvPrioritizer;
 import org.jax.svanna.core.priority.SvPriority;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +27,7 @@ abstract class BaseAdditiveSvPrioritizer<DATA extends RouteData, RESULT extends 
     }
 
     @Override
-    public SvPriority prioritize(Variant variant) {
+    public SvPriority prioritize(GenomicVariant variant) {
         try {
             Routes routes = dispatcher.assembleRoutes(List.of(variant));
             DATA data = routeDataService.getData(routes);

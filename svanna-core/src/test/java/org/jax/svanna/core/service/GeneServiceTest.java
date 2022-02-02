@@ -7,6 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import xyz.ielis.silent.genes.model.Gene;
@@ -31,7 +32,7 @@ public class GeneServiceTest {
     @CsvSource({
             "HGNC:11474, SURF1,  4919",
             "HGNC:11475, SURF2,  4609",
-            "HGNC:5024,  HNF4A, 78897",
+            "HGNC:5024,  HNF4A, 77146",
     })
     public void bySymbol(String termId, String symbol, int length) {
         List<Gene> genes = geneService.byHgncId(TermId.of(termId));

@@ -3,6 +3,7 @@ package org.jax.svanna.db.landscape;
 import org.jax.svanna.db.IngestDao;
 import org.jax.svanna.model.landscape.dosage.*;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, IngestDao<DosageRegion> {
 

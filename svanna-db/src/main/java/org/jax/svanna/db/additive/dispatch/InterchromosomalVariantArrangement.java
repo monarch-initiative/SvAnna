@@ -1,9 +1,9 @@
 package org.jax.svanna.db.additive.dispatch;
 
-import org.monarchinitiative.svart.Breakend;
-import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.GenomicBreakend;
+import org.monarchinitiative.svart.GenomicBreakendVariant;
 import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -16,26 +16,26 @@ class InterchromosomalVariantArrangement extends VariantArrangement {
     private final GenomicRegion rightVariantRegion;
 
 
-    InterchromosomalVariantArrangement(List<Variant> variants, int breakendIndex) {
+    InterchromosomalVariantArrangement(List<GenomicVariant> variants, int breakendIndex) {
         super(variants);
         this.breakendIndex = breakendIndex;
-        BreakendVariant variant = (BreakendVariant) variants.get(breakendIndex);
+        GenomicBreakendVariant variant = (GenomicBreakendVariant) variants.get(breakendIndex);
         this.leftVariantRegion = prepareLeftRegion(variants(), variant.left());
         this.rightVariantRegion = prepareRightRegion(variants(), variant.right());
     }
 
-    static GenomicRegion prepareLeftRegion(LinkedList<Variant> variants, Breakend left) {
-        Variant first = variants.getFirst();
+    static GenomicRegion prepareLeftRegion(LinkedList<GenomicVariant> variants, GenomicBreakend left) {
+        GenomicVariant first = variants.getFirst();
         return GenomicRegion.of(left.contig(), left.strand(), CS,
                 first.startOnStrandWithCoordinateSystem(left.strand(), CS),
                 left.endWithCoordinateSystem(CS));
     }
 
-    static GenomicRegion prepareRightRegion(LinkedList<Variant> variants, Breakend right) {
+    static GenomicRegion prepareRightRegion(LinkedList<GenomicVariant> variants, GenomicBreakend right) {
         GenomicRegion last = variants.getLast();
-        if (last instanceof BreakendVariant) {
+        if (last instanceof GenomicBreakendVariant) {
             // if there is only one variant in `variants`, then `last` should correspond to the right breakend
-            last = ((BreakendVariant) last).right();
+            last = ((GenomicBreakendVariant) last).right();
         }
 
         return GenomicRegion.of(right.contig(), right.strand(), CS,
@@ -43,8 +43,8 @@ class InterchromosomalVariantArrangement extends VariantArrangement {
                 last.endOnStrandWithCoordinateSystem(right.strand(), CS));
     }
 
-    public BreakendVariant breakendVariant() {
-        return (BreakendVariant) variants.get(breakendIndex);
+    public GenomicBreakendVariant breakendVariant() {
+        return (GenomicBreakendVariant) variants.get(breakendIndex);
     }
 
     @Override

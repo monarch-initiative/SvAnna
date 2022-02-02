@@ -5,6 +5,7 @@ import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

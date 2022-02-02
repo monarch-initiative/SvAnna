@@ -19,8 +19,8 @@ public class RouteUtils {
      * @param variants        list of variants to build the route from
      * @return route
      */
-    public static Route buildRoute(int upstreamBound, int downstreamBound, List<? extends Variant> variants) {
-        Variant first = variants.get(0);
+    public static Route buildRoute(int upstreamBound, int downstreamBound, List<? extends GenomicVariant> variants) {
+        GenomicVariant first = variants.get(0);
         int firstStart = first.startWithCoordinateSystem(CS);
 
         List<Segment> segments = new LinkedList<>();
@@ -33,8 +33,8 @@ public class RouteUtils {
 
 
         for (int i = 1; i < variants.size(); i++) {
-            Variant previous = variants.get(i - 1);
-            Variant current = variants.get(i);
+            GenomicVariant previous = variants.get(i - 1);
+            GenomicVariant current = variants.get(i);
             if (!previous.contig().equals(current.contig()))
                 throw new DispatchException("Different contigs (" + previous.contigName() + " vs. " + current.contigName() + " )" +
                         " in variants " + LogUtils.variantSummary(previous) + " and " + LogUtils.variantSummary(current));
@@ -48,11 +48,11 @@ public class RouteUtils {
         }
 
 
-        Variant last = variants.get(variants.size() - 1);
+        GenomicVariant last = variants.get(variants.size() - 1);
         Strand lastStrand;
         int lastEnd;
-        if (last instanceof BreakendVariant) {
-            Breakend right = ((BreakendVariant) last).right();
+        if (last instanceof GenomicBreakendVariant) {
+            GenomicBreakend right = ((GenomicBreakendVariant) last).right();
             lastStrand = right.strand();
             lastEnd = right.endWithCoordinateSystem(CS);
         } else {
@@ -67,7 +67,7 @@ public class RouteUtils {
         return Route.of(segments);
     }
 
-    private static <T extends Variant> List<Segment> makeVariantSegment(T variant, Strand previous) {
+    private static <T extends GenomicVariant> List<Segment> makeVariantSegment(T variant, Strand previous) {
         List<Segment> segments;
         // variant coordinates are always on the Strand.POSITIVE, except for breakends
         int start = variant.startOnStrandWithCoordinateSystem(previous, CS);
@@ -95,9 +95,9 @@ public class RouteUtils {
                 break;
             case BND:
                 try {
-                    BreakendVariant bnd = (BreakendVariant) variant;
-                    Breakend left = bnd.left();
-                    Breakend right = bnd.right();
+                    GenomicBreakendVariant bnd = (GenomicBreakendVariant) variant;
+                    GenomicBreakend left = bnd.left();
+                    GenomicBreakend right = bnd.right();
                     segments = List.of(
                             Segment.of(left.contig(), left.strand(), Coordinates.of(CS, left.startWithCoordinateSystem(CS), left.endWithCoordinateSystem(CS)),
                                     left.id(), Event.BREAKEND, 1),

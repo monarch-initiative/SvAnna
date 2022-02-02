@@ -1,8 +1,8 @@
 package org.jax.svanna.core.priority.additive;
 
-import org.monarchinitiative.svart.AssignedMoleculeType;
+import org.monarchinitiative.svart.assembly.AssignedMoleculeType;
 import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.SequenceRole;
+import org.monarchinitiative.svart.assembly.SequenceRole;
 
 import java.util.Objects;
 

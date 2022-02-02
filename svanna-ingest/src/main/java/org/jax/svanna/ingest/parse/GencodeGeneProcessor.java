@@ -1,6 +1,7 @@
 package org.jax.svanna.ingest.parse;
 
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.SequenceRole;
 import xyz.ielis.silent.genes.gencode.io.GencodeParser;
 import xyz.ielis.silent.genes.gencode.model.Biotype;
 import xyz.ielis.silent.genes.gencode.model.GencodeGene;

@@ -1,21 +1,21 @@
 package org.jax.svanna.benchmark.cmd.benchmark_case;
 
 import org.jax.svanna.core.priority.SvPriority;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 
 import java.util.Objects;
 
 class VariantPriority {
-    private final Variant variant;
+    private final GenomicVariant variant;
     private final SvPriority priority;
 
 
-    VariantPriority(Variant variant, SvPriority priority) {
+    VariantPriority(GenomicVariant variant, SvPriority priority) {
         this.variant = variant;
         this.priority = priority;
     }
 
-    public Variant variant() {
+    public GenomicVariant variant() {
         return variant;
     }
 

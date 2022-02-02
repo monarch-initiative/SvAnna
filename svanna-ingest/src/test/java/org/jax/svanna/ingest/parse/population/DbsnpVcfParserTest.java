@@ -3,6 +3,8 @@ package org.jax.svanna.ingest.parse.population;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

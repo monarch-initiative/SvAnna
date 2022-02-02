@@ -25,8 +25,7 @@ public interface TadBoundary extends Located {
 
         int start = median + CoordinateSystem.zeroBased().startDelta(coordinateSystem());
 //        int end = median + CoordinateSystem.zeroBased().endDelta(coordinateSystem()) + 1; // one base downstream
-        int end = median + CoordinateSystem.zeroBased().endDelta(coordinateSystem());
-        return Coordinates.of(coordinateSystem(), start, location().startConfidenceInterval(), end, location().endConfidenceInterval());
+        return Coordinates.of(coordinateSystem(), start, location().startConfidenceInterval(), median, location().endConfidenceInterval());
     }
 
 }

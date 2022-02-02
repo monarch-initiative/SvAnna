@@ -29,7 +29,7 @@ public class TadAwareDispatcher implements Dispatcher {
     }
 
     @Override
-    public Routes assembleRoutes(List<Variant> variants) throws DispatchException {
+    public Routes assembleRoutes(List<GenomicVariant> variants) throws DispatchException {
         // variants are sorted and put to the same strand - either POSITIVE or NEGATIVE
         VariantArrangement arrangement = RouteAssemblyUtils.assemble(variants);
 
@@ -48,9 +48,9 @@ public class TadAwareDispatcher implements Dispatcher {
              - define reference routes using left and right TAD pairs
              - define alternate routes using left upstream and right downstream
              */
-            Variant v = arrangement.variants().get(arrangement.breakendIndex());
+            GenomicVariant v = arrangement.variants().get(arrangement.breakendIndex());
             try {
-                return interchromosomalArrangement((BreakendVariant) v);
+                return interchromosomalArrangement((GenomicBreakendVariant) v);
             } catch (ClassCastException e) {
                 LogUtils.logWarn(LOGGER, "Expected to get BreakendVariant, got `{}`. {}", v.getClass().getSimpleName(), e.getMessage());
                 throw new DispatchException(e);
@@ -60,11 +60,11 @@ public class TadAwareDispatcher implements Dispatcher {
         }
     }
 
-    private Routes interchromosomalArrangement(BreakendVariant bv) throws DispatchException {
+    private Routes interchromosomalArrangement(GenomicBreakendVariant bv) throws DispatchException {
         // reference regions
-        Breakend left = bv.left();
+        GenomicBreakend left = bv.left();
         List<Gene> leftGenes = geneService.overlappingGenes(left).overlapping();
-        Breakend right = bv.right();
+        GenomicBreakend right = bv.right();
         List<Gene> rightGenes = geneService.overlappingGenes(right).overlapping();
         Pair<GenomicRegion> pair = (!leftGenes.isEmpty() || !rightGenes.isEmpty())
                 ? calculateGeneBoundsForBreakends(left, leftGenes, right, rightGenes) // dispatch for the genes only
@@ -79,8 +79,8 @@ public class TadAwareDispatcher implements Dispatcher {
     }
 
     private Routes intrachromosomalArrangement(VariantArrangement arrangement) {
-        LinkedList<? extends Variant> variants = arrangement.variants();
-        Variant first = variants.getFirst();
+        LinkedList<? extends GenomicVariant> variants = arrangement.variants();
+        GenomicVariant first = variants.getFirst();
 
         int upstreamBound = -1, downstreamBound = -1;
         if (!dispatchOptions.forceEvaluateTad() && variants.size() == 1) {
@@ -96,12 +96,12 @@ public class TadAwareDispatcher implements Dispatcher {
         }
         if (upstreamBound < 0 || downstreamBound < 0) {
             // use TADs
-            Variant last = variants.getLast();
+            GenomicVariant last = variants.getLast();
             if (first.strand() != last.strand())
                 throw new DispatchException("First and last variants must be on the same strand");
 
             upstreamBound = upstreamBound(first) + first.coordinateSystem().startDelta(CS);
-            downstreamBound = downstreamBound(last) + last.coordinateSystem().endDelta(CS);
+            downstreamBound = downstreamBound(last);
         }
 
         GenomicRegion reference = GenomicRegion.of(first.contig(), first.strand(), CS, upstreamBound, downstreamBound);
@@ -110,7 +110,7 @@ public class TadAwareDispatcher implements Dispatcher {
         return Routes.of(List.of(reference), List.of(altRoute));
     }
 
-    private static Pair<GenomicRegion> calculateGeneBoundsForBreakends(Breakend left, List<Gene> leftGenes, Breakend right, List<Gene> rightGenes) {
+    private static Pair<GenomicRegion> calculateGeneBoundsForBreakends(GenomicBreakend left, List<Gene> leftGenes, GenomicBreakend right, List<Gene> rightGenes) {
         GenomicRegion leftRegion;
         if (leftGenes.isEmpty())
             leftRegion = left;
@@ -129,7 +129,7 @@ public class TadAwareDispatcher implements Dispatcher {
         return Pair.of(leftRegion, rightRegion);
     }
 
-    private Pair<GenomicRegion> calculateTadBounds(Breakend left, Breakend right) {
+    private Pair<GenomicRegion> calculateTadBounds(GenomicBreakend left, GenomicBreakend right) {
         int leftUpstream = upstreamBound(left);
         int leftDownstream = downstreamBound(left);
         GenomicRegion leftReference = GenomicRegion.of(left.contig(), left.strand(), CS, leftUpstream, leftDownstream);
@@ -141,7 +141,7 @@ public class TadAwareDispatcher implements Dispatcher {
         return Pair.of(leftReference, rightReference);
     }
 
-    private static Pair<GenomicRegion> calculateBoundsBasedOnBreakendsOnly(Breakend left, Breakend right) {
+    private static Pair<GenomicRegion> calculateBoundsBasedOnBreakendsOnly(GenomicBreakend left, GenomicBreakend right) {
         return Pair.of(left, right);
     }
 
@@ -162,10 +162,10 @@ public class TadAwareDispatcher implements Dispatcher {
             // Subtract one to not include the TAD as a relevant genomic element for evaluation. Otherwise, using the
             // upstream & downstream bounds to query overlapping TADs will fetch the TAD used to delimit the downstream
             // bound. This is because 0-based coordinate system includes the end position.
-            return tadBoundary.midpoint().end() + tadBoundary.coordinateSystem().endDelta(query.coordinateSystem()) - 1;
+            return tadBoundary.midpoint().end() - 1;
         } else
             // empty coordinate of the contig end in query's coordinate system
-            return query.contig().length() + CoordinateSystem.zeroBased().endDelta(query.coordinateSystem());
+            return query.contig().length();
     }
 
 
@@ -192,8 +192,8 @@ public class TadAwareDispatcher implements Dispatcher {
                 regionStart = region.startWithCoordinateSystem(coordinateSystem);
                 regionEnd = region.endOnStrandWithCoordinateSystem(strand, coordinateSystem);
             } else {
-                regionStart = Coordinates.invertPosition(coordinateSystem, region.contig(), region.end());
-                regionEnd = Coordinates.invertPosition(coordinateSystem, region.contig(), region.start());
+                regionStart = Coordinates.invertCoordinate(coordinateSystem, region.contig(), region.end());
+                regionEnd = Coordinates.invertCoordinate(coordinateSystem, region.contig(), region.start());
             }
             if (startPos == -1)
                 startPos = regionStart;

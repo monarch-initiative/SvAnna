@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable {
 
@@ -53,22 +52,22 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
         this.dosageRegions = dosageRegions;
     }
 
-    private HtmlLocation getSimpleLocation(Variant variant) {
+    private HtmlLocation getSimpleLocation(GenomicVariant variant) {
         // works for INV, DEL, DUP
         return new HtmlLocation(variant.contig(),
                 variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
                 variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
     }
 
-    private HtmlLocation getInsertionLocation(Variant variant) {
+    private HtmlLocation getInsertionLocation(GenomicVariant variant) {
         return new HtmlLocation(variant.contig(),
                 variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()),
                 variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
     }
 
-    private List<HtmlLocation> getTranslocationLocations(BreakendVariant breakended) {
-        Breakend left = breakended.left();
-        Breakend right = breakended.right();
+    private List<HtmlLocation> getTranslocationLocations(GenomicBreakendVariant breakended) {
+        GenomicBreakend left = breakended.left();
+        GenomicBreakend right = breakended.right();
         return List.of(new HtmlLocation(left.contig(),
                         left.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased())),
                 new HtmlLocation(right.contig(),
@@ -103,8 +102,8 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
                 break;
             case TRA:
             case BND:
-                if (variant() instanceof BreakendVariant) {
-                    locs.addAll(getTranslocationLocations((BreakendVariant) variant()));
+                if (variant() instanceof GenomicBreakendVariant) {
+                    locs.addAll(getTranslocationLocations((GenomicBreakendVariant) variant()));
                 }
                 break;
             default:

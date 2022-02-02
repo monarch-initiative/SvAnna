@@ -37,8 +37,8 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
                                               List<Gene> genes,
                                               List<Enhancer> enhancers,
                                               List<RepetitiveRegion> repeats,
-                                              Variant variant,
-                                              Breakend breakend,
+                                              GenomicVariant variant,
+                                              GenomicBreakend breakend,
                                               int ystart) {
         super(minPos, maxPos, variant, genes, enhancers, repeats);
         this.contig = breakend.contig();

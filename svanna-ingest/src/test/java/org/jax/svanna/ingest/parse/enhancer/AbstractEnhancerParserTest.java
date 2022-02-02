@@ -4,8 +4,8 @@ import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
 import org.jax.svanna.ingest.parse.enhancer.fantom.FantomEnhancerParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 
 import java.io.IOException;
 import java.nio.file.Path;

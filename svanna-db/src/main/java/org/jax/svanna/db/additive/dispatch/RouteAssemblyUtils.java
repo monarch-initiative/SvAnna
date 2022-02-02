@@ -25,11 +25,11 @@ class RouteAssemblyUtils {
      *
      * @throws RouteAssemblyException if not possible to arrange the variants in a meaningful way
      */
-    static VariantArrangement assemble(List<Variant> variants) throws RouteAssemblyException {
+    static VariantArrangement assemble(List<GenomicVariant> variants) throws RouteAssemblyException {
         if (variants.isEmpty()) throw new RouteAssemblyException("Variant list must not be empty");
 
-        LinkedList<Variant> breakends = variants.stream()
-                .filter(Variant::isBreakend)
+        LinkedList<GenomicVariant> breakends = variants.stream()
+                .filter(GenomicVariant::isBreakend)
                 .collect(Collectors.toCollection(LinkedList::new));
 
         if (breakends.isEmpty())
@@ -40,20 +40,20 @@ class RouteAssemblyUtils {
             throw new RouteAssemblyException("Unable to assemble a list of " + breakends.size() + "(>1) breakend variants");
     }
 
-    private static VariantArrangement assembleIntrachromosomal(List<Variant> variants) {
-        long contigCount = variants.stream().map(Variant::contig).distinct().count();
+    private static VariantArrangement assembleIntrachromosomal(List<GenomicVariant> variants) {
+        long contigCount = variants.stream().map(GenomicVariant::contig).distinct().count();
         if (contigCount > 1)
             throw new RouteAssemblyException("Unable to assemble variants on " + contigCount + "(>1) contigs without knowing the breakend");
         if (variants.size() == 1)
             return VariantArrangement.intrachromosomal(variants);
 
-        List<Variant> sortedByStart = variants.stream()
+        List<GenomicVariant> sortedByStart = variants.stream()
                 .map(v -> v.withStrand(Strand.POSITIVE)) // this can fail if V does not override `withStrand`
                 .sorted(Comparator.comparingInt(v -> v.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())))
                 .collect(Collectors.toUnmodifiableList());
 
-        Variant previous = sortedByStart.get(0);
-        for (Variant current : sortedByStart) {
+        GenomicVariant previous = sortedByStart.get(0);
+        for (GenomicVariant current : sortedByStart) {
             if (previous == current) continue;
             if (previous.overlapsWith(current))
                 throw new RouteAssemblyException("Unable to assemble overlapping variants: "
@@ -64,38 +64,38 @@ class RouteAssemblyUtils {
         return VariantArrangement.intrachromosomal(sortedByStart);
     }
 
-    private static VariantArrangement assembleInterchromosomal(List<? extends Variant> variants, Variant breakendVariant) {
-        BreakendVariant breakend = (BreakendVariant) breakendVariant;
+    private static VariantArrangement assembleInterchromosomal(List<? extends GenomicVariant> variants, GenomicVariant breakendVariant) {
+        GenomicBreakendVariant breakend = (GenomicBreakendVariant) breakendVariant;
 
-        Breakend left = breakend.left();
-        Breakend right = breakend.right();
+        GenomicBreakend left = breakend.left();
+        GenomicBreakend right = breakend.right();
         if (left.contig().equals(right.contig()))
             // TODO - evaluate
             throw new IntrachromosomalBreakendException("Intrachromosomal breakends are not currently supported: " + LogUtils.variantSummary(breakend));
 
-        List<Variant> leftSorted = variants.stream()
+        List<GenomicVariant> leftSorted = variants.stream()
                 .filter(v -> v.contig().equals(left.contig()) && !v.equals(breakend))
                 .sorted(Comparator.comparingInt(left::distanceTo))
-                .map(v -> (Variant) v.withStrand(left.strand())) // this might fail if V does not override `withStrand`
+                .map(v -> (GenomicVariant) v.withStrand(left.strand())) // this might fail if V does not override `withStrand`
                 .collect(Collectors.toUnmodifiableList());
-        for (Variant variant : leftSorted) {
+        for (GenomicVariant variant : leftSorted) {
             if (left.distanceTo(variant) > 0)
                 throw new RouteAssemblyException("Variant " + LogUtils.variantSummary(variant) + " is not upstream of the breakend " + LogUtils.breakendSummary(left));
         }
 
 
-        List<Variant> rightSorted = variants.stream()
+        List<GenomicVariant> rightSorted = variants.stream()
                 .filter(v -> v.contig().equals(right.contig()) && !v.equals(breakend))
                 .sorted(Comparator.comparing(v -> right.distanceTo((Region<?>) v)).reversed())
-                .map(v -> (Variant) v.withStrand(right.strand()))
+                .map(v -> (GenomicVariant) v.withStrand(right.strand()))
                 .collect(Collectors.toUnmodifiableList());
-        for (Variant variant : rightSorted) {
+        for (GenomicVariant variant : rightSorted) {
             if (right.distanceTo(variant) < 0)
                 throw new RouteAssemblyException("Variant " + LogUtils.variantSummary(variant) + " is not downstream of the breakend " + LogUtils.breakendSummary(right));
         }
 
 
-        List<Variant> sortedVariants = new ArrayList<>();
+        List<GenomicVariant> sortedVariants = new ArrayList<>();
         sortedVariants.addAll(leftSorted);
         sortedVariants.add(breakendVariant);
         sortedVariants.addAll(rightSorted);
@@ -104,9 +104,9 @@ class RouteAssemblyUtils {
     }
 
 
-    static List<Route> makeAltRouteForBreakendVariant(BreakendVariant bv, GenomicRegion leftGeneRegion, GenomicRegion rightGeneRegion) {
-        Breakend left = bv.left();
-        Breakend right = bv.right();
+    static List<Route> makeAltRouteForBreakendVariant(GenomicBreakendVariant bv, GenomicRegion leftGeneRegion, GenomicRegion rightGeneRegion) {
+        GenomicBreakend left = bv.left();
+        GenomicBreakend right = bv.right();
 
         // ------------------------------------ The LEFT segments ------------------------------------------------------
         List<Segment> leftSegments = new LinkedList<>();

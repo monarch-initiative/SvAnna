@@ -4,6 +4,7 @@ import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,7 @@ public class ClingenRegionCurationParser implements IngestRecordParser<DosageReg
             }
             int start = Integer.parseInt(matcher.group("start"));
             int end = Integer.parseInt(matcher.group("end"));
-            Coordinates coordinates = Coordinates.of(CoordinateSystem.FULLY_CLOSED, start, end);
+            Coordinates coordinates = Coordinates.of(CoordinateSystem.oneBased(), start, end);
 
 
             return makeDosageElements(contig, Strand.POSITIVE, coordinates, id, tokens[4], tokens[12]);

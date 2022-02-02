@@ -23,7 +23,7 @@ import org.jax.svanna.db.additive.dispatch.TadAwareDispatcher;
 import org.jax.svanna.db.landscape.TadBoundaryDao;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import xyz.ielis.silent.genes.model.Gene;
 
 import javax.sql.DataSource;

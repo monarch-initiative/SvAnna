@@ -34,13 +34,12 @@ public class GeneSequenceImpactCalculatorTest {
         // make transcript
         TranscriptIdentifier txId = TranscriptIdentifier.of("TX1", "TX1_SYMBOL", null);
         List<Coordinates> exons = makeExons(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd);
-        Coordinates startCodon = Coordinates.of(CoordinateSystem.zeroBased(), start + 10, start + 13);
-        Coordinates stopCodon = Coordinates.of(CoordinateSystem.zeroBased(), end - 13, end - 10);
-        Transcript tx = Transcript.coding(txId, location, exons, startCodon, stopCodon);
+        Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start + 10, end - 10);
+        Transcript tx = Transcript.coding(txId, location, exons, cdsCoordinates);
 
         // make gene
         GeneIdentifier gId = GeneIdentifier.of("NCBIGene:123", "A", null, null);
-        return Gene.of(gId, location, Set.of(tx));
+        return Gene.of(gId, location, List.of(tx));
     }
 
     private static List<Coordinates> makeExons(int oneStart, int oneEnd, int twoStart, int twoEnd, int threeStart, int threeEnd) {

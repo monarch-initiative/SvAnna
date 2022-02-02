@@ -1,6 +1,6 @@
 package org.jax.svanna.io.parse;
 
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public interface VariantParser<T extends Variant> {
+public interface VariantParser<T extends GenomicVariant> {
 
     /**
      * Obtain a stream of variants read from given <code>filePath</code>.

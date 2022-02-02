@@ -7,7 +7,7 @@ import htsjdk.variant.variantcontext.writer.VariantContextWriterBuilder;
 import htsjdk.variant.vcf.*;
 import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.io.FullSvannaVariant;
-import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.GenomicBreakendVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
 import org.monarchinitiative.svart.util.Seq;
@@ -43,8 +43,8 @@ public class VcfWriter implements FullSvannaVariantWriter {
                         .start(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
                         .stop(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased()));
 
-                if (variant instanceof BreakendVariant) {
-                    BreakendVariant bv = (BreakendVariant) variant;
+                if (variant instanceof GenomicBreakendVariant) {
+                    GenomicBreakendVariant bv = (GenomicBreakendVariant) variant;
                     String alt = VcfBreakendFormatter.makeAltVcfField(bv);
                     String ref = bv.strand().isPositive() ? bv.ref() : Seq.reverseComplement(bv.ref());
 

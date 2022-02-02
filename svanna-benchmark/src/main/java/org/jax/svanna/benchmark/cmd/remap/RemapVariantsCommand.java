@@ -10,7 +10,7 @@ import org.jax.svanna.benchmark.cmd.remap.write.VcfWriter;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
-import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;

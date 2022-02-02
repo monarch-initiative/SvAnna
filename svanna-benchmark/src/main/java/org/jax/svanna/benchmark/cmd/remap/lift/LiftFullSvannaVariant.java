@@ -7,6 +7,7 @@ import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.parse.BreakendedSvannaVariant;
 import org.jax.svanna.io.parse.DefaultSvannaVariant;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class LiftFullSvannaVariant {
             // we must artificially make the breakend region to have length 1 (hence -1).
 
             // LEFT
-            Breakend left = bv.left();
+            GenomicBreakend left = bv.left();
             int leftStart = left.startWithCoordinateSystem(CoordinateSystem.oneBased()) - 1;
             Interval leftInput = new Interval(left.contig().ucscName(),
                     leftStart,
@@ -55,14 +56,14 @@ public class LiftFullSvannaVariant {
                     left.startConfidenceInterval(),
                     leftLifted.getEnd(),
                     left.endConfidenceInterval());
-            Breakend liftedLeft = Breakend.of(leftContig,
+            GenomicBreakend liftedLeft = GenomicBreakend.of(leftContig,
                     left.id(),
                     leftLifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
                     leftCoordinates);
 
 
             // RIGHT
-            Breakend right = bv.right();
+            GenomicBreakend right = bv.right();
             int rightStart = right.startWithCoordinateSystem(CoordinateSystem.oneBased()) - 1;
             Interval rightInput = new Interval(right.contig().ucscName(),
                     rightStart,
@@ -81,12 +82,12 @@ public class LiftFullSvannaVariant {
                     right.startConfidenceInterval(),
                     rightLifted.getEnd(),
                     right.endConfidenceInterval());
-            Breakend liftedRight = Breakend.of(rightContig,
+            GenomicBreakend liftedRight = GenomicBreakend.of(rightContig,
                     right.id(),
                     rightLifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
                     rightCoordinates);
 
-            BreakendVariant bvLifted = BreakendVariant.of(bv.eventId(), liftedLeft, liftedRight, bv.ref(), bv.alt());
+            GenomicBreakendVariant bvLifted = GenomicBreakendVariant.of(bv.eventId(), liftedLeft, liftedRight, bv.ref(), bv.alt());
 
 
             return Optional.of(BreakendedSvannaVariant.builder()
@@ -122,10 +123,10 @@ public class LiftFullSvannaVariant {
                             lifted.getEnd(),
                             variant.endConfidenceInterval());
 
-                    Variant v;
+                    GenomicVariant v;
                     if (variant.isSymbolic()) {
                         // symbolic variant
-                        v = Variant.of(contig, variant.id(), lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
+                        v = GenomicVariant.of(contig, variant.id(), lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
                                 coordinates,
                                 variant.ref(),
                                 variant.alt(),
@@ -136,7 +137,7 @@ public class LiftFullSvannaVariant {
                             // unable to lift the coordinates
                             return Optional.empty();
                         }
-                        v = Variant.of(contig,
+                        v = GenomicVariant.of(contig,
                                 variant.id(),
                                 lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
                                 coordinates,

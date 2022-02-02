@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant> implements FullSvannaVariant {
+public final class DefaultSvannaVariant extends BaseGenomicVariant<DefaultSvannaVariant> implements FullSvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
@@ -184,7 +184,7 @@ public final class DefaultSvannaVariant extends BaseVariant<DefaultSvannaVariant
                 "} " + super.toString();
     }
 
-    public static class Builder extends BaseVariant.Builder<Builder> {
+    public static class Builder extends BaseGenomicVariant.Builder<Builder> {
 
         private final Set<FilterType> passedFilterTypes = new HashSet<>();
         private final Set<FilterType> failedFilterTypes = new HashSet<>();

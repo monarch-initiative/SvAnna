@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority;
 
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 
 /**
  * The most general definition of the variant prioritizer which calculates priority {@link P} for a variant.
@@ -9,6 +9,6 @@ import org.monarchinitiative.svart.Variant;
  */
 public interface SvPrioritizer<P extends SvPriority> {
 
-    P prioritize(Variant variant);
+    P prioritize(GenomicVariant variant);
 
 }

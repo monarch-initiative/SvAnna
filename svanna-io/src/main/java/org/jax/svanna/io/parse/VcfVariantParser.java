@@ -14,6 +14,7 @@ import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.util.VariantTrimmer;
 import org.monarchinitiative.svart.util.VcfConverter;
 import org.slf4j.Logger;
@@ -112,7 +113,7 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
      * <p>
      * Multi-allelic sequence variants are supported, while multi-allelic symbolic variants are not.
      *
-     * @return function that maps variant context to collection of {@link Variant}s
+     * @return function that maps variant context to collection of {@link FullSvannaVariant}s
      */
     protected Function<VariantContext, Optional<FullSvannaVariant>> toVariants() {
         return vc -> {

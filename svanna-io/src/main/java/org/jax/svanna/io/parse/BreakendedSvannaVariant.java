@@ -7,15 +7,15 @@ import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.io.FullSvannaVariant;
-import org.monarchinitiative.svart.BaseBreakendVariant;
-import org.monarchinitiative.svart.Breakend;
+import org.monarchinitiative.svart.BaseGenomicBreakendVariant;
+import org.monarchinitiative.svart.GenomicBreakend;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public final class BreakendedSvannaVariant extends BaseBreakendVariant<BreakendedSvannaVariant> implements FullSvannaVariant {
+public final class BreakendedSvannaVariant extends BaseGenomicBreakendVariant<BreakendedSvannaVariant> implements FullSvannaVariant {
 
     private final VariantCallAttributes variantCallAttributes;
     private final Set<FilterType> passedFilterTypes;
@@ -24,8 +24,8 @@ public final class BreakendedSvannaVariant extends BaseBreakendVariant<Breakende
     private final VariantContext variantContext;
 
     private BreakendedSvannaVariant(String eventId,
-                                    Breakend left,
-                                    Breakend right,
+                                    GenomicBreakend left,
+                                    GenomicBreakend right,
                                     String ref,
                                     String alt,
                                     VariantCallAttributes variantCallAttributes,
@@ -53,8 +53,8 @@ public final class BreakendedSvannaVariant extends BaseBreakendVariant<Breakende
     }
 
     public static BreakendedSvannaVariant of(String eventId,
-                                             Breakend left,
-                                             Breakend right,
+                                             GenomicBreakend left,
+                                             GenomicBreakend right,
                                              String ref,
                                              String alt,
                                              VariantCallAttributes variantCallAttributes,
@@ -68,7 +68,7 @@ public final class BreakendedSvannaVariant extends BaseBreakendVariant<Breakende
     }
 
     @Override
-    protected BreakendedSvannaVariant newBreakendVariantInstance(String eventId, Breakend left, Breakend right, String ref, String alt) {
+    protected BreakendedSvannaVariant newBreakendVariantInstance(String eventId, GenomicBreakend left, GenomicBreakend right, String ref, String alt) {
         return new BreakendedSvannaVariant(eventId, left, right, ref, alt, variantCallAttributes, passedFilterTypes, failedFilterTypes, priority, variantContext);
     }
 
@@ -167,7 +167,7 @@ public final class BreakendedSvannaVariant extends BaseBreakendVariant<Breakende
                 "} " + super.toString();
     }
 
-    public static class Builder extends BaseBreakendVariant.Builder<Builder> {
+    public static class Builder extends BaseGenomicBreakendVariant.Builder<Builder> {
 
         private final Set<FilterType> passedFilterTypes = new HashSet<>();
         private final Set<FilterType> failedFilterTypes = new HashSet<>();

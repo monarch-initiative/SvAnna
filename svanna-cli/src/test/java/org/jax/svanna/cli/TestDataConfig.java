@@ -4,8 +4,8 @@ import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.io.service.SilentGenesGeneService;
 import org.jax.svanna.test.TestVariants;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

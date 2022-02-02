@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import xyz.ielis.silent.genes.model.Gene;
@@ -43,7 +43,7 @@ public class WriteHaploSvgTest {
 
     @Test
     public void testWriteSvg() {
-        Variant singeExonDel = testVariants.deletions().surf1SingleExon_exon2();
+        GenomicVariant singeExonDel = testVariants.deletions().surf1SingleExon_exon2();
         List<Gene> genes = geneOverlapper.getOverlaps(singeExonDel).stream()
                 .map(GeneOverlap::gene)
                 .collect(Collectors.toUnmodifiableList());

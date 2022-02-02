@@ -10,8 +10,9 @@ import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
-import org.monarchinitiative.svart.BreakendVariant;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicBreakend;
+import org.monarchinitiative.svart.GenomicBreakendVariant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,7 @@ public class HtmlResultWriter implements ResultWriter {
                 .filter(s -> s.variant().numberOfAltReads() >= analysisParameters.minAltReadSupport()
                         && s.variant().passedFilters()
                         && !Double.isNaN(s.variant().svPriority().getPriority()))
-                .filter(v -> !(v.variant() instanceof BreakendVariant) || !doNotReportBreakends)
+                .filter(v -> !(v.variant() instanceof GenomicBreakendVariant) || !doNotReportBreakends)
                 .limit(analysisParameters.topNVariantsReported())
                 .map(visualizableGenerator::makeVisualizable)
                 .map(visualizer::getHtml)
@@ -99,7 +100,7 @@ public class HtmlResultWriter implements ResultWriter {
             int priority = r.svPriority().compareTo(l.svPriority()); // the order is intentional
             if (priority != 0)
                 return priority;
-            return Variant.compare(l, r);
+            return GenomicVariant.compare(l, r);
         };
     }
 

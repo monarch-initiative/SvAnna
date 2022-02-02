@@ -1,8 +1,8 @@
 package org.jax.svanna.core;
 
-import org.monarchinitiative.svart.Breakend;
+import org.monarchinitiative.svart.GenomicBreakend;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.monarchinitiative.svart.Strand;
-import org.monarchinitiative.svart.Variant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 
@@ -12,7 +12,7 @@ public class LogUtils {
         // private no-op
     }
 
-    public static String variantSummary(Variant variant) {
+    public static String variantSummary(GenomicVariant variant) {
         if (VariantType.isSymbolic(variant.alt()))
             return String.format("%s %s:%d-%d %s", variant.id(), variant.contigName(),
                     variant.startOnStrand(Strand.POSITIVE), variant.endOnStrand(Strand.POSITIVE), variant.alt());
@@ -21,7 +21,7 @@ public class LogUtils {
     }
 
 
-    public static String breakendSummary(Breakend variant) {
+    public static String breakendSummary(GenomicBreakend variant) {
         return String.format("%s %s:%d-%d",
                 variant.id(), variant.contigName(), variant.startOnStrand(Strand.POSITIVE), variant.endOnStrand(Strand.POSITIVE));
     }

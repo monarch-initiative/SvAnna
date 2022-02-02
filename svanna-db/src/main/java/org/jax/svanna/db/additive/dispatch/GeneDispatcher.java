@@ -26,7 +26,7 @@ public class GeneDispatcher implements Dispatcher {
     }
 
     @Override
-    public Routes assembleRoutes(List<Variant> variants) throws DispatchException {
+    public Routes assembleRoutes(List<GenomicVariant> variants) throws DispatchException {
         VariantArrangement arrangement = RouteAssemblyUtils.assemble(variants);
 
         if (!arrangement.hasBreakend()) {
@@ -35,8 +35,8 @@ public class GeneDispatcher implements Dispatcher {
             if (arrangement.size() != 1)
                 throw new DispatchException("Dispatching from more than one breakend variant is not currently supported, got " + arrangement.size() + " variants");
             try {
-                Variant v = arrangement.variants().get(arrangement.breakendIndex());
-                BreakendVariant bv = (BreakendVariant) v;
+                GenomicVariant v = arrangement.variants().get(arrangement.breakendIndex());
+                GenomicBreakendVariant bv = (GenomicBreakendVariant) v;
                 return interchromosomalArrangement(bv, arrangement);
             } catch (ClassCastException e) {
                 throw new DispatchException("Expected BreakendVariant but found " + variants.getClass() + " instead at position " + arrangement.breakendIndex() + " of the variant arrangement");
@@ -60,7 +60,7 @@ public class GeneDispatcher implements Dispatcher {
         return Routes.of(List.of(reference), List.of(altRoute));
     }
 
-    private Routes interchromosomalArrangement(BreakendVariant bv, VariantArrangement arrangement) throws DispatchException {
+    private Routes interchromosomalArrangement(GenomicBreakendVariant bv, VariantArrangement arrangement) throws DispatchException {
         GenomicRegion leftVariantRegion, rightVariantRegion;
         if (arrangement instanceof InterchromosomalVariantArrangement) {
             // This should always be the case, but let's be 100% sure.

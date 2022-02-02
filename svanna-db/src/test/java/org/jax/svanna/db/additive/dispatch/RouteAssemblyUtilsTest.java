@@ -14,15 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class RouteAssemblyUtilsTest {
 
     @Nested
-    public class Intrachromosomal {
+    public class IntrachromosomalVariantsTest {
 
         @Test
         public void multipleVariantsOnSingleChromosome() {
             TestContig contig = TestContig.of(1, 100);
-            List<Variant> variants = List.of(
-                    Variant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
-                    Variant.of(contig, "three", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
-                    Variant.of(contig, "two", Strand.NEGATIVE, CoordinateSystem.oneBased(), 80, "TTT", "C")
+            List<GenomicVariant> variants = List.of(
+                    GenomicVariant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
+                    GenomicVariant.of(contig, "three", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
+                    GenomicVariant.of(contig, "two", Strand.NEGATIVE, CoordinateSystem.oneBased(), 80, "TTT", "C")
             );
 
             VariantArrangement assembled = RouteAssemblyUtils.assemble(variants);
@@ -35,21 +35,21 @@ public class RouteAssemblyUtilsTest {
     }
 
     @Nested
-    public class Interchromosomal {
+    public class InterchromosomalVariantsTest {
 
         @Test
         public void assembleWithBreakend() {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
-            List<Variant> variants = List.of(
-                    Variant.of( "three",
-                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
-                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
+            List<GenomicVariant> variants = List.of(
+                    GenomicVariant.of( "three",
+                            GenomicBreakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            GenomicBreakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
                             "", "C"),
-                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
-                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
-                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
+                    GenomicVariant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
+                    GenomicVariant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
+                    GenomicVariant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
+                    GenomicVariant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
             );
 
             VariantArrangement assembled = RouteAssemblyUtils.assemble(variants);
@@ -67,16 +67,16 @@ public class RouteAssemblyUtilsTest {
         public void failWhenVariantIsNotUpstreamOfLeftBreakend() {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
-            List<Variant> variants = List.of(
-                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 50, "CCC", "C"), // culprit
+            List<GenomicVariant> variants = List.of(
+                    GenomicVariant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 50, "CCC", "C"), // culprit
 
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
-                    Variant.of( "three",
-                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
-                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
+                    GenomicVariant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
+                    GenomicVariant.of( "three",
+                            GenomicBreakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            GenomicBreakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
                             "", "C"),
-                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
-                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
+                    GenomicVariant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
+                    GenomicVariant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 40, "C", "G")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
@@ -87,15 +87,15 @@ public class RouteAssemblyUtilsTest {
         public void failWhenVariantIsNotDownstreamOfRightBreakend() {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
-            List<Variant> variants = List.of(
-                    Variant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
-                    Variant.of( "three",
-                            Breakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
-                            Breakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
+            List<GenomicVariant> variants = List.of(
+                    GenomicVariant.of(ctg1, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 30, "CCC", "C"),
+                    GenomicVariant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"),
+                    GenomicVariant.of( "three",
+                            GenomicBreakend.of(ctg1, "threeLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            GenomicBreakend.of(ctg2, "threeRight", Strand.NEGATIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)),
                             "", "C"),
-                    Variant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
-                    Variant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 25, "C", "G")  // culprit
+                    GenomicVariant.of(ctg2, "five", Strand.POSITIVE, CoordinateSystem.oneBased(), 20, "AAA", "C"),
+                    GenomicVariant.of(ctg2, "four", Strand.NEGATIVE, CoordinateSystem.oneBased(), 25, "C", "G")  // culprit
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
@@ -105,18 +105,19 @@ public class RouteAssemblyUtilsTest {
 
 
     @Nested
-    public class Special {
+    public class SpecialCasesTest {
 
         @Test
         public void failOnAssemblyOfMoreThanOneBreakend() {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
-            List<Variant> variants = List.of(
-                    Variant.of( "one",
-                            Breakend.of(ctg1, "oneLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 5, 5)),
-                            Breakend.of(ctg2, "oneRight", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)), "", "C"),Variant.of( "one",
-                            Breakend.of(ctg2, "twoLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
-                            Breakend.of(ctg1, "twoRight", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 60, 60)), "", "")
+            List<GenomicVariant> variants = List.of(
+                    GenomicVariant.of( "one",
+                            GenomicBreakend.of(ctg1, "oneLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 5, 5)),
+                            GenomicBreakend.of(ctg2, "oneRight", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 30, 30)), "", "C"),
+                    GenomicVariant.of( "one",
+                            GenomicBreakend.of(ctg2, "twoLeft", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 40, 40)),
+                            GenomicBreakend.of(ctg1, "twoRight", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 60, 60)), "", "")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
@@ -127,9 +128,9 @@ public class RouteAssemblyUtilsTest {
         public void failOnAssemblyOnMoreThanOneContig() {
             TestContig ctg1 = TestContig.of(1, 100);
             TestContig ctg2 = TestContig.of(1, 100);
-            List<Variant> variants = List.of(
-                    Variant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "CCCC", "C"),
-                    Variant.of(ctg2, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
+            List<GenomicVariant> variants = List.of(
+                    GenomicVariant.of(ctg1, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "CCCC", "C"),
+                    GenomicVariant.of(ctg2, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
@@ -139,9 +140,9 @@ public class RouteAssemblyUtilsTest {
         @Test
         public void failOnAssemblyOfOverlappingVariants() {
             TestContig contig = TestContig.of(1, 100);
-            List<Variant> variants = List.of(
-                    Variant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "CCCC", "C"),
-                    Variant.of(contig, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
+            List<GenomicVariant> variants = List.of(
+                    GenomicVariant.of(contig, "one", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "CCCC", "C"),
+                    GenomicVariant.of(contig, "two", Strand.POSITIVE, CoordinateSystem.oneBased(), 6, "CCC", "C")
             );
 
             RouteAssemblyException e = assertThrows(RouteAssemblyException.class, () -> RouteAssemblyUtils.assemble(variants));
@@ -151,7 +152,7 @@ public class RouteAssemblyUtilsTest {
         @Test
         public void singleVariantIsAlreadyAssembled() {
             TestContig contig = TestContig.of(1, 10);
-            List<Variant> variants = List.of(Variant.of(contig, "rs123", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"));
+            List<GenomicVariant> variants = List.of(GenomicVariant.of(contig, "rs123", Strand.POSITIVE, CoordinateSystem.oneBased(), 5, "C", "G"));
 
             VariantArrangement assembled = RouteAssemblyUtils.assemble(variants);
 

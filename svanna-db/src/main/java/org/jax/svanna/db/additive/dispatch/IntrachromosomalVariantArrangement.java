@@ -2,7 +2,7 @@ package org.jax.svanna.db.additive.dispatch;
 
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,14 +14,14 @@ class IntrachromosomalVariantArrangement extends VariantArrangement {
     private static final Strand STRAND = Strand.POSITIVE;
     private final GenomicRegion variantRegion;
 
-    IntrachromosomalVariantArrangement(List<Variant> variants) {
+    IntrachromosomalVariantArrangement(List<GenomicVariant> variants) {
         super(variants);
         variantRegion = makeIntrachromosomalVariantRegion(variants());
     }
 
-    static GenomicRegion makeIntrachromosomalVariantRegion(LinkedList<Variant> variants) {
-        Variant first = variants.getFirst();
-        Variant last = variants.getLast();
+    static GenomicRegion makeIntrachromosomalVariantRegion(LinkedList<GenomicVariant> variants) {
+        GenomicVariant first = variants.getFirst();
+        GenomicVariant last = variants.getLast();
         return GenomicRegion.of(first.contig(), STRAND, CS,
                 first.startOnStrandWithCoordinateSystem(STRAND, CS),
                 last.endOnStrandWithCoordinateSystem(STRAND, CS));

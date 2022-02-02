@@ -36,14 +36,14 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
      * @param genes genes affected by this translocation
      * @param enhancers Enhancers disrupted by this translocation
      */
-    public TranslocationSvgGenerator(Variant variant,
-                                     BreakendVariant breakended,
+    public TranslocationSvgGenerator(GenomicVariant variant,
+                                     GenomicBreakendVariant breakended,
                                      List<Gene> genes,
                                      List<Enhancer> enhancers,
                                      List<RepetitiveRegion> repeats) {
         super(variant, genes, enhancers, repeats, List.of());
-        Breakend left = breakended.left();
-        Breakend right = breakended.right();
+        GenomicBreakend left = breakended.left();
+        GenomicBreakend right = breakended.right();
 
         List<Gene> genesA = genes.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
         List<Gene> genesB = genes.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());

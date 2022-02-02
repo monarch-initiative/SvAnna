@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TestVariant extends BaseVariant<TestVariant> implements SvannaVariant {
+public class TestVariant extends BaseGenomicVariant<TestVariant> implements SvannaVariant {
 
     private final Set<FilterType> passedFilterTypes;
     private final Set<FilterType> failedFilterTypes;

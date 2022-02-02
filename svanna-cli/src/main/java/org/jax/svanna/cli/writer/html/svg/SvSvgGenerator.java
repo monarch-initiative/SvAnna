@@ -63,7 +63,7 @@ public abstract class SvSvgGenerator {
     /**
      * Variant on {@link Strand#POSITIVE}
      */
-    protected final Variant variant;
+    protected final GenomicVariant variant;
     /**
      * Leftmost position (most 5' on chromosome).
      */
@@ -147,7 +147,7 @@ public abstract class SvSvgGenerator {
      * @param genes genes affected by the structural variant we are displaying
      * @param enhancers enhancers  affected by the structural variant we are displaying
      */
-    public SvSvgGenerator(Variant variant,
+    public SvSvgGenerator(GenomicVariant variant,
                           List<Gene> genes,
                           List<Enhancer> enhancers,
                           List<RepetitiveRegion> repeats,
@@ -192,7 +192,7 @@ public abstract class SvSvgGenerator {
 
     public SvSvgGenerator(int minPos,
                           int maxPos,
-                          Variant variant,
+                          GenomicVariant variant,
                           List<Gene> genes,
                           List<Enhancer> enhancers,
                           List<RepetitiveRegion> repeats) {
@@ -443,11 +443,11 @@ public abstract class SvSvgGenerator {
 
         int cdsStart = tx.strand().isPositive()
                 ? coding.codingStart()
-                : Coordinates.invertPosition(tx.coordinateSystem(), tx.contig(), coding.codingStart());
+                : Coordinates.invertCoordinate(tx.coordinateSystem(), tx.contig(), coding.codingStart());
         double cdsStartSvg = translateGenomicToSvg(cdsStart);
         int cdsEnd = tx.strand().isPositive()
                 ? coding.codingEnd()
-                : Coordinates.invertPosition(tx.coordinateSystem(), tx.contig(), coding.codingEnd());
+                : Coordinates.invertCoordinate(tx.coordinateSystem(), tx.contig(), coding.codingEnd());
         double cdsEndSvg = translateGenomicToSvg(cdsEnd);
         List<Coordinates> exons = tx.strand().isPositive()
                 ? tx.exons()

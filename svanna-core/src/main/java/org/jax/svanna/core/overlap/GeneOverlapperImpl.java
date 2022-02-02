@@ -162,7 +162,7 @@ class GeneOverlapperImpl implements GeneOverlapper {
     }
 
     @Override
-    public List<GeneOverlap> getOverlaps(Variant variant) {
+    public List<GeneOverlap> getOverlaps(GenomicVariant variant) {
         switch (variant.variantType().baseType()) {
             case DEL:
             case DUP:
@@ -175,8 +175,8 @@ class GeneOverlapperImpl implements GeneOverlapper {
                 return variant.length() == 0 ? emptyRegionOverlap(variant) : intrachromosomalEventOverlaps(variant);
             case TRA:
             case BND:
-                if (variant instanceof BreakendVariant) {
-                    return translocationOverlaps(((BreakendVariant) variant));
+                if (variant instanceof GenomicBreakendVariant) {
+                    return translocationOverlaps(((GenomicBreakendVariant) variant));
                 } else {
                     LogUtils.logWarn(LOGGER, "Variant `{}` has type `{}` but it is not instance of BreakendVariant", LogUtils.variantSummary(variant), variant.variantType());
                     return List.of();
@@ -198,15 +198,15 @@ class GeneOverlapperImpl implements GeneOverlapper {
         return parseIntrachromosomalEventQueryResult(region, results);
     }
 
-    private List<GeneOverlap> translocationOverlaps(BreakendVariant breakendVariant) {
+    private List<GeneOverlap> translocationOverlaps(GenomicBreakendVariant breakendVariant) {
         List<GeneOverlap> overlaps = new LinkedList<>();
 
         // the loop is unrolled as we only have 2 breakends here
-        Breakend left = breakendVariant.left();
+        GenomicBreakend left = breakendVariant.left();
         QueryResult<Gene> leftResult = geneService.overlappingGenes(left);
         overlaps.addAll(parseIntrachromosomalEventQueryResult(left, leftResult));
 
-        Breakend right = breakendVariant.right();
+        GenomicBreakend right = breakendVariant.right();
         QueryResult<Gene> rightResult = geneService.overlappingGenes(right);
         overlaps.addAll(parseIntrachromosomalEventQueryResult(right, rightResult));
 

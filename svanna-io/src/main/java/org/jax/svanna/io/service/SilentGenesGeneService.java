@@ -6,7 +6,7 @@ import org.jax.svanna.core.service.QueryResult;
 import org.jax.svanna.io.service.jannovar.IntervalArray;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;

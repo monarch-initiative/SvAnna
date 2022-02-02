@@ -4,6 +4,7 @@ import org.jax.svanna.db.IngestDao;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.tad.TadBoundaryDefault;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -170,7 +171,7 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
 
         int pos = strand.isPositive()
                 ? midpoint
-                : Coordinates.invertPosition(CS, contig, midpoint);
+                : Coordinates.invertCoordinate(CS, contig, midpoint);
         GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, CS, pos, pos);
         return TadBoundaryDefault.of(location,
                 rs.getString("ID"),

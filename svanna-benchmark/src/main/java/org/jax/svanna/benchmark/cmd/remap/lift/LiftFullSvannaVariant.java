@@ -132,6 +132,10 @@ public class LiftFullSvannaVariant {
                                 calculateChangeLength(variant.startWithCoordinateSystem(CoordinateSystem.zeroBased()), variant.endWithCoordinateSystem(CoordinateSystem.zeroBased()), variant.variantType(), variant.changeLength()));
                     } else {
                         // sequence variant
+                        if (coordinates.length() != variant.ref().length()) {
+                            // unable to lift the coordinates
+                            return Optional.empty();
+                        }
                         v = Variant.of(contig,
                                 variant.id(),
                                 lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,

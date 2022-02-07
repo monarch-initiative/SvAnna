@@ -11,7 +11,7 @@ import java.util.List;
 
 public class GnomadSVFileParserTest {
 
-    private static final Path testFile = Paths.get(GnomadSVFileParser.class.getResource("variants_for_nstd166.5lines.csv.gz").getPath());
+    private static final Path testFile = Paths.get("src/test/resources/population/variants_for_nstd166.5lines.csv.gz");
 
     private static final GenomicAssembly genomicAssembly = GenomicAssemblies.GRCh38p13();
 

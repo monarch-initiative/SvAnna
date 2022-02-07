@@ -14,7 +14,7 @@ import static org.hamcrest.Matchers.hasSize;
 
 public class HgSvc2VcfParserTest {
 
-    private static final Path testFile = Paths.get(HgSvc2VcfParserTest.class.getResource("freeze3.sv.alt.250lines.vcf.gz").getPath());
+    private static final Path testFile = Paths.get("src/test/resources/population/freeze3.sv.alt.250lines.vcf.gz");
     private static final GenomicAssembly genomicAssembly = GenomicAssemblies.GRCh38p13();
 
     @Test

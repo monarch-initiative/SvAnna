@@ -10,6 +10,7 @@ import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,7 @@ public class VistaEnhancerParserTest extends AbstractEnhancerParserTest {
 
     @Test
     public void parse() throws Exception {
-        Path vistaPath = Path.of(VistaEnhancerParserTest.class.getResource("vista.tsv").getPath());
+        Path vistaPath = Paths.get("src/test/resources/enhancer/vista/vista.tsv");
         VistaEnhancerParser parser = new VistaEnhancerParser(GRCh38p13, vistaPath, UBERON_TO_HPO);
         List<? extends Enhancer> enhancers = parser.parseToList();
 

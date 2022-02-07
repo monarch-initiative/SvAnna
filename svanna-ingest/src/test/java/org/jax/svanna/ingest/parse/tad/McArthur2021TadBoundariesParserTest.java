@@ -1,7 +1,5 @@
 package org.jax.svanna.ingest.parse.tad;
 
-import org.jax.svanna.ingest.parse.RepetitiveRegionParserTest;
-import org.jax.svanna.ingest.parse.population.GnomadSVFileParser;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.CoordinateSystem;
@@ -10,6 +8,7 @@ import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.Strand;
 
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -19,14 +18,15 @@ import static org.hamcrest.Matchers.*;
 
 public class McArthur2021TadBoundariesParserTest {
 
-    private static final Path chainFile = Paths.get(RepetitiveRegionParserTest.class.getResource("hg19ToHg38.over.chain.gz").getPath());
+    private static final Path chainFile = Paths.get("src/test/resources/hg19ToHg38.over.chain.gz");
 
     private static final GenomicAssembly genomicAssembly = GenomicAssemblies.GRCh38p13();
 
     @Test
     public void parse() throws Exception {
         List<? extends TadBoundary> records;
-        try (InputStream is = McArthur2021TadBoundariesParserTest.class.getResourceAsStream("emcarthur-TAD-stability-heritability.3records.bed")) {
+        Path tadsPath = Paths.get("src/test/resources/tad/emcarthur-TAD-stability-heritability.3records.bed");
+        try (InputStream is = Files.newInputStream(tadsPath)) {
             McArthur2021TadBoundariesParser instance = new McArthur2021TadBoundariesParser(genomicAssembly, is, chainFile);
             records = instance.parseToList();
         }

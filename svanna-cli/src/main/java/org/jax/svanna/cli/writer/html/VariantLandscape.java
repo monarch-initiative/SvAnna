@@ -5,7 +5,7 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svart.VariantType;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.List;
 import java.util.stream.Collectors;

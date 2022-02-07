@@ -1,9 +1,9 @@
 package org.jax.svanna.core.service;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.GenomicRegion;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Located;
 
 import java.util.List;
 

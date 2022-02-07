@@ -8,8 +8,8 @@ import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svart.GenomicRegion;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Located;
 
 import java.util.Collection;
 import java.util.List;

@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
-import xyz.ielis.silent.genes.gencode.io.GencodeParser;
-import xyz.ielis.silent.genes.gencode.model.GencodeGene;
-import xyz.ielis.silent.genes.io.GeneParser;
-import xyz.ielis.silent.genes.io.GeneParserFactory;
-import xyz.ielis.silent.genes.io.SerializationFormat;
+import org.monarchinitiative.sgenes.gencode.io.GencodeParser;
+import org.monarchinitiative.sgenes.gencode.model.GencodeGene;
+import org.monarchinitiative.sgenes.io.GeneParser;
+import org.monarchinitiative.sgenes.io.GeneParserFactory;
+import org.monarchinitiative.sgenes.io.SerializationFormat;
 
 import java.io.*;
 import java.nio.file.Files;

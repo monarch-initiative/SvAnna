@@ -1,7 +1,7 @@
 package org.jax.svanna.model.landscape;
 
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.GenomicRegion;
-import xyz.ielis.silent.genes.model.Located;
 
 import java.util.Objects;
 

@@ -4,7 +4,7 @@ import org.jax.svanna.core.priority.additive.*;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.core.service.QueryResult;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.List;
 

@@ -1,6 +1,6 @@
 package org.jax.svanna.core.overlap;
 
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.*;
 

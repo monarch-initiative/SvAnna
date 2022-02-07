@@ -1,8 +1,8 @@
 package org.jax.svanna.core.service;
 
 import org.jax.svanna.model.landscape.dosage.*;
+import org.monarchinitiative.sgenes.model.Gene;
 import org.monarchinitiative.svart.GenomicRegion;
-import xyz.ielis.silent.genes.model.Gene;
 
 import java.util.Collection;
 import java.util.List;

@@ -4,7 +4,7 @@ import org.jax.svanna.core.priority.additive.RouteData;
 import org.jax.svanna.core.priority.additive.Routes;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.*;
 

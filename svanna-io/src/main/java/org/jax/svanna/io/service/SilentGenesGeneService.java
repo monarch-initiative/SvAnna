@@ -11,10 +11,10 @@ import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ielis.silent.genes.io.GeneParser;
-import xyz.ielis.silent.genes.io.GeneParserFactory;
-import xyz.ielis.silent.genes.io.SerializationFormat;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.io.GeneParser;
+import org.monarchinitiative.sgenes.io.GeneParserFactory;
+import org.monarchinitiative.sgenes.io.SerializationFormat;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

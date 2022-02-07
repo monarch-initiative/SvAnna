@@ -5,10 +5,10 @@ import org.jax.svanna.core.service.QueryResult;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.GenomicRegion;
-import xyz.ielis.silent.genes.io.GeneParser;
-import xyz.ielis.silent.genes.io.GeneParserFactory;
-import xyz.ielis.silent.genes.io.SerializationFormat;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.io.GeneParser;
+import org.monarchinitiative.sgenes.io.GeneParserFactory;
+import org.monarchinitiative.sgenes.io.SerializationFormat;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

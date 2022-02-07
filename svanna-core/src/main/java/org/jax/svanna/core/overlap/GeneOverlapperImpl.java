@@ -3,12 +3,12 @@ package org.jax.svanna.core.overlap;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.core.service.QueryResult;
+import org.monarchinitiative.sgenes.model.Coding;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Transcript;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ielis.silent.genes.model.Coding;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Transcript;
 
 import java.util.*;
 import java.util.stream.Collectors;

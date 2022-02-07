@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.GenomicVariant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

@@ -1,8 +1,8 @@
 package org.jax.svanna.model.landscape.tad;
 
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
-import xyz.ielis.silent.genes.model.Located;
 
 public interface TadBoundary extends Located {
 

@@ -1,7 +1,7 @@
 package org.jax.svanna.core.priority.additive.impact;
 
 import org.jax.svanna.core.priority.additive.Projection;
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.sgenes.model.Located;
 
 /**
  * This interface returns a number in range <code>[0,...]</code> to estimate {@link T}'s function on the allele

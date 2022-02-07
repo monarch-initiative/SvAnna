@@ -16,8 +16,8 @@ public class FantomEnhancerParserTest extends AbstractEnhancerParserTest {
 
     @Test
     public void parse() throws Exception {
-        Path countsPath = Paths.get(FantomEnhancerParserTest.class.getResource("/enhancers/F5.hg38.enhancers.expression.matrix.3lines.tsv.gz").getPath());
-        Path samplesPath = Paths.get(FantomEnhancerParserTest.class.getResource("/enhancers/Human.sample_name2library_id.txt").getPath());
+        Path countsPath = Paths.get(FantomEnhancerParserTest.class.getResource("F5.hg38.enhancers.expression.matrix.3lines.tsv.gz").getPath());
+        Path samplesPath = Paths.get(FantomEnhancerParserTest.class.getResource("Human.sample_name2library_id.txt").getPath());
         FantomEnhancerParser instance = new FantomEnhancerParser(GRCh38p13, countsPath, samplesPath, UBERON_TO_HPO);
         List<? extends FEnhancer> enhancers = instance.parseToList();
 

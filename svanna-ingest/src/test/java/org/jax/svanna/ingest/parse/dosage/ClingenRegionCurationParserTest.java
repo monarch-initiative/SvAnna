@@ -17,7 +17,7 @@ public class ClingenRegionCurationParserTest {
 
     @Test
     public void parse() throws Exception {
-        Path regionPath = Path.of(ClingenRegionCurationParserTest.class.getResource("/dosage/ClinGen_region_curation_list_GRCh38.15lines.tsv").getPath());
+        Path regionPath = Path.of(ClingenRegionCurationParserTest.class.getResource("ClinGen_region_curation_list_GRCh38.15lines.tsv").getPath());
         ClingenRegionCurationParser parser = new ClingenRegionCurationParser(regionPath, GenomicAssemblies.GRCh38p13());
 
         List<? extends DosageRegion> elements = parser.parseToList();

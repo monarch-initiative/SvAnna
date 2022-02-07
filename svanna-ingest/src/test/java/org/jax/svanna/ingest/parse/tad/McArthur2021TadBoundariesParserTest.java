@@ -1,5 +1,6 @@
 package org.jax.svanna.ingest.parse.tad;
 
+import org.jax.svanna.ingest.parse.RepetitiveRegionParserTest;
 import org.jax.svanna.ingest.parse.population.GnomadSVFileParser;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.junit.jupiter.api.Test;
@@ -18,14 +19,14 @@ import static org.hamcrest.Matchers.*;
 
 public class McArthur2021TadBoundariesParserTest {
 
-    private static final Path chainFile = Paths.get(GnomadSVFileParser.class.getResource("/liftover/hg19ToHg38.over.chain.gz").getPath());
+    private static final Path chainFile = Paths.get(RepetitiveRegionParserTest.class.getResource("hg19ToHg38.over.chain.gz").getPath());
 
     private static final GenomicAssembly genomicAssembly = GenomicAssemblies.GRCh38p13();
 
     @Test
     public void parse() throws Exception {
         List<? extends TadBoundary> records;
-        try (InputStream is = McArthur2021TadBoundariesParserTest.class.getResourceAsStream("/tads/emcarthur-TAD-stability-heritability.3records.bed")) {
+        try (InputStream is = McArthur2021TadBoundariesParserTest.class.getResourceAsStream("emcarthur-TAD-stability-heritability.3records.bed")) {
             McArthur2021TadBoundariesParser instance = new McArthur2021TadBoundariesParser(genomicAssembly, is, chainFile);
             records = instance.parseToList();
         }

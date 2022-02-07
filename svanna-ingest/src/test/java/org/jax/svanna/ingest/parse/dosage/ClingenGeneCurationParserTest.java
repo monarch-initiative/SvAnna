@@ -51,7 +51,7 @@ public class ClingenGeneCurationParserTest {
 
     @Test
     public void parse() throws Exception {
-        Path geneListPath = Path.of(ClingenGeneCurationParserTest.class.getResource("/dosage/ClinGen_gene_curation_list_GRCh38.15lines.tsv").getPath());
+        Path geneListPath = Path.of(ClingenGeneCurationParserTest.class.getResource("ClinGen_gene_curation_list_GRCh38.15lines.tsv").getPath());
         Map<TermId, GenomicRegion> geneById = makeGeneByIdMap();
         Map<Integer, Integer> ncbiGeneToHgnc = makeNcbiGeneToHgnc();
 

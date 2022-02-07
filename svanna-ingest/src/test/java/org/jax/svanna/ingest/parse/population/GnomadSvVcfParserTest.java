@@ -1,5 +1,6 @@
 package org.jax.svanna.ingest.parse.population;
 
+import org.jax.svanna.ingest.parse.RepetitiveRegionParserTest;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,8 @@ import static org.hamcrest.Matchers.*;
 
 public class GnomadSvVcfParserTest {
 
-    private static final Path testFile = Paths.get(GnomadSVFileParser.class.getResource("/variants/gnomad_v2.1_sv.sites.200lines.vcf.gz").getPath());
-    private static final Path chainFile = Paths.get(GnomadSVFileParser.class.getResource("/liftover/hg19ToHg38.over.chain.gz").getPath());
+    private static final Path testFile = Paths.get(GnomadSVFileParser.class.getResource("gnomad_v2.1_sv.sites.200lines.vcf.gz").getPath());
+    private static final Path chainFile = Paths.get(RepetitiveRegionParserTest.class.getResource("hg19ToHg38.over.chain.gz").getPath());
 
     private static final GenomicAssembly genomicAssembly = GenomicAssemblies.GRCh38p13();
     private static final double ERROR = 1E-5;

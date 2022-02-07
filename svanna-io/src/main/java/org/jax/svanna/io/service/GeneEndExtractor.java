@@ -3,7 +3,7 @@ package org.jax.svanna.io.service;
 import org.jax.svanna.io.service.jannovar.IntervalEndExtractor;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 class GeneEndExtractor implements IntervalEndExtractor<Gene> {
 

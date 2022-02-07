@@ -19,7 +19,7 @@ public class DbsnpVcfParserTest {
 
     private static final double ERROR = 5e-6;
 
-    private static final Path testFile = Paths.get(HgSvc2VcfParserTest.class.getResource("/variants/00-common_all.100lines.vcf.gz").getPath());
+    private static final Path testFile = Paths.get("src/test/resources/population/00-common_all.100lines.vcf.gz");
     private static final GenomicAssembly assembly = GenomicAssemblies.GRCh38p13();
 
     @Test

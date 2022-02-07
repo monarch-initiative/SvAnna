@@ -8,8 +8,8 @@ import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Located;
 
 import java.util.*;
 

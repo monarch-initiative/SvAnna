@@ -2,9 +2,9 @@ package org.jax.svanna.ingest.parse;
 
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.assembly.SequenceRole;
-import xyz.ielis.silent.genes.gencode.io.GencodeParser;
-import xyz.ielis.silent.genes.gencode.model.Biotype;
-import xyz.ielis.silent.genes.gencode.model.GencodeGene;
+import org.monarchinitiative.sgenes.gencode.io.GencodeParser;
+import org.monarchinitiative.sgenes.gencode.model.Biotype;
+import org.monarchinitiative.sgenes.gencode.model.GencodeGene;
 
 import java.nio.file.Path;
 import java.util.*;

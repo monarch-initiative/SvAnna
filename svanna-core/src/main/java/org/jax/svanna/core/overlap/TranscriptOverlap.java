@@ -1,7 +1,5 @@
 package org.jax.svanna.core.overlap;
 
-import xyz.ielis.silent.genes.model.Transcript;
-
 /**
  * An object that represents the type and degree of overlap of a structural variant and
  * a transcript or enhancer feature.

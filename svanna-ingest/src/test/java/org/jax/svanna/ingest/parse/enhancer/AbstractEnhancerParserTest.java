@@ -2,7 +2,6 @@ package org.jax.svanna.ingest.parse.enhancer;
 
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
-import org.jax.svanna.ingest.parse.enhancer.fantom.FantomEnhancerParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
@@ -14,7 +13,7 @@ import java.util.Map;
 
 public abstract class AbstractEnhancerParserTest {
 
-    private static final Path ENHANCER_MAP_PATH = Paths.get(FantomEnhancerParser.class.getResource("/uberon_tissue_to_hpo_top_level.csv").getPath());
+    private static final Path ENHANCER_MAP_PATH = Paths.get("src/main/resources/uberon_tissue_to_hpo_top_level.csv");
     protected static final GenomicAssembly GRCh38p13 = GenomicAssemblies.GRCh38p13();
 
     protected static Map<TermId, HpoMapping> UBERON_TO_HPO;

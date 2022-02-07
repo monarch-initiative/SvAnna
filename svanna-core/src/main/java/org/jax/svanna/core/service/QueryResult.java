@@ -1,6 +1,6 @@
 package org.jax.svanna.core.service;
 
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.sgenes.model.Located;
 
 import java.util.Collection;
 import java.util.List;

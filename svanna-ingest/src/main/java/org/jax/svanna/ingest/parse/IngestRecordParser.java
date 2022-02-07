@@ -1,6 +1,6 @@
 package org.jax.svanna.ingest.parse;
 
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.sgenes.model.Located;
 
 import java.io.IOException;
 import java.util.List;

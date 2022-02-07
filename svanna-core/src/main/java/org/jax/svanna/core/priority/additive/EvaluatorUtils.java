@@ -2,12 +2,12 @@ package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Located;
 
 import java.util.*;
 import java.util.stream.Collectors;

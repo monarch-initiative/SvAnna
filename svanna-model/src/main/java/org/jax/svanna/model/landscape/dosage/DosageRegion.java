@@ -1,9 +1,7 @@
 package org.jax.svanna.model.landscape.dosage;
 
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.GenomicRegion;
-import xyz.ielis.silent.genes.model.Located;
-
-import java.util.List;
 
 /**
  * The region shown to be dosage sensitive.

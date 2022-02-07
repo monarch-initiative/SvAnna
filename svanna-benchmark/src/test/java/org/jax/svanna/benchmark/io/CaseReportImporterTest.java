@@ -53,7 +53,7 @@ public class CaseReportImporterTest {
 
     @Test
     public void parseBreakendCase() throws Exception {
-        Path path = Path.of(CaseReportImporterTest.class.getResource("Iqbal-2013-ANK3-V:1.json").toURI());
+        Path path = Path.of(CaseReportImporterTest.class.getResource("Iqbal-2013-ANK3-V_1.json").toURI());
         List<CaseReport> caseReports = CaseReportImporter.readCasesProvidedAsPositionalArguments(List.of(path));
 
         assertThat(caseReports, hasSize(1));

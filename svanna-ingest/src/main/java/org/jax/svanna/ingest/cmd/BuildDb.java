@@ -343,7 +343,7 @@ public class BuildDb implements Callable<Integer> {
                                         GenomicAssembly assembly,
                                         DataSource dataSource) throws IOException {
         Map<TermId, HpoMapping> uberonToHpoMap;
-        try (InputStream is = FantomEnhancerParser.class.getResourceAsStream("uberon_tissue_to_hpo_top_level.csv")) {
+        try (InputStream is = BuildDb.class.getResourceAsStream("/uberon_tissue_to_hpo_top_level.csv")) {
             HpoTissueMapParser hpoTissueMapParser = new HpoTissueMapParser(is);
             uberonToHpoMap = hpoTissueMapParser.getOtherToHpoMap();
         }

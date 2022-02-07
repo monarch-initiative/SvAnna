@@ -1,7 +1,7 @@
 package org.jax.svanna.core.priority.additive;
 
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Located;
 
 import java.util.Collection;
 import java.util.HashSet;

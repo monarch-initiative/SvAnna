@@ -4,7 +4,7 @@ import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.*;
 import java.util.stream.Collectors;

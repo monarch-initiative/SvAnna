@@ -7,7 +7,7 @@ import org.monarchinitiative.phenol.annotations.formats.hpo.category.HpoCategory
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
 
 import java.util.*;
 import java.util.stream.Collectors;

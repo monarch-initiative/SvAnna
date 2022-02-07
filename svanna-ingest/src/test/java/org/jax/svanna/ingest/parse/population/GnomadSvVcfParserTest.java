@@ -4,6 +4,8 @@ import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,8 +16,8 @@ import static org.hamcrest.Matchers.*;
 
 public class GnomadSvVcfParserTest {
 
-    private static final Path testFile = Paths.get(GnomadSVFileParser.class.getResource("/variants/gnomad_v2.1_sv.sites.200lines.vcf.gz").getPath());
-    private static final Path chainFile = Paths.get(GnomadSVFileParser.class.getResource("/liftover/hg19ToHg38.over.chain.gz").getPath());
+    private static final Path testFile = Paths.get("src/test/resources/population/gnomad_v2.1_sv.sites.200lines.vcf.gz");
+    private static final Path chainFile = Paths.get("src/test/resources/hg19ToHg38.over.chain.gz");
 
     private static final GenomicAssembly genomicAssembly = GenomicAssemblies.GRCh38p13();
     private static final double ERROR = 1E-5;

@@ -1,8 +1,8 @@
 package org.jax.svanna.db.landscape;
 
 import org.jax.svanna.db.TestDataConfig;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

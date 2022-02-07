@@ -1,6 +1,6 @@
 package org.jax.svanna.core.priority.additive;
 
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 /**
  * Assess the relevance of a potential change to the gene for an individual with given phenotype.

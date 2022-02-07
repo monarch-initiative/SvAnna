@@ -1,12 +1,12 @@
 package org.jax.svanna.io;
 
 import org.jax.svanna.test.TestVariants;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
-import xyz.ielis.silent.genes.model.Identifier;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.Identifier;
 
 import java.util.Map;
 import java.util.function.Function;

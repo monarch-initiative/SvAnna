@@ -5,6 +5,7 @@ import org.jax.svanna.model.landscape.variant.BasePopulationVariant;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

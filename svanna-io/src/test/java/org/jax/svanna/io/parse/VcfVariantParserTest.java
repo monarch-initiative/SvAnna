@@ -13,6 +13,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.file.Path;
@@ -49,32 +51,32 @@ public class VcfVariantParserTest {
         public void createVariantList() throws Exception {
             VcfVariantParser instance = new VcfVariantParser(GRCh38p13);
 
-            List<? extends Variant> variants = instance.createVariantAlleleList(SV_EXAMPLE_PATH);
+            List<? extends GenomicVariant> variants = instance.createVariantAlleleList(SV_EXAMPLE_PATH);
 
             assertThat(variants, hasSize(12));
 
-            Set<BreakendVariant> translocations = variants.stream()
-                    .filter(Variant::isBreakend)
-                    .map(v -> ((BreakendVariant) v))
+            Set<GenomicBreakendVariant> translocations = variants.stream()
+                    .filter(GenomicVariant::isBreakend)
+                    .map(v -> ((GenomicBreakendVariant) v))
                     .collect(toSet());
             assertThat(translocations.stream()
                             .map(bnd -> bnd.left().id())
                             .collect(toSet()),
                     hasItems("bnd_W", "bnd_V", "bnd_U", "bnd_X", "bnd_Y", "bnd_Z"));
             assertThat(translocations.stream()
-                            .map(BreakendVariant::eventId)
+                            .map(GenomicBreakendVariant::eventId)
                             .collect(toSet()),
                     hasItems("tra1", "tra2", "tra3"));
 
             assertThat(variants.stream()
                             .filter(variant -> variant.isSymbolic() && !variant.isBreakend())
-                            .map(Variant::id)
+                            .map(GenomicVariant::id)
                             .collect(toSet()),
                     hasItems("ins0", "del0", "dup0"));
 
             assertThat(variants.stream()
                             .filter(v -> !v.isSymbolic())
-                            .map(Variant::id)
+                            .map(GenomicVariant::id)
                             .collect(toSet()),
                     hasItems("rs6054257", "microsat1"));
         }
@@ -86,7 +88,7 @@ public class VcfVariantParserTest {
             List<FullSvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/pbsv.vcf"));
 
             assertThat(variants, hasSize(6));
-            assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
+            assertThat(variants.stream().map(GenomicVariant::variantType).collect(toSet()),
                     hasItems(VariantType.DEL, VariantType.INS, VariantType.BND, VariantType.INV, VariantType.DUP, VariantType.CNV));
 
             // check general fields for the first variant
@@ -118,8 +120,8 @@ public class VcfVariantParserTest {
             assertThat(breakendVariant.start(), equalTo(13_054_707));
             assertThat(breakendVariant.end(), equalTo(13_054_707));
 
-            BreakendVariant breakended = (BreakendVariant) breakendVariant;
-            Breakend left = breakended.left();
+            GenomicBreakendVariant breakended = (GenomicBreakendVariant) breakendVariant;
+            GenomicBreakend left = breakended.left();
             assertThat(left.id(), equalTo("pbsv.BND.CM000663.2:13054707-CM000663.2:13256071"));
             assertThat(left.contig(), equalTo(GRCh38p13.contigByName("CM000663.2")));
             assertThat(left.strand(), equalTo(Strand.POSITIVE));
@@ -127,7 +129,7 @@ public class VcfVariantParserTest {
             assertThat(left.start(), equalTo(13_054_708));
             assertThat(left.end(), equalTo(13_054_707));
 
-            Breakend right = breakended.right();
+            GenomicBreakend right = breakended.right();
             assertThat(right.id(), equalTo("pbsv.BND.CM000663.2:13256071-CM000663.2:13054707"));
             assertThat(right.contig(), equalTo(GRCh38p13.contigByName("CM000663.2")));
             assertThat(right.strand(), equalTo(Strand.NEGATIVE));
@@ -149,7 +151,7 @@ public class VcfVariantParserTest {
             List<FullSvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/svim.vcf"));
 
             assertThat(variants, hasSize(6));
-            assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
+            assertThat(variants.stream().map(GenomicVariant::variantType).collect(toSet()),
                     hasItems(VariantType.DEL, VariantType.INS, VariantType.BND, VariantType.DUP, VariantType.INV, VariantType.DUP_TANDEM));
 
             // check general fields for the first variant
@@ -181,8 +183,8 @@ public class VcfVariantParserTest {
             assertThat(breakendVariant.start(), equalTo(1_177_318));
             assertThat(breakendVariant.end(), equalTo(1_177_318));
 
-            BreakendVariant breakended = (BreakendVariant) breakendVariant;
-            Breakend left = breakended.left();
+            GenomicBreakendVariant breakended = (GenomicBreakendVariant) breakendVariant;
+            GenomicBreakend left = breakended.left();
             assertThat(left.id(), equalTo("svim.BND.3"));
             assertThat(left.contig(), equalTo(GRCh38p13.contigByName("CM000663.2")));
             assertThat(left.strand(), equalTo(Strand.POSITIVE));
@@ -190,7 +192,7 @@ public class VcfVariantParserTest {
             assertThat(left.start(), equalTo(1_177_319));
             assertThat(left.end(), equalTo(1_177_318));
 
-            Breakend right = breakended.right();
+            GenomicBreakend right = breakended.right();
             assertThat(right.id(), equalTo(""));
             assertThat(right.contigName(), equalTo("4"));
             assertThat(left.strand(), equalTo(Strand.POSITIVE));
@@ -206,7 +208,7 @@ public class VcfVariantParserTest {
             List<FullSvannaVariant> variants = instance.createVariantAlleleList(Paths.get("src/test/resources/org/jax/svanna/io/parse/sniffles.vcf"));
 
             assertThat(variants, hasSize(6));
-            assertThat(variants.stream().map(Variant::variantType).collect(toSet()),
+            assertThat(variants.stream().map(GenomicVariant::variantType).collect(toSet()),
                     hasItems(VariantType.DEL, VariantType.DUP, VariantType.INV, VariantType.INS, VariantType.INS, VariantType.SYMBOLIC)); // INVDUP -> SYMBOLIC
 
             // check general fields for the first variant
@@ -243,7 +245,7 @@ public class VcfVariantParserTest {
 
             String line = "2\t321681\tbnd_W\tG\tG]17:198982],C\t6\tPASS\tSVTYPE=BND;MATEID=bnd_Y;EVENT=tra1\tGT\t./.";
             VariantContext vc = VCF_CODEC.decode(line);
-            Optional<? extends Variant> vo = instance.toVariants().apply(vc);
+            Optional<? extends GenomicVariant> vo = instance.toVariants().apply(vc);
 
             assertThat(vo.isPresent(), is(false));
         }
@@ -254,7 +256,7 @@ public class VcfVariantParserTest {
 
             String line = "2\t321682\tdel0\tT\t<DEL>,C\t6\tPASS\tSVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62\tGT:GQ:DP\t0/1:12:11";
             VariantContext vc = VCF_CODEC.decode(line);
-            Optional<? extends Variant> vo = instance.toVariants().apply(vc);
+            Optional<? extends GenomicVariant> vo = instance.toVariants().apply(vc);
 
             assertThat(vo.isPresent(), is(false));
         }
@@ -265,7 +267,7 @@ public class VcfVariantParserTest {
 
             String line = "bacon\t12665100\tdup0\tA\t<DUP>\t14\tPASS\tSVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500;DP=5\tGT:GQ:CN:CNQ\t./.:0:3:16.2";
             VariantContext vc = VCF_CODEC.decode(line);
-            Optional<? extends Variant> variants = instance.toVariants().apply(vc);
+            Optional<? extends GenomicVariant> variants = instance.toVariants().apply(vc);
 
             assertThat(variants.isPresent(), is(false));
         }
@@ -276,7 +278,7 @@ public class VcfVariantParserTest {
 
             String line = "bacon\t14370\trs6054257\tG\tA\t29\tPASS\tDP=14;AF=0.5;DB\tGT:GQ:DP\t1/1:43:5";
             VariantContext vc = VCF_CODEC.decode(line);
-            Optional<? extends Variant> vo = instance.toVariants().apply(vc);
+            Optional<? extends GenomicVariant> vo = instance.toVariants().apply(vc);
 
             assertThat(vo.isPresent(), is(false));
         }
@@ -389,24 +391,24 @@ public class VcfVariantParserTest {
 
             // breakend bits
             assertThat(variant.isBreakend(), equalTo(true));
-            BreakendVariant bnd = (BreakendVariant) variant;
+            GenomicBreakendVariant bnd = (GenomicBreakendVariant) variant;
             assertThat(bnd.eventId(), equalTo("tra2"));
 
-            Breakend left = bnd.left();
+            GenomicBreakend left = bnd.left();
             assertThat(left.id(), equalTo("bnd_V"));
             assertThat(left.contig(), equalTo(assembly.contigByName("1")));
             assertThat(left.strand(), equalTo(Strand.NEGATIVE));
-            assertThat(left.coordinateSystem(), equalTo(CoordinateSystem.FULLY_CLOSED));
+            assertThat(left.coordinateSystem(), equalTo(CoordinateSystem.oneBased()));
             assertThat(left.start(), equalTo(8));
             assertThat(left.coordinates().startConfidenceInterval(), equalTo(ConfidenceInterval.of( -2, 1)));
             assertThat(left.end(), equalTo(7));
             assertThat(left.coordinates().endConfidenceInterval(), equalTo(ConfidenceInterval.of( -2, 1)));
 
-            Breakend right = bnd.right();
+            GenomicBreakend right = bnd.right();
             assertThat(right.id(), equalTo("bnd_U"));
             assertThat(right.contig(), equalTo(assembly.contigByName("2")));
             assertThat(left.strand(), equalTo(Strand.NEGATIVE));
-            assertThat(left.coordinateSystem(), equalTo(CoordinateSystem.FULLY_CLOSED));
+            assertThat(left.coordinateSystem(), equalTo(CoordinateSystem.oneBased()));
             assertThat(right.start(), equalTo(6));
             assertThat(right.coordinates().startConfidenceInterval(), equalTo(ConfidenceInterval.of(-1, 2)));
             assertThat(right.end(), equalTo(5));

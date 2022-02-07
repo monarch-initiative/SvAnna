@@ -7,11 +7,11 @@ import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.svart.BreakendVariant;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicBreakendVariant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -42,10 +42,10 @@ public class TranslocationSvGeneratorTest {
     @Test
     @Disabled
     public void testWriteSvg() {
-        Variant variant = testVariants.translocations().translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
+        GenomicVariant variant = testVariants.translocations().translocationWhereOneCdsIsDisruptedAndTheOtherIsNot();
         List<Gene> genes = geneOverlapper.getOverlaps(variant).stream().map(GeneOverlap::gene).collect(Collectors.toList());
         List<Enhancer> enhancerList = List.of();
-        TranslocationSvgGenerator gen = new TranslocationSvgGenerator(variant, ((BreakendVariant) variant), genes, enhancerList, List.of());
+        TranslocationSvgGenerator gen = new TranslocationSvgGenerator(variant, ((GenomicBreakendVariant) variant), genes, enhancerList, List.of());
         String svg = gen.getSvg();
         assertNotNull(svg);
         try {

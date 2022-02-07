@@ -23,15 +23,15 @@ import org.jax.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
 
 import javax.sql.DataSource;
 import java.io.*;

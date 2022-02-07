@@ -18,11 +18,11 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>xyz.ielis.silent.genes</groupId>
+            <groupId>org.monarchinitiative.sgenes</groupId>
             <artifactId>silent-genes-gencode</artifactId>
         </dependency>
         <dependency>
-            <groupId>xyz.ielis.silent.genes</groupId>
+            <groupId>org.monarchinitiative.sgenes</groupId>
             <artifactId>silent-genes-io</artifactId>
         </dependency>
         <dependency>

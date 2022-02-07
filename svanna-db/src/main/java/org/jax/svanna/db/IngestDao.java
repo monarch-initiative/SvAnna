@@ -1,6 +1,6 @@
 package org.jax.svanna.db;
 
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.sgenes.model.Located;
 
 public interface IngestDao<T extends Located> {
 

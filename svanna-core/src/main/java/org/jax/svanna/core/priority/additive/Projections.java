@@ -1,12 +1,12 @@
 package org.jax.svanna.core.priority.additive;
 
 import org.jax.svanna.core.LogUtils;
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ielis.silent.genes.model.Located;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,8 +95,8 @@ public class Projections {
             int nBasesInPreviousSegments = countBasesInPreviousSegments(segments, segmentIdx);
             int start = query.startOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start();
             int end = query.endOnStrandWithCoordinateSystem(segment.strand(), segment.coordinateSystem()) - segment.start();
-            int invertedEnd = Coordinates.invertPosition(CS, route.neoContig(), nBasesInPreviousSegments + start);
-            int invertedStart = Coordinates.invertPosition(CS, route.neoContig(), nBasesInPreviousSegments + end);
+            int invertedEnd = Coordinates.invertCoordinate(CS, route.neoContig(), nBasesInPreviousSegments + start);
+            int invertedStart = Coordinates.invertCoordinate(CS, route.neoContig(), nBasesInPreviousSegments + end);
 
             return List.of(Projection.builder(route, query, route.neoContig(), STRAND.opposite(), CS)
                     .start(invertedStart).setStartEvent(Projection.Location.of(segmentIdx, Event.INVERSION))

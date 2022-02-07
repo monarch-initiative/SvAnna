@@ -3,13 +3,13 @@ package org.jax.svanna.core.priority.additive.impact;
 import org.jax.svanna.core.priority.additive.Event;
 import org.jax.svanna.core.priority.additive.Projection;
 import org.jax.svanna.core.priority.additive.Segment;
+import org.monarchinitiative.sgenes.model.Coding;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Transcript;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ielis.silent.genes.model.Coding;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Transcript;
 
 import java.util.*;
 import java.util.stream.Collectors;

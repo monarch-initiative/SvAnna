@@ -5,7 +5,7 @@ import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -37,8 +37,8 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
                                               List<Gene> genes,
                                               List<Enhancer> enhancers,
                                               List<RepetitiveRegion> repeats,
-                                              Variant variant,
-                                              Breakend breakend,
+                                              GenomicVariant variant,
+                                              GenomicBreakend breakend,
                                               int ystart) {
         super(minPos, maxPos, variant, genes, enhancers, repeats);
         this.contig = breakend.contig();

@@ -14,7 +14,7 @@
                 <include>README.md</include>
                 <include>LICENSE</include>
                 <include>CHANGELOG.rst</include>
-                <include>legal/*</include>
+                <include>legal/**</include>
             </includes>
         </fileSet>
         <fileSet>

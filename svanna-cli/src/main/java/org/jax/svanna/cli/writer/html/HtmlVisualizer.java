@@ -13,11 +13,11 @@ import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.phenol.ontology.data.Term;
-import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.GenomicBreakendVariant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -194,8 +194,8 @@ public class HtmlVisualizer implements Visualizer {
                     break;
                 case TRA:
                 case BND:
-                    if (variant instanceof BreakendVariant) {
-                        gen = new TranslocationSvgGenerator(variant, (BreakendVariant) variant, genes, enhancers, repetitiveRegions);
+                    if (variant instanceof GenomicBreakendVariant) {
+                        gen = new TranslocationSvgGenerator(variant, (GenomicBreakendVariant) variant, genes, enhancers, repetitiveRegions);
                         break;
                     }
                     // fall through to default

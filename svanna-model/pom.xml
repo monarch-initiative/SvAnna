@@ -17,7 +17,7 @@
             <artifactId>svart</artifactId>
         </dependency>
         <dependency>
-            <groupId>xyz.ielis.silent.genes</groupId>
+            <groupId>org.monarchinitiative.sgenes</groupId>
             <artifactId>silent-genes-model</artifactId>
         </dependency>
         <dependency>

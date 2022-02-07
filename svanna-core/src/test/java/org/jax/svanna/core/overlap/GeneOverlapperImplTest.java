@@ -6,6 +6,7 @@ import org.jax.svanna.core.service.GeneService;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.util.VcfBreakendResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,7 +34,7 @@ public class GeneOverlapperImplTest {
     })
     public void getOverlaps_tss_deletion(int pos, String ref, String alt, boolean expected) {
         Contig chr9 = genomicAssembly.contigByName("9");
-        Variant variant = Variant.of(chr9, "TSS_DEL", Strand.POSITIVE, CoordinateSystem.oneBased(), pos, ref, alt);
+        GenomicVariant variant = GenomicVariant.of(chr9, "TSS_DEL", Strand.POSITIVE, CoordinateSystem.oneBased(), pos, ref, alt);
 
         GeneOverlapperImpl overlapper = new GeneOverlapperImpl(geneService);
         List<GeneOverlap> surf2Overlaps = overlapper.getOverlaps(variant).stream()
@@ -58,7 +59,7 @@ public class GeneOverlapperImplTest {
         chr16_KI270856v1_alt	58	pbsv.BND.chr16_KI270856v1_alt:58-chr16:1871875	T	]chr16:1871875]T	.	NearContigEnd	CIPOS=-57,19;MATEID=pbsv.BND.chr16:1871875-chr16_KI270856v1_alt:58;SVTYPE=BND;TADSV=0.00	GT:AD:DP	0/1:3,8:11
          */
         VcfBreakendResolver breakendResolver = new VcfBreakendResolver(genomicAssembly);
-        BreakendVariant variant = breakendResolver.resolve(
+        GenomicBreakendVariant variant = breakendResolver.resolve(
                 "EVENT", id, mateId,
                 genomicAssembly.contigByName(contigName), pos, ConfidenceInterval.of(ciPosStart, ciPosEnd), ConfidenceInterval.precise(),
                 ref, alt);

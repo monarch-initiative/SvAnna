@@ -8,12 +8,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.Transcript;
+import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.springframework.boot.test.context.SpringBootTest;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
-import xyz.ielis.silent.genes.model.Transcript;
-import xyz.ielis.silent.genes.model.TranscriptIdentifier;
 
 import java.util.List;
 import java.util.Set;
@@ -71,9 +73,8 @@ public class TermSimilarityGeneWeightCalculatorTest {
         GenomicRegion location = GenomicRegion.of(ASSEMBLY.contigByName("9"), Strand.POSITIVE, CoordinateSystem.oneBased(), 48_408_313, 48_645_721);
         TranscriptIdentifier txId = TranscriptIdentifier.of("TX_ACCESSION", "FBN1", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721));
-        Coordinates startCodong = Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_408_315);
-        Coordinates stopCodon  = Coordinates.of(CoordinateSystem.oneBased(), 48_645_719, 48_645_721);
-        Set<Transcript> transcripts = Set.of(Transcript.coding(txId, location, exons, startCodong, stopCodon));
+        Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721);
+        List<Transcript> transcripts = List.of(Transcript.coding(txId, location, exons, cdsCoordinates));
         Gene gene = Gene.of(id, location, transcripts);
 
 

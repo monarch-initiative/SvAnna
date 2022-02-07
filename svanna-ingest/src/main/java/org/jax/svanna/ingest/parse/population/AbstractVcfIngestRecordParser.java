@@ -2,7 +2,7 @@ package org.jax.svanna.ingest.parse.population;
 
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.util.VariantTrimmer;
 import org.monarchinitiative.svart.util.VcfConverter;
 

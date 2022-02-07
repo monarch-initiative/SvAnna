@@ -26,7 +26,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>xyz.ielis.silent.genes</groupId>
+            <groupId>org.monarchinitiative.sgenes</groupId>
             <artifactId>silent-genes-io</artifactId>
             <scope>test</scope>
         </dependency>

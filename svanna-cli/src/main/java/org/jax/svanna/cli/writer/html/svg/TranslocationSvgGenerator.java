@@ -3,8 +3,8 @@ package org.jax.svanna.cli.writer.html.svg;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Spliced;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Spliced;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -36,14 +36,14 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
      * @param genes genes affected by this translocation
      * @param enhancers Enhancers disrupted by this translocation
      */
-    public TranslocationSvgGenerator(Variant variant,
-                                     BreakendVariant breakended,
+    public TranslocationSvgGenerator(GenomicVariant variant,
+                                     GenomicBreakendVariant breakended,
                                      List<Gene> genes,
                                      List<Enhancer> enhancers,
                                      List<RepetitiveRegion> repeats) {
         super(variant, genes, enhancers, repeats, List.of());
-        Breakend left = breakended.left();
-        Breakend right = breakended.right();
+        GenomicBreakend left = breakended.left();
+        GenomicBreakend right = breakended.right();
 
         List<Gene> genesA = genes.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
         List<Gene> genesB = genes.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());

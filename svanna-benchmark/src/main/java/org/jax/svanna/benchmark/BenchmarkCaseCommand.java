@@ -17,8 +17,8 @@ import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.svart.GenomicAssembly;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -129,7 +129,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(validatedPatientTermIds);
 
             // prepare the variants
-            List<Variant> caseVariants = new LinkedList<>(filteredVariants);
+            List<GenomicVariant> caseVariants = new LinkedList<>(filteredVariants);
             Collection<SvannaVariant> targetVariants = caseReport.variants();
             List<SvannaVariant> filteredTargetVariants = filter.filter(targetVariants);
             for (SvannaVariant filteredTargetVariant : filteredTargetVariants) {
@@ -148,7 +148,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             List<VariantPriority> priorities = TaskUtils.executeBlocking(() -> annotationStream.collect(Collectors.toList()), nThreads);
 
             Set<String> causalIds = targetVariants.stream()
-                    .map(Variant::id)
+                    .map(GenomicVariant::id)
                     .collect(Collectors.toSet());
 
             // ---------------------------------------------
@@ -192,7 +192,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
 
             int rank = 1;
             for (VariantPriority priority : prioritized) {
-                Variant variant = priority.variant();
+                GenomicVariant variant = priority.variant();
                 printer.print(results.caseName());
                 printer.print(results.backgroundVcfName());
                 printer.print(variant.id());

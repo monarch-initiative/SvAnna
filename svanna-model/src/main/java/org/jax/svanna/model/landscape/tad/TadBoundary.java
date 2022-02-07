@@ -1,8 +1,8 @@
 package org.jax.svanna.model.landscape.tad;
 
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
-import xyz.ielis.silent.genes.model.Located;
 
 public interface TadBoundary extends Located {
 
@@ -25,8 +25,7 @@ public interface TadBoundary extends Located {
 
         int start = median + CoordinateSystem.zeroBased().startDelta(coordinateSystem());
 //        int end = median + CoordinateSystem.zeroBased().endDelta(coordinateSystem()) + 1; // one base downstream
-        int end = median + CoordinateSystem.zeroBased().endDelta(coordinateSystem());
-        return Coordinates.of(coordinateSystem(), start, location().startConfidenceInterval(), end, location().endConfidenceInterval());
+        return Coordinates.of(coordinateSystem(), start, location().startConfidenceInterval(), median, location().endConfidenceInterval());
     }
 
 }

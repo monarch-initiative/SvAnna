@@ -11,10 +11,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
-import xyz.ielis.silent.genes.model.Transcript;
-import xyz.ielis.silent.genes.model.TranscriptIdentifier;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.Transcript;
+import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,12 +48,11 @@ public class TadAwareDispatcherTest {
 
         TranscriptIdentifier txId = TranscriptIdentifier.of(id + "_tx", symbol + "_tx", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
-        Coordinates startCodon = Coordinates.of(CoordinateSystem.zeroBased(), start, start + 3);
-        Coordinates stopCodon = Coordinates.of(CoordinateSystem.zeroBased(), end - 3, end);
-        Transcript tx = Transcript.coding(txId, location, exons, startCodon, stopCodon);
+        Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start, end);
+        Transcript tx = Transcript.coding(txId, location, exons, cdsCoordinates);
 
         GeneIdentifier geneId = GeneIdentifier.of(id, symbol, null, null);
-        return Gene.of(geneId, location, Set.of(tx));
+        return Gene.of(geneId, location, List.of(tx));
     }
 
     @BeforeEach
@@ -64,9 +63,9 @@ public class TadAwareDispatcherTest {
 
     @Test
     public void assembleRoutes() {
-        Breakend left = Breakend.of(ctg1, "left", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 300, 300));
-        Breakend right = Breakend.of(ctg2, "right", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 500, 500));
-        BreakendVariant bv = BreakendVariant.of("BLA", left, right, "N", "ACGT");
+        GenomicBreakend left = GenomicBreakend.of(ctg1, "left", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 300, 300));
+        GenomicBreakend right = GenomicBreakend.of(ctg2, "right", Strand.POSITIVE, Coordinates.of(CoordinateSystem.zeroBased(), 500, 500));
+        GenomicBreakendVariant bv = GenomicBreakendVariant.of("BLA", left, right, "N", "ACGT");
 
         when(geneService.overlappingGenes(left))
                 .thenReturn(QueryResult.of(List.of(GENES.get(0))));

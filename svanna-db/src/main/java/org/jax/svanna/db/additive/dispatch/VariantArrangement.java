@@ -1,7 +1,7 @@
 package org.jax.svanna.db.additive.dispatch;
 
 import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,23 +15,23 @@ abstract class VariantArrangement {
 
     protected static final CoordinateSystem CS = CoordinateSystem.zeroBased();
 
-    protected final LinkedList<Variant> variants;
+    protected final LinkedList<GenomicVariant> variants;
 
-    protected VariantArrangement(List<Variant> variants) {
+    protected VariantArrangement(List<GenomicVariant> variants) {
         this.variants = (variants instanceof LinkedList)
-                ? (LinkedList<Variant>) variants
+                ? (LinkedList<GenomicVariant>) variants
                 : new LinkedList<>(variants);
     }
 
-    static IntrachromosomalVariantArrangement intrachromosomal(List<Variant> variants) {
+    static IntrachromosomalVariantArrangement intrachromosomal(List<GenomicVariant> variants) {
         return new IntrachromosomalVariantArrangement(variants);
     }
 
-    static VariantArrangement interchromosomal(List<Variant> variants, int breakendIdx) {
+    static VariantArrangement interchromosomal(List<GenomicVariant> variants, int breakendIdx) {
         return new InterchromosomalVariantArrangement(variants, breakendIdx);
     }
 
-    public LinkedList<Variant> variants() {
+    public LinkedList<GenomicVariant> variants() {
         return variants;
     }
 

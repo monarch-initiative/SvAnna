@@ -7,8 +7,11 @@ import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +52,7 @@ public class ClingenGeneCurationParserTest {
 
     @Test
     public void parse() throws Exception {
-        Path geneListPath = Path.of(ClingenGeneCurationParserTest.class.getResource("/dosage/ClinGen_gene_curation_list_GRCh38.15lines.tsv").getPath());
+        Path geneListPath = Paths.get("src/test/resources/dosage/ClinGen_gene_curation_list_GRCh38.15lines.tsv");
         Map<TermId, GenomicRegion> geneById = makeGeneByIdMap();
         Map<Integer, Integer> ncbiGeneToHgnc = makeNcbiGeneToHgnc();
 

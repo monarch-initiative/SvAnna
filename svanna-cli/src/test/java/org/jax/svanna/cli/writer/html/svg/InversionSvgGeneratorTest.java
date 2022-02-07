@@ -6,10 +6,10 @@ import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.test.TestVariants;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -30,7 +30,7 @@ public class InversionSvgGeneratorTest {
 
     @Test
     public void testWriteSvg() {
-        Variant variant = testVariants.inversions().gckExonic();
+        GenomicVariant variant = testVariants.inversions().gckExonic();
         List<Gene> genes = geneOverlapper.getOverlaps(variant).stream()
                 .map(GeneOverlap::gene)
                 .collect(Collectors.toUnmodifiableList());

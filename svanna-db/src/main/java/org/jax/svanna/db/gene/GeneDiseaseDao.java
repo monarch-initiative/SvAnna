@@ -3,7 +3,7 @@ package org.jax.svanna.db.gene;
 import org.jax.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.springframework.jdbc.core.*;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;

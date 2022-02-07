@@ -6,7 +6,7 @@ import org.apache.commons.csv.CSVRecord;
 import org.jax.svanna.ingest.parse.IOUtils;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

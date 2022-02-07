@@ -3,7 +3,7 @@ package org.jax.svanna.cli.writer.html;
 import org.jax.svanna.core.overlap.GeneOverlap;
 import org.jax.svanna.model.HpoDiseaseSummary;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.List;
 import java.util.Set;

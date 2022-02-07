@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
-import xyz.ielis.silent.genes.model.Transcript;
-import xyz.ielis.silent.genes.model.TranscriptIdentifier;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.Transcript;
+import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 
 import java.util.List;
 import java.util.Set;
@@ -40,12 +40,11 @@ public class RouteDataEvaluatorGETadTest {
 
         TranscriptIdentifier txId = TranscriptIdentifier.of(id + "_tx", symbol + "_tx", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
-        Coordinates startCodon = Coordinates.of(CoordinateSystem.zeroBased(), start, start + 3);
-        Coordinates stopCodon = Coordinates.of(CoordinateSystem.zeroBased(), end - 3, end);
-        Transcript tx = Transcript.coding(txId, location, exons, startCodon, stopCodon);
+        Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start, end);
+        Transcript tx = Transcript.coding(txId, location, exons, cdsCoordinates);
 
         GeneIdentifier geneId = GeneIdentifier.of(id, symbol, null, null);
-        return Gene.of(geneId, location, Set.of(tx));
+        return Gene.of(geneId, location, List.of(tx));
     }
 
     private static Routes makeRoutes(GenomicRegion reference, Segment... segments) {

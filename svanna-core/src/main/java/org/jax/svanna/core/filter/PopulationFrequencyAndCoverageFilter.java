@@ -52,7 +52,7 @@ public class PopulationFrequencyAndCoverageFilter {
 
     public <T extends SvannaVariant> List<T> filter(Collection<T> variants) {
         Map<Integer, List<T>> variantsByContig = variants.stream()
-                .collect(Collectors.groupingBy(Variant::contigId));
+                .collect(Collectors.groupingBy(GenomicVariant::contigId));
         List<T> results = new LinkedList<>();
         for (Integer contigId : variantsByContig.keySet()) {
             List<T> contigVariants = variantsByContig.get(contigId).stream()

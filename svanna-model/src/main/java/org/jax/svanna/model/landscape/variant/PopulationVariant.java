@@ -1,7 +1,7 @@
 package org.jax.svanna.model.landscape.variant;
 
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svart.VariantType;
-import xyz.ielis.silent.genes.model.Located;
 
 public interface PopulationVariant extends Located {
 

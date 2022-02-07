@@ -4,12 +4,12 @@ import org.jax.svanna.core.service.ConstantGeneDosageDataService;
 import org.jax.svanna.core.service.GeneDosageDataService;
 import org.jax.svanna.core.service.GeneService;
 import org.jax.svanna.test.TestVariants;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
-import xyz.ielis.silent.genes.model.Identifier;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.Identifier;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -36,6 +36,7 @@ public class TestDataConfig {
      *     <li><em>COL4A5</em></li> (on <code>chrX</code>)
      *     <li><em>SRY</em></li> (on <code>chrY</code>)
      * </ul>
+     * The file is prepared by `org.jax.svanna.ingest.MakeSmallGencodeFileTest.makeSmallGencodeFile()`.
      */
     private static final Path SILENT_GENE_DATA = Paths.get("src/test/resources/gencode.10genes.v38.basic.annotation.json.gz");
 

@@ -3,8 +3,8 @@ package org.jax.svanna.cli.writer.html.svg;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
-import org.monarchinitiative.svart.Variant;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.svart.GenomicVariant;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -23,7 +23,7 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
      * @param repeats repeat regions that overlap with the SV
      * @param dosageRegions triplo/haplosensitive regions that overlap with the SV
      */
-    public DuplicationSvgGenerator(Variant variant,
+    public DuplicationSvgGenerator(GenomicVariant variant,
                                    List<Gene> genes,
                                    List<Enhancer> enhancers,
                                    List<RepetitiveRegion> repeats,

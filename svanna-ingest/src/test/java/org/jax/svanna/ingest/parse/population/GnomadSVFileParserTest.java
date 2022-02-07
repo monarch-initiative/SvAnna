@@ -2,8 +2,8 @@ package org.jax.svanna.ingest.parse.population;
 
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.svart.GenomicAssemblies;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class GnomadSVFileParserTest {
 
-    private static final Path testFile = Paths.get(GnomadSVFileParser.class.getResource("/variants/variants_for_nstd166.5lines.csv.gz").getPath());
+    private static final Path testFile = Paths.get("src/test/resources/population/variants_for_nstd166.5lines.csv.gz");
 
     private static final GenomicAssembly genomicAssembly = GenomicAssemblies.GRCh38p13();
 

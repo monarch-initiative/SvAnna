@@ -5,9 +5,10 @@ import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.junit.jupiter.api.Test;
-import org.monarchinitiative.svart.GenomicAssemblies;
+import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -17,7 +18,7 @@ public class ClingenRegionCurationParserTest {
 
     @Test
     public void parse() throws Exception {
-        Path regionPath = Path.of(ClingenRegionCurationParserTest.class.getResource("/dosage/ClinGen_region_curation_list_GRCh38.15lines.tsv").getPath());
+        Path regionPath = Paths.get("src/test/resources/dosage/ClinGen_region_curation_list_GRCh38.15lines.tsv");
         ClingenRegionCurationParser parser = new ClingenRegionCurationParser(regionPath, GenomicAssemblies.GRCh38p13());
 
         List<? extends DosageRegion> elements = parser.parseToList();

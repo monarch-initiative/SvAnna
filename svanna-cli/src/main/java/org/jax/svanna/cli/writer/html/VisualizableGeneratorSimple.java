@@ -13,15 +13,15 @@ import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
-import org.monarchinitiative.svart.BreakendVariant;
+import org.monarchinitiative.svart.GenomicBreakendVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.GeneIdentifier;
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.Located;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -165,13 +165,13 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         if (overlaps.isEmpty()) {
             LogUtils.logWarn(LOGGER, "No gene for variant {}", variant.id());
         } else {
-            if (!(variant instanceof BreakendVariant)) {
+            if (!(variant instanceof GenomicBreakendVariant)) {
                 GenomicRegion viewport = calculateUpperLowerBounds(variant, overlaps);
                 repetitiveRegions.addAll(annotationDataService.overlappingRepetitiveRegions(viewport));
             } else {
                 Map<Integer, List<GeneOverlap>> overlapsByContig = overlaps.stream()
                         .collect(Collectors.groupingBy(go -> go.gene().contigId(), Collectors.toUnmodifiableList()));
-                BreakendVariant bv = (BreakendVariant) variant;
+                GenomicBreakendVariant bv = (GenomicBreakendVariant) variant;
                 List<GeneOverlap> leftOverlaps = overlapsByContig.getOrDefault(bv.left().contigId(), List.of());
                 if (!leftOverlaps.isEmpty()) {
                     GenomicRegion viewport = calculateUpperLowerBounds(bv.left(), leftOverlaps);

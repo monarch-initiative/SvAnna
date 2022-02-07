@@ -7,10 +7,10 @@ import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Coding;
-import xyz.ielis.silent.genes.model.Gene;
-import xyz.ielis.silent.genes.model.Spliced;
-import xyz.ielis.silent.genes.model.Transcript;
+import org.monarchinitiative.sgenes.model.Coding;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Spliced;
+import org.monarchinitiative.sgenes.model.Transcript;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -63,7 +63,7 @@ public abstract class SvSvgGenerator {
     /**
      * Variant on {@link Strand#POSITIVE}
      */
-    protected final Variant variant;
+    protected final GenomicVariant variant;
     /**
      * Leftmost position (most 5' on chromosome).
      */
@@ -147,7 +147,7 @@ public abstract class SvSvgGenerator {
      * @param genes genes affected by the structural variant we are displaying
      * @param enhancers enhancers  affected by the structural variant we are displaying
      */
-    public SvSvgGenerator(Variant variant,
+    public SvSvgGenerator(GenomicVariant variant,
                           List<Gene> genes,
                           List<Enhancer> enhancers,
                           List<RepetitiveRegion> repeats,
@@ -192,7 +192,7 @@ public abstract class SvSvgGenerator {
 
     public SvSvgGenerator(int minPos,
                           int maxPos,
-                          Variant variant,
+                          GenomicVariant variant,
                           List<Gene> genes,
                           List<Enhancer> enhancers,
                           List<RepetitiveRegion> repeats) {
@@ -443,11 +443,11 @@ public abstract class SvSvgGenerator {
 
         int cdsStart = tx.strand().isPositive()
                 ? coding.codingStart()
-                : Coordinates.invertPosition(tx.coordinateSystem(), tx.contig(), coding.codingStart());
+                : Coordinates.invertCoordinate(tx.coordinateSystem(), tx.contig(), coding.codingStart());
         double cdsStartSvg = translateGenomicToSvg(cdsStart);
         int cdsEnd = tx.strand().isPositive()
                 ? coding.codingEnd()
-                : Coordinates.invertPosition(tx.coordinateSystem(), tx.contig(), coding.codingEnd());
+                : Coordinates.invertCoordinate(tx.coordinateSystem(), tx.contig(), coding.codingEnd());
         double cdsEndSvg = translateGenomicToSvg(cdsEnd);
         List<Coordinates> exons = tx.strand().isPositive()
                 ? tx.exons()

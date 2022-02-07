@@ -2,6 +2,7 @@ package org.jax.svanna.test;
 
 
 import org.monarchinitiative.svart.*;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 
 // Let's keep the variant declarations within the test class even at the cost of code duplication.
 // The in situ variant declarations improve tests' independence
@@ -51,9 +52,9 @@ public class TestVariants {
          * GCK:NM_000162 upstream, 200b deletion
          * chr7:44_189_901-44_190_100
          */
-        public Variant gckUpstreamIntergenic_affectingEnhancer() {
+        public GenomicVariant gckUpstreamIntergenic_affectingEnhancer() {
             Contig chr7 = assembly.contigByName("7");
-            return Variant.of(chr7, "gck_del_upstream_intergenic_enhancer", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_189_900, 44_190_100, "N", "<DEL>", -200);
+            return GenomicVariant.of(chr7, "gck_del_upstream_intergenic_enhancer", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_189_900, 44_190_100, "N", "<DEL>", -200);
         }
 
 
@@ -63,9 +64,9 @@ public class TestVariants {
          * GCK:NM_000162 upstream, 1kb deletion
          * chr7:44_191_001-44_192_000
          */
-        public Variant gckUpstreamIntergenic_NotAffectingEnhancer() {
+        public GenomicVariant gckUpstreamIntergenic_NotAffectingEnhancer() {
             Contig chr7 = assembly.contigByName("7");
-            return Variant.of(chr7, "gck_del_upstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_191_000, 44_192_000, "N", "<DEL>", -1_000);
+            return GenomicVariant.of(chr7, "gck_del_upstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_191_000, 44_192_000, "N", "<DEL>", -1_000);
         }
 
         /**
@@ -74,9 +75,9 @@ public class TestVariants {
          * GCK:NM_000162 upstream, 1kb deletion
          * chr7:44_191_001-44_192_000
          */
-        public Variant gckUpstreamIntergenic_affectingPhenotypicallyNonrelevantEnhancer() {
+        public GenomicVariant gckUpstreamIntergenic_affectingPhenotypicallyNonrelevantEnhancer() {
             Contig chr7 = assembly.contigByName("7");
-            return Variant.of(chr7, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_194_500, 44_195_500, "N", "<DEL>", -1_000);
+            return GenomicVariant.of(chr7, "gck_del_upstream_intergenic_phenotypically_nonrelevant_enhancer", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_194_500, 44_195_500, "N", "<DEL>", -1_000);
         }
 
         /**
@@ -85,9 +86,9 @@ public class TestVariants {
          * SURF2:NM_017503.5 deletion of exon 3, tx on (+) strand
          * chr9:133_357_501-133_358_000
          */
-        public Variant surf2singleExon_exon3() {
+        public GenomicVariant surf2singleExon_exon3() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "single_exon_del", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_357_500, 133_358_000, "N", "<DEL>", -500);
+            return GenomicVariant.of(chr9, "single_exon_del", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_357_500, 133_358_000, "N", "<DEL>", -500);
         }
 
 
@@ -97,9 +98,9 @@ public class TestVariants {
          * SURF1:NM_003172.4 deletion of exons 6 and 7, tx on (-) strand
          * chr9:133_352_301-133_352_900
          */
-        public Variant surf1TwoExon_exons_6_and_7() {
+        public GenomicVariant surf1TwoExon_exons_6_and_7() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "two_exon_del", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_352_300, 133_352_900, "N", "<DEL>", -600);
+            return GenomicVariant.of(chr9, "two_exon_del", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_352_300, 133_352_900, "N", "<DEL>", -600);
         }
 
         /**
@@ -108,9 +109,9 @@ public class TestVariants {
          * SURF1:NM_003172.4 deletion of the exon 2, tx on (-) strand
          * chr9:133_356_251-133_356_350
          */
-        public Variant surf1SingleExon_exon2() {
+        public GenomicVariant surf1SingleExon_exon2() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "surf1_exon2_del", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_356_250, 133_356_350, "N", "<DEL>", -100);
+            return GenomicVariant.of(chr9, "surf1_exon2_del", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_356_250, 133_356_350, "N", "<DEL>", -100);
         }
 
         /**
@@ -119,9 +120,9 @@ public class TestVariants {
          * SURF1:NM_003172.4 entirely deleted, SURF2:NM_017503.5 partially deleted
          * chr9:133_350_001-133_358_000
          */
-        public Variant surf1Surf2oneEntireTranscriptAndPartOfAnother() {
+        public GenomicVariant surf1Surf2oneEntireTranscriptAndPartOfAnother() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "entire_tx_del",Strand.POSITIVE, CoordinateSystem.oneBased(),  133_350_000, 133_358_000, "N", "<DEL>", -8_000);
+            return GenomicVariant.of(chr9, "entire_tx_del",Strand.POSITIVE, CoordinateSystem.oneBased(),  133_350_000, 133_358_000, "N", "<DEL>", -8_000);
         }
 
 
@@ -131,17 +132,17 @@ public class TestVariants {
          * SURF2:NM_017503.5 700bp deletion within intron 3
          * chr9:133_359_001-133_359_700
          */
-        public Variant surf2WithinAnIntron() {
+        public GenomicVariant surf2WithinAnIntron() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "del_within_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_359_000, 133_359_700, "N", "<DEL>", -700);
+            return GenomicVariant.of(chr9, "del_within_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_359_000, 133_359_700, "N", "<DEL>", -700);
         }
 
         /**
          * ZBTB48, is forward strand. Test a variant in intron 1, i.e.,  between	6_580_137-6_580_540
          */
-        public Variant zbtb48intron1() {
+        public GenomicVariant zbtb48intron1() {
             Contig chr1 = assembly.contigByName("1");
-            return Variant.of(chr1, "del_within_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 6_580_300, 6_580_400, "N", "<DEL>", -100);
+            return GenomicVariant.of(chr1, "del_within_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 6_580_300, 6_580_400, "N", "<DEL>", -100);
         }
 
         /**
@@ -150,9 +151,9 @@ public class TestVariants {
          * SURF2:NM_017503.5 20bp deletion in 5UTR
          * chr9:133_356_561-133_356_580
          */
-        public Variant surf2In5UTR() {
+        public GenomicVariant surf2In5UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "del_in_5utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_356_560, 133_356_580, "N", "<DEL>", -20);
+            return GenomicVariant.of(chr9, "del_in_5utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_356_560, 133_356_580, "N", "<DEL>", -20);
         }
 
         /**
@@ -161,9 +162,9 @@ public class TestVariants {
          * SURF1:NM_003172.4 100bp deletion in 3UTR
          * chr9:133_351_801-133_351_900
          */
-        public Variant surf1In3UTR() {
+        public GenomicVariant surf1In3UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "del_in_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_351_800, 133_351_900, "N", "<DEL>", -100);
+            return GenomicVariant.of(chr9, "del_in_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_351_800, 133_351_900, "N", "<DEL>", -100);
         }
 
         /**
@@ -172,9 +173,9 @@ public class TestVariants {
          * SURF1:NM_003172.4 downstream, 10kb deletion
          * chr9:133_300_001-133_310_000
          */
-        public Variant surf1DownstreamIntergenic() {
+        public GenomicVariant surf1DownstreamIntergenic() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "del_downstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_300_000, 133_310_000, "N", "<DEL>", -10_000);
+            return GenomicVariant.of(chr9, "del_downstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_300_000, 133_310_000, "N", "<DEL>", -10_000);
         }
 
         /**
@@ -184,9 +185,9 @@ public class TestVariants {
          * upstream, 10kb deletion
          * chr15:48_655_000-48_665_000
          */
-        public Variant brca2UpstreamIntergenic() {
+        public GenomicVariant brca2UpstreamIntergenic() {
             Contig chr15 = assembly.contigByName("15");
-            return Variant.of(chr15, "del_upstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), 48_655_000, 48_665_000, "N", "<DEL>", -10_000);
+            return GenomicVariant.of(chr15, "del_upstream_intergenic", Strand.POSITIVE, CoordinateSystem.oneBased(), 48_655_000, 48_665_000, "N", "<DEL>", -10_000);
         }
     }
 
@@ -197,9 +198,9 @@ public class TestVariants {
          * SURF2:NM_017503.5 10bp insertion in 5UTR
          * chr9:133_356_571-133_356_571
          */
-        public Variant surf2InsertionIn5UTR() {
+        public GenomicVariant surf2InsertionIn5UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "ins_5utr",Strand.POSITIVE, CoordinateSystem.oneBased(),  133_356_571, 133_356_572, "N", "<INS>", 10);
+            return GenomicVariant.of(chr9, "ins_5utr",Strand.POSITIVE, CoordinateSystem.oneBased(),  133_356_571, 133_356_572, "N", "<INS>", 10);
         }
 
         /**
@@ -208,9 +209,9 @@ public class TestVariants {
          * SURF1:NM_003172.4 10bp insertion in 3UTR
          * chr9:133_351_851-133_351_851
          */
-        public Variant surf1InsertionIn3UTR() {
+        public GenomicVariant surf1InsertionIn3UTR() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "ins_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_351_851, 133_351_852, "N", "<INS>", 10);
+            return GenomicVariant.of(chr9, "ins_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_351_851, 133_351_852, "N", "<INS>", 10);
         }
 
         /**
@@ -219,9 +220,9 @@ public class TestVariants {
          * SURF2:NM_017503.5 10bp insertion in exon 4
          * chr9:133_360_001-133_360_001
          */
-        public Variant surf2Exon4() {
+        public GenomicVariant surf2Exon4() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "ins_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_360_001, 133_360_002, "N", "<INS>", 10);
+            return GenomicVariant.of(chr9, "ins_3utr", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_360_001, 133_360_002, "N", "<INS>", 10);
         }
 
 
@@ -231,9 +232,9 @@ public class TestVariants {
          * SURF2:NM_017503.5 10bp insertion in intron 3
          * chr9:133_359_001-133_359_001
          */
-        public Variant surf2Intron3() {
+        public GenomicVariant surf2Intron3() {
             Contig chr9 = assembly.contigByName("9");
-            return Variant.of(chr9, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_359_001, 133_359_002, "N", "<INS>", 10);
+            return GenomicVariant.of(chr9, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_359_001, 133_359_002, "N", "<INS>", 10);
         }
 
 
@@ -243,10 +244,10 @@ public class TestVariants {
          * GCK:NM_000162 upstream, 200b insertion
          * chr7:44_190_025-44_190_026
          */
-        public Variant gckRelevantEnhancer() {
+        public GenomicVariant gckRelevantEnhancer() {
             int inserted = 200;
             Contig chr7 = assembly.contigByName("7");
-            return Variant.of(chr7, "ins_intron",Strand.POSITIVE, CoordinateSystem.oneBased(),  44_190_025, 44_190_026, "N", "<INS>", inserted);
+            return GenomicVariant.of(chr7, "ins_intron",Strand.POSITIVE, CoordinateSystem.oneBased(),  44_190_025, 44_190_026, "N", "<INS>", inserted);
         }
 
         /**
@@ -255,10 +256,10 @@ public class TestVariants {
          * GCK:NM_000162 upstream, 200b insertion
          * chr7:44_195_025-44_195_026
          */
-        public Variant gckNonRelevantEnhancer() {
+        public GenomicVariant gckNonRelevantEnhancer() {
             int inserted = 200;
             Contig chr7 = assembly.contigByName("7");
-            return Variant.of(chr7, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_195_025, 44_195_026, "N", "<INS>", inserted);
+            return GenomicVariant.of(chr7, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_195_025, 44_195_026, "N", "<INS>", inserted);
         }
 
         /**
@@ -267,10 +268,10 @@ public class TestVariants {
          * GCK:NM_000162 upstream, 200b insertion
          * chr7:44_196_025-44_196_026
          */
-        public Variant gckIntergenic() {
+        public GenomicVariant gckIntergenic() {
             int inserted = 200;
             Contig chr7 = assembly.contigByName("7");
-            return Variant.of(chr7, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_196_025, 44_196_026, "N", "<INS>", inserted);
+            return GenomicVariant.of(chr7, "ins_intron", Strand.POSITIVE, CoordinateSystem.oneBased(), 44_196_025, 44_196_026, "N", "<INS>", inserted);
         }
 
     }
@@ -290,7 +291,7 @@ public class TestVariants {
 
     public class Inversions {
 
-        public Variant gckIntronic() {
+        public GenomicVariant gckIntronic() {
             Contig chr7 = assembly.contigByName("7");
             int begin = 44_178_001;
             int end = 44_180_000;
@@ -304,7 +305,7 @@ public class TestVariants {
          *
          * @return Inversion 48bp upstream of FBN1 TSS
          */
-        public Variant fbn1PromoterInversion() {
+        public GenomicVariant fbn1PromoterInversion() {
             Contig chr15 = assembly.contigByName("15");
             int begin = 48_645_838;
             int end = 48_645_938;
@@ -319,7 +320,7 @@ public class TestVariants {
          *
          * @return Inversion 25000bp upstream of FBN1 TSS
          */
-        public Variant fbn1UpstreamInversion() {
+        public GenomicVariant fbn1UpstreamInversion() {
             Contig chr15 = assembly.contigByName("15");
             int TSS = 48_645_788;
             int begin = TSS + 25_000;
@@ -337,7 +338,7 @@ public class TestVariants {
          *
          * @return
          */
-        public Variant fbn1WholeGeneEnhancerAt90kb() {
+        public GenomicVariant fbn1WholeGeneEnhancerAt90kb() {
             Contig chr15 = assembly.contigByName("15");
             int begin = 48_407_306;
             int end = 48_646_788;
@@ -350,7 +351,7 @@ public class TestVariants {
          * Inversion that disrupts the sequence of this enhancer
          * chr20	51642723	51642826	0.557366	UBERON:0000955	brain	HP:0012443	Abnormality of brain morphology
          */
-        public Variant brainEnhancerDisruptedByInversion() {
+        public GenomicVariant brainEnhancerDisruptedByInversion() {
             Contig chr20 = assembly.contigByName("20");
             int begin = 51_642_780;
             int end = 51_642_880;
@@ -367,7 +368,7 @@ public class TestVariants {
          *
          * @return inversion affecting an exon of GCK
          */
-        public Variant gckExonic() {
+        public GenomicVariant gckExonic() {
             Contig chr7 = assembly.contigByName("7");
             int begin = 44_153_401;
             int end = 44_153_600;
@@ -375,8 +376,8 @@ public class TestVariants {
             return makeInversion(chr7, begin, end);
         }
 
-        private Variant makeInversion(Contig contig, int begin, int end) {
-            return Variant.of(contig, "inversion", Strand.POSITIVE, CoordinateSystem.oneBased(), begin, end, "N", "<INV>", 0);
+        private GenomicVariant makeInversion(Contig contig, int begin, int end) {
+            return GenomicVariant.of(contig, "inversion", Strand.POSITIVE, CoordinateSystem.oneBased(), begin, end, "N", "<INV>", 0);
         }
 
     }
@@ -391,13 +392,13 @@ public class TestVariants {
          * right mate, upstream from BRCA2 (not disrupted)
          * chr13:32_300_000 (+)
          */
-        public Variant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+        public GenomicVariant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
             Contig chr9 = assembly.contigByName("9");
-            Breakend left = Breakend.of(chr9, "tra_l", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_359_001, 133_359_000);
+            GenomicBreakend left = GenomicBreakend.of(chr9, "tra_l", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_359_001, 133_359_000);
             Contig chr13 = assembly.contigByName("13");
-            Breakend right = Breakend.of(chr13, "tra_r", Strand.POSITIVE, CoordinateSystem.oneBased(), 32_300_001, 32_300_000);
+            GenomicBreakend right = GenomicBreakend.of(chr13, "tra_r", Strand.POSITIVE, CoordinateSystem.oneBased(), 32_300_001, 32_300_000);
 
-            return BreakendVariant.of("translocation_where_one_cds_is_disrupted_and_the_other_is_not", left, right, "G", "");
+            return GenomicBreakendVariant.of("translocation_where_one_cds_is_disrupted_and_the_other_is_not", left, right, "G", "");
         }
 
     }

@@ -3,8 +3,8 @@ package org.jax.svanna.cli.writer.html.svg;
 import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
-import org.monarchinitiative.svart.Variant;
-import xyz.ielis.silent.genes.model.Gene;
+import org.monarchinitiative.svart.GenomicVariant;
+import org.monarchinitiative.sgenes.model.Gene;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -16,7 +16,7 @@ public class InversionSvgGenerator extends SvSvgGenerator {
     private final int inversionGenomicEnd;
     private final double ARROWHEAD_SIZE = 8.0;
 
-    public InversionSvgGenerator(Variant variant,
+    public InversionSvgGenerator(GenomicVariant variant,
                                  List<Gene> genes,
                                  List<Enhancer> enhancers,
                                  List<RepetitiveRegion> repeats,

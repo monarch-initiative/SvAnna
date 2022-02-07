@@ -10,9 +10,9 @@ import org.jax.svanna.model.landscape.variant.BasePopulationVariant;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.jax.svanna.model.landscape.variant.PopulationVariantOrigin;
 import org.monarchinitiative.svart.Contig;
-import org.monarchinitiative.svart.GenomicAssembly;
+import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Variant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -81,7 +81,7 @@ public class DbsnpVcfParser extends AbstractVcfIngestRecordParser {
                 if (ref.length() == 1 && ref.length() == alt.length() )
                     continue; // ignore SNVs
 
-                Variant variant = vcfConverter.convert(contig, vc.getID(), vc.getStart(), ref.getDisplayString(), alt.getDisplayString());
+                GenomicVariant variant = vcfConverter.convert(contig, vc.getID(), vc.getStart(), ref.getDisplayString(), alt.getDisplayString());
 
                 String frequency = caf.get(i);
                 float alleleFrequency = frequency.equals(".") ? DEFAULT_FREQ : 100 * Float.parseFloat(frequency);

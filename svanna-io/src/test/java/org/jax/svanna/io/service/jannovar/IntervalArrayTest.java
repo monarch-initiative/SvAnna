@@ -2,7 +2,9 @@ package org.jax.svanna.io.service.jannovar;
 
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
-import xyz.ielis.silent.genes.model.Located;
+import org.monarchinitiative.svart.assembly.SequenceRole;
+import org.monarchinitiative.svart.assembly.AssignedMoleculeType;
+import org.monarchinitiative.sgenes.model.Located;
 
 import java.util.ArrayList;
 

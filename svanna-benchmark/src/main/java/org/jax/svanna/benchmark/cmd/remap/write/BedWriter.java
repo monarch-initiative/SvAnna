@@ -1,8 +1,10 @@
 package org.jax.svanna.benchmark.cmd.remap.write;
 
 import org.jax.svanna.io.FullSvannaVariant;
+import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.assembly.SequenceRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +110,11 @@ public class BedWriter implements FullSvannaVariantWriter {
         2	2212312	2332212	loss
         2	2222999	3000222	gain
          */
-        String contigName = variant.contig().name();
+        Contig contig = variant.contig();
+        if (!contig.sequenceRole().equals(SequenceRole.ASSEMBLED_MOLECULE))
+            // X-CNV does not work with non-canonical contigs
+            return Optional.empty();
+        String contigName = contig.name();
         int start = variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
         int end = variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
         switch (variant.variantType().baseType()) {

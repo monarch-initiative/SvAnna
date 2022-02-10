@@ -28,130 +28,133 @@ public class LiftFullSvannaVariant {
         this.liftOver = new LiftOver(liftoverChain.toFile());
     }
 
+    public Optional<GenomicBreakendVariant> liftBreakend(GenomicBreakendVariant variant) {
+        // Liftover cannot lift interval with length zero. Since all breakends have zero length,
+        // we must artificially make the breakend region to have length 1 (hence -1).
+
+        // LEFT
+        GenomicBreakend left = variant.left();
+        int leftStart = left.startWithCoordinateSystem(CoordinateSystem.oneBased()) - 1;
+        Interval leftInput = new Interval(left.contig().ucscName(),
+                leftStart,
+                left.endWithCoordinateSystem(CoordinateSystem.oneBased()),
+                left.strand().isNegative(),
+                null);
+        Interval leftLifted = liftOver.liftOver(leftInput);
+        if (leftLifted == null) return Optional.empty();
+        Contig leftContig = genomicAssembly.contigByName(leftLifted.getContig());
+        if (leftContig.isUnknown()) {
+            LOGGER.warn("Unknown contig {} after lifting the variant {}", leftLifted.getContig(), variant);
+            return Optional.empty();
+        }
+        Coordinates leftCoordinates = Coordinates.of(CoordinateSystem.oneBased(),
+                leftLifted.getStart() + 1,
+                left.startConfidenceInterval(),
+                leftLifted.getEnd(),
+                left.endConfidenceInterval());
+        GenomicBreakend liftedLeft = GenomicBreakend.of(leftContig,
+                left.id(),
+                leftLifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
+                leftCoordinates);
+
+
+        // RIGHT
+        GenomicBreakend right = variant.right();
+        int rightStart = right.startWithCoordinateSystem(CoordinateSystem.oneBased()) - 1;
+        Interval rightInput = new Interval(right.contig().ucscName(),
+                rightStart,
+                right.endWithCoordinateSystem(CoordinateSystem.oneBased()),
+                right.strand().isNegative(),
+                null);
+        Interval rightLifted = liftOver.liftOver(rightInput);
+        if (rightLifted == null) return Optional.empty();
+        Contig rightContig = genomicAssembly.contigByName(rightLifted.getContig());
+        if (rightContig.isUnknown()) {
+            LOGGER.warn("Unknown contig {} after lifting the variant {}", rightLifted.getContig(), variant);
+            return Optional.empty();
+        }
+        Coordinates rightCoordinates = Coordinates.of(CoordinateSystem.oneBased(),
+                rightLifted.getStart() + 1,
+                right.startConfidenceInterval(),
+                rightLifted.getEnd(),
+                right.endConfidenceInterval());
+        GenomicBreakend liftedRight = GenomicBreakend.of(rightContig,
+                right.id(),
+                rightLifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
+                rightCoordinates);
+
+        return Optional.of(GenomicBreakendVariant.of(variant.eventId(), liftedLeft, liftedRight, variant.ref(), variant.alt()));
+    }
+
+    public Optional<? extends GenomicVariant> liftIntrachromosomal(GenomicVariant variant) {
+        String contigName = variant.contig().ucscName();
+        boolean isZeroLength = variant.length() == 0;
+
+        int start = variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
+        if (isZeroLength) {
+            // liftover cannot lift interval with length zero. We must artificially make it a region of length 1.
+            start = start - 1;
+        }
+        Interval liftoverInput = new Interval(contigName, start, variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased()));
+
+        Interval lifted = liftOver.liftOver(liftoverInput);
+        if (lifted == null) {
+            // cannot be lifted over
+            return Optional.empty();
+        } else {
+            Contig contig = genomicAssembly.contigByName(lifted.getContig());
+            if (contig.isUnknown()) {
+                LOGGER.warn("Unknown contig {} after lifting the variant {}", lifted.getContig(), variant);
+                return Optional.empty();
+            } else {
+                Coordinates coordinates = Coordinates.of(CoordinateSystem.oneBased(),
+                        isZeroLength ? lifted.getStart() + 1 : lifted.getStart(),
+                        variant.startConfidenceInterval(),
+                        lifted.getEnd(),
+                        variant.endConfidenceInterval());
+
+                GenomicVariant v;
+                if (variant.isSymbolic()) {
+                    // symbolic variant
+                    v = GenomicVariant.of(contig, variant.id(), lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
+                            coordinates,
+                            variant.ref(),
+                            variant.alt(),
+                            calculateChangeLength(variant.startWithCoordinateSystem(CoordinateSystem.zeroBased()), variant.endWithCoordinateSystem(CoordinateSystem.zeroBased()), variant.variantType(), variant.changeLength()));
+                } else {
+                    // sequence variant
+                    if (coordinates.length() != variant.ref().length()) {
+                        // unable to lift the coordinates
+                        return Optional.empty();
+                    }
+                    v = GenomicVariant.of(contig,
+                            variant.id(),
+                            lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
+                            coordinates,
+                            variant.ref(),
+                            variant.alt());
+                }
+                return Optional.of(v);
+            }
+        }
+    }
+
     public Optional<? extends FullSvannaVariant> lift(FullSvannaVariant variant) {
         VariantCallAttributes attributes = createVariantCallAttributes(variant);
         if (variant.isBreakend()) {
-
-            BreakendedSvannaVariant bv = (BreakendedSvannaVariant) variant;
-            // Liftover cannot lift interval with length zero. Since all breakends have zero length,
-            // we must artificially make the breakend region to have length 1 (hence -1).
-
-            // LEFT
-            GenomicBreakend left = bv.left();
-            int leftStart = left.startWithCoordinateSystem(CoordinateSystem.oneBased()) - 1;
-            Interval leftInput = new Interval(left.contig().ucscName(),
-                    leftStart,
-                    left.endWithCoordinateSystem(CoordinateSystem.oneBased()),
-                    left.strand().isNegative(),
-                    null);
-            Interval leftLifted = liftOver.liftOver(leftInput);
-            if (leftLifted == null) return Optional.empty();
-            Contig leftContig = genomicAssembly.contigByName(leftLifted.getContig());
-            if (leftContig.isUnknown()) {
-                LOGGER.warn("Unknown contig {} after lifting the variant {}", leftLifted.getContig(), variant);
-                return Optional.empty();
-            }
-            Coordinates leftCoordinates = Coordinates.of(CoordinateSystem.oneBased(),
-                    leftLifted.getStart() + 1,
-                    left.startConfidenceInterval(),
-                    leftLifted.getEnd(),
-                    left.endConfidenceInterval());
-            GenomicBreakend liftedLeft = GenomicBreakend.of(leftContig,
-                    left.id(),
-                    leftLifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
-                    leftCoordinates);
-
-
-            // RIGHT
-            GenomicBreakend right = bv.right();
-            int rightStart = right.startWithCoordinateSystem(CoordinateSystem.oneBased()) - 1;
-            Interval rightInput = new Interval(right.contig().ucscName(),
-                    rightStart,
-                    right.endWithCoordinateSystem(CoordinateSystem.oneBased()),
-                    right.strand().isNegative(),
-                    null);
-            Interval rightLifted = liftOver.liftOver(rightInput);
-            if (rightLifted == null) return Optional.empty();
-            Contig rightContig = genomicAssembly.contigByName(rightLifted.getContig());
-            if (rightContig.isUnknown()) {
-                LOGGER.warn("Unknown contig {} after lifting the variant {}", rightLifted.getContig(), variant);
-                return Optional.empty();
-            }
-            Coordinates rightCoordinates = Coordinates.of(CoordinateSystem.oneBased(),
-                    rightLifted.getStart() + 1,
-                    right.startConfidenceInterval(),
-                    rightLifted.getEnd(),
-                    right.endConfidenceInterval());
-            GenomicBreakend liftedRight = GenomicBreakend.of(rightContig,
-                    right.id(),
-                    rightLifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
-                    rightCoordinates);
-
-            GenomicBreakendVariant bvLifted = GenomicBreakendVariant.of(bv.eventId(), liftedLeft, liftedRight, bv.ref(), bv.alt());
-
-
-            return Optional.of(BreakendedSvannaVariant.builder()
-                    .with(bvLifted)
-                    .variantCallAttributes(attributes)
-                    .variantContext(variant.variantContext())
-                    .build());
-
+            return liftBreakend((GenomicBreakendVariant) variant)
+                    .map(bv -> BreakendedSvannaVariant.builder()
+                            .with(bv)
+                            .variantCallAttributes(attributes)
+                            .variantContext(variant.variantContext())
+                            .build());
         } else {
-            String contigName = variant.contig().ucscName();
-            boolean isZeroLength = variant.length() == 0;
-
-            int start = variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
-            if (isZeroLength) {
-                // liftover cannot lift interval with length zero. We must artificially make it a region of length 1.
-                start = start - 1;
-            }
-            Interval liftoverInput = new Interval(contigName, start, variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased()));
-
-            Interval lifted = liftOver.liftOver(liftoverInput);
-            if (lifted == null) {
-                // cannot be lifted over
-                return Optional.empty();
-            } else {
-                Contig contig = genomicAssembly.contigByName(lifted.getContig());
-                if (contig.isUnknown()) {
-                    LOGGER.warn("Unknown contig {} after lifting the variant {}", lifted.getContig(), variant);
-                    return Optional.empty();
-                } else {
-                    Coordinates coordinates = Coordinates.of(CoordinateSystem.oneBased(),
-                            isZeroLength ? lifted.getStart() + 1 : lifted.getStart(),
-                            variant.startConfidenceInterval(),
-                            lifted.getEnd(),
-                            variant.endConfidenceInterval());
-
-                    GenomicVariant v;
-                    if (variant.isSymbolic()) {
-                        // symbolic variant
-                        v = GenomicVariant.of(contig, variant.id(), lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
-                                coordinates,
-                                variant.ref(),
-                                variant.alt(),
-                                calculateChangeLength(variant.startWithCoordinateSystem(CoordinateSystem.zeroBased()), variant.endWithCoordinateSystem(CoordinateSystem.zeroBased()), variant.variantType(), variant.changeLength()));
-                    } else {
-                        // sequence variant
-                        if (coordinates.length() != variant.ref().length()) {
-                            // unable to lift the coordinates
-                            return Optional.empty();
-                        }
-                        v = GenomicVariant.of(contig,
-                                variant.id(),
-                                lifted.isPositiveStrand() ? Strand.POSITIVE : Strand.NEGATIVE,
-                                coordinates,
-                                variant.ref(),
-                                variant.alt());
-                    }
-
-                    return Optional.of(DefaultSvannaVariant.builder()
+            return liftIntrachromosomal(variant)
+                    .map(v -> DefaultSvannaVariant.builder()
                             .with(v)
                             .variantCallAttributes(attributes)
                             .variantContext(variant.variantContext())
                             .build());
-                }
-            }
         }
     }
 

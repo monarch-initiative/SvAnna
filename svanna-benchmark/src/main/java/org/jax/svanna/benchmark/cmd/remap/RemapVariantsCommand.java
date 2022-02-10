@@ -2,7 +2,6 @@ package org.jax.svanna.benchmark.cmd.remap;
 
 import htsjdk.variant.vcf.VCFFileReader;
 import org.jax.svanna.benchmark.Main;
-import org.jax.svanna.benchmark.cmd.Util;
 import org.jax.svanna.benchmark.cmd.remap.lift.LiftFullSvannaVariant;
 import org.jax.svanna.benchmark.cmd.remap.write.BedWriter;
 import org.jax.svanna.benchmark.cmd.remap.write.FullSvannaVariantWriter;
@@ -22,6 +21,7 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "remap-variants",
@@ -106,7 +106,7 @@ public class RemapVariantsCommand implements Callable<Integer> {
         }
 
         List<FullSvannaVariant> remappedVariants = variants.stream()
-                .map(Util.convertCoordinates(convertToGrch37, lift))
+                .map(convertCoordinates(convertToGrch37, lift))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
         LOGGER.info("Remapped {} variants", NF.format(remappedVariants.size()));
@@ -132,5 +132,17 @@ public class RemapVariantsCommand implements Callable<Integer> {
         int writtenLines = writer.write(remappedVariants);
         LOGGER.info("Stored {} variants", NF.format(writtenLines));
         return 0;
+    }
+
+    private static Function<? super FullSvannaVariant, Optional<? extends FullSvannaVariant>> convertCoordinates(boolean convertToGrch37,
+                                                                                                                LiftFullSvannaVariant lift) {
+        return variant -> {
+            if (!convertToGrch37) {
+                // no-op
+                return Optional.of(variant);
+            } else {
+                return lift.lift(variant);
+            }
+        };
     }
 }

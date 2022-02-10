@@ -1,6 +1,7 @@
 package org.jax.svanna.benchmark;
 
 import org.jax.svanna.benchmark.cmd.benchmark_case.BenchmarkCaseCommand;
+import org.jax.svanna.benchmark.cmd.lift_coordinates.LiftCoordinatesCommand;
 import org.jax.svanna.benchmark.cmd.remap.RemapVariantsCommand;
 import picocli.CommandLine;
 
@@ -37,7 +38,8 @@ public class Main implements Callable<Integer>  {
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
                 .addSubcommand("benchmark-case", new BenchmarkCaseCommand())
-                .addSubcommand("remap-variants", new RemapVariantsCommand());
+                .addSubcommand("remap-variants", new RemapVariantsCommand())
+                .addSubcommand("lift-coordinates", new LiftCoordinatesCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));
     }

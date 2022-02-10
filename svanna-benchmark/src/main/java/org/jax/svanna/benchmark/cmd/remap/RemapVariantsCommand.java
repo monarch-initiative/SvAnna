@@ -2,6 +2,7 @@ package org.jax.svanna.benchmark.cmd.remap;
 
 import htsjdk.variant.vcf.VCFFileReader;
 import org.jax.svanna.benchmark.Main;
+import org.jax.svanna.benchmark.cmd.Util;
 import org.jax.svanna.benchmark.cmd.remap.lift.LiftFullSvannaVariant;
 import org.jax.svanna.benchmark.cmd.remap.write.BedWriter;
 import org.jax.svanna.benchmark.cmd.remap.write.FullSvannaVariantWriter;
@@ -11,6 +12,7 @@ import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.parse.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
+import org.monarchinitiative.svart.util.VariantTrimmer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
@@ -20,7 +22,6 @@ import java.text.NumberFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "remap-variants",
@@ -69,11 +70,29 @@ public class RemapVariantsCommand implements Callable<Integer> {
 
     private LiftFullSvannaVariant lift;
 
+    private static VariantTrimmer.BaseRetentionStrategy prepareRetentionStrategy(String outputFormat) {
+        if ("BED".equals(outputFormat)) {
+            return VariantTrimmer.removingCommonBase();
+        } else if ("VCF".equals(outputFormat)) {
+            // we need that leading base here!
+            return VariantTrimmer.retainingCommonBase();
+        } else {
+            throw new RuntimeException("Invalid output format: " + outputFormat);
+        }
+    }
+
+    private static String readSampleName(Path inputVcfPath) {
+        try (VCFFileReader reader = new VCFFileReader(inputVcfPath, false)) {
+            return reader.getFileHeader().getSampleNamesInOrder().get(0);
+        }
+    }
+
     @Override
     public Integer call() throws Exception {
         // 1. read input variants
         LOGGER.info("Reading variants from {}", inputVcfPath.toAbsolutePath());
-        VariantParser<? extends FullSvannaVariant> parser = new VcfVariantParser(GenomicAssemblies.GRCh38p13());
+        VariantTrimmer.BaseRetentionStrategy retentionStrategy = prepareRetentionStrategy(outputFormat);
+        VariantParser<? extends FullSvannaVariant> parser = new VcfVariantParser(GenomicAssemblies.GRCh38p13(), retentionStrategy);
         List<? extends FullSvannaVariant> variants = parser.createVariantAlleleList(inputVcfPath);
         String sampleName = readSampleName(inputVcfPath);
 
@@ -87,24 +106,13 @@ public class RemapVariantsCommand implements Callable<Integer> {
         }
 
         List<FullSvannaVariant> remappedVariants = variants.stream()
-                .map(convertCoordinates(convertToGrch37))
+                .map(Util.convertCoordinates(convertToGrch37, lift))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
         LOGGER.info("Remapped {} variants", NF.format(remappedVariants.size()));
 
         // 3. format to VCF or BED & write
         return writeVariants(sampleName, remappedVariants);
-    }
-
-    private Function<? super FullSvannaVariant, Optional<? extends FullSvannaVariant>> convertCoordinates(boolean convertToGrch37) {
-        return variant -> {
-            if (!convertToGrch37) {
-                // no-op
-                return Optional.of(variant);
-            } else {
-                return lift.lift(variant);
-            }
-        };
     }
 
     private int writeVariants(String sampleName, List<FullSvannaVariant> remappedVariants) {
@@ -124,11 +132,5 @@ public class RemapVariantsCommand implements Callable<Integer> {
         int writtenLines = writer.write(remappedVariants);
         LOGGER.info("Stored {} variants", NF.format(writtenLines));
         return 0;
-    }
-
-    private static String readSampleName(Path inputVcfPath) {
-        try (VCFFileReader reader = new VCFFileReader(inputVcfPath, false)) {
-            return reader.getFileHeader().getSampleNamesInOrder().get(0);
-        }
     }
 }

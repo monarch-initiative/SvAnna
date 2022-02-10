@@ -35,7 +35,7 @@ public class CaseReportImporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CaseReportImporter.class);
 
     private static final GenomicAssembly ASSEMBLY = GenomicAssemblies.GRCh38p13();
-    private static final VcfConverter VCF_CONVERTER = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.removingCommonBase()));
+    private static final VcfConverter VCF_CONVERTER = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.retainingCommonBase()));
 
     private static final JsonFormat.Parser JSON_PARSER = JsonFormat.parser();
     // Matches a string like `Nguyen-2018-30269814-PIGS-Family_2_II_1`

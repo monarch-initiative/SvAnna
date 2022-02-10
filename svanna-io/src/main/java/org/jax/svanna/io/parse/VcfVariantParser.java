@@ -43,7 +43,11 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
     private final VcfConverter vcfConverter;
 
     public VcfVariantParser(GenomicAssembly assembly) {
-        this.vcfConverter = new VcfConverter(assembly, VariantTrimmer.leftShiftingTrimmer(VariantTrimmer.removingCommonBase()));
+        this(assembly, VariantTrimmer.removingCommonBase());
+    }
+
+    public VcfVariantParser(GenomicAssembly assembly, VariantTrimmer.BaseRetentionStrategy baseRetentionStrategy) {
+        this.vcfConverter = new VcfConverter(assembly, VariantTrimmer.leftShiftingTrimmer(baseRetentionStrategy));
     }
 
     /**

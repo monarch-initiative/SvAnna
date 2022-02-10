@@ -115,8 +115,8 @@ public class BedWriter implements FullSvannaVariantWriter {
             // X-CNV does not work with non-canonical contigs
             return Optional.empty();
         String contigName = contig.name();
-        int start = variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
-        int end = variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
+        int start = variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+        int end = variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
         switch (variant.variantType().baseType()) {
             case DUP:
                 return Optional.of(String.format("%s\t%d\t%d\t%s", contigName, start, end, "gain"));

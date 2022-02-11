@@ -41,14 +41,6 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
         NF.setMaximumFractionDigits(2);
     }
 
-    @CommandLine.Option(names = "--genomic-assembly",
-            description = "target genomic assembly [GRCh37, GRCh38] (default: ${DEFAULT-VALUE})")
-    public String genomicAssemblyVersion = "GRCh38";
-
-    @CommandLine.Option(names = "--liftover-chain",
-            description = "path to Liftover chain for conversion from GRCh38 to GRCh37. Must be provided if `--genomic-assembly GRCh37`")
-    public Path liftoverChainPath;
-
     @CommandLine.Parameters(
             index = "0",
             description = "path to VCF file with structural variants")
@@ -56,6 +48,11 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
 
     @CommandLine.Parameters(
             index = "1",
+            description = "path to Liftover chain for conversion from GRCh38 to GRCh37")
+    public Path liftoverChainPath;
+
+    @CommandLine.Parameters(
+            index = "2",
             description = "where to store the output file")
     public Path outputPath;
 
@@ -68,6 +65,8 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
 
         LOGGER.info("Read {} cases", NF.format(cases.size()));
 
+        lift = new LiftFullSvannaVariant(GenomicAssemblies.GRCh37p13(), liftoverChainPath);
+
         // 2. Lift if necessary and write
         String[] header = {
                 "case_id", "variant_id",
@@ -77,30 +76,29 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
         try (BufferedWriter writer = Files.newBufferedWriter(outputPath);
              CSVPrinter printer = CSVFormat.DEFAULT.withHeader(header).print(writer)) {
 
-            boolean liftToGrch37 = "GRCh37".equals(genomicAssemblyVersion);
-            if (liftToGrch37) {
-                LOGGER.info("Remapping variants to GRCh37");
-                lift = new LiftFullSvannaVariant(GenomicAssemblies.GRCh37p13(), liftoverChainPath);
-            }
             for (CaseReport caseReport : cases) {
-
                 for (SvannaVariant variant : caseReport.variants()) {
-                    Optional<? extends GenomicVariant> liftedOptional = liftIfNecessary(liftToGrch37, variant);
+                    Optional<? extends GenomicVariant> liftedOptional = liftVariantCoordinates(variant);
+
+                    printer.print(caseReport.caseSummary().phenopacketId());
+                    printer.print(variant.id());
+                    // GRCh38
+                    printer.print(variant.contigName());
+                    printer.print(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                    printer.print(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
 
                     if (liftedOptional.isPresent()) {
-                        printer.print(caseReport.caseSummary().phenopacketId());
-                        printer.print(variant.id());
-                        // GRCh38
-                        printer.print(variant.contigName());
-                        printer.print(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-                        printer.print(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
                         // GRCh37
                         GenomicVariant lv = liftedOptional.get();
                         printer.print(lv.contigName());
                         printer.print(lv.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
                         printer.print(lv.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-                        printer.println();
+                    } else {
+                        printer.print("N/A");
+                        printer.print("NaN");
+                        printer.print("NaN");
                     }
+                    printer.println();
                 }
             }
         }
@@ -109,16 +107,12 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
         return 0;
     }
 
-    private Optional<? extends GenomicVariant> liftIfNecessary(boolean liftToGrch37, SvannaVariant variant) {
+    private Optional<? extends GenomicVariant> liftVariantCoordinates(SvannaVariant variant) {
         Optional<? extends GenomicVariant> genoVarOptional;
-        if (liftToGrch37) {
-            if (variant.isBreakend()) {
-                genoVarOptional = lift.liftBreakend(((GenomicBreakendVariant) variant));
-            } else {
-                genoVarOptional = lift.liftIntrachromosomal(variant);
-            }
+        if (variant.isBreakend()) {
+            genoVarOptional = lift.liftBreakend(((GenomicBreakendVariant) variant));
         } else {
-            genoVarOptional = Optional.of(variant);
+            genoVarOptional = lift.liftIntrachromosomal(variant);
         }
         return genoVarOptional;
     }

@@ -2,10 +2,15 @@
 Changelog
 =========
 
-------
+----------
 latest
-------
+----------
 
+----------
+v1.0.0-RC5
+----------
+- changes required for benchmarking the other SV prioritization tools
+- drop *Jannovar*
 
 ----------
 v1.0.0-RC4

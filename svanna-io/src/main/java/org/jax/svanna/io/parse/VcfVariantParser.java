@@ -43,7 +43,11 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
     private final VcfConverter vcfConverter;
 
     public VcfVariantParser(GenomicAssembly assembly) {
-        this.vcfConverter = new VcfConverter(assembly, VariantTrimmer.leftShiftingTrimmer(VariantTrimmer.removingCommonBase()));
+        this(assembly, VariantTrimmer.removingCommonBase());
+    }
+
+    public VcfVariantParser(GenomicAssembly assembly, VariantTrimmer.BaseRetentionStrategy baseRetentionStrategy) {
+        this.vcfConverter = new VcfConverter(assembly, VariantTrimmer.leftShiftingTrimmer(baseRetentionStrategy));
     }
 
     /**
@@ -100,11 +104,9 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
         return reader.lines()
                 .onClose(() -> {try {reader.close();} catch (IOException ignored) {}})
                 .map(toVariantContext(codec))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(Optional::stream)
                 .map(toVariants())
-                .filter(Optional::isPresent)
-                .map(Optional::get);
+                .flatMap(Optional::stream);
     }
 
     /**

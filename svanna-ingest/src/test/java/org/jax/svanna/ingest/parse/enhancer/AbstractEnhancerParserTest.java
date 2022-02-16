@@ -2,7 +2,6 @@ package org.jax.svanna.ingest.parse.enhancer;
 
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
-import org.jax.svanna.ingest.parse.enhancer.fantom.FantomEnhancerParser;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;

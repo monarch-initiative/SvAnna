@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.io;
 
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.junit.jupiter.api.Disabled;

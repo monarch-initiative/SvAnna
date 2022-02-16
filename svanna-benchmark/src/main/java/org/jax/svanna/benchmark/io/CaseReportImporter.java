@@ -1,4 +1,4 @@
-package org.jax.svanna.benchmark;
+package org.jax.svanna.benchmark.io;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
@@ -30,12 +30,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-class CaseReportImporter {
+public class CaseReportImporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CaseReportImporter.class);
 
     private static final GenomicAssembly ASSEMBLY = GenomicAssemblies.GRCh38p13();
-    private static final VcfConverter VCF_CONVERTER = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.removingCommonBase()));
+    private static final VcfConverter VCF_CONVERTER = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.retainingCommonBase()));
 
     private static final JsonFormat.Parser JSON_PARSER = JsonFormat.parser();
     // Matches a string like `Nguyen-2018-30269814-PIGS-Family_2_II_1`

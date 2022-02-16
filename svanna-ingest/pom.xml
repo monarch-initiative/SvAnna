@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>org.monarchinitiative.sgenes</groupId>
-            <artifactId>silent-genes-gencode</artifactId>
+            <artifactId>silent-genes-gtf</artifactId>
         </dependency>
         <dependency>
             <groupId>org.monarchinitiative.sgenes</groupId>

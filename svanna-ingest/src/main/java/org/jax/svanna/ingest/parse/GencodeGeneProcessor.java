@@ -1,10 +1,11 @@
 package org.jax.svanna.ingest.parse;
 
+import org.monarchinitiative.sgenes.gtf.io.GtfGeneParser;
+import org.monarchinitiative.sgenes.gtf.io.GtfGeneParserFactory;
+import org.monarchinitiative.sgenes.gtf.model.Biotype;
+import org.monarchinitiative.sgenes.gtf.model.GencodeGene;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.assembly.SequenceRole;
-import org.monarchinitiative.sgenes.gencode.io.GencodeParser;
-import org.monarchinitiative.sgenes.gencode.model.Biotype;
-import org.monarchinitiative.sgenes.gencode.model.GencodeGene;
 
 import java.nio.file.Path;
 import java.util.*;
@@ -22,7 +23,7 @@ public class GencodeGeneProcessor {
     }
 
     public List<? extends GencodeGene> process() {
-        GencodeParser parser = new GencodeParser(localGencodeGtfPath, assembly);
+        GtfGeneParser<GencodeGene> parser = GtfGeneParserFactory.gtfGeneParser(localGencodeGtfPath, assembly);
         return parser.stream()
                 .filter(geneHasHgncId())
                 .filter(geneIsCodingOrAtLeastOneTranscriptIsCoding())

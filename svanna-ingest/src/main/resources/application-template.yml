@@ -33,8 +33,8 @@ svanna.ingest:
 
 
   phenotype:
-    hpoJsonUrl: https://purl.obolibrary.org/obo/hp.json
-    hpoAnnotationsUrl: https://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa
+    hpoJsonUrl: http://purl.obolibrary.org/obo/hp.json
+    hpoAnnotationsUrl: http://purl.obolibrary.org/obo/hp/hpoa/phenotype.hpoa
     mim2geneMedgenUrl: ftp://ftp.ncbi.nlm.nih.gov/gene/DATA/mim2gene_medgen
     geneInfoUrl: ftp://ftp.ncbi.nih.gov/gene/DATA/GENE_INFO/Mammalia/Homo_sapiens.gene_info.gz
 

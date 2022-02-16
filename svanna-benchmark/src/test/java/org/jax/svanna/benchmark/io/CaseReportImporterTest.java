@@ -1,6 +1,7 @@
 package org.jax.svanna.benchmark.io;
 
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
@@ -8,7 +9,6 @@ import org.monarchinitiative.svart.CoordinateSystem;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -19,10 +19,17 @@ import static org.hamcrest.Matchers.*;
 
 public class CaseReportImporterTest {
 
+    private CaseReportImporter importer;
+
+    @BeforeEach
+    public void setUp() {
+        importer = new CaseReportImporter(false);
+    }
+
     @Test
     public void sequenceCasePath() throws Exception {
         Path path = Path.of(CaseReportImporterTest.class.getResource("Witzel-2017-SMARCD2-BII.1.json").toURI());
-        List<CaseReport> caseReports = CaseReportImporter.readCasesProvidedAsPositionalArguments(List.of(path));
+        List<CaseReport> caseReports = importer.readCasesProvidedAsPositionalArguments(List.of(path));
 
         assertThat(caseReports, hasSize(1));
 
@@ -40,7 +47,7 @@ public class CaseReportImporterTest {
     @Test
     public void symbolicCasePath() throws Exception {
         Path path = Path.of(CaseReportImporterTest.class.getResource("Hsiao-2015-NF1-UAB-1.json").toURI());
-        List<CaseReport> caseReports = CaseReportImporter.readCasesProvidedAsPositionalArguments(List.of(path));
+        List<CaseReport> caseReports = importer.readCasesProvidedAsPositionalArguments(List.of(path));
 
         assertThat(caseReports, hasSize(1));
 
@@ -54,7 +61,7 @@ public class CaseReportImporterTest {
     @Test
     public void parseBreakendCase() throws Exception {
         Path path = Path.of(CaseReportImporterTest.class.getResource("Iqbal-2013-ANK3-V_1.json").toURI());
-        List<CaseReport> caseReports = CaseReportImporter.readCasesProvidedAsPositionalArguments(List.of(path));
+        List<CaseReport> caseReports = importer.readCasesProvidedAsPositionalArguments(List.of(path));
 
         assertThat(caseReports, hasSize(1));
 
@@ -67,25 +74,10 @@ public class CaseReportImporterTest {
 
     @Test
     @Disabled
-    public void allCasesPath() {
-        Path caseFolderPath = Paths.get("/home/ielis/data/clinical-long-read-genome/phenopackets");
-        List<CaseReport> caseReports = CaseReportImporter.readCasesProvidedViaCaseFolderOption(caseFolderPath);
-        for (CaseReport report : caseReports) {
-            Collection<SvannaVariant> variants = report.variants();
-            for (SvannaVariant variant : variants) {
-                System.err.printf("%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%s\n",
-                        report.caseSummary(), variant.contigName(), variant.start(), variant.end(), variant.ref(), variant.alt(),
-                        variant.zygosity(), variant.minDepthOfCoverage(), variant.numberOfRefReads(), variant.numberOfAltReads());
-            }
-        }
-    }
-
-    @Test
-    @Disabled
     public void curatedCasesSummary() {
         // used to generate Phenopacket table
         Path caseFolderPath = Paths.get("/home/ielis/data/clinical-long-read-genome/phenopackets");
-        List<CaseReport> caseReports = CaseReportImporter.readCasesProvidedViaCaseFolderOption(caseFolderPath).stream()
+        List<CaseReport> caseReports = importer.readCasesProvidedViaCaseFolderOption(caseFolderPath).stream()
                 .sorted(Comparator.comparing(cr -> cr.caseSummary().firstAuthor()))
                 .collect(Collectors.toList());
         for (CaseReport report : caseReports) {

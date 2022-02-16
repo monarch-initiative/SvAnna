@@ -61,7 +61,8 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
     @Override
     public Integer call() throws Exception {
         // 1. Read all cases of a folder
-        List<CaseReport> cases = CaseReportImporter.readCasesProvidedViaCaseFolderOption(caseFolderPath);
+        CaseReportImporter importer = new CaseReportImporter(true);
+        List<CaseReport> cases = importer.readCasesProvidedViaCaseFolderOption(caseFolderPath);
 
         LOGGER.info("Read {} cases", NF.format(cases.size()));
 

@@ -90,7 +90,8 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
 
     @Override
     public Integer call() {
-        List<CaseReport> cases = CaseReportImporter.readCasesProvidedAsPositionalArguments(List.of(caseReport));
+        CaseReportImporter caseReportImporter = new CaseReportImporter(false);
+        List<CaseReport> cases = caseReportImporter.readCasesProvidedAsPositionalArguments(List.of(caseReport));
 
         if (cases.isEmpty()) {
             LOGGER.warn("Unable to continue with no cases");

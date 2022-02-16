@@ -35,20 +35,22 @@ public class CaseReportImporter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CaseReportImporter.class);
 
     private static final GenomicAssembly ASSEMBLY = GenomicAssemblies.GRCh38p13();
-    private static final VcfConverter VCF_CONVERTER = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(VariantTrimmer.retainingCommonBase()));
+    private final VcfConverter vcfConverter;
 
     private static final JsonFormat.Parser JSON_PARSER = JsonFormat.parser();
     // Matches a string like `Nguyen-2018-30269814-PIGS-Family_2_II_1`
     private static final Pattern PHENOPACKET_ID_PATTERN = Pattern.compile("(?<author>[\\w_-]+)-(?<year>\\d{4})-(?<pmid>\\d+)-(?<gene>[\\w\\d]+)-(?<proband>[\\w\\d‐\\-:,._]+)", Pattern.UNICODE_CHARACTER_CLASS);
 
-    private CaseReportImporter() {
+    public CaseReportImporter(boolean retainCommonBase) {
+        VariantTrimmer.BaseRetentionStrategy baseRetentionStrategy = retainCommonBase ? VariantTrimmer.retainingCommonBase() : VariantTrimmer.removingCommonBase();
+        vcfConverter = new VcfConverter(ASSEMBLY, VariantTrimmer.rightShiftingTrimmer(baseRetentionStrategy));
     }
 
 
-    public static List<CaseReport> readCasesProvidedAsPositionalArguments(List<Path> caseReports) {
+    public List<CaseReport> readCasesProvidedAsPositionalArguments(List<Path> caseReports) {
         if (caseReports != null) {
             return caseReports.stream()
-                    .map(CaseReportImporter::importPhenopacket)
+                    .map(this::importPhenopacket)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toList());
@@ -56,7 +58,7 @@ public class CaseReportImporter {
         return List.of();
     }
 
-    public static List<CaseReport> readCasesProvidedViaCaseFolderOption(Path caseReportPath) {
+    public List<CaseReport> readCasesProvidedViaCaseFolderOption(Path caseReportPath) {
         if (caseReportPath != null) {
             File caseReportFile = caseReportPath.toFile();
             if (caseReportFile.isDirectory()) {
@@ -65,7 +67,7 @@ public class CaseReportImporter {
                     LogUtils.logDebug(LOGGER, "Found {} JSON files in `{}`", jsons.length, caseReportPath.toAbsolutePath());
                     return Arrays.stream(jsons)
                             .map(File::toPath)
-                            .map(CaseReportImporter::importPhenopacket)
+                            .map(this::importPhenopacket)
                             .filter(Optional::isPresent)
                             .map(Optional::get)
                             .collect(Collectors.toList());
@@ -78,7 +80,7 @@ public class CaseReportImporter {
     }
 
 
-    private static Optional<CaseReport> importPhenopacket(Path casePath) {
+    private Optional<CaseReport> importPhenopacket(Path casePath) {
         LogUtils.logTrace(LOGGER, "Parsing `{}`", casePath);
         String payload;
         try (BufferedReader reader = Files.newBufferedReader(casePath)) {
@@ -119,7 +121,7 @@ public class CaseReportImporter {
                     continue;
                 }
 
-                Contig contig = VCF_CONVERTER.parseContig(vcfAllele.getChr());
+                Contig contig = vcfConverter.parseContig(vcfAllele.getChr());
                 if (contig.isUnknown()) {
                     LogUtils.logWarn(LOGGER, "Unable to find contig `{}` in GRCh38.p13", vcfAllele.getChr());
                     continue;
@@ -150,7 +152,7 @@ public class CaseReportImporter {
                         // BREAKEND
                         String mateId = infoFields.getOrDefault("MATEID", "");
                         String eventId = infoFields.getOrDefault("EVENTID", "");
-                        BreakendedSvannaVariant.Builder builder = VCF_CONVERTER.convertBreakend(BreakendedSvannaVariant.builder(),
+                        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(),
                                 contig, variantId, vcfAllele.getPos(), ciPos,
                                 vcfAllele.getRef(), vcfAllele.getAlt(),
                                 ciEnd, mateId, eventId);
@@ -177,7 +179,7 @@ public class CaseReportImporter {
 
                     try {
                         // SYMBOLIC
-                        DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convertSymbolic(DefaultSvannaVariant.builder(),
+                        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(),
                                 contig, variantId, vcfAllele.getPos(), ciPos, end, ciEnd,
                                 vcfAllele.getRef(), '<' + vcfAllele.getAlt() + '>', changeLength);
                         builder.variantCallAttributes(attrBuilder.build());
@@ -188,7 +190,7 @@ public class CaseReportImporter {
                     }
                 } else {
                     // SEQUENCE
-                    DefaultSvannaVariant.Builder builder = VCF_CONVERTER.convert(DefaultSvannaVariant.builder(),
+                    DefaultSvannaVariant.Builder builder = vcfConverter.convert(DefaultSvannaVariant.builder(),
                             contig, variantId, vcfAllele.getPos(),
                             vcfAllele.getRef(), vcfAllele.getAlt());
                     builder.variantCallAttributes(attrBuilder.build());

@@ -36,6 +36,7 @@ public class InversionSvgGenerator extends SvSvgGenerator {
         String inversionDescription = String.format("%s inversion", inversionLength);
         writeInversion(starty, inversionDescription, writer);
         y += 100;
+        y = writeDosage(writer, y);
         y = writeRepeats(writer, y);
         for (var e : this.affectedEnhancers) {
             writeEnhancer(e, y, writer);

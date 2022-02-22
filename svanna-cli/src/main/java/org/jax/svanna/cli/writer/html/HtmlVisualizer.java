@@ -195,7 +195,7 @@ public class HtmlVisualizer implements Visualizer {
                 case TRA:
                 case BND:
                     if (variant instanceof GenomicBreakendVariant) {
-                        gen = new TranslocationSvgGenerator(variant, (GenomicBreakendVariant) variant, genes, enhancers, repetitiveRegions);
+                        gen = new TranslocationSvgGenerator((GenomicBreakendVariant) variant, genes, enhancers, repetitiveRegions, dosages);
                         break;
                     }
                     // fall through to default

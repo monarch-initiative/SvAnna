@@ -16,6 +16,7 @@ import static org.jax.svanna.cli.writer.html.svg.SvSvgGenerator.*;
 public class SvgDosageWriter {
     private final List<DosageRegion> dosageRegions;
     private final int paddedGenomicMinPos;
+    private final int paddedGenomicMaxPos;
     private final double genomicSpan;
 
 
@@ -24,6 +25,7 @@ public class SvgDosageWriter {
                            int paddedGenomicMinimumPos,
                            int paddedGenomicMaximumPos) {
         this.paddedGenomicMinPos = paddedGenomicMinimumPos;
+        this.paddedGenomicMaxPos = paddedGenomicMaximumPos;
         this.genomicSpan = paddedGenomicMaximumPos - this.paddedGenomicMinPos;
         this.dosageRegions = dosages;
     }
@@ -34,7 +36,7 @@ public class SvgDosageWriter {
      * @return the vertical space that will be taken up by the repeat tracks
      */
     public double verticalSpace() {
-        return 40d;
+        return dosageRegions.isEmpty() ? 0d : 40d;
     }
 
 
@@ -75,8 +77,9 @@ public class SvgDosageWriter {
 
             String sensitivity = dose.isHaploinsufficient() ? "haplosensitive (%s)" : "triplosensitive (%s)";
             sensitivity = String.format(sensitivity, dose.dosage().id());
-            int start = dose.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-            int end = dose.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+            // clip start and end to ensure we do not draw outside of bounds, as dosage regions are not used to calculate min and max coordinates
+            int start = Math.max(paddedGenomicMinPos, dose.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+            int end = Math.min(paddedGenomicMaxPos, dose.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
             double x_start_dosage = translateGenomicToSvg(start);
             double x_end_dosage = translateGenomicToSvg(end);
             double repeat_width = x_end_dosage - x_start_dosage;

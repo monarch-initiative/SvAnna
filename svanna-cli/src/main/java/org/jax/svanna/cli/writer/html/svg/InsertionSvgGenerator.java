@@ -28,6 +28,7 @@ public class InsertionSvgGenerator extends SvSvgGenerator {
         super(variant, genes, enhancers, repeats, dosageRegions);
     }
 
+    @Override
     public void write(Writer writer) throws IOException {
         int starty = 50;
         int y = starty;

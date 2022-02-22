@@ -28,8 +28,11 @@ public class SvSvgGeneratorTest {
     @Test
     public void testWriteSvg() {
         List<Gene> genes = geneService.byHgncId(TermId.of("HGNC:4195"));
-        SvSvgGenerator generator = new DeletionSvgGenerator(testVariants.deletions().gckUpstreamIntergenic_affectingEnhancer(), genes,
-                List.of(), List.of(), List.of());
+        SvSvgGenerator generator = new DeletionSvgGenerator(testVariants.deletions().gckUpstreamIntergenic_affectingEnhancer(),
+                genes,
+                List.of(),
+                List.of(),
+                List.of(TestData.gckHaploinsufficiency()));
         String svg = generator.getSvg();
         assertNotNull(svg);
         try {

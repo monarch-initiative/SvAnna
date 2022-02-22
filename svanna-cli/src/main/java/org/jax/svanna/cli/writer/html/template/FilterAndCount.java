@@ -46,12 +46,13 @@ public class FilterAndCount {
         // iterate through priorities and rearrangements
         for (VariantLandscape variantLandscape : variantLandscapes) {
             SvannaVariant variant = variantLandscape.variant();
+            VariantType vt = variant.genomicVariant().variantType();
             if (variant.numberOfAltReads() < minAltAllele) {
-                this.categoryToByVariantTypeCountMap.get(ALT_ALLELE_COUNT).merge(variant.variantType(), 1, Integer::sum);
+                this.categoryToByVariantTypeCountMap.get(ALT_ALLELE_COUNT).merge(vt, 1, Integer::sum);
             } else if (!variant.passedFilters()) {
-                this.categoryToByVariantTypeCountMap.get(FILTERED).merge(variant.variantType(), 1, Integer::sum);
+                this.categoryToByVariantTypeCountMap.get(FILTERED).merge(vt, 1, Integer::sum);
             } else {
-                this.categoryToByVariantTypeCountMap.get(PASS).merge(variant.variantType(), 1, Integer::sum);
+                this.categoryToByVariantTypeCountMap.get(PASS).merge(vt, 1, Integer::sum);
                 double priority = variant.svPriority().getPriority();
                 if (Double.isNaN(priority))
                     unknown++;

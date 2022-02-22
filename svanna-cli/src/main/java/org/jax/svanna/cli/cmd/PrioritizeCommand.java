@@ -267,7 +267,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             ProgressReporter priorityProgress = new ProgressReporter(5_000);
             UnaryOperator<FullSvannaVariant> prioritizationFunction = v -> {
                 priorityProgress.logItem(v);
-                SvPriority priority = prioritizer.prioritize(v);
+                SvPriority priority = prioritizer.prioritize(v.genomicVariant());
                 v.setSvPriority(priority);
                 return v;
             };

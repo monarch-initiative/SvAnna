@@ -13,6 +13,7 @@ import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.io.FullSvannaVariant;
+import org.jax.svanna.io.FullSvannaVariantBuilder;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.util.VariantTrimmer;
@@ -152,18 +153,21 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
     }
 
     private Optional<FullSvannaVariant> parseSequenceVariantAllele(VariantContext vc, Contig contig) {
+        GenomicVariant gv = vcfConverter.convert(contig, vc.getID(), vc.getStart(), vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString());
         VariantCallAttributes attrs = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        DefaultSvannaVariant.Builder builder = vcfConverter.convert(DefaultSvannaVariant.builder(),
-                contig, vc.getID(), vc.getStart(),
-                vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString());
+        // SvPriority is null at this point
+        FullSvannaVariantBuilder builder = FullSvannaVariant.builder(gv)
+                .variantCallAttributes(attrs)
+                .variantContext(vc);
+
 
         // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
         // variants with low quality
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
 
-        return Optional.of(builder.variantCallAttributes(attrs).variantContext(vc).build());
+        return Optional.of(builder.build());
     }
 
     private Optional<FullSvannaVariant> parseSymbolicVariantAllele(VariantContext vc, Contig contig) {
@@ -228,14 +232,19 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
             end = end -1 ;
         }
 
+        GenomicVariant gv = vcfConverter.convertSymbolic(contig, vc.getID(), start, cipos, end, ciend, ref, alt, svlen);
         VariantCallAttributes variantCallAttributes = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
-        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(), contig, vc.getID(), start, cipos, end, ciend, ref, alt, svlen);
+
+        // SvPriority is null at this point
+        FullSvannaVariantBuilder builder = FullSvannaVariant.builder(gv)
+                .variantCallAttributes(variantCallAttributes)
+                .variantContext(vc);
 
         // we assume that `PASS` is not added in between variant context's filters by HtsJDK,
         // and all the other values denote low quality variants
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FAILED_VARIANT_FILTER_RESULT);
-        return Optional.of(builder.variantCallAttributes(variantCallAttributes).variantContext(vc).build());
+        return Optional.of(builder.build());
     }
 
     private Optional<FullSvannaVariant> parseBreakendAllele(VariantContext vc, Contig contig) {
@@ -274,18 +283,19 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
         String mateId = vc.getAttributeAsString("MATEID", "");
         String eventId = vc.getAttributeAsString("EVENT", "");
 
+        GenomicBreakendVariant gv = vcfConverter.convertBreakend(contig, vc.getID(), pos, ciPos, vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString(), ciEnd, mateId, eventId);
         VariantCallAttributes attrs = VariantCallAttributeParser.parseAttributes(vc.getAttributes(), vc.getGenotype(0));
 
-        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(), contig, vc.getID(), pos, ciPos,
-                vc.getReference().getDisplayString(), vc.getAlternateAllele(0).getDisplayString(),
-                ciEnd, mateId, eventId);
+        FullSvannaVariantBuilder builder = FullSvannaVariant.builder(gv)
+                .variantCallAttributes(attrs)
+                .variantContext(vc);
 
         // we assume that `PASS` is not added in between variant context's filters, and all the other values denote
         // variants with low quality
         if (!vc.getFilters().isEmpty())
             builder.addFilterResult(FilterResult.fail(FilterType.FAILED_VARIANT_FILTER));
 
-        return Optional.of(builder.variantCallAttributes(attrs).variantContext(vc).build());
+        return Optional.of(builder.build());
     }
 
 }

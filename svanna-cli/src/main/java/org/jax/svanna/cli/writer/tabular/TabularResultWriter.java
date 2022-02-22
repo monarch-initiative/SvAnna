@@ -11,6 +11,7 @@ import org.jax.svanna.core.filter.Filterable;
 import org.jax.svanna.core.priority.Prioritized;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.monarchinitiative.svart.Strand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,17 +70,18 @@ public class TabularResultWriter implements ResultWriter {
 
     private static Consumer<? super SvannaVariant> printVariant(CSVPrinter printer) {
         return variant -> {
+            GenomicVariant gv = variant.genomicVariant();
             try {
-                printer.print(variant.contigName());
-                printer.print(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-                printer.print(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-                printer.print(variant.id());
-                printer.print(variant.variantType());
+                printer.print(gv.contig().name());
+                printer.print(gv.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                printer.print(gv.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                printer.print(gv.id());
+                printer.print(gv.variantType());
                 printer.print(failedFilters(variant));
                 printer.print(variant.svPriority().getPriority());
                 printer.println();
             } catch (IOException e) {
-                LogUtils.logWarn(LOGGER, "Error writing out record `{}`", LogUtils.variantSummary(variant));
+                LogUtils.logWarn(LOGGER, "Error writing out record `{}`", LogUtils.variantSummary(gv));
             }
         };
     }

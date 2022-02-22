@@ -15,6 +15,7 @@ import org.jax.svanna.core.priority.SvPrioritizer;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
 import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.VariantAware;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
 import org.jax.svanna.io.parse.VariantParser;
@@ -134,14 +135,14 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             SvPrioritizer<SvPriority> prioritizer = svPrioritizerFactory.getPrioritizer(validatedPatientTermIds);
 
             // prepare the variants
-            List<GenomicVariant> caseVariants = new LinkedList<>(filteredVariants);
+            List<SvannaVariant> caseVariants = new LinkedList<>(filteredVariants);
             Collection<SvannaVariant> targetVariants = caseReport.variants();
             List<SvannaVariant> filteredTargetVariants = filter.filter(targetVariants);
             for (SvannaVariant filteredTargetVariant : filteredTargetVariants) {
                 if (filteredTargetVariant.passedFilters()) {
                     caseVariants.add(filteredTargetVariant);
                 } else {
-                    LOGGER.warn("Variant {}-{} did not pass the filters! {}", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant), filteredTargetVariant);
+                    LOGGER.warn("Variant {}-{} did not pass the filters! {}", caseReport.caseSummary(), LogUtils.variantSummary(filteredTargetVariant.genomicVariant()), filteredTargetVariant);
                 }
             }
 
@@ -149,11 +150,11 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
             Stream<VariantPriority> annotationStream = caseVariants.parallelStream()
                     .onClose(progressReporter.summarize())
                     .peek(progressReporter::logItem)
-                    .map(v -> new VariantPriority(v, prioritizer.prioritize(v)));
+                    .map(v -> new VariantPriority(v.genomicVariant(), prioritizer.prioritize(v.genomicVariant())));
             List<VariantPriority> priorities = TaskUtils.executeBlocking(() -> annotationStream.collect(Collectors.toList()), nThreads);
 
             Set<String> causalIds = targetVariants.stream()
-                    .map(GenomicVariant::id)
+                    .map(VariantAware::id)
                     .collect(Collectors.toSet());
 
             // ---------------------------------------------

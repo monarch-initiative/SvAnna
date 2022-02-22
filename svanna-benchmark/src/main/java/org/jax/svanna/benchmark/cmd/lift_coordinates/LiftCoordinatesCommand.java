@@ -84,9 +84,10 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
                     printer.print(caseReport.caseSummary().phenopacketId());
                     printer.print(variant.id());
                     // GRCh38
-                    printer.print(variant.contigName());
-                    printer.print(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-                    printer.print(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                    GenomicVariant gv = variant.genomicVariant();
+                    printer.print(gv.contig().name());
+                    printer.print(gv.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
+                    printer.print(gv.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
 
                     if (liftedOptional.isPresent()) {
                         // GRCh37
@@ -110,10 +111,11 @@ public class LiftCoordinatesCommand implements Callable<Integer> {
 
     private Optional<? extends GenomicVariant> liftVariantCoordinates(SvannaVariant variant) {
         Optional<? extends GenomicVariant> genoVarOptional;
-        if (variant.isBreakend()) {
-            genoVarOptional = lift.liftBreakend(((GenomicBreakendVariant) variant));
+        GenomicVariant gv = variant.genomicVariant();
+        if (gv.isBreakend()) {
+            genoVarOptional = lift.liftBreakend(((GenomicBreakendVariant) gv));
         } else {
-            genoVarOptional = lift.liftIntrachromosomal(variant);
+            genoVarOptional = lift.liftIntrachromosomal(gv);
         }
         return genoVarOptional;
     }

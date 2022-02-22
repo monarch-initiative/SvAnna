@@ -392,7 +392,7 @@ public class TestVariants {
          * right mate, upstream from BRCA2 (not disrupted)
          * chr13:32_300_000 (+)
          */
-        public GenomicVariant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
+        public GenomicBreakendVariant translocationWhereOneCdsIsDisruptedAndTheOtherIsNot() {
             Contig chr9 = assembly.contigByName("9");
             GenomicBreakend left = GenomicBreakend.of(chr9, "tra_l", Strand.POSITIVE, CoordinateSystem.oneBased(), 133_359_001, 133_359_000);
             Contig chr13 = assembly.contigByName("13");

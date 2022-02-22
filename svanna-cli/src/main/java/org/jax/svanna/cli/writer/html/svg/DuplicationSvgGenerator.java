@@ -42,6 +42,7 @@ public class DuplicationSvgGenerator extends SvSvgGenerator {
      * @param writer a file handle
      * @throws IOException if we cannot write.
      */
+    @Override
     public void write(Writer writer) throws IOException {
         int starty = 50;
         int y = starty;

@@ -1,5 +1,6 @@
 package org.jax.svanna.cli.writer.html.svg;
 
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
@@ -32,18 +33,17 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
     /**
      * The constructor calculates the left and right boundaries for display.
      * @param variant Variant object representing a translocation
-     * @param breakended
      * @param genes genes affected by this translocation
      * @param enhancers Enhancers disrupted by this translocation
      */
-    public TranslocationSvgGenerator(GenomicVariant variant,
-                                     GenomicBreakendVariant breakended,
+    public TranslocationSvgGenerator(GenomicBreakendVariant variant,
                                      List<Gene> genes,
                                      List<Enhancer> enhancers,
-                                     List<RepetitiveRegion> repeats) {
+                                     List<RepetitiveRegion> repeats,
+                                     List<DosageRegion> dosages) {
         super(variant, genes, enhancers, repeats, List.of());
-        GenomicBreakend left = breakended.left();
-        GenomicBreakend right = breakended.right();
+        GenomicBreakend left = variant.left();
+        GenomicBreakend right = variant.right();
 
         List<Gene> genesA = genes.stream().filter(t -> t.contigId() == left.contigId()).collect(Collectors.toList());
         List<Gene> genesB = genes.stream().filter(t -> t.contigId() == right.contigId()).collect(Collectors.toList());
@@ -53,6 +53,9 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
 
         List<RepetitiveRegion> repeatsA = repeats.stream().filter(r -> r.contigId() == left.contigId()).collect(Collectors.toList());
         List<RepetitiveRegion> repeatsB = repeats.stream().filter(r -> r.contigId() == right.contigId()).collect(Collectors.toList());
+
+        List<DosageRegion> dosagesA = dosages.stream().filter(d -> d.contigId() == left.contigId()).collect(Collectors.toList());
+        List<DosageRegion> dosagesB = dosages.stream().filter(d -> d.contigId() == right.contigId()).collect(Collectors.toList());
 
         int nTranscripts = genesA.stream()
                 .mapToInt(Spliced::transcriptCount)
@@ -65,11 +68,11 @@ public class TranslocationSvgGenerator extends SvSvgGenerator {
         this.componentA = new TranslocationComponentSvgGenerator(
                 getMin(genesA, enhancersA, left.startOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM)),
                 getMax(genesA, enhancersA, left.endOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM), left.contig().length()),
-                genesA, enhancersA, repeatsA, variant, left, YSTART);
+                genesA, enhancersA, repeatsA, dosagesA, variant, left, YSTART);
         this.componentB = new TranslocationComponentSvgGenerator(
                 getMin(genesB, enhancersB, right.startOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM)),
                 getMax(genesB, enhancersB, right.endOnStrandWithCoordinateSystem(Strand.POSITIVE, COORDINATE_SYSTEM), right.contig().length()),
-                genesB, enhancersB, repeatsB, variant, right, ystartB);
+                genesB, enhancersB, repeatsB, dosagesB, variant, right, ystartB);
     }
 
     static int getMin(List<Gene> genes, List<Enhancer> enhancers, int contigPos) {

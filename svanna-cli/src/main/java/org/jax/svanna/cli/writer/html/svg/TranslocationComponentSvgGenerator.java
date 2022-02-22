@@ -2,6 +2,7 @@ package org.jax.svanna.cli.writer.html.svg;
 
 
 import org.jax.svanna.core.SvAnnaRuntimeException;
+import org.jax.svanna.model.landscape.dosage.DosageRegion;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
@@ -37,10 +38,11 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
                                               List<Gene> genes,
                                               List<Enhancer> enhancers,
                                               List<RepetitiveRegion> repeats,
+                                              List<DosageRegion> dosages,
                                               GenomicVariant variant,
                                               GenomicBreakend breakend,
                                               int ystart) {
-        super(minPos, maxPos, variant, genes, enhancers, repeats);
+        super(minPos, maxPos, variant, genes, enhancers, repeats, dosages);
         this.contig = breakend.contig();
         this.positionOnContig = breakend.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
         this.ystart = ystart;
@@ -103,6 +105,9 @@ public class TranslocationComponentSvgGenerator extends SvSvgGenerator {
         int ypos = this.ystart;
         int offset = 0;
         int n_display_items = 0;
+        // TODO - write dosage?
+//        writeDosage(writer, ypos);
+//        ypos += Constants.HEIGHT_PER_DISPLAY_ITEM;
         for (var enh : this.affectedEnhancers) {
             writeEnhancer(enh, ypos, writer);
             ypos += Constants.HEIGHT_PER_DISPLAY_ITEM;

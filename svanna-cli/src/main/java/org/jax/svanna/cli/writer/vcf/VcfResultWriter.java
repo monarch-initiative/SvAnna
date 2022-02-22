@@ -16,6 +16,7 @@ import org.jax.svanna.core.priority.Prioritized;
 import org.jax.svanna.core.priority.SvPriority;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,8 +75,9 @@ public class VcfResultWriter implements ResultWriter {
 
             VariantContext vc = sv.variantContext();
             if (vc == null) {
+                GenomicVariant gv = sv.genomicVariant();
                 LogUtils.logDebug(LOGGER, "Cannot write VCF line for variant '{}' because variant context is missing. {}:{}{}>{}",
-                        sv.id(), sv.contigName(), sv.startWithCoordinateSystem(CoordinateSystem.oneBased()), sv.ref(), sv.alt());
+                        gv.id(), gv.contig().name(), gv.startOnStrandWithCoordinateSystem(gv.strand(), CoordinateSystem.oneBased()), gv.ref(), gv.alt());
                 return Optional.empty();
             }
 

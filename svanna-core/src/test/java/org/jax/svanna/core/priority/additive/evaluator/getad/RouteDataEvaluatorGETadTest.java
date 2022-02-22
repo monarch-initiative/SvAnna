@@ -18,7 +18,6 @@ import org.monarchinitiative.sgenes.model.Transcript;
 import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 
 import java.util.List;
-import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
@@ -41,7 +40,7 @@ public class RouteDataEvaluatorGETadTest {
         TranscriptIdentifier txId = TranscriptIdentifier.of(id + "_tx", symbol + "_tx", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
         Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start, end);
-        Transcript tx = Transcript.coding(txId, location, exons, cdsCoordinates);
+        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates);
 
         GeneIdentifier geneId = GeneIdentifier.of(id, symbol, null, null);
         return Gene.of(geneId, location, List.of(tx));

@@ -4,8 +4,6 @@ import htsjdk.samtools.liftover.LiftOver;
 import htsjdk.samtools.util.Interval;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.io.FullSvannaVariant;
-import org.jax.svanna.io.parse.BreakendedSvannaVariant;
-import org.jax.svanna.io.parse.DefaultSvannaVariant;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
@@ -141,17 +139,16 @@ public class LiftFullSvannaVariant {
 
     public Optional<? extends FullSvannaVariant> lift(FullSvannaVariant variant) {
         VariantCallAttributes attributes = createVariantCallAttributes(variant);
-        if (variant.isBreakend()) {
-            return liftBreakend((GenomicBreakendVariant) variant)
-                    .map(bv -> BreakendedSvannaVariant.builder()
-                            .with(bv)
+        GenomicVariant gv = variant.genomicVariant();
+        if (gv.isBreakend()) {
+            return liftBreakend((GenomicBreakendVariant) gv)
+                    .map(bv -> FullSvannaVariant.builder(bv)
                             .variantCallAttributes(attributes)
                             .variantContext(variant.variantContext())
                             .build());
         } else {
-            return liftIntrachromosomal(variant)
-                    .map(v -> DefaultSvannaVariant.builder()
-                            .with(v)
+            return liftIntrachromosomal(gv)
+                    .map(v -> FullSvannaVariant.builder(v)
                             .variantCallAttributes(attributes)
                             .variantContext(variant.variantContext())
                             .build());

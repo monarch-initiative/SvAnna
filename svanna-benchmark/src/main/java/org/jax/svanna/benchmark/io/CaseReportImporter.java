@@ -6,11 +6,12 @@ import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.core.reference.Zygosity;
-import org.jax.svanna.io.parse.BreakendedSvannaVariant;
-import org.jax.svanna.io.parse.DefaultSvannaVariant;
+import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.ConfidenceInterval;
 import org.monarchinitiative.svart.Contig;
+import org.monarchinitiative.svart.GenomicBreakendVariant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.util.VariantTrimmer;
@@ -152,12 +153,14 @@ public class CaseReportImporter {
                         // BREAKEND
                         String mateId = infoFields.getOrDefault("MATEID", "");
                         String eventId = infoFields.getOrDefault("EVENTID", "");
-                        BreakendedSvannaVariant.Builder builder = vcfConverter.convertBreakend(BreakendedSvannaVariant.builder(),
+                        GenomicBreakendVariant bv = vcfConverter.convertBreakend(
                                 contig, variantId, vcfAllele.getPos(), ciPos,
                                 vcfAllele.getRef(), vcfAllele.getAlt(),
                                 ciEnd, mateId, eventId);
-                        builder.variantCallAttributes(attrBuilder.build());
-                        variants.add(builder.build());
+                        SvannaVariant variant = FullSvannaVariant.builder(bv)
+                                .variantCallAttributes(attrBuilder.build())
+                                .build();
+                        variants.add(variant);
                         continue;
                     }
                     if (!infoFields.containsKey("END")) {
@@ -179,22 +182,24 @@ public class CaseReportImporter {
 
                     try {
                         // SYMBOLIC
-                        DefaultSvannaVariant.Builder builder = vcfConverter.convertSymbolic(DefaultSvannaVariant.builder(),
-                                contig, variantId, vcfAllele.getPos(), ciPos, end, ciEnd,
+                        GenomicVariant gv = vcfConverter.convertSymbolic(contig, variantId, vcfAllele.getPos(), ciPos, end, ciEnd,
                                 vcfAllele.getRef(), '<' + vcfAllele.getAlt() + '>', changeLength);
-                        builder.variantCallAttributes(attrBuilder.build());
-                        variants.add(builder.build());
+                        SvannaVariant variant = FullSvannaVariant.builder(gv)
+                                .variantCallAttributes(attrBuilder.build())
+                                .build();
+                        variants.add(variant);
                     } catch (Exception e) {
                         LogUtils.logWarn(LOGGER, "Error: {}", e.getMessage());
                         throw e;
                     }
                 } else {
                     // SEQUENCE
-                    DefaultSvannaVariant.Builder builder = vcfConverter.convert(DefaultSvannaVariant.builder(),
-                            contig, variantId, vcfAllele.getPos(),
+                    GenomicVariant gv = vcfConverter.convert(contig, variantId, vcfAllele.getPos(),
                             vcfAllele.getRef(), vcfAllele.getAlt());
-                    builder.variantCallAttributes(attrBuilder.build());
-                    variants.add(builder.build());
+                    SvannaVariant variant = FullSvannaVariant.builder(gv)
+                            .variantCallAttributes(attrBuilder.build())
+                            .build();
+                    variants.add(variant);
                 }
             }
         }

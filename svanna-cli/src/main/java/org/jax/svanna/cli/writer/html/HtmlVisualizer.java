@@ -14,6 +14,7 @@ import org.jax.svanna.model.landscape.enhancer.EnhancerTissueSpecificity;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.svart.GenomicBreakendVariant;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.monarchinitiative.svart.VariantType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,29 +180,30 @@ public class HtmlVisualizer implements Visualizer {
             List<Enhancer> enhancers = visualizable.enhancers();
             List<RepetitiveRegion> repetitiveRegions = visualizable.repetitiveRegions();
             List<DosageRegion> dosages = visualizable.dosageRegions();
-            switch (variant.variantType().baseType()) {
+            VariantType vt = variant.genomicVariant().variantType();
+            switch (vt.baseType()) {
                 case DEL:
-                    gen = new DeletionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
+                    gen = new DeletionSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INS:
-                    gen = new InsertionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
+                    gen = new InsertionSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INV:
-                    gen = new InversionSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
+                    gen = new InversionSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case DUP:
-                    gen = new DuplicationSvgGenerator(variant, genes, enhancers, repetitiveRegions, dosages);
+                    gen = new DuplicationSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case TRA:
                 case BND:
                     if (variant instanceof GenomicBreakendVariant) {
-                        gen = new TranslocationSvgGenerator(variant, (GenomicBreakendVariant) variant, genes, enhancers, repetitiveRegions);
+                        gen = new TranslocationSvgGenerator(variant.genomicVariant(), (GenomicBreakendVariant) variant, genes, enhancers, repetitiveRegions);
                         break;
                     }
                     // fall through to default
                 default:
-                    LOGGER.warn("SVG not implemented for type {}", variant.variantType());
-                    return String.format("SVG generation for variant type %s not implemented.", variant.variantType().toString());
+                    LOGGER.warn("SVG not implemented for type {}", vt);
+                    return String.format("SVG generation for variant type %s not implemented.", vt.toString());
             }
             return gen.getSvg();
         } catch (SvAnnaRuntimeException e) {
@@ -227,11 +229,13 @@ public class HtmlVisualizer implements Visualizer {
 
     private String getVariantRepresentation(Visualizable visualizable, List<HtmlLocation> locations) {
         SvannaVariant variant = visualizable.variant();
-        VariantType svtype = variant.variantType().baseType();
+        GenomicVariant gv = variant.genomicVariant();
+        VariantType vt = gv.variantType();
+        VariantType svtype = vt.baseType();
         HtmlLocation loc;
         switch (svtype) {
             case INS:
-                int len = variant.changeLength();
+                int len = gv.changeLength();
                 if (locations.size() != 1) {
                     throw new SvAnnaRuntimeException("Was expecting one location for insertion but got " + locations.size());
                 }
@@ -243,7 +247,7 @@ public class HtmlVisualizer implements Visualizer {
                     throw new SvAnnaRuntimeException("Was expecting one location for deletion but got " + locations.size());
                 }
                 loc = locations.get(0);
-                String lend = getLengthDisplayString(visualizable.variant().length());
+                String lend = getLengthDisplayString(visualizable.variant().genomicVariant().length());
                 return String.format("%s:%s-%sdel (%s)", loc.getChrom(), decimalFormat.format(loc.getBegin()), decimalFormat.format(loc.getEnd()), lend);
             case TRA:
             case BND:
@@ -262,7 +266,7 @@ public class HtmlVisualizer implements Visualizer {
                 HtmlLocation dupLoc = locations.get(0);
                 int dupBegin = Math.min(dupLoc.getBegin(), dupLoc.getEnd());
                 int dupEnd = Math.max(dupLoc.getBegin(), dupLoc.getEnd());
-                String lengthDup = getLengthDisplayString(visualizable.variant().length());
+                String lengthDup = getLengthDisplayString(gv.length());
                 return String.format("%s:%d-%d duplication (%s)", dupLoc.getChrom(), dupBegin, dupEnd, lengthDup);
             case INV:
                 if (locations.size() != 1) {
@@ -271,7 +275,7 @@ public class HtmlVisualizer implements Visualizer {
                 HtmlLocation invLoc = locations.get(0);
                 int invBegin = Math.min(invLoc.getBegin(), invLoc.getEnd());
                 int invEnd = Math.max(invLoc.getBegin(), invLoc.getEnd());
-                String lengthInv = getLengthDisplayString(visualizable.variant().length());
+                String lengthInv = getLengthDisplayString(gv.length());
                 return String.format("inv(%s)(%d; %d) (%s)", invLoc.getChrom(), invBegin, invEnd, lengthInv);
         }
 
@@ -379,7 +383,7 @@ public class HtmlVisualizer implements Visualizer {
         int copyNumber = variant.copyNumber();
 
         List<HtmlLocation> locations = visualizable.locations();
-        String idString = variant.id();
+        String idString = variant.genomicVariant().id();
         sb.append("<table class=\"vartab\">\n");
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
@@ -399,10 +403,10 @@ public class HtmlVisualizer implements Visualizer {
         sb.append(itemValueRow("UCSC", ucscBuilder.toString()));
         int totalReads = nAltReads + nRefReads;
         if (totalReads != minSequenceDepth) {
-            LOGGER.warn("Sum of alt ({})/ref({}) reads not equal to minDepth ({}) for variant {}", nAltReads, nRefReads, minSequenceDepth, visualizable.variant().id());
+            LOGGER.warn("Sum of alt ({})/ref({}) reads not equal to minDepth ({}) for variant {}", nAltReads, nRefReads, minSequenceDepth, visualizable.variant().genomicVariant().id());
         }
         if (totalReads == 0) {
-            LOGGER.warn("Total reads zero (should never happen), setting to 1 for variant {}.", visualizable.variant().id());
+            LOGGER.warn("Total reads zero (should never happen), setting to 1 for variant {}.", visualizable.variant().genomicVariant().id());
             totalReads = 1;
         }
         String refReads = String.format("%d/%d reads (%.1f%%)", nRefReads, totalReads, 100.0 * (float)nRefReads/totalReads);

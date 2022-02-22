@@ -52,7 +52,7 @@ public class PopulationFrequencyAndCoverageFilter {
 
     public <T extends SvannaVariant> List<T> filter(Collection<T> variants) {
         Map<Integer, List<T>> variantsByContig = variants.stream()
-                .collect(Collectors.groupingBy(GenomicVariant::contigId));
+                .collect(Collectors.groupingBy(v -> v.genomicVariant().contigId()));
         List<T> results = new LinkedList<>();
         for (Integer contigId : variantsByContig.keySet()) {
             List<T> contigVariants = variantsByContig.get(contigId).stream()
@@ -83,18 +83,19 @@ public class PopulationFrequencyAndCoverageFilter {
         int minPos = -1, maxPos = -1;
 
         for (T t : sublist) {
-            int startPos = t.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+            GenomicVariant v = t.genomicVariant();
+            int startPos = v.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
             if (minPos == -1 || startPos < minPos) {
                 minPos = startPos;
             }
-            int endPos = t.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+            int endPos = v.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
             if (maxPos == -1 || endPos > maxPos) {
                 maxPos = startPos;
             }
         }
         List<T> results = new LinkedList<>();
         T variant = sublist.get(0);
-        GenomicRegion query = GenomicRegion.of(variant.contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), minPos, maxPos);
+        GenomicRegion query = GenomicRegion.of(variant.genomicVariant().contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), minPos, maxPos);
         LogUtils.logTrace(LOGGER, "Filtering variants on contig `{}-{}-{}`", query.contigId(), query.start(), query.end());
         List<PopulationVariant> populationVariants = annotationDataService.overlappingPopulationVariants(query, PopulationVariantOrigin.benign());
         for (T item : sublist) {
@@ -112,11 +113,11 @@ public class PopulationFrequencyAndCoverageFilter {
 
     private <T extends SvannaVariant> FilterResult runFrequencyFilter(List<PopulationVariant> populationVariants, T item) {
         FilterResult freqFilterResult = null;
-        if (FREQ_FILTER_RECOGNIZED_VARIANTS.contains(item.variantType().baseType())) {
+        if (FREQ_FILTER_RECOGNIZED_VARIANTS.contains(item.genomicVariant().variantType().baseType())) {
             for (PopulationVariant populationVariant : populationVariants) {
-                if (populationVariant.variantType().baseType() == item.variantType().baseType()
+                if (populationVariant.variantType().baseType() == item.genomicVariant().variantType().baseType()
                         && populationVariant.alleleFrequency() >= frequencyThreshold
-                        && FilterUtils.reciprocalOverlap(populationVariant.location(), item) * 100.F > similarityThreshold) {
+                        && FilterUtils.reciprocalOverlap(populationVariant.location(), item.genomicVariant()) * 100.F > similarityThreshold) {
                     freqFilterResult = FF_FAIL;
                     break;
                 }
@@ -139,8 +140,8 @@ public class PopulationFrequencyAndCoverageFilter {
 
     private static <T extends SvannaVariant> Comparator<? super T> byPositionOnPositiveStrand() {
         return Comparator
-                .comparingInt(t -> ((SvannaVariant) t).startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
-                .thenComparingInt(v -> (((SvannaVariant) v).endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())));
+                .comparingInt(t -> ((SvannaVariant) t).genomicVariant().startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                .thenComparingInt(v -> (((SvannaVariant) v).genomicVariant().endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased())));
     }
 
 }

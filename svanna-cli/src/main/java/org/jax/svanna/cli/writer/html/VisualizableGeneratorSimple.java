@@ -13,10 +13,7 @@ import org.jax.svanna.model.landscape.dosage.DosageSensitivity;
 import org.jax.svanna.model.landscape.dosage.DosageSensitivityEvidence;
 import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.repeat.RepetitiveRegion;
-import org.monarchinitiative.svart.GenomicBreakendVariant;
-import org.monarchinitiative.svart.CoordinateSystem;
-import org.monarchinitiative.svart.GenomicRegion;
-import org.monarchinitiative.svart.Strand;
+import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.monarchinitiative.sgenes.model.Gene;
@@ -131,9 +128,10 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     @Override
     public VariantLandscape prepareLandscape(SvannaVariant variant) {
-        List<GeneOverlap> overlaps = overlapper.getOverlaps(variant);
-        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(variant);
-        List<DosageRegion> dosageRegions = annotationDataService.dosageElements(variant);
+        GenomicVariant v = variant.genomicVariant();
+        List<GeneOverlap> overlaps = overlapper.getOverlaps(v);
+        List<Enhancer> enhancers = annotationDataService.overlappingEnhancers(v);
+        List<DosageRegion> dosageRegions = annotationDataService.dosageElements(v);
         return SimpleVariantLandscape.of(variant, overlaps, enhancers, dosageRegions);
     }
 
@@ -141,7 +139,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
     public Visualizable makeVisualizable(VariantLandscape variantLandscape) {
         SvannaVariant variant = variantLandscape.variant();
         List<GeneOverlap> overlaps = variantLandscape.overlaps();
-        List<RepetitiveRegion> repetitiveRegions = prepareRepetitiveRegions(variant, overlaps);
+        List<RepetitiveRegion> repetitiveRegions = prepareRepetitiveRegions(variant.genomicVariant(), overlaps);
         List<DosageRegion> dosageRegions = mergeOverlappingDosageRegions(variantLandscape.dosageRegions());
 
         List<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
@@ -160,7 +158,7 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
         return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions, dosageRegions);
     }
 
-    private List<RepetitiveRegion> prepareRepetitiveRegions(SvannaVariant variant, List<GeneOverlap> overlaps) {
+    private List<RepetitiveRegion> prepareRepetitiveRegions(GenomicVariant variant, List<GeneOverlap> overlaps) {
         List<RepetitiveRegion> repetitiveRegions = new LinkedList<>();
         if (overlaps.isEmpty()) {
             LogUtils.logWarn(LOGGER, "No gene for variant {}", variant.id());

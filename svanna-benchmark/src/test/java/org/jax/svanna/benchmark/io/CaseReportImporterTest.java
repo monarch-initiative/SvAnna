@@ -1,11 +1,13 @@
 package org.jax.svanna.benchmark.io;
 
 import org.jax.svanna.core.reference.SvannaVariant;
+import org.jax.svanna.core.reference.VariantAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicVariant;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,7 +42,7 @@ public class CaseReportImporterTest {
         assertThat(terms, hasItems("HP:0002164", "HP:0030431", "HP:0002041", "HP:0001263", "HP:0032434", "HP:0010314",
                 "HP:0001508", "HP:0032152", "HP:0100806", "HP:0000956", "HP:0001763", "HP:0001007", "HP:0000698"));
 
-        Set<String> variantIds = report.variants().stream().map(SvannaVariant::id).collect(Collectors.toSet());
+        Set<String> variantIds = report.variants().stream().map(VariantAware::id).collect(Collectors.toSet());
         assertThat(variantIds, hasItems("causal:dea7c5a2f59009cce209e9137dba0890"));
     }
 
@@ -83,10 +85,11 @@ public class CaseReportImporterTest {
         for (CaseReport report : caseReports) {
             CaseSummary caseSummary = report.caseSummary();
             for (SvannaVariant variant : report.variants()) {
+                GenomicVariant gv = variant.genomicVariant();
                 var line = String.join("\t",
                         caseSummary.firstAuthor(), caseSummary.year(), caseSummary.pmid(), caseSummary.gene(),
-                        String.format("%s:%d-%d", variant.contigName(), variant.startWithCoordinateSystem(CoordinateSystem.zeroBased()), variant.endWithCoordinateSystem(CoordinateSystem.zeroBased())),
-                        variant.variantType().toString());
+                        String.format("%s:%d-%d", gv.contig().name(), gv.startOnStrandWithCoordinateSystem(gv.strand(), CoordinateSystem.zeroBased()), gv.endOnStrandWithCoordinateSystem(gv.strand(), CoordinateSystem.zeroBased())),
+                        gv.variantType().toString());
                 System.err.println(line);
             }
         }

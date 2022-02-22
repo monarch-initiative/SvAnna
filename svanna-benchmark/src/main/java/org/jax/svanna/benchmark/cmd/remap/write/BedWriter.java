@@ -3,6 +3,7 @@ package org.jax.svanna.benchmark.cmd.remap.write;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svart.Contig;
 import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.monarchinitiative.svart.Strand;
 import org.monarchinitiative.svart.assembly.SequenceRole;
 import org.slf4j.Logger;
@@ -89,10 +90,11 @@ public class BedWriter implements FullSvannaVariantWriter {
         chr3	190380498	191783134	DEL
         chr17	13029888	14707559	DUP
          */
-        String contigName = variant.contig().ucscName();
-        int start = variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
-        int end = variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
-        switch (variant.variantType().baseType()) {
+        GenomicVariant gv = variant.genomicVariant();
+        String contigName = gv.contig().ucscName();
+        int start = gv.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
+        int end = gv.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased());
+        switch (gv.variantType().baseType()) {
             case DUP:
                 return Optional.of(String.format("%s\t%d\t%d\t%s", contigName, start, end, "DUP"));
             case DEL:
@@ -110,14 +112,15 @@ public class BedWriter implements FullSvannaVariantWriter {
         2	2212312	2332212	loss
         2	2222999	3000222	gain
          */
-        Contig contig = variant.contig();
+        GenomicVariant gv = variant.genomicVariant();
+        Contig contig = gv.contig();
         if (!contig.sequenceRole().equals(SequenceRole.ASSEMBLED_MOLECULE))
             // X-CNV does not work with non-canonical contigs
             return Optional.empty();
         String contigName = contig.name();
-        int start = variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-        int end = variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-        switch (variant.variantType().baseType()) {
+        int start = gv.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+        int end = gv.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
+        switch (gv.variantType().baseType()) {
             case DUP:
                 return Optional.of(String.format("%s\t%d\t%d\t%s", contigName, start, end, "gain"));
             case DEL:

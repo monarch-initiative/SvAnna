@@ -91,14 +91,14 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
     @Override
     public List<HtmlLocation> locations() {
         List<HtmlLocation> locs = new ArrayList<>();
-        switch (variant().variantType().baseType()) {
+        switch (variantType().baseType()) {
             case DEL:
             case DUP:
             case INV:
-                locs.add(getSimpleLocation(variant()));
+                locs.add(getSimpleLocation(variant().genomicVariant()));
                 break;
             case INS:
-                locs.add(getInsertionLocation(variant()));
+                locs.add(getInsertionLocation(variant().genomicVariant()));
                 break;
             case TRA:
             case BND:
@@ -107,7 +107,7 @@ class SimpleVisualizable extends SimpleVariantLandscape implements Visualizable 
                 }
                 break;
             default:
-                LOGGER.warn("Unable to get locations for variant type `{}`", variant().variantType());
+                LOGGER.warn("Unable to get locations for variant type `{}`", variantType());
                 break;
         }
         return locs;

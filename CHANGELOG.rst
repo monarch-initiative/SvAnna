@@ -5,6 +5,7 @@ Changelog
 ----------
 latest
 ----------
+- `SvannaVariant` does not inherit from *Svart*
 
 ----------
 v1.0.0-RC5

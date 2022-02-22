@@ -10,7 +10,6 @@ import org.jax.svanna.core.overlap.GeneOverlapper;
 import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
-import org.monarchinitiative.svart.GenomicBreakend;
 import org.monarchinitiative.svart.GenomicBreakendVariant;
 import org.monarchinitiative.svart.GenomicVariant;
 import org.slf4j.Logger;
@@ -100,7 +99,7 @@ public class HtmlResultWriter implements ResultWriter {
             int priority = r.svPriority().compareTo(l.svPriority()); // the order is intentional
             if (priority != 0)
                 return priority;
-            return GenomicVariant.compare(l, r);
+            return GenomicVariant.compare(l.genomicVariant(), r.genomicVariant());
         };
     }
 

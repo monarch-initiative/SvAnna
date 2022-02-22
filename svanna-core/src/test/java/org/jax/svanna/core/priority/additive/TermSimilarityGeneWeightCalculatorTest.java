@@ -74,7 +74,7 @@ public class TermSimilarityGeneWeightCalculatorTest {
         TranscriptIdentifier txId = TranscriptIdentifier.of("TX_ACCESSION", "FBN1", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721));
         Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721);
-        List<Transcript> transcripts = List.of(Transcript.coding(txId, location, exons, cdsCoordinates));
+        List<Transcript> transcripts = List.of(Transcript.of(txId, location, exons, cdsCoordinates));
         Gene gene = Gene.of(id, location, transcripts);
 
 

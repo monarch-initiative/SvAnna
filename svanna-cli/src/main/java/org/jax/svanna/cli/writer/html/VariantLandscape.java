@@ -18,7 +18,7 @@ public interface VariantLandscape {
     SvannaVariant variant();
 
     default VariantType variantType() {
-        return variant().variantType();
+        return variant().genomicVariant().variantType();
     }
 
     List<GeneOverlap> overlaps();

@@ -34,7 +34,7 @@ public class GeneSequenceImpactCalculatorTest {
         TranscriptIdentifier txId = TranscriptIdentifier.of("TX1", "TX1_SYMBOL", null);
         List<Coordinates> exons = makeExons(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd);
         Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start + 10, end - 10);
-        Transcript tx = Transcript.coding(txId, location, exons, cdsCoordinates);
+        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates);
 
         // make gene
         GeneIdentifier gId = GeneIdentifier.of("NCBIGene:123", "A", null, null);

@@ -9,6 +9,7 @@ import org.jax.svanna.core.reference.Zygosity;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svart.GenomicBreakendVariant;
 import org.monarchinitiative.svart.CoordinateSystem;
+import org.monarchinitiative.svart.GenomicVariant;
 import org.monarchinitiative.svart.Strand;
 import org.monarchinitiative.svart.util.Seq;
 import org.monarchinitiative.svart.util.VcfBreakendFormatter;
@@ -38,10 +39,11 @@ public class VcfWriter implements FullSvannaVariantWriter {
             writer.writeHeader(header);
             int writtenLines = 0;
             for (FullSvannaVariant variant : variants) {
+                GenomicVariant gv = variant.genomicVariant();
                 VariantContextBuilder vcb = new VariantContextBuilder(variant.variantContext())
-                        .chr(variant.contigName())
-                        .start(variant.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
-                        .stop(variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased()));
+                        .chr(gv.contig().name())
+                        .start(gv.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()))
+                        .stop(gv.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased()));
 
                 if (variant instanceof GenomicBreakendVariant) {
                     GenomicBreakendVariant bv = (GenomicBreakendVariant) variant;
@@ -50,8 +52,8 @@ public class VcfWriter implements FullSvannaVariantWriter {
 
                     setGenotypes(vcb, ref, alt, variant.zygosity());
                 } else {
-                    vcb.attribute("END", variant.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased()))
-                            .attribute("SVLEN", variant.changeLength());
+                    vcb.attribute("END", gv.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.oneBased()))
+                            .attribute("SVLEN", gv.changeLength());
                 }
 
                 VariantContext vc = vcb.make();

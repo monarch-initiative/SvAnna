@@ -82,11 +82,6 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
     }
 
     @Override
-    public List<TadBoundary> getAllItems() {
-        throw new RuntimeException("The deprecated method is not implemented");
-    }
-
-    @Override
     public List<TadBoundary> getOverlapping(GenomicRegion query) {
         String sql = "select CONTIG, MIDPOINT, ID, STABILITY " +
                 " from SVANNA.TAD_BOUNDARY " +

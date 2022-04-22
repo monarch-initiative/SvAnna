@@ -17,7 +17,7 @@ import java.util.Map;
 
 /**
  * Parse the sample to id file from
- * https://fantom.gsc.riken.jp/5/datafiles/latest/extra/Enhancers/Human.sample_name2library_id.txt
+ * <a href="https://fantom.gsc.riken.jp/5/datafiles/latest/extra/Enhancers/Human.sample_name2library_id.txt">https://fantom.gsc.riken.jp/5/datafiles/latest/extra/Enhancers/Human.sample_name2library_id.txt</a>
  * A typical line in this file is like this
  * <pre>
  *     substantia nigra, newborn, donor10223	CNhs14076

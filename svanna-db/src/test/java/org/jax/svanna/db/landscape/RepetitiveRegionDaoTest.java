@@ -16,15 +16,6 @@ import static org.hamcrest.Matchers.hasSize;
 
 public class RepetitiveRegionDaoTest extends AbstractDaoTest {
 
-
-    @Test
-    @Sql({"repetitive_regions_create_table.sql", "repetitive_regions_insert_data.sql"})
-    public void getAllItems() {
-        RepetitiveRegionDao instance = new RepetitiveRegionDao(dataSource, ASSEMBLY);
-        List<RepetitiveRegion> items = instance.getAllItems();
-        assertThat(items, hasSize(3));
-    }
-
     @ParameterizedTest
     @CsvSource({
             "10, 30, 1",

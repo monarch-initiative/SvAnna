@@ -4,9 +4,6 @@ package org.jax.svanna.test;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 
-// Let's keep the variant declarations within the test class even at the cost of code duplication.
-// The in situ variant declarations improve tests' independence
-@Deprecated
 public class TestVariants {
 
     private final GenomicAssembly assembly;

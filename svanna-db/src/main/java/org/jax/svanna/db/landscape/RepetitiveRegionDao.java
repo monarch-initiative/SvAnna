@@ -29,8 +29,6 @@ public class RepetitiveRegionDao implements AnnotationDao<RepetitiveRegion>, Ing
         this.genomicAssembly = genomicAssembly;
     }
 
-
-    @Override
     public List<RepetitiveRegion> getAllItems() {
         String sql = "select CONTIG, START, END, REPEAT_FAMILY from SVANNA.REPETITIVE_REGIONS";
         try (Connection connection = dataSource.getConnection();

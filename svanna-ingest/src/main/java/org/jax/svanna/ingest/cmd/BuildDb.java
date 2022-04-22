@@ -42,11 +42,14 @@ import org.jax.svanna.model.landscape.enhancer.Enhancer;
 import org.jax.svanna.model.landscape.tad.TadBoundary;
 import org.jax.svanna.model.landscape.variant.PopulationVariant;
 import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationLoader;
+import org.monarchinitiative.phenol.annotations.base.Ratio;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseaseAnnotation;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
 import org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase;
-import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseAnnotationLoader;
+import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoader;
+import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.io.OntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
@@ -200,20 +203,21 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.debug("Parsing HPO disease associations at {}", hpoAnnotationsPath);
         LOGGER.debug("Parsing gene info file at {}", geneInfoPath.toAbsolutePath());
         LOGGER.debug("Parsing MIM to gene medgen file at {}", mim2geneMedgenPath.toAbsolutePath());
-        HpoAssociationData hpoAssociationData = HpoAssociationLoader.loadHpoAssociationData(hpo, geneInfoPath, mim2geneMedgenPath, null, hpoAnnotationsPath, DISEASE_DATABASES);
-        HpoDiseases hpoDiseases = HpoDiseaseAnnotationLoader.loadHpoDiseases(hpoAnnotationsPath, hpo, DISEASE_DATABASES);
-        Map<TermId, HpoDisease> diseaseMap = hpoDiseases.diseaseById();
+        HpoDiseaseLoaderOptions loaderOptions = HpoDiseaseLoaderOptions.of(DISEASE_DATABASES, true, HpoDiseaseLoaderOptions.DEFAULT_COHORT_SIZE);
+        HpoDiseaseLoader loader = HpoDiseaseLoader.of(hpo, loaderOptions);
+        HpoDiseases diseases = loader.load(hpoAnnotationsPath);
+        HpoAssociationData hpoAssociationData = HpoAssociationLoader.loadHpoAssociationData(hpo, geneInfoPath, mim2geneMedgenPath, null, diseases);
 
         // Ingest geneToDisease
-        int updatedGeneToDisease = ingestGeneToDiseaseMap(hpoAssociationData, ncbiGeneToHgnc, diseaseMap, geneDiseaseDao);
+        int updatedGeneToDisease = ingestGeneToDiseaseMap(hpoAssociationData, ncbiGeneToHgnc, diseases, geneDiseaseDao);
         LOGGER.info("Ingest of gene to disease associations updated {} rows", NF.format(updatedGeneToDisease));
 
         // Ingest disease to phenotypes
-        int updatedDiseaseToPhenotypes = ingestDiseaseToPhenotypes(geneDiseaseDao, diseaseMap);
+        int updatedDiseaseToPhenotypes = ingestDiseaseToPhenotypes(geneDiseaseDao, diseases);
         LOGGER.info("Ingest of disease to phenotypes updated {} rows", NF.format(updatedDiseaseToPhenotypes));
 
         // Return the PhenotypeData so that we don't have to re-read the files
-        return new PhenotypeData(hpo, hpoDiseases, hpoAssociationData);
+        return new PhenotypeData(hpo, diseases, hpoAssociationData);
     }
 
     private static int insertGeneIdentifiers(List<? extends GencodeGene> genes,
@@ -268,7 +272,7 @@ public class BuildDb implements Callable<Integer> {
 
     private static int ingestGeneToDiseaseMap(HpoAssociationData hpoAssociationData,
                                               Map<Integer, Integer> ncbiGeneToHgnc,
-                                              Map<TermId, HpoDisease> diseaseMap,
+                                              HpoDiseases diseases,
                                               GeneDiseaseDao geneDiseaseDao) {
 
         Map<Integer, List<HpoDiseaseSummary>> geneToDisease = new HashMap<>();
@@ -276,6 +280,7 @@ public class BuildDb implements Callable<Integer> {
         // extract relevant bits and pieces for diseases, and map NCBIGene to HGNC
         Map<TermId, Collection<TermId>> geneToDiseaseIdMap = hpoAssociationData.geneToDiseases();
 
+        Map<TermId, HpoDisease> diseaseMap = diseases.diseaseById();
         for (TermId ncbiGeneTermId : geneToDiseaseIdMap.keySet()) {
             Matcher matcher = NCBI_GENE_PATTERN.matcher(ncbiGeneTermId.getValue());
             if (matcher.matches()) {
@@ -286,7 +291,7 @@ public class BuildDb implements Callable<Integer> {
                         HpoDisease hpoDisease = diseaseMap.get(diseaseId);
                         if (hpoDisease != null) {
                             geneToDisease.computeIfAbsent(hgncId, k -> new LinkedList<>())
-                                    .add(HpoDiseaseSummary.of(diseaseId.getValue(), hpoDisease.getDiseaseName()));
+                                    .add(HpoDiseaseSummary.of(diseaseId.getValue(), hpoDisease.diseaseName()));
                         }
                     }
                 }
@@ -297,13 +302,16 @@ public class BuildDb implements Callable<Integer> {
         return geneDiseaseDao.insertGeneToDisease(geneToDisease);
     }
 
-    private static int ingestDiseaseToPhenotypes(GeneDiseaseDao geneDiseaseDao,
-                                                 Map<TermId, HpoDisease> diseaseMap) {
+    private static int ingestDiseaseToPhenotypes(GeneDiseaseDao geneDiseaseDao, HpoDiseases diseases) {
 
         int updated = 0;
-        for (Map.Entry<TermId, HpoDisease> entry : diseaseMap.entrySet()) {
-            TermId diseaseId = entry.getKey();
-            updated += geneDiseaseDao.insertDiseaseToPhenotypes(diseaseId.getValue(), entry.getValue().getPhenotypicAbnormalityTermIdList());
+        for (HpoDisease disease : diseases) {
+            List<TermId> presentPhenotypeTermIds = disease.phenotypicAbnormalitiesStream()
+                    // We assume that the terms with missing ratio are observed/present.
+                    .filter(pa -> pa.ratio().map(Ratio::isPositive).orElse(true))
+                    .map(HpoDiseaseAnnotation::id)
+                    .collect(Collectors.toList());
+            updated += geneDiseaseDao.insertDiseaseToPhenotypes(disease.id().getValue(), presentPhenotypeTermIds);
         }
         return updated;
     }
@@ -421,14 +429,14 @@ public class BuildDb implements Callable<Integer> {
 
     private static void precomputeIcMica(DataSource dataSource,
                                          Ontology hpo,
-                                         Map<TermId, HpoDisease> diseaseMap) {
-        Map<TermPair, Double> similarityMap = IcMicaCalculator.precomputeIcMicaValues(hpo, diseaseMap);
+                                         HpoDiseases diseases) {
+        Map<TermPair, Double> similarityMap = IcMicaCalculator.precomputeIcMicaValues(hpo, diseases);
 
         MicaDao dao = new MicaDao(dataSource);
         similarityMap.forEach(dao::insertItem);
     }
 
-    private static Map<TermId, GenomicRegion> readGeneRegions(List<? extends GencodeGene> genes, GenomicAssembly assembly) {
+    private static Map<TermId, GenomicRegion> readGeneRegions(List<? extends GencodeGene> genes) {
         Map<TermId, GenomicRegion> regionsByHgncId = new HashMap<>(genes.size());
         for (Gene gene : genes) {
             Optional<String> hgncIdOptional = gene.id().hgncId();
@@ -627,8 +635,8 @@ public class BuildDb implements Callable<Integer> {
 
             precomputeIcMica(dataSource,
                     phenotypeData.hpo(),
-                    phenotypeData.hpoDiseases().diseaseById());
-            Map<TermId, GenomicRegion> geneMap = readGeneRegions(genes, assembly);
+                    phenotypeData.hpoDiseases());
+            Map<TermId, GenomicRegion> geneMap = readGeneRegions(genes);
             ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap, ncbiGeneToHgncId);
 
             LOGGER.info("The ingest is complete");

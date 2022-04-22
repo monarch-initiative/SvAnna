@@ -3,7 +3,6 @@ package org.jax.svanna.ingest.parse.enhancer;
 import java.util.List;
 
 // TODO - extends GenomicRegion
-@Deprecated(forRemoval = true)
 public interface IngestedEnhancer {
 
     String getName();

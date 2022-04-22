@@ -3,7 +3,6 @@ package org.jax.svanna.autoconfigure.configuration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "svanna.data.enhancers")
-@Deprecated
 public class EnhancerProperties {
 
     private boolean useVista = true;

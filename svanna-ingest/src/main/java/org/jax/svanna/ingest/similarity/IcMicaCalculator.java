@@ -1,9 +1,11 @@
 package org.jax.svanna.ingest.similarity;
 
-import com.google.common.collect.Sets;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.hpo.TermPair;
+import org.monarchinitiative.phenol.annotations.base.Ratio;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseaseAnnotation;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.data.TermIds;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Precompute information content (IC) of most informative common ancestors (MICA) for term pairs.
@@ -25,17 +28,21 @@ public class IcMicaCalculator {
     }
 
     public static Map<TermPair, Double> precomputeIcMicaValues(Ontology ontology,
-                                                               Map<TermId, HpoDisease> diseaseMap) {
+                                                               HpoDiseases diseases) {
         LogUtils.logInfo(LOGGER, "Computing information contents of most informative common ancestor terms");
         Map<TermId, Collection<TermId>> diseaseIdToTermIds = new HashMap<>();
         Map<TermId, Collection<TermId>> termIdToDiseaseIds = new HashMap<>();
-        for (TermId diseaseId : diseaseMap.keySet()) {
-            HpoDisease disease = diseaseMap.get(diseaseId);
-            List<TermId> hpoTerms = disease.getPhenotypicAbnormalityTermIdList();
+        for (HpoDisease disease : diseases) {
+            TermId diseaseId = disease.id();
             diseaseIdToTermIds.putIfAbsent(diseaseId, new HashSet<>());
 
             // add term ancestors
-            Set<TermId> inclAncestorTermIds = TermIds.augmentWithAncestors(ontology, Sets.newHashSet(hpoTerms), true);
+            Set<TermId> hpoTerms = disease.phenotypicAbnormalitiesStream()
+                    // We assume that the terms with missing ratio are observed/present.
+                    .filter(a -> a.ratio().map(Ratio::isPositive).orElse(true))
+                    .map(HpoDiseaseAnnotation::id)
+                    .collect(Collectors.toSet());
+            Set<TermId> inclAncestorTermIds = TermIds.augmentWithAncestors(ontology, hpoTerms, true);
             for (TermId tid : inclAncestorTermIds) {
                 termIdToDiseaseIds.putIfAbsent(tid, new HashSet<>());
                 termIdToDiseaseIds.get(tid).add(diseaseId);

@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.5.1</version>
+        <version>2.6.7</version>
     </parent>
 
     <properties>
@@ -33,9 +33,9 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <phenol.version>2.0.0-RC1</phenol.version>
-        <phenopacket.version>1.0.0</phenopacket.version>
-        <protobuf.version>3.8.0</protobuf.version>
+        <phenol.version>2.0.0-RC2</phenol.version>
+        <phenopacket.version>2.0.0</phenopacket.version>
+        <protobuf.version>3.14.0</protobuf.version>
         <silent.genes.version>0.2.0</silent.genes.version>
         <htsjdk.version>2.23.0</htsjdk.version>
         <spring-boot-starter.version>2.5.1</spring-boot-starter.version>

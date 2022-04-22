@@ -3,6 +3,8 @@ package org.jax.svanna.ingest.cmd;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -14,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.jax.svanna.core.LogUtils;
+import org.jax.svanna.core.SvAnnaRuntimeException;
 import org.jax.svanna.core.hpo.TermPair;
 import org.jax.svanna.db.IngestDao;
 import org.jax.svanna.db.gene.GeneDiseaseDao;
@@ -23,6 +26,7 @@ import org.jax.svanna.ingest.Main;
 import org.jax.svanna.ingest.config.*;
 import org.jax.svanna.ingest.hpomap.HpoMapping;
 import org.jax.svanna.ingest.hpomap.HpoTissueMapParser;
+import org.jax.svanna.ingest.io.ZipCompressionWrapper;
 import org.jax.svanna.ingest.parse.GencodeGeneProcessor;
 import org.jax.svanna.ingest.parse.IngestRecordParser;
 import org.jax.svanna.ingest.parse.RepetitiveRegionParser;
@@ -135,6 +139,18 @@ public class BuildDb implements Callable<Integer> {
             description = "path to directory where the database will be built (default: ${DEFAULT-VALUE})")
     public Path buildDir = Path.of("data");
 
+    @CommandLine.Option(names = {"--db-version"},
+            required = true,
+            paramLabel = "2102",
+            description = "Database version, e.g. `2102` for database built in Feb 2021")
+    public String version;
+
+    @CommandLine.Option(names = {"--assembly"},
+            required = true,
+            paramLabel = "{hg19, hg38}",
+            description = "Genomic assembly version")
+    public String assembly;
+
     public static DataSource initializeDataSource(Path dbPath) {
         DataSource dataSource = makeDataSourceAt(dbPath);
 
@@ -165,6 +181,25 @@ public class BuildDb implements Callable<Integer> {
                 .load();
         MigrateResult migrate = flyway.migrate();
         return migrate.migrationsExecuted;
+    }
+
+    private static String getVersionedAssembly(String assembly, String version) {
+        assembly = normalizeAssemblyString(assembly);
+        // a string like `1902_hg19`
+        return version + "_" + assembly;
+    }
+
+    private static String normalizeAssemblyString(String assembly) {
+        switch (assembly.toLowerCase()) {
+            case "hg19":
+            case "grch37":
+                return "hg19";
+            case "hg38":
+            case "grch38":
+                return "hg38";
+            default:
+                throw new SvAnnaRuntimeException(String.format("Unknown assembly string '%s'", assembly));
+        }
     }
 
     private static PhenotypeData downloadPhenotypeFiles(PhenotypeProperties properties,
@@ -633,15 +668,52 @@ public class BuildDb implements Callable<Integer> {
             ingestRepeats(properties, assembly, dataSource, tmpDir);
             ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
 
-            precomputeIcMica(dataSource,
-                    phenotypeData.hpo(),
-                    phenotypeData.hpoDiseases());
+            precomputeIcMica(dataSource, phenotypeData.hpo(), phenotypeData.hpoDiseases());
             Map<TermId, GenomicRegion> geneMap = readGeneRegions(genes);
             ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap, ncbiGeneToHgncId);
-
-            LOGGER.info("The ingest is complete");
-            return 0;
         }
+
+        // Calculate SHA256 digest for the resource files
+        List<File> resources = Arrays.stream(Objects.requireNonNull(buildDir.toFile().listFiles()))
+                .filter(File::isFile)
+                .collect(Collectors.toList());
+        LOGGER.info("Calculating SHA256 digest for resource files in `{}`", buildDir.toAbsolutePath());
+        Map<File, String> fileToDigest = new HashMap<>();
+        {
+            DigestUtils digest = new DigestUtils(MessageDigestAlgorithms.SHA_256);
+
+            for (File resource : resources) {
+                if (LOGGER.isDebugEnabled()) LOGGER.debug("Calculating SHA256 digest for `{}`", resource);
+                String hexDigest = digest.digestAsHex(resource);
+                fileToDigest.put(resource, hexDigest);
+            }
+        }
+
+        Path digestFilePath = buildDir.resolve("checksum.sha256");
+        LOGGER.info("Storing the digest into `{}`", digestFilePath);
+        try (BufferedWriter digestWriter = Files.newBufferedWriter(digestFilePath)) {
+            for (File resource : fileToDigest.keySet()) {
+                String line = String.format("%s  %s", fileToDigest.get(resource), resource.getName());
+                digestWriter.write(line);
+                digestWriter.write(System.lineSeparator());
+            }
+        }
+
+        {
+            List<File> resourcesToCompress = new ArrayList<>(resources);
+            resourcesToCompress.add(digestFilePath.toFile());
+            Path zipPath = buildDir.resolve(getVersionedAssembly(assembly, version) + ".svanna.zip");
+            LOGGER.info("Compressing the resource files into a single ZIP file `{}`", zipPath);
+            try (ZipCompressionWrapper wrapper = new ZipCompressionWrapper(zipPath.toFile())) {
+                for (File resource : resourcesToCompress) {
+                    LOGGER.info("Compressing `{}`", resource);
+                    wrapper.addResource(resource, resource.getName());
+                }
+            }
+        }
+
+        LOGGER.info("The ingest is complete");
+        return 0;
     }
 
     protected ConfigurableApplicationContext getContext() {

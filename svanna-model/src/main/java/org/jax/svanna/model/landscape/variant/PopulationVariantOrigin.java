@@ -49,7 +49,7 @@ public enum PopulationVariantOrigin {
      * International Standards for Cytogenomic Arrays (ISCA) containing CNV data from chromosomal microarray analysis.
      * <p>
      * This aggregated and de‐identified clinical data, collected from laboratories around the world, is stored in
-     * a publicly available database (http://www.ncbi.nlm.nih.gov/dbvar/studies/nstd37/; www.iscaconsortium.org).
+     * a publicly available database (<a href="http://www.ncbi.nlm.nih.gov/dbvar/studies/<a href="nstd37/">http://www.nc">nstd37/">http://www.nc</a>bi.nlm.nih.gov/dbvar/studies/nstd37/</a>; www.iscaconsortium.org).
      * </p>
      */
     ISCA,

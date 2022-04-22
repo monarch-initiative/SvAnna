@@ -7,9 +7,6 @@ import java.util.List;
 
 public interface AnnotationDao<T extends Located> {
 
-    @Deprecated(forRemoval = true) // for backward compatibility
-    List<T> getAllItems();
-
     List<T> getOverlapping(GenomicRegion query);
 
 }

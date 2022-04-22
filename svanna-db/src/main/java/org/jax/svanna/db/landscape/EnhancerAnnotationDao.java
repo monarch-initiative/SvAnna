@@ -110,7 +110,6 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
         return updated;
     }
 
-    @Override
     public List<Enhancer> getAllItems() {
         String sql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
                 " TERM_ID, TERM_LABEL, HPO_ID, HPO_LABEL, SPECIFICITY " +

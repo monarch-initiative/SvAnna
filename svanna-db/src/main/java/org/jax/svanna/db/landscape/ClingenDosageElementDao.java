@@ -155,9 +155,4 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
             return dosageRegions;
         }
     }
-
-    @Override
-    public List<DosageRegion> getAllItems() {
-        return List.of();
-    }
 }

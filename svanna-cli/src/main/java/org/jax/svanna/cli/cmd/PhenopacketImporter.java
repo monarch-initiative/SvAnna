@@ -1,6 +1,5 @@
 package org.jax.svanna.cli.cmd;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,7 +79,7 @@ public class PhenopacketImporter {
     public boolean hasVcf() { return  this.vcfFile !=null; }
 
     public List<TermId> getHpoTerms() {
-        ImmutableList.Builder<TermId> builder = new ImmutableList.Builder<>();
+        List<TermId> builder = new ArrayList<>();
         for (PhenotypicFeature feature : phenoPacket.getPhenotypicFeaturesList()) {
             if (feature.getNegated()) continue;
             String id = feature.getType().getId();
@@ -96,12 +96,12 @@ public class PhenopacketImporter {
                 builder.add(tid);
             }
         }
-        return builder.build();
+        return builder;
     }
 
 
     public List<TermId> getNegatedHpoTerms() {
-        ImmutableList.Builder<TermId> builder = new ImmutableList.Builder<>();
+        List<TermId> builder = new ArrayList<>();
         for (PhenotypicFeature feature : phenoPacket.getPhenotypicFeaturesList()) {
             if (! feature.getNegated()) continue;
             String id = feature.getType().getId();
@@ -118,7 +118,7 @@ public class PhenopacketImporter {
                 builder.add(tid);
             }
         }
-        return builder.build();
+        return builder;
     }
 
     /**

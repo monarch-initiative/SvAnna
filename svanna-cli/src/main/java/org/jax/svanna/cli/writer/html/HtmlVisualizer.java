@@ -180,27 +180,29 @@ public class HtmlVisualizer implements Visualizer {
             List<Enhancer> enhancers = visualizable.enhancers();
             List<RepetitiveRegion> repetitiveRegions = visualizable.repetitiveRegions();
             List<DosageRegion> dosages = visualizable.dosageRegions();
-            VariantType vt = variant.genomicVariant().variantType();
+            GenomicVariant genomicVariant = variant.genomicVariant();
+            VariantType vt = genomicVariant.variantType();
             switch (vt.baseType()) {
                 case DEL:
-                    gen = new DeletionSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
+                    gen = new DeletionSvgGenerator(genomicVariant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INS:
-                    gen = new InsertionSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
+                    gen = new InsertionSvgGenerator(genomicVariant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case INV:
-                    gen = new InversionSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
+                    gen = new InversionSvgGenerator(genomicVariant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case DUP:
-                    gen = new DuplicationSvgGenerator(variant.genomicVariant(), genes, enhancers, repetitiveRegions, dosages);
+                    gen = new DuplicationSvgGenerator(genomicVariant, genes, enhancers, repetitiveRegions, dosages);
                     break;
                 case TRA:
                 case BND:
-                    if (variant instanceof GenomicBreakendVariant) {
-                        gen = new TranslocationSvgGenerator((GenomicBreakendVariant) variant, genes, enhancers, repetitiveRegions, dosages);
-                        break;
-                    }
                     // fall through to default
+                    if (genomicVariant instanceof GenomicBreakendVariant) {
+                        gen = new TranslocationSvgGenerator((GenomicBreakendVariant) genomicVariant, genes, enhancers, repetitiveRegions, dosages);
+                        break;
+                    } else
+                        LOGGER.warn("Variant `{}` should have been an instance of GenomicBreakendVariant but it is not!", genomicVariant.id());
                 default:
                     LOGGER.warn("SVG not implemented for type {}", vt);
                     return String.format("SVG generation for variant type %s not implemented.", vt.toString());
@@ -387,7 +389,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<table class=\"vartab\">\n");
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
-        sb.append(itemValueRow("type", visualizable.variantType().toString()));
+        sb.append(itemValueRow("type", visualizable.variant().genomicVariant().variantType().toString()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");
@@ -445,7 +447,7 @@ public class HtmlVisualizer implements Visualizer {
         sb.append("<table class=\"vartab\">\n");
         sb.append("<caption>Variant information and disease association</caption>\n");
         sb.append(itemValueRow("ID", idString));
-        sb.append(itemValueRow("type", visualizable.variantType().toString()));
+        sb.append(itemValueRow("type", visualizable.variant().genomicVariant().variantType().toString()));
         StringBuilder ucscBuilder = new StringBuilder();
         if (locations.isEmpty()) {
             ucscBuilder.append("ERROR - could not retrieve location(s) of structural variant</p>\n");

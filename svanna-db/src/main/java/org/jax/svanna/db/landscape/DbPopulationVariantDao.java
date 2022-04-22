@@ -47,11 +47,6 @@ public class DbPopulationVariantDao implements PopulationVariantDao, IngestDao<P
         }
     }
 
-    @Override
-    public List<PopulationVariant> getAllItems() {
-        throw new UnsupportedOperationException("Loading all population variants into memory is not supported");
-    }
-
     private List<PopulationVariant> processStatement(PreparedStatement preparedStatement, Set<PopulationVariantOrigin> origins) throws SQLException {
         List<PopulationVariant> regions = new ArrayList<>();
         try (ResultSet rs = preparedStatement.executeQuery()) {

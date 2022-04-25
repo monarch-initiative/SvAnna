@@ -11,6 +11,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.FilterResult;
 import org.jax.svanna.core.filter.FilterType;
+import org.jax.svanna.core.io.VariantParser;
 import org.jax.svanna.core.reference.VariantCallAttributes;
 import org.jax.svanna.io.FullSvannaVariant;
 import org.jax.svanna.io.FullSvannaVariantBuilder;

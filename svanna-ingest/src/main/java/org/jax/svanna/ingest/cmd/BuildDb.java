@@ -151,15 +151,15 @@ public class BuildDb implements Callable<Integer> {
             description = "Genomic assembly version")
     public String assembly;
 
-    public static DataSource initializeDataSource(Path dbPath) {
-        DataSource dataSource = makeDataSourceAt(dbPath);
+    public static HikariDataSource initializeDataSource(Path dbPath) {
+        HikariDataSource dataSource = makeDataSourceAt(dbPath);
 
         int migrations = applyMigrations(dataSource);
         LOGGER.info("Applied {} migration(s)", migrations);
         return dataSource;
     }
 
-    private static DataSource makeDataSourceAt(Path databasePath) {
+    private static HikariDataSource makeDataSourceAt(Path databasePath) {
         String absolutePath = databasePath.toFile().getAbsolutePath();
         if (absolutePath.endsWith(".mv.db"))
             absolutePath = absolutePath.substring(0, absolutePath.length() - 6);
@@ -648,7 +648,7 @@ public class BuildDb implements Callable<Integer> {
             }
 
             LOGGER.info("Creating database at {}", dbPath);
-            DataSource dataSource = initializeDataSource(dbPath);
+            HikariDataSource dataSource = initializeDataSource(dbPath);
 
             Path tmpDir = buildDir.resolve("build");
             List<? extends GencodeGene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
@@ -671,6 +671,7 @@ public class BuildDb implements Callable<Integer> {
             precomputeIcMica(dataSource, phenotypeData.hpo(), phenotypeData.hpoDiseases());
             Map<TermId, GenomicRegion> geneMap = readGeneRegions(genes);
             ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap, ncbiGeneToHgncId);
+            dataSource.close();
         }
 
         // Calculate SHA256 digest for the resource files

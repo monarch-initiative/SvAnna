@@ -6,25 +6,20 @@ Run SvAnna
 
 SvAnna is a command-line Java tool that runs with Java version 11 or higher.
 
-Before using SvAnna, you must setup SvAnna as describe in the :ref:`rstsetup` section.
-
-SvAnna provides a command for performing phenotype-driven prioritization of structural variants (SVs) stored in
-VCF format.
-
-In the examples below, we assume that ``svanna-config.yml`` points to a configuration file with correct locations of
-SvAnna resources.
+In the examples below, we assume that ``svanna-cli.jar`` points to the executable JAR file and
+``path/to/svanna-data`` points to the data directory we created in the :ref:`rstsetup` section.
 
 ``prioritize`` - Prioritization of structural variants
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The aim of this command is to perform phenotype-driven prioritization of SVs in VCF file. The prioritized variants are
-stored in one or more :ref:`rstoutputformats`.
+SvAnna provides a command for performing phenotype-driven prioritization of structural variants (SVs) stored in
+VCF format. The prioritized variants are stored in one or more :ref:`rstoutputformats`.
 
 To prioritize variants in the `example.vcf`_ file (an example VCF file with 8 variants stored in SvAnna repository), run::
 
-  $ java -jar svanna-cli.jar prioritize --config svanna-config.yaml --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147 --prefix /path/to/output
+  $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147 --prefix /path/to/output
 
-After the annotation, the results are stored at ``/path/to/output.html``.
+After the run, the results are stored at ``/path/to/output.html``.
 
 Mandatory arguments
 ~~~~~~~~~~~~~~~~~~~
@@ -33,32 +28,61 @@ All CLI arguments for the ``prioritize`` command are supplied as *options* (no p
 
 There is one *mandatory* option:
 
-* ``-c | --config`` - path to SvAnna configuration file
+* ``-d | --data-directory``: Path to SvAnna data directory.
 
-Then, input data is specified either as a path to VCF file along with one or more HPO terms, or as a *Phenopacket*:
+Analysis input
+##############
 
-* ``--vcf`` - path to input VCF file
-* ``-t | --term`` - HPO term describing clinical condition of the proband, may be specified multiple times (e.g. ``--term HP:1234567 --term HP:9876543``)
-* ``-p | --phenopacket`` - path to Phenopacket in JSON format
+The input data can be specified in two ways: either as a path to a VCF file along with one or more HPO terms,
+or as a *Phenopacket*:
 
-If both ``--vcf`` and ``--phenopacket`` options are specified, ``--vcf`` has a precedence and the phenopacket will *not*
-be processed.
+* ``-p | --phenopacket``: Path to Phenopacket in JSON format.
+* ``-t | --phenotype-term``: HPO term describing clinical condition of the proband, may be specified multiple times (e.g. ``--term HP:1234567 --term HP:9876543``).
+* ``--vcf``: Path to the input VCF file.
 
-Optional arguments
-~~~~~~~~~~~~~~~~~~
+.. note::
+  In case path to a VCF file is provided both in *phenopacket* and via ``--vcf`` option, the ``--vcf`` option has a precedence.
 
-SvAnna allows to fine-tune the prioritization using the following *optional* options:
+Optional parameters
+~~~~~~~~~~~~~~~~~~~
 
-* ``--n-threads`` - prioritize variants using *n* threads to speed up the prioritization. More threads require more RAM (default ``2``)
-* ``--min-read-support`` - minimum number of reads that must support presence of the *alt* allele in order for variant to be included in the analysis (default `3``)
-* ``--overlap-threshold`` - threshold value to determine if a SV matches a variant from the population variant databases. The threshold is provided as a percentage (default ``80``)
-* ``--no-breakends`` - do not report breakends/translocations in the HTML report
-* ``--frequency-threshold`` - threshold for labeling SVs in population variant databases *pv* as common. If query SV *v* overlaps with *pv* that has frequency above the threshold, then *v* is considered to be *common*.
-* ``--output-format`` - comma separated list of output formats to use for writing the results. See :ref:`rstoutputformats` section for available output formats (default ``html``)
-* ``--prefix`` - prefix for output files (default: based on the input VCF name)
-* ``--report-top-variants`` - report top *n* variants in the HTML report (default: ``100``)
-* ``--uncompressed-output`` - the tabular and VCF output files are compressed by default. Use this flag if you want to disable compressing the output files (default: ``false``)
+SvAnna allows to fine-tune the prioritization using a number of *optional* parameters. For clarity, we group the options into several groups::
 
+Run options
+###########
+
+* ``--frequency-threshold``: Threshold for labeling SVs in population variant databases *pv* as common.
+  If query SV *v* overlaps with *pv* that has frequency above the threshold, then *v* is considered to be *common*.
+  The value is provided as a percentage (default ``1``).
+* ``--overlap-threshold``: Threshold to determine if a SV matches a variant from the population variant databases.
+  The value is provided as a percentage (default ``80``).
+* ``--min-read-support``: Minimum number of reads supporting the presence of the *alt* allele required
+  to include a variant into the analysis (default `3``).
+* ``--n-threads``: Number of threads used to prioritize the SVs (default ``2``).
+
+Output options
+##############
+
+* ``--no-breakends``: Do not report breakends/translocations in the HTML report (default: ``false``).
+* ``--output-format``: Comma separated list of output formats to use for writing the results (default ``html``).
+.. note::
+  See :ref:`rstoutputformats` section for more details.
+* ``--prefix``: Prefix for output files (default: based on the input VCF name).
+* ``--report-top-variants``: Include top *n* variants in the HTML report (default: ``100``).
+.. note::
+  Beware, the HTML report becomes rather large when including large number of variants.
+* ``--uncompressed-output`` - the tabular and VCF output files are compressed by default.
+  Use this flag if you want to disable compressing the output files (default: ``false``).
+
+SvAnna configuration
+####################
+
+* ``--term-similarity-measure``: Phenotype term similarity measure, use one of ``{RESNIK_SYMMETRIC, RESNIK_ASYMETRIC}`` (default: RESNIK_SYMMETRIC).
+* ``--ic-mica-mode``: The mode for getting information content of the most informative common ancestors for terms :math:`t_1`, and :math:`t_2`.
+  Use one of ``{DATABASE, IN_MEMORY}`` (default: ``DATABASE``).
+* ``--promoter-length``: Number of bases pre-pended to a transcript and evaluated as a promoter region (default: ``2000``).
+* ``--promoter-fitness-gain``: Set to ``0.`` to score the promoter variants as strictly as coding variants
+  or to ``1.`` to completely disregard the promoter variants (default: ``0.6``).
 
 See the next section to learn more about the SvAnna :ref:`rstoutputformats`,
 and the :ref:`rstexamples` section to see how SvAnna prioritizes various SV classes.

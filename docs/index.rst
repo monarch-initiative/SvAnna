@@ -15,7 +15,6 @@ of germline variants.
    setup
    running
    outputformats
-   tutorial
    examples
 
 

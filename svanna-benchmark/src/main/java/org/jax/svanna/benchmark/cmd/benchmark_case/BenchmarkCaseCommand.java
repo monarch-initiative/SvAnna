@@ -18,7 +18,7 @@ import org.jax.svanna.core.reference.SvannaVariant;
 import org.jax.svanna.core.reference.VariantAware;
 import org.jax.svanna.core.service.AnnotationDataService;
 import org.jax.svanna.core.service.PhenotypeDataService;
-import org.jax.svanna.io.parse.VariantParser;
+import org.jax.svanna.core.io.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;

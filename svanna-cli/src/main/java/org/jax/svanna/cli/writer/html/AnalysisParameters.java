@@ -39,10 +39,6 @@ public class AnalysisParameters {
      */
     private int minAltReadSupport;
     /**
-     * Number of variants reported in HTML result. The variants are sorted by priority.
-     */
-    private int topNVariantsReported;
-    /**
      * TAD must be present in at least this percentage of the tissues to be included in the analysis.
      * Threshold is provided as percentage.
      */
@@ -115,14 +111,6 @@ public class AnalysisParameters {
 
     public void setMinAltReadSupport(int minAltReadSupport) {
         this.minAltReadSupport = minAltReadSupport;
-    }
-
-    public int topNVariantsReported() {
-        return topNVariantsReported;
-    }
-
-    public void setTopNVariantsReported(int topNVariantsReported) {
-        this.topNVariantsReported = topNVariantsReported;
     }
 
     public double tadStabilityThreshold() {

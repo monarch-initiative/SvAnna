@@ -17,7 +17,7 @@
         </dependency>
         <dependency>
             <groupId>org.jax.svanna</groupId>
-            <artifactId>svanna-spring-boot-starter</artifactId>
+            <artifactId>svanna-configuration</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

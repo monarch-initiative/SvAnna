@@ -1,5 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.jax.svanna.autoconfigure.SvannaAutoConfiguration
-org.springframework.boot.diagnostics.FailureAnalyzer=org.jax.svanna.autoconfigure.exception.UndefinedResourceFailureAnalyzer,\
-  org.jax.svanna.autoconfigure.exception.InvalidResourceFailureAnalyzer,\
-  org.jax.svanna.autoconfigure.exception.MissingResourceFailureAnalyzer

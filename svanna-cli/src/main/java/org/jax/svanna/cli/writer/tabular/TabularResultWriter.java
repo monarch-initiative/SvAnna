@@ -4,6 +4,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.jax.svanna.cli.writer.AnalysisResults;
+import org.jax.svanna.cli.writer.OutputOptions;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.filter.FilterType;
@@ -47,8 +48,8 @@ public class TabularResultWriter implements ResultWriter {
     }
 
     @Override
-    public void write(AnalysisResults analysisResults, String prefix) throws IOException {
-        try (BufferedWriter writer = openWriter(prefix)) {
+    public void write(AnalysisResults analysisResults, OutputOptions outputOptions) throws IOException {
+        try (BufferedWriter writer = openWriter(outputOptions.prefix())) {
             CSVPrinter printer = CSVFormat.DEFAULT.withDelimiter(columnSeparator)
                     .withHeader(HEADER)
                     .print(writer);

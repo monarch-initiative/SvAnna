@@ -36,12 +36,9 @@ on the SvAnna GitHub page and download the latest precompiled version of SvAnna.
 SvAnna database files
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-SvAnna database files are available for download from:
+SvAnna database files are available for download in the :ref:`rstdownloads` section.
 
-**hg38/GRCh38**
-  Download `2112_hg38_svanna.zip <https://svanna.s3.amazonaws.com/2112_hg38_svanna.zip>`_ (~675 MB for download,  2.4 GB unpacked)
-
-After the download, unzip the archive(s) content into a folder and note the folder path.
+After the download, unzip the archive(s) content into a folder of your choice and note down the path.
 
 .. tip::
   Keeping the files on a fast hard drive will improve the runtime performance.
@@ -54,7 +51,7 @@ As an alternative to using prebuilt SvAnna JAR file, the SvAnna JAR file can als
 
 Run the following commands to download SvAnna source code from GitHub repository and to build SvAnna JAR file::
 
-  $ git https://github.com/TheJacksonLaboratory/SvAnna
+  $ git clone https://github.com/TheJacksonLaboratory/SvAnna
   $ cd SvAnna
   $ ./mvnw package
 
@@ -71,53 +68,3 @@ You should see a message describing how to run the individual commands.
 
 .. note::
   From now on, we will use ``svanna-cli.jar`` instead of spelling out the full path to the JAR file within your environment.
-
-.. _generate-config-ref:
-
-``generate-config`` - Generate and fill the configuration file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-SvAnna needs to know about the locations of the external files. The locations are provided in a YAML configuration file.
-The command ``generate-config`` generates an empty configuration file::
-
-  $ java -jar svanna-cli.jar generate-config svanna-config.yml
-
-
-The command above generates an empty configuration file ``svanna-config.yml`` in the working directory.
-
-The configuration file has the following content::
-
-  # SvAnna configuration template. The template follows YAML syntax.
-  svanna:
-    # path to folder with SvAnna database and the other required files.
-    dataDirectory:
-
-    #prioritization:
-      # term similarity measure, choose from {RESNIK_SYMMETRIC, RESNIK_ASYMMETRIC}
-      #termSimilarityMeasure: RESNIK_SYMMETRIC
-      # The mode for getting information content of the most informative common ancestors for terms t1, and t2.
-      # Choose from {IN_MEMORY, DATABASE}.
-      # IN_MEMORY is faster but uses more memory
-      # DATABASE is slower but also more memory efficient
-      #icMicaMode: DATABASE
-      # Number of bases prepended to a transcript and evaluated as a promoter region
-      #promoterLength: 2000
-      # Set to 0. to score promoter variants as strictly as coding variants, or to 1. to skip
-      #promoterFitnessGain: .6
-
-
-Mandatory parameters
-~~~~~~~~~~~~~~~~~~~~
-
-Open the file in your favorite text editor and provide the path to the SvAnna data directory.
-The directory is expected to have a structure like::
-
-    svanna_folder
-      |- gencode.v38.genes.json.gz
-      |- hp.obo
-      \- svanna_db.mv.db
-
-where ``svanna_folder`` corresponds to content of the ZIP files downloaded in the previous section
-
-.. tip::
-  The YAML syntax requires to include a white space between key, value pairs (e.g. ``dataDirectory: /project/joe/svanna_resources``.

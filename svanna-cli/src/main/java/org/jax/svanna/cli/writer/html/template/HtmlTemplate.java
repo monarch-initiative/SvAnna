@@ -6,10 +6,10 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.Version;
+import org.jax.svanna.cli.writer.OutputOptions;
 import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.core.LogUtils;
 import org.monarchinitiative.phenol.ontology.data.Term;
-import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HtmlTemplate {
     /** Map of data that will be used for the FreeMark template. */
@@ -36,9 +35,8 @@ public class HtmlTemplate {
     public HtmlTemplate(List<String> htmlList,
                         Map<String, String> infoMap,
                         Collection<Term> originalHpoTerms,
-                        AnalysisParameters analysisParameters) {
-        Map<TermId, String> originalTermMap = originalHpoTerms.stream()
-                .collect(Collectors.toMap(Term::id, Term::getName));
+                        AnalysisParameters analysisParameters,
+                        OutputOptions outputOptions) {
 
         this.cfg = new Configuration(new Version(String.valueOf(Configuration.VERSION_2_3_0)));
         cfg.setDefaultEncoding("UTF-8");
@@ -55,7 +53,7 @@ public class HtmlTemplate {
         templateData.put("phenopacket_file", infoMap.getOrDefault("phenopacket_file", NOT_AVAILABLE));
         templateData.put("n_affectedGenes", infoMap.getOrDefault("n_affectedGenes", NOT_AVAILABLE));
         templateData.put("n_affectedEnhancers", infoMap.getOrDefault("n_affectedEnhancers", NOT_AVAILABLE));
-        MetaDataHtmlComponent metaDataHtmlComponent = new MetaDataHtmlComponent(originalTermMap, analysisParameters);
+        MetaDataHtmlComponent metaDataHtmlComponent = new MetaDataHtmlComponent(originalHpoTerms, analysisParameters, outputOptions);
         templateData.put("analysisMetadata", metaDataHtmlComponent.getHtml());
     }
 

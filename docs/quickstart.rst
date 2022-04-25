@@ -44,9 +44,8 @@ After unzipping the distribution archive, run the following command to display t
       -h, --help      Show this help message and exit.
       -V, --version   Print version information and exit.
     Commands:
-      generate-config, G  Generate a configuration YAML file
       prioritize, P       Prioritize the variants
-    See the full documentation at `https://github.com/TheJacksonLaboratory/SvAnna`
+    See the full documentation at `https://svanna.readthedocs.io/en/master`
 
 2. Download SvAnna database files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -61,7 +61,7 @@ public abstract class SvAnnaCommand implements Callable<Integer> {
                 description = "Number of bases prepended to a transcript and evaluated as a promoter region (default: ${DEFAULT-VALUE}).")
         protected int promoterLength = 2_000;
         @CommandLine.Option(names = {"--promoter-fitness-gain"},
-                description = "Set to 0. to score promoter variants as strictly as coding variants, or to 1. to skip  (default: ${DEFAULT-VALUE}).")
+                description = "Set to 0. to score the promoter variants as strictly as coding variants, or to 1. to skip them altogether (default: ${DEFAULT-VALUE}).")
         protected double promoterFitnessGain = .6;
     }
 

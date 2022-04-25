@@ -11,6 +11,6 @@ import java.io.IOException;
  */
 public interface ResultWriter {
 
-    void write(AnalysisResults analysisResults, String prefix) throws IOException;
+    void write(AnalysisResults analysisResults, OutputOptions outputOptions) throws IOException;
 
 }

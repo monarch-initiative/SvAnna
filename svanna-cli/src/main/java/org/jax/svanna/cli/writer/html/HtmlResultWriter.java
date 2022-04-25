@@ -2,6 +2,7 @@ package org.jax.svanna.cli.writer.html;
 
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
+import org.jax.svanna.cli.writer.OutputOptions;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.cli.writer.html.template.FilterAndCount;
 import org.jax.svanna.cli.writer.html.template.HtmlTemplate;
@@ -51,12 +52,12 @@ public class HtmlResultWriter implements ResultWriter {
     }
 
     @Override
-    public void write(AnalysisResults results, String prefix) {
-        String outString = prefix + OutputFormat.HTML.fileSuffix();
+    public void write(AnalysisResults results, OutputOptions outputOptions) {
+        String outString = outputOptions.prefix() + OutputFormat.HTML.fileSuffix();
         Path outPath = Path.of(outString);
         LogUtils.logInfo(LOGGER, "Writing HTML results to {}", outPath.toAbsolutePath());
 
-        LogUtils.logDebug(LOGGER, "Reporting up to {} variants sorted by priority", analysisParameters.topNVariantsReported());
+        LogUtils.logDebug(LOGGER, "Reporting up to {} variants sorted by priority", outputOptions.nVariantsToReport());
         // Add data required to create the header summary table in the HTML report (genes, enhancers, etc.)
         List<VariantLandscape> variantLandscapes = results.variants().stream()
                 .sorted(prioritizedVariantComparator())
@@ -74,12 +75,12 @@ public class HtmlResultWriter implements ResultWriter {
                         && s.variant().passedFilters()
                         && !Double.isNaN(s.variant().svPriority().getPriority()))
                 .filter(v -> !(v.variant() instanceof GenomicBreakendVariant) || !doNotReportBreakends)
-                .limit(analysisParameters.topNVariantsReported())
+                .limit(outputOptions.nVariantsToReport())
                 .map(visualizableGenerator::makeVisualizable)
                 .map(visualizer::getHtml)
                 .collect(Collectors.toList());
 
-        HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.probandPhenotypeTerms(), this.analysisParameters);
+        HtmlTemplate template = new HtmlTemplate(visualizations, variantCountSummary, results.probandPhenotypeTerms(), analysisParameters, outputOptions);
         template.outputFile(outPath);
     }
 

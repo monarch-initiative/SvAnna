@@ -37,7 +37,7 @@ The prioritization adds a novel *INFO* field to each variant:
 
 .. note::
   * ``--report-top-variants`` option has no effect for the *VCF* output format.
-  * add ``--uncompressed-output`` flag if you want to get uncompressed VCF file
+  * add ``--uncompressed-output`` flag if you want to get uncompressed VCF file.
 
 
 CSV/TSV output format

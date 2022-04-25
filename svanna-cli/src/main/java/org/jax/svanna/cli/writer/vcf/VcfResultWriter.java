@@ -10,6 +10,7 @@ import htsjdk.variant.variantcontext.writer.VariantContextWriterBuilder;
 import htsjdk.variant.vcf.*;
 import org.jax.svanna.cli.writer.AnalysisResults;
 import org.jax.svanna.cli.writer.OutputFormat;
+import org.jax.svanna.cli.writer.OutputOptions;
 import org.jax.svanna.cli.writer.ResultWriter;
 import org.jax.svanna.core.LogUtils;
 import org.jax.svanna.core.priority.Prioritized;
@@ -91,11 +92,11 @@ public class VcfResultWriter implements ResultWriter {
     }
 
     @Override
-    public void write(AnalysisResults analysisResults, String prefix) throws IOException {
+    public void write(AnalysisResults analysisResults, OutputOptions outputOptions) throws IOException {
         Path inputVcfPath = Paths.get(analysisResults.variantSource());
         VCFHeader header = prepareVcfHeader(inputVcfPath);
 
-        Path outPath = Paths.get(prefix + OutputFormat.VCF.fileSuffix() + (compress ? ".gz" : ""));
+        Path outPath = Paths.get(outputOptions.prefix() + OutputFormat.VCF.fileSuffix() + (compress ? ".gz" : ""));
         LogUtils.logInfo(LOGGER, "Writing VCF results into {}", outPath.toAbsolutePath());
 
         try (VariantContextWriter writer = new VariantContextWriterBuilder()

@@ -1,13 +1,10 @@
 package org.jax.svanna.cli.cmd;
 
+import org.jax.svanna.cli.writer.*;
 import org.jax.svanna.configuration.exception.InvalidResourceException;
 import org.jax.svanna.configuration.exception.MissingResourceException;
 import org.jax.svanna.configuration.exception.UndefinedResourceException;
 import org.jax.svanna.cli.Main;
-import org.jax.svanna.cli.writer.AnalysisResults;
-import org.jax.svanna.cli.writer.OutputFormat;
-import org.jax.svanna.cli.writer.ResultWriter;
-import org.jax.svanna.cli.writer.ResultWriterFactory;
 import org.jax.svanna.cli.writer.html.AnalysisParameters;
 import org.jax.svanna.cli.writer.html.HtmlResultWriter;
 import org.jax.svanna.core.SvAnna;
@@ -48,6 +45,7 @@ import java.util.stream.Collectors;
 @CommandLine.Command(name = "prioritize",
         header = "Prioritize the variants",
         mixinStandardHelpOptions = true,
+        sortOptions = false,
         version = Main.VERSION,
         usageHelpWidth = Main.WIDTH,
         footer = Main.FOOTER)
@@ -60,30 +58,25 @@ public class PrioritizeCommand extends SvAnnaCommand {
         NF.setMaximumFractionDigits(2);
     }
 
-    @CommandLine.ArgGroup(validate = false, heading = "Input options:%n")
+    @CommandLine.ArgGroup(validate = false, heading = "Analysis input:%n")
     public InputOptions inputOptions = new InputOptions();
     public static class InputOptions {
         @CommandLine.Option(names = {"-p", "--phenopacket"},
                 description = "Path to phenopacket.")
         public Path phenopacket = null;
 
-        @CommandLine.Option(names = {"-t", "--term"},
+        @CommandLine.Option(names = {"-t", "--phenotype-term"},
                 description = "HPO term ID(s). Can be provided multiple times.")
         public List<String> hpoTermIdList = List.of();
 
         @CommandLine.Option(names = {"--vcf"},
-                description = "Path to input VCF file.")
+                description = "Path to the input VCF file.")
         public Path vcf = null;
     }
 
     @CommandLine.ArgGroup(validate = false, heading = "Run options:%n")
     public RunOptions runOptions = new RunOptions();
     public static class RunOptions {
-        @CommandLine.Option(names = {"--n-threads"},
-                paramLabel = "2",
-                description = "Process variants using n threads (default: ${DEFAULT-VALUE}).")
-        public int parallelism = 2;
-
         /*
          * ------------ FILTERING OPTIONS ------------
          */
@@ -91,18 +84,23 @@ public class PrioritizeCommand extends SvAnnaCommand {
                 description = "Frequency threshold as a percentage [0-100] (default: ${DEFAULT-VALUE}).")
         public float frequencyThreshold = 1.F;
 
+        @CommandLine.Option(names = {"--overlap-threshold"},
+                description = "Percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE}).")
+        public float overlapThreshold = 80.F;
+
         @CommandLine.Option(names = {"--min-read-support"},
                 description = "Minimum number of ALT reads to prioritize (default: ${DEFAULT-VALUE}).")
         public int minAltReadSupport = 3;
 
-        @CommandLine.Option(names = {"--overlap-threshold"},
-                description = "Percentage threshold for determining variant's region is similar enough to database entry (default: ${DEFAULT-VALUE}).")
-        public float overlapThreshold = 80.F;
+        @CommandLine.Option(names = {"--n-threads"},
+                paramLabel = "2",
+                description = "Process variants using n threads (default: ${DEFAULT-VALUE}).")
+        public int parallelism = 2;
     }
 
     @CommandLine.ArgGroup(validate = false, heading = "Output options:%n")
-    public OutputOptions outputOptions = new OutputOptions();
-    public static class OutputOptions {
+    public OutputConfig outputConfig = new OutputConfig();
+    public static class OutputConfig {
         @CommandLine.Option(names = {"--no-breakends"},
                 description = "Do not include breakend variants into HTML report (default: ${DEFAULT-VALUE}).")
         public boolean doNotReportBreakends = false;
@@ -149,7 +147,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             return 1;
         }
 
-        LOGGER.info("The analysis has completed successfully. Bye");
+        LOGGER.info("We're done, bye!");
         return 0;
     }
 
@@ -235,15 +233,16 @@ public class PrioritizeCommand extends SvAnnaCommand {
             LOGGER.warn("You asked for more threads ({}) than processors ({}) available on the system", runOptions.parallelism, processorsAvailable);
         }
 
-        if (outputOptions.outputFormats.isEmpty()) {
+        if (outputConfig.outputFormats.isEmpty()) {
             LOGGER.error("Aborting the analysis since no valid output format was provided");
             return 1;
         }
         return 0;
     }
 
+    // TODO - improve the exception handling
     private void runAnalysis(AnalysisData analysisData, SvAnnaProperties svAnnaProperties) throws IOException, ExecutionException, InterruptedException, InvalidResourceException, MissingResourceException, UndefinedResourceException {
-        Collection<OutputFormat> outputFormats = Utils.parseOutputFormats(outputOptions.outputFormats);
+        Collection<OutputFormat> outputFormats = Utils.parseOutputFormats(outputConfig.outputFormats);
         SvAnna svAnna = bootstrapSvAnna(svAnnaProperties);
 
         GenomicAssembly genomicAssembly = svAnna.assembly();
@@ -295,22 +294,23 @@ public class PrioritizeCommand extends SvAnnaCommand {
         LOGGER.info("Writing out the results");
         ResultWriterFactory resultWriterFactory = resultWriterFactory(svAnna);
         String prefix = resolveOutPrefix(analysisData.vcf());
+        OutputOptions outputOptions = new OutputOptions(prefix, outputConfig.reportNVariants);
         for (OutputFormat outputFormat : outputFormats) {
-            ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat, !outputOptions.uncompressed);
+            ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat, !outputConfig.uncompressed);
             if (writer instanceof HtmlResultWriter) {
                 // TODO - is there a more elegant way to pass the HTML specific parameters into the writer?
                 HtmlResultWriter htmlWriter = (HtmlResultWriter) writer;
                 htmlWriter.setAnalysisParameters(getAnalysisParameters(analysisData, svAnnaProperties));
-                htmlWriter.setDoNotReportBreakends(outputOptions.doNotReportBreakends);
+                htmlWriter.setDoNotReportBreakends(outputConfig.doNotReportBreakends);
             }
-            writer.write(results, prefix);
+            writer.write(results, outputOptions);
         }
 
     }
 
     private String resolveOutPrefix(Path vcfFile) {
-        if (outputOptions.outPrefix != null)
-            return outputOptions.outPrefix;
+        if (outputConfig.outPrefix != null)
+            return outputConfig.outPrefix;
 
         String vcfPath = vcfFile.toAbsolutePath().toString();
         String prefixBase;
@@ -333,7 +333,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
         analysisParameters.setFrequencyThreshold(runOptions.frequencyThreshold);
         analysisParameters.addAllPopulationVariantOrigins(PopulationVariantOrigin.benign());
         analysisParameters.setMinAltReadSupport(runOptions.minAltReadSupport);
-        analysisParameters.setTopNVariantsReported(outputOptions.reportNVariants);
         analysisParameters.setTadStabilityThreshold(properties.dataProperties().tadStabilityThresholdAsPercentage());
         analysisParameters.setUseVistaEnhancers(properties.dataProperties().useVista());
         analysisParameters.setUseFantom5Enhancers(properties.dataProperties().useFantom5());

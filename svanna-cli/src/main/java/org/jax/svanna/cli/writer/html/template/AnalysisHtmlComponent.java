@@ -1,14 +1,14 @@
 package org.jax.svanna.cli.writer.html.template;
 
+import org.jax.svanna.cli.writer.OutputOptions;
 import org.jax.svanna.cli.writer.html.AnalysisParameters;
 
 public class AnalysisHtmlComponent {
 
     private final String html;
 
-     AnalysisHtmlComponent(AnalysisParameters analysisParameters) {
-
-         this.html = parametersTable(analysisParameters);
+     AnalysisHtmlComponent(AnalysisParameters analysisParameters, OutputOptions outputOptions) {
+         this.html = parametersTable(analysisParameters, outputOptions);
      }
 
     private String header(String caption) {
@@ -36,14 +36,14 @@ public class AnalysisHtmlComponent {
         return "<tr><td>" + key + "</td><td>" + (value ? "Yes": "No") + "</td></tr>\n";
     }
 
-    private String parametersTable(AnalysisParameters analysisParameters) {
+    private String parametersTable(AnalysisParameters analysisParameters, OutputOptions outputOptions) {
         StringBuilder sb = new StringBuilder();
         sb.append(header("Analysis parameters"));
         sb.append(keyValueTableRow("Frequency threshold",analysisParameters.frequencyThreshold()));
         sb.append(keyValueTableRow("Minimum alt read support",analysisParameters.minAltReadSupport()));
         sb.append(keyValueTableRow("Phenotype Term Similarity Measure",analysisParameters.phenotypeTermSimilarityMeasure()));
         sb.append(keyValueTableRow("Similarity Threshold", analysisParameters.similarityThreshold()));
-        sb.append(keyValueTableRow("Number of variants reported", analysisParameters.topNVariantsReported()));
+        sb.append(keyValueTableRow("Number of variants reported", outputOptions.nVariantsToReport()));
         sb.append(keyValueTableRow("Include VISTA enhancer definitions?",  analysisParameters.useVistaEnhancers()));
         sb.append(keyValueTableRow("Include FANTOM5 enhancer definitions?",  analysisParameters.useFantom5Enhancers()));
         sb.append("</table>\n");

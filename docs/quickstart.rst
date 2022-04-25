@@ -50,29 +50,9 @@ After unzipping the distribution archive, run the following command to display t
 2. Download SvAnna database files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Download SvAnna data files by running::
+SvAnna database files are available for download in the :ref:`rstdownloads` section.
 
-  $ wget https://svanna.s3.amazonaws.com/2112_hg38_svanna.zip
-
-.. tip::
-  Use ``curl --output 2112_hg38_svanna.zip https://svanna.s3.amazonaws.com/2112_hg38_svanna.zip`` if ``wget`` is not available in your environment
-
-3. Generate & fill the configuration file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Generate the configuration file::
-
-  $ java -jar `pwd`/svanna/svanna-cli-${project.version}.jar generate-config svanna-config.yml
-
-Now open the generated file in your favorite text editor and provide absolute paths to the SvAnna database files:
-
-* ``dataDirectory:`` - the absolute path to the folder where SvAnna database files were extracted
-
-.. tip::
-  The YAML syntax requires a whitespace to be present between the *key*: *value* pairs.
-
-Note the location of the configuration file, as the path to the configuration file must be provided for all SvAnna runs.
-Having completed the steps above, you are good to prioritize variants in a VCF file.
+After the download, unzip the archive(s) content into a folder of your choice and note down the path.
 
 Prioritize structural variants in VCF file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -94,11 +74,12 @@ sequencing run of a patient presenting with the following clinical symptoms:
 
 Now, let's prioritize the variants::
 
-  $ java -jar svanna/svanna-cli-${project.version}.jar prioritize --config svanna-config.yml --output-format html,csv,vcf --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147
+  $ java -jar svanna-cli-${project.version}.jar prioritize -d path/to/svanna-data --output-format html,csv,vcf --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147
+
 
 The variant with ID ``Othman-2010-20696945-VWF-index-FigS7`` that disrupts a promoter of the *von Willenbrand factor*
 (*VWF*) gene (`Othman et al., 2010 <https://pubmed.ncbi.nlm.nih.gov/20696945>`_)
-receives the highest :math:`PSV` score of 64.18, and the variant is ranked first.
+receives the highest :math:`PSV` score of 47.26, and the variant is ranked first.
 
 SvAnna stores prioritization results in *HTML*, *CSV*, and *VCF* output formats next to the input VCF file.
 

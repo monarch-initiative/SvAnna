@@ -1,8 +1,7 @@
-package org.jax.svanna.autoconfigure;
+package org.jax.svanna.configuration;
 
-import org.jax.svanna.autoconfigure.configuration.PrioritizationProperties;
-import org.jax.svanna.autoconfigure.configuration.SvannaProperties;
-import org.jax.svanna.core.LogUtils;
+import org.jax.svanna.core.configuration.PrioritizationProperties;
+import org.jax.svanna.core.configuration.SvAnnaProperties;
 import org.jax.svanna.core.hpo.SimilarityScoreCalculator;
 import org.jax.svanna.core.priority.SvPrioritizer;
 import org.jax.svanna.core.priority.SvPrioritizerFactory;
@@ -33,7 +32,7 @@ class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 
     private final GenomicAssembly genomicAssembly;
     private final DataSource dataSource;
-    private final SvannaProperties svannaProperties;
+    private final SvAnnaProperties svAnnaProperties;
     private final AnnotationDataService annotationDataService;
     private final GeneService geneService;
     private final PhenotypeDataService phenotypeDataService;
@@ -43,14 +42,14 @@ class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
     SvPrioritizerFactoryImpl(
             GenomicAssembly genomicAssembly,
             DataSource dataSource,
-            SvannaProperties svannaProperties,
+            SvAnnaProperties svAnnaProperties,
             AnnotationDataService annotationDataService,
             GeneService geneService,
             PhenotypeDataService phenotypeDataService,
             SimilarityScoreCalculator similarityScoreCalculator) {
         this.genomicAssembly = genomicAssembly;
         this.dataSource = dataSource;
-        this.svannaProperties = svannaProperties;
+        this.svAnnaProperties = svAnnaProperties;
         this.annotationDataService = annotationDataService;
         this.geneService = geneService;
         this.phenotypeDataService = phenotypeDataService;
@@ -68,16 +67,16 @@ class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
     }
 
     private Dispatcher getTadDispatcher() {
-        TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svannaProperties.dataParameters().tadStabilityThresholdAsFraction());
+        TadBoundaryDao tadBoundaryDao = new TadBoundaryDao(dataSource, genomicAssembly, svAnnaProperties.dataProperties().tadStabilityThresholdAsFraction());
 //        DispatchOptions dispatchOptions = DispatchOptions.of(svannaProperties.prioritization().forceTadEvaluation());
         DispatchOptions dispatchOptions = DispatchOptions.of(false);
-        LogUtils.logDebug(LOGGER, "Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
+        LOGGER.debug("Forcing TAD evaluation: {}", dispatchOptions.forceEvaluateTad());
         return new TadAwareDispatcher(geneService, tadBoundaryDao, dispatchOptions);
     }
 
     @Override
     public SvPrioritizer<SvPriority> getPrioritizer(Collection<TermId> phenotypeTerms) {
-        LogUtils.logDebug(LOGGER, "Preparing top-level enhancer phenotype terms for the input terms");
+        LOGGER.debug("Preparing top-level enhancer phenotype terms for the input terms");
         Set<TermId> topLevelEnhancerTerms = annotationDataService.enhancerPhenotypeAssociations();
         Set<TermId> enhancerRelevantAncestors = phenotypeDataService.getRelevantAncestors(phenotypeTerms, topLevelEnhancerTerms);
 
@@ -86,7 +85,7 @@ class SvPrioritizerFactoryImpl implements SvPrioritizerFactory {
 //        RouteDataService<RouteDataGETad> dbRouteDataService = fct.getService(RouteDataGETad.class);
         RouteDataService<RouteDataGE> dbRouteDataService = fct.getService(RouteDataGE.class);
 
-        PrioritizationProperties prioritizationProperties = svannaProperties.prioritization();
+        PrioritizationProperties prioritizationProperties = svAnnaProperties.prioritizationProperties();
         SequenceImpactCalculator<Gene> geneImpactCalculator = new GeneSequenceImpactCalculator(prioritizationProperties.geneFactor(), prioritizationProperties.promoterLength(), prioritizationProperties.promoterFitnessGain());
         GeneWeightCalculator geneWeightCalculator = configureGeneWeightCalculator(phenotypeDataService, similarityScoreCalculator, phenotypeTerms);
 

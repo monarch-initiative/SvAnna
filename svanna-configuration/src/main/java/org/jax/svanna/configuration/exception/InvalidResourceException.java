@@ -1,4 +1,4 @@
-package org.jax.svanna.autoconfigure.exception;
+package org.jax.svanna.configuration.exception;
 
 /**
  * This exception is thrown when a resource is corrupted or if the resource should be present but it is missing.

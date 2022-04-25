@@ -1,6 +1,6 @@
-package org.jax.svanna.autoconfigure;
+package org.jax.svanna.configuration;
 
-import org.jax.svanna.autoconfigure.exception.MissingResourceException;
+import org.jax.svanna.configuration.exception.MissingResourceException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

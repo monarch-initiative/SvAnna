@@ -1,4 +1,4 @@
-package org.jax.svanna.autoconfigure.exception;
+package org.jax.svanna.configuration.exception;
 
 /**
  * This exception is thrown during auto-configuration, if an information that should have been provided by the user

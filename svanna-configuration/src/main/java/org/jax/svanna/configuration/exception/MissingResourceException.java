@@ -1,4 +1,4 @@
-package org.jax.svanna.autoconfigure.exception;
+package org.jax.svanna.configuration.exception;
 
 /**
  * An exception thrown when a resource file (e.g. a database file) is missing from SvAnna data directory.

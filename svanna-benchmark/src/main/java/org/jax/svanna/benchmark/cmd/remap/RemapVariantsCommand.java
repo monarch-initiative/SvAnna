@@ -8,7 +8,7 @@ import org.jax.svanna.benchmark.cmd.remap.write.FullSvannaVariantWriter;
 import org.jax.svanna.benchmark.cmd.remap.write.SvTool;
 import org.jax.svanna.benchmark.cmd.remap.write.VcfWriter;
 import org.jax.svanna.io.FullSvannaVariant;
-import org.jax.svanna.io.parse.VariantParser;
+import org.jax.svanna.core.io.VariantParser;
 import org.jax.svanna.io.parse.VcfVariantParser;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.util.VariantTrimmer;

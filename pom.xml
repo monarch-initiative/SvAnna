@@ -11,8 +11,7 @@
         <module>svanna-io</module>
         <module>svanna-ingest</module>
         <module>svanna-db</module>
-        <module>svanna-spring-boot-autoconfigure</module>
-        <module>svanna-spring-boot-starter</module>
+        <module>svanna-configuration</module>
         <module>svanna-cli</module>
         <module>svanna-benchmark</module>
     </modules>

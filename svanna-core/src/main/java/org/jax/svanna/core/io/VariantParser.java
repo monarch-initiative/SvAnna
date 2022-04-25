@@ -1,4 +1,4 @@
-package org.jax.svanna.io.parse;
+package org.jax.svanna.core.io;
 
 import org.jax.svanna.core.reference.SvannaVariant;
 

@@ -9,6 +9,7 @@ v1.0.0
   - ``SvannaVariant`` *has* a ``GenomicVariant`` and it is *not* a ``GenomicVariant`` anymore.
   - Updated dependencies: phenol ``v2.0.0-RC2``, phenopackets ``v2.0.0``, protobuf ``v3.14.0``, spring-boot-starter-parent ``v2.6.7``.
   - Simplify the documentation.
+  - Change the namespace.
 - ``svanna-cli``
   - Remove the config YAML file and expose the CLI parameters instead.
 - ``svanna-ingest``

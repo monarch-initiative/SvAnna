@@ -5,9 +5,9 @@
     <artifactId>SvAnna</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>svanna-core</module>
-        <module>svanna-model</module>
         <module>svanna-test</module>
+        <module>svanna-model</module>
+        <module>svanna-core</module>
         <module>svanna-io</module>
         <module>svanna-ingest</module>
         <module>svanna-db</module>

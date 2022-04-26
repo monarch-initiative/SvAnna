@@ -16,7 +16,7 @@
         <module>svanna-benchmark</module>
     </modules>
     <groupId>org.monarchinitiative.svanna</groupId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <name>SvAnna</name>
 
     <parent>
@@ -64,7 +64,7 @@
         <connection>scm:git:git@github.com:TheJacksonLaboratory/SvAnna.git</connection>
         <developerConnection>scm:git:git@github.com:TheJacksonLaboratory/SvAnna.git</developerConnection>
         <url>scm:git:git@github.com:TheJacksonLaboratory/SvAnna.git</url>
-        <tag>v1.0.0</tag>
+        <tag>v${project.version}</tag>
     </scm>
 
     <dependencyManagement>

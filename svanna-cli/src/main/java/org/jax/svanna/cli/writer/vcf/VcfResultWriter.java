@@ -96,7 +96,7 @@ public class VcfResultWriter implements ResultWriter {
         Path inputVcfPath = Paths.get(analysisResults.variantSource());
         VCFHeader header = prepareVcfHeader(inputVcfPath);
 
-        Path outPath = Paths.get(outputOptions.prefix() + OutputFormat.VCF.fileSuffix() + (compress ? ".gz" : ""));
+        Path outPath = outputOptions.output().resolve(outputOptions.prefix() + OutputFormat.VCF.fileSuffix() + (compress ? ".gz" : ""));
         LogUtils.logInfo(LOGGER, "Writing VCF results into {}", outPath.toAbsolutePath());
 
         try (VariantContextWriter writer = new VariantContextWriterBuilder()

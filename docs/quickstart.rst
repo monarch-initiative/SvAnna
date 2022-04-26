@@ -82,4 +82,4 @@ The variant ``Othman-2010-20696945-VWF-index-FigS7`` disrupts a promoter of the 
 (*VWF*) gene (`Othman et al., 2010 <https://pubmed.ncbi.nlm.nih.gov/20696945>`_).
 The variant receives the highest :math:`PSV` score of 47.26, and it is ranked first.
 
-SvAnna stores prioritization results in *HTML*, *CSV*, and *VCF* output formats next to the input VCF file.
+SvAnna stores prioritization results in *HTML*, *CSV*, and *VCF* output formats in the current working directory.

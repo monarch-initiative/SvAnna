@@ -49,7 +49,7 @@ public class TabularResultWriter implements ResultWriter {
 
     @Override
     public void write(AnalysisResults analysisResults, OutputOptions outputOptions) throws IOException {
-        try (BufferedWriter writer = openWriter(outputOptions.prefix())) {
+        try (BufferedWriter writer = openWriter(outputOptions.output(), outputOptions.prefix())) {
             CSVPrinter printer = CSVFormat.DEFAULT.withDelimiter(columnSeparator)
                     .withHeader(HEADER)
                     .print(writer);
@@ -60,9 +60,8 @@ public class TabularResultWriter implements ResultWriter {
         }
     }
 
-    private BufferedWriter openWriter(String prefix) throws IOException {
-        String pathString = prefix + suffix + (compress ? ".gz" : "");
-        Path outPath = Paths.get(pathString);
+    private BufferedWriter openWriter(Path output, String prefix) throws IOException {
+        Path outPath = output.resolve(prefix + suffix + (compress ? ".gz" : ""));
         LogUtils.logInfo(LOGGER, "Writing tabular results into {}", outPath.toAbsolutePath());
         return compress
                 ? new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(outPath.toFile()))))

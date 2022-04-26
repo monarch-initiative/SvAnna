@@ -33,6 +33,7 @@ import picocli.CommandLine;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.time.Duration;
@@ -109,6 +110,10 @@ public class PrioritizeCommand extends SvAnnaCommand {
                 paramLabel = "html",
                 description = "Comma separated list of output formats to use for writing the results (default: ${DEFAULT-VALUE}).")
         public String outputFormats = "html";
+
+        @CommandLine.Option(names = {"--out-dir"},
+            description = "Path to folder where to write the output files (default: current working directory).")
+        public Path outDir = Path.of("");
 
         @CommandLine.Option(names = {"--prefix"},
                 description = "Prefix for output files (default: based on the input VCF name).")
@@ -237,6 +242,16 @@ public class PrioritizeCommand extends SvAnnaCommand {
             LOGGER.error("Aborting the analysis since no valid output format was provided");
             return 1;
         }
+
+        if (!Files.isDirectory(outputConfig.outDir)) {
+            LOGGER.info("The output directory {} does not exist. Creating the missing directories.", outputConfig.outDir.toAbsolutePath());
+            try {
+                Files.createDirectories(outputConfig.outDir);
+            } catch (IOException e) {
+                LOGGER.error("Unable to creating the output directory: {}", e.getMessage());
+                return 1;
+            }
+        }
         return 0;
     }
 
@@ -294,7 +309,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
         LOGGER.info("Writing out the results");
         ResultWriterFactory resultWriterFactory = resultWriterFactory(svAnna);
         String prefix = resolveOutPrefix(analysisData.vcf());
-        OutputOptions outputOptions = new OutputOptions(prefix, outputConfig.reportNVariants);
+        OutputOptions outputOptions = new OutputOptions(outputConfig.outDir, prefix, outputConfig.reportNVariants);
         for (OutputFormat outputFormat : outputFormats) {
             ResultWriter writer = resultWriterFactory.resultWriterForFormat(outputFormat, !outputConfig.uncompressed);
             if (writer instanceof HtmlResultWriter) {
@@ -309,17 +324,17 @@ public class PrioritizeCommand extends SvAnnaCommand {
     }
 
     private String resolveOutPrefix(Path vcfFile) {
-        if (outputConfig.outPrefix != null)
+        if (outputConfig.outPrefix != null && !outputConfig.outPrefix.isBlank())
             return outputConfig.outPrefix;
 
-        String vcfPath = vcfFile.toAbsolutePath().toString();
+        String vcfName = vcfFile.toFile().getName();
         String prefixBase;
-        if (vcfPath.endsWith(".vcf.gz"))
-            prefixBase = vcfPath.substring(0, vcfPath.length() - 7);
-        else if (vcfPath.endsWith(".vcf"))
-            prefixBase = vcfPath.substring(0, vcfPath.length() - 4);
+        if (vcfName.endsWith(".vcf.gz"))
+            prefixBase = vcfName.substring(0, vcfName.length() - 7);
+        else if (vcfName.endsWith(".vcf"))
+            prefixBase = vcfName.substring(0, vcfName.length() - 4);
         else
-            prefixBase = vcfPath;
+            prefixBase = vcfName;
         return prefixBase + ".SVANNA";
     }
 

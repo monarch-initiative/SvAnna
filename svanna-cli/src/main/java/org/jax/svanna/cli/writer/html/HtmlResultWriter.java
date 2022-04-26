@@ -53,8 +53,7 @@ public class HtmlResultWriter implements ResultWriter {
 
     @Override
     public void write(AnalysisResults results, OutputOptions outputOptions) {
-        String outString = outputOptions.prefix() + OutputFormat.HTML.fileSuffix();
-        Path outPath = Path.of(outString);
+        Path outPath = outputOptions.output().resolve(outputOptions.prefix() + OutputFormat.HTML.fileSuffix());
         LogUtils.logInfo(LOGGER, "Writing HTML results to {}", outPath.toAbsolutePath());
 
         LogUtils.logDebug(LOGGER, "Reporting up to {} variants sorted by priority", outputOptions.nVariantsToReport());

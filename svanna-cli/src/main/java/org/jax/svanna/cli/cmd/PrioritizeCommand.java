@@ -43,7 +43,7 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 @CommandLine.Command(name = "prioritize",
-        header = "Prioritize the variants",
+        header = "Prioritize the variants.",
         mixinStandardHelpOptions = true,
         sortOptions = false,
         version = Main.VERSION,

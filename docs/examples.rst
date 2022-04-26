@@ -8,13 +8,13 @@ This section shows how SvAnna prioritizes various structural variant classes.
 The resulting HTML reports contain graphics that are reported in the supplement of SvAnna paper.
 
 The examples work with variants stored in `examples.vcf`_ file. The VCF file is stored in SvAnna GitHub repository.
-Use the `run_examples.sh`_ script to generate HTML reports for all cases described below. Note that you must provide paths
-to SvAnna JAR file, data directory, and the ``examples.vcf`` file prior running the script.
+Use the `run_examples.sh`_ script to generate HTML reports for all cases described below. Note that you must enter
+the paths to SvAnna JAR file, data directory, and the ``examples.vcf`` into the script before running.
 
 Single exon deletion
 ^^^^^^^^^^^^^^^^^^^^
 
-A deletion of 6.93 kb (``chr17:31,150,798-31,157,725del``) affecting *NF1* that was assigned a *PSV* score of 157.95.
+A deletion of 6.93 kb (``chr17:31,150,798-31,157,725del``) affecting *NF1* that was assigned a *PSV* score of 124.98.
 
 The deletion affects exon 2 of several *NF1* transcripts.
 Pathogenic variants in *NF1* are associated with neurofibromatosis type 1 (``OMIM:162200``).
@@ -40,7 +40,7 @@ Command
 Deletion of multiple exons
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A deletion of 10.26 kb (``chr17:43,100,079-43,110,335del``) affecting *BRCA1* that was assigned a *PSV* score of 427.00.
+A deletion of 10.26 kb (``chr17:43,100,079-43,110,335del``) affecting *BRCA1* that was assigned a *PSV* score of 272.91.
 
 The deletion affects three *BRCA1* exons. Pathogenic variants in *BRCA1* are associated with
 Breast-ovarian cancer, familial, 1 (``OMIM:604370``).
@@ -64,7 +64,7 @@ Deletion of multiple genes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Deletion of 481.73 kb (``chr2:109,923,337-110,405,062del``) affecting *MALL*, *NPHP1*, and *MTLN*
-that was assigned a *PSV* score of 17.60.
+that was assigned a *PSV* score of 16.41.
 
 Pathogenic variants in *NPHP1* are associated with Joubert syndrome 4 (``OMIM:609583``).
 
@@ -95,7 +95,7 @@ Command
 Duplication of coding sequence
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Duplication of 36 bp (``chr13:72835296-72835332dup``) affecting *PIBF1* that was assigned a *PSV* score of 3.38.
+Duplication of 36 bp (``chr13:72835296-72835332dup``) affecting *PIBF1* that was assigned a *PSV* score of 3.29.
 Pathogenic variants in *PIBF1* are associated with Joubert syndrome 33 (``OMIM:617767``).
 
 The phenotypic features curated for this case were:
@@ -137,7 +137,7 @@ Multigene inversion
 ^^^^^^^^^^^^^^^^^^^
 
 Inversion of ~12.23 kb (``inv(chr3)(9725702; 9737931)``) that disrupts the coding sequence of *BRPF1* was assigned
-*PSV* score of 9.25.
+*PSV* score of 8.01.
 
 Pathogenic variants in *BRPF1* are associated with Intellectual developmental disorder with dysmorphic facies and ptosis ``OMIM:617333``.
 
@@ -175,7 +175,7 @@ Deletion affecting transcription start site
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Deletion of ∼1.57 kb (``chrX:64,205,190-64,206,761del``) affecting transcription start site of *AMER1* was assigned
-*PSV* score of 10.39.
+*PSV* score of 9.05.
 
 Pathogenic variants in *AMER1* are associated with Osteopathia striata with cranial sclerosis (``OMIM:300373``).
 
@@ -206,7 +206,7 @@ Deletion affecting promoter region
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A deletion of 13 bp (``chr12:6,124,705-6,124,718del``) located in the core promoter region of *VWF* was assigned *PSV* score of
-64.18.
+47.26.
 
 In the original publication, the deletion was shown to lead to aberrant binding of Ets transcription factors to the site
 of the deletion (30 bp upstream of *ENST00000261405.10*) and thereby reduce VWF expression.
@@ -233,7 +233,7 @@ Command
 Translocation disrupting a gene sequence
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A translocation (``t(chr3:11,007,014; chr4:139,383,334)``) affecting *SLC6A1* was assigned *PSV* score of 4.74.
+A translocation (``t(chr3:11,007,014; chr4:139,383,334)``) affecting *SLC6A1* was assigned *PSV* score of 4.51.
 
 Pathogenic variants in *SLC6A1* are associated with Myoclonic-atonic epilepsy (``OMIM:616421``).
 
@@ -263,7 +263,7 @@ Command
 
 
 
-.. _examples.vcf: https://github.com/TheJacksonLaboratory/Squirls/blob/development/squirls-cli/src/examples/example.vcf
+.. _examples.vcf: https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf
 .. _Decoding NF1 Intragenic Copy-Number Variations: https://pubmed.ncbi.nlm.nih.gov/26189818
 .. _The first case report of a large deletion of the BRCA1 gene in Croatia: https://pubmed.ncbi.nlm.nih.gov/29310340
 .. _Whole-exome sequencing and digital PCR identified a novel compound heterozygous mutation in the NPHP1 gene in a case of Joubert syndrome and related disorders: https://pubmed.ncbi.nlm.nih.gov/28347285

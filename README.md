@@ -3,7 +3,7 @@
 [![Java CI with Maven](https://github.com/TheJacksonLaboratory/SvAnna/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/TheJacksonLaboratory/SvAnna/actions/workflows/maven.yml)
 [![Documentation Status](https://readthedocs.org/projects/squirls/badge/?version=latest)](https://svanna.readthedocs.io/en/latest/?badge=latest)
 
-Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing
+Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing.
 
 Most users should download the latest SvAnna distribution ZIP file from
 the [Releases page](https://github.com/TheJacksonLaboratory/SvAnna/releases).

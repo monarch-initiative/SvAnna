@@ -29,6 +29,7 @@
             <outputDirectory>./examples</outputDirectory>
             <includes>
                 <include>example.vcf</include>
+                <include>run_examples.sh</include>
             </includes>
         </fileSet>
     </fileSets>

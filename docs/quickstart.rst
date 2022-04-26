@@ -20,8 +20,8 @@ If ``java`` is present on your ``$PATH``, then the command above will print a me
   OpenJDK Runtime Environment 18.9 (build 11+28)
   OpenJDK 64-Bit Server VM 18.9 (build 11+28, mixed mode)
 
-SvAnna setup
-^^^^^^^^^^^^
+Setup
+^^^^^
 
 SvAnna is installed by running the following three steps.
 
@@ -44,7 +44,7 @@ After unzipping the distribution archive, run the following command to display t
       -h, --help      Show this help message and exit.
       -V, --version   Print version information and exit.
     Commands:
-      prioritize, P       Prioritize the variants
+      prioritize         Prioritize the variants.
     See the full documentation at `https://svanna.readthedocs.io/en/master`
 
 2. Download SvAnna database files
@@ -52,18 +52,19 @@ After unzipping the distribution archive, run the following command to display t
 
 SvAnna database files are available for download in the :ref:`rstdownloads` section.
 
-After the download, unzip the archive(s) content into a folder of your choice and note down the path.
+After the download, unzip the archive(s) content into a folder of your choice and note down the path::
+
+  $ unzip -d svanna-data *.svanna.zip
 
 Prioritize structural variants in VCF file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let's annotate a toy VCF file containing eight SVs reported in the SvAnna manuscript.
+First, let's download the VCF file from `here <https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf>`_::
 
-First, let's download the VCF file::
+  $ wget https://raw.githubusercontent.com/TheJacksonLaboratory/SvAnna/master/svanna-cli/src/examples/example.vcf
 
-  $ wget https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf
-
-The variants were sourced from published clinical case reports and each variant led to a Mendelian disease.
+The variants were sourced from published clinical case reports and presence of each variant results in a Mendelian disease.
 
 For the purpose of this test run, let's assume that the VCF file contains SVs identified in a short/long read
 sequencing run of a patient presenting with the following clinical symptoms:
@@ -74,13 +75,11 @@ sequencing run of a patient presenting with the following clinical symptoms:
 
 Now, let's prioritize the variants::
 
-  $ java -jar svanna-cli-${project.version}.jar prioritize -d path/to/svanna-data --output-format html,csv,vcf --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147
+  $ java -jar svanna-cli-${project.version}.jar prioritize -d svanna-data --output-format html,csv,vcf --vcf example.vcf --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147
 
 
-The variant with ID ``Othman-2010-20696945-VWF-index-FigS7`` that disrupts a promoter of the *von Willenbrand factor*
-(*VWF*) gene (`Othman et al., 2010 <https://pubmed.ncbi.nlm.nih.gov/20696945>`_)
-receives the highest :math:`PSV` score of 47.26, and the variant is ranked first.
+The variant ``Othman-2010-20696945-VWF-index-FigS7`` disrupts a promoter of the *von Willenbrand factor*
+(*VWF*) gene (`Othman et al., 2010 <https://pubmed.ncbi.nlm.nih.gov/20696945>`_).
+The variant receives the highest :math:`PSV` score of 47.26, and it is ranked first.
 
 SvAnna stores prioritization results in *HTML*, *CSV*, and *VCF* output formats next to the input VCF file.
-
-Read the :ref:`rstsetup` and :ref:`rstrunning` sections to learn all details regarding setting up and running SvAnna.

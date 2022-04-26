@@ -15,7 +15,7 @@
         <module>svanna-cli</module>
         <module>svanna-benchmark</module>
     </modules>
-    <groupId>org.jax.svanna</groupId>
+    <groupId>org.monarchinitiative.svanna</groupId>
     <version>1.0.0-RC6-SNAPSHOT</version>
     <name>SvAnna</name>
 

@@ -17,7 +17,7 @@ VCF format. The prioritized variants are stored in one or more :ref:`rstoutputfo
 
 To prioritize variants in the `example.vcf`_ file (an example VCF file with 8 variants stored in SvAnna repository), run::
 
-  $ java -jar svanna-cli.jar prioritize -d svanna-data --vcf example.vcf --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147 --prefix results/example
+  $ java -jar svanna-cli.jar prioritize -d svanna-data --vcf example.vcf --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147 --out-dir results --prefix example
 
 After the run, the results are stored at ``results/example.html``.
 
@@ -67,6 +67,7 @@ Output options
 * ``--output-format`` - comma separated list of output formats to use for writing the results (default ``html``).
 .. note::
   See :ref:`rstoutputformats` section for more details.
+* ``--out-dir`` - path to a folder where to write the output files (default: current working directory).
 * ``--prefix`` - prefix for output files (default: based on the input VCF name).
 * ``--report-top-variants`` - include top *n* variants in the HTML report (default: ``100``).
 .. note::

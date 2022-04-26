@@ -2,10 +2,17 @@
 Changelog
 =========
 
-----------
-latest
-----------
-- `SvannaVariant` does not inherit from *Svart*
+------
+v1.0.0
+------
+- ``SvAnna``
+  - ``SvannaVariant`` *has* a ``GenomicVariant`` and it is *not* a ``GenomicVariant`` anymore.
+  - Updated dependencies: phenol ``v2.0.0-RC2``, phenopackets ``v2.0.0``, protobuf ``v3.14.0``, spring-boot-starter-parent ``v2.6.7``.
+  - Simplify the documentation.
+- ``svanna-cli``
+  - Remove the config YAML file and expose the CLI parameters instead.
+- ``svanna-ingest``
+  - Ingest the resources into a ZIP file, calculate ``sha256`` checksums.
 
 ----------
 v1.0.0-RC5

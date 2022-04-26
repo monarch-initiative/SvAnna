@@ -17,7 +17,7 @@ import static picocli.CommandLine.Help.Ansi.Style.*;
         footer = Main.FOOTER)
 public class Main implements Callable<Integer>  {
 
-    public static final String VERSION = "svanna-cli v1.0.0-RC6-SNAPSHOT";
+    public static final String VERSION = "svanna-cli v1.0.0";
 
     public static final int WIDTH = 120;
 

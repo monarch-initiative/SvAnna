@@ -527,7 +527,7 @@ a.svg:hover, a.svg:active {
       <div style="text-align: center">
           <p>Developed by <em>Daniel Danis</em> and <em>Peter N Robinson</em> at <a href="https://www.jax.org">The Jackson Laboratory for Genomic Medicine</a>.</p>
           <p>Problems, suggestions, or comments? Feel free to submit an issue to our <a href="https://github.com/TheJacksonLaboratory/SvAnna/issues">GitHub tracker</a>.</p>
-          <p>&#169; 2021 Daniel Danis, Peter N Robinson</p>
+          <p>&#169; 2022 Daniel Danis, Peter N Robinson</p>
       </div>
   </footer>
 

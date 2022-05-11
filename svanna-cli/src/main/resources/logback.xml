@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <!-- We're not interested in seeing events produced by the following libraries: -->
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    <logger name="org.springframework.jdbc" level="WARN"/>
+
     <property name="pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
 
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- We write INFO and above events to console. -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
@@ -11,7 +16,11 @@
         </encoder>
     </appender>
 
+    <!-- We write DEBUG and above events into the svanna.log file. -->
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
         <file>svanna.log</file>
         <append>false</append>
         <encoder>
@@ -19,14 +28,8 @@
         </encoder>
     </appender>
 
-    <logger name="org.jax.svanna" level="DEBUG">
+    <root>
+        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="org.monarchinitiative.phenol" level="DEBUG">
-        <appender-ref ref="FILE"/>
-    </logger>
-    <logger name="com.zaxxer.hikari" level="WARN"/>
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

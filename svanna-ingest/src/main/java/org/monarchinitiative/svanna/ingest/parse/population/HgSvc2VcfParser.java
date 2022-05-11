@@ -47,7 +47,7 @@ public class HgSvc2VcfParser extends AbstractVcfIngestRecordParser {
                 .map(Optional::get);
     }
 
-    private Function<VariantContext, Optional<? extends PopulationVariant>> toPopulationVariant() {
+    Function<VariantContext, Optional<? extends PopulationVariant>> toPopulationVariant() {
         return vc -> {
             Contig contig = vcfConverter.parseContig(vc.getContig());
             if (contig.isUnknown()) {

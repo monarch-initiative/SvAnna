@@ -3,9 +3,12 @@ Changelog
 =========
 
 ------
-latest
+v1.0.1
 ------
-
+- ``svanna-core``
+  - Fix bug leading to wrong query coordinates for getting the population variants.
+- ``svanna-cli``
+  - Fix logback configuration.
 
 ------
 v1.0.0

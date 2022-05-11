@@ -80,20 +80,17 @@ public class PopulationFrequencyAndCoverageFilter {
             return sublist;
         }
 
-        int minPos = -1, maxPos = -1;
+        int minPos = Integer.MAX_VALUE, maxPos = Integer.MIN_VALUE;
 
         for (T t : sublist) {
             GenomicVariant v = t.genomicVariant();
             int startPos = v.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-            if (minPos == -1 || startPos < minPos) {
-                minPos = startPos;
-            }
+            minPos = Math.min(minPos, startPos);
+
             int endPos = v.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased());
-            if (maxPos == -1 || endPos > maxPos) {
-                maxPos = startPos;
-            }
+            maxPos = Math.max(maxPos, endPos);
         }
-        List<T> results = new LinkedList<>();
+        List<T> results = new ArrayList<>(sublist.size());
         T variant = sublist.get(0);
         GenomicRegion query = GenomicRegion.of(variant.genomicVariant().contig(), Strand.POSITIVE, CoordinateSystem.zeroBased(), minPos, maxPos);
         LogUtils.logTrace(LOGGER, "Filtering variants on contig `{}-{}-{}`", query.contigId(), query.start(), query.end());

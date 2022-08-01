@@ -9,8 +9,8 @@
         <module>svanna-model</module>
         <module>svanna-core</module>
         <module>svanna-io</module>
-        <module>svanna-ingest</module>
         <module>svanna-db</module>
+        <module>svanna-ingest</module>
         <module>svanna-configuration</module>
         <module>svanna-cli</module>
         <module>svanna-benchmark</module>
@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.7</version>
+        <version>2.6.10</version>
     </parent>
 
     <properties>
@@ -33,16 +33,8 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <phenol.version>2.0.0-RC2</phenol.version>
-        <phenopacket.version>2.0.0</phenopacket.version>
-        <protobuf.version>3.14.0</protobuf.version>
         <silent.genes.version>0.2.0</silent.genes.version>
-        <htsjdk.version>2.23.0</htsjdk.version>
-        <spring-boot-starter.version>2.5.1</spring-boot-starter.version>
-        <svart.version>2.0.0-RC1</svart.version>
-        <commons-io.version>2.8.0</commons-io.version>
-        <commons-csv.version>1.7</commons-csv.version>
-        <commons-compress.version>1.21</commons-compress.version>
-        <commons-net.version>3.8.0</commons-net.version>
+        <h2.version>1.4.200</h2.version>
     </properties>
 
     <developers>
@@ -70,37 +62,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>info.picocli</groupId>
-                <artifactId>picocli</artifactId>
-                <version>4.5.2</version>
-            </dependency>
-            <dependency>
                 <groupId>org.monarchinitiative.svart</groupId>
                 <artifactId>svart</artifactId>
-                <version>${svart.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>de.charite.compbio</groupId>
-                <artifactId>jannovar-core</artifactId>
-                <version>${jannovar.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-io</groupId>
-                        <artifactId>commons-io</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.commons</groupId>
-                        <artifactId>commons-compress</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.testing</groupId>
-                        <artifactId>testing</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-slf4j-impl</artifactId>
-                    </exclusion>
-                </exclusions>
+                <version>2.0.0-RC1</version>
             </dependency>
             <dependency>
                 <groupId>org.monarchinitiative.phenol</groupId>
@@ -137,10 +101,31 @@
                 <artifactId>silent-genes-io</artifactId>
                 <version>${silent.genes.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.phenopackets</groupId>
+                <artifactId>phenopacket-schema</artifactId>
+                <version>2.0.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java-util</artifactId>
+                <version>3.20.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>31.1-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.errorprone</groupId>
+                <artifactId>error_prone_annotations</artifactId>
+                <version>2.11.0</version>
+            </dependency>
             <dependency>
                 <groupId>com.github.samtools</groupId>
                 <artifactId>htsjdk</artifactId>
-                <version>${htsjdk.version}</version>
+                <version>2.23.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.tukaani</groupId>
@@ -148,55 +133,39 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <dependency>
-                <groupId>org.phenopackets</groupId>
-                <artifactId>phenopacket-schema</artifactId>
-                <version>${phenopacket.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.google.protobuf</groupId>
-                <artifactId>protobuf-java-util</artifactId>
-                <version>${protobuf.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>commons-io</groupId>
-                <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
-                <version>${commons-csv.version}</version>
+                <version>1.7</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
-                <version>${commons-compress.version}</version>
+                <version>1.21</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.8.0</version>
             </dependency>
             <dependency>
                 <groupId>commons-net</groupId>
                 <artifactId>commons-net</artifactId>
-                <version>${commons-net.version}</version>
+                <version>3.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>info.picocli</groupId>
+                <artifactId>picocli</artifactId>
+                <version>4.5.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-logging</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -233,8 +202,8 @@
         
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

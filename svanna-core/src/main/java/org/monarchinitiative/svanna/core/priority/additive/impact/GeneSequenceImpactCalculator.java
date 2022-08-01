@@ -117,7 +117,7 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
     @Override
     public double projectImpact(Projection<Gene> projection) {
         List<Transcript> transcripts = projection.source().transcriptStream()
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toList());
         double promoterImpact = checkPromoter(projection.route().segments(), transcripts);
 
         double geneImpact = projection.isIntraSegment()
@@ -134,15 +134,15 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
         return geneFactor;
     }
 
-    private double checkPromoter(List<Segment> segments, Collection<Transcript> transcripts) {
-        Set<Segment> nonGapSegments = segments.stream()
-                .filter(s -> s.event() != Event.GAP)
-                .collect(Collectors.toSet());
+    private double checkPromoter(Collection<Segment> segments, Iterable<Transcript> transcripts) {
+        Iterable<Segment> nonGapSegments = segments.stream()
+                .filter(s -> !Event.GAP.equals(s.event()))
+                .collect(Collectors.toList());
 
         double score = Double.NaN;
         for (Transcript tx : transcripts) {
             int txStart = tx.start();
-            int promoterStart = txStart - promoterLength;
+            int promoterStart = Math.max(txStart - promoterLength, 0); // Let's not allow negative start coordinate.
             int promoterEnd = txStart + Coordinates.endDelta(tx.coordinateSystem());
 
             for (Segment nonGapSegment : nonGapSegments) {
@@ -150,13 +150,27 @@ public class GeneSequenceImpactCalculator implements SequenceImpactCalculator<Ge
                 int segmentEnd = nonGapSegment.endOnStrand(tx.strand());
                 if (Coordinates.overlap(tx.coordinateSystem(), promoterStart, promoterEnd,
                         nonGapSegment.coordinateSystem(), segmentStart, segmentEnd)) {
-                    double fitness = fitnessWithEvent.get(nonGapSegment.event());
+                    double fitness;
+                    if (Event.INVERSION.equals(nonGapSegment.event())) {
+                        if (Coordinates.aContainsB(CS, segmentStart, segmentEnd, CS, promoterStart, promoterEnd))
+                            // Inversion of an entire promoter is not considered deleterious.
+                            fitness = 1;
+                        else
+                            // The promoter is disrupted by the inversion boundary, hence deleterious.
+                            fitness = fitnessWithEvent.get(Event.INVERSION);
+                    } else {
+                        // All other events are scored using default scoring scheme.
+                        fitness = fitnessWithEvent.get(nonGapSegment.event());
+                    }
+
                     // In theory, `fitness + geneFactor * promoterFitnessGain` can be above 1, which does not make sense.
                     // Let's not allow that to happen.
-                    double bla = Math.min(fitness + geneFactor * promoterFitnessGain, 1.);
-                    fitness = Math.min(bla, geneFactor);
-                    if (Double.isNaN(score) || fitness < score)
-                        score = fitness;
+                    double maxAllowedFitness = Math.min(fitness + geneFactor * promoterFitnessGain, 1.);
+                    fitness = Math.min(maxAllowedFitness, geneFactor);
+
+                    score = Double.isNaN(score)
+                            ? fitness
+                            : Math.min(fitness, score);
                 }
             }
         }

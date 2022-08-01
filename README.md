@@ -2,7 +2,7 @@
 
 [![GitHub release](https://img.shields.io/github/release/TheJacksonLaboratory/SvAnna.svg)](https://github.com/TheJacksonLaboratory/SvAnna/releases)
 [![Java CI with Maven](https://github.com/TheJacksonLaboratory/SvAnna/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/TheJacksonLaboratory/SvAnna/actions/workflows/maven.yml)
-[![Documentation Status](https://readthedocs.org/projects/squirls/badge/?version=latest)](https://svanna.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/svanna/badge/?version=master)](https://svanna.readthedocs.io/en/master/?badge=master)
 
 Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing.
 

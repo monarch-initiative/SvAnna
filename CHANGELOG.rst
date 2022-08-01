@@ -3,6 +3,19 @@ Changelog
 =========
 
 ------
+latest
+------
+
+------
+v1.0.2
+------
+
+- ``SvAnna``
+  - update dependency versions.
+- ``svanna-core``
+  - Fix bug that assigned wrong score to multi-gene inversions based on promoter overlap.
+
+------
 v1.0.1
 ------
 - ``svanna-core``

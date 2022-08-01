@@ -1,0 +1,37 @@
+##fileformat=VCFv4.2
+##fileDate=2021-01-01T00:00:00.000Z
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the structural variant described in this record">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=AD,Number=R,Type=Integer,Description="Read depth per allele">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read depth at this position for this sample">
+##contig=<ID=CM000663.2,length=248956422>
+##contig=<ID=CM000664.2,length=242193529>
+##contig=<ID=CM000665.2,length=198295559>
+##contig=<ID=CM000666.2,length=190214555>
+##contig=<ID=CM000667.2,length=181538259>
+##contig=<ID=CM000668.2,length=170805979>
+##contig=<ID=CM000669.2,length=159345973>
+##contig=<ID=CM000670.2,length=145138636>
+##contig=<ID=CM000671.2,length=138394717>
+##contig=<ID=CM000672.2,length=133797422>
+##contig=<ID=CM000673.2,length=135086622>
+##contig=<ID=CM000674.2,length=133275309>
+##contig=<ID=CM000675.2,length=114364328>
+##contig=<ID=CM000676.2,length=107043718>
+##contig=<ID=CM000677.2,length=101991189>
+##contig=<ID=CM000678.2,length=90338345>
+##contig=<ID=CM000679.2,length=83257441>
+##contig=<ID=CM000680.2,length=80373285>
+##contig=<ID=CM000681.2,length=58617616>
+##contig=<ID=CM000682.2,length=64444167>
+##contig=<ID=CM000683.2,length=46709983>
+##contig=<ID=CM000684.2,length=50818468>
+##contig=<ID=CM000685.2,length=156040895>
+##contig=<ID=CM000686.2,length=57227415>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	Sample
+chr12	25803195	Something	N	<INV>	1000	PASS	SVTYPE=INV;END=125316602;SVLEN=0	GT:DP:AD	0/1:10:5,5

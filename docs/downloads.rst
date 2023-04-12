@@ -10,13 +10,14 @@ SvAnna database files are available for download from the following locations:
  Version    Genome build                           URL                                                      Size
 =========  ==============  ============================================================  =============================================
  2204       hg38/GRCh38     https://storage.googleapis.com/svanna/2204_hg38.svanna.zip      ~627 MB for download, ~2.3 GB unpacked
+ 2304       hg38/GRCh38     https://storage.googleapis.com/svanna/2304_hg38.svanna.zip      ~674 MB for download, ~2.6 GB unpacked
 =========  ==============  ============================================================  =============================================
 
 Use ``curl`` or ``wget`` utilities to download the files from command line::
 
   $ wget https://storage.googleapis.com/svanna/2204_hg38.svanna.zip
   or
-  $ curl --output 2204_hg38.svanna.zip https://storage.googleapis.com/svanna/2204_hg38.svanna.zip
+  $ curl --output 2304_hg38.svanna.zip https://storage.googleapis.com/svanna/2304_hg38.svanna.zip
 
 Alternatively, use a GUI FTP client such as `FileZilla <https://filezilla-project.org/>`_.
 

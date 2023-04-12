@@ -33,6 +33,7 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
         <phenol.version>2.0.0</phenol.version>
+        <phenopacket-tools.version>1.0.0-RC2</phenopacket-tools.version>
         <silent.genes.version>0.2.5</silent.genes.version>
         <h2.version>1.4.200</h2.version>
     </properties>
@@ -100,6 +101,11 @@
                 <groupId>org.monarchinitiative.sgenes</groupId>
                 <artifactId>silent-genes-io</artifactId>
                 <version>${silent.genes.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.phenopackets.phenopackettools</groupId>
+                <artifactId>phenopacket-tools-io</artifactId>
+                <version>${phenopacket-tools.version}</version>
             </dependency>
 
             <dependency>

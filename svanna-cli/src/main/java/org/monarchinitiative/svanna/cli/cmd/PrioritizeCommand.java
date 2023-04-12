@@ -24,15 +24,12 @@ import org.monarchinitiative.svanna.model.landscape.variant.PopulationVariantOri
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
-import org.phenopackets.schema.v1.Phenopacket;
-import org.phenopackets.schema.v1.core.HtsFile;
+import org.phenopackets.phenopackettools.io.PhenopacketParserFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
@@ -63,12 +60,12 @@ public class PrioritizeCommand extends SvAnnaCommand {
     public InputOptions inputOptions = new InputOptions();
     public static class InputOptions {
         @CommandLine.Option(names = {"-p", "--phenopacket"},
-                description = "Path to phenopacket.")
+                description = "Path to v1 or v2 phenopacket in JSON, YAML or Protobuf format.")
         public Path phenopacket = null;
 
         @CommandLine.Option(names = {"-t", "--phenotype-term"},
                 description = "HPO term ID(s). Can be provided multiple times.")
-        public List<String> hpoTermIdList = List.of();
+        public List<String> hpoTermIdList = null;
 
         @CommandLine.Option(names = {"--vcf"},
                 description = "Path to the input VCF file.")
@@ -139,14 +136,11 @@ public class PrioritizeCommand extends SvAnnaCommand {
         DataProperties dataProperties = dataProperties();
         SvAnnaProperties svAnnaProperties = SvAnnaProperties.of(svannaDataDirectory, prioritizationProperties, dataProperties);
 
-        Optional<AnalysisData> analysisData = parseAnalysisData();
-        if (analysisData.isEmpty())
-            return 1;
-
         try {
-            runAnalysis(analysisData.get(), svAnnaProperties);
+            AnalysisData analysisData = parseAnalysisData();
+            runAnalysis(analysisData, svAnnaProperties);
         } catch (InterruptedException | ExecutionException | IOException | InvalidResourceException |
-                 MissingResourceException | UndefinedResourceException e) {
+                 MissingResourceException | UndefinedResourceException | AnalysisInputException e) {
             LOGGER.error("Error: {}", e.getMessage());
             LOGGER.debug("Error: {}", e.getMessage(), e);
             return 1;
@@ -156,76 +150,50 @@ public class PrioritizeCommand extends SvAnnaCommand {
         return 0;
     }
 
-    private Optional<AnalysisData> parseAnalysisData() {
-        Path vcf;
-        List<TermId> phenotypeTermIds;
-        if (inputOptions.vcf != null) { // VCF & CLI
-            vcf = inputOptions.vcf;
-            phenotypeTermIds = inputOptions.hpoTermIdList.stream()
+    private AnalysisData parseAnalysisData() throws AnalysisInputException {
+        if (inputOptions.hpoTermIdList != null) { // CLI
+            LOGGER.info("Using {} phenotype features supplied via CLI", inputOptions.hpoTermIdList.size());
+            Path vcf = inputOptions.vcf;
+            List<TermId> phenotypeTermIds = inputOptions.hpoTermIdList.stream()
                     .map(TermId::of)
                     .collect(Collectors.toList());
-        } else { // phenopacket
+            return new AnalysisData(phenotypeTermIds, vcf);
+        } else { // Phenopacket
+            LOGGER.info("Using phenotype features from a phenopacket at {}", inputOptions.phenopacket.toAbsolutePath());
+            PhenopacketParserFactory parserFactory = PhenopacketParserFactory.getInstance();
+
+            // try v2 first
             try {
-                Phenopacket phenopacket = PhenopacketImporter.readPhenopacket(inputOptions.phenopacket);
-                phenotypeTermIds = phenopacket.getPhenotypicFeaturesList().stream()
-                        .map(pf -> TermId.of(pf.getType().getId()))
-                        .collect(Collectors.toList());
-
-                Optional<Path> vcfFilePathOptional = getVcfFilePath(phenopacket);
-                if (vcfFilePathOptional.isEmpty()) {
-                    if (inputOptions.vcf == null) {
-                        LOGGER.error("VCF file was found neither in CLI arguments nor in the Phenopacket. Aborting.");
-                        return Optional.empty();
-                    } else {
-                        vcf = inputOptions.vcf;
-                    }
-                } else {
-                    LOGGER.info("VCF file was found in both CLI arguments and in the Phenopacket. Using the file from CLI: `{}`", inputOptions.vcf);
-                    vcf = inputOptions.vcf;
-                }
-
-            } catch (IOException e) {
-                LOGGER.error("Error reading phenopacket at `{}`: {}", inputOptions.phenopacket, e.getMessage());
-                return Optional.empty();
+                LOGGER.debug("Trying v2 format first..");
+                AnalysisData analysisData = PhenopacketAnalysisDataUtil.parseV2Phenopacket(inputOptions.phenopacket, inputOptions.vcf, parserFactory);
+                LOGGER.debug("Success!");
+                return analysisData;
+            } catch (AnalysisInputException e) {
+                // swallow and try v1
+                LOGGER.debug("Unable to decode {} as v2 phenopacket, falling back to v1", inputOptions.phenopacket.toAbsolutePath());
             }
+
+            // try v1 or fail
+            AnalysisData analysisData = PhenopacketAnalysisDataUtil.parseV1Phenopacket(inputOptions.phenopacket, inputOptions.vcf, parserFactory);
+            LOGGER.debug("Success!");
+            return analysisData;
         }
 
-        return Optional.of(new AnalysisData(phenotypeTermIds, vcf));
-    }
-
-    private static Optional<Path> getVcfFilePath(Phenopacket phenopacket) {
-        // There should be exactly one VCF file
-        LinkedList<HtsFile> vcfFiles = phenopacket.getHtsFilesList().stream()
-                .filter(htsFile -> htsFile.getHtsFormat().equals(HtsFile.HtsFormat.VCF))
-                .distinct()
-                .collect(Collectors.toCollection(LinkedList::new));
-        if (vcfFiles.isEmpty()) {
-            LOGGER.info("VCF file was not found in Phenopacket. Expecting to find the file among the CLI arguments");
-            return Optional.empty();
-        }
-
-        if (vcfFiles.size() > 1)
-            LOGGER.warn("Found >1 VCF files. Using the first one.");
-
-        // The VCF file should have a proper URI
-        HtsFile vcf = vcfFiles.getFirst();
-        try {
-            URI uri = new URI(vcf.getUri());
-            return Optional.of(Path.of(uri));
-        } catch (URISyntaxException e) {
-            LOGGER.warn("Invalid URI `{}`: {}", vcf.getUri(), e.getMessage());
-            return Optional.empty();
-        }
     }
 
     protected int checkArguments() {
-        if ((inputOptions.vcf == null) == (inputOptions.phenopacket == null)) {
-            LOGGER.error("Path to a VCF file or to a phenopacket must be supplied");
+        if (inputOptions.hpoTermIdList == null && inputOptions.phenopacket == null) {
+            LOGGER.error("No phenotype features provided. Use the CLI or a phenopacket");
             return 1;
         }
 
-        if (inputOptions.phenopacket != null && !inputOptions.hpoTermIdList.isEmpty()) {
-            LOGGER.error("Passing HPO terms both through CLI and Phenopacket is not supported");
+        if (inputOptions.hpoTermIdList != null && inputOptions.phenopacket != null) {
+            LOGGER.error("Passing HPO terms both through CLI and Phenopacket is not supported. Choose one");
+            return 1;
+        }
+
+        if (inputOptions.vcf == null || inputOptions.phenopacket == null) {
+            LOGGER.error("Path to a VCF file or to a phenopacket must be supplied");
             return 1;
         }
 
@@ -356,22 +324,4 @@ public class PrioritizeCommand extends SvAnnaCommand {
         return analysisParameters;
     }
 
-
-    private static class AnalysisData {
-        private final List<TermId> phenotypeTerms;
-        private final Path vcf;
-
-        private AnalysisData(List<TermId> phenotypeTerms, Path vcf) {
-            this.phenotypeTerms = phenotypeTerms;
-            this.vcf = vcf;
-        }
-
-        public List<TermId> phenotypeTerms() {
-            return phenotypeTerms;
-        }
-
-        public Path vcf() {
-            return vcf;
-        }
-    }
 }

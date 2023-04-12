@@ -37,8 +37,6 @@ After the download, unzip the archive and put SvAnna database files into a folde
 
 .. note::
   From now on, we will use ``svanna-data`` instead of spelling out the full path to SvAnna database files.
-.. tip::
-  Keeping the files on a fast hard drive improves the runtime performance.
 
 
 Build SvAnna from source

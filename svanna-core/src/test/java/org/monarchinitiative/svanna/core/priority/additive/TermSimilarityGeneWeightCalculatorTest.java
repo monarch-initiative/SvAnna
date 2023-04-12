@@ -1,5 +1,6 @@
 package org.monarchinitiative.svanna.core.priority.additive;
 
+import org.monarchinitiative.sgenes.model.*;
 import org.monarchinitiative.svanna.core.TestDataConfig;
 import org.monarchinitiative.svanna.core.hpo.SimilarityScoreCalculator;
 import org.monarchinitiative.svanna.core.service.PhenotypeDataService;
@@ -8,10 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.sgenes.model.Gene;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
-import org.monarchinitiative.sgenes.model.Transcript;
-import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
@@ -73,7 +70,8 @@ public class TermSimilarityGeneWeightCalculatorTest {
         TranscriptIdentifier txId = TranscriptIdentifier.of("TX_ACCESSION", "FBN1", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721));
         Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.oneBased(), 48_408_313, 48_645_721);
-        List<Transcript> transcripts = List.of(Transcript.of(txId, location, exons, cdsCoordinates));
+        TranscriptMetadata metadata = TranscriptMetadata.of(TranscriptEvidence.CANONICAL);
+        List<Transcript> transcripts = List.of(Transcript.of(txId, location, exons, cdsCoordinates, metadata));
         Gene gene = Gene.of(id, location, transcripts);
 
 

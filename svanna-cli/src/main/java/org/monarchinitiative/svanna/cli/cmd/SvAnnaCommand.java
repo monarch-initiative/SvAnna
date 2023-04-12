@@ -1,5 +1,7 @@
 package org.monarchinitiative.svanna.cli.cmd;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import org.monarchinitiative.svanna.cli.writer.ResultWriterFactory;
 import org.monarchinitiative.svanna.configuration.SvAnnaBuilder;
 import org.monarchinitiative.svanna.configuration.exception.InvalidResourceException;
@@ -16,9 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
@@ -36,6 +40,11 @@ public abstract class SvAnnaCommand implements Callable<Integer> {
     private static final double FANTOM_5_TISSUE_SPECIFICITY = .5;
     private static final double TAD_STABILITY_THRESHOLD = 80.;
     // -----------------------------------------------------------------------------------------------------------------
+
+    @CommandLine.Option(names = {"-v"},
+            description = {"Specify multiple -v options to increase verbosity.",
+                    "For example, `-v -v -v` or `-vvv`"})
+    protected boolean[] verbosity = {};
 
     @CommandLine.Option(names = {"-d", "--data-directory"},
             paramLabel = "path/to/datadir",
@@ -76,6 +85,17 @@ public abstract class SvAnnaCommand implements Callable<Integer> {
         return properties;
     }
 
+    @Override
+    public Integer call() {
+        // (0) Setup verbosity and print banner.
+        setupLoggingAndPrintBanner();
+
+        // (1) Run the command functionality.
+        return execute();
+    }
+
+    protected abstract Integer execute();
+
     protected SvAnna bootstrapSvAnna(SvAnnaProperties svAnnaProperties) throws MissingResourceException, InvalidResourceException, UndefinedResourceException {
         LOGGER.info("Spooling up SvAnna v{} using resources in {}", SVANNA_VERSION, svAnnaProperties.dataDirectory().toAbsolutePath());
         return SvAnnaBuilder.builder(svAnnaProperties)
@@ -101,6 +121,46 @@ public abstract class SvAnnaCommand implements Callable<Integer> {
     protected static ResultWriterFactory resultWriterFactory(SvAnna svAnna) {
         GeneOverlapper overlapper = GeneOverlapper.of(svAnna.geneService());
         return new ResultWriterFactory(overlapper, svAnna.annotationDataService(), svAnna.phenotypeDataService());
+    }
+
+    private void setupLoggingAndPrintBanner() {
+        Level level = parseVerbosityLevel();
+
+        LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+        context.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(level);
+
+        printBanner();
+    }
+
+    private static String readBanner() {
+        try (InputStream is = new BufferedInputStream(Objects.requireNonNull(SvAnnaCommand.class.getResourceAsStream("/banner.txt")))) {
+            return new String(is.readAllBytes());
+        } catch (IOException e) {
+            // swallow
+            return "";
+        }
+    }
+
+    private Level parseVerbosityLevel() {
+        int verbosity = 0;
+        for (boolean a : this.verbosity) {
+            if (a) verbosity++;
+        }
+
+        switch (verbosity) {
+            case 0:
+                return Level.INFO;
+            case 1:
+                return Level.DEBUG;
+            case 2:
+                return Level.TRACE;
+            default:
+                return Level.ALL;
+        }
+    }
+
+    private static void printBanner() {
+        System.err.println(readBanner());
     }
 
 }

@@ -1,5 +1,6 @@
 package org.monarchinitiative.svanna.core.priority.additive.impact;
 
+import org.monarchinitiative.sgenes.model.*;
 import org.monarchinitiative.svanna.core.TestContig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,10 +10,6 @@ import org.monarchinitiative.svart.CoordinateSystem;
 import org.monarchinitiative.svart.Coordinates;
 import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.Strand;
-import org.monarchinitiative.sgenes.model.Gene;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
-import org.monarchinitiative.sgenes.model.Transcript;
-import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 
 import java.util.List;
 
@@ -34,7 +31,8 @@ public class GeneSequenceImpactCalculatorTest {
         TranscriptIdentifier txId = TranscriptIdentifier.of("TX1", "TX1_SYMBOL", null);
         List<Coordinates> exons = makeExons(oneStart, oneEnd, twoStart, twoEnd, threeStart, threeEnd);
         Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start + 10, end - 10);
-        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates);
+        TranscriptMetadata metadata = TranscriptMetadata.of(TranscriptEvidence.CANONICAL);
+        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates, metadata);
 
         // make gene
         GeneIdentifier gId = GeneIdentifier.of("NCBIGene:123", "A", null, null);

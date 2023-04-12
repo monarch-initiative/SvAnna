@@ -1,5 +1,6 @@
 package org.monarchinitiative.svanna.core.priority.additive.evaluator.getad;
 
+import org.monarchinitiative.sgenes.model.*;
 import org.monarchinitiative.svanna.core.TestContig;
 import org.monarchinitiative.svanna.core.TestEnhancer;
 import org.monarchinitiative.svanna.core.TestTad;
@@ -12,10 +13,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.monarchinitiative.svanna.core.priority.additive.*;
 import org.monarchinitiative.svart.*;
-import org.monarchinitiative.sgenes.model.Gene;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
-import org.monarchinitiative.sgenes.model.Transcript;
-import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 
 import java.util.List;
 
@@ -40,7 +37,8 @@ public class RouteDataEvaluatorGETadTest {
         TranscriptIdentifier txId = TranscriptIdentifier.of(id + "_tx", symbol + "_tx", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
         Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start, end);
-        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates);
+        TranscriptMetadata metadata = TranscriptMetadata.of(TranscriptEvidence.CANONICAL);
+        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates, metadata);
 
         GeneIdentifier geneId = GeneIdentifier.of(id, symbol, null, null);
         return Gene.of(geneId, location, List.of(tx));

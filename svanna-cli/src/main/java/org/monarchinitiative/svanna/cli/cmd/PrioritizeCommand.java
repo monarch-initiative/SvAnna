@@ -127,7 +127,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
     }
 
     @Override
-    public Integer call() {
+    public Integer execute() {
         int status = checkArguments();
         if (status != 0)
             return status;
@@ -192,7 +192,7 @@ public class PrioritizeCommand extends SvAnnaCommand {
             return 1;
         }
 
-        if (inputOptions.vcf == null || inputOptions.phenopacket == null) {
+        if (inputOptions.vcf == null && inputOptions.phenopacket == null) {
             LOGGER.error("Path to a VCF file or to a phenopacket must be supplied");
             return 1;
         }

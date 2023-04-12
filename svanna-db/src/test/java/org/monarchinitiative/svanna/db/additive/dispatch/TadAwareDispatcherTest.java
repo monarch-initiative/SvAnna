@@ -1,5 +1,6 @@
 package org.monarchinitiative.svanna.db.additive.dispatch;
 
+import org.monarchinitiative.sgenes.model.*;
 import org.monarchinitiative.svanna.core.priority.additive.Routes;
 import org.monarchinitiative.svanna.core.service.GeneService;
 import org.monarchinitiative.svanna.core.service.QueryResult;
@@ -11,10 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
-import org.monarchinitiative.sgenes.model.Gene;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
-import org.monarchinitiative.sgenes.model.Transcript;
-import org.monarchinitiative.sgenes.model.TranscriptIdentifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +45,8 @@ public class TadAwareDispatcherTest {
         TranscriptIdentifier txId = TranscriptIdentifier.of(id + "_tx", symbol + "_tx", null);
         List<Coordinates> exons = List.of(Coordinates.of(CoordinateSystem.zeroBased(), start, end));
         Coordinates cdsCoordinates = Coordinates.of(CoordinateSystem.zeroBased(), start, end);
-        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates);
+        TranscriptMetadata metadata = TranscriptMetadata.of(TranscriptEvidence.CANONICAL);
+        Transcript tx = Transcript.of(txId, location, exons, cdsCoordinates, metadata);
 
         GeneIdentifier geneId = GeneIdentifier.of(id, symbol, null, null);
         return Gene.of(geneId, location, List.of(tx));

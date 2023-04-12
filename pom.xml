@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.10</version>
+        <version>3.0.5</version>
     </parent>
 
     <properties>
@@ -32,8 +32,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <phenol.version>2.0.0-RC2</phenol.version>
-        <silent.genes.version>0.2.0</silent.genes.version>
+        <phenol.version>2.0.0</phenol.version>
+        <silent.genes.version>0.2.5</silent.genes.version>
         <h2.version>1.4.200</h2.version>
     </properties>
 
@@ -125,7 +125,7 @@
             <dependency>
                 <groupId>com.github.samtools</groupId>
                 <artifactId>htsjdk</artifactId>
-                <version>2.23.0</version>
+                <version>3.0.5</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.tukaani</groupId>

@@ -15,6 +15,9 @@ import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
+import org.monarchinitiative.phenol.annotations.assoc.GeneInfoGeneType;
+import org.monarchinitiative.phenol.annotations.formats.hpo.*;
+import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaders;
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.SvAnnaRuntimeException;
 import org.monarchinitiative.svanna.core.hpo.TermPair;
@@ -45,12 +48,6 @@ import org.monarchinitiative.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svanna.model.landscape.variant.PopulationVariant;
-import org.monarchinitiative.phenol.annotations.assoc.HpoAssociationLoader;
-import org.monarchinitiative.phenol.annotations.base.Ratio;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseaseAnnotation;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
 import org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoader;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
@@ -239,9 +236,13 @@ public class BuildDb implements Callable<Integer> {
         LOGGER.debug("Parsing gene info file at {}", geneInfoPath.toAbsolutePath());
         LOGGER.debug("Parsing MIM to gene medgen file at {}", mim2geneMedgenPath.toAbsolutePath());
         HpoDiseaseLoaderOptions loaderOptions = HpoDiseaseLoaderOptions.of(DISEASE_DATABASES, true, HpoDiseaseLoaderOptions.DEFAULT_COHORT_SIZE);
-        HpoDiseaseLoader loader = HpoDiseaseLoader.of(hpo, loaderOptions);
+        HpoDiseaseLoader loader = HpoDiseaseLoaders.defaultLoader(hpo, loaderOptions);
         HpoDiseases diseases = loader.load(hpoAnnotationsPath);
-        HpoAssociationData hpoAssociationData = HpoAssociationLoader.loadHpoAssociationData(hpo, geneInfoPath, mim2geneMedgenPath, null, diseases);
+        HpoAssociationData hpoAssociationData = HpoAssociationData.builder(hpo)
+                .hpoDiseases(diseases)
+                .mim2GeneMedgen(mim2geneMedgenPath)
+                .homoSapiensGeneInfo(geneInfoPath, GeneInfoGeneType.DEFAULT)
+                .build();
 
         // Ingest geneToDisease
         int updatedGeneToDisease = ingestGeneToDiseaseMap(hpoAssociationData, ncbiGeneToHgnc, diseases, geneDiseaseDao);
@@ -313,7 +314,7 @@ public class BuildDb implements Callable<Integer> {
         Map<Integer, List<HpoDiseaseSummary>> geneToDisease = new HashMap<>();
 
         // extract relevant bits and pieces for diseases, and map NCBIGene to HGNC
-        Map<TermId, Collection<TermId>> geneToDiseaseIdMap = hpoAssociationData.geneToDiseases();
+        Map<TermId, Collection<TermId>> geneToDiseaseIdMap = hpoAssociationData.associations().geneIdToDiseaseIds();
 
         Map<TermId, HpoDisease> diseaseMap = diseases.diseaseById();
         for (TermId ncbiGeneTermId : geneToDiseaseIdMap.keySet()) {
@@ -341,9 +342,7 @@ public class BuildDb implements Callable<Integer> {
 
         int updated = 0;
         for (HpoDisease disease : diseases) {
-            List<TermId> presentPhenotypeTermIds = disease.phenotypicAbnormalitiesStream()
-                    // We assume that the terms with missing ratio are observed/present.
-                    .filter(pa -> pa.ratio().map(Ratio::isPositive).orElse(true))
+            List<TermId> presentPhenotypeTermIds = disease.presentAnnotationsStream()
                     .map(HpoDiseaseAnnotation::id)
                     .collect(Collectors.toList());
             updated += geneDiseaseDao.insertDiseaseToPhenotypes(disease.id().getValue(), presentPhenotypeTermIds);

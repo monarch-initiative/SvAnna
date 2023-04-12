@@ -34,9 +34,9 @@ Analysis input
 ##############
 
 The input data can be specified in two ways: either as a path to a VCF file along with one or more HPO terms,
-or as a *Phenopacket*:
+or as a *phenopacket*:
 
-* ``-p | --phenopacket`` - path to Phenopacket in JSON format.
+* ``-p | --phenopacket`` - path to a phenopacket file. We support *v1* and *v2* schemas and the file can be in JSON, YAML, or protobuf binary format.
 * ``-t | --phenotype-term`` - HPO term describing clinical condition of the proband, may be specified multiple times (e.g. ``--term HP:1234567 --term HP:9876543``).
 * ``--vcf`` - path to the input VCF file.
 
@@ -84,6 +84,7 @@ SvAnna configuration
 * ``--promoter-length`` - number of bases pre-pended to a transcript and evaluated as a promoter region (default: ``2000``).
 * ``--promoter-fitness-gain`` - set to ``0.`` to score the promoter variants as strictly as coding variants
   or to ``1.`` to completely disregard the promoter variants (default: ``0.6``).
+* ``-v`` - set logging output granularity. The option can be set multiple times (e.g. ``-vv``) to increase logging output.
 
 See the next section to learn more about the SvAnna :ref:`rstoutputformats`,
 and the :ref:`rstexamples` section to see how SvAnna prioritizes various SV classes.

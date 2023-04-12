@@ -3,8 +3,13 @@ Changelog
 =========
 
 ------
-latest
+v1.0.3
 ------
+- ``SvAnna``
+  - update dependency versions.
+- ``svanna-cli``
+  - Add support for *v1* and *v2* phenopacket in JSON, YAML, or protobuf binary formats.
+  - Rework the logging functionality to log all output to standard error output and to allow setting the logging granularity via ``-v`` CLI option.
 
 ------
 v1.0.2

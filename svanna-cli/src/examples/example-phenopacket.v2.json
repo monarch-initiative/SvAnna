@@ -1,9 +1,11 @@
 {
-  "id": "example",
+  "id": "example-phenopacket",
   "subject": {
-    "id": "example",
-    "ageAtCollection": {
-      "age": "P2Y"
+    "id": "Sample",
+    "timeAtLastEncounter": {
+      "age": {
+        "iso8601duration": "P2Y"
+      }
     }
   },
   "phenotypicFeatures": [{
@@ -11,11 +13,6 @@
       "id": "HP:0008330",
       "label": "Reduced von Willebrand factor activity"
     }
-  }],
-  "htsFiles": [{
-    "uri": "file:///***/***/example.vcf",
-    "htsFormat": "VCF",
-    "genomeAssembly": "hg38"
   }],
   "metaData": {
     "created": "2021-07-13T15:08:53.846Z",
@@ -28,6 +25,6 @@
       "namespacePrefix": "HP",
       "iriPrefix": "http://purl.obolibrary.org/obo/HP_"
     }],
-    "phenopacketSchemaVersion": "1.0.0"
+    "phenopacketSchemaVersion": "2.0.0"
   }
 }

@@ -24,12 +24,12 @@
                 <include>svanna-cli-${version}.jar</include>
             </includes>
         </fileSet>
+        <!-- Include example data -->
         <fileSet>
-            <directory>${project.build.directory}/assembly-resources</directory>
+            <directory>${project.basedir}/src/examples</directory>
             <outputDirectory>./examples</outputDirectory>
             <includes>
-                <include>example.vcf</include>
-                <include>run_examples.sh</include>
+                <include>**/**</include>
             </includes>
         </fileSet>
     </fileSets>

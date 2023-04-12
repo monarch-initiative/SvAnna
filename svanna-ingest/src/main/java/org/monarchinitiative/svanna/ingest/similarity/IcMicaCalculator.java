@@ -2,7 +2,6 @@ package org.monarchinitiative.svanna.ingest.similarity;
 
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.hpo.TermPair;
-import org.monarchinitiative.phenol.annotations.base.Ratio;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseaseAnnotation;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
@@ -37,9 +36,7 @@ public class IcMicaCalculator {
             diseaseIdToTermIds.putIfAbsent(diseaseId, new HashSet<>());
 
             // add term ancestors
-            Set<TermId> hpoTerms = disease.phenotypicAbnormalitiesStream()
-                    // We assume that the terms with missing ratio are observed/present.
-                    .filter(a -> a.ratio().map(Ratio::isPositive).orElse(true))
+            Set<TermId> hpoTerms = disease.presentAnnotationsStream()
                     .map(HpoDiseaseAnnotation::id)
                     .collect(Collectors.toSet());
             Set<TermId> inclAncestorTermIds = TermIds.augmentWithAncestors(ontology, hpoTerms, true);

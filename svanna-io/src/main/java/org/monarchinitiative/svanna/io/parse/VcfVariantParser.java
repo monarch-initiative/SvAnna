@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -97,18 +97,37 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
         VCFCodec codec = new VCFCodec();
         codec.setVCFHeader(header, header.getVCFHeaderVersion() == null ? VCFHeaderVersion.VCF4_1 : header.getVCFHeaderVersion());
 
-        BufferedReader reader;
-        if (filePath.toFile().getName().endsWith(".gz"))
-            reader = new BufferedReader(new InputStreamReader(new GzipCompressorInputStream(new FileInputStream(filePath.toFile()))));
-        else
-            reader = Files.newBufferedReader(filePath);
+        BufferedReader reader = openFileForReading(filePath);
 
         return reader.lines()
-                .onClose(() -> {try {reader.close();} catch (IOException ignored) {}})
+                .onClose(closeReader(reader))
                 .map(toVariantContext(codec))
                 .flatMap(Optional::stream)
                 .map(toVariants())
                 .flatMap(Optional::stream);
+    }
+
+    private static BufferedReader openFileForReading(Path filePath) throws IOException {
+        BufferedReader reader;
+        if (filePath.toFile().getName().endsWith(".gz"))
+            reader = new BufferedReader(
+                    new InputStreamReader(
+                            new GzipCompressorInputStream(Files.newInputStream(filePath)),
+                            StandardCharsets.UTF_8));
+        else
+            reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8);
+        return reader;
+    }
+
+    private static Runnable closeReader(BufferedReader reader) {
+        return () -> {
+            try {
+                LOGGER.trace("Closing VCF file");
+                reader.close();
+            } catch (IOException e) {
+                LOGGER.warn("Error while closing the VCF file", e);
+            }
+        };
     }
 
     /**

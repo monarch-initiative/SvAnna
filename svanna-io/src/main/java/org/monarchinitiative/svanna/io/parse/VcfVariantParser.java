@@ -7,7 +7,6 @@ import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.filter.FilterResult;
 import org.monarchinitiative.svanna.core.filter.FilterType;
@@ -32,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Parse variants stored in a VCF file. The parser is <em>NOT</em> thread safe!
@@ -112,7 +112,7 @@ public class VcfVariantParser implements VariantParser<FullSvannaVariant> {
         if (filePath.toFile().getName().endsWith(".gz"))
             reader = new BufferedReader(
                     new InputStreamReader(
-                            new GzipCompressorInputStream(Files.newInputStream(filePath)),
+                            new GZIPInputStream(Files.newInputStream(filePath)),
                             StandardCharsets.UTF_8));
         else
             reader = Files.newBufferedReader(filePath, StandardCharsets.UTF_8);

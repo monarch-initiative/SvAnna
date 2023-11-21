@@ -7,8 +7,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -87,6 +85,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 @CommandLine.Command(name = "build-db",
         aliases = "B",
@@ -369,7 +369,7 @@ public class BuildDb implements Callable<Integer> {
         GeneParser jsonParser = parserFactory.forFormat(SerializationFormat.JSON);
         Path destination = buildDir.resolve("gencode.v38.genes.json.gz");
         LOGGER.info("Serializing the genes to {}", destination.toAbsolutePath());
-        try (OutputStream os = new BufferedOutputStream(new GzipCompressorOutputStream(Files.newOutputStream(destination)))) {
+        try (OutputStream os = new BufferedOutputStream(new GZIPOutputStream(Files.newOutputStream(destination)))) {
             jsonParser.write(genes, os);
         }
 
@@ -563,7 +563,7 @@ public class BuildDb implements Callable<Integer> {
 
     private static BufferedReader openForReading(Path tablePath) throws IOException {
         return (tablePath.toFile().getName().endsWith(".gz"))
-                ? new BufferedReader(new InputStreamReader(new GzipCompressorInputStream(Files.newInputStream(tablePath))))
+                ? new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(tablePath))))
                 : Files.newBufferedReader(tablePath);
 
     }

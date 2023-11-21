@@ -3,6 +3,15 @@ Changelog
 =========
 
 ------
+v1.0.4
+------
+
+- ``SvAnna``
+  - update dependency versions.
+- ``svanna-io``
+  - Fix issue with VCF files compressed by newer compressor versions
+
+------
 v1.0.3
 ------
 - ``SvAnna``

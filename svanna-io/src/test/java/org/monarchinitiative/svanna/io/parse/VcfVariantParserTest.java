@@ -4,15 +4,12 @@ import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFCodec;
 import htsjdk.variant.vcf.VCFFileReader;
 import htsjdk.variant.vcf.VCFHeaderVersion;
+import org.junit.jupiter.api.*;
 import org.monarchinitiative.svanna.core.reference.SvannaVariant;
 import org.monarchinitiative.svanna.core.reference.VariantAware;
 import org.monarchinitiative.svanna.core.reference.Zygosity;
 import org.monarchinitiative.svanna.io.FullSvannaVariant;
 import org.monarchinitiative.svanna.io.TestDataConfig;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.monarchinitiative.svart.*;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
@@ -31,7 +28,8 @@ import static org.hamcrest.Matchers.*;
 @SpringBootTest(classes = TestDataConfig.class)
 public class VcfVariantParserTest {
 
-    private static final Path SV_EXAMPLE_PATH = Paths.get("src/test/resources/org/monarchinitiative/svanna/io/parse/sv_example.vcf");
+    private static final Path TEST_VCF_DIR = Paths.get("src/test/resources/org/monarchinitiative/svanna/io/parse");
+    private static final Path SV_EXAMPLE_PATH = TEST_VCF_DIR.resolve("sv_example.vcf");
     private static final VCFCodec VCF_CODEC = new VCFCodec();
 
     @BeforeAll
@@ -423,6 +421,41 @@ public class VcfVariantParserTest {
             assertThat(right.coordinates().startConfidenceInterval(), equalTo(ConfidenceInterval.of(-1, 2)));
             assertThat(right.end(), equalTo(5));
             assertThat(right.coordinates().endConfidenceInterval(), equalTo(ConfidenceInterval.of(-1, 2)));
+        }
+    }
+
+    /**
+     * Per issue <a href="https://github.com/TheJacksonLaboratory/SvAnna/issues/235">235</a>,
+     * HTSlib &gt;1.17 produces a gzipped file that cannot be read by common-compress's `GzipCompressorInputStream`.
+     * As a fix, the class was replaced by JRE's {@link java.util.zip.GZIPInputStream}.
+     * <p>
+     * Here we test that both older and newer VCFs can be correctly read by SvAnna's code.
+     */
+    @Nested
+    public class GzipQuirkTests {
+
+        private final GenomicAssembly GRCh38p13 = GenomicAssemblies.GRCh38p13();
+        private VcfVariantParser instance;
+
+        @BeforeEach
+        public void setUp() {
+            instance = new VcfVariantParser(GRCh38p13);
+        }
+
+        @Test
+        public void loadHtslibLeq16() throws Exception {
+            Path input = TEST_VCF_DIR.resolve("htslib_16.vcf.gz");
+            List<FullSvannaVariant> alleles = instance.createVariantAlleleList(input);
+
+            assertThat(alleles, hasSize(8));
+        }
+
+        @Test
+        public void loadHtslibGeq17() throws Exception {
+            Path input = TEST_VCF_DIR.resolve("htslib_17.vcf.gz");
+            List<FullSvannaVariant> alleles = instance.createVariantAlleleList(input);
+
+            assertThat(alleles, hasSize(8));
         }
     }
 

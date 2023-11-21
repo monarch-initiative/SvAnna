@@ -11,6 +11,7 @@
             <outputDirectory>./</outputDirectory>
             <filtered>true</filtered>
             <includes>
+                <include>img/**</include>
                 <include>README.md</include>
                 <include>LICENSE</include>
                 <include>CHANGELOG.rst</include>

@@ -1,6 +1,5 @@
 package org.monarchinitiative.svanna.io.service;
 
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.monarchinitiative.svanna.core.service.GeneService;
 import org.monarchinitiative.svanna.core.service.QueryResult;
 import org.monarchinitiative.svanna.io.service.jannovar.IntervalArray;
@@ -23,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 public class SilentGenesGeneService implements GeneService {
 
@@ -64,7 +64,7 @@ public class SilentGenesGeneService implements GeneService {
     private static InputStream openForReading(Path silentGenesJsonPath) throws IOException {
         if (silentGenesJsonPath.toFile().getName().endsWith(".gz")) {
             LOGGER.debug("Assuming the file is gzipped");
-            return new BufferedInputStream(new GzipCompressorInputStream(Files.newInputStream(silentGenesJsonPath)));
+            return new BufferedInputStream(new GZIPInputStream(Files.newInputStream(silentGenesJsonPath)));
         } else {
             return new BufferedInputStream(Files.newInputStream(silentGenesJsonPath));
         }

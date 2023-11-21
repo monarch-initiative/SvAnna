@@ -1,6 +1,5 @@
 package org.monarchinitiative.svanna.cli.writer.tabular;
 
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.monarchinitiative.svanna.cli.writer.AnalysisResults;
@@ -27,6 +26,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.zip.GZIPOutputStream;
 
 public class TabularResultWriter implements ResultWriter {
 
@@ -63,7 +63,7 @@ public class TabularResultWriter implements ResultWriter {
         Path outPath = output.resolve(prefix + suffix + (compress ? ".gz" : ""));
         LogUtils.logInfo(LOGGER, "Writing tabular results into {}", outPath.toAbsolutePath());
         return compress
-                ? new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(outPath.toFile()))))
+                ? new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(outPath.toFile()))))
                 : Files.newBufferedWriter(outPath);
     }
 

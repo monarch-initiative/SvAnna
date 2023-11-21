@@ -1,6 +1,5 @@
 package org.monarchinitiative.svanna.benchmark.cmd.benchmark_case;
 
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.monarchinitiative.svanna.benchmark.cmd.BaseBenchmarkCommand;
@@ -34,6 +33,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
 
 @CommandLine.Command(name = "benchmark-case",
         aliases = {"BC"},
@@ -191,7 +191,7 @@ public class BenchmarkCaseCommand extends BaseBenchmarkCommand {
 
         // "case_name", "background_vcf", "variant_id", "rank", "vtype", "is_causal", "priority"
         LOGGER.info("Writing the results for `{}`", results.caseName());
-        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GzipCompressorOutputStream(new FileOutputStream(output))))) {
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(output))))) {
             CSVPrinter printer = CSVFormat.DEFAULT
                     .withHeader("case_name", "background_vcf", "variant_id", "rank", "vtype", "is_causal", "priority")
                     .print(writer);

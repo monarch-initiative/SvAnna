@@ -16,7 +16,7 @@
         <module>svanna-benchmark</module>
     </modules>
     <groupId>org.monarchinitiative.svanna</groupId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <name>SvAnna</name>
 
     <parent>

@@ -51,7 +51,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             String sql = "insert into SVANNA.CLINGEN_DOSAGE_ELEMENT(" +
-                    " CONTIG, START, END, " +
+                    " CONTIG, START_POS, END_POS, " +
                     " ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE) " +
                     " VALUES ( ?, ?, ?, ?, ?, ? )";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -83,11 +83,11 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
 
     @Override
     public List<DosageRegion> getOverlapping(GenomicRegion query) {
-        String sql = "select CONTIG, START, END, ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
+        String sql = "select CONTIG, START_POS, END_POS, ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
                 " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where CONTIG = ? " +
-                "    and ? < END " +
-                "    and START < ?";
+                "    and ? < END_POS " +
+                "    and START_POS < ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, query.contigId());
@@ -119,8 +119,8 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
         String sql = "select distinct ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
                 " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where (CONTIG = ? " +
-                "      and ? < END " +
-                "      and START < ?) " +
+                "      and ? < END_POS " +
+                "      and START_POS < ?) " +
                 "    or ID = ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -146,7 +146,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
                     continue;
                 }
                 Coordinates coordinates = Coordinates.of(CoordinateSystem.zeroBased(), // database invariant
-                        rs.getInt("START"), rs.getInt("END"));
+                        rs.getInt("START_POS"), rs.getInt("END_POS"));
                 GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, coordinates);
                 Dosage dosage = Dosage.of(rs.getString("ID"),
                         DosageSensitivity.valueOf(rs.getString("DOSAGE_SENSITIVITY")),

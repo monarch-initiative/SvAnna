@@ -449,7 +449,9 @@ public class BuildDb implements Callable<Integer> {
         URL mcArthurSupplement = new URL(properties.mcArthur2021Supplement());
         Path localPath = downloadUrl(mcArthurSupplement, tmpDir);
 
-        try (ZipFile zipFile = new ZipFile(localPath.toFile())) {
+        try (ZipFile zipFile = ZipFile.builder()
+                .setFile(localPath.toFile())
+                .get()) {
             // this is the single file from the entire ZIP that we're interested in
             String entryName = "emcarthur-TAD-stability-heritability-184f51a/data/boundariesByStability/100kbBookendBoundaries_mainText/100kbBookendBoundaries_byStability.bed";
             ZipArchiveEntry entry = zipFile.getEntry(entryName);
@@ -683,7 +685,7 @@ public class BuildDb implements Callable<Integer> {
             DigestUtils digest = new DigestUtils(MessageDigestAlgorithms.SHA_256);
 
             for (File resource : resources) {
-                if (LOGGER.isDebugEnabled()) LOGGER.debug("Calculating SHA256 digest for `{}`", resource);
+                LOGGER.debug("Calculating SHA256 digest for `{}`", resource);
                 String hexDigest = digest.digestAsHex(resource);
                 fileToDigest.put(resource, hexDigest);
             }

@@ -1,4 +1,4 @@
-insert into SVANNA.TAD_BOUNDARY(CONTIG, START, END, MIDPOINT, ID, STABILITY)
+insert into SVANNA.TAD_BOUNDARY(CONTIG, START_POS, END_POS, MIDPOINT, ID, STABILITY)
 values
        ( 1, 20, 40, 30, 'one',   .8),
        ( 1, 30, 50, 40, 'two',   .9),

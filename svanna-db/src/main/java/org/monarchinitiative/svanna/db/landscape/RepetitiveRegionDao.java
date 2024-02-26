@@ -30,7 +30,7 @@ public class RepetitiveRegionDao implements AnnotationDao<RepetitiveRegion>, Ing
     }
 
     public List<RepetitiveRegion> getAllItems() {
-        String sql = "select CONTIG, START, END, REPEAT_FAMILY from SVANNA.REPETITIVE_REGIONS";
+        String sql = "select CONTIG, START_POS, END_POS, REPEAT_FAMILY from SVANNA.REPETITIVE_REGIONS";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             return processStatement(preparedStatement);
@@ -42,11 +42,11 @@ public class RepetitiveRegionDao implements AnnotationDao<RepetitiveRegion>, Ing
 
     @Override
     public List<RepetitiveRegion> getOverlapping(GenomicRegion query) {
-        String sql = "select CONTIG, START, END, REPEAT_FAMILY " +
+        String sql = "select CONTIG, START_POS, END_POS, REPEAT_FAMILY " +
                 " from SVANNA.REPETITIVE_REGIONS " +
                 "  where CONTIG = ? " +
-                "    and ? < END " +
-                "    and START < ?";
+                "    and ? < END_POS " +
+                "    and START_POS < ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, query.contigId());
@@ -70,7 +70,7 @@ public class RepetitiveRegionDao implements AnnotationDao<RepetitiveRegion>, Ing
                 }
                 regions.add(RepetitiveRegion.of(contig,
                         Strand.POSITIVE, CoordinateSystem.zeroBased(), // database invariant
-                        rs.getInt("START"), rs.getInt("END"),
+                        rs.getInt("START_POS"), rs.getInt("END_POS"),
                         RepeatFamily.valueOf(rs.getString("REPEAT_FAMILY"))));
             }
         }
@@ -83,7 +83,7 @@ public class RepetitiveRegionDao implements AnnotationDao<RepetitiveRegion>, Ing
 
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            String sql = "insert into SVANNA.REPETITIVE_REGIONS(CONTIG, START, END, REPEAT_FAMILY) " +
+            String sql = "insert into SVANNA.REPETITIVE_REGIONS(CONTIG, START_POS, END_POS, REPEAT_FAMILY) " +
                     "VALUES ( ?, ?, ?, ? )";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, item.contigId());

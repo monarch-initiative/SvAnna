@@ -61,7 +61,7 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
 
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            String enhancerSql = "insert into SVANNA.ENHANCERS(CONTIG, START, END, " +
+            String enhancerSql = "insert into SVANNA.ENHANCERS(CONTIG, START_POS, END_POS, " +
                     " ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU) " +
                     " VALUES ( ?, ?, ?, ?, ?, ?, ? )";
             String tissueSpecSql = "insert into SVANNA.ENHANCER_TISSUE_SPECIFICITY(ENHANCER_ID, " +
@@ -111,7 +111,7 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
     }
 
     public List<Enhancer> getAllItems() {
-        String sql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
+        String sql = "select E.ENHANCER_ID, CONTIG, START_POS, END_POS, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
                 " TERM_ID, TERM_LABEL, HPO_ID, HPO_LABEL, SPECIFICITY " +
                 " from SVANNA.ENHANCERS E join SVANNA.ENHANCER_TISSUE_SPECIFICITY ETS on E.ENHANCER_ID = ETS.ENHANCER_ID";
         try (Connection connection = dataSource.getConnection();
@@ -157,12 +157,12 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
         try (Connection connection = dataSource.getConnection()) {
             if (!enhancerParameters.useFantom5()) {
                 // just VISTA
-                String enhancerSql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
+                String enhancerSql = "select E.ENHANCER_ID, CONTIG, START_POS, END_POS, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
                         " TERM_ID, TERM_LABEL, HPO_ID, HPO_LABEL, SPECIFICITY " +
                         "   from SVANNA.ENHANCERS E join SVANNA.ENHANCER_TISSUE_SPECIFICITY ETS on E.ENHANCER_ID = ETS.ENHANCER_ID " +
                         " where E.CONTIG = ? " +
-                        "   and ? < E.END " +
-                        "   and E.START < ? " +
+                        "   and ? < E.END_POS " +
+                        "   and E.START_POS < ? " +
                         "   and E.IS_DEVELOPMENTAL = true";
                 try (PreparedStatement ps = connection.prepareStatement(enhancerSql)) {
                     ps.setInt(1, query.contigId());
@@ -172,12 +172,12 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
                 }
             } else {
                 // FANTOM5 and maybe VISTA
-                String enhancerSql = "select E.ENHANCER_ID, CONTIG, START, END, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
+                String enhancerSql = "select E.ENHANCER_ID, CONTIG, START_POS, END_POS, ENHANCER_SOURCE, NAME, IS_DEVELOPMENTAL, TAU, " +
                         " TERM_ID, TERM_LABEL, HPO_ID, HPO_LABEL, SPECIFICITY " +
                         "   from SVANNA.ENHANCERS E join SVANNA.ENHANCER_TISSUE_SPECIFICITY ETS on E.ENHANCER_ID = ETS.ENHANCER_ID" +
                         " where E.CONTIG = ? " +
-                        "   and ? < E.END " +
-                        "   and E.START < ? " +
+                        "   and ? < E.END_POS " +
+                        "   and E.START_POS < ? " +
                         "   and (E.IS_DEVELOPMENTAL = ? or (E.IS_DEVELOPMENTAL = false and ETS.SPECIFICITY > ?))";
                 try (PreparedStatement ps = connection.prepareStatement(enhancerSql)) {
                     ps.setInt(1, query.contigId());
@@ -210,7 +210,7 @@ public class EnhancerAnnotationDao implements AnnotationDao<Enhancer>, IngestDao
 
                 if (!builders.containsKey(enhancerId)) {
                     // database invariant
-                    Coordinates coordinates = Coordinates.of(CoordinateSystem.zeroBased(), rs.getInt("START"), rs.getInt("END"));
+                    Coordinates coordinates = Coordinates.of(CoordinateSystem.zeroBased(), rs.getInt("START_POS"), rs.getInt("END_POS"));
                     GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, coordinates);
                     BaseEnhancer.Builder builder = BaseEnhancer.builder()
                             .location(location)

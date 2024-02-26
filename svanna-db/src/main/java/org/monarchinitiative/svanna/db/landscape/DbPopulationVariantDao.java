@@ -60,7 +60,7 @@ public class DbPopulationVariantDao implements PopulationVariantDao, IngestDao<P
                 }
                 regions.add(
                         BasePopulationVariant.of(
-                                GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), rs.getInt("START"), rs.getInt("END")),
+                                GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.zeroBased(), rs.getInt("START_POS"), rs.getInt("END_POS")),
                                 rs.getString("ID"), VariantType.valueOf(rs.getString("VARIANT_TYPE")),
                                 rs.getFloat("ALLELE_FREQUENCY"), origin));
             }
@@ -74,7 +74,7 @@ public class DbPopulationVariantDao implements PopulationVariantDao, IngestDao<P
 
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            String sql = "insert into SVANNA.POPULATION_VARIANTS(CONTIG, START, END, " +
+            String sql = "insert into SVANNA.POPULATION_VARIANTS(CONTIG, START_POS, END_POS, " +
                     "ID, VARIANT_TYPE, ORIGIN, ALLELE_FREQUENCY) " +
                     "VALUES ( ?, ?, ?, ?, ?, ?, ? )";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -111,11 +111,11 @@ public class DbPopulationVariantDao implements PopulationVariantDao, IngestDao<P
     @Override
     public List<PopulationVariant> getOverlapping(GenomicRegion query, Set<PopulationVariantOrigin> origins) {
 
-        String sql = "select CONTIG, START, END, ID, VARIANT_TYPE, ORIGIN, ALLELE_FREQUENCY " +
+        String sql = "select CONTIG, START_POS, END_POS, ID, VARIANT_TYPE, ORIGIN, ALLELE_FREQUENCY " +
                 " from SVANNA.POPULATION_VARIANTS " +
                 "  where CONTIG = ? " +
-                "    and ? < END " +
-                "    and START < ?";
+                "    and ? < END_POS " +
+                "    and START_POS < ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, query.contigId());

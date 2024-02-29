@@ -6,12 +6,19 @@ Downloads
 
 SvAnna database files are available for download from the following locations:
 
-=========  ==============  ============================================================  =============================================
- Version    Genome build                           URL                                                      Size
-=========  ==============  ============================================================  =============================================
- 2204       hg38/GRCh38     https://storage.googleapis.com/svanna/2204_hg38.svanna.zip      ~627 MB for download, ~2.3 GB unpacked
- 2304       hg38/GRCh38     https://storage.googleapis.com/svanna/2304_hg38.svanna.zip      ~674 MB for download, ~2.6 GB unpacked
-=========  ==============  ============================================================  =============================================
+=========  ================ ==============  ============================================================  =============================================
+ Version    Compatibility    Genome build                           URL                                                      Size
+=========  ================ ==============  ============================================================  =============================================
+ 2204       [1.0.0, 1.0.3)   hg38/GRCh38     https://storage.googleapis.com/svanna/2204_hg38.svanna.zip      ~627 MB for download, ~2.3 GB unpacked
+ 2304       [1.0.3, 1.1.0)   hg38/GRCh38     https://storage.googleapis.com/svanna/2304_hg38.svanna.zip      ~674 MB for download, ~2.6 GB unpacked
+ 2402       [1.1.0, latest)  hg38/GRCh38     https://storage.googleapis.com/svanna/2402_hg38.svanna.zip      ~648 MB for download, ~2.1 GB unpacked
+=========  ================ ==============  ============================================================  =============================================
+
+.. note::
+
+  The *Compatibility* column indicates the SvAnna application version that is compatible
+  with given database files *Version*. The bracket `[` is inclusive while `)` is exclusive.
+  For instance version `2304` works with SvAnna versions `1.0.3` and `1.0.4` but *not* with `1.1.0`.
 
 Use ``curl`` or ``wget`` utilities to download the files from command line::
 

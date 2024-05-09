@@ -28,7 +28,7 @@ SvAnna is installed by running the following three steps.
 1. Download SvAnna distribution ZIP
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Download and extract SvAnna distribution ZIP archive from `here <https://github.com/TheJacksonLaboratory/SvAnna/releases>`_.
+Download and extract SvAnna distribution ZIP archive from `here <https://github.com/monarch-initiative/SvAnna/releases>`_.
 Expand the *Assets* menu and download the ``svanna-cli-${project.version}-distribution.zip``. Choose the latest stable version,
 or a release candidate (RC).
 
@@ -60,9 +60,9 @@ Prioritize structural variants in VCF file
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Let's annotate a toy VCF file containing eight SVs reported in the SvAnna manuscript.
-First, let's download the VCF file from `here <https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf>`_::
+First, let's download the VCF file from `here <https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf>`_::
 
-  $ wget https://raw.githubusercontent.com/TheJacksonLaboratory/SvAnna/master/svanna-cli/src/examples/example.vcf
+  $ wget https://raw.githubusercontent.com/monarch-initiative/SvAnna/master/svanna-cli/src/examples/example.vcf
 
 The variants were sourced from published clinical case reports and presence of each variant results in a Mendelian disease.
 

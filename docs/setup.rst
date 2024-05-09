@@ -21,7 +21,7 @@ Prebuilt SvAnna executable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To download the executable SvAnna JAR file, go to the
-`Releases section <https://github.com/TheJacksonLaboratory/SvAnna/releases>`_
+`Releases section <https://github.com/monarch-initiative/SvAnna/releases>`_
 on the SvAnna GitHub page and download the latest SvAnna ZIP archive.
 
 
@@ -52,7 +52,7 @@ are required for build.
 
 Run the following commands to download SvAnna source code from GitHub repository and to build SvAnna JAR file::
 
-  $ git clone https://github.com/TheJacksonLaboratory/SvAnna
+  $ git clone https://github.com/monarch-initiative/SvAnna
   $ cd SvAnna
   $ ./mvnw package
 

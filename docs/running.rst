@@ -89,4 +89,4 @@ SvAnna configuration
 See the next section to learn more about the SvAnna :ref:`rstoutputformats`,
 and the :ref:`rstexamples` section to see how SvAnna prioritizes various SV classes.
 
-.. _example.vcf: https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf
+.. _example.vcf: https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf

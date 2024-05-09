@@ -263,7 +263,7 @@ Command
 
 
 
-.. _examples.vcf: https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf
+.. _examples.vcf: https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf
 .. _Decoding NF1 Intragenic Copy-Number Variations: https://pubmed.ncbi.nlm.nih.gov/26189818
 .. _The first case report of a large deletion of the BRCA1 gene in Croatia: https://pubmed.ncbi.nlm.nih.gov/29310340
 .. _Whole-exome sequencing and digital PCR identified a novel compound heterozygous mutation in the NPHP1 gene in a case of Joubert syndrome and related disorders: https://pubmed.ncbi.nlm.nih.gov/28347285
@@ -272,4 +272,4 @@ Command
 .. _Deletion of Exon 1 in AMER1 in Osteopathia Striata with Cranial Sclerosis: https://pubmed.ncbi.nlm.nih.gov/33265914
 .. _Functional characterization of a 13-bp deletion (c.-1522_-1510del13) in the promoter of the von Willebrand factor gene in type 1 von Willebrand disease: https://pubmed.ncbi.nlm.nih.gov/20696945
 .. _Phenotypic consequences of gene disruption by a balanced de novo translocation involving SLC6A1 and NAA15: https://pubmed.ncbi.nlm.nih.gov/29621621
-.. _run_examples.sh: https://github.com/TheJacksonLaboratory/SvAnna/blob/development/svanna-cli/src/examples/run_examples.sh
+.. _run_examples.sh: https://github.com/monarch-initiative/SvAnna/blob/development/svanna-cli/src/examples/run_examples.sh

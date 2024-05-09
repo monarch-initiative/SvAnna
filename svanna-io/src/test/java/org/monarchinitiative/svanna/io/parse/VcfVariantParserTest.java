@@ -425,7 +425,7 @@ public class VcfVariantParserTest {
     }
 
     /**
-     * Per issue <a href="https://github.com/TheJacksonLaboratory/SvAnna/issues/235">235</a>,
+     * Per issue <a href="https://github.com/monarch-initiative/SvAnna/issues/235">235</a>,
      * HTSlib &gt;1.17 produces a gzipped file that cannot be read by common-compress's `GzipCompressorInputStream`.
      * As a fix, the class was replaced by JRE's {@link java.util.zip.GZIPInputStream}.
      * <p>

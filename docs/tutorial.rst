@@ -30,7 +30,7 @@ If you have a VCF file on hand that was called with a caller such as `pbsv <http
 `sniffles <https://github.com/fritzsedlazeck/Sniffles>`_, or `SVIM <https://github.com/eldariont/svim>`_, it can be used instead or
 you can add the 8 variants to the end of that file to simulate a "real-life" long-read seuqencing experiment.
 
-The file with the 8 variants can be downloaded here: `svanna-cli/src/examples/example.vcf <https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf>`_.
+The file with the 8 variants can be downloaded here: `svanna-cli/src/examples/example.vcf <https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf>`_.
 
 Running SvAnna in VCF-only mode
 ###############################
@@ -74,7 +74,7 @@ with disease, patient, and genetic information, enabling clinicians, biologists,
 build more complete models of disease. See the `GA4GH documentation <https://phenopacket-schema.readthedocs.io/en/latest/basics.html>`_ for more information.
 
 Importantly, to run SvAnna with a Phenopacket, the path of the VCF file needs to be recorded in the Phenopacket. This can
-be done in a text editor but we recommend the `PhenopacketGenerator <https://github.com/TheJacksonLaboratory/PhenopacketGenerator>`_ for
+be done in a text editor but we recommend the `PhenopacketGenerator <https://github.com/monarch-initiative/PhenopacketGenerator>`_ for
 convenience -- enter the HPO terms and the path to the VCF file.
 
 The following is a minimal Phenopacket (note this is version 1, we will add support for the v2 in near future). ::
@@ -117,7 +117,7 @@ To run this on your system, replace the path for the VCF file (``file:///***/***
 have the VCF file at ``/home/myname/data/example.vcf``, the line should read ``"uri": "file:///home/myname/data/example.vcf"``.
 
 
-This phenopacket file can be downloaded here: `svanna-cli/src/examples/example-phenopacket.json <https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example-phenopacket.json>`_.
+This phenopacket file can be downloaded here: `svanna-cli/src/examples/example-phenopacket.json <https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example-phenopacket.json>`_.
 Note however, that you will need to adjust the path to the VCF file as described just above.
 
 This command will prioritize the SVs according to phenotypic relevance. We entered a single HPO term,
@@ -148,4 +148,4 @@ The deletion is visualized as follows.
   :width: 800
   :alt: VWF deletion
 
-And that's it! If you encounter any problems, please create an issue on the SvAnna `tracker <https://github.com/TheJacksonLaboratory/SvAnna/issues>`_.
+And that's it! If you encounter any problems, please create an issue on the SvAnna `tracker <https://github.com/monarch-initiative/SvAnna/issues>`_.

@@ -1,13 +1,13 @@
 # SvAnna - Structural Variant Annotation and Analysis
 
-[![GitHub release](https://img.shields.io/github/release/TheJacksonLaboratory/SvAnna.svg)](https://github.com/TheJacksonLaboratory/SvAnna/releases)
-[![Java CI with Maven](https://github.com/TheJacksonLaboratory/SvAnna/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/TheJacksonLaboratory/SvAnna/actions/workflows/maven.yml)
+[![GitHub release](https://img.shields.io/github/release/monarch-initiative/SvAnna.svg)](https://github.com/monarch-initiative/SvAnna/releases)
+[![Java CI with Maven](https://github.com/monarch-initiative/SvAnna/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/monarch-initiative/SvAnna/actions/workflows/maven.yml)
 [![Documentation Status](https://readthedocs.org/projects/svanna/badge/?version=master)](https://svanna.readthedocs.io/en/master/?badge=master)
 
 Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing.
 
 Most users should download the latest SvAnna distribution ZIP file from
-the [Releases page](https://github.com/TheJacksonLaboratory/SvAnna/releases).
+the [Releases page](https://github.com/monarch-initiative/SvAnna/releases).
 
 ## Example use
 

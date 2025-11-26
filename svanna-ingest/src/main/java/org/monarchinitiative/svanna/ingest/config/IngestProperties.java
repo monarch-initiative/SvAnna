@@ -13,8 +13,6 @@ public class IngestProperties {
     @NestedConfigurationProperty
     private VariantProperties variants;
     @NestedConfigurationProperty
-    private PhenotypeProperties phenotype;
-    @NestedConfigurationProperty
     private TadProperties tad;
     @NestedConfigurationProperty
     private GeneDosageProperties dosage;
@@ -41,14 +39,6 @@ public class IngestProperties {
         this.repetitiveRegionsUrl = repetitiveRegionsUrl;
     }
 
-//    public String ncbiGeneToHgnc() {
-//        return ncbiGeneToHgnc;
-//    }
-
-//    public void setNcbiGeneToHgnc(String ncbiGeneToHgnc) {
-//        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
-//    }
-
     public EnhancerProperties enhancers() {
         return enhancers;
     }
@@ -64,15 +54,6 @@ public class IngestProperties {
     public void setVariants(VariantProperties variants) {
         this.variants = variants;
     }
-
-    public PhenotypeProperties phenotype() {
-        return phenotype;
-    }
-
-    public void setPhenotype(PhenotypeProperties phenotype) {
-        this.phenotype = phenotype;
-    }
-
 
     public TadProperties tad() {
         return tad;

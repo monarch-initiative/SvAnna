@@ -2,7 +2,6 @@ package org.monarchinitiative.svanna.db.landscape;
 
 import org.monarchinitiative.svanna.core.service.AnnotationDataService;
 import org.monarchinitiative.svanna.core.service.GeneDosageDataService;
-import org.monarchinitiative.svanna.model.landscape.dosage.Dosage;
 import org.monarchinitiative.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svanna.model.landscape.repeat.RepetitiveRegion;
@@ -68,15 +67,5 @@ public class DbAnnotationDataService implements AnnotationDataService {
     @Override
     public List<DosageRegion> dosageElements(GenomicRegion query) {
         return geneDosageDataService.dosageElements(query);
-    }
-
-    @Override
-    public List<Dosage> geneDosageDataForHgncId(String hgncId) {
-        return geneDosageDataService.geneDosageDataForHgncId(hgncId);
-    }
-
-    @Override
-    public List<Dosage> geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
-        return geneDosageDataService.geneDosageDataForHgncIdAndRegion(hgncId, query);
     }
 }

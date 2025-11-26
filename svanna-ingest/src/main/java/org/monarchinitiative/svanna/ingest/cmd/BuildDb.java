@@ -12,16 +12,9 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
-import org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase;
-import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoader;
-import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
-import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaders;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
-import org.monarchinitiative.phenol.io.MinimalOntologyLoader;
-import org.monarchinitiative.phenol.ontology.data.MinimalOntology;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.phenol.ontology.similarity.TermPair;
 import org.monarchinitiative.sgenes.gtf.model.GencodeGene;
 import org.monarchinitiative.sgenes.io.GeneParser;
 import org.monarchinitiative.sgenes.io.GeneParserFactory;
@@ -30,7 +23,6 @@ import org.monarchinitiative.sgenes.model.Gene;
 import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.SvAnnaRuntimeException;
-import org.monarchinitiative.svanna.core.ic.PrecomputeIcMica;
 import org.monarchinitiative.svanna.db.IngestDao;
 import org.monarchinitiative.svanna.db.landscape.*;
 import org.monarchinitiative.svanna.ingest.Main;
@@ -51,7 +43,6 @@ import org.monarchinitiative.svanna.ingest.parse.population.DgvFileParser;
 import org.monarchinitiative.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.monarchinitiative.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.monarchinitiative.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
-import org.monarchinitiative.svanna.io.hpo.IcMicaDictUtils;
 import org.monarchinitiative.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svanna.model.landscape.tad.TadBoundary;
@@ -75,7 +66,6 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
@@ -94,7 +84,6 @@ import java.util.zip.GZIPOutputStream;
         IngestProperties.class,
         EnhancerProperties.class,
         VariantProperties.class,
-        PhenotypeProperties.class,
         TadProperties.class,
         GeneDosageProperties.class,
         GeneProperties.class
@@ -103,9 +92,6 @@ public class BuildDb implements Callable<Integer> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildDb.class);
 
-    private static final Set<DiseaseDatabase> DISEASE_DATABASES = Set.of(DiseaseDatabase.DECIPHER,
-            DiseaseDatabase.OMIM,
-            DiseaseDatabase.ORPHANET);
     private static final NumberFormat NF = NumberFormat.getNumberInstance();
 
     static {
@@ -304,35 +290,34 @@ public class BuildDb implements Callable<Integer> {
     }
 
     private static Map<TermId, GenomicRegion> readGeneRegions(List<? extends GencodeGene> genes) {
-        Map<TermId, GenomicRegion> regionsByHgncId = new HashMap<>(genes.size());
+        Map<TermId, GenomicRegion> regionsByEntrezId = new HashMap<>(genes.size());
         for (Gene gene : genes) {
-            Optional<String> hgncIdOptional = gene.id().hgncId();
-            if (hgncIdOptional.isEmpty())
+            Optional<String> entrezIdOptional = gene.id().ncbiGeneId();
+            if (entrezIdOptional.isEmpty())
                 continue;
 
             try {
-                TermId hgncId = TermId.of(hgncIdOptional.get());
-                regionsByHgncId.put(hgncId, gene.location());
+                TermId entrezId = TermId.of(entrezIdOptional.get());
+                regionsByEntrezId.put(entrezId, gene.location());
             } catch (PhenolRuntimeException e) {
-                LOGGER.warn("Invalid HGNC id `{}` in gene {}", hgncIdOptional.get(), gene);
+                LOGGER.warn("Invalid Entrez id `{}` in gene {}", entrezIdOptional.get(), gene);
             }
         }
 
-        return regionsByHgncId;
+        return regionsByEntrezId;
     }
 
     private static void ingestGeneDosage(GeneDosageProperties properties,
                                          GenomicAssembly assembly,
                                          DataSource dataSource,
                                          Path tmpDir,
-                                         Map<TermId, ? extends GenomicRegion> geneRegions,
-                                         Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
+                                         Map<TermId, ? extends GenomicRegion> entrezIdToRegion) throws IOException {
         ClingenDosageElementDao clingenDosageElementDao = new ClingenDosageElementDao(dataSource, assembly);
 
         // dosage sensitive genes
         URL geneUrl = new URL(properties.getGeneUrl());
         Path geneLocalPath = downloadUrl(geneUrl, tmpDir);
-        ClingenGeneCurationParser geneParser = new ClingenGeneCurationParser(geneLocalPath, assembly, geneRegions, ncbiGeneToHgnc);
+        ClingenGeneCurationParser geneParser = new ClingenGeneCurationParser(geneLocalPath, assembly, entrezIdToRegion);
         try (Stream<? extends DosageRegion> geneStream = geneParser.parse()) {
             int geneUpdated = geneStream
                     .mapToInt(clingenDosageElementDao::insertItem)
@@ -435,7 +420,6 @@ public class BuildDb implements Callable<Integer> {
 
             Path tmpDir = buildDir.resolve("build");
             List<? extends GencodeGene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
-            Map<Integer, Integer> ncbiGeneToHgncId = downloadAndIngestNcbiToHgncTable(tmpDir, properties.phenotype().getHgncCompleteSet());
 
             ingestEnhancers(properties.enhancers(), assembly, dataSource);
 
@@ -445,7 +429,7 @@ public class BuildDb implements Callable<Integer> {
             ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
 
             Map<TermId, GenomicRegion> geneMap = readGeneRegions(genes);
-            ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap, ncbiGeneToHgncId);
+            ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap);
             dataSource.close();
         }
 

@@ -35,16 +35,14 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegio
 
     private final Path clingenGeneListPath;
     private final GenomicAssembly assembly;
-    private final Map<TermId, ? extends GenomicRegion> geneRegions;
-    private final Map<Integer, Integer> ncbiGeneToHgnc;
+    private final Map<TermId, ? extends GenomicRegion> entrezIdToRegion;
 
     public ClingenGeneCurationParser(Path clingenGeneListPath,
-                                     GenomicAssembly assembly, Map<TermId, ? extends GenomicRegion> geneRegions,
-                                     Map<Integer, Integer> ncbiGeneToHgnc) {
+                                     GenomicAssembly assembly,
+                                     Map<TermId, ? extends GenomicRegion> entrezIdToRegion) {
         this.clingenGeneListPath = clingenGeneListPath;
         this.assembly = assembly;
-        this.geneRegions = geneRegions;
-        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
+        this.entrezIdToRegion = entrezIdToRegion;
     }
 
     @Override
@@ -86,18 +84,12 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegio
                 LOGGER.warn("Invalid gene ID {} (not numeric)", ncbiGeneId);
                 return List.of();
             }
+            TermId ncbiGene = TermId.of("NCBIGene", ncbiGeneId);
 
             // We must extract gene region for the gene, either:
-            // - using HGNC ID that corresponds to the NCBIGene and then the corresponding gene region, or
+            // - using NCBIGene and then the corresponding gene region, or
             // - by parsing the `Genomic Location` (token[3])
-            GenomicRegion geneRegion = null;
-
-            // Try to get the
-            Optional<TermId> hgncId = getHgncId(tokens[1]);
-            if (hgncId.isPresent()) {
-                geneRegion = geneRegions.get(hgncId.get());
-            }
-
+            GenomicRegion geneRegion = entrezIdToRegion.get(ncbiGene);;
 
             if (geneRegion == null) {
                 Optional<GenomicRegion> region = getRegion(tokens[3]);
@@ -132,25 +124,6 @@ public class ClingenGeneCurationParser implements IngestRecordParser<DosageRegio
         int start = Integer.parseInt(genomicLocation.group("start"));
         int end = Integer.parseInt(genomicLocation.group("end"));
         return Optional.of(GenomicRegion.of(contig, Strand.POSITIVE, CoordinateSystem.oneBased(), start, end));
-    }
-
-    private Optional<TermId> getHgncId(String ncbiGeneId) {
-        // parse Gene ID - numeric part of NCBIGene
-        Matcher geneIdMatcher = NUMBER.matcher(ncbiGeneId);
-        if (!geneIdMatcher.matches()) {
-            LOGGER.warn("Invalid gene ID {} (not numeric)", ncbiGeneId);
-            return Optional.empty();
-        }
-
-        // get HGNC ID that corresponds to the NCBIGene
-        int ncbiGeneNumber = Integer.parseInt(ncbiGeneId);
-        Integer hgncIdNumber = ncbiGeneToHgnc.get(ncbiGeneNumber);
-        if (hgncIdNumber == null) {
-            // there is no HGNC ID for the NCBIGene
-            return Optional.empty();
-        }
-
-        return Optional.of(TermId.of(String.format("HGNC:%s", hgncIdNumber)));
     }
 
 }

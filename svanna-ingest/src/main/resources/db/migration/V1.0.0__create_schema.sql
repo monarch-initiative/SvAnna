@@ -88,7 +88,7 @@ create table SVANNA.CLINGEN_DOSAGE_ELEMENT
     START_POS          INT          not null, -- zero-based start on POSITIVE strand
     END_POS            INT          not null, -- zero-based end on POSITIVE strand
 
-    ID                 VARCHAR(200) not null, -- HGNC ID or other ID if available
+    ID                 VARCHAR(200) not null, -- HGVS symbol or other ID if available
     DOSAGE_SENSITIVITY VARCHAR(20)  not null,
     DOSAGE_EVIDENCE    VARCHAR(20)  not null
 );

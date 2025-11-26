@@ -190,49 +190,6 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static void downloadPhenotypeFiles(PhenotypeProperties properties,
-                                               DataSource dataSource,
-                                               Path buildDir,
-                                               List<? extends GencodeGene> genes,
-                                               Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
-        // The files belong to the `buildDir`.
-        URL hpoJsonUrl = new URL(properties.hpoJsonUrl());
-        Path hpoJsonPath = downloadUrl(hpoJsonUrl, buildDir);
-
-        URL hpoAnnotationsUrl = new URL(properties.hpoAnnotationsUrl());
-        Path hpoAnnotationsPath = downloadUrl(hpoAnnotationsUrl, buildDir);
-
-        URL mim2geneMedgenUrl = new URL(properties.mim2geneMedgenUrl());
-        Path mim2geneMedgenPath = downloadUrl(mim2geneMedgenUrl, buildDir);
-
-        URL hgncCompleteSet = new URL(properties.getHgncCompleteSet());
-        Path hgncCompleteSetPath = downloadUrl(hgncCompleteSet, buildDir);
-        // Download is done
-
-        // Read phenotype data
-        LOGGER.debug("Reading HPO file from {}", hpoJsonPath);
-        MinimalOntology hpo = MinimalOntologyLoader.loadOntology(hpoJsonPath.toFile());
-
-        LOGGER.debug("Parsing HPO disease associations at {}", hpoAnnotationsPath);
-        LOGGER.debug("Parsing gene info file at {}", hgncCompleteSetPath.toAbsolutePath());
-        LOGGER.debug("Parsing MIM to gene medgen file at {}", mim2geneMedgenPath.toAbsolutePath());
-        HpoDiseaseLoaderOptions loaderOptions = HpoDiseaseLoaderOptions.of(DISEASE_DATABASES, true, HpoDiseaseLoaderOptions.DEFAULT_COHORT_SIZE);
-        HpoDiseaseLoader loader = HpoDiseaseLoaders.defaultLoader(hpo, loaderOptions);
-        HpoDiseases diseases = loader.load(hpoAnnotationsPath);
-
-        // Precompute IC MICA map
-        LOGGER.info("Precomputing IC MICA values");
-        Map<TermPair, Double> icMicaMap = PrecomputeIcMica.precomputeIcMicaMap(hpo, diseases, true);
-        Path tpsCsvPath = buildDir.resolve(IcMicaDictUtils.TERM_PAIR_SIMILARITY_NAME);
-        LOGGER.info("Storing {} values to {}", NF.format(icMicaMap.size()), tpsCsvPath.toAbsolutePath());
-        try (BufferedWriter writer = org.monarchinitiative.svanna.io.IOUtils.openForWriting(tpsCsvPath)) {
-            LocalDate now = LocalDate.now();
-            String hpoVersion = hpo.version().orElse("N/A");
-            String hpoaVersion = diseases.version().orElse("N/A");
-            IcMicaDictUtils.writeTermPairMap(icMicaMap, writer, now, hpoVersion, hpoaVersion);
-        }
-    }
-
     private static List<? extends GencodeGene> downloadAndPreprocessGenes(GeneProperties properties,
                                                                           GenomicAssembly assembly,
                                                                           Path buildDir,
@@ -479,12 +436,6 @@ public class BuildDb implements Callable<Integer> {
             Path tmpDir = buildDir.resolve("build");
             List<? extends GencodeGene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
             Map<Integer, Integer> ncbiGeneToHgncId = downloadAndIngestNcbiToHgncTable(tmpDir, properties.phenotype().getHgncCompleteSet());
-
-            downloadPhenotypeFiles(properties.phenotype(),
-                    dataSource,
-                    buildDir,
-                    genes,
-                    ncbiGeneToHgncId);
 
             ingestEnhancers(properties.enhancers(), assembly, dataSource);
 

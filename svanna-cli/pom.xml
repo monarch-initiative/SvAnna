@@ -24,6 +24,10 @@
             <artifactId>phenopacket-tools-io</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.monarchinitiative.biodownload</groupId>
+            <artifactId>biodownload</artifactId>
+        </dependency>
+        <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
         </dependency>

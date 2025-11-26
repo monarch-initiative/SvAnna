@@ -1,7 +1,7 @@
 package org.monarchinitiative.svanna.cli;
 
 
-import org.monarchinitiative.svanna.cli.cmd.ComputeIcCommand;
+import org.monarchinitiative.svanna.cli.cmd.SetupPhenotypeCommand;
 import org.monarchinitiative.svanna.cli.cmd.PrioritizeCommand;
 import picocli.CommandLine;
 
@@ -37,7 +37,7 @@ public class Main implements Callable<Integer>  {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
-                .addSubcommand("compute-ic", new ComputeIcCommand())
+                .addSubcommand("setup-phenotype", new SetupPhenotypeCommand())
                 .addSubcommand("prioritize", new PrioritizeCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));

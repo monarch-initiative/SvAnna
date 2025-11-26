@@ -12,23 +12,33 @@ public class SvannaDataResolver {
     private final Path svannaDataDirectory;
 
     public SvannaDataResolver(Path svannaDataDirectory) throws MissingResourceException {
+        this(svannaDataDirectory, true);
+    }
+
+    public SvannaDataResolver(Path svannaDataDirectory, boolean check) throws MissingResourceException {
         this.svannaDataDirectory = svannaDataDirectory;
 
-        // now check that we have all files present
-        List<Path> paths = List.of(
-                fullDataSourcePath(),
-                hpOntologyPath(),
-                phenotypeHpoaPath(),
-                genesJsonPath(),
-                termToIcMicaPath(),
-                mim2GeneMedgenPath(),
-                hgncCompleteSetPath()
-        );
-        for (Path path : paths) {
-            if (!(Files.isRegularFile(path) && Files.isReadable(path))) {
-                throw new MissingResourceException(String.format("The file `%s` is missing in SvAnna directory", path.toFile().getName()));
+        if (check) {
+            // now check that we have all files present
+            List<Path> paths = List.of(
+                    fullDataSourcePath(),
+                    hpOntologyPath(),
+                    phenotypeHpoaPath(),
+                    genesJsonPath(),
+                    termToIcMicaPath(),
+                    mim2GeneMedgenPath(),
+                    hgncCompleteSetPath()
+            );
+            for (Path path : paths) {
+                if (!(Files.isRegularFile(path) && Files.isReadable(path))) {
+                    throw new MissingResourceException(String.format("The file `%s` is missing in SvAnna directory", path.toFile().getName()));
+                }
             }
         }
+    }
+
+    public Path svannaDataDirectory() {
+        return svannaDataDirectory;
     }
 
     public Path dataSourcePath() {

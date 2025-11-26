@@ -70,7 +70,7 @@ public interface PhenotypeDataService {
 
     private Predicate<? super TermId> validateTerm() {
         return termId -> {
-            if (ontology().containsTermId(termId)) {
+            if (!ontology().containsTermId(termId)) {
                 LOGGER.warn("Term ID `{}` is not present in the used ontology", termId);
                 return false;
             }

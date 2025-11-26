@@ -35,7 +35,7 @@ svanna-ingest download -d ${DWN_DIR}
 ASSEMBLY=hg38
 DB_VERSION=2511 # 👈 update
 CONFIG_PATH=svanna-ingest-config.yml
-BUILD_DIR=/home/ielis/dub/data/svanna/${DB_VERSION}
+BUILD_DIR=/home/ielis/dub/data/svanna/${DB_VERSION}_${ASSEMBLY}
 svanna-ingest build-db --assembly ${ASSEMBLY} \
   --db-version ${DB_VERSION} \
   ${CONFIG_PATH} \
@@ -43,5 +43,5 @@ svanna-ingest build-db --assembly ${ASSEMBLY} \
 ```
 
 During ingest, you may need to download some files manually due to network interrupts.
-Last time, `phenotype.hpoa` included a weird disease name for [#111400](https://omim.org/entry/111400),
+Last time, the `phenotype.hpoa` included a weird disease name for [#111400](https://omim.org/entry/111400),
 which was manually removed from HPOA.

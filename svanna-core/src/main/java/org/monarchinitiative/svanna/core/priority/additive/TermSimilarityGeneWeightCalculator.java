@@ -32,11 +32,11 @@ public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator 
         if (hgncIdOptional.isEmpty())
             return maxSimilarity;
 
-        List<String> diseaseIds = phenotypeDataService.getDiseasesForGene(hgncIdOptional.get()).stream()
+        List<TermId> diseaseIds = phenotypeDataService.getDiseasesForGene(hgncIdOptional.get()).stream()
                 .map(HpoDiseaseSummary::getDiseaseId)
                 .collect(Collectors.toUnmodifiableList());
 
-        for (String diseaseId : diseaseIds) {
+        for (TermId diseaseId : diseaseIds) {
             List<TermId> diseaseHpoIds = phenotypeDataService.phenotypicAbnormalitiesForDiseaseId(diseaseId);
             double resnikSimilarity = similarityScoreCalculator.computeSimilarityScore(patientFeatures, diseaseHpoIds);
             maxSimilarity = Math.max(maxSimilarity, resnikSimilarity);

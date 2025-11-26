@@ -76,8 +76,8 @@ public class TermSimilarityGeneWeightCalculatorTest {
 
 
         when(phenotypeDataService.getDiseasesForGene(hgncId))
-                .thenReturn(List.of(HpoDiseaseSummary.of("OMIM:154700", "Marfan Syndrome")));
-        when(phenotypeDataService.phenotypicAbnormalitiesForDiseaseId("OMIM:154700"))
+                .thenReturn(List.of(HpoDiseaseSummary.of(TermId.of("OMIM:154700"), "Marfan Syndrome")));
+        when(phenotypeDataService.phenotypicAbnormalitiesForDiseaseId(TermId.of("OMIM:154700")))
                 .thenReturn(marfanSampleFeatures);
 
 

@@ -12,16 +12,17 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseaseAnnotation;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
 import org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoader;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaders;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
-import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.io.MinimalOntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.MinimalOntology;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.ontology.similarity.TermPair;
 import org.monarchinitiative.sgenes.gtf.model.GencodeGene;
 import org.monarchinitiative.sgenes.io.GeneParser;
 import org.monarchinitiative.sgenes.io.GeneParserFactory;
@@ -31,11 +32,10 @@ import org.monarchinitiative.sgenes.model.GeneIdentifier;
 import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.SvAnnaRuntimeException;
-import org.monarchinitiative.svanna.core.hpo.TermPair;
+import org.monarchinitiative.svanna.core.ic.PrecomputeIcMica;
 import org.monarchinitiative.svanna.db.IngestDao;
 import org.monarchinitiative.svanna.db.gene.GeneDiseaseDao;
 import org.monarchinitiative.svanna.db.landscape.*;
-import org.monarchinitiative.svanna.db.phenotype.MicaDao;
 import org.monarchinitiative.svanna.ingest.Main;
 import org.monarchinitiative.svanna.ingest.config.*;
 import org.monarchinitiative.svanna.ingest.hpomap.HpoMapping;
@@ -54,7 +54,7 @@ import org.monarchinitiative.svanna.ingest.parse.population.DgvFileParser;
 import org.monarchinitiative.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.monarchinitiative.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.monarchinitiative.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
-import org.monarchinitiative.svanna.ingest.similarity.IcMicaCalculator;
+import org.monarchinitiative.svanna.io.hpo.IcMicaDictUtils;
 import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svanna.model.landscape.enhancer.Enhancer;
@@ -79,6 +79,7 @@ import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
@@ -198,20 +199,20 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static PhenotypeData downloadPhenotypeFiles(PhenotypeProperties properties,
+    private static void downloadPhenotypeFiles(PhenotypeProperties properties,
                                                         DataSource dataSource,
                                                         Path buildDir,
                                                         Path tmpDir,
                                                         List<? extends GencodeGene> genes,
                                                         Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
-        // JSON ontology belongs to the buildDir
+        // hp.json belongs to the buildDir
         URL hpoJsonUrl = new URL(properties.hpoJsonUrl());
-        Path hpoOboPath = downloadUrl(hpoJsonUrl, buildDir);
+        Path hpoJsonPath = downloadUrl(hpoJsonUrl, buildDir);
+        // HPOA belongs to the buildDir
+        URL hpoAnnotationsUrl = new URL(properties.hpoAnnotationsUrl());
+        Path hpoAnnotationsPath = downloadUrl(hpoAnnotationsUrl, buildDir);
 
         // other files are temporary
-        // HPOA
-        URL hpoAnnotationsUrl = new URL(properties.hpoAnnotationsUrl());
-        Path hpoAnnotationsPath = downloadUrl(hpoAnnotationsUrl, tmpDir);
         // mim2geneMedgen
         URL mim2geneMedgenUrl = new URL(properties.mim2geneMedgenUrl());
         Path mim2geneMedgenPath = downloadUrl(mim2geneMedgenUrl, tmpDir);
@@ -226,10 +227,9 @@ public class BuildDb implements Callable<Integer> {
         int updatedGeneIdentifiers = insertGeneIdentifiers(genes, geneDiseaseDao, ncbiGeneToHgnc);
         LOGGER.info("Ingest of gene identifiers updated {} rows", NF.format(updatedGeneIdentifiers));
 
-
         // Read phenotype data
-        LOGGER.debug("Reading HPO file from {}", hpoOboPath);
-        Ontology hpo = OntologyLoader.loadOntology(hpoOboPath.toFile());
+        LOGGER.debug("Reading HPO file from {}", hpoJsonPath);
+        MinimalOntology hpo = MinimalOntologyLoader.loadOntology(hpoJsonPath.toFile());
 
         LOGGER.debug("Parsing HPO disease associations at {}", hpoAnnotationsPath);
         LOGGER.debug("Parsing gene info file at {}", hgncCompleteSetPath.toAbsolutePath());
@@ -245,12 +245,17 @@ public class BuildDb implements Callable<Integer> {
         int updatedGeneToDisease = ingestGeneToDiseaseMap(hpoAssociationData, ncbiGeneToHgnc, diseases, geneDiseaseDao);
         LOGGER.info("Ingest of gene to disease associations updated {} rows", NF.format(updatedGeneToDisease));
 
-        // Ingest disease to phenotypes
-        int updatedDiseaseToPhenotypes = ingestDiseaseToPhenotypes(geneDiseaseDao, diseases);
-        LOGGER.info("Ingest of disease to phenotypes updated {} rows", NF.format(updatedDiseaseToPhenotypes));
-
-        // Return the PhenotypeData so that we don't have to re-read the files
-        return new PhenotypeData(hpo, diseases, hpoAssociationData);
+        // Precompute IC MICA map
+        LOGGER.info("Precomputing IC MICA values");
+        Map<TermPair, Double> icMicaMap = PrecomputeIcMica.precomputeIcMicaMap(hpo, diseases, true);
+        Path tpsCsvPath = buildDir.resolve(IcMicaDictUtils.TERM_PAIR_SIMILARITY_NAME);
+        LOGGER.info("Storing {} values to {}", NF.format(icMicaMap.size()), tpsCsvPath.toAbsolutePath());
+        try (BufferedWriter writer = org.monarchinitiative.svanna.io.IOUtils.openForWriting(tpsCsvPath)) {
+            LocalDate now = LocalDate.now();
+            String hpoVersion = hpo.version().orElse("N/A");
+            String hpoaVersion = diseases.version().orElse("N/A");
+            IcMicaDictUtils.writeTermPairMap(icMicaMap, writer, now, hpoVersion, hpoaVersion);
+        }
     }
 
     private static int insertGeneIdentifiers(List<? extends GencodeGene> genes,
@@ -324,7 +329,7 @@ public class BuildDb implements Callable<Integer> {
                         HpoDisease hpoDisease = diseaseMap.get(diseaseId);
                         if (hpoDisease != null) {
                             geneToDisease.computeIfAbsent(hgncId, k -> new LinkedList<>())
-                                    .add(HpoDiseaseSummary.of(diseaseId.getValue(), hpoDisease.diseaseName()));
+                                    .add(HpoDiseaseSummary.of(diseaseId, hpoDisease.diseaseName()));
                         }
                     }
                 }
@@ -333,18 +338,6 @@ public class BuildDb implements Callable<Integer> {
         }
 
         return geneDiseaseDao.insertGeneToDisease(geneToDisease);
-    }
-
-    private static int ingestDiseaseToPhenotypes(GeneDiseaseDao geneDiseaseDao, HpoDiseases diseases) {
-
-        int updated = 0;
-        for (HpoDisease disease : diseases) {
-            List<TermId> presentPhenotypeTermIds = disease.presentAnnotationsStream()
-                    .map(HpoDiseaseAnnotation::id)
-                    .collect(Collectors.toList());
-            updated += geneDiseaseDao.insertDiseaseToPhenotypes(disease.id().getValue(), presentPhenotypeTermIds);
-        }
-        return updated;
     }
 
     private static List<? extends GencodeGene> downloadAndPreprocessGenes(GeneProperties properties,
@@ -458,15 +451,6 @@ public class BuildDb implements Callable<Integer> {
             int updated = ingestTrack(parser, dao);
             LOGGER.info("Ingest of TAD boundaries affected {} rows", NF.format(updated));
         }
-    }
-
-    private static void precomputeIcMica(DataSource dataSource,
-                                         Ontology hpo,
-                                         HpoDiseases diseases) {
-        Map<TermPair, Double> similarityMap = IcMicaCalculator.precomputeIcMicaValues(hpo, diseases);
-
-        MicaDao dao = new MicaDao(dataSource);
-        similarityMap.forEach(dao::insertItem);
     }
 
     private static Map<TermId, GenomicRegion> readGeneRegions(List<? extends GencodeGene> genes) {
@@ -603,7 +587,7 @@ public class BuildDb implements Callable<Integer> {
             List<? extends GencodeGene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
             Map<Integer, Integer> ncbiGeneToHgncId = downloadAndIngestNcbiToHgncTable(tmpDir, properties.phenotype().getHgncCompleteSet());
 
-            PhenotypeData phenotypeData = downloadPhenotypeFiles(properties.phenotype(),
+            downloadPhenotypeFiles(properties.phenotype(),
                     dataSource,
                     buildDir,
                     tmpDir,
@@ -617,7 +601,6 @@ public class BuildDb implements Callable<Integer> {
             ingestRepeats(properties, assembly, dataSource, tmpDir);
             ingestTads(properties.tad(), assembly, dataSource, tmpDir, hg19ToHg38Chain);
 
-            precomputeIcMica(dataSource, phenotypeData.hpo(), phenotypeData.hpoDiseases());
             Map<TermId, GenomicRegion> geneMap = readGeneRegions(genes);
             ingestGeneDosage(properties.getDosage(), assembly, dataSource, tmpDir, geneMap, ncbiGeneToHgncId);
             dataSource.close();

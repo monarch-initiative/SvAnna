@@ -25,17 +25,12 @@ public class HgncCompleteSetParser {
         // static utility class
     }
 
-    public static Map<Integer, Integer> parseNcbiToHgncTable(String ncbiGeneToHgnc) throws IOException {
-        Path tablePath = Path.of(ncbiGeneToHgnc);
-        return parseNcbiToHgncTable(tablePath);
-    }
-
     public static Map<Integer, Integer> parseNcbiToHgncTable(Path ncbiGeneToHgnc) throws IOException {
         if (Files.notExists(ncbiGeneToHgnc)) {
             throw new IOException("Table for mapping NCBIGene to HGNC does not exist at " + ncbiGeneToHgnc.toAbsolutePath());
         }
 
-        try (BufferedReader reader = IOUtils.openForReading(ncbiGeneToHgnc)) {
+        try (BufferedReader reader = org.monarchinitiative.svanna.io.IOUtils.openForReading(ncbiGeneToHgnc)) {
             return parseNcbiToHgncTable(reader);
         }
     }
@@ -43,7 +38,10 @@ public class HgncCompleteSetParser {
     public static Map<Integer, Integer> parseNcbiToHgncTable(BufferedReader reader) throws IOException {
         Map<Integer, Integer> results = new HashMap<>();
 
-        CSVParser parser = CSVFormat.TDF.withFirstRecordAsHeader().parse(reader);
+        CSVParser parser = CSVFormat.TDF.builder()
+                .setSkipHeaderRecord(true)
+                .build()
+                .parse(reader);
         Pattern hgncPattern = Pattern.compile("HGNC:(?<payload>\\d+)");
         // hgnc_id	symbol	name    ... entrez_id	... mane_select	gencc
         // HGNC:5	A1BG	alpha-1-B glycoprotein	... 8086    ...	"ENST00000263100.8|NM_130786.4"

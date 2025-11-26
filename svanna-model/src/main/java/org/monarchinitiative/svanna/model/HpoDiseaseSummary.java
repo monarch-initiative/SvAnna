@@ -1,12 +1,14 @@
 package org.monarchinitiative.svanna.model;
 
+import org.monarchinitiative.phenol.ontology.data.TermId;
+
 public interface HpoDiseaseSummary {
 
-    static HpoDiseaseSummary of(String diseaseId, String diseaseName) {
+    static HpoDiseaseSummary of(TermId diseaseId, String diseaseName) {
         return new HpoDiseaseSummaryDefault(diseaseId, diseaseName);
     }
 
-    String getDiseaseId();
+    TermId getDiseaseId();
 
     String getDiseaseName();
 

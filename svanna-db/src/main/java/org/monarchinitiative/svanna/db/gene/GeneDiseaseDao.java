@@ -28,18 +28,9 @@ public class GeneDiseaseDao {
         while (rs.next()) {
             String hgncId = "HGNC:" + rs.getString("HGNC_ID");
             builder.computeIfAbsent(hgncId, key -> new LinkedList<>())
-                    .add(HpoDiseaseSummary.of(rs.getString("DISEASE_ID"), rs.getString("DISEASE_NAME")));
+                    .add(HpoDiseaseSummary.of(TermId.of(rs.getString("DISEASE_ID")), rs.getString("DISEASE_NAME")));
         }
         return Map.copyOf(builder);
-    };
-    private static final ResultSetExtractor<Map<String, List<TermId>>> DISEASE_TO_PHENOTYPES_EXTRACTOR = rs -> {
-        Map<String, List<TermId>> results = new HashMap<>();
-        while (rs.next()) {
-            String diseaseId = rs.getString(1);
-            String hpoId = rs.getString(2);
-            results.computeIfAbsent(diseaseId, k -> new LinkedList<>()).add(TermId.of(hpoId));
-        }
-        return Map.copyOf(results);
     };
 
     private final JdbcTemplate jdbcTemplate;
@@ -50,10 +41,6 @@ public class GeneDiseaseDao {
 
     public List<GeneIdentifier> geneIdentifiers() {
         return jdbcTemplate.query("select ACCESSION, SYMBOL, HGNC_ID, NCBI_GENE from SVANNA.GENE_IDENTIFIER", GENE_IDENTIFIER_ROW_MAPPER);
-    }
-
-    public Map<String, List<TermId>> diseaseToPhenotypes() {
-        return jdbcTemplate.query("select DISEASE_ID, TERM_ID from SVANNA.DISEASE_TO_PHENOTYPE", DISEASE_TO_PHENOTYPES_EXTRACTOR);
     }
 
     public Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDiseases() {
@@ -86,7 +73,7 @@ public class GeneDiseaseDao {
             for (HpoDiseaseSummary hpoDiseaseSummary : entry.getValue()) {
                 all += jdbcTemplate.update(geneToDiseaseSql, pss -> {
                     pss.setInt(1, hgncId);
-                    pss.setString(2, hpoDiseaseSummary.getDiseaseId());
+                    pss.setString(2, hpoDiseaseSummary.getDiseaseId().getValue());
                 });
             }
         }
@@ -98,25 +85,12 @@ public class GeneDiseaseDao {
                 .distinct()
                 .mapToInt(diseaseSummary -> jdbcTemplate.update(hpoDiseaseSummary,
                         pss -> {
-                            pss.setString(1, diseaseSummary.getDiseaseId());
+                            pss.setString(1, diseaseSummary.getDiseaseId().getValue());
                             pss.setString(2, diseaseSummary.getDiseaseName());
                         }))
                 .sum();
 
         return all;
-    }
-
-    public int insertDiseaseToPhenotypes(String diseaseId, List<TermId> phenotypes) {
-        int updated = 0;
-        String insertDiseaseToPhenotypes = "insert into SVANNA.DISEASE_TO_PHENOTYPE(DISEASE_ID, TERM_ID) VALUES ( ?, ? )";
-        for (TermId phenotype : phenotypes) {
-            updated += jdbcTemplate.update(insertDiseaseToPhenotypes,
-                    pss -> {
-                        pss.setString(1, diseaseId);
-                        pss.setString(2, phenotype.getValue());
-                    });
-        }
-        return updated;
     }
 
     private static class GeneIdentifierBatchPreparedStatementSetter implements BatchPreparedStatementSetter {

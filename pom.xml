@@ -38,7 +38,7 @@
         <silent.genes.version>0.2.5</silent.genes.version>
         <htsjdk.version>3.0.5</htsjdk.version>
         <guava.version>33.0.0-jre</guava.version>
-        <commons-csv.version>1.7</commons-csv.version>
+        <commons-csv.version>1.10.0</commons-csv.version>
         <commons-io.version>2.15.1</commons-io.version>
         <commons-net.version>3.9.0</commons-net.version>
         <commons-compress.version>1.26.0</commons-compress.version>

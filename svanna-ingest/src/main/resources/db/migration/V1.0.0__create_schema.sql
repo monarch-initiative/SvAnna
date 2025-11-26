@@ -79,17 +79,6 @@ create index SVANNA.TAD_BOUNDARY__CONTIG_START_END_IDX
 create index SVANNA.TAD_BOUNDARY__CONTIG_MIDPOINT_IDX
     on SVANNA.TAD_BOUNDARY (CONTIG, MIDPOINT);
 
----------------------------------- IC MICA -----------------------------------------------------------------------------
-drop table if exists SVANNA.HP_TERM_MICA;
-create table SVANNA.HP_TERM_MICA
-(
-    LEFT_VALUE  INT   not null, -- left term value. The value for `HP:0001234` is 1234
-    RIGHT_VALUE INT   not null, -- right term value
-    IC_MICA     FLOAT not null  -- information content of the most common informative ancestor
-);
-drop index if exists SVANNA.HP_TERM_MICA__LEFT_VALUE_RIGHT_VALUE_IDX;
-create unique index SVANNA.HP_TERM_MICA__LEFT_VALUE_RIGHT_VALUE_IDX
-    on SVANNA.HP_TERM_MICA (LEFT_VALUE, RIGHT_VALUE);
 
 ---------------------------------- CLINGEN DOSAGE ELEMENT --------------------------------------------------------------
 drop table if exists SVANNA.CLINGEN_DOSAGE_ELEMENT;
@@ -150,13 +139,3 @@ create table SVANNA.HPO_DISEASE_SUMMARY
 drop index if exists SVANNA.HPO_DISEASE_SUMMARY__DISEASE_ID;
 create unique index SVANNA.HPO_DISEASE_SUMMARY__DISEASE_ID on SVANNA.HPO_DISEASE_SUMMARY (DISEASE_ID);
 
-
-
-drop table if exists SVANNA.DISEASE_TO_PHENOTYPE;
-create table SVANNA.DISEASE_TO_PHENOTYPE
-(
-    DISEASE_ID VARCHAR(50) not null, -- e.g. OMIM:123456, maps to SVANNA.HPO_DISEASE_SUMMARY.DISEASE_ID
-    TERM_ID    CHAR(10)    not null -- `HP`, `:`, and exactly 7 digits
-);
-drop index if exists SVANNA.DISEASE_TO_PHENOTYPE__DISEASE_ID;
-create index SVANNA.DISEASE_TO_PHENOTYPE__DISEASE_ID on SVANNA.DISEASE_TO_PHENOTYPE (DISEASE_ID);

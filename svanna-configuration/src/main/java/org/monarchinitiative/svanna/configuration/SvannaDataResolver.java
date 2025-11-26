@@ -3,6 +3,7 @@ package org.monarchinitiative.svanna.configuration;
 import org.monarchinitiative.svanna.configuration.exception.MissingResourceException;
 import org.monarchinitiative.svanna.io.hpo.IcMicaDictUtils;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -35,10 +36,18 @@ public class SvannaDataResolver {
                 }
             }
         }
+
+        if (!Files.isDirectory(phenotypeDataDirectory())) {
+            try {
+                Files.createDirectories(phenotypeDataDirectory());
+            } catch (IOException e) {
+                throw new MissingResourceException("Cannot create phenotype folder at " + svannaDataDirectory.toAbsolutePath(), e);
+            }
+        }
     }
 
-    public Path svannaDataDirectory() {
-        return svannaDataDirectory;
+    public Path phenotypeDataDirectory() {
+        return svannaDataDirectory.resolve("phenotype");
     }
 
     public Path dataSourcePath() {
@@ -50,11 +59,11 @@ public class SvannaDataResolver {
     }
 
     public Path hpOntologyPath() {
-        return svannaDataDirectory.resolve("hp.json");
+        return phenotypeDataDirectory().resolve("hp.json");
     }
 
     public Path phenotypeHpoaPath() {
-        return svannaDataDirectory.resolve("phenotype.hpoa");
+        return phenotypeDataDirectory().resolve("phenotype.hpoa");
     }
 
     public Path genesJsonPath() {
@@ -62,15 +71,15 @@ public class SvannaDataResolver {
     }
 
     public Path termToIcMicaPath() {
-        return svannaDataDirectory.resolve(IcMicaDictUtils.TERM_PAIR_SIMILARITY_NAME);
+        return phenotypeDataDirectory().resolve(IcMicaDictUtils.TERM_PAIR_SIMILARITY_NAME);
     }
 
     public Path mim2GeneMedgenPath() {
-        return svannaDataDirectory.resolve("mim2gene_medgen");
+        return phenotypeDataDirectory().resolve("mim2gene_medgen");
     }
 
     public Path hgncCompleteSetPath() {
-        return svannaDataDirectory.resolve("hgnc_complete_set.txt");
+        return phenotypeDataDirectory().resolve("hgnc_complete_set.txt");
     }
 
 }

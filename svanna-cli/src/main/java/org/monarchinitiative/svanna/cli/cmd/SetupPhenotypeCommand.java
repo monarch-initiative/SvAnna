@@ -24,7 +24,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Map;
 
 @CommandLine.Command(name = "setup-phenotype",
         header = "Setup gene-phenotype resources.",
@@ -59,6 +59,9 @@ public class SetupPhenotypeCommand extends BaseSvAnnaCommand {
         SvannaDataResolver resolver;
         try {
             resolver = new SvannaDataResolver(svannaDataDirectory, false);
+            LOGGER.info("Setting up phenotype at {}", resolver.phenotypeDataDirectory().toAbsolutePath());
+            if (overwrite)
+                LOGGER.info("Overwriting existing files");
             downloadFiles(resolver);
 
             if (!resolver.termToIcMicaPath().toFile().isFile() || overwrite) {
@@ -88,7 +91,7 @@ public class SetupPhenotypeCommand extends BaseSvAnnaCommand {
     }
 
     private void downloadFiles(SvannaDataResolver resolver) throws FileDownloadException {
-        BioDownloader downloader = BioDownloader.builder(resolver.svannaDataDirectory())
+        BioDownloader downloader = BioDownloader.builder(resolver.phenotypeDataDirectory())
                 .overwrite(overwrite)
                 .hpoJson()
                 .hpDiseaseAnnotations()

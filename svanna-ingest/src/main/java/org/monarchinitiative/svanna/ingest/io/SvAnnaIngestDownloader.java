@@ -35,12 +35,8 @@ public class SvAnnaIngestDownloader {
     public void download() {
         downloadFileIfNeeded(ENHANCER_FILE,ENHANCERS_URL);
         downloadFileIfNeeded(SAMPLENAME_FILE, SAMPLENAME_URL);
+        System.out.println("Download complete!");
     }
-
-
-
-
-
 
 
     private void downloadFileIfNeeded(String filename, String webAddress) {

@@ -8,7 +8,6 @@ public class IngestProperties {
 
     private String repetitiveRegionsUrl;
     private String hg19toHg38ChainUrl;
-    private String ncbiGeneToHgnc;
     @NestedConfigurationProperty
     private EnhancerProperties enhancers;
     @NestedConfigurationProperty
@@ -42,13 +41,13 @@ public class IngestProperties {
         this.repetitiveRegionsUrl = repetitiveRegionsUrl;
     }
 
-    public String ncbiGeneToHgnc() {
-        return ncbiGeneToHgnc;
-    }
+//    public String ncbiGeneToHgnc() {
+//        return ncbiGeneToHgnc;
+//    }
 
-    public void setNcbiGeneToHgnc(String ncbiGeneToHgnc) {
-        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
-    }
+//    public void setNcbiGeneToHgnc(String ncbiGeneToHgnc) {
+//        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
+//    }
 
     public EnhancerProperties enhancers() {
         return enhancers;

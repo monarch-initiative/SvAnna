@@ -7,15 +7,28 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipFile;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
-import org.monarchinitiative.phenol.annotations.assoc.GeneInfoGeneType;
-import org.monarchinitiative.phenol.annotations.formats.hpo.*;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseaseAnnotation;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
+import org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase;
+import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoader;
+import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaders;
+import org.monarchinitiative.phenol.base.PhenolRuntimeException;
+import org.monarchinitiative.phenol.io.OntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.Ontology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.sgenes.gtf.model.GencodeGene;
+import org.monarchinitiative.sgenes.io.GeneParser;
+import org.monarchinitiative.sgenes.io.GeneParserFactory;
+import org.monarchinitiative.sgenes.io.SerializationFormat;
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.GeneIdentifier;
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.SvAnnaRuntimeException;
 import org.monarchinitiative.svanna.core.hpo.TermPair;
@@ -29,6 +42,7 @@ import org.monarchinitiative.svanna.ingest.hpomap.HpoMapping;
 import org.monarchinitiative.svanna.ingest.hpomap.HpoTissueMapParser;
 import org.monarchinitiative.svanna.ingest.io.ZipCompressionWrapper;
 import org.monarchinitiative.svanna.ingest.parse.GencodeGeneProcessor;
+import org.monarchinitiative.svanna.ingest.parse.HgncCompleteSetParser;
 import org.monarchinitiative.svanna.ingest.parse.IngestRecordParser;
 import org.monarchinitiative.svanna.ingest.parse.RepetitiveRegionParser;
 import org.monarchinitiative.svanna.ingest.parse.dosage.ClingenGeneCurationParser;
@@ -46,17 +60,9 @@ import org.monarchinitiative.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svanna.model.landscape.tad.TadBoundary;
 import org.monarchinitiative.svanna.model.landscape.variant.PopulationVariant;
-import org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase;
-import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoader;
-import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
-import org.monarchinitiative.phenol.base.PhenolRuntimeException;
-import org.monarchinitiative.phenol.io.OntologyLoader;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.sgenes.gtf.model.GencodeGene;
+import org.monarchinitiative.svart.GenomicRegion;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
-import org.monarchinitiative.svart.GenomicRegion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -64,12 +70,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import picocli.CommandLine;
-import org.monarchinitiative.sgenes.io.GeneParser;
-import org.monarchinitiative.sgenes.io.GeneParserFactory;
-import org.monarchinitiative.sgenes.io.SerializationFormat;
-import org.monarchinitiative.sgenes.model.Gene;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
-import org.monarchinitiative.sgenes.model.Located;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -85,7 +85,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 @CommandLine.Command(name = "build-db",
@@ -216,9 +215,9 @@ public class BuildDb implements Callable<Integer> {
         // mim2geneMedgen
         URL mim2geneMedgenUrl = new URL(properties.mim2geneMedgenUrl());
         Path mim2geneMedgenPath = downloadUrl(mim2geneMedgenUrl, tmpDir);
-        // geneInfoPath
-        URL geneInfoPathUrl = new URL(properties.geneInfoUrl());
-        Path geneInfoPath = downloadUrl(geneInfoPathUrl, tmpDir);
+        // hgncCompleteSet
+        URL hgncCompleteSet = new URL(properties.getHgncCompleteSet());
+        Path hgncCompleteSetPath = downloadUrl(hgncCompleteSet, tmpDir);
         // Download is done
 
         GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(dataSource);
@@ -233,15 +232,13 @@ public class BuildDb implements Callable<Integer> {
         Ontology hpo = OntologyLoader.loadOntology(hpoOboPath.toFile());
 
         LOGGER.debug("Parsing HPO disease associations at {}", hpoAnnotationsPath);
-        LOGGER.debug("Parsing gene info file at {}", geneInfoPath.toAbsolutePath());
+        LOGGER.debug("Parsing gene info file at {}", hgncCompleteSetPath.toAbsolutePath());
         LOGGER.debug("Parsing MIM to gene medgen file at {}", mim2geneMedgenPath.toAbsolutePath());
         HpoDiseaseLoaderOptions loaderOptions = HpoDiseaseLoaderOptions.of(DISEASE_DATABASES, true, HpoDiseaseLoaderOptions.DEFAULT_COHORT_SIZE);
         HpoDiseaseLoader loader = HpoDiseaseLoaders.defaultLoader(hpo, loaderOptions);
         HpoDiseases diseases = loader.load(hpoAnnotationsPath);
         HpoAssociationData hpoAssociationData = HpoAssociationData.builder(hpo)
-                .hpoDiseases(diseases)
-                .mim2GeneMedgen(mim2geneMedgenPath)
-                .homoSapiensGeneInfo(geneInfoPath, GeneInfoGeneType.DEFAULT)
+                .hpoDiseases(diseases).mim2GeneMedgen(mim2geneMedgenPath).hgncCompleteSetArchive(hgncCompleteSetPath)
                 .build();
 
         // Ingest geneToDisease
@@ -521,55 +518,6 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static Map<Integer, Integer> parseNcbiToHgncTable(String ncbiGeneToHgnc) throws IOException {
-        Path tablePath = Path.of(ncbiGeneToHgnc);
-        if (Files.notExists(tablePath)) {
-            throw new IOException("Table for mapping NCBIGene to HGNC does not exist at " + tablePath.toAbsolutePath());
-        }
-
-        Map<Integer, Integer> results = new HashMap<>();
-        try (BufferedReader reader = openForReading(tablePath);
-             CSVParser parser = CSVFormat.TDF.withFirstRecordAsHeader().parse(reader)) {
-            Pattern hgncPattern = Pattern.compile("HGNC:(?<payload>\\d+)");
-            // HGNC ID	NCBI gene ID	Approved symbol
-            // HGNC:13666	8086	AAAS
-            for (CSVRecord record : parser) {
-                // parse NCBIGene. Should be a number, but may be missing.
-                String ncbiGene = record.get("NCBI gene ID");
-                if (ncbiGene.isBlank())
-                    // missing NCBI gene ID for this gene
-                    continue;
-
-                int ncbiGeneId;
-                try {
-                    ncbiGeneId = Integer.parseInt(ncbiGene);
-                } catch (NumberFormatException e) {
-                    LOGGER.warn("Skipping non-numeric NCBIGene id `{}` on line #{}: `{}`", ncbiGene, record.getRecordNumber(), record);
-                    continue;
-                }
-
-                // parse HGNC id
-                Matcher hgncMatcher = hgncPattern.matcher(record.get("HGNC ID"));
-                if (!hgncMatcher.matches()) {
-                    LOGGER.warn("Skipping HGNC id `{}` on line #{}: `{}`", record.get("HGNC ID"), record.getRecordNumber(), record);
-                    continue;
-                }
-                Integer hgncId = Integer.parseInt(hgncMatcher.group("payload"));
-
-                // store the results
-                results.put(ncbiGeneId, hgncId);
-            }
-        }
-        return results;
-    }
-
-    private static BufferedReader openForReading(Path tablePath) throws IOException {
-        return (tablePath.toFile().getName().endsWith(".gz"))
-                ? new BufferedReader(new InputStreamReader(new GZIPInputStream(Files.newInputStream(tablePath))))
-                : Files.newBufferedReader(tablePath);
-
-    }
-
     private static <T extends Located> int ingestTrack(IngestRecordParser<? extends T> ingestRecordParser, IngestDao<? super T> ingestDao) throws IOException {
         return ingestRecordParser.parse()
                 .mapToInt(ingestDao::insertItem)
@@ -653,7 +601,7 @@ public class BuildDb implements Callable<Integer> {
 
             Path tmpDir = buildDir.resolve("build");
             List<? extends GencodeGene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
-            Map<Integer, Integer> ncbiGeneToHgncId = parseNcbiToHgncTable(properties.ncbiGeneToHgnc());
+            Map<Integer, Integer> ncbiGeneToHgncId = downloadAndIngestNcbiToHgncTable(tmpDir, properties.phenotype().getHgncCompleteSet());
 
             PhenotypeData phenotypeData = downloadPhenotypeFiles(properties.phenotype(),
                     dataSource,
@@ -716,6 +664,12 @@ public class BuildDb implements Callable<Integer> {
 
         LOGGER.info("The ingest is complete");
         return 0;
+    }
+
+    private static Map<Integer, Integer> downloadAndIngestNcbiToHgncTable(Path tmpDir, String hgncCompleteSetUrl) throws IOException {
+        URL url = new URL(hgncCompleteSetUrl);
+        Path localHgncCompleteSetPath = downloadUrl(url, tmpDir);
+        return HgncCompleteSetParser.parseNcbiToHgncTable(localHgncCompleteSetPath);
     }
 
     protected ConfigurableApplicationContext getContext() {

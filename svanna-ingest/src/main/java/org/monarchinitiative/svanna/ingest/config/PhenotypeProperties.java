@@ -8,7 +8,7 @@ public class PhenotypeProperties {
     private String hpoJsonUrl;
     private String hpoAnnotationsUrl;
     private String mim2geneMedgenUrl;
-    private String geneInfoUrl;
+    private String hgncCompleteSet;
 
     public String hpoJsonUrl() {
         return hpoJsonUrl;
@@ -34,12 +34,12 @@ public class PhenotypeProperties {
         this.mim2geneMedgenUrl = mim2geneMedgenUrl;
     }
 
-    public String geneInfoUrl() {
-        return geneInfoUrl;
+    public String getHgncCompleteSet() {
+        return hgncCompleteSet;
     }
 
-    public void setGeneInfoUrl(String geneInfoUrl) {
-        this.geneInfoUrl = geneInfoUrl;
+    public void setHgncCompleteSet(String hgncCompleteSet) {
+        this.hgncCompleteSet = hgncCompleteSet;
     }
 
 }

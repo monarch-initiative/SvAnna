@@ -22,14 +22,12 @@ import org.monarchinitiative.svanna.core.service.AnnotationDataService;
 import org.monarchinitiative.svanna.core.service.GeneDosageDataService;
 import org.monarchinitiative.svanna.core.service.GeneService;
 import org.monarchinitiative.svanna.core.service.PhenotypeDataService;
-import org.monarchinitiative.svanna.db.gene.GeneDiseaseDao;
 import org.monarchinitiative.svanna.db.landscape.*;
 import org.monarchinitiative.svanna.db.service.ClinGenGeneDosageDataService;
 import org.monarchinitiative.svanna.io.IOUtils;
 import org.monarchinitiative.svanna.io.hpo.DbPhenotypeDataService;
 import org.monarchinitiative.svanna.io.hpo.IcMicaDictUtils;
 import org.monarchinitiative.svanna.io.service.SilentGenesGeneService;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
@@ -41,7 +39,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -114,9 +111,7 @@ public class SvAnnaBuilder {
         }
 
         // 3 - PhenotypeDataService ------------------------------------------------------------------------------------
-        DataSource dataSource = null;
         if (phenotypeDataService == null) {
-            dataSource = svAnnaDataSource(dataResolver.dataSourcePath());
             LOGGER.debug("Reading HPO file from {}", dataResolver.hpOntologyPath().toAbsolutePath());
             MinimalOntology hpo = MinimalOntologyLoader.loadOntology(dataResolver.hpOntologyPath().toFile());
             HpoDiseases diseases;
@@ -134,16 +129,14 @@ public class SvAnnaBuilder {
                     .build();
 
             Map<TermId, Collection<TermId>> geneIdToDiseaseIds = data.associations().geneIdToDiseaseIds();
-            GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(dataSource);
-            List<GeneIdentifier> geneIdentifiers = geneDiseaseDao.geneIdentifiers();
 
-            phenotypeDataService = new DbPhenotypeDataService(hpo, diseases, geneIdentifiers, geneIdToDiseaseIds);
+            phenotypeDataService = new DbPhenotypeDataService(hpo, diseases, geneIdToDiseaseIds);
         }
 
+        DataSource dataSource = null;
         // 4 - AnnotationDataService -----------------------------------------------------------------------------------
         if (annotationDataService == null) {
-            if (dataSource == null)
-                dataSource = svAnnaDataSource(dataResolver.dataSourcePath());
+            dataSource = svAnnaDataSource(dataResolver.dataSourcePath());
 
             DataProperties dataProperties = properties.dataProperties();
             LOGGER.debug("Including TAD boundaries with stability >{}%", NF.format(dataProperties.tadStabilityThresholdAsPercentage()));

@@ -26,11 +26,11 @@ public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator 
     public double calculateRelevance(Gene gene) {
         double maxSimilarity = 0.;
 
-        Optional<String> hgncIdOptional = gene.id().hgncId();
-        if (hgncIdOptional.isEmpty())
+        Optional<String> ncbiGeneIdOptional = gene.id().ncbiGeneId();
+        if (ncbiGeneIdOptional.isEmpty())
             return maxSimilarity;
 
-        Collection<TermId> diseaseIds = phenotypeDataService.getDiseaseIdsForGene(hgncIdOptional.get());
+        Collection<TermId> diseaseIds = phenotypeDataService.getDiseaseIdsForGene(ncbiGeneIdOptional.get());
 
         for (TermId diseaseId : diseaseIds) {
             List<TermId> diseaseHpoIds = phenotypeDataService.phenotypicAbnormalitiesForDiseaseId(diseaseId);

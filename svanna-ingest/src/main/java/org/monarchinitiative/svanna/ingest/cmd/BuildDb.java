@@ -11,7 +11,6 @@ import org.apache.commons.io.IOUtils;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.output.MigrateResult;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
-import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDisease;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
 import org.monarchinitiative.phenol.annotations.io.hpo.DiseaseDatabase;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoader;
@@ -28,13 +27,11 @@ import org.monarchinitiative.sgenes.io.GeneParser;
 import org.monarchinitiative.sgenes.io.GeneParserFactory;
 import org.monarchinitiative.sgenes.io.SerializationFormat;
 import org.monarchinitiative.sgenes.model.Gene;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
 import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.SvAnnaRuntimeException;
 import org.monarchinitiative.svanna.core.ic.PrecomputeIcMica;
 import org.monarchinitiative.svanna.db.IngestDao;
-import org.monarchinitiative.svanna.db.gene.GeneDiseaseDao;
 import org.monarchinitiative.svanna.db.landscape.*;
 import org.monarchinitiative.svanna.ingest.Main;
 import org.monarchinitiative.svanna.ingest.config.*;
@@ -55,7 +52,6 @@ import org.monarchinitiative.svanna.ingest.parse.population.GnomadSvVcfParser;
 import org.monarchinitiative.svanna.ingest.parse.population.HgSvc2VcfParser;
 import org.monarchinitiative.svanna.ingest.parse.tad.McArthur2021TadBoundariesParser;
 import org.monarchinitiative.svanna.io.hpo.IcMicaDictUtils;
-import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.svanna.model.landscape.dosage.DosageRegion;
 import org.monarchinitiative.svanna.model.landscape.enhancer.Enhancer;
 import org.monarchinitiative.svanna.model.landscape.tad.TadBoundary;
@@ -82,8 +78,6 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
@@ -117,9 +111,6 @@ public class BuildDb implements Callable<Integer> {
     static {
         NF.setMaximumFractionDigits(2);
     }
-
-    private static final Pattern NCBI_GENE_PATTERN = Pattern.compile("NCBIGene:(?<value>\\d+)");
-    private static final Pattern HGNC_GENE_PATTERN = Pattern.compile("HGNC:(?<value>\\d+)");
 
     private static final String LOCATIONS = "classpath:db/migration";
 
@@ -218,12 +209,6 @@ public class BuildDb implements Callable<Integer> {
         Path hgncCompleteSetPath = downloadUrl(hgncCompleteSet, buildDir);
         // Download is done
 
-        GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(dataSource);
-
-        // Ingest geneIdentifiers
-        int updatedGeneIdentifiers = insertGeneIdentifiers(genes, geneDiseaseDao, ncbiGeneToHgnc);
-        LOGGER.info("Ingest of gene identifiers updated {} rows", NF.format(updatedGeneIdentifiers));
-
         // Read phenotype data
         LOGGER.debug("Reading HPO file from {}", hpoJsonPath);
         MinimalOntology hpo = MinimalOntologyLoader.loadOntology(hpoJsonPath.toFile());
@@ -234,13 +219,6 @@ public class BuildDb implements Callable<Integer> {
         HpoDiseaseLoaderOptions loaderOptions = HpoDiseaseLoaderOptions.of(DISEASE_DATABASES, true, HpoDiseaseLoaderOptions.DEFAULT_COHORT_SIZE);
         HpoDiseaseLoader loader = HpoDiseaseLoaders.defaultLoader(hpo, loaderOptions);
         HpoDiseases diseases = loader.load(hpoAnnotationsPath);
-        HpoAssociationData hpoAssociationData = HpoAssociationData.builder(hpo)
-                .hpoDiseases(diseases).mim2GeneMedgen(mim2geneMedgenPath).hgncCompleteSetArchive(hgncCompleteSetPath)
-                .build();
-
-        // Ingest geneToDisease
-        int updatedGeneToDisease = ingestGeneToDiseaseMap(hpoAssociationData, ncbiGeneToHgnc, diseases, geneDiseaseDao);
-        LOGGER.info("Ingest of gene to disease associations updated {} rows", NF.format(updatedGeneToDisease));
 
         // Precompute IC MICA map
         LOGGER.info("Precomputing IC MICA values");
@@ -253,88 +231,6 @@ public class BuildDb implements Callable<Integer> {
             String hpoaVersion = diseases.version().orElse("N/A");
             IcMicaDictUtils.writeTermPairMap(icMicaMap, writer, now, hpoVersion, hpoaVersion);
         }
-    }
-
-    private static int insertGeneIdentifiers(List<? extends GencodeGene> genes,
-                                             GeneDiseaseDao geneDiseaseDao,
-                                             Map<Integer, Integer> ncbiGeneToHgnc) {
-        Map<Integer, Integer> hgncToNcbiGene = ncbiGeneToHgnc.entrySet().stream()
-                .collect(Collectors.toUnmodifiableMap(Map.Entry::getValue, Map.Entry::getKey));
-
-        List<GeneIdentifier> geneIdentifiers = new ArrayList<>(genes.size());
-        for (GencodeGene gene : genes) {
-            Optional<String> hgncIdOpt = gene.id().hgncId();
-            Optional<String> ncbiGeneOpt = gene.id().ncbiGeneId();
-
-            String hgncId = null, ncbiGeneId = null;
-
-            if (hgncIdOpt.isPresent()) {
-                // We have the ID, this was easy
-                hgncId = hgncIdOpt.get();
-            } else {
-                // Let's try to get the ID from the corresponding NCBIGene id
-                if (ncbiGeneOpt.isPresent()) {
-                    Matcher matcher = NCBI_GENE_PATTERN.matcher(ncbiGeneOpt.get());
-                    if (matcher.matches()) {
-                        int ncbiGeneInt = Integer.parseInt(matcher.group("value"));
-                        Integer hgncIdInt = ncbiGeneToHgnc.get(ncbiGeneInt);
-                        if (hgncIdInt != null)
-                            hgncId = "HGNC:" + hgncIdInt;
-                    }
-                }
-            }
-
-            if (ncbiGeneOpt.isPresent()) {
-                // We have the ID, this was easy
-                ncbiGeneId = ncbiGeneOpt.get();
-            } else {
-                // Let's try to get the ID from corresponding HGNC id
-                if (hgncIdOpt.isPresent()) {
-                    Matcher matcher = HGNC_GENE_PATTERN.matcher(hgncIdOpt.get());
-                    if (matcher.matches()) {
-                        int hgncIdInt = Integer.parseInt(matcher.group("value"));
-                        Integer ncbiGeneInt = hgncToNcbiGene.get(hgncIdInt);
-                        if (ncbiGeneInt != null)
-                            ncbiGeneId = "NCBIGene:" + ncbiGeneInt;
-                    }
-                }
-            }
-            geneIdentifiers.add(GeneIdentifier.of(gene.accession(), gene.symbol(), hgncId, ncbiGeneId));
-        }
-
-        return geneDiseaseDao.insertGeneIdentifiers(geneIdentifiers);
-    }
-
-    private static int ingestGeneToDiseaseMap(HpoAssociationData hpoAssociationData,
-                                              Map<Integer, Integer> ncbiGeneToHgnc,
-                                              HpoDiseases diseases,
-                                              GeneDiseaseDao geneDiseaseDao) {
-
-        Map<Integer, List<HpoDiseaseSummary>> geneToDisease = new HashMap<>();
-
-        // extract relevant bits and pieces for diseases, and map NCBIGene to HGNC
-        Map<TermId, Collection<TermId>> geneToDiseaseIdMap = hpoAssociationData.associations().geneIdToDiseaseIds();
-
-        Map<TermId, HpoDisease> diseaseMap = diseases.diseaseById();
-        for (TermId ncbiGeneTermId : geneToDiseaseIdMap.keySet()) {
-            Matcher matcher = NCBI_GENE_PATTERN.matcher(ncbiGeneTermId.getValue());
-            if (matcher.matches()) {
-                int ncbiGeneId = Integer.parseInt(matcher.group("value"));
-                Integer hgncId = ncbiGeneToHgnc.get(ncbiGeneId);
-                if (hgncId != null) {
-                    for (TermId diseaseId : geneToDiseaseIdMap.get(ncbiGeneTermId)) {
-                        HpoDisease hpoDisease = diseaseMap.get(diseaseId);
-                        if (hpoDisease != null) {
-                            geneToDisease.computeIfAbsent(hgncId, k -> new LinkedList<>())
-                                    .add(HpoDiseaseSummary.of(diseaseId, hpoDisease.diseaseName()));
-                        }
-                    }
-                }
-
-            }
-        }
-
-        return geneDiseaseDao.insertGeneToDisease(geneToDisease);
     }
 
     private static List<? extends GencodeGene> downloadAndPreprocessGenes(GeneProperties properties,

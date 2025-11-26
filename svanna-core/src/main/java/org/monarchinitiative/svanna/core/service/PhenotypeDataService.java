@@ -4,14 +4,12 @@ import org.monarchinitiative.phenol.ontology.data.MinimalOntology;
 import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public interface PhenotypeDataService {
 
@@ -19,9 +17,7 @@ public interface PhenotypeDataService {
 
     MinimalOntology ontology();
 
-    Stream<GeneIdentifier> geneWithIds();
-
-    List<HpoDiseaseSummary> getDiseasesForGene(String hgncId);
+    List<HpoDiseaseSummary> getDiseasesForGene(String entrezId);
 
     List<TermId> phenotypicAbnormalitiesForDiseaseId(TermId diseaseId);
 
@@ -29,13 +25,8 @@ public interface PhenotypeDataService {
 
     // --------------------------------- DERIVED METHODS ---------------------------------------------------------------
 
-    default Map<String, List<GeneIdentifier>> geneByHgvsSymbol() {
-        return geneWithIds()
-                .collect(Collectors.groupingBy(GeneIdentifier::symbol, Collectors.toUnmodifiableList()));
-    }
-
-    default Collection<TermId> getDiseaseIdsForGene(String hgncId) {
-        return getDiseasesForGene(hgncId).stream()
+    default Collection<TermId> getDiseaseIdsForGene(String entrezId) {
+        return getDiseasesForGene(entrezId).stream()
                 .map(HpoDiseaseSummary::getDiseaseId)
                 .collect(Collectors.toList());
     }

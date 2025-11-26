@@ -1,5 +1,7 @@
 package org.monarchinitiative.svanna.cli.writer.html;
 
+import org.monarchinitiative.sgenes.model.Gene;
+import org.monarchinitiative.sgenes.model.Located;
 import org.monarchinitiative.svanna.core.LogUtils;
 import org.monarchinitiative.svanna.core.overlap.GeneOverlap;
 import org.monarchinitiative.svanna.core.overlap.GeneOverlapper;
@@ -16,9 +18,6 @@ import org.monarchinitiative.svanna.model.landscape.repeat.RepetitiveRegion;
 import org.monarchinitiative.svart.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.monarchinitiative.sgenes.model.Gene;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
-import org.monarchinitiative.sgenes.model.Located;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,15 +32,12 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
     private final PhenotypeDataService phenotypeDataService;
 
-    private final Map<String, List<GeneIdentifier>> hgvsSymbolToGeneIdentifier;
-
     public VisualizableGeneratorSimple(GeneOverlapper overlapper,
                                        AnnotationDataService annotationDataService,
                                        PhenotypeDataService phenotypeDataService) {
         this.overlapper = overlapper;
         this.annotationDataService = annotationDataService;
         this.phenotypeDataService = phenotypeDataService;
-        this.hgvsSymbolToGeneIdentifier = phenotypeDataService.geneByHgvsSymbol();
     }
 
     private static List<DosageRegion> mergeOverlappingDosageRegions(List<DosageRegion> dosageRegions) {
@@ -144,16 +140,10 @@ public class VisualizableGeneratorSimple implements VisualizableGenerator {
 
         List<HpoDiseaseSummary> diseaseSummaries = overlaps.stream()
                 // get gene IDs from the overlaps
-                .map(geneOverlap -> geneOverlap.gene().symbol())
-                .map(key -> hgvsSymbolToGeneIdentifier.getOrDefault(key, List.of()))
-                .flatMap(Collection::stream)
-                // get HGNC IDs from gene IDs
-                .flatMap(id -> id.hgncId().stream()) // only work with gene IDs that have HGNC id
-                .distinct()
-                // get associated diseases for HGNC IDs
+                .flatMap(geneOverlap -> geneOverlap.gene().id().ncbiGeneId().stream())
                 .map(phenotypeDataService::getDiseasesForGene)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableList());
+                .collect(Collectors.toList());
 
         return SimpleVisualizable.of(variantLandscape, diseaseSummaries, repetitiveRegions, dosageRegions);
     }

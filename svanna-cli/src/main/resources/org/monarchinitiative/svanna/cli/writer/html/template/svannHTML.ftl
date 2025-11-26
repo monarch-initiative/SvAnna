@@ -9,9 +9,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <style>
-@import url("https://www.jax.org/_res/css/modules/jax-base/p01-fonts.css");
-@import url("https://www.jax.org/_res/css/modules/fonts-extended.css");
-
 * {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;

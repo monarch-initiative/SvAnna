@@ -2,11 +2,13 @@ package org.monarchinitiative.svanna.configuration;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
 import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
 import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaders;
 import org.monarchinitiative.phenol.io.MinimalOntologyLoader;
 import org.monarchinitiative.phenol.ontology.data.MinimalOntology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.phenol.ontology.similarity.TermPair;
 import org.monarchinitiative.svanna.configuration.exception.InvalidResourceException;
 import org.monarchinitiative.svanna.configuration.exception.MissingResourceException;
@@ -27,7 +29,6 @@ import org.monarchinitiative.svanna.io.IOUtils;
 import org.monarchinitiative.svanna.io.hpo.DbPhenotypeDataService;
 import org.monarchinitiative.svanna.io.hpo.IcMicaDictUtils;
 import org.monarchinitiative.svanna.io.service.SilentGenesGeneService;
-import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.sgenes.model.GeneIdentifier;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
@@ -39,6 +40,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -125,10 +127,17 @@ public class SvAnnaBuilder {
                 throw new InvalidResourceException("Error reading HPO annotations from `" + dataResolver.phenotypeHpoaPath().toAbsolutePath() + "`", e);
             }
 
+            HpoAssociationData data = HpoAssociationData.builder(hpo)
+                    .hpoDiseases(diseases)
+                    .mim2GeneMedgen(dataResolver.mim2GeneMedgenPath())
+                    .hgncCompleteSetArchive(dataResolver.hgncCompleteSetPath())
+                    .build();
+
+            Map<TermId, Collection<TermId>> geneIdToDiseaseIds = data.associations().geneIdToDiseaseIds();
             GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(dataSource);
             List<GeneIdentifier> geneIdentifiers = geneDiseaseDao.geneIdentifiers();
-            Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDiseases = geneDiseaseDao.hgncGeneIdToDiseases();
-            phenotypeDataService = new DbPhenotypeDataService(hpo, diseases, geneIdentifiers, hgncGeneIdToDiseases);
+
+            phenotypeDataService = new DbPhenotypeDataService(hpo, diseases, geneIdentifiers, geneIdToDiseaseIds);
         }
 
         // 4 - AnnotationDataService -----------------------------------------------------------------------------------

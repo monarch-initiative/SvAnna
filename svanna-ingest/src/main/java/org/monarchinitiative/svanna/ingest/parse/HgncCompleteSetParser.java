@@ -18,8 +18,8 @@ import java.util.regex.Pattern;
 public class HgncCompleteSetParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HgncCompleteSetParser.class);
-    private static final String HGNC_ID_COL_NAME = "hgnc_id";
-    private static final String ENTREZ_ID_COL_NAME = "entrez_id";
+    private static final int HGNC_ID_COL_IDX = 0;
+    private static final int ENTREZ_ID_COL_IDX = 18;
 
     private HgncCompleteSetParser() {
         // static utility class
@@ -47,7 +47,7 @@ public class HgncCompleteSetParser {
         // HGNC:5	A1BG	alpha-1-B glycoprotein	... 8086    ...	"ENST00000263100.8|NM_130786.4"
         for (CSVRecord record : parser) {
             // parse NCBIGene. Should be a number, but may be missing.
-            String ncbiGene = record.get(ENTREZ_ID_COL_NAME);
+            String ncbiGene = record.get(ENTREZ_ID_COL_IDX);
             if (ncbiGene.isBlank())
                 // missing NCBI gene ID for this gene
                 continue;
@@ -61,9 +61,9 @@ public class HgncCompleteSetParser {
             }
 
             // parse HGNC id
-            Matcher hgncMatcher = hgncPattern.matcher(record.get(HGNC_ID_COL_NAME));
+            Matcher hgncMatcher = hgncPattern.matcher(record.get(HGNC_ID_COL_IDX));
             if (!hgncMatcher.matches()) {
-                LOGGER.warn("Skipping HGNC id `{}` on line #{}: `{}`", record.get("hgnc_id"), record.getRecordNumber(), record);
+                LOGGER.warn("Skipping HGNC id `{}` on line #{}: `{}`", record.get(HGNC_ID_COL_IDX), record.getRecordNumber(), record);
                 continue;
             }
             Integer hgncId = Integer.parseInt(hgncMatcher.group("payload"));

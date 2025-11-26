@@ -200,25 +200,22 @@ public class BuildDb implements Callable<Integer> {
     }
 
     private static void downloadPhenotypeFiles(PhenotypeProperties properties,
-                                                        DataSource dataSource,
-                                                        Path buildDir,
-                                                        Path tmpDir,
-                                                        List<? extends GencodeGene> genes,
-                                                        Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
-        // hp.json belongs to the buildDir
+                                               DataSource dataSource,
+                                               Path buildDir,
+                                               List<? extends GencodeGene> genes,
+                                               Map<Integer, Integer> ncbiGeneToHgnc) throws IOException {
+        // The files belong to the `buildDir`.
         URL hpoJsonUrl = new URL(properties.hpoJsonUrl());
         Path hpoJsonPath = downloadUrl(hpoJsonUrl, buildDir);
-        // HPOA belongs to the buildDir
+
         URL hpoAnnotationsUrl = new URL(properties.hpoAnnotationsUrl());
         Path hpoAnnotationsPath = downloadUrl(hpoAnnotationsUrl, buildDir);
 
-        // other files are temporary
-        // mim2geneMedgen
         URL mim2geneMedgenUrl = new URL(properties.mim2geneMedgenUrl());
-        Path mim2geneMedgenPath = downloadUrl(mim2geneMedgenUrl, tmpDir);
-        // hgncCompleteSet
+        Path mim2geneMedgenPath = downloadUrl(mim2geneMedgenUrl, buildDir);
+
         URL hgncCompleteSet = new URL(properties.getHgncCompleteSet());
-        Path hgncCompleteSetPath = downloadUrl(hgncCompleteSet, tmpDir);
+        Path hgncCompleteSetPath = downloadUrl(hgncCompleteSet, buildDir);
         // Download is done
 
         GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(dataSource);
@@ -590,7 +587,6 @@ public class BuildDb implements Callable<Integer> {
             downloadPhenotypeFiles(properties.phenotype(),
                     dataSource,
                     buildDir,
-                    tmpDir,
                     genes,
                     ncbiGeneToHgncId);
 

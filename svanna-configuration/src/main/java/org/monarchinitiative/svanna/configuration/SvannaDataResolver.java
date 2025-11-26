@@ -15,7 +15,15 @@ public class SvannaDataResolver {
         this.svannaDataDirectory = svannaDataDirectory;
 
         // now check that we have all files present
-        List<Path> paths = List.of(fullDataSourcePath(), hpOntologyPath(), phenotypeHpoaPath(), genesJsonPath(), termToIcMicaPath());
+        List<Path> paths = List.of(
+                fullDataSourcePath(),
+                hpOntologyPath(),
+                phenotypeHpoaPath(),
+                genesJsonPath(),
+                termToIcMicaPath(),
+                mim2GeneMedgenPath(),
+                hgncCompleteSetPath()
+        );
         for (Path path : paths) {
             if (!(Files.isRegularFile(path) && Files.isReadable(path))) {
                 throw new MissingResourceException(String.format("The file `%s` is missing in SvAnna directory", path.toFile().getName()));
@@ -46,4 +54,13 @@ public class SvannaDataResolver {
     public Path termToIcMicaPath() {
         return svannaDataDirectory.resolve(IcMicaDictUtils.TERM_PAIR_SIMILARITY_NAME);
     }
+
+    public Path mim2GeneMedgenPath() {
+        return svannaDataDirectory.resolve("mim2gene_medgen");
+    }
+
+    public Path hgncCompleteSetPath() {
+        return svannaDataDirectory.resolve("hgnc_complete_set.txt");
+    }
+
 }

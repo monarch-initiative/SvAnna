@@ -34,6 +34,12 @@ public interface PhenotypeDataService {
                 .collect(Collectors.groupingBy(GeneIdentifier::symbol, Collectors.toUnmodifiableList()));
     }
 
+    default Collection<TermId> getDiseaseIdsForGene(String hgncId) {
+        return getDiseasesForGene(hgncId).stream()
+                .map(HpoDiseaseSummary::getDiseaseId)
+                .collect(Collectors.toList());
+    }
+
     /**
      * Validate the input hpo terms and return a subset with the valid terms.
      *

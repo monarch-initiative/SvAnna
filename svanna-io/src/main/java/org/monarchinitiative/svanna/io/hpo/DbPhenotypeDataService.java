@@ -21,17 +21,18 @@ public class DbPhenotypeDataService implements PhenotypeDataService {
     private final MinimalOntology hpo;
     private final HpoDiseases hpoDiseases;
     private final List<GeneIdentifier> geneIdentifiers;
-    private final Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDisease;
+    private final Map<TermId, Collection<TermId>> geneIdToDiseaseIds;
     private final HpoCategoryLookup lookup;
 
     public DbPhenotypeDataService(MinimalOntology hpo,
                                   HpoDiseases hpoDiseases,
                                   List<GeneIdentifier> geneIdentifiers,
-                                  Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDisease) {
+                                  Map<TermId, Collection<TermId>> geneIdToDiseaseIds
+    ) {
         this.hpo = Objects.requireNonNull(hpo, "Ontology must not be null");
         this.hpoDiseases = Objects.requireNonNull(hpoDiseases);
-        this.geneIdentifiers = Objects.requireNonNull(geneIdentifiers, "Gene identifiers must not be null");
-        this.hgncGeneIdToDisease = Objects.requireNonNull(hgncGeneIdToDisease, "HGNC gene ID to diseases must not be null");
+        this.geneIdentifiers = Objects.requireNonNull(geneIdentifiers);
+        this.geneIdToDiseaseIds = Objects.requireNonNull(geneIdToDiseaseIds);
         this.lookup = new HpoCategoryLookup(hpo.graph(), HpoCategories.preset());
     }
 
@@ -55,7 +56,15 @@ public class DbPhenotypeDataService implements PhenotypeDataService {
 
     @Override
     public List<HpoDiseaseSummary> getDiseasesForGene(String hgncId) {
-        return hgncGeneIdToDisease.getOrDefault(hgncId, List.of());
+        return this.geneIdToDiseaseIds.getOrDefault(TermId.of(hgncId), List.of()).stream()
+                .flatMap(diseaseId -> hpoDiseases.diseaseById(diseaseId).stream())
+                .map(d -> HpoDiseaseSummary.of(d.id(), d.diseaseName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Collection<TermId> getDiseaseIdsForGene(String hgncId) {
+        return this.geneIdToDiseaseIds.getOrDefault(TermId.of(hgncId), List.of());
     }
 
     @Override

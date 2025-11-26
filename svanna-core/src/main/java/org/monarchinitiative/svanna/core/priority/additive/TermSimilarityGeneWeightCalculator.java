@@ -2,12 +2,10 @@ package org.monarchinitiative.svanna.core.priority.additive;
 
 import org.monarchinitiative.svanna.core.hpo.SimilarityScoreCalculator;
 import org.monarchinitiative.svanna.core.service.PhenotypeDataService;
-import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator {
 
@@ -32,9 +30,7 @@ public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator 
         if (hgncIdOptional.isEmpty())
             return maxSimilarity;
 
-        List<TermId> diseaseIds = phenotypeDataService.getDiseasesForGene(hgncIdOptional.get()).stream()
-                .map(HpoDiseaseSummary::getDiseaseId)
-                .collect(Collectors.toUnmodifiableList());
+        Collection<TermId> diseaseIds = phenotypeDataService.getDiseaseIdsForGene(hgncIdOptional.get());
 
         for (TermId diseaseId : diseaseIds) {
             List<TermId> diseaseHpoIds = phenotypeDataService.phenotypicAbnormalitiesForDiseaseId(diseaseId);

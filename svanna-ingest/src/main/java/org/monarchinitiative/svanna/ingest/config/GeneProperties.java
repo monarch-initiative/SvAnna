@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class GeneProperties {
 
     private String gencodeGtfUrl;
+    private String hgncCompleteSetUrl;
 
     public String gencodeGtfUrl() {
         return gencodeGtfUrl;
@@ -15,4 +16,11 @@ public class GeneProperties {
         this.gencodeGtfUrl = gencodeGtfUrl;
     }
 
+    public String hgncCompleteSetUrl() {
+        return hgncCompleteSetUrl;
+    }
+
+    public void setHgncCompleteSetUrl(String hgncCompleteSetUrl) {
+        this.hgncCompleteSetUrl = hgncCompleteSetUrl;
+    }
 }

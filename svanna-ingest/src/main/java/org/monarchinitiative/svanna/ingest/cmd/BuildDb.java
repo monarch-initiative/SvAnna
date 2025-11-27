@@ -15,7 +15,6 @@ import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
 import org.monarchinitiative.phenol.base.PhenolRuntimeException;
 import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.sgenes.gtf.model.GencodeGene;
 import org.monarchinitiative.sgenes.io.GeneParser;
 import org.monarchinitiative.sgenes.io.GeneParserFactory;
 import org.monarchinitiative.sgenes.io.SerializationFormat;
@@ -176,18 +175,21 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static List<? extends GencodeGene> downloadAndPreprocessGenes(GeneProperties properties,
-                                                                          GenomicAssembly assembly,
-                                                                          Path buildDir,
-                                                                          Path tmpDir) throws IOException {
+    private static List<? extends Gene> downloadAndPreprocessGenes(
+            GeneProperties properties,
+            GenomicAssembly assembly,
+            Map<String, String> hgncToNcbiGeneId,
+            Path buildDir,
+            Path tmpDir)
+    throws IOException {
         // download Gencode GTF
         URL url = new URL(properties.gencodeGtfUrl());
         Path localGencodeGtfPath = downloadUrl(url, tmpDir);
 
         // Load the Gencode GTF into the "silent gene" format
         LOGGER.info("Reading Gencode GTF file at {}", localGencodeGtfPath.toAbsolutePath());
-        GencodeGeneProcessor gencodeGeneProcessor = new GencodeGeneProcessor(localGencodeGtfPath, assembly);
-        List<? extends GencodeGene> genes = gencodeGeneProcessor.process();
+        GencodeGeneProcessor gencodeGeneProcessor = new GencodeGeneProcessor(localGencodeGtfPath, assembly, hgncToNcbiGeneId);
+        List<? extends Gene> genes = gencodeGeneProcessor.process();
         LOGGER.info("Read {} genes", NF.format(genes.size()));
 
         // dump the transformed genes to compressed JSON file in the build directory
@@ -289,7 +291,7 @@ public class BuildDb implements Callable<Integer> {
         }
     }
 
-    private static Map<TermId, GenomicRegion> readGeneRegions(List<? extends GencodeGene> genes) {
+    private static Map<TermId, GenomicRegion> readGeneRegions(List<? extends Gene> genes) {
         Map<TermId, GenomicRegion> regionsByEntrezId = new HashMap<>(genes.size());
         for (Gene gene : genes) {
             Optional<String> entrezIdOptional = gene.id().ncbiGeneId();
@@ -419,7 +421,8 @@ public class BuildDb implements Callable<Integer> {
             HikariDataSource dataSource = initializeDataSource(dbPath);
 
             Path tmpDir = buildDir.resolve("build");
-            List<? extends GencodeGene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, buildDir, tmpDir);
+            Map<String, String> hgncToNcbiGeneId = downloadAndIngestHgncIdToNcbiGeneId(tmpDir, properties.getGenes().hgncCompleteSetUrl());
+            List<? extends Gene> genes = downloadAndPreprocessGenes(properties.getGenes(), assembly, hgncToNcbiGeneId, buildDir, tmpDir);
 
             ingestEnhancers(properties.enhancers(), assembly, dataSource);
 
@@ -476,10 +479,10 @@ public class BuildDb implements Callable<Integer> {
         return 0;
     }
 
-    private static Map<Integer, Integer> downloadAndIngestNcbiToHgncTable(Path tmpDir, String hgncCompleteSetUrl) throws IOException {
+    private static Map<String, String> downloadAndIngestHgncIdToNcbiGeneId(Path tmpDir, String hgncCompleteSetUrl) throws IOException {
         URL url = new URL(hgncCompleteSetUrl);
         Path localHgncCompleteSetPath = downloadUrl(url, tmpDir);
-        return HgncCompleteSetParser.parseNcbiToHgncTable(localHgncCompleteSetPath);
+        return HgncCompleteSetParser.parseHgncToNcbiGeneTable(localHgncCompleteSetPath);
     }
 
     protected ConfigurableApplicationContext getContext() {

@@ -42,6 +42,8 @@ svanna.ingest:
 
   genes:
     gencodeGtfUrl: https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_38/gencode.v38.chr_patch_hapl_scaff.annotation.gtf.gz
+    # See HGNC downloads at https://www.genenames.org/download/ and get the URL for `Complete set new TSV`
+    hgncCompleteSetUrl: https://storage.googleapis.com/public-download-files/hgnc/tsv/tsv/hgnc_complete_set.txt
 
 ##############################
 # Do not edit anything below

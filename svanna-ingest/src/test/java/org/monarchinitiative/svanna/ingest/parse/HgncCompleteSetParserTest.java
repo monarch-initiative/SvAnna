@@ -16,15 +16,15 @@ public class HgncCompleteSetParserTest {
     private static final String TEST_PATH = "hgnc_complete_set.head.txt";
 
     @Test
-    public void parseNcbiToHgncTable() throws IOException {
-        Map<Integer, Integer> table;
+    public void parseHgncToNcbiGeneTable() throws IOException {
+        Map<String, String> hgncToNcbigene;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(HgncCompleteSetParserTest.class.getResourceAsStream(TEST_PATH))))) {
-            table = HgncCompleteSetParser.parseNcbiToHgncTable(reader);
+            hgncToNcbigene = HgncCompleteSetParser.parseHgncToNcbiGeneTable(reader);
         }
 
-        assertThat(table, hasEntry(1, 5)); // A1BG
-        assertThat(table, hasEntry(2, 7)); // A2M
-        assertThat(table, hasEntry(503_538, 37_133)); // A1BG-AS1
-        assertThat(table, hasEntry(29_974, 24_086)); // A1CF
+        assertThat(hgncToNcbigene, hasEntry("HGNC:5", "NCBIGene:1")); // A1BG
+        assertThat(hgncToNcbigene, hasEntry("HGNC:37133", "NCBIGene:503538")); // A1BG-AS1
+        assertThat(hgncToNcbigene, hasEntry("HGNC:24086", "NCBIGene:29974")); // A1CF
+        assertThat(hgncToNcbigene, hasEntry("HGNC:7", "NCBIGene:2")); // A2M
     }
 }

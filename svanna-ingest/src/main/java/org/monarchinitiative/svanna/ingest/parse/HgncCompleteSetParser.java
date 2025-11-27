@@ -20,29 +20,30 @@ public class HgncCompleteSetParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(HgncCompleteSetParser.class);
     private static final int HGNC_ID_COL_IDX = 0;
     private static final int ENTREZ_ID_COL_IDX = 18;
+    private static final Pattern NUMBER = Pattern.compile("^\\d+$");
+    private static final Pattern HGNC_PATTERN = Pattern.compile("^HGNC:\\d+$");
 
     private HgncCompleteSetParser() {
         // static utility class
     }
 
-    public static Map<Integer, Integer> parseNcbiToHgncTable(Path ncbiGeneToHgnc) throws IOException {
+    public static Map<String, String> parseHgncToNcbiGeneTable(Path ncbiGeneToHgnc) throws IOException {
         if (Files.notExists(ncbiGeneToHgnc)) {
             throw new IOException("Table for mapping NCBIGene to HGNC does not exist at " + ncbiGeneToHgnc.toAbsolutePath());
         }
 
         try (BufferedReader reader = org.monarchinitiative.svanna.io.IOUtils.openForReading(ncbiGeneToHgnc)) {
-            return parseNcbiToHgncTable(reader);
+            return parseHgncToNcbiGeneTable(reader);
         }
     }
 
-    public static Map<Integer, Integer> parseNcbiToHgncTable(BufferedReader reader) throws IOException {
-        Map<Integer, Integer> results = new HashMap<>();
+    public static Map<String, String> parseHgncToNcbiGeneTable(BufferedReader reader) throws IOException {
+        Map<String, String> hgncIdToNcbiGeneId = new HashMap<>();
 
         CSVParser parser = CSVFormat.TDF.builder()
                 .setSkipHeaderRecord(true)
                 .build()
                 .parse(reader);
-        Pattern hgncPattern = Pattern.compile("HGNC:(?<payload>\\d+)");
         // hgnc_id	symbol	name    ... entrez_id	... mane_select	gencc
         // HGNC:5	A1BG	alpha-1-B glycoprotein	... 8086    ...	"ENST00000263100.8|NM_130786.4"
         for (CSVRecord record : parser) {
@@ -52,26 +53,24 @@ public class HgncCompleteSetParser {
                 // missing NCBI gene ID for this gene
                 continue;
 
-            int ncbiGeneId;
-            try {
-                ncbiGeneId = Integer.parseInt(ncbiGene);
-            } catch (NumberFormatException e) {
+            Matcher matcher = NUMBER.matcher(ncbiGene);
+            if (!matcher.matches()) {
                 LOGGER.warn("Skipping non-numeric NCBIGene/Entrez id `{}` on line #{}: `{}`", ncbiGene, record.getRecordNumber(), record);
                 continue;
             }
 
             // parse HGNC id
-            Matcher hgncMatcher = hgncPattern.matcher(record.get(HGNC_ID_COL_IDX));
+            String hgncId = record.get(HGNC_ID_COL_IDX);
+            Matcher hgncMatcher = HGNC_PATTERN.matcher(hgncId);
             if (!hgncMatcher.matches()) {
-                LOGGER.warn("Skipping HGNC id `{}` on line #{}: `{}`", record.get(HGNC_ID_COL_IDX), record.getRecordNumber(), record);
+                LOGGER.warn("Skipping HGNC id `{}` on line #{}: `{}`", hgncId, record.getRecordNumber(), record);
                 continue;
             }
-            Integer hgncId = Integer.parseInt(hgncMatcher.group("payload"));
 
-            // store the results
-            results.put(ncbiGeneId, hgncId);
+            hgncIdToNcbiGeneId.put(hgncId, "NCBIGene:" + ncbiGene);
         }
-        return results;
+
+        return hgncIdToNcbiGeneId;
     }
 }
 

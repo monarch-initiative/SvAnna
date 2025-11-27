@@ -77,6 +77,7 @@ public class SetupPhenotypeCommand extends BaseSvAnnaCommand {
     }
 
     private static void computeTermPairToIcMicaTable(SvannaDataResolver resolver) throws IOException {
+        LOGGER.info("Computing information content for HPO term pairs");
         MinimalOntology hpo = MinimalOntologyLoader.loadOntology(resolver.hpOntologyPath().toFile());
         HpoDiseaseLoader hpoaLoader = HpoDiseaseLoaders.defaultLoader(hpo, HpoDiseaseLoaderOptions.defaultOptions());
         HpoDiseases diseases = hpoaLoader.load(resolver.phenotypeHpoaPath());
@@ -85,7 +86,10 @@ public class SetupPhenotypeCommand extends BaseSvAnnaCommand {
         LocalDate date = LocalDate.now();
         String hpoVersion = hpo.version().orElse("N/A");
         String hpoaVersion = diseases.version().orElse("N/A");
-        try (Writer writer = IOUtils.openForWriting(resolver.termToIcMicaPath())) {
+
+        Path outPath = resolver.termToIcMicaPath();
+        LOGGER.info("Writing the term pairs table to {}", outPath.toAbsolutePath());
+        try (Writer writer = IOUtils.openForWriting(outPath)) {
             IcMicaDictUtils.writeTermPairMap(icMicaMap, writer, date, hpoVersion, hpoaVersion);
         }
     }

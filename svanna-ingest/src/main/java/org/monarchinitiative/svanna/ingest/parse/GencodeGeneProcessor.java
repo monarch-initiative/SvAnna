@@ -23,7 +23,7 @@ public class GencodeGeneProcessor {
     }
 
     public List<? extends GencodeGene> process() {
-        GtfGeneParser<GencodeGene> parser = GtfGeneParserFactory.gtfGeneParser(localGencodeGtfPath, assembly);
+        GtfGeneParser<GencodeGene> parser = GtfGeneParserFactory.gencodeGeneParser(localGencodeGtfPath, assembly);
         return parser.stream()
                 .filter(geneHasHgncId())
                 .filter(geneIsCodingOrAtLeastOneTranscriptIsCoding())

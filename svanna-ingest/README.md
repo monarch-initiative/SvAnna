@@ -34,8 +34,9 @@ svanna-ingest download -d ${DWN_DIR}
 ```shell
 ASSEMBLY=hg38
 DB_VERSION=2511 # 👈 update
-CONFIG_PATH=svanna-ingest-config.yml
-BUILD_DIR=/home/ielis/dub/data/svanna/${DB_VERSION}_${ASSEMBLY}
+PARENT_DIR=/home/ielis/dub/data/clinical-long-read-genome/svanna
+CONFIG_PATH=${PARENT_DIR}/${DB_VERSION}_${ASSEMBLY}.svanna-ingest-config.yaml
+BUILD_DIR=${PARENT_DIR}/${DB_VERSION}_${ASSEMBLY}
 svanna-ingest build-db --assembly ${ASSEMBLY} \
   --db-version ${DB_VERSION} \
   ${CONFIG_PATH} \

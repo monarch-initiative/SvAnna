@@ -1,41 +1,34 @@
 package org.monarchinitiative.svanna.core.service;
 
+import org.monarchinitiative.phenol.ontology.data.MinimalOntology;
 import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
-import org.monarchinitiative.phenol.ontology.algo.OntologyAlgorithm;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
 import org.monarchinitiative.phenol.ontology.data.Term;
 import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public interface PhenotypeDataService {
 
     Logger LOGGER = LoggerFactory.getLogger(PhenotypeDataService.class);
 
-    Ontology ontology();
+    MinimalOntology ontology();
 
-    Stream<GeneIdentifier> geneWithIds();
+    List<HpoDiseaseSummary> getDiseasesForGene(String entrezId);
 
-    List<HpoDiseaseSummary> getDiseasesForGene(String hgncId);
-
-    List<TermId> phenotypicAbnormalitiesForDiseaseId(String diseaseId);
+    List<TermId> phenotypicAbnormalitiesForDiseaseId(TermId diseaseId);
 
     Set<Term> getTopLevelTerms(Collection<Term> hpoTermIds);
 
     // --------------------------------- DERIVED METHODS ---------------------------------------------------------------
 
-    default Map<String, List<GeneIdentifier>> geneByHgvsSymbol() {
-        return geneWithIds()
-                .collect(Collectors.groupingBy(GeneIdentifier::symbol, Collectors.toUnmodifiableList()));
+    default Collection<TermId> getDiseaseIdsForGene(String entrezId) {
+        return getDiseasesForGene(entrezId).stream()
+                .map(HpoDiseaseSummary::getDiseaseId)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -47,7 +40,7 @@ public interface PhenotypeDataService {
     default Set<Term> validateTerms(Collection<TermId> hpoTermIds) {
         return hpoTermIds.stream()
                 .filter(validateTerm())
-                .map(termId -> ontology().getTermMap().get(termId))
+                .flatMap(termId -> ontology().termForTermId(termId).stream())
                 .collect(Collectors.toUnmodifiableSet());
     }
 
@@ -60,15 +53,21 @@ public interface PhenotypeDataService {
      * @return set {@code candidates} ancestors that are in {#code ancestorTerms}
      */
     default Set<TermId> getRelevantAncestors(Collection<TermId> candidates, Collection<TermId> ancestorTerms) {
-        Set<TermId> candidateAncestors = OntologyAlgorithm.getAncestorTerms(ontology(), Set.copyOf(candidates), true);
-        return candidateAncestors.stream()
-                .filter(ancestorTerms::contains)
-                .collect(Collectors.toSet());
+        Set<TermId> relevant = new HashSet<>();
+        for (TermId candidate : candidates) {
+            if (ancestorTerms.contains(candidate))
+                relevant.add(candidate);
+            for (TermId ancestor : ontology().graph().getAncestors(candidate)) {
+                if (ancestorTerms.contains(ancestor))
+                    relevant.add(ancestor);
+            }
+        }
+        return relevant;
     }
 
     private Predicate<? super TermId> validateTerm() {
         return termId -> {
-            if (!ontology().getTermMap().containsKey(termId)) {
+            if (!ontology().containsTermId(termId)) {
                 LOGGER.warn("Term ID `{}` is not present in the used ontology", termId);
                 return false;
             }

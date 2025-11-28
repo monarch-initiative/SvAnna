@@ -2,12 +2,10 @@ package org.monarchinitiative.svanna.core.priority.additive;
 
 import org.monarchinitiative.svanna.core.hpo.SimilarityScoreCalculator;
 import org.monarchinitiative.svanna.core.service.PhenotypeDataService;
-import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
 import org.monarchinitiative.phenol.ontology.data.TermId;
 import org.monarchinitiative.sgenes.model.Gene;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator {
 
@@ -28,15 +26,13 @@ public class TermSimilarityGeneWeightCalculator implements GeneWeightCalculator 
     public double calculateRelevance(Gene gene) {
         double maxSimilarity = 0.;
 
-        Optional<String> hgncIdOptional = gene.id().hgncId();
-        if (hgncIdOptional.isEmpty())
+        Optional<String> ncbiGeneIdOptional = gene.id().ncbiGeneId();
+        if (ncbiGeneIdOptional.isEmpty())
             return maxSimilarity;
 
-        List<String> diseaseIds = phenotypeDataService.getDiseasesForGene(hgncIdOptional.get()).stream()
-                .map(HpoDiseaseSummary::getDiseaseId)
-                .collect(Collectors.toUnmodifiableList());
+        Collection<TermId> diseaseIds = phenotypeDataService.getDiseaseIdsForGene(ncbiGeneIdOptional.get());
 
-        for (String diseaseId : diseaseIds) {
+        for (TermId diseaseId : diseaseIds) {
             List<TermId> diseaseHpoIds = phenotypeDataService.phenotypicAbnormalitiesForDiseaseId(diseaseId);
             double resnikSimilarity = similarityScoreCalculator.computeSimilarityScore(patientFeatures, diseaseHpoIds);
             maxSimilarity = Math.max(maxSimilarity, resnikSimilarity);

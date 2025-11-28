@@ -2,6 +2,14 @@ package org.monarchinitiative.svanna.configuration;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoAssociationData;
+import org.monarchinitiative.phenol.annotations.formats.hpo.HpoDiseases;
+import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaderOptions;
+import org.monarchinitiative.phenol.annotations.io.hpo.HpoDiseaseLoaders;
+import org.monarchinitiative.phenol.io.MinimalOntologyLoader;
+import org.monarchinitiative.phenol.ontology.data.MinimalOntology;
+import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.ontology.similarity.TermPair;
 import org.monarchinitiative.svanna.configuration.exception.InvalidResourceException;
 import org.monarchinitiative.svanna.configuration.exception.MissingResourceException;
 import org.monarchinitiative.svanna.configuration.exception.UndefinedResourceException;
@@ -14,27 +22,23 @@ import org.monarchinitiative.svanna.core.service.AnnotationDataService;
 import org.monarchinitiative.svanna.core.service.GeneDosageDataService;
 import org.monarchinitiative.svanna.core.service.GeneService;
 import org.monarchinitiative.svanna.core.service.PhenotypeDataService;
-import org.monarchinitiative.svanna.db.gene.GeneDiseaseDao;
 import org.monarchinitiative.svanna.db.landscape.*;
-import org.monarchinitiative.svanna.db.phenotype.MicaDao;
 import org.monarchinitiative.svanna.db.service.ClinGenGeneDosageDataService;
+import org.monarchinitiative.svanna.io.IOUtils;
 import org.monarchinitiative.svanna.io.hpo.DbPhenotypeDataService;
+import org.monarchinitiative.svanna.io.hpo.IcMicaDictUtils;
 import org.monarchinitiative.svanna.io.service.SilentGenesGeneService;
-import org.monarchinitiative.svanna.model.HpoDiseaseSummary;
-import org.monarchinitiative.phenol.io.OntologyLoader;
-import org.monarchinitiative.phenol.ontology.data.Ontology;
-import org.monarchinitiative.phenol.ontology.data.TermId;
-import org.monarchinitiative.sgenes.model.GeneIdentifier;
 import org.monarchinitiative.svart.assembly.GenomicAssemblies;
 import org.monarchinitiative.svart.assembly.GenomicAssembly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.NumberFormat;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
@@ -107,23 +111,32 @@ public class SvAnnaBuilder {
         }
 
         // 3 - PhenotypeDataService ------------------------------------------------------------------------------------
-        DataSource dataSource = null;
         if (phenotypeDataService == null) {
-            dataSource = svAnnaDataSource(dataResolver.dataSourcePath());
             LOGGER.debug("Reading HPO file from {}", dataResolver.hpOntologyPath().toAbsolutePath());
-            Ontology ontology = OntologyLoader.loadOntology(dataResolver.hpOntologyPath().toFile());
+            MinimalOntology hpo = MinimalOntologyLoader.loadOntology(dataResolver.hpOntologyPath().toFile());
+            HpoDiseases diseases;
+            try {
+                LOGGER.debug("Reading HPO annotations file from {}", dataResolver.phenotypeHpoaPath().toAbsolutePath());
+                diseases = HpoDiseaseLoaders.defaultLoader(hpo, HpoDiseaseLoaderOptions.defaultOptions()).load(dataResolver.phenotypeHpoaPath());
+            } catch (IOException e) {
+                throw new InvalidResourceException("Error reading HPO annotations from `" + dataResolver.phenotypeHpoaPath().toAbsolutePath() + "`", e);
+            }
 
-            GeneDiseaseDao geneDiseaseDao = new GeneDiseaseDao(dataSource);
-            List<GeneIdentifier> geneIdentifiers = geneDiseaseDao.geneIdentifiers();
-            Map<String, List<HpoDiseaseSummary>> hgncGeneIdToDiseases = geneDiseaseDao.hgncGeneIdToDiseases();
-            Map<String, List<TermId>> phenotypicAbnormalitiesForDiseaseId = geneDiseaseDao.diseaseToPhenotypes();
-            phenotypeDataService = new DbPhenotypeDataService(ontology, geneIdentifiers, hgncGeneIdToDiseases, phenotypicAbnormalitiesForDiseaseId);
+            HpoAssociationData data = HpoAssociationData.builder(hpo)
+                    .hpoDiseases(diseases)
+                    .mim2GeneMedgen(dataResolver.mim2GeneMedgenPath())
+                    .hgncCompleteSetArchive(dataResolver.hgncCompleteSetPath())
+                    .build();
+
+            Map<TermId, Collection<TermId>> geneIdToDiseaseIds = data.associations().geneIdToDiseaseIds();
+
+            phenotypeDataService = new DbPhenotypeDataService(hpo, diseases, geneIdToDiseaseIds);
         }
 
+        DataSource dataSource = null;
         // 4 - AnnotationDataService -----------------------------------------------------------------------------------
         if (annotationDataService == null) {
-            if (dataSource == null)
-                dataSource = svAnnaDataSource(dataResolver.dataSourcePath());
+            dataSource = svAnnaDataSource(dataResolver.dataSourcePath());
 
             DataProperties dataProperties = properties.dataProperties();
             LOGGER.debug("Including TAD boundaries with stability >{}%", NF.format(dataProperties.tadStabilityThresholdAsPercentage()));
@@ -158,11 +171,19 @@ public class SvAnnaBuilder {
             TermSimilarityMeasure similarityMeasure = properties.prioritizationProperties().termSimilarityMeasure();
             LOGGER.debug("Initializing phenotype term similarity calculator {}", similarityMeasure);
 
-            MicaCalculator similarityCalculator = prepareMicaCalculator(dataSource, properties.prioritizationProperties().icMicaMode());
+            LOGGER.debug("Reading IC MICA table from {}", dataResolver.termToIcMicaPath());
+            MicaCalculator micaCalculator;
+            try (BufferedReader reader = IOUtils.openForReading(dataResolver.termToIcMicaPath())) {
+                Map<TermPair, Double> termPairDoubleMap = IcMicaDictUtils.readTermPairMap(reader);
+                micaCalculator = new InMemoryMicaCalculator(termPairDoubleMap);
+            } catch (IOException e) {
+                throw new InvalidResourceException("Cannot configure MICA calculator", e);
+            }
+
             if (similarityMeasure.equals(TermSimilarityMeasure.RESNIK_SYMMETRIC)) {
-                similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, true);
+                similarityScoreCalculator = new ResnikSimilarityScoreCalculator(micaCalculator, true);
             } else if (similarityMeasure.equals(TermSimilarityMeasure.RESNIK_ASYMMETRIC)) {
-                similarityScoreCalculator = new ResnikSimilarityScoreCalculator(similarityCalculator, false);
+                similarityScoreCalculator = new ResnikSimilarityScoreCalculator(micaCalculator, false);
             } else {
                 throw new UndefinedResourceException("Unknown term similarity measure " + similarityMeasure);
             }
@@ -190,20 +211,5 @@ public class SvAnnaBuilder {
         config.setPoolName("svanna-pool");
 
         return new HikariDataSource(config);
-    }
-
-    private static MicaCalculator prepareMicaCalculator(DataSource svannaDatasource,
-                                                        IcMicaMode icMicaMode) {
-        MicaDao dao = new MicaDao(svannaDatasource);
-        switch (icMicaMode) {
-            case IN_MEMORY:
-                LOGGER.debug("Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
-                return new InMemoryMicaCalculator(dao.getAllMicaValues());
-            default:
-                LOGGER.warn("Unknown value `{}` for getting IC of the most informative common ancestor for HPO terms. Falling back to DATABASE", icMicaMode);
-            case DATABASE:
-                LOGGER.debug("Using `{}` to get IC of the most informative common ancestor for HPO terms", icMicaMode);
-                return (a, b) -> dao.getMica(TermPair.symmetric(a, b));
-        }
     }
 }

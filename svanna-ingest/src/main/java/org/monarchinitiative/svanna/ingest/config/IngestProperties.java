@@ -8,13 +8,10 @@ public class IngestProperties {
 
     private String repetitiveRegionsUrl;
     private String hg19toHg38ChainUrl;
-    private String ncbiGeneToHgnc;
     @NestedConfigurationProperty
     private EnhancerProperties enhancers;
     @NestedConfigurationProperty
     private VariantProperties variants;
-    @NestedConfigurationProperty
-    private PhenotypeProperties phenotype;
     @NestedConfigurationProperty
     private TadProperties tad;
     @NestedConfigurationProperty
@@ -42,14 +39,6 @@ public class IngestProperties {
         this.repetitiveRegionsUrl = repetitiveRegionsUrl;
     }
 
-    public String ncbiGeneToHgnc() {
-        return ncbiGeneToHgnc;
-    }
-
-    public void setNcbiGeneToHgnc(String ncbiGeneToHgnc) {
-        this.ncbiGeneToHgnc = ncbiGeneToHgnc;
-    }
-
     public EnhancerProperties enhancers() {
         return enhancers;
     }
@@ -65,15 +54,6 @@ public class IngestProperties {
     public void setVariants(VariantProperties variants) {
         this.variants = variants;
     }
-
-    public PhenotypeProperties phenotype() {
-        return phenotype;
-    }
-
-    public void setPhenotype(PhenotypeProperties phenotype) {
-        this.phenotype = phenotype;
-    }
-
 
     public TadProperties tad() {
         return tad;

@@ -1,5 +1,7 @@
 package org.monarchinitiative.svanna.model;
 
+import org.monarchinitiative.phenol.ontology.data.TermId;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -23,23 +25,23 @@ public class HpoDiseaseInheritanceData implements HpoDiseaseSummary {
             ModeOfInheritance.UNKNOWN, 0x40              // hex for 0100 0000
     );
 
-    private final String diseaseId;
+    private final TermId diseaseId;
     private final String diseaseName;
     private final int inheritanceModeCompatibility;
 
-    public static HpoDiseaseInheritanceData of(String diseaseId, String diseaseName, Set<ModeOfInheritance> inheritanceModeCompatibility) {
+    public static HpoDiseaseInheritanceData of(TermId diseaseId, String diseaseName, Set<ModeOfInheritance> inheritanceModeCompatibility) {
         int compatibility = inheritanceModeCompatibility.stream().mapToInt(moi -> HpoDiseaseInheritanceData.COMPATIBILITY_MAP.getOrDefault(moi, 0x0)).sum();
         return new HpoDiseaseInheritanceData(diseaseId, diseaseName, compatibility);
     }
 
-    private HpoDiseaseInheritanceData(String diseaseId, String diseaseName, int inheritanceModeCompatibility) {
+    private HpoDiseaseInheritanceData(TermId diseaseId, String diseaseName, int inheritanceModeCompatibility) {
         this.diseaseId = Objects.requireNonNull(diseaseId);
         this.diseaseName = Objects.requireNonNull(diseaseName);
         this.inheritanceModeCompatibility = inheritanceModeCompatibility;
     }
 
     @Override
-    public String getDiseaseId() {
+    public TermId getDiseaseId() {
         return diseaseId;
     }
 

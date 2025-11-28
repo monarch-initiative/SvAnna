@@ -2,7 +2,6 @@
 
 [![GitHub release](https://img.shields.io/github/release/monarch-initiative/SvAnna.svg)](https://github.com/monarch-initiative/SvAnna/releases)
 [![Java CI with Maven](https://github.com/monarch-initiative/SvAnna/workflows/Java%20CI%20with%20Maven/badge.svg)](https://github.com/monarch-initiative/SvAnna/actions/workflows/maven.yml)
-[![Documentation Status](https://readthedocs.org/projects/svanna/badge/?version=master)](https://svanna.readthedocs.io/en/master/?badge=master)
 
 Efficient and accurate pathogenicity prediction for coding and regulatory structural variants in long-read genome sequencing.
 
@@ -14,7 +13,7 @@ the [Releases page](https://github.com/monarch-initiative/SvAnna/releases).
 SvAnna is a standalone command-line Java application and can be run as follows:
 
 ```shell
-java -jar svanna-cli.jar -d path/to/svanna/data \
+java -jar svanna-cli.jar -d path/to/svanna-data \
   -t HP:0008330 \
   --vcf example.vcf.gz \
   --output-format html,csv,vcf
@@ -54,7 +53,7 @@ We also show the variant in context of the neighboring repetitive regions and ge
 ## Read more
 
 Please consult the Read the docs site for a detailed documentation:
-- [stable version](https://svanna.readthedocs.io/en/master) describing the latest release at the *Releases page*, or
-- [latest version](https://svanna.readthedocs.io/en/latest) summarizing the latest development on `development` branch.
+- [stable version](https://monarch-initiative.github.io/SvAnna/stable) describing the latest release at the *Releases page*, or
+- [latest version](https://monarch-initiative.github.io/SvAnna/latest) summarizing the latest development on `development` branch.
 
 Check out SvAnna manuscript in [Genome Medicine](https://doi.org/10.1186/s13073-022-01046-6).

@@ -33,7 +33,13 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0007565 --term HP:0009732 --term HP:0009735 --term HP:0009736
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        --vcf example.vcf \
+        -t HP:0007565 \
+        -t HP:0009732 \
+        -t HP:0009735 \
+        -t HP:0009736
 
 
 
@@ -56,7 +62,10 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize  -d path/to/svanna-data --vcf example.vcf --term HP:0003002
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        --vcf example.vcf \
+        --phenotype-term HP:0003002
 
 
 
@@ -88,7 +97,19 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0003774 --term HP:0001320 --term HP:0002078 --term HP:0000618 --term HP:0000508 --term HP:0002419 --term HP:0011933 --term HP:0002070 --term HP:0000543 --term HP:0000589
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        --vcf example.vcf \
+        --phenotype-term HP:0003774 \
+        --phenotype-term HP:0001320 \
+        --phenotype-term HP:0002078 \
+        --phenotype-term HP:0000618 \
+        --phenotype-term HP:0000508 \
+        --phenotype-term HP:0002419 \
+        --phenotype-term HP:0011933 \
+        --phenotype-term HP:0002070 \
+        --phenotype-term HP:0000543 \
+        --phenotype-term HP:0000589
 
 
 
@@ -129,7 +150,30 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0032417 --term HP:0000076 --term HP:0002079 --term HP:0001541 --term HP:0000540 --term HP:0011968 --term HP:0001250 --term HP:0000490 --term HP:0001263 --term HP:0001284 --term HP:0002240 --term HP:0001290 --term HP:0031200 --term HP:0011800 --term HP:0000090 --term HP:0000092 --term HP:0001919 --term HP:0012650 --term HP:0002419 --term HP:0002119 --term HP:0000105
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        --vcf example.vcf \
+        --phenotype-term HP:0032417 \
+        --phenotype-term HP:0000076 \
+        --phenotype-term HP:0002079 \
+        --phenotype-term HP:0001541 \
+        --phenotype-term HP:0000540 \
+        --phenotype-term HP:0011968 \
+        --phenotype-term HP:0001250 \
+        --phenotype-term HP:0000490 \
+        --phenotype-term HP:0001263 \
+        --phenotype-term HP:0001284 \
+        --phenotype-term HP:0002240 \
+        --phenotype-term HP:0001290 \
+        --phenotype-term HP:0031200 \
+        --phenotype-term HP:0011800 \
+        --phenotype-term HP:0000090 \
+        --phenotype-term HP:0000092 \
+        --phenotype-term HP:0001919 \
+        --phenotype-term HP:0012650 \
+        --phenotype-term HP:0002419 \
+        --phenotype-term HP:0002119 \
+        --phenotype-term HP:0000105
 
 
 
@@ -167,7 +211,24 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0000286 --term HP:0002069 --term HP:0000494 --term HP:0002342 --term HP:0000486 --term HP:0000750 --term HP:0000431 --term HP:0001252 --term HP:0002194 --term HP:0012368 --term HP:0011150 --term HP:0002949 --term HP:0000508 --term HP:0000316 --term HP:0000311
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        --vcf example.vcf \
+        --phenotype-term HP:0000286 \
+        --phenotype-term HP:0002069 \
+        --phenotype-term HP:0000494 \
+        --phenotype-term HP:0002342 \
+        --phenotype-term HP:0000486 \
+        --phenotype-term HP:0000750 \
+        --phenotype-term HP:0000431 \
+        --phenotype-term HP:0001252 \
+        --phenotype-term HP:0002194 \
+        --phenotype-term HP:0012368 \
+        --phenotype-term HP:0011150 \
+        --phenotype-term HP:0002949 \
+        --phenotype-term HP:0000508 \
+        --phenotype-term HP:0000316 \
+        --phenotype-term HP:0000311
 
 
 
@@ -198,7 +259,18 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0001561 --term HP:0000750 --term HP:0002684 --term HP:0002781 --term HP:0000316 --term HP:0031367 --term HP:0002744 --term HP:0000256 --term HP:0001004
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        --vcf example.vcf \
+        --phenotype-term HP:0001561 \
+        --phenotype-term HP:0000750 \
+        --phenotype-term HP:0002684 \
+        --phenotype-term HP:0002781 \
+        --phenotype-term HP:0000316 \
+        --phenotype-term HP:0031367 \
+        --phenotype-term HP:0002744 \
+        --phenotype-term HP:0000256 \
+        --phenotype-term HP:0001004
 
 
 
@@ -226,7 +298,12 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0011890 --term HP:0000978 --term HP:0012147
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        --vcf example.vcf \
+        --phenotype-term HP:0011890 \
+        --phenotype-term HP:0000978 \
+        --phenotype-term HP:0012147
 
 
 
@@ -259,7 +336,21 @@ Command
 
 .. code-block:: console
 
-    $ java -jar svanna-cli.jar prioritize -d path/to/svanna-data --vcf example.vcf --term HP:0000252 --term HP:0000446 --term HP:0000272 --term HP:0000219 --term HP:0000179 --term HP:0002650 --term HP:0002987 --term HP:0006380 --term HP:0001250 --term HP:0001263 --term HP:0001263 --term HP:0001276
+    $ java -jar svanna-cli.jar prioritize \
+        -d path/to/svanna-data \
+        -vcf example.vcf \
+        --phenotype-term HP:0000252 \
+        --phenotype-term HP:0000446 \
+        --phenotype-term HP:0000272 \
+        --phenotype-term HP:0000219 \
+        --phenotype-term HP:0000179 \
+        --phenotype-term HP:0002650 \
+        --phenotype-term HP:0002987 \
+        --phenotype-term HP:0006380 \
+        --phenotype-term HP:0001250 \
+        --phenotype-term HP:0001263 \
+        --phenotype-term HP:0001263 \
+        --phenotype-term HP:0001276
 
 
 

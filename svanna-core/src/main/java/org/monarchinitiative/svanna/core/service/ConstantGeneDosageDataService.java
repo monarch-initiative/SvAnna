@@ -41,14 +41,4 @@ public class ConstantGeneDosageDataService implements GeneDosageDataService {
                 DosageRegion.of(g.location(), DEFAULT.get(1))
         );
     }
-
-    @Override
-    public List<Dosage> geneDosageDataForHgncId(String hgncId) {
-        return DEFAULT;
-    }
-
-    @Override
-    public List<Dosage> geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
-        return DEFAULT;
-    }
 }

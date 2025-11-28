@@ -47,7 +47,7 @@ After unzipping the distribution archive, run the following command to display t
     Commands:
       setup-phenotype  Setup gene-phenotype resources.
       prioritize       Prioritize the variants.
-    See the full documentation at `https://svanna.readthedocs.io/en/master`
+    See the full documentation at `https://monarch-initiative.github.io/SvAnna/stable`
 
 
 2. Download SvAnna database files

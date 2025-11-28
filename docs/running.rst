@@ -17,14 +17,21 @@ VCF format. The prioritized variants are stored in one or more :ref:`rstoutputfo
 
 To prioritize variants in the `example.vcf`_ file (an example VCF file with 8 variants stored in SvAnna repository), run::
 
-  $ java -jar svanna-cli.jar prioritize -d svanna-data --vcf example.vcf --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147 --out-dir results --prefix example
+  $ java -jar svanna-cli.jar prioritize \
+    -d svanna-data \
+    --vcf example.vcf \
+    --phenotype-term HP:0011890 \
+    --phenotype-term HP:0000978 \
+    --phenotype-term HP:0012147 \
+    --out-dir results \
+    --prefix example
 
 After the run, the results are stored at ``results/example.html``.
 
 Mandatory arguments
 ~~~~~~~~~~~~~~~~~~~
 
-All CLI arguments for the ``prioritize`` command are supplied as *options* (no positional parameters).
+All arguments command are supplied as *options* (no positional parameters).
 
 There is one *mandatory* option:
 
@@ -36,8 +43,10 @@ Analysis input
 The input data can be specified in two ways: either as a path to a VCF file along with one or more HPO terms,
 or as a *phenopacket*:
 
-* ``-p | --phenopacket`` - path to a phenopacket file. We support *v1* and *v2* schemas and the file can be in JSON, YAML, or protobuf binary format.
-* ``-t | --phenotype-term`` - HPO term describing clinical condition of the proband, may be specified multiple times (e.g. ``--term HP:1234567 --term HP:9876543``).
+* ``-p | --phenopacket`` - path to a phenopacket file. We support *v1* and *v2* schemas and the file can be
+  in JSON, YAML, or protobuf binary format.
+* ``-t | --phenotype-term`` - HPO term describing clinical condition of the proband,
+  may be specified multiple times (e.g. ``-t HP:1234567 -t HP:9876543``).
 * ``--vcf`` - path to the input VCF file.
 
 .. note::

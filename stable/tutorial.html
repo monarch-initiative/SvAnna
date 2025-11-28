@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SvAnna: Tutorial &mdash; SvAnna 1.0.4 documentation</title>
+  <title>SvAnna: Tutorial &mdash; SvAnna 1.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=71272d9f"></script>
+      <script src="_static/documentation_options.js?v=6efca38a"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -42,7 +42,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up SvAnna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running.html">Run SvAnna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="outputformats.html">Output formats</a></li>
@@ -93,7 +93,7 @@ sequencing (such as Illumina) do not call the full range of SVs that are called 
 If you have a VCF file on hand that was called with a caller such as <a class="reference external" href="https://github.com/PacificBiosciences/pbsv">pbsv</a> or
 <a class="reference external" href="https://github.com/fritzsedlazeck/Sniffles">sniffles</a>, or <a class="reference external" href="https://github.com/eldariont/svim">SVIM</a>, it can be used instead or
 you can add the 8 variants to the end of that file to simulate a “real-life” long-read seuqencing experiment.</p>
-<p>The file with the 8 variants can be downloaded here: <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">svanna-cli/src/examples/example.vcf</a>.</p>
+<p>The file with the 8 variants can be downloaded here: <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">svanna-cli/src/examples/example.vcf</a>.</p>
 </section>
 <section id="running-svanna-in-vcf-only-mode">
 <h2>Running SvAnna in VCF-only mode<a class="headerlink" href="#running-svanna-in-vcf-only-mode" title="Link to this heading"></a></h2>
@@ -123,7 +123,7 @@ to understand, diagnose, and treat both rare and common diseases. A Phenopacket 
 with disease, patient, and genetic information, enabling clinicians, biologists, and disease and drug researchers to
 build more complete models of disease. See the <a class="reference external" href="https://phenopacket-schema.readthedocs.io/en/latest/basics.html">GA4GH documentation</a> for more information.</p>
 <p>Importantly, to run SvAnna with a Phenopacket, the path of the VCF file needs to be recorded in the Phenopacket. This can
-be done in a text editor but we recommend the <a class="reference external" href="https://github.com/TheJacksonLaboratory/PhenopacketGenerator">PhenopacketGenerator</a> for
+be done in a text editor but we recommend the <a class="reference external" href="https://github.com/monarch-initiative/PhenopacketGenerator">PhenopacketGenerator</a> for
 convenience – enter the HPO terms and the path to the VCF file.</p>
 <p>The following is a minimal Phenopacket (note this is version 1, we will add support for the v2 in near future).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
@@ -163,7 +163,7 @@ convenience – enter the HPO terms and the path to the VCF file.</p>
 </div>
 <p>To run this on your system, replace the path for the VCF file (<code class="docutils literal notranslate"><span class="pre">file:///***/***/example.vcf</span></code>). For instance, if you
 have the VCF file at <code class="docutils literal notranslate"><span class="pre">/home/myname/data/example.vcf</span></code>, the line should read <code class="docutils literal notranslate"><span class="pre">&quot;uri&quot;:</span> <span class="pre">&quot;file:///home/myname/data/example.vcf&quot;</span></code>.</p>
-<p>This phenopacket file can be downloaded here: <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example-phenopacket.json">svanna-cli/src/examples/example-phenopacket.json</a>.
+<p>This phenopacket file can be downloaded here: <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example-phenopacket.json">svanna-cli/src/examples/example-phenopacket.json</a>.
 Note however, that you will need to adjust the path to the VCF file as described just above.</p>
 <p>This command will prioritize the SVs according to phenotypic relevance. We entered a single HPO term,
 <a class="reference external" href="https://hpo.jax.org/app/browse/term/HP:0008330">Reduced von Willebrand factor activity</a>. The term and a summary of
@@ -179,7 +179,7 @@ while it is about 75.60 kb downstream of <em>CD9</em>.</p>
 <p>The deletion is visualized as follows.</p>
 <a class="reference internal image-reference" href="_images/VWFdel.png"><img alt="VWF deletion" src="_images/VWFdel.png" style="width: 800px;" />
 </a>
-<p>And that’s it! If you encounter any problems, please create an issue on the SvAnna <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/issues">tracker</a>.</p>
+<p>And that’s it! If you encounter any problems, please create an issue on the SvAnna <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/issues">tracker</a>.</p>
 </section>
 </section>
 
@@ -191,7 +191,7 @@ while it is about 75.60 kb downstream of <em>CD9</em>.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Daniel Danis, Peter N Robinson.</p>
+    <p>&#169; Copyright 2025, Daniel Danis, Peter N Robinson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

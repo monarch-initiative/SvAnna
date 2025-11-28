@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Run SvAnna &mdash; SvAnna 1.0.4 documentation</title>
+  <title>Run SvAnna &mdash; SvAnna 1.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=71272d9f"></script>
+      <script src="_static/documentation_options.js?v=6efca38a"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -45,7 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up SvAnna</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Run SvAnna</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#prioritization-of-structural-variants">Prioritization of structural variants</a><ul>
@@ -100,14 +100,21 @@
 <h2>Prioritization of structural variants<a class="headerlink" href="#prioritization-of-structural-variants" title="Link to this heading"></a></h2>
 <p>SvAnna provides <code class="docutils literal notranslate"><span class="pre">prioritize</span></code> command for performing phenotype-driven prioritization of structural variants (SVs) stored in
 VCF format. The prioritized variants are stored in one or more <a class="reference internal" href="outputformats.html#rstoutputformats"><span class="std std-ref">Output formats</span></a>.</p>
-<p>To prioritize variants in the <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">example.vcf</a> file (an example VCF file with 8 variants stored in SvAnna repository), run:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ java -jar svanna-cli.jar prioritize -d svanna-data --vcf example.vcf --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147 --out-dir results --prefix example
+<p>To prioritize variants in the <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">example.vcf</a> file (an example VCF file with 8 variants stored in SvAnna repository), run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ java -jar svanna-cli.jar prioritize \
+  -d svanna-data \
+  --vcf example.vcf \
+  --phenotype-term HP:0011890 \
+  --phenotype-term HP:0000978 \
+  --phenotype-term HP:0012147 \
+  --out-dir results \
+  --prefix example
 </pre></div>
 </div>
 <p>After the run, the results are stored at <code class="docutils literal notranslate"><span class="pre">results/example.html</span></code>.</p>
 <section id="mandatory-arguments">
 <h3>Mandatory arguments<a class="headerlink" href="#mandatory-arguments" title="Link to this heading"></a></h3>
-<p>All CLI arguments for the <code class="docutils literal notranslate"><span class="pre">prioritize</span></code> command are supplied as <em>options</em> (no positional parameters).</p>
+<p>All arguments command are supplied as <em>options</em> (no positional parameters).</p>
 <p>There is one <em>mandatory</em> option:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">|</span> <span class="pre">--data-directory</span></code> - path to SvAnna data directory.</p></li>
@@ -117,8 +124,10 @@ VCF format. The prioritized variants are stored in one or more <a class="referen
 <p>The input data can be specified in two ways: either as a path to a VCF file along with one or more HPO terms,
 or as a <em>phenopacket</em>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">|</span> <span class="pre">--phenopacket</span></code> - path to a phenopacket file. We support <em>v1</em> and <em>v2</em> schemas and the file can be in JSON, YAML, or protobuf binary format.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">|</span> <span class="pre">--phenotype-term</span></code> - HPO term describing clinical condition of the proband, may be specified multiple times (e.g. <code class="docutils literal notranslate"><span class="pre">--term</span> <span class="pre">HP:1234567</span> <span class="pre">--term</span> <span class="pre">HP:9876543</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">|</span> <span class="pre">--phenopacket</span></code> - path to a phenopacket file. We support <em>v1</em> and <em>v2</em> schemas and the file can be
+in JSON, YAML, or protobuf binary format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">|</span> <span class="pre">--phenotype-term</span></code> - HPO term describing clinical condition of the proband,
+may be specified multiple times (e.g. <code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">HP:1234567</span> <span class="pre">-t</span> <span class="pre">HP:9876543</span></code>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">--vcf</span></code> - path to the input VCF file.</p></li>
 </ul>
 <div class="admonition note">
@@ -129,7 +138,8 @@ or as a <em>phenopacket</em>:</p>
 </section>
 <section id="optional-parameters">
 <h3>Optional parameters<a class="headerlink" href="#optional-parameters" title="Link to this heading"></a></h3>
-<p>SvAnna allows to fine-tune the prioritization using a number of <em>optional</em> parameters. For clarity, we group the options into several groups:</p>
+<p>SvAnna allows to fine-tune the prioritization using a number of <em>optional</em> parameters.
+For clarity, we group the options into several groups.</p>
 <section id="run-options">
 <h4>Run options<a class="headerlink" href="#run-options" title="Link to this heading"></a></h4>
 <ul class="simple">
@@ -196,7 +206,7 @@ and the <a class="reference internal" href="examples.html#rstexamples"><span cla
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Daniel Danis, Peter N Robinson.</p>
+    <p>&#169; Copyright 2025, Daniel Danis, Peter N Robinson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

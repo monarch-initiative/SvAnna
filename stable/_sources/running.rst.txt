@@ -17,14 +17,21 @@ VCF format. The prioritized variants are stored in one or more :ref:`rstoutputfo
 
 To prioritize variants in the `example.vcf`_ file (an example VCF file with 8 variants stored in SvAnna repository), run::
 
-  $ java -jar svanna-cli.jar prioritize -d svanna-data --vcf example.vcf --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147 --out-dir results --prefix example
+  $ java -jar svanna-cli.jar prioritize \
+    -d svanna-data \
+    --vcf example.vcf \
+    --phenotype-term HP:0011890 \
+    --phenotype-term HP:0000978 \
+    --phenotype-term HP:0012147 \
+    --out-dir results \
+    --prefix example
 
 After the run, the results are stored at ``results/example.html``.
 
 Mandatory arguments
 ~~~~~~~~~~~~~~~~~~~
 
-All CLI arguments for the ``prioritize`` command are supplied as *options* (no positional parameters).
+All arguments command are supplied as *options* (no positional parameters).
 
 There is one *mandatory* option:
 
@@ -36,8 +43,10 @@ Analysis input
 The input data can be specified in two ways: either as a path to a VCF file along with one or more HPO terms,
 or as a *phenopacket*:
 
-* ``-p | --phenopacket`` - path to a phenopacket file. We support *v1* and *v2* schemas and the file can be in JSON, YAML, or protobuf binary format.
-* ``-t | --phenotype-term`` - HPO term describing clinical condition of the proband, may be specified multiple times (e.g. ``--term HP:1234567 --term HP:9876543``).
+* ``-p | --phenopacket`` - path to a phenopacket file. We support *v1* and *v2* schemas and the file can be
+  in JSON, YAML, or protobuf binary format.
+* ``-t | --phenotype-term`` - HPO term describing clinical condition of the proband,
+  may be specified multiple times (e.g. ``-t HP:1234567 -t HP:9876543``).
 * ``--vcf`` - path to the input VCF file.
 
 .. note::
@@ -46,7 +55,8 @@ or as a *phenopacket*:
 Optional parameters
 ~~~~~~~~~~~~~~~~~~~
 
-SvAnna allows to fine-tune the prioritization using a number of *optional* parameters. For clarity, we group the options into several groups::
+SvAnna allows to fine-tune the prioritization using a number of *optional* parameters.
+For clarity, we group the options into several groups.
 
 Run options
 ###########
@@ -65,13 +75,17 @@ Output options
 
 * ``--no-breakends`` - do not report breakends/translocations in the HTML report (default: ``false``).
 * ``--output-format`` - comma separated list of output formats to use for writing the results (default ``html``).
+
 .. note::
   See :ref:`rstoutputformats` section for more details.
+
 * ``--out-dir`` - path to a folder where to write the output files (default: current working directory).
 * ``--prefix`` - prefix for output files (default: based on the input VCF name).
 * ``--report-top-variants`` - include top *n* variants in the HTML report (default: ``100``).
+
 .. note::
   Beware, the HTML report becomes rather large when including large number of variants.
+
 * ``--uncompressed-output`` - the tabular and VCF output files are compressed by default.
   Use this flag if you want to disable compressing the output files (default: ``false``).
 
@@ -89,4 +103,4 @@ SvAnna configuration
 See the next section to learn more about the SvAnna :ref:`rstoutputformats`,
 and the :ref:`rstexamples` section to see how SvAnna prioritizes various SV classes.
 
-.. _example.vcf: https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf
+.. _example.vcf: https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf

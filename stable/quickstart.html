@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quickstart &mdash; SvAnna 1.0.4 documentation</title>
+  <title>Tutorial &mdash; SvAnna 1.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=71272d9f"></script>
+      <script src="_static/documentation_options.js?v=6efca38a"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Setting up SvAnna" href="setup.html" />
-    <link rel="prev" title="SvAnna:" href="index.html" /> 
+    <link rel="prev" title="SvAnna" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,11 +45,12 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setup">Setup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#download-svanna-distribution-zip">1. Download SvAnna distribution ZIP</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#download-svanna-database-files">2. Download SvAnna database files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-the-genotype-phenotype-resources">3. Setup the genotype-phenotype resources</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#prioritize-structural-variants-in-vcf-file">Prioritize structural variants in VCF file</a></li>
@@ -75,7 +76,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Quickstart</li>
+      <li class="breadcrumb-item active">Tutorial</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/quickstart.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -85,9 +86,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="quickstart">
-<span id="rstquickstart"></span><h1>Quickstart<a class="headerlink" href="#quickstart" title="Link to this heading"></a></h1>
-<p>This document is intended for the impatient users who want to quickly setup and prioritize variants with SvAnna.</p>
+  <section id="tutorial">
+<span id="rstquickstart"></span><h1>Tutorial<a class="headerlink" href="#tutorial" title="Link to this heading"></a></h1>
+<p>This document is an end-to-end tutorial for the impatient users
+who want to quickly setup and prioritize structural variants with SvAnna.</p>
 <section id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Link to this heading"></a></h2>
 <p>SvAnna is written in Java 11 and needs Java 11+ to be present in the runtime environment. Please verify that you are
@@ -107,7 +109,7 @@ using Java 11+ by running:</p>
 <p>SvAnna is installed by running the following three steps.</p>
 <section id="download-svanna-distribution-zip">
 <h3>1. Download SvAnna distribution ZIP<a class="headerlink" href="#download-svanna-distribution-zip" title="Link to this heading"></a></h3>
-<p>Download and extract SvAnna distribution ZIP archive from <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/releases">here</a>.
+<p>Download and extract SvAnna distribution ZIP archive from <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/releases">GitHub releases</a>.
 Expand the <em>Assets</em> menu and download the <code class="docutils literal notranslate"><span class="pre">svanna-cli-${project.version}-distribution.zip</span></code>. Choose the latest stable version,
 or a release candidate (RC).</p>
 <p>After unzipping the distribution archive, run the following command to display the help message:</p>
@@ -116,14 +118,15 @@ or a release candidate (RC).</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If things went OK, the command above will print the following help message:</p>
+<p>If things went well, the command above will print the following help message:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Structural variant prioritization
 Usage: svanna-cli.jar [-hV] [COMMAND]
   -h, --help      Show this help message and exit.
   -V, --version   Print version information and exit.
 Commands:
-  prioritize         Prioritize the variants.
-See the full documentation at `https://svanna.readthedocs.io/en/master`
+  setup-phenotype  Setup gene-phenotype resources.
+  prioritize       Prioritize the variants.
+See the full documentation at `https://monarch-initiative.github.io/SvAnna/stable`
 </pre></div>
 </div>
 </div>
@@ -135,13 +138,26 @@ See the full documentation at `https://svanna.readthedocs.io/en/master`
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ unzip -d svanna-data *.svanna.zip
 </pre></div>
 </div>
+<p>The command extracts the archive content into a new folder called <code class="docutils literal notranslate"><span class="pre">svanna-data</span></code>
+We will need the data folder path in the next steps.</p>
+</section>
+<section id="setup-the-genotype-phenotype-resources">
+<h3>3. Setup the genotype-phenotype resources<a class="headerlink" href="#setup-the-genotype-phenotype-resources" title="Link to this heading"></a></h3>
+<p>SvAnna needs additional data files from the Human Phenotype Ontology (HPO) project to support the gene-phenotype matching.
+These files can be downloaded with the <code class="docutils literal notranslate"><span class="pre">setup-phenotype</span></code> command:</p>
+<blockquote>
+<div><p>$ java -jar svanna-cli.jar setup-phenotype -d svanna-data</p>
+</div></blockquote>
+<p>The command asks for a path to SvAnna data directory (defined in the previous step) and will download the files,
+precompute information content for HPO term pairs, and store the files into <code class="docutils literal notranslate"><span class="pre">phenotype</span></code> subfolder (e.g. <code class="docutils literal notranslate"><span class="pre">svanna-data/phenotype</span></code>).</p>
 </section>
 </section>
 <section id="prioritize-structural-variants-in-vcf-file">
 <h2>Prioritize structural variants in VCF file<a class="headerlink" href="#prioritize-structural-variants-in-vcf-file" title="Link to this heading"></a></h2>
-<p>Let’s annotate a toy VCF file containing eight SVs reported in the SvAnna manuscript.
-First, let’s download the VCF file from <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">here</a>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ wget https://raw.githubusercontent.com/TheJacksonLaboratory/SvAnna/master/svanna-cli/src/examples/example.vcf
+<p>Now, let’s annotate a toy VCF file containing eight SVs reported in the SvAnna manuscript.
+First, let’s download the VCF file from
+<a class="reference external" href="https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">SvAnna source code repository</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ wget https://raw.githubusercontent.com/monarch-initiative/SvAnna/master/svanna-cli/src/examples/example.vcf
 </pre></div>
 </div>
 <p>The variants were sourced from published clinical case reports and presence of each variant results in a Mendelian disease.</p>
@@ -153,7 +169,13 @@ sequencing run of a patient presenting with the following clinical symptoms:</p>
 <li><p><em>HP:0012147</em> - Reduced quantity of Von Willebrand factor</p></li>
 </ul>
 <p>Now, let’s prioritize the variants:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ java -jar svanna-cli-${project.version}.jar prioritize -d svanna-data --output-format html,csv,vcf --vcf example.vcf --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ java -jar svanna-cli-${project.version}.jar prioritize \
+  -d svanna-data \
+  --output-format html,csv,vcf \
+  --vcf example.vcf \
+  --phenotype-term HP:0011890 \
+  --phenotype-term HP:0000978 \
+  --phenotype-term HP:0012147
 </pre></div>
 </div>
 <p>The variant <code class="docutils literal notranslate"><span class="pre">Othman-2010-20696945-VWF-index-FigS7</span></code> disrupts a promoter of the <em>von Willenbrand factor</em>
@@ -167,14 +189,14 @@ The variant receives the highest <span class="math notranslate nohighlight">\(PS
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="SvAnna:" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="SvAnna" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="setup.html" class="btn btn-neutral float-right" title="Setting up SvAnna" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Daniel Danis, Peter N Robinson.</p>
+    <p>&#169; Copyright 2025, Daniel Danis, Peter N Robinson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

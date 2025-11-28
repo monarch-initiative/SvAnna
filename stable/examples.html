@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Examples &mdash; SvAnna 1.0.4 documentation</title>
+  <title>Examples &mdash; SvAnna 1.2.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=71272d9f"></script>
+      <script src="_static/documentation_options.js?v=6efca38a"></script>
       <script src="_static/doctools.js?v=9a2dae69"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
@@ -43,7 +43,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up SvAnna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running.html">Run SvAnna</a></li>
 <li class="toctree-l1"><a class="reference internal" href="outputformats.html">Output formats</a></li>
@@ -112,8 +112,8 @@
 <span id="rstexamples"></span><h1>Examples<a class="headerlink" href="#examples" title="Link to this heading"></a></h1>
 <p>This section shows how SvAnna prioritizes various structural variant classes.
 The resulting HTML reports contain graphics that are reported in the supplement of SvAnna paper.</p>
-<p>The examples work with variants stored in <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">examples.vcf</a> file. The VCF file is stored in SvAnna GitHub repository.
-Use the <a class="reference external" href="https://github.com/TheJacksonLaboratory/SvAnna/blob/development/svanna-cli/src/examples/run_examples.sh">run_examples.sh</a> script to generate HTML reports for all cases described below. Note that you must enter
+<p>The examples work with variants stored in <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">examples.vcf</a> file. The VCF file is stored in SvAnna GitHub repository.
+Use the <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/blob/development/svanna-cli/src/examples/run_examples.sh">run_examples.sh</a> script to generate HTML reports for all cases described below. Note that you must enter
 the paths to SvAnna JAR file, data directory, and the <code class="docutils literal notranslate"><span class="pre">examples.vcf</span></code> into the script before running.</p>
 <section id="single-exon-deletion">
 <h2>Single exon deletion<a class="headerlink" href="#single-exon-deletion" title="Link to this heading"></a></h2>
@@ -130,7 +130,13 @@ Pathogenic variants in <em>NF1</em> are associated with neurofibromatosis type 1
 <p>Data were curated from a published case report in <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/26189818">Decoding NF1 Intragenic Copy-Number Variations</a>.</p>
 <section id="command">
 <h3>Command<a class="headerlink" href="#command" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0007565<span class="w"> </span>--term<span class="w"> </span>HP:0009732<span class="w"> </span>--term<span class="w"> </span>HP:0009735<span class="w"> </span>--term<span class="w"> </span>HP:0009736
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-t<span class="w"> </span>HP:0007565<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-t<span class="w"> </span>HP:0009732<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-t<span class="w"> </span>HP:0009735<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-t<span class="w"> </span>HP:0009736
 </pre></div>
 </div>
 </section>
@@ -147,7 +153,10 @@ Breast-ovarian cancer, familial, 1 (<code class="docutils literal notranslate"><
 <p>Data were curated from a published case report <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/29310340">The first case report of a large deletion of the BRCA1 gene in Croatia</a>.</p>
 <section id="id1">
 <h3>Command<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w">  </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0003002
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0003002
 </pre></div>
 </div>
 </section>
@@ -173,7 +182,19 @@ that was assigned a <em>PSV</em> score of 16.41.</p>
 <p>Data were curated from a published case report <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/28347285">Whole-exome sequencing and digital PCR identified a novel compound heterozygous mutation in the NPHP1 gene in a case of Joubert syndrome and related disorders</a>.</p>
 <section id="id2">
 <h3>Command<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0003774<span class="w"> </span>--term<span class="w"> </span>HP:0001320<span class="w"> </span>--term<span class="w"> </span>HP:0002078<span class="w"> </span>--term<span class="w"> </span>HP:0000618<span class="w"> </span>--term<span class="w"> </span>HP:0000508<span class="w"> </span>--term<span class="w"> </span>HP:0002419<span class="w"> </span>--term<span class="w"> </span>HP:0011933<span class="w"> </span>--term<span class="w"> </span>HP:0002070<span class="w"> </span>--term<span class="w"> </span>HP:0000543<span class="w"> </span>--term<span class="w"> </span>HP:0000589
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0003774<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001320<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002078<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000618<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000508<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002419<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0011933<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002070<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000543<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000589
 </pre></div>
 </div>
 </section>
@@ -209,7 +230,30 @@ Pathogenic variants in <em>PIBF1</em> are associated with Joubert syndrome 33 (<
 <p>Data were curated from a published case report <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/29695797">A biallelic 36-bp insertion in PIBF1 is associated with Joubert syndrome</a></p>
 <section id="id3">
 <h3>Command<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0032417<span class="w"> </span>--term<span class="w"> </span>HP:0000076<span class="w"> </span>--term<span class="w"> </span>HP:0002079<span class="w"> </span>--term<span class="w"> </span>HP:0001541<span class="w"> </span>--term<span class="w"> </span>HP:0000540<span class="w"> </span>--term<span class="w"> </span>HP:0011968<span class="w"> </span>--term<span class="w"> </span>HP:0001250<span class="w"> </span>--term<span class="w"> </span>HP:0000490<span class="w"> </span>--term<span class="w"> </span>HP:0001263<span class="w"> </span>--term<span class="w"> </span>HP:0001284<span class="w"> </span>--term<span class="w"> </span>HP:0002240<span class="w"> </span>--term<span class="w"> </span>HP:0001290<span class="w"> </span>--term<span class="w"> </span>HP:0031200<span class="w"> </span>--term<span class="w"> </span>HP:0011800<span class="w"> </span>--term<span class="w"> </span>HP:0000090<span class="w"> </span>--term<span class="w"> </span>HP:0000092<span class="w"> </span>--term<span class="w"> </span>HP:0001919<span class="w"> </span>--term<span class="w"> </span>HP:0012650<span class="w"> </span>--term<span class="w"> </span>HP:0002419<span class="w"> </span>--term<span class="w"> </span>HP:0002119<span class="w"> </span>--term<span class="w"> </span>HP:0000105
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0032417<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000076<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002079<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001541<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000540<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0011968<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001250<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000490<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001263<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001284<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002240<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001290<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0031200<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0011800<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000090<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000092<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001919<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0012650<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002419<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002119<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000105
 </pre></div>
 </div>
 </section>
@@ -240,7 +284,24 @@ Pathogenic variants in <em>PIBF1</em> are associated with Joubert syndrome 33 (<
 <p>Data were curated from a published case report <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/33157260">Pathogenic 12-kb copy-neutral inversion in syndromic intellectual disability identified by high-fidelity long-read sequencing</a></p>
 <section id="id4">
 <h3>Command<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0000286<span class="w"> </span>--term<span class="w"> </span>HP:0002069<span class="w"> </span>--term<span class="w"> </span>HP:0000494<span class="w"> </span>--term<span class="w"> </span>HP:0002342<span class="w"> </span>--term<span class="w"> </span>HP:0000486<span class="w"> </span>--term<span class="w"> </span>HP:0000750<span class="w"> </span>--term<span class="w"> </span>HP:0000431<span class="w"> </span>--term<span class="w"> </span>HP:0001252<span class="w"> </span>--term<span class="w"> </span>HP:0002194<span class="w"> </span>--term<span class="w"> </span>HP:0012368<span class="w"> </span>--term<span class="w"> </span>HP:0011150<span class="w"> </span>--term<span class="w"> </span>HP:0002949<span class="w"> </span>--term<span class="w"> </span>HP:0000508<span class="w"> </span>--term<span class="w"> </span>HP:0000316<span class="w"> </span>--term<span class="w"> </span>HP:0000311
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000286<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002069<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000494<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002342<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000486<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000750<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000431<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001252<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002194<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0012368<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0011150<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002949<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000508<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000316<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000311
 </pre></div>
 </div>
 </section>
@@ -265,7 +326,18 @@ Pathogenic variants in <em>PIBF1</em> are associated with Joubert syndrome 33 (<
 <p>Data were curated from a published case report <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/33265914">Deletion of Exon 1 in AMER1 in Osteopathia Striata with Cranial Sclerosis</a>.</p>
 <section id="id5">
 <h3>Command<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0001561<span class="w"> </span>--term<span class="w"> </span>HP:0000750<span class="w"> </span>--term<span class="w"> </span>HP:0002684<span class="w"> </span>--term<span class="w"> </span>HP:0002781<span class="w"> </span>--term<span class="w"> </span>HP:0000316<span class="w"> </span>--term<span class="w"> </span>HP:0031367<span class="w"> </span>--term<span class="w"> </span>HP:0002744<span class="w"> </span>--term<span class="w"> </span>HP:0000256<span class="w"> </span>--term<span class="w"> </span>HP:0001004
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001561<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000750<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002684<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002781<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000316<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0031367<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002744<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000256<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001004
 </pre></div>
 </div>
 </section>
@@ -286,7 +358,12 @@ of the deletion (30 bp upstream of <em>ENST00000261405.10</em>) and thereby redu
 <p>Data were curated from a published case report <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/20696945">Functional characterization of a 13-bp deletion (c.-1522_-1510del13) in the promoter of the von Willebrand factor gene in type 1 von Willebrand disease</a>.</p>
 <section id="id6">
 <h3>Command<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0011890<span class="w"> </span>--term<span class="w"> </span>HP:0000978<span class="w"> </span>--term<span class="w"> </span>HP:0012147
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0011890<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000978<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0012147
 </pre></div>
 </div>
 </section>
@@ -312,7 +389,21 @@ of the deletion (30 bp upstream of <em>ENST00000261405.10</em>) and thereby redu
 <p>Data were curated from a published case report <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/29621621">Phenotypic consequences of gene disruption by a balanced de novo translocation involving SLC6A1 and NAA15</a></p>
 <section id="id7">
 <h3>Command<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span>--vcf<span class="w"> </span>example.vcf<span class="w"> </span>--term<span class="w"> </span>HP:0000252<span class="w"> </span>--term<span class="w"> </span>HP:0000446<span class="w"> </span>--term<span class="w"> </span>HP:0000272<span class="w"> </span>--term<span class="w"> </span>HP:0000219<span class="w"> </span>--term<span class="w"> </span>HP:0000179<span class="w"> </span>--term<span class="w"> </span>HP:0002650<span class="w"> </span>--term<span class="w"> </span>HP:0002987<span class="w"> </span>--term<span class="w"> </span>HP:0006380<span class="w"> </span>--term<span class="w"> </span>HP:0001250<span class="w"> </span>--term<span class="w"> </span>HP:0001263<span class="w"> </span>--term<span class="w"> </span>HP:0001263<span class="w"> </span>--term<span class="w"> </span>HP:0001276
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>java<span class="w"> </span>-jar<span class="w"> </span>svanna-cli.jar<span class="w"> </span>prioritize<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span>path/to/svanna-data<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-vcf<span class="w"> </span>example.vcf<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000252<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000446<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000272<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000219<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0000179<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002650<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0002987<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0006380<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001250<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001263<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001263<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--phenotype-term<span class="w"> </span>HP:0001276
 </pre></div>
 </div>
 </section>
@@ -329,7 +420,7 @@ of the deletion (30 bp upstream of <em>ENST00000261405.10</em>) and thereby redu
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Daniel Danis, Peter N Robinson.</p>
+    <p>&#169; Copyright 2025, Daniel Danis, Peter N Robinson.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

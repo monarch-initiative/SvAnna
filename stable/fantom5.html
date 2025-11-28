@@ -1,0 +1,152 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FANTOM5 &mdash; SvAnna 1.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=71272d9f"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SvAnna
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up SvAnna</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Run SvAnna</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputformats.html">Output formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SvAnna</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">FANTOM5</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/fantom5.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="fantom5">
+<span id="rstfantom5"></span><h1>FANTOM5<a class="headerlink" href="#fantom5" title="Link to this heading"></a></h1>
+<p>SvAnna uses definitions of transcribed enhancers from
+the paper
+<a class="reference external" href="https://www.nature.com/articles/nature12787">An atlas of active enhancers across human cell types and tissues</a>.
+In detail, SvAnna uses the
+<code class="docutils literal notranslate"><span class="pre">F5.hg38.enhancers.expression.matrix</span></code> file from
+<a class="reference external" href="https://fantom.gsc.riken.jp/5/datafiles/reprocessed/hg38_latest/extra/enhancer/">https://fantom.gsc.riken.jp/5/datafiles/reprocessed/hg38_latest/extra/enhancer/</a>
+and the <code class="docutils literal notranslate"><span class="pre">Human.sample_name2library_id.txt</span></code> file from
+<a class="reference external" href="https://fantom.gsc.riken.jp/5/datafiles/latest/extra/Enhancers/">https://fantom.gsc.riken.jp/5/datafiles/latest/extra/Enhancers/</a>.</p>
+<section id="how-tissue-specificity-is-calculated">
+<h2>How tissue specificity is calculated<a class="headerlink" href="#how-tissue-specificity-is-calculated" title="Link to this heading"></a></h2>
+<p>The authors of the above cited paper define facets of related cell type libraries, stating</p>
+<blockquote>
+<div><p>The majority of detected enhancers within any facet are not restricted to that facet.
+Exceptions, where facets use a higher fraction of specific enhancers include immune cells,
+neurons, neural stem cells and hepatocytes amongst the cell type facets, and brain, blood,
+liver and testis amongst the organ/tissue facets. Second, despite their apparent promiscuity,
+enhancers are more generally detected in a much smaller subset of samples than mRNA
+transcripts, consistent with cell line studies and the higher specificity of non-coding
+RNAs (ncRNAs) in general. Facets in which we detect many enhancers typically also have
+a higher fraction of facet-specific enhancers. Third, the number of detected expressed
+enhancers and mRNA transcripts is correlated, but the number of
+detected expressed gene transcripts (&gt;1TPM) is 19-34 fold larger than the number of
+detected enhancers with the cutoffs used. Noteworthy exceptions include blood and immune
+cells, testis, thymus, and spleen, which have high enhancer/gene ratio.</p>
+</div></blockquote>
+<p>Our strategy is to map the libraries to facets (roughly, tissues or groups of tissues) acccording
+to the FANTOM5 annotations. We then calculate the tissue-specifity score as detailed below. We then
+assign each enhancer to the tissue with the highest tissue specifity (highest number of reads).</p>
+</section>
+<section id="tissue-specificity-score">
+<h2>Tissue specificity score<a class="headerlink" href="#tissue-specificity-score" title="Link to this heading"></a></h2>
+<p>The specificity score for each robust enhancer was defined to range between 0 and 1,
+where 0 means unspecific (ubiquitously expressed across facets) and 1 means specific
+(exclusively expressed in one facet).</p>
+<p>In detail, specificity(X) = 1 – (entropy(X) / log2(N) ), where X is a vector of
+sample-average expression values for an enhancer over all facets (cell types and
+organs/tissues were analyzed separately) and N its cardinality (<a href="#id1"><span class="problematic" id="id2">|X|</span></a>, the number of facets).</p>
+</section>
+<section id="processing">
+<h2>Processing<a class="headerlink" href="#processing" title="Link to this heading"></a></h2>
+<p>The code currently filters our FANTOM5 enhancers whose overall count per million level is below a given percentile threshold
+(by default: 20th percentile) and who tissue specificity (tau) is a below a percentile threshold (by default: 20th p
+ercentile).</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Daniel Danis, Peter N Robinson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

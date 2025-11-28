@@ -1,0 +1,162 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VISTA &mdash; SvAnna 1.0.4 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=71272d9f"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SvAnna
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up SvAnna</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Run SvAnna</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputformats.html">Output formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SvAnna</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">VISTA</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/vista.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="vista">
+<span id="rstvista"></span><h1>VISTA<a class="headerlink" href="#vista" title="Link to this heading"></a></h1>
+<p>svanna uses data on enhancers to prioritize candidate regulatory variants. The <code class="docutils literal notranslate"><span class="pre">svanna-ingest</span></code> module contains code
+for preparing enhancer data including data from VISTA. This module creates files that can be used directly by svanna and
+most users will not need to generate the files themselves. The code and this documentation is provided for those
+who may desire to reproduce or extend our results.</p>
+<p><a class="reference external" href="https://enhancer.lbl.gov/">VISTA</a> is a database of distant-acting transcriptional enhancers in the human and mouse
+genomes.  As of 1/31/2021 the VISTA database contained information on 3148 in vivo tested elements - 1631 elements with
+enhancer activity, with data from human and mouse. For our purposes, we import the positive data from human.</p>
+<p>Transgenic mouse assays were used by the VISTA authors to investigate candidate enhancers. Each positive developmental
+enhancer is annotated based on the observed spatial pattern of expression (More information is available on the
+<a class="reference external" href="https://enhancer.lbl.gov/">VISTA</a> web portal and in <a class="reference external" href="https://pubmed.ncbi.nlm.nih.gov/17130149/">Vissel at el, 2007</a>).</p>
+<p>Because the data is represented using hg19 coordinates, we use the UCSC liftOver tool to transform to hg38. We use the
+Python script <code class="docutils literal notranslate"><span class="pre">extractVistaEnhancers.py</span></code> in the <code class="docutils literal notranslate"><span class="pre">scripts</span></code> folder for this. The script downloads the VISTA data, the
+liftOver tool, and the chainFile, and performs a liftover to hg38 and relabels the enhancers using
+<a class="reference external" href="https://www.ebi.ac.uk/ols/ontologies/uberon">UBERON</a> terms. It outputs a file called <code class="docutils literal notranslate"><span class="pre">hg38-vista-enhancers.tsv</span></code>
+that is used for in the <code class="docutils literal notranslate"><span class="pre">svanna-ingest</span></code> module to input the VISTA enhancers. This file has the following
+structure.</p>
+<table class="docutils align-default" id="id3">
+<caption><span class="caption-text">hg38-vista-enhancers.tsv file structure</span><a class="headerlink" href="#id3" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 12.5%" />
+<col style="width: 12.5%" />
+<col style="width: 12.5%" />
+<col style="width: 12.5%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>name</p></th>
+<th class="head"><p>chr</p></th>
+<th class="head"><p>begin</p></th>
+<th class="head"><p>end</p></th>
+<th class="head"><p>tissues</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>element 1</p></td>
+<td><p>chr16</p></td>
+<td><p>86396481</p></td>
+<td><p>86397120</p></td>
+<td><p>neural tube[UBERON:0001049]; presumptive hindbrain[UBERON:0007277]; limb[UBERON:0002101]; cranial nerve[UBERON:0001785]</p></td>
+</tr>
+<tr class="row-odd"><td><p>element 4</p></td>
+<td><p>chr16</p></td>
+<td><p>80338696</p></td>
+<td><p>80339858</p></td>
+<td><p>neural tube[UBERON:0001049]; presumptive hindbrain[UBERON:0007277]; presumptive midbrain[UBERON:0009616]</p></td>
+</tr>
+<tr class="row-even"><td><p>element 12</p></td>
+<td><p>chr16</p></td>
+<td><p>78476711</p></td>
+<td><p>78478047</p></td>
+<td><p>presumptive hindbrain[UBERON:0007277]; forebrain[UBERON:0001890]</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Daniel Danis, Peter N Robinson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

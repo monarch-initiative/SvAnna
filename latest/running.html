@@ -1,0 +1,229 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run SvAnna &mdash; SvAnna 1.1.0-SNAPSHOT documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=52484d29"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Output formats" href="outputformats.html" />
+    <link rel="prev" title="Setting up SvAnna" href="setup.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SvAnna
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup.html">Setting up SvAnna</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Run SvAnna</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prioritization-of-structural-variants">Prioritization of structural variants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mandatory-arguments">Mandatory arguments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#analysis-input">Analysis input</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#optional-parameters">Optional parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#run-options">Run options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#output-options">Output options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#svanna-configuration">SvAnna configuration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="outputformats.html">Output formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SvAnna</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Run SvAnna</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/running.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="run-svanna">
+<span id="rstrunning"></span><h1>Run SvAnna<a class="headerlink" href="#run-svanna" title="Link to this heading"></a></h1>
+<p>SvAnna is a command-line Java tool that runs with Java version 11 or higher.</p>
+<p>In the examples below, we assume that <code class="docutils literal notranslate"><span class="pre">svanna-cli.jar</span></code> points to the executable JAR file and
+<code class="docutils literal notranslate"><span class="pre">svanna-data</span></code> points to the data directory we created in the <a class="reference internal" href="setup.html#rstsetup"><span class="std std-ref">Setting up SvAnna</span></a> section.</p>
+<section id="prioritization-of-structural-variants">
+<h2>Prioritization of structural variants<a class="headerlink" href="#prioritization-of-structural-variants" title="Link to this heading"></a></h2>
+<p>SvAnna provides <code class="docutils literal notranslate"><span class="pre">prioritize</span></code> command for performing phenotype-driven prioritization of structural variants (SVs) stored in
+VCF format. The prioritized variants are stored in one or more <a class="reference internal" href="outputformats.html#rstoutputformats"><span class="std std-ref">Output formats</span></a>.</p>
+<p>To prioritize variants in the <a class="reference external" href="https://github.com/monarch-initiative/SvAnna/blob/master/svanna-cli/src/examples/example.vcf">example.vcf</a> file (an example VCF file with 8 variants stored in SvAnna repository), run:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ java -jar svanna-cli.jar prioritize \
+  -d svanna-data \
+  --vcf example.vcf \
+  --phenotype-term HP:0011890 \
+  --phenotype-term HP:0000978 \
+  --phenotype-term HP:0012147 \
+  --out-dir results \
+  --prefix example
+</pre></div>
+</div>
+<p>After the run, the results are stored at <code class="docutils literal notranslate"><span class="pre">results/example.html</span></code>.</p>
+<section id="mandatory-arguments">
+<h3>Mandatory arguments<a class="headerlink" href="#mandatory-arguments" title="Link to this heading"></a></h3>
+<p>All arguments command are supplied as <em>options</em> (no positional parameters).</p>
+<p>There is one <em>mandatory</em> option:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-d</span> <span class="pre">|</span> <span class="pre">--data-directory</span></code> - path to SvAnna data directory.</p></li>
+</ul>
+<section id="analysis-input">
+<h4>Analysis input<a class="headerlink" href="#analysis-input" title="Link to this heading"></a></h4>
+<p>The input data can be specified in two ways: either as a path to a VCF file along with one or more HPO terms,
+or as a <em>phenopacket</em>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">|</span> <span class="pre">--phenopacket</span></code> - path to a phenopacket file. We support <em>v1</em> and <em>v2</em> schemas and the file can be
+in JSON, YAML, or protobuf binary format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">|</span> <span class="pre">--phenotype-term</span></code> - HPO term describing clinical condition of the proband,
+may be specified multiple times (e.g. <code class="docutils literal notranslate"><span class="pre">-t</span> <span class="pre">HP:1234567</span> <span class="pre">-t</span> <span class="pre">HP:9876543</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--vcf</span></code> - path to the input VCF file.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In case path to a VCF file is provided both in <em>phenopacket</em> and via <code class="docutils literal notranslate"><span class="pre">--vcf</span></code> option, the <code class="docutils literal notranslate"><span class="pre">--vcf</span></code> option has a precedence.</p>
+</div>
+</section>
+</section>
+<section id="optional-parameters">
+<h3>Optional parameters<a class="headerlink" href="#optional-parameters" title="Link to this heading"></a></h3>
+<p>SvAnna allows to fine-tune the prioritization using a number of <em>optional</em> parameters.
+For clarity, we group the options into several groups.</p>
+<section id="run-options">
+<h4>Run options<a class="headerlink" href="#run-options" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--frequency-threshold</span></code> - threshold for labeling SVs in population variant databases <em>pv</em> as common.
+If query SV <em>v</em> overlaps with <em>pv</em> that has frequency above the threshold, then <em>v</em> is considered to be <em>common</em>.
+The value is provided as a percentage (default <code class="docutils literal notranslate"><span class="pre">1</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--overlap-threshold</span></code> - threshold to determine if a SV matches a variant from the population variant databases.
+The value is provided as a percentage (default <code class="docutils literal notranslate"><span class="pre">80</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--min-read-support</span></code> - minimum number of reads supporting the presence of the <em>alt</em> allele required
+to include a variant into the analysis (default <cite>3`</cite>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--n-threads</span></code> - number of threads used to prioritize the SVs (default <code class="docutils literal notranslate"><span class="pre">2</span></code>).</p></li>
+</ul>
+</section>
+<section id="output-options">
+<h4>Output options<a class="headerlink" href="#output-options" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--no-breakends</span></code> - do not report breakends/translocations in the HTML report (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--output-format</span></code> - comma separated list of output formats to use for writing the results (default <code class="docutils literal notranslate"><span class="pre">html</span></code>).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See <a class="reference internal" href="outputformats.html#rstoutputformats"><span class="std std-ref">Output formats</span></a> section for more details.</p>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--out-dir</span></code> - path to a folder where to write the output files (default: current working directory).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--prefix</span></code> - prefix for output files (default: based on the input VCF name).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--report-top-variants</span></code> - include top <em>n</em> variants in the HTML report (default: <code class="docutils literal notranslate"><span class="pre">100</span></code>).</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Beware, the HTML report becomes rather large when including large number of variants.</p>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--uncompressed-output</span></code> - the tabular and VCF output files are compressed by default.
+Use this flag if you want to disable compressing the output files (default: <code class="docutils literal notranslate"><span class="pre">false</span></code>).</p></li>
+</ul>
+</section>
+<section id="svanna-configuration">
+<h4>SvAnna configuration<a class="headerlink" href="#svanna-configuration" title="Link to this heading"></a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--term-similarity-measure</span></code> - phenotype term similarity measure, use one of <code class="docutils literal notranslate"><span class="pre">{RESNIK_SYMMETRIC,</span> <span class="pre">RESNIK_ASYMETRIC}</span></code> (default: RESNIK_SYMMETRIC).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--ic-mica-mode</span></code> - the mode for getting information content of the most informative common ancestors for terms <span class="math notranslate nohighlight">\(t_1\)</span>, and <span class="math notranslate nohighlight">\(t_2\)</span>.
+Use one of <code class="docutils literal notranslate"><span class="pre">{DATABASE,</span> <span class="pre">IN_MEMORY}</span></code> (default: <code class="docutils literal notranslate"><span class="pre">DATABASE</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--promoter-length</span></code> - number of bases pre-pended to a transcript and evaluated as a promoter region (default: <code class="docutils literal notranslate"><span class="pre">2000</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--promoter-fitness-gain</span></code> - set to <code class="docutils literal notranslate"><span class="pre">0.</span></code> to score the promoter variants as strictly as coding variants
+or to <code class="docutils literal notranslate"><span class="pre">1.</span></code> to completely disregard the promoter variants (default: <code class="docutils literal notranslate"><span class="pre">0.6</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-v</span></code> - set logging output granularity. The option can be set multiple times (e.g. <code class="docutils literal notranslate"><span class="pre">-vv</span></code>) to increase logging output.</p></li>
+</ul>
+<p>See the next section to learn more about the SvAnna <a class="reference internal" href="outputformats.html#rstoutputformats"><span class="std std-ref">Output formats</span></a>,
+and the <a class="reference internal" href="examples.html#rstexamples"><span class="std std-ref">Examples</span></a> section to see how SvAnna prioritizes various SV classes.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setup.html" class="btn btn-neutral float-left" title="Setting up SvAnna" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outputformats.html" class="btn btn-neutral float-right" title="Output formats" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Daniel Danis, Peter N Robinson.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -55,7 +55,8 @@ or as a *phenopacket*:
 Optional parameters
 ~~~~~~~~~~~~~~~~~~~
 
-SvAnna allows to fine-tune the prioritization using a number of *optional* parameters. For clarity, we group the options into several groups::
+SvAnna allows to fine-tune the prioritization using a number of *optional* parameters.
+For clarity, we group the options into several groups.
 
 Run options
 ###########
@@ -74,13 +75,17 @@ Output options
 
 * ``--no-breakends`` - do not report breakends/translocations in the HTML report (default: ``false``).
 * ``--output-format`` - comma separated list of output formats to use for writing the results (default ``html``).
+
 .. note::
   See :ref:`rstoutputformats` section for more details.
+
 * ``--out-dir`` - path to a folder where to write the output files (default: current working directory).
 * ``--prefix`` - prefix for output files (default: based on the input VCF name).
 * ``--report-top-variants`` - include top *n* variants in the HTML report (default: ``100``).
+
 .. note::
   Beware, the HTML report becomes rather large when including large number of variants.
+
 * ``--uncompressed-output`` - the tabular and VCF output files are compressed by default.
   Use this flag if you want to disable compressing the output files (default: ``false``).
 

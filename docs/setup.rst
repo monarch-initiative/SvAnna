@@ -44,7 +44,7 @@ The command should print the help message::
     Commands:
       setup-phenotype  Setup gene-phenotype resources.
       prioritize       Prioritize the variants.
-    See the full documentation at `https://svanna.readthedocs.io/en/master`
+    See the full documentation at `https://monarch-initiative.github.io/SvAnna/stable`
 
 .. note::
 

@@ -9,9 +9,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
   <style>
-@import url("https://www.jax.org/_res/css/modules/jax-base/p01-fonts.css");
-@import url("https://www.jax.org/_res/css/modules/fonts-extended.css");
-
 * {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
@@ -526,8 +523,8 @@ a.svg:hover, a.svg:active {
   <footer>
       <div style="text-align: center">
           <p>Developed by <em>Daniel Danis</em> and <em>Peter N Robinson</em> at <a href="https://www.jax.org">The Jackson Laboratory for Genomic Medicine</a>.</p>
-          <p>Problems, suggestions, or comments? Feel free to submit an issue to our <a href="https://github.com/TheJacksonLaboratory/SvAnna/issues">GitHub tracker</a>.</p>
-          <p>&#169; 2022 Daniel Danis, Peter N Robinson</p>
+          <p>Problems, suggestions, or comments? Feel free to submit an issue to our <a href="https://github.com/monarch-initiative/SvAnna/issues">GitHub tracker</a>.</p>
+          <p>&#169; 2025 Daniel Danis, Peter N Robinson</p>
       </div>
   </footer>
 

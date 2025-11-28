@@ -3,7 +3,7 @@
     <parent>
         <artifactId>SvAnna</artifactId>
         <groupId>org.monarchinitiative.svanna</groupId>
-        <version>1.0.4</version>
+        <version>1.2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>svanna-ingest</artifactId>
@@ -13,6 +13,11 @@
         <dependency>
             <groupId>org.monarchinitiative.svanna</groupId>
             <artifactId>svanna-db</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.svanna</groupId>
+            <artifactId>svanna-io</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
@@ -26,10 +31,6 @@
         <dependency>
             <groupId>org.monarchinitiative.phenol</groupId>
             <artifactId>phenol-io</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.monarchinitiative.phenol</groupId>
-            <artifactId>phenol-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>info.picocli</groupId>

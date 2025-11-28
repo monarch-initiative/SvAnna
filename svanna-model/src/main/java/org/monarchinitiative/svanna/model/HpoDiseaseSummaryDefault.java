@@ -1,19 +1,21 @@
 package org.monarchinitiative.svanna.model;
 
+import org.monarchinitiative.phenol.ontology.data.TermId;
+
 import java.util.Objects;
 
 class HpoDiseaseSummaryDefault implements HpoDiseaseSummary {
 
-    private final String diseaseId;
+    private final TermId diseaseId;
     private final String diseaseName;
 
-    HpoDiseaseSummaryDefault(String diseaseId, String diseaseName) {
+    HpoDiseaseSummaryDefault(TermId diseaseId, String diseaseName) {
         this.diseaseId = Objects.requireNonNull(diseaseId, "Disease ID must not be null");
         this.diseaseName = Objects.requireNonNull(diseaseName, "Disease name must not be null");
     }
 
     @Override
-    public String getDiseaseId() {
+    public TermId getDiseaseId() {
         return diseaseId;
     }
 

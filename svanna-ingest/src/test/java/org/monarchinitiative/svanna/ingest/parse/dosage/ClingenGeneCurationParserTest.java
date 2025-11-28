@@ -36,27 +36,12 @@ public class ClingenGeneCurationParserTest {
         );
     }
 
-    private static Map<Integer, Integer> makeNcbiGeneToHgnc() {
-        return Map.of(
-                53947, 18149, // A4GALT
-//                79719, 25662, // AAGAB (commented to simulate missing NCBIGene to HGNC mapping)
-                32, 20, // ABCA2
-                57505, 21022, // AARS2
-                10157, 17366, // AASS
-                18, 23, // ABAT
-                8647, 42, // ABCB11
-                6833, 59, // ABCC8
-                215, 61 // ABCD1
-        );
-    }
-
     @Test
     public void parse() throws Exception {
         Path geneListPath = Paths.get("src/test/resources/dosage/ClinGen_gene_curation_list_GRCh38.15lines.tsv");
         Map<TermId, GenomicRegion> geneById = makeGeneByIdMap();
-        Map<Integer, Integer> ncbiGeneToHgnc = makeNcbiGeneToHgnc();
 
-        ClingenGeneCurationParser parser = new ClingenGeneCurationParser(geneListPath, ASSEMBLY, geneById, ncbiGeneToHgnc);
+        ClingenGeneCurationParser parser = new ClingenGeneCurationParser(geneListPath, ASSEMBLY, geneById);
 
         List<? extends DosageRegion> elements = parser.parseToList();
         assertThat(elements, hasSize(9));

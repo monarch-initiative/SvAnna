@@ -1,6 +1,7 @@
 package org.monarchinitiative.svanna.core.hpo;
 
 import org.monarchinitiative.phenol.ontology.data.TermId;
+import org.monarchinitiative.phenol.ontology.similarity.TermPair;
 
 import java.util.Map;
 import java.util.Objects;

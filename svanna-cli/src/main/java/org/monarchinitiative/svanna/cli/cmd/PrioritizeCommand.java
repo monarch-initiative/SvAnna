@@ -146,7 +146,6 @@ public class PrioritizeCommand extends SvAnnaCommand {
             return 1;
         }
 
-        LOGGER.info("We're done, bye!");
         return 0;
     }
 

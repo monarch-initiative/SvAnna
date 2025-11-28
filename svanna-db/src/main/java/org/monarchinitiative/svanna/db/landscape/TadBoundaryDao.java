@@ -53,7 +53,7 @@ public class TadBoundaryDao implements IngestDao<TadBoundary>, AnnotationDao<Tad
 
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
-            String sql = "insert into SVANNA.TAD_BOUNDARY(CONTIG, START, END, MIDPOINT, ID, STABILITY) " +
+            String sql = "insert into SVANNA.TAD_BOUNDARY(CONTIG, START_POS, END_POS, MIDPOINT, ID, STABILITY) " +
                     "VALUES ( ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
                 preparedStatement.setInt(1, item.contigId());

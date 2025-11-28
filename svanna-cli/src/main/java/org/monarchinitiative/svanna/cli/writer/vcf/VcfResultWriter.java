@@ -77,15 +77,15 @@ public class VcfResultWriter implements ResultWriter {
             VariantContext vc = sv.variantContext();
             if (vc == null) {
                 GenomicVariant gv = sv.genomicVariant();
-                LogUtils.logDebug(LOGGER, "Cannot write VCF line for variant '{}' because variant context is missing. {}:{}{}>{}",
+                LOGGER.debug("Cannot write VCF line for variant '{}' because variant context is missing. {}:{}{}>{}",
                         gv.id(), gv.contig().name(), gv.startOnStrandWithCoordinateSystem(gv.strand(), CoordinateSystem.oneBased()), gv.ref(), gv.alt());
                 return Optional.empty();
             }
 
-            VariantContextBuilder builder = new VariantContextBuilder(vc);
             if (svPriority == null || Double.isNaN(svPriority.getPriority()))
-                return Optional.of(builder.make());
+                return Optional.of(vc);
 
+            VariantContextBuilder builder = new VariantContextBuilder(vc);
             return Optional.of(builder.attribute(SVANNA_PSV_FIELD_NAME, svPriority.getPriority())
                     .make());
         };

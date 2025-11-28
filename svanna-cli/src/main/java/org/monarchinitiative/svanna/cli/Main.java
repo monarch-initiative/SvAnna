@@ -1,6 +1,7 @@
 package org.monarchinitiative.svanna.cli;
 
 
+import org.monarchinitiative.svanna.cli.cmd.SetupPhenotypeCommand;
 import org.monarchinitiative.svanna.cli.cmd.PrioritizeCommand;
 import picocli.CommandLine;
 
@@ -17,11 +18,11 @@ import static picocli.CommandLine.Help.Ansi.Style.*;
         footer = Main.FOOTER)
 public class Main implements Callable<Integer>  {
 
-    public static final String VERSION = "svanna-cli v1.0.4";
+    public static final String VERSION = "svanna-cli v1.2.0";
 
     public static final int WIDTH = 120;
 
-    public static final String FOOTER = "See the full documentation at `https://svanna.readthedocs.io/en/master`";
+    public static final String FOOTER = "See the full documentation at `https://monarch-initiative.github.io/SvAnna/stable`";
 
     private static final CommandLine.Help.ColorScheme COLOR_SCHEME = new CommandLine.Help.ColorScheme.Builder()
             .commands(bold, fg_blue, underline)
@@ -36,6 +37,7 @@ public class Main implements Callable<Integer>  {
         Locale.setDefault(Locale.US);
         commandLine = new CommandLine(new Main())
                 .setColorScheme(COLOR_SCHEME)
+                .addSubcommand("setup-phenotype", new SetupPhenotypeCommand())
                 .addSubcommand("prioritize", new PrioritizeCommand());
         commandLine.setToggleBooleanFlags(false);
         System.exit(commandLine.execute(args));

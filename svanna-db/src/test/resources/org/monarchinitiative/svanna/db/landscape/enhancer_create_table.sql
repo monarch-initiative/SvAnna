@@ -5,8 +5,8 @@ create table SVANNA.ENHANCERS
 (
     ENHANCER_ID      INT auto_increment,
     CONTIG           INT          not null,
-    START            INT          not null,
-    END              INT          not null,
+    START_POS        INT          not null,
+    END_POS          INT          not null,
     ENHANCER_SOURCE  VARCHAR(50)  not null,
     NAME             VARCHAR(255) not null,
     IS_DEVELOPMENTAL BOOL         not null,
@@ -14,7 +14,7 @@ create table SVANNA.ENHANCERS
 );
 
 create index SVANNA.ENHANCERS__CONTIG_START_END_IDX
-    on SVANNA.ENHANCERS (CONTIG, START, END);
+    on SVANNA.ENHANCERS (CONTIG, START_POS, END_POS);
 
 
 drop table if exists SVANNA.ENHANCER_TISSUE_SPECIFICITY;

@@ -29,21 +29,6 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
         this.genomicAssembly = genomicAssembly;
     }
 
-    private static List<Dosage> processDosageDataStatement(PreparedStatement preparedStatement) throws SQLException {
-        List<Dosage> regions = new LinkedList<>();
-        try (ResultSet rs = preparedStatement.executeQuery()) {
-            while (rs.next()) {
-                Dosage dosageData = Dosage.of(rs.getString("ID"),
-                        DosageSensitivity.valueOf(rs.getString("DOSAGE_SENSITIVITY")),
-                        DosageSensitivityEvidence.valueOf(rs.getString("DOSAGE_EVIDENCE")));
-
-                regions.add(dosageData);
-            }
-        }
-
-        return regions;
-    }
-
     @Override
     public int insertItem(DosageRegion item) {
         int updated = 0;
@@ -51,7 +36,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
         try (Connection connection = dataSource.getConnection()) {
             connection.setAutoCommit(false);
             String sql = "insert into SVANNA.CLINGEN_DOSAGE_ELEMENT(" +
-                    " CONTIG, START, END, " +
+                    " CONTIG, START_POS, END_POS, " +
                     " ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE) " +
                     " VALUES ( ?, ?, ?, ?, ?, ? )";
             try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
@@ -83,52 +68,17 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
 
     @Override
     public List<DosageRegion> getOverlapping(GenomicRegion query) {
-        String sql = "select CONTIG, START, END, ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
+        String sql = "select CONTIG, START_POS, END_POS, ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
                 " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
                 "  where CONTIG = ? " +
-                "    and ? < END " +
-                "    and START < ?";
+                "    and ? < END_POS " +
+                "    and START_POS < ?";
         try (Connection connection = dataSource.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setInt(1, query.contigId());
             preparedStatement.setInt(2, query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
             preparedStatement.setInt(3, query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
             return processDosageRegionStatement(preparedStatement);
-        } catch (SQLException e) {
-            if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());
-            return List.of();
-        }
-    }
-
-    public List<Dosage> geneDosageDataForHgncId(String hgncId) {
-        String sql = "select ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
-                " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
-                "  where ID = ?";
-
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, hgncId);
-            return processDosageDataStatement(preparedStatement);
-        } catch (SQLException e) {
-            if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());
-            return List.of();
-        }
-    }
-
-    public List<Dosage> geneDosageDataForHgncIdAndRegion(String hgncId, GenomicRegion query) {
-        String sql = "select distinct ID, DOSAGE_SENSITIVITY, DOSAGE_EVIDENCE " +
-                " from SVANNA.CLINGEN_DOSAGE_ELEMENT " +
-                "  where (CONTIG = ? " +
-                "      and ? < END " +
-                "      and START < ?) " +
-                "    or ID = ?";
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, query.contigId());
-            preparedStatement.setInt(2, query.startOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-            preparedStatement.setInt(3, query.endOnStrandWithCoordinateSystem(Strand.POSITIVE, CoordinateSystem.zeroBased()));
-            preparedStatement.setString(4, hgncId);
-            return processDosageDataStatement(preparedStatement);
         } catch (SQLException e) {
             if (LOGGER.isWarnEnabled()) LOGGER.warn("Error occurred: {}", e.getMessage());
             return List.of();
@@ -146,7 +96,7 @@ public class ClingenDosageElementDao implements AnnotationDao<DosageRegion>, Ing
                     continue;
                 }
                 Coordinates coordinates = Coordinates.of(CoordinateSystem.zeroBased(), // database invariant
-                        rs.getInt("START"), rs.getInt("END"));
+                        rs.getInt("START_POS"), rs.getInt("END_POS"));
                 GenomicRegion location = GenomicRegion.of(contig, Strand.POSITIVE, coordinates);
                 Dosage dosage = Dosage.of(rs.getString("ID"),
                         DosageSensitivity.valueOf(rs.getString("DOSAGE_SENSITIVITY")),

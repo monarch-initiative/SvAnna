@@ -1,8 +1,8 @@
 package org.monarchinitiative.svanna.ingest.io;
 
-import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +36,7 @@ public class ZipCompressionWrapper implements Closeable {
             return;
         }
 
-        ArchiveEntry entry = archive.createArchiveEntry(file, name);
+        ZipArchiveEntry entry = archive.createArchiveEntry(file, name);
         archive.putArchiveEntry(entry);
         if (attributes.isRegularFile()) {
             try (InputStream is = Files.newInputStream(file.toPath())) {

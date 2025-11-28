@@ -3,7 +3,7 @@
     <parent>
         <artifactId>SvAnna</artifactId>
         <groupId>org.monarchinitiative.svanna</groupId>
-        <version>1.0.4</version>
+        <version>1.2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,6 +14,10 @@
             <groupId>org.monarchinitiative.svanna</groupId>
             <artifactId>svanna-model</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.monarchinitiative.phenol</groupId>
+            <artifactId>phenol-annotations</artifactId>
         </dependency>
 
         <!--    TESTS    -->
@@ -26,11 +30,6 @@
         <dependency>
             <groupId>org.monarchinitiative.sgenes</groupId>
             <artifactId>silent-genes-io</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.monarchinitiative.phenol</groupId>
-            <artifactId>phenol-annotations</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

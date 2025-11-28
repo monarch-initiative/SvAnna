@@ -70,8 +70,7 @@ public class HtmlResultWriter implements ResultWriter {
         // Limit performing of the expensive DB lookups to several dozens of variants that will be reported
         // in the report, and not to the entire variant corpus
         List<String> visualizations = variantLandscapes.stream()
-                .filter(s -> s.variant().numberOfAltReads() >= analysisParameters.minAltReadSupport()
-                        && s.variant().passedFilters()
+                .filter(s -> s.variant().passedFilters()
                         && !Double.isNaN(s.variant().svPriority().getPriority()))
                 .filter(v -> !(v.variant() instanceof GenomicBreakendVariant) || !doNotReportBreakends)
                 .limit(outputOptions.nVariantsToReport())

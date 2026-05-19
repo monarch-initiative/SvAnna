@@ -48,7 +48,7 @@ java -jar ${SVANNA_JAR} prioritize -d ${DATA_DIRECTORY} --vcf ${EXAMPLE_VCF} --p
 java -jar ${SVANNA_JAR} prioritize -d ${DATA_DIRECTORY} --vcf ${EXAMPLE_VCF} --prefix ${OUTPUT_DIR}/BRPF1_multi_gene_inv --phenotype-term HP:0000286 --phenotype-term HP:0002069 --phenotype-term HP:0000494 --phenotype-term HP:0002342 --phenotype-term HP:0000486 --phenotype-term HP:0000750 --phenotype-term HP:0000431 --phenotype-term HP:0001252 --phenotype-term HP:0002194 --phenotype-term HP:0012368 --phenotype-term HP:0011150 --phenotype-term HP:0002949 --phenotype-term HP:0000508 --phenotype-term HP:0000316 --phenotype-term HP:0000311
 
 # AMER1 (transcription start site)
-java -jar ${SVANNA_JAR} prioritize -d ${DATA_DIRECTORY} --vcf ${EXAMPLE_VCF} --prefix ${OUTPUT_DIR}/AMER1_tss_del --phenotype-term HP:0001561 --phenotype-term HP:0000750 --phenotype-term HP:0002684 --phenotype-term HP:0002781 --phenotype-term HP:0000316 --phenotype-term HP:0031367 --phenotype-term HP:0002744 --phenotype-term HP:0000256 --phenotype-term HP:0001004
+java -jar ${SVANNA_JAR} prioritize -d ${DATA_DIRECTORY} --vcf ${EXAMPLE_VCF} --prefix ${OUTPUT_DIR}/AMER1_tss_del --phenotype-term HP:0001561 --phenotype-term HP:0000750 --phenotype-term HP:0002684 --phenotype-term HP:0002781 --phenotype-term HP:0000316 --phenotype-term HP:0031367 --phenotype-term HP:0100337 --phenotype-term HP:0000256 --phenotype-term HP:0001004
 
 # VWF (promoter variant)
 java -jar ${SVANNA_JAR} prioritize -d ${DATA_DIRECTORY} --vcf ${EXAMPLE_VCF} --prefix ${OUTPUT_DIR}/VWF_promoter_del --phenotype-term HP:0011890 --phenotype-term HP:0000978 --phenotype-term HP:0012147

@@ -127,36 +127,36 @@ be done in a text editor but we recommend the <a class="reference external" href
 convenience – enter the HPO terms and the path to the VCF file.</p>
 <p>The following is a minimal Phenopacket (note this is version 1, we will add support for the v2 in near future).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-<span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;example&quot;</span><span class="p">,</span>
-<span class="s2">&quot;subject&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;example&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;ageAtCollection&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="s2">&quot;P2Y&quot;</span>
+<span class="s2">"id"</span><span class="p">:</span> <span class="s2">"example"</span><span class="p">,</span>
+<span class="s2">"subject"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"example"</span><span class="p">,</span>
+    <span class="s2">"ageAtCollection"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"age"</span><span class="p">:</span> <span class="s2">"P2Y"</span>
     <span class="p">}</span>
 <span class="p">},</span>
-<span class="s2">&quot;phenotypicFeatures&quot;</span><span class="p">:</span> <span class="p">[{</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;HP:0008330&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;label&quot;</span><span class="p">:</span> <span class="s2">&quot;Reduced von Willebrand factor activity&quot;</span>
+<span class="s2">"phenotypicFeatures"</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="s2">"type"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"HP:0008330"</span><span class="p">,</span>
+        <span class="s2">"label"</span><span class="p">:</span> <span class="s2">"Reduced von Willebrand factor activity"</span>
     <span class="p">}</span>
 <span class="p">}],</span>
-<span class="s2">&quot;htsFiles&quot;</span><span class="p">:</span> <span class="p">[{</span>
-    <span class="s2">&quot;uri&quot;</span><span class="p">:</span> <span class="s2">&quot;file:///***/***/example.vcf&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;htsFormat&quot;</span><span class="p">:</span> <span class="s2">&quot;VCF&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;genomeAssembly&quot;</span><span class="p">:</span> <span class="s2">&quot;hg38&quot;</span>
+<span class="s2">"htsFiles"</span><span class="p">:</span> <span class="p">[{</span>
+    <span class="s2">"uri"</span><span class="p">:</span> <span class="s2">"file:///***/***/example.vcf"</span><span class="p">,</span>
+    <span class="s2">"htsFormat"</span><span class="p">:</span> <span class="s2">"VCF"</span><span class="p">,</span>
+    <span class="s2">"genomeAssembly"</span><span class="p">:</span> <span class="s2">"hg38"</span>
 <span class="p">}],</span>
-<span class="s2">&quot;metaData&quot;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="s2">&quot;2021-07-13T15:08:53.846Z&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;createdBy&quot;</span><span class="p">:</span> <span class="s2">&quot;ExampleOrg:ExampleCurator&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="p">[{</span>
-        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;hp&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;human phenotype ontology&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;http://purl.obolibrary.org/obo/hp.owl&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown HPO version&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;namespacePrefix&quot;</span><span class="p">:</span> <span class="s2">&quot;HP&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;iriPrefix&quot;</span><span class="p">:</span> <span class="s2">&quot;http://purl.obolibrary.org/obo/HP_&quot;</span>
+<span class="s2">"metaData"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s2">"created"</span><span class="p">:</span> <span class="s2">"2021-07-13T15:08:53.846Z"</span><span class="p">,</span>
+    <span class="s2">"createdBy"</span><span class="p">:</span> <span class="s2">"ExampleOrg:ExampleCurator"</span><span class="p">,</span>
+    <span class="s2">"resources"</span><span class="p">:</span> <span class="p">[{</span>
+        <span class="s2">"id"</span><span class="p">:</span> <span class="s2">"hp"</span><span class="p">,</span>
+        <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"human phenotype ontology"</span><span class="p">,</span>
+        <span class="s2">"url"</span><span class="p">:</span> <span class="s2">"http://purl.obolibrary.org/obo/hp.owl"</span><span class="p">,</span>
+        <span class="s2">"version"</span><span class="p">:</span> <span class="s2">"unknown HPO version"</span><span class="p">,</span>
+        <span class="s2">"namespacePrefix"</span><span class="p">:</span> <span class="s2">"HP"</span><span class="p">,</span>
+        <span class="s2">"iriPrefix"</span><span class="p">:</span> <span class="s2">"http://purl.obolibrary.org/obo/HP_"</span>
         <span class="p">}],</span>
-    <span class="s2">&quot;phenopacketSchemaVersion&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span>
+    <span class="s2">"phenopacketSchemaVersion"</span><span class="p">:</span> <span class="s2">"1.0.0"</span>
     <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
